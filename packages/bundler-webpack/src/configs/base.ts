@@ -8,7 +8,7 @@ import webpack from 'webpack'
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 
-const nodeModulesPath = path.resolve(__dirname, '../../node_modules')
+const nodeModulesPath = path.resolve(__dirname, '../../../../')
 const adminFolderPath = path.resolve(nodeModulesPath, 'payload/dist/admin')
 const bundlerPath = path.resolve(__dirname, '../')
 
@@ -80,6 +80,5 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       http: false,
       https: false,
     },
-    modules: ['node_modules', nodeModulesPath],
   },
 })

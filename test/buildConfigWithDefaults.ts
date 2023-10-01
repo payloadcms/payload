@@ -51,6 +51,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             password: 'test',
           },
     ...(config.admin || {}),
+    buildPath: path.resolve(__dirname, '../build'),
     bundler: bundlerAdapters[process.env.PAYLOAD_BUNDLER || 'webpack'],
     webpack: (webpackConfig) => {
       const existingConfig =

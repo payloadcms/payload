@@ -135,6 +135,9 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
+      path-browserify:
+        specifier: 1.0.1
+        version: 1.0.1
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
