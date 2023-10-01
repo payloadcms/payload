@@ -16,6 +16,8 @@ import React from 'react'
 import { BlockComponent } from '../component'
 
 export type BlockFields = {
+  blockName: string
+  collapsed: boolean
   /** Block data */
   data: null | unknown
   /** Block type. This is the slug of the block added to the Blocks Feature */

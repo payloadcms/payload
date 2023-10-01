@@ -41,6 +41,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const [editor] = useLexicalComposerContext()
   const { editorConfig, field } = useEditorConfigContext()
   const { i18n } = useTranslation()
+  const [collapsed, setCollapsed] = React.useState<boolean>(fields.collapsed)
+  const [blockName, setBlockName] = React.useState<string>(fields.blockName)
 
   const path = `${field.path}.${0}`
 
@@ -50,28 +52,42 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const onFormChange = useCallback(
     ({ formData }: { formData: Data }) => {
-      console.log('processing', formData)
       editor.update(() => {
         const node: BlockNode = $getNodeByKey(nodeKey)
         if (node) {
+          console.log(
+            'onFormChange',
+            formData,
+            'schema',
+            block.fields.map((field) => ({
+              ...field,
+              path: createNestedFieldPath(null, field),
+            })),
+          )
           node.setFields({
+            blockName: blockName,
+            collapsed: collapsed,
             data: formData,
             type: block.slug,
           })
-
-          /*
-          node.replace(
-            $createBlockNode({
-              data: formData,
-              type: block.slug,
-            }),
-          )
-          */
         }
       })
     },
-    [block?.slug, editor, nodeKey],
+    [block?.slug, editor, nodeKey, collapsed, blockName],
   )
+
+  const onCollapsedOrBlockNameChange = useCallback(() => {
+    editor.update(() => {
+      const node: BlockNode = $getNodeByKey(nodeKey)
+      if (node) {
+        node.setFields({
+          ...node.getFields(),
+          blockName: blockName,
+          collapsed: collapsed,
+        })
+      }
+    })
+  }, [editor, nodeKey, collapsed, blockName])
 
   const initialDataRef = React.useRef<Data>(buildInitialState(fields.data || {})) // Store initial value in a ref, so it doesn't change on re-render and only gets initialized once
 
@@ -83,25 +99,35 @@ export const BlockComponent: React.FC<Props> = (props) => {
           <div id={`row-${0}`} key={`$row-${0}`}>
             <Collapsible
               className=""
-              collapsed={false}
+              collapsed={collapsed}
               collapsibleStyle={false ? 'error' : 'default'}
               header={
                 <div className={`${baseClass}__block-header`}>
-                  <span className={`${baseClass}__block-number`}>
-                    {String(0 + 1).padStart(2, '0')}
-                  </span>
                   <Pill
                     className={`${baseClass}__block-pill ${baseClass}__block-pill-${fields.type}`}
                     pillStyle="white"
                   >
                     {getTranslation(block.labels.singular, i18n)}
                   </Pill>
-                  <SectionTitle path={`${path}.blockName`} readOnly={field?.admin?.readOnly} />
+                  <SectionTitle
+                    customOnChange={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      setBlockName(e.target.value)
+                      onCollapsedOrBlockNameChange()
+                    }}
+                    customValue={blockName}
+                    path={`${path}.blockName`}
+                    readOnly={field?.admin?.readOnly}
+                  />
                   {false && <ErrorPill count={0} withMessage />}
                 </div>
               }
               key={0}
-              onToggle={(collapsed) => {}}
+              onToggle={(collapsed) => {
+                setCollapsed(collapsed)
+                onCollapsedOrBlockNameChange()
+              }}
             >
               <HiddenInput name={`${path}.id`} value={0} />
 
@@ -119,11 +145,17 @@ export const BlockComponent: React.FC<Props> = (props) => {
             </Collapsible>
           </div>
 
-          <FormSavePlugin onChange={onFormChange} />
+          <FormSavePlugin
+            fieldSchema={block.fields.map((field) => ({
+              ...field,
+              path: createNestedFieldPath(null, field),
+            }))}
+            onChange={onFormChange}
+          />
         </Form>
       )
     )
   }, [block, onFormChange, field.fieldTypes, field.admin.readOnly])
 
-  return <div className="className">{formContent}</div>
+  return <div className={baseClass}>{formContent}</div>
 }

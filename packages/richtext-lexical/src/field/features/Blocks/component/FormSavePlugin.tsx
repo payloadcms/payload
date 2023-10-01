@@ -1,4 +1,4 @@
-import type { Data } from 'payload/types'
+import type { Data, FieldWithPath } from 'payload/types'
 import type React from 'react'
 
 import { reduceFieldsToValues, useAllFormFields } from 'payload/components/forms'
@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import './index.scss'
 
 type Props = {
+  fieldSchema: FieldWithPath[]
   onChange?: ({ formData }: { formData: Data }) => void
 }
 
@@ -14,6 +15,9 @@ export const FormSavePlugin: React.FC<Props> = (props) => {
   const { onChange } = props
 
   const [fields, dispatchFields] = useAllFormFields()
+  useEffect(() => {
+    console.log('fields', fields)
+  }, [fields])
 
   // Pass in fields, and indicate if you'd like to "unflatten" field data.
   // The result below will reflect the data stored in the form at the given time

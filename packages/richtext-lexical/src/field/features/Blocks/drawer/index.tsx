@@ -36,6 +36,8 @@ const insertBlock = ({
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
+      blockName: '',
+      collapsed: false,
       data: null,
       type: blockType,
     })
@@ -45,6 +47,8 @@ const insertBlock = ({
       if (node) {
         node.replace(
           $createBlockNode({
+            blockName: '',
+            collapsed: false,
             data: null,
             type: blockType,
           }),
@@ -70,7 +74,6 @@ export const BlocksDrawerComponent: React.FC = () => {
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string) => {
-      console.log('addRow', rowIndex, blockType)
       insertBlock({
         blockType: blockType,
         editor,
