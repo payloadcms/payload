@@ -8,4 +8,5 @@ export { createArrayFromCommaDelineated } from '../utilities/createArrayFromComm
 export { deepCopyObject } from '../utilities/deepCopyObject'
 export { deepMerge } from '../utilities/deepMerge'
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields'
+export { formatLabels, formatNames, toWords } from '../utilities/formatLabels'
 export { getTranslation } from '../utilities/getTranslation'
