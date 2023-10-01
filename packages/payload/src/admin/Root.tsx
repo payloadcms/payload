@@ -10,6 +10,7 @@ import React from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { Slide, ToastContainer } from 'react-toastify'
 
+import { NavProvider } from './components/elements/Nav/context'
 import { StepNavProvider } from './components/elements/StepNav'
 import { AuthProvider } from './components/utilities/Auth'
 import { ConfigProvider } from './components/utilities/Config'
@@ -21,8 +22,6 @@ import { PreferencesProvider } from './components/utilities/Preferences'
 import { SearchParamsProvider } from './components/utilities/SearchParams'
 import { ThemeProvider } from './components/utilities/Theme'
 import { Routes } from './components/views/Routes'
-import { NavProvider } from './components/elements/Nav/context'
-
 import './scss/app.scss'
 
 const Root = () => {

@@ -388,7 +388,7 @@ export type DeleteManyArgs = {
   where: Where
 }
 
-export type DeleteMany = (args: DeleteManyArgs) => Promise<PaginatedDocs>
+export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = MigrationData & {
   down: ({ payload }: { payload }) => Promise<boolean>

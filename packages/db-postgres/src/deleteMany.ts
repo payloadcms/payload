@@ -37,6 +37,4 @@ export const deleteMany: DeleteMany = async function deleteMany(
   if (ids.length > 0) {
     await db.delete(this.tables[tableName]).where(inArray(this.tables[tableName].id, ids))
   }
-
-  return result
 }

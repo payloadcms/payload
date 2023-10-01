@@ -10,7 +10,7 @@ import { buildSortParam } from './queries/buildSortParam'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
-export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
+export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
   { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {

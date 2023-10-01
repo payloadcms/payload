@@ -12,6 +12,8 @@ async function findOne(
     user,
   } = args
 
+  if (!user) return null
+
   const where: Where = {
     and: [
       { key: { equals: key } },
