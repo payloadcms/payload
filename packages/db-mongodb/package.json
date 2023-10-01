@@ -36,5 +36,8 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
