@@ -3,6 +3,7 @@ import path from 'path'
 import { payloadCloud } from '@payloadcms/plugin-cloud'
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 import { webpackBundler } from '@payloadcms/bundler-webpack' // bundler-import
+import { createLexical } from '@payloadcms/richtext-lexical' // editor-import
 import { buildConfig } from 'payload/config'
 
 import Users from './collections/Users'
@@ -11,6 +12,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
   },
+  editor: createLexical({}), // editor-config
   collections: [Users],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
