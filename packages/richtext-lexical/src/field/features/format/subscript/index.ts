@@ -29,6 +29,7 @@ export const SubscriptTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        props: null,
       }
     },
     key: 'subscript',
