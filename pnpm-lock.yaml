@@ -668,6 +668,9 @@ importers:
       '@types/body-parser':
         specifier: 1.19.2
         version: 1.19.2
+      '@types/body-scroll-lock':
+        specifier: ^3.1.0
+        version: 3.1.0
       '@types/compression':
         specifier: 1.7.2
         version: 1.7.2
@@ -3861,6 +3864,10 @@ packages:
     dependencies:
       '@types/connect': 3.4.36
       '@types/node': 20.5.7
+    dev: true
+
+  /@types/body-scroll-lock@3.1.0:
+    resolution: {integrity: sha512-3owAC4iJub5WPqRhxd8INarF2bWeQq1yQHBgYhN0XLBJMpd5ED10RrJ3aKiAwlTyL5wK7RkBD4SZUQz2AAAMdA==}
     dev: true
 
   /@types/busboy@1.5.1:
