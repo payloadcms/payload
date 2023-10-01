@@ -55,3 +55,4 @@ export type DbDetails = {
 }
 
 export type BundlerType = 'webpack' | 'vite'
+export type EditorType = 'lexical' | 'slate'
