@@ -9,12 +9,11 @@ import react from '@vitejs/plugin-react'
 import getPort from 'get-port'
 import path from 'path'
 import scss from 'rollup-plugin-scss'
-import viteCommonJS from 'vite-plugin-commonjs'
 import virtual from 'vite-plugin-virtual'
 
-const bundlerPath = path.resolve(__dirname, '../')
-const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
-const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
+const bundlerPath = path.resolve(__dirname, './')
+const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js')
+const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js')
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
   const { createLogger } = await import('vite')
@@ -30,7 +29,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
   const hmrPort = await getPort()
 
   const absoluteAliases = {
-    [`${bundlerPath}`]: path.resolve(__dirname, '../mock.js'),
+    [`${bundlerPath}`]: path.resolve(__dirname, './mock.js'),
   }
 
   const alias = [
@@ -54,7 +53,10 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         if (path.isAbsolute(source)) {
           absoluteAliases[source] = target
         } else {
-          alias[source] = target
+          alias.push({
+            find: source,
+            replacement: target,
+          })
         }
       })
     }
@@ -79,7 +81,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         //   },
         // },
         input: {
-          main: path.resolve(__dirname, '../index.html'),
+          main: path.resolve(__dirname, './index.html'),
         },
         plugins: [
           image(),
@@ -107,8 +109,10 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         // from pre-bundling
       ],
       include: [
-        'payload/**/*.tsx',
-        'payload/**/*.ts',
+        // 'payload/**/*.tsx',
+        // 'payload/**/*.ts',
+        // 'payload/**/*.js',
+        // 'payload/*.js',
         // 'slate',
         // 'slate-react',
         // 'slate-history',
@@ -145,25 +149,11 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         https: 'export default {}',
       }),
       react(),
-      // viteCommonJS(),
-      // {
-      //   name: 'init-admin-panel',
-      //   transformIndexHtml(html) {
-      //     const indexFile = process.env.PAYLOAD_DEV_MODE === 'true' ? 'index.tsx' : 'index.js'
-
-      //     if (html.includes(`/${indexFile}`)) return html
-
-      //     return html.replace(
-      //       '</body>',
-      //       `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/${indexFile}"></script></body>`,
-      //     )
-      //   },
-      // },
     ],
     resolve: {
       alias,
     },
-    root: path.resolve(__dirname, '../'),
+    root: path.resolve(__dirname, './'),
     server: {
       hmr: {
         port: hmrPort,

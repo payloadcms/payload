@@ -6,7 +6,7 @@ import express from 'express'
 
 import type { Payload } from '../../../payload'
 
-import { getViteConfig } from '../configs/vite'
+import { getViteConfig } from '../config'
 
 const router = express.Router()
 

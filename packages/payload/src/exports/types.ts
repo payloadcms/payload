@@ -14,15 +14,15 @@ export type {
 
 export type { CellComponentProps } from '../admin/components/views/collections/List/Cell/types'
 
-export {
+export type {
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from './../admin/components/elements/types'
 
-export { RowLabel } from './../admin/components/forms/RowLabel/types'
+export type { RowLabel } from './../admin/components/forms/RowLabel/types'
 
-export {
+export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
@@ -42,11 +42,11 @@ export {
   TypeWithID,
 } from './../collections/config/types'
 
-export { Access, AccessArgs } from './../config/types'
+export type { Access, AccessArgs } from './../config/types'
 
-export { DatabaseAdapter } from './../database/types'
+export type { DatabaseAdapter } from './../database/types'
 
-export {
+export type {
   ArrayField,
   Block,
   BlockField,
@@ -98,6 +98,9 @@ export {
   Validate,
   ValidateOptions,
   ValueWithRelation,
+} from './../fields/config/types'
+
+export {
   fieldAffectsData,
   fieldHasMaxDepth,
   fieldHasSubFields,
@@ -112,7 +115,8 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from './../fields/config/types'
-export {
+
+export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
   BeforeChangeHook as GlobalBeforeChangeHook,

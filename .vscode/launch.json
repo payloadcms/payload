@@ -31,6 +31,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "PAYLOAD_BUNDLER=vite pnpm run dev fields -- -I", // Allow input
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Fields (Vite)",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "ts-node ./packages/payload/src/bin/index.ts migrate",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",

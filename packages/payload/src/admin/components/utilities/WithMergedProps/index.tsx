@@ -1,5 +1,6 @@
-import { deepMerge } from 'payload/utilities'
 import React from 'react'
+
+import { deepMerge } from '../../../../utilities/deepMerge'
 
 /**
  * Creates a higher-order component (HOC) that merges predefined properties (`toMergeIntoProps`)
