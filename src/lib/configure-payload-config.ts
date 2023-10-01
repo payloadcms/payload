@@ -3,7 +3,7 @@ import path from 'path'
 
 import type { DbDetails } from '../types'
 import { warning } from '../utils/log'
-import { bundlerPackages, dbPackages } from './packages'
+import { bundlerPackages, dbPackages, editorPackages } from './packages'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
@@ -21,9 +21,11 @@ export async function configurePayloadConfig(args: {
 
     const dbPackage = dbPackages[args.dbDetails.type]
     const bundlerPackage = bundlerPackages['webpack']
+    const editorPackage = editorPackages['lexical']
 
     packageObj.dependencies[dbPackage.packageName] = 'latest'
     packageObj.dependencies[bundlerPackage.packageName] = 'latest'
+    packageObj.dependencies[editorPackage.packageName] = 'latest'
 
     await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
   } catch (err: unknown) {
@@ -54,6 +56,7 @@ export async function configurePayloadConfig(args: {
 
     const dbReplacement = dbPackages[args.dbDetails.type]
     const bundlerReplacement = bundlerPackages['webpack']
+    const editorReplacement = editorPackages['lexical']
 
     let dbConfigStartLineIndex: number | undefined
     let dbConfigEndLineIndex: number | undefined
@@ -68,6 +71,14 @@ export async function configurePayloadConfig(args: {
 
       if (l.includes('// bundler-config')) {
         configLines[i] = bundlerReplacement.configReplacement
+      }
+
+      if (l.includes('// editor-import')) {
+        configLines[i] = editorReplacement.importReplacement
+      }
+
+      if (l.includes('// editor-config')) {
+        configLines[i] = editorReplacement.configReplacement
       }
 
       if (l.includes('// database-adapter-config-start')) {

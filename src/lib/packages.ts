@@ -1,4 +1,4 @@
-import type { BundlerType, DbType } from '../types'
+import type { BundlerType, DbType, EditorType } from '../types'
 
 type DbAdapterReplacement = {
   packageName: string
@@ -7,6 +7,12 @@ type DbAdapterReplacement = {
 }
 
 type BundlerReplacement = {
+  packageName: string
+  importReplacement: string
+  configReplacement: string
+}
+
+type EditorReplacement = {
   packageName: string
   importReplacement: string
   configReplacement: string
@@ -56,4 +62,18 @@ const viteReplacement: BundlerReplacement = {
 export const bundlerPackages: Record<BundlerType, BundlerReplacement> = {
   webpack: webpackReplacement,
   vite: viteReplacement,
+}
+
+export const editorPackages: Record<EditorType, EditorReplacement> = {
+  slate: {
+    packageName: '@payloadcms/richtext-slate',
+    importReplacement: "import { createSlate } from '@payloadcms/richtext-slate'",
+    configReplacement: '  editor: createSlate({}),',
+  },
+  lexical: {
+    packageName: '@payloadcms/richtext-lexical',
+    importReplacement:
+      "import { createLexical } from '@payloadcms/richtext-lexical'",
+    configReplacement: '  editor: createLexical({}),',
+  },
 }
