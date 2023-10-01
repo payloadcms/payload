@@ -62,10 +62,12 @@ export function createLexical({
 export { BlockQuoteFeature } from './field/features/BlockQuote'
 export { BlocksFeature } from './field/features/Blocks'
 export { HeadingFeature } from './field/features/Heading'
-export { LinkFeature, LinkFeatureProps } from './field/features/Link'
+export { LinkFeature } from './field/features/Link'
+export type { LinkFeatureProps } from './field/features/Link'
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
-export { UploadFeature, UploadFeatureProps } from './field/features/Upload'
+export { UploadFeature } from './field/features/Upload'
+export type { UploadFeatureProps } from './field/features/Upload'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export { TreeviewFeature } from './field/features/debug/TreeView'
@@ -82,7 +84,7 @@ export { CheckListFeature } from './field/features/lists/CheckList'
 export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnoderedListFeature } from './field/features/lists/UnorderedList'
 
-export {
+export type {
   Feature,
   FeatureProvider,
   FeatureProviderMap,

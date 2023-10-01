@@ -131,12 +131,17 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
           // TODO: need to handle this better. This is overly simple.
           if (source.startsWith('.')) {
             fullSourcePath = path.resolve(path.dirname(importer), source)
-          }
 
-          if (fullSourcePath) {
-            const aliasMatch = absoluteAliases[fullSourcePath]
-            if (aliasMatch) {
-              return aliasMatch
+            if (fullSourcePath) {
+              const exactMatch = absoluteAliases[fullSourcePath]
+              if (exactMatch) return exactMatch
+
+              const indexMatch = absoluteAliases[`${fullSourcePath}/index`]
+              if (indexMatch) return indexMatch
+
+              const withoutFileExtensionMatch =
+                absoluteAliases[`${fullSourcePath.replace(/\.[^/.]+$/, '')}`]
+              if (withoutFileExtensionMatch) return withoutFileExtensionMatch
             }
           }
 

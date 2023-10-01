@@ -4,5 +4,5 @@ export { default as BlockSearch } from '../../../admin/components/forms/field-ty
 export type { Props as BlocksDrawerProps } from '../../../admin/components/forms/field-types/Blocks/BlocksDrawer/types'
 export { RowActions } from '../../../admin/components/forms/field-types/Blocks/RowActions'
 export { default as SectionTitle } from '../../../admin/components/forms/field-types/Blocks/SectionTitle/index'
-export { Props as SectionTitleProps } from '../../../admin/components/forms/field-types/Blocks/SectionTitle/types'
+export type { Props as SectionTitleProps } from '../../../admin/components/forms/field-types/Blocks/SectionTitle/types'
 export type { Props } from '../../../admin/components/forms/field-types/Blocks/types'
