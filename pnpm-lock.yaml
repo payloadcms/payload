@@ -514,6 +514,9 @@ importers:
       joi:
         specifier: 17.9.2
         version: 17.9.2
+      json-formatter-js:
+        specifier: ^2.3.4
+        version: 2.3.4
       json-schema-to-typescript:
         specifier: 11.0.3
         version: 11.0.3
@@ -10224,6 +10227,10 @@ packages:
       cli-color: 2.0.3
       difflib: 0.2.4
       dreamopt: 0.8.0
+    dev: false
+
+  /json-formatter-js@2.3.4:
+    resolution: {integrity: sha512-gmAzYRtPRmYzeAT4T7+t3NhTF89JOAIioCVDddl9YDb3ls3kWcskirafw/MZGJaRhEU6fRimGJHl7CC7gaAI2Q==}
     dev: false
 
   /json-parse-better-errors@1.0.2:
