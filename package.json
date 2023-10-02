@@ -25,6 +25,7 @@
     "release:patch": "release-it patch",
     "pretest": "pnpm build",
     "reinstall": "./scripts/reinstall.sh",
+    "release:list:beta": "./scripts/list_published_packages.sh beta",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
     "test:e2e": "npx playwright install --with-deps && ts-node -T ./test/runE2E.ts",
