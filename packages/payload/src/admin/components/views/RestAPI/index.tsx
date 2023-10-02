@@ -1,4 +1,3 @@
-// import JsonFormatter from 'json-formatter-js'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
