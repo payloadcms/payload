@@ -17,6 +17,7 @@
     "dev:postgres": "pnpm --filter payload run dev:postgres",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
+    "lint-staged": "lint-staged",
     "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
     "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
     "release:major": "release-it major",
@@ -31,7 +32,8 @@
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "test:int:postgres": "cross-env PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
-    "translateNewKeys": "pnpm --filter payload run translateNewKeys"
+    "translateNewKeys": "pnpm --filter payload run translateNewKeys",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -52,10 +54,12 @@
     "form-data": "3.0.1",
     "get-port": "5.1.1",
     "graphql-request": "6.1.0",
+    "husky": "^8.0.3",
     "isomorphic-fetch": "3.0.0",
     "jest": "29.6.4",
     "jest-environment-jsdom": "29.6.4",
     "jwt-decode": "3.1.2",
+    "lint-staged": "^14.0.1",
     "mongodb-memory-server": "8.12.2",
     "node-fetch": "2.6.12",
     "prettier": "^3.0.3",
@@ -75,5 +79,10 @@
   "engines": {
     "node": ">=14",
     "pnpm": ">=8"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write"
+    ]
   }
 }

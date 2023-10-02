@@ -19,7 +19,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest
 }
 
-async function localForgotPassword<T extends keyof GeneratedTypes['collections']> (
+async function localForgotPassword<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {

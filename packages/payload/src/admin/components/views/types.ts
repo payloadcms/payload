@@ -1,5 +1,9 @@
 import type { CollectionPermission, GlobalPermission, User } from '../../../auth'
-import type { Fields, SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../exports/types'
+import type {
+  Fields,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from '../../../exports/types'
 
 export type EditViewProps = (
   | {

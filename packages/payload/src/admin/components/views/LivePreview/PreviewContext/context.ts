@@ -1,4 +1,4 @@
-import type { Dispatch} from 'react';
+import type { Dispatch } from 'react'
 
 import { createContext, useContext } from 'react'
 

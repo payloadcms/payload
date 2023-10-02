@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react'
 
 import { useLivePreviewContext } from '../../PreviewContext/context'
-
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar'
@@ -11,7 +10,7 @@ export const PreviewFrameSizeInput: React.FC<{
 }> = (props) => {
   const { axis } = props
 
-  const { setWidth, setHeight, size, deviceFrameRef } = useLivePreviewContext()
+  const { setHeight, setWidth, size } = useLivePreviewContext()
 
   // const [size, setSize] = React.useState<string>(() => {
   //   if (sizeToUse === 'width') {
@@ -45,10 +44,10 @@ export const PreviewFrameSizeInput: React.FC<{
   return (
     <input
       className={`${baseClass}__size`}
+      disabled // enable this once its wired up properly
+      onChange={handleChange}
       type="number"
       value={sizeValue}
-      onChange={handleChange}
-      disabled // enable this once its wired up properly
     />
   )
 }

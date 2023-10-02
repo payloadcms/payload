@@ -15,7 +15,7 @@ export const ToolbarArea: React.FC<{
   })
 
   return (
-    <div ref={setNodeRef} className={baseClass}>
+    <div className={baseClass} ref={setNodeRef}>
       {children}
     </div>
   )

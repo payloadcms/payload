@@ -2,7 +2,7 @@ import type { GeneratedTypes } from '../../'
 import type { Where } from '../../types'
 import type { PreferenceRequest } from '../types'
 
-async function findOne (
+async function findOne(
   args: PreferenceRequest,
 ): Promise<GeneratedTypes['collections']['_preference']> {
   const {

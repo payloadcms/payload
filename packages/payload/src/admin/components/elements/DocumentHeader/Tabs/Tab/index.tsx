@@ -57,21 +57,23 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     const pillToRender = typeof pillLabel === 'function' ? pillLabel({ versions }) : pillLabel
 
     return (
-      <Link
-        className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
-        to={href}
-        {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
-      >
-        <span className={`${baseClass}__label`}>
-          {labelToRender}
-          {pillToRender && (
-            <Fragment>
-              &nbsp;
-              <span className={`${baseClass}__count`}>{pillToRender}</span>
-            </Fragment>
-          )}
-        </span>
-      </Link>
+      <li className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}>
+        <Link
+          className={`${baseClass}__link`}
+          to={href}
+          {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
+        >
+          <span className={`${baseClass}__label`}>
+            {labelToRender}
+            {pillToRender && (
+              <Fragment>
+                &nbsp;
+                <span className={`${baseClass}__count`}>{pillToRender}</span>
+              </Fragment>
+            )}
+          </span>
+        </Link>
+      </li>
     )
   }
 

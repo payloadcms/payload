@@ -25,7 +25,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<T extends keyof GeneratedTypes['globals']> (
+export default async function findVersionsLocal<T extends keyof GeneratedTypes['globals']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {

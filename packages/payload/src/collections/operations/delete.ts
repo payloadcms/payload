@@ -27,7 +27,7 @@ export type Arguments = {
   where: Where
 }
 
-async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']> (
+async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
 ): Promise<{
   docs: GeneratedTypes['collections'][TSlug][]
@@ -93,7 +93,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     )
 
     if (!where) {
-      throw new APIError('Missing \'where\' query of documents to delete.', httpStatus.BAD_REQUEST)
+      throw new APIError("Missing 'where' query of documents to delete.", httpStatus.BAD_REQUEST)
     }
 
     // /////////////////////////////////////

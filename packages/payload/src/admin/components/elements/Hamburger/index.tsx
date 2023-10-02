@@ -1,18 +1,17 @@
 import React from 'react'
-
-import { Chevron } from '../..'
 import { useTranslation } from 'react-i18next'
 
+import { Chevron } from '../..'
 import './index.scss'
 
 const baseClass = 'hamburger'
 
 export const Hamburger: React.FC<{
-  isActive?: boolean
   closeIcon?: 'collapse' | 'x'
+  isActive?: boolean
 }> = (props) => {
   const { t } = useTranslation('general')
-  const { isActive = false, closeIcon = 'x' } = props
+  const { closeIcon = 'x', isActive = false } = props
 
   return (
     <div className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}>
@@ -28,7 +27,7 @@ export const Hamburger: React.FC<{
         </div>
       )}
       {closeIcon === 'collapse' && (
-        <div className={`${baseClass}__collapse`} aria-label={t('collapse')} title={t('collapse')}>
+        <div aria-label={t('collapse')} className={`${baseClass}__collapse`} title={t('collapse')}>
           <div className={`${baseClass}__line ${baseClass}__collapse-left`} />
           <Chevron className={`${baseClass}__collapse-chevron`} direction="left" />
           <div className={`${baseClass}__collapse-label`}>{t('collapse')}</div>

@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom'
 
 import type { Context as ContextType } from './types'
 
+import { IconGraphic } from '../../../../exports/components/graphics'
 import { getTranslation } from '../../../../utilities/getTranslation'
-import Chevron from '../../icons/Chevron'
 import { useConfig } from '../../utilities/Config'
 import './index.scss'
 
@@ -32,8 +32,8 @@ const StepNav: React.FC<{
   className?: string
 }> = (props) => {
   const { className } = props
-  const { i18n, t } = useTranslation()
-  const dashboardLabel = <span>{t('general:dashboard')}</span>
+  const { i18n } = useTranslation()
+
   const { stepNav } = useStepNav()
   const config = useConfig()
   const {
@@ -44,11 +44,13 @@ const StepNav: React.FC<{
     <nav className={['step-nav', className].filter(Boolean).join(' ')}>
       {stepNav.length > 0 ? (
         <Fragment>
-          <Link to={admin}>{dashboardLabel}</Link>
+          <Link to={admin}>
+            <IconGraphic />
+          </Link>
           <span>/</span>
         </Fragment>
       ) : (
-        dashboardLabel
+        <IconGraphic />
       )}
       {stepNav.map((item, i) => {
         const StepLabel = <span key={i}>{getTranslation(item.label, i18n)}</span>

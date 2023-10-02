@@ -212,27 +212,27 @@ export type CollectionAdminOptions = {
        */
       Edit?:
         | {
-        [key: string]: EditView
-        /**
-         * Replace or modify individual nested routes, or add new ones:
-         * + `Default` - `/admin/collections/:collection/:id`
-         * + `API` - `/admin/collections/:collection/:id/api`
-         * + `LivePreview` - `/admin/collections/:collection/:id/preview`
-         * + `References` - `/admin/collections/:collection/:id/references`
-         * + `Relationships` - `/admin/collections/:collection/:id/relationships`
-         * + `Versions` - `/admin/collections/:collection/:id/versions`
-         * + `Version` - `/admin/collections/:collection/:id/versions/:version`
-         * + `:path` - `/admin/collections/:collection/:id/:path`
-         */
-        Default?: EditView
-        Versions?: EditView
-        // TODO: uncomment these as they are built
-        // API?: EditView
-        // LivePreview?: EditView
-        // References?: EditView
-        // Relationships?: EditView
-        // Version: EditView
-      }
+            [key: string]: EditView
+            /**
+             * Replace or modify individual nested routes, or add new ones:
+             * + `Default` - `/admin/collections/:collection/:id`
+             * + `API` - `/admin/collections/:collection/:id/api`
+             * + `LivePreview` - `/admin/collections/:collection/:id/preview`
+             * + `References` - `/admin/collections/:collection/:id/references`
+             * + `Relationships` - `/admin/collections/:collection/:id/relationships`
+             * + `Versions` - `/admin/collections/:collection/:id/versions`
+             * + `Version` - `/admin/collections/:collection/:id/versions/:version`
+             * + `:path` - `/admin/collections/:collection/:id/:path`
+             */
+            Default?: EditView
+            Versions?: EditView
+            // TODO: uncomment these as they are built
+            // API?: EditView
+            // LivePreview?: EditView
+            // References?: EditView
+            // Relationships?: EditView
+            // Version: EditView
+          }
         | EditViewComponent
       List?: React.ComponentType<ListProps>
     }
@@ -328,9 +328,9 @@ export type CollectionConfig = {
    */
   graphQL?:
     | {
-    pluralName?: string
-    singularName?: string
-  }
+        pluralName?: string
+        singularName?: string
+      }
     | false
   /**
    * Hooks to modify Payload functionality

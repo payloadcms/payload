@@ -10,11 +10,6 @@
     padding-left: 0;
   }
 
-  &__tab {
-    display: flex;
-    white-space: nowrap;
-  }
-
   @include mid-break {
     width: 100%;
     padding: 0;
@@ -23,10 +18,8 @@
     &__tabs {
       padding: 0;
       margin-left: var(--gutter-h);
-    }
 
-    &__tab {
-      &:last-child {
+      & > *:last-child {
         // CSS hack, give the illusion of right margin within the overflowing container
         // margin-right, padding-right, etc are tricky within overflowing flex-boxes
         &::after {
