@@ -97,3 +97,12 @@ export {
   useEditorConfigContext,
 } from './field/lexical/config/EditorConfigProvider'
 export { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexical/config/default'
+export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
+export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
+// export SanitizedEditorConfig
+export type { EditorConfig, SanitizedEditorConfig }
+export type { AdapterProps }
+export { RichTextCell }
+export { RichTextField }
+export { getEnabledNodes } from './field/lexical/nodes'
+export { defaultRichTextValue } from './populate/defaultValue'
