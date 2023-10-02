@@ -1,8 +1,9 @@
 import React from 'react'
 
-import './index.scss'
 import { Chevron } from '../..'
 import { useTranslation } from 'react-i18next'
+
+import './index.scss'
 
 const baseClass = 'hamburger'
 
@@ -30,7 +31,7 @@ export const Hamburger: React.FC<{
         <div className={`${baseClass}__collapse`} aria-label={t('collapse')} title={t('collapse')}>
           <div className={`${baseClass}__line ${baseClass}__collapse-left`} />
           <Chevron className={`${baseClass}__collapse-chevron`} direction="left" />
-          {/* <div className={`${baseClass}__collapse-label`}>{t('collapse')}</div> */}
+          <div className={`${baseClass}__collapse-label`}>{t('collapse')}</div>
         </div>
       )}
     </div>

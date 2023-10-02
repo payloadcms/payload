@@ -2,6 +2,7 @@ import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
+import type { EditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
@@ -14,7 +15,6 @@ import Meta from '../../utilities/Meta'
 import { PreviewWindow } from './PreviewWindow'
 import './index.scss'
 import { usePopupWindow } from './usePopupWindow'
-import { EditViewProps } from '../types'
 
 const baseClass = 'live-preview'
 

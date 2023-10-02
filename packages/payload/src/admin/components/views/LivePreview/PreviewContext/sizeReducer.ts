@@ -10,20 +10,20 @@
 // },
 
 type SizeReducerState = {
-  width: number
   height: number
+  width: number
 }
 
 export type SizeReducerAction =
   | {
-      type: 'width' | 'height'
+      type: 'height' | 'width'
       value: number
     }
   | {
       type: 'reset'
       value: {
-        width: number
         height: number
+        width: number
       }
     }
 

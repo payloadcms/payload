@@ -1,4 +1,4 @@
-import { EditViewComponent, EditViewConfig } from '../../../../../exports/config'
+import type { EditViewConfig } from '../../../../../exports/config'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 
 import { defaultGlobalViews } from '../../../views/Global/Routes/CustomComponent'
