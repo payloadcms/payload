@@ -37,7 +37,7 @@ import { webpack } from './webpack'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
-    const migrationDir = args.migrationDir || path.resolve(__dirname, '../../../migrations')
+    const migrationDir = args.migrationDir || path.resolve(process.cwd(), 'src/migrations')
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       name: 'postgres',
