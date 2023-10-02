@@ -266,7 +266,10 @@ describe('admin', () => {
       const options = page.locator('.rs__option')
       await options.locator('text=Español').click()
 
-      await expect(page.locator('.step-nav')).toContainText('Tablero')
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Tablero',
+      )
 
       await field.click()
       await options.locator('text=English').click()
@@ -276,7 +279,10 @@ describe('admin', () => {
 
     test('should allow custom translation', async () => {
       await page.goto(url.account)
-      await expect(page.locator('.step-nav')).toContainText('Home')
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Home',
+      )
     })
   })
 
