@@ -13,20 +13,25 @@ import Logger from '../utilities/logger'
 const generateEntityDeclarations = (
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
   key: 'collections' | 'globals',
-): string =>
-  entities.reduce((dec, entity, i) => {
-    const title = entity.typescript?.interface
-      ? entity.typescript.interface
-      : singular(toWords(entity.slug, true))
+): string => {
+  if (entities.length) {
+    return entities.reduce((dec, entity, i) => {
+      const title = entity.typescript?.interface
+        ? entity.typescript.interface
+        : singular(toWords(entity.slug, true))
 
-    return `${dec}
+      return `${dec}
       '${entity.slug}': ${title}${
         i + 1 === entities.length
           ? `
-  }`
+    }`
           : ''
       }`
-  }, `    ${key}: {`)
+    }, `    ${key}: {`)
+  }
+
+  return ''
+}
 
 export async function generateTypes(): Promise<void> {
   const logger = Logger()

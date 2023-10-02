@@ -12,7 +12,7 @@ export { getPayload } from './payload'
 
 require('isomorphic-fetch')
 
-export class Payload extends BasePayload {
+export class Payload extends BasePayload<GeneratedTypes> {
   async init(options: InitOptions): Promise<LocalPayload> {
     const payload = await initHTTP(options)
     Object.assign(this, payload)
