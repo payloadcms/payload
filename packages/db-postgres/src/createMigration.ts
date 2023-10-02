@@ -26,7 +26,7 @@ ${upSQL}\`);
 }
 };
 
-export async function down({ payload }: MigrateUpArgs): Promise<void> {
+export async function down({ payload }: MigrateDownArgs): Promise<void> {
 ${
   downSQL
     ? `await payload.db.db.execute(sql\`

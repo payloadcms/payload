@@ -1,5 +1,4 @@
-import type { Config as SchemaConfig } from 'payload/generated-types'
-
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
@@ -19,10 +18,10 @@ export type Resolver<T> = (
   },
 ) => Promise<T>
 
-export default function findByIDResolver<T extends keyof SchemaConfig['collections']>(
+export default function findByIDResolver<T extends keyof GeneratedTypes['collections']> (
   collection: Collection,
-): Resolver<SchemaConfig['collections'][T]> {
-  return async function resolver(_, args, context) {
+): Resolver<GeneratedTypes['collections'][T]> {
+  return async function resolver (_, args, context) {
     const { req } = context
     if (args.locale) req.locale = args.locale
     if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale

@@ -1,11 +1,11 @@
 import { Table } from 'console-table-printer'
 
-import type { DatabaseAdapter } from '../types'
+import type { BaseDatabaseAdapter } from '../types'
 
 import { getMigrations } from './getMigrations'
 import { readMigrationFiles } from './readMigrationFiles'
 
-export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
+export async function migrateStatus(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 

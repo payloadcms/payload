@@ -45,8 +45,6 @@ export type {
 
 export type { Access, AccessArgs } from './../config/types'
 
-export type { DatabaseAdapter } from './../database/types'
-
 export type {
   ArrayField,
   Block,

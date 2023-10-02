@@ -2,12 +2,13 @@ import { lazy } from 'react'
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
+import type { EditViewProps } from '../../../types'
+
 import { useAuth } from '../../../../utilities/Auth'
 import { useConfig } from '../../../../utilities/Config'
 import NotFound from '../../../NotFound'
 import { CustomCollectionComponent } from './CustomComponent'
 import { collectionCustomRoutes } from './custom'
-import { EditViewProps } from '../../../types'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Unauthorized = lazy(() => import('../../../Unauthorized'))
@@ -33,6 +34,17 @@ export const CollectionRoutes: React.FC<EditViewProps> = (props) => {
         >
           {permissions?.readVersions?.permission ? (
             <CustomCollectionComponent view="Versions" {...props} />
+          ) : (
+            <Unauthorized />
+          )}
+        </Route>
+        <Route
+          exact
+          key={`${collection.slug}-api`}
+          path={`${adminRoute}/collections/${collection.slug}/:id/api`}
+        >
+          {permissions?.read ? (
+            <CustomCollectionComponent view="API" {...props} />
           ) : (
             <Unauthorized />
           )}

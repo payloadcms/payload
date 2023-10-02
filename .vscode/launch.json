@@ -68,6 +68,17 @@
       "type": "node-terminal"
     },
     {
+      "command": "ts-node ./packages/payload/src/bin/index.ts generate:types",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/_community/config.ts",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+      },
+      "name": "Generate Types CLI",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "ts-node ./packages/payload/src/bin/index.ts migrate:status",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",

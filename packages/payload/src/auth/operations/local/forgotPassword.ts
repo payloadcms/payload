@@ -1,5 +1,4 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
+import type { GeneratedTypes } from '../../..'
 import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Result } from '../forgotPassword'
@@ -20,7 +19,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest
 }
 
-async function localForgotPassword<T extends keyof GeneratedTypes['collections']>(
+async function localForgotPassword<T extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {

@@ -1,7 +1,6 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
 import httpStatus from 'http-status'
 
+import type { GeneratedTypes } from '../../'
 import type { AccessResult } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Where } from '../../types'
@@ -28,7 +27,7 @@ export type Arguments = {
   where: Where
 }
 
-async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']> (
   incomingArgs: Arguments,
 ): Promise<{
   docs: GeneratedTypes['collections'][TSlug][]
@@ -94,7 +93,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     )
 
     if (!where) {
-      throw new APIError("Missing 'where' query of documents to delete.", httpStatus.BAD_REQUEST)
+      throw new APIError('Missing \'where\' query of documents to delete.', httpStatus.BAD_REQUEST)
     }
 
     // /////////////////////////////////////

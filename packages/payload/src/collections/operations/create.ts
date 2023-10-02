@@ -1,10 +1,10 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { MarkOptional } from 'ts-essentials'
 
 import crypto from 'crypto'
 import fs from 'fs'
 import { promisify } from 'util'
 
+import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../express/types'
 import type { Document } from '../../types'
 import type {

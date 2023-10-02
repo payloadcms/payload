@@ -3,13 +3,12 @@ import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks this import
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler'
 import type { SendMailOptions } from 'nodemailer'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type pino from 'pino'
 
 import crypto from 'crypto'
 import path from 'path'
 
-import type { DatabaseAdapter } from './' // Must import from Payload to support declare module
+import type { DatabaseAdapter, GeneratedTypes } from './' // Must import from Payload to support declare module
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword'
 import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword'
 import type { Options as LoginOptions } from './auth/operations/local/login'
@@ -315,7 +314,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 
-    this.logger.info('Starting Payload...')
+    // this.logger.info('Starting Payload...')
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
     }

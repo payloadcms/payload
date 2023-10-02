@@ -19,7 +19,7 @@ import type {
   CollectionConfig,
   SanitizedCollectionConfig,
 } from '../collections/config/types'
-import type { DatabaseAdapter } from '../database/types'
+import type { BaseDatabaseAdapter } from '../database/types'
 import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
@@ -481,7 +481,7 @@ export type Config = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
   /** Pass in a database adapter for use on this project. */
-  db: (args: { payload: Payload }) => DatabaseAdapter
+  db: (args: { payload: Payload }) => BaseDatabaseAdapter
   /** Enable to expose more detailed error information. */
   debug?: boolean
   /**
