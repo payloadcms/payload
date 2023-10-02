@@ -6,6 +6,8 @@ import mongoose from 'mongoose'
 import { createDatabaseAdapter } from 'payload/database'
 import { createMigration } from 'payload/database'
 
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
+
 import type { CollectionModel, GlobalModel } from './types'
 
 import { connect } from './connect'

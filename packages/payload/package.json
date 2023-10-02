@@ -38,6 +38,7 @@
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
+    "prepublishOnly": "pnpm clean && pnpm build",
     "pretest": "pnpm build",
     "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
     "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",

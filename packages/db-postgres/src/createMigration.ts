@@ -12,7 +12,7 @@ import { migrationTableExists } from './utilities/migrationTableExists'
 const migrationTemplate = (
   upSQL?: string,
   downSQL?: string,
-) => `import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres/types'
+) => `import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres'
 import { sql } from 'drizzle-orm'
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
