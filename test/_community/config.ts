@@ -35,8 +35,6 @@ export default buildConfigWithDefaults({
   },
 
   onInit: async (payload) => {
-    console.log(payload.db.db)
-
     await payload.create({
       collection: 'users',
       data: {
