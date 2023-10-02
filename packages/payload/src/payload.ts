@@ -9,6 +9,7 @@ import type pino from 'pino'
 import crypto from 'crypto'
 import path from 'path'
 
+import type { DatabaseAdapter } from './' // Must import from Payload to support declare module
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword'
 import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword'
 import type { Options as LoginOptions } from './auth/operations/local/login'
@@ -35,7 +36,6 @@ import type {
   Options as UpdateOptions,
 } from './collections/operations/local/update'
 import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types'
-import type { DatabaseAdapter } from './database/types'
 import type { PaginatedDocs } from './database/types'
 import type { BuildEmailResult } from './email/types'
 import type { PayloadAuthenticate } from './express/middleware/authenticate'

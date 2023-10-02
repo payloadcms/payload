@@ -1,11 +1,14 @@
 export const migrationTemplate = `
-import payload, { Payload } from 'payload';
+import {
+  MigrateUpArgs,
+  MigrateDownArgs,
+} from "@payloadcms/db-mongodb";
 
-export async function up(payload: Payload): Promise<void> {
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
   // Migration code
 };
 
-export async function down(payload: Payload): Promise<void> {
+export async function down({ payload }: MigrateUpArgs): Promise<void> {
   // Migration code
 };
 `

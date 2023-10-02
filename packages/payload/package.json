@@ -38,6 +38,7 @@
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
+    "prepublishOnly": "pnpm clean && pnpm build",
     "pretest": "pnpm build",
     "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
     "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
@@ -139,7 +140,6 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@release-it/conventional-changelog": "7.0.0",
-    "@types/body-scroll-lock": "^3.1.0",
     "@types/sharp": "0.31.1",
     "@types/asap": "2.0.0",
     "@types/body-parser": "1.19.2",

@@ -5,6 +5,8 @@ import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
+
 import { connect } from './connect'
 import { create } from './create'
 import { createGlobal } from './createGlobal'

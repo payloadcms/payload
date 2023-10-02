@@ -81,5 +81,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       http: false,
       https: false,
     },
+    modules: ['node_modules', nodeModulesPath, path.resolve(__dirname, '../../node_modules')],
   },
 })

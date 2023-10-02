@@ -10,7 +10,7 @@ const router = express.Router()
 type ServeAdminType = (options: { payload: Payload }) => Promise<PayloadHandler>
 
 export const serveAdmin: ServeAdminType = async ({ payload }) => {
-  router.use(payload.config.routes.admin, history())
+  router.use(history())
 
   router.get('*', (req, res, next) => {
     if (req.path.substr(-1) === '/' && req.path.length > 1) {

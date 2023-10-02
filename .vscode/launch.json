@@ -59,6 +59,7 @@
       "command": "ts-node ./packages/payload/src/bin/index.ts build",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/fields/config.ts",
+        "PAYLOAD_ANALYZE_BUNDLE": "true",
         "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
       },
       "name": "Build CLI - Webpack",
