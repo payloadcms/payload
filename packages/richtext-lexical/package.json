@@ -12,7 +12,9 @@
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
+    "clean": "rimraf dist",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
@@ -62,5 +64,8 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }

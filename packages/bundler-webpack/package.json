@@ -15,7 +15,9 @@
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist"
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
     "compression": "1.7.4",
