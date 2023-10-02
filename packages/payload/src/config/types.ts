@@ -38,6 +38,27 @@ type Email = {
 // eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Config | Promise<Config>
 
+export type LivePreview = {
+  /**
+    Device breakpoints to use for the `iframe` of the Live Preview window.
+    Options are displayed in the Live Preview toolbar.
+    The `responsive` breakpoint is included by default.
+  */
+  breakpoints?: {
+    height: number | string
+    label: string
+    name: string
+    width: number | string
+  }[]
+  /**
+    The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+    Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+    The frontend application is responsible for receiving the message and updating the UI accordingly.
+    Use the `useLivePreview` hook to get started in React applications.
+  */
+  url?: string
+}
+
 type GeneratePreviewURLOptions = {
   locale: string
   token: string

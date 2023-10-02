@@ -6,6 +6,7 @@ import { QueryInspector } from '../../../RestAPI'
 import VersionView from '../../../Version/Version'
 import VersionsView from '../../../Versions'
 import { DefaultCollectionEdit } from '../Default/index'
+import { LivePreviewView } from '../../../LivePreview'
 
 export type collectionViewType =
   | 'API'
@@ -21,7 +22,7 @@ export const defaultCollectionViews: {
 } = {
   API: QueryInspector,
   Default: DefaultCollectionEdit,
-  LivePreview: null,
+  LivePreview: LivePreviewView,
   References: null,
   Relationships: null,
   Version: VersionView,

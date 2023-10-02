@@ -12,6 +12,7 @@
 
   &__tab {
     display: flex;
+    white-space: nowrap;
   }
 
   @include mid-break {

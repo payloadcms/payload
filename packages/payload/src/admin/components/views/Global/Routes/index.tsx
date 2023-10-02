@@ -48,6 +48,13 @@ export const GlobalRoutes: React.FC<EditViewProps> = (props) => {
             <Unauthorized />
           )}
         </Route>
+        <Route
+          exact
+          key={`${global.slug}-live-preview`}
+          path={`${adminRoute}/globals/${global.slug}/preview`}
+        >
+          <CustomGlobalComponent view="LivePreview" {...props} />
+        </Route>
         {globalCustomRoutes({
           global,
           match,

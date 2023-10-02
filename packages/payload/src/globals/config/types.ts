@@ -15,6 +15,7 @@ import type {
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
+  LivePreview,
 } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Field } from '../../fields/config/types'
@@ -119,6 +120,10 @@ export type GlobalAdminOptions = {
    * Hide the API URL within the Edit view
    */
   hideAPIURL?: boolean
+  /**
+   * Live preview options
+   */
+  livePreview?: LivePreview
   /**
    * Function to generate custom preview URL
    */

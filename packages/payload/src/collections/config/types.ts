@@ -19,6 +19,7 @@ import type {
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
+  LivePreview,
 } from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
@@ -269,6 +270,10 @@ export type CollectionAdminOptions = {
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[]
+  /**
+   * Live preview options
+   */
+  livePreview?: LivePreview
   pagination?: {
     defaultLimit?: number
     limits?: number[]

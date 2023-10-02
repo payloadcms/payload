@@ -739,6 +739,9 @@
         "light": {
           "type": "string"
         },
+        "livePreview": {
+          "type": "string"
+        },
         "loading": {
           "type": "string"
         },
