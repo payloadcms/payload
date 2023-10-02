@@ -41,12 +41,12 @@ export default buildConfigWithDefaults({
               width: 375,
               height: 667,
             },
-            {
-              label: 'Desktop',
-              name: 'desktop',
-              width: 1440,
-              height: 900,
-            },
+            // {
+            //   label: 'Desktop',
+            //   name: 'desktop',
+            //   width: 1440,
+            //   height: 900,
+            // },
           ],
         },
       },
