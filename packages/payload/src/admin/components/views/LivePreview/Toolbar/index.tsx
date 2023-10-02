@@ -8,7 +8,6 @@ import { ExternalLinkIcon } from '../../../graphics/ExternalLink'
 import DragHandle from '../../../icons/Drag'
 import { useLivePreviewContext } from '../PreviewContext/context'
 import { PreviewFrameSizeInput } from './SizeInput'
-
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar'
@@ -20,13 +19,12 @@ export const LivePreviewToolbar: React.FC<
   }
 > = (props) => {
   const {
-    deviceSize,
     popupState: { openPopupWindow },
     style,
     url,
   } = props
 
-  const { zoom, setZoom, breakpoint, breakpoints, setBreakpoint } = useLivePreviewContext()
+  const { breakpoint, breakpoints, setBreakpoint, setZoom, zoom } = useLivePreviewContext()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',

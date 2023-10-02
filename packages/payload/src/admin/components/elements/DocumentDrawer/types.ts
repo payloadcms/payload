@@ -1,6 +1,7 @@
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
-import { EditViewProps } from '../../views/types'
+
+import type { EditViewProps } from '../../views/types'
 
 export type DocumentDrawerProps = {
   collectionSlug: string

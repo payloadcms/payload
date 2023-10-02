@@ -1,10 +1,12 @@
-import { Collision, CollisionDetection, rectIntersection } from '@dnd-kit/core'
+import type { CollisionDetection } from '@dnd-kit/core'
+
+import { rectIntersection } from '@dnd-kit/core'
 
 // If the toolbar exits the preview area, we need to reset its position
 // This will prevent the toolbar from getting stuck outside the preview area
 export const customCollisionDetection: CollisionDetection = ({
-  droppableContainers,
   collisionRect,
+  droppableContainers,
   ...args
 }) => {
   const droppableContainer = droppableContainers.find(({ id }) => id === 'live-preview-area')

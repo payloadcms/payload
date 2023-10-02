@@ -1,19 +1,16 @@
 import React, { useEffect } from 'react'
 
+import type { LivePreview } from '../../../../../exports/config'
+import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
 
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
-import { IFrame } from '../PreviewIFrame'
-import { EditViewProps } from '../../types'
-
 import { LivePreviewProvider } from '../PreviewContext'
-import { LivePreview } from '../../../../../exports/config'
 import { useLivePreviewContext } from '../PreviewContext/context'
-
-import { ToolbarArea } from '../ToolbarArea'
+import { IFrame } from '../PreviewIFrame'
 import { LivePreviewToolbar } from '../Toolbar'
-
+import { ToolbarArea } from '../ToolbarArea'
 import './index.scss'
 
 const baseClass = 'live-preview-window'
@@ -23,7 +20,7 @@ const ResponsiveWindow: React.FC<{
 }> = (props) => {
   const { children } = props
 
-  const { breakpoint, zoom, breakpoints, deviceFrameRef } = useLivePreviewContext()
+  const { breakpoint, breakpoints, deviceFrameRef, zoom } = useLivePreviewContext()
 
   const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
 
@@ -44,8 +41,8 @@ const ResponsiveWindow: React.FC<{
 
   return (
     <div
-      ref={deviceFrameRef}
       className={`${baseClass}__responsive-window`}
+      ref={deviceFrameRef}
       style={{
         height:
           foundBreakpoint && typeof foundBreakpoint?.height === 'number'
@@ -53,13 +50,13 @@ const ResponsiveWindow: React.FC<{
             : typeof zoom === 'number'
             ? `${100 / zoom}%`
             : '100%',
+        transform: `translate3d(${x}, 0, 0)`,
         width:
           foundBreakpoint && typeof foundBreakpoint?.width === 'number'
             ? `${foundBreakpoint?.width / (typeof zoom === 'number' ? zoom : 1)}px`
             : typeof zoom === 'number'
             ? `${100 / zoom}%`
             : '100%',
-        transform: `translate3d(${x}, 0, 0)`,
       }}
     >
       {children}
@@ -75,31 +72,12 @@ const Preview: React.FC<
 > = (props) => {
   const {
     popupState: { isPopupOpen, popupHasLoaded, popupRef },
+    url,
   } = props
 
-  const { iframeRef, setIframeHasLoaded, iframeHasLoaded } = useLivePreviewContext()
+  const { iframeHasLoaded, iframeRef, setIframeHasLoaded } = useLivePreviewContext()
 
-  let url
-  let breakpoints: LivePreview['breakpoints'] = [
-    {
-      name: 'responsive',
-      height: '100%',
-      label: 'Responsive',
-      width: '100%',
-    },
-  ]
-
-  if ('collection' in props) {
-    url = props?.collection.admin.livePreview.url
-    breakpoints = breakpoints.concat(props?.collection.admin.livePreview.breakpoints)
-  }
-
-  if ('global' in props) {
-    url = props?.global.admin.livePreview.url
-    breakpoints = breakpoints.concat(props?.global.admin.livePreview.breakpoints)
-  }
-
-  const { toolbarPosition, breakpoint } = useLivePreviewContext()
+  const { breakpoint, toolbarPosition } = useLivePreviewContext()
 
   const [fields] = useAllFormFields()
 
@@ -127,7 +105,16 @@ const Preview: React.FC<
         }
       }
     }
-  }, [fields, url, iframeHasLoaded, isPopupOpen, popupRef, popupHasLoaded])
+  }, [
+    fields,
+    url,
+    iframeHasLoaded,
+    isPopupOpen,
+    popupRef,
+    popupHasLoaded,
+    iframeRef,
+    setIframeHasLoaded,
+  ])
 
   if (!isPopupOpen) {
     return (
@@ -143,7 +130,7 @@ const Preview: React.FC<
         <ToolbarArea>
           <div className={`${baseClass}__wrapper`}>
             <ResponsiveWindow>
-              <IFrame ref={iframeRef} url={url} setIframeHasLoaded={setIframeHasLoaded} />
+              <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
             </ResponsiveWindow>
           </div>
           <LivePreviewToolbar
@@ -189,7 +176,7 @@ export const PreviewWindow: React.FC<
   }
 
   return (
-    <LivePreviewProvider {...props} breakpoints={breakpoints}>
+    <LivePreviewProvider {...props} breakpoints={breakpoints} url={url}>
       <Preview {...props} />
     </LivePreviewProvider>
   )

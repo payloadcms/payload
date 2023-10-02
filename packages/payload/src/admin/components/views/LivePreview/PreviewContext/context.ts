@@ -1,53 +1,56 @@
-import { Dispatch, createContext, useContext } from 'react'
-import { LivePreview } from '../../../../../exports/config'
-import { SizeReducerAction } from './sizeReducer'
+import type { Dispatch } from 'react'
+
+import { createContext, useContext } from 'react'
+
+import type { LivePreview } from '../../../../../exports/config'
+import type { SizeReducerAction } from './sizeReducer'
 
 export interface LivePreviewContextType {
-  zoom: number
-  setZoom: (zoom: number) => void
-  size: {
-    width: number
-    height: number
-  }
-  setWidth: (width: number) => void
-  setHeight: (height: number) => void
-  setSize: Dispatch<SizeReducerAction>
   breakpoint: LivePreview['breakpoints'][number]['name']
-  iframeRef: React.RefObject<HTMLIFrameElement>
+  breakpoints: LivePreview['breakpoints']
   deviceFrameRef: React.RefObject<HTMLDivElement>
   iframeHasLoaded: boolean
+  iframeRef: React.RefObject<HTMLIFrameElement>
+  setBreakpoint: (breakpoint: LivePreview['breakpoints'][number]['name']) => void
+  setHeight: (height: number) => void
   setIframeHasLoaded: (loaded: boolean) => void
+  setSize: Dispatch<SizeReducerAction>
+  setToolbarPosition: (position: { x: number; y: number }) => void
+  setWidth: (width: number) => void
+  setZoom: (zoom: number) => void
+  size: {
+    height: number
+    width: number
+  }
   toolbarPosition: {
     x: number
     y: number
   }
-  setToolbarPosition: (position: { x: number; y: number }) => void
-  breakpoints: LivePreview['breakpoints']
-  setBreakpoint: (breakpoint: LivePreview['breakpoints'][number]['name']) => void
+  zoom: number
 }
 
 export const LivePreviewContext = createContext<LivePreviewContextType>({
-  zoom: 1,
-  setZoom: () => {},
-  size: {
-    width: 0,
-    height: 0,
-  },
-  setWidth: () => {},
-  setHeight: () => {},
-  setSize: () => {},
   breakpoint: undefined,
-  iframeRef: undefined,
+  breakpoints: undefined,
   deviceFrameRef: undefined,
   iframeHasLoaded: false,
+  iframeRef: undefined,
+  setBreakpoint: () => {},
+  setHeight: () => {},
   setIframeHasLoaded: () => {},
+  setSize: () => {},
+  setToolbarPosition: () => {},
+  setWidth: () => {},
+  setZoom: () => {},
+  size: {
+    height: 0,
+    width: 0,
+  },
   toolbarPosition: {
     x: 0,
     y: 0,
   },
-  setToolbarPosition: () => {},
-  breakpoints: undefined,
-  setBreakpoint: () => {},
+  zoom: 1,
 })
 
 export const useLivePreviewContext = () => useContext(LivePreviewContext)
