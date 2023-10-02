@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "13.4.19"
+    "next": "^13.5.3"
   },
   "devDependencies": {
     "@types/node": "20.6.2",

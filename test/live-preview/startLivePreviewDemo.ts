@@ -1,18 +1,52 @@
 import payload, { Payload } from '../../packages/payload/src'
-import { exec, execSync } from 'child_process'
+import { spawn } from 'child_process'
 import path from 'path'
 
 export const startLivePreviewDemo = async (args: { payload: Payload }): Promise<void> => {
-  payload.logger.info('Starting Next.js...')
+  let installing = false
+  let started = false
 
-  await exec(`cd ${path.resolve(__dirname, './next-app')} && yarn dev`, (err, stdout, stderr) => {
-    if (err) {
-      payload.logger.error(err)
-      return
-    }
-
-    // Do not log here because the Next.js app does not send a response
+  // Install the node modules for the Next.js app
+  const installation = spawn('yarn', ['install'], {
+    cwd: path.resolve(__dirname, './next-app'),
   })
 
-  payload.logger.info(`Next.js App URL: http://localhost:3001`)
+  installation.stdout.on('data', (data) => {
+    if (!installing) {
+      payload.logger.info('Installing Next.js...')
+      installing = true
+    }
+
+    payload.logger.info(data.toString())
+  })
+
+  installation.stderr.on('data', (data) => {
+    payload.logger.error(data.toString())
+  })
+
+  installation.on('exit', (code) => {
+    payload.logger.info(`Next.js exited with code ${code}`)
+  })
+
+  // Boot up the Next.js app
+  const app = spawn('yarn', ['dev'], {
+    cwd: path.resolve(__dirname, './next-app'),
+  })
+
+  app.stdout.on('data', (data) => {
+    if (!started) {
+      payload.logger.info('Starting Next.js...')
+      started = true
+    }
+
+    payload.logger.info(data.toString())
+  })
+
+  app.stderr.on('data', (data) => {
+    payload.logger.error(data.toString())
+  })
+
+  app.on('exit', (code) => {
+    payload.logger.info(`Next.js exited with code ${code}`)
+  })
 }
