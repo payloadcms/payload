@@ -1,4 +1,4 @@
-import JsonFormatter from 'json-formatter-js'
+// import JsonFormatter from 'json-formatter-js'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -32,11 +32,11 @@ export const QueryInspector = () => {
         )
 
         const json = await request.json()
-        const formatter = new JsonFormatter(json, Infinity)
-        const formattedJSON = formatter.render()
+        // const formatter = new JsonFormatter(json, Infinity)
+        // const formattedJSON = formatter.render()
 
         containerRef.current.innerHTML = '' // Clear previous content
-        containerRef.current.appendChild(formattedJSON)
+        containerRef.current.appendChild(json)
       }
     }
 
