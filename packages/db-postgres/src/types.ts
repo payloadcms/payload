@@ -47,7 +47,7 @@ export type DrizzleTransaction = PgTransaction<
 
 export type PostgresAdapter = BaseDatabaseAdapter &
   Args & {
-    db: DrizzleDB
+    drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
     pool: Pool
     relations: Record<string, GenericRelation>
