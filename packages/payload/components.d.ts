@@ -1,5 +1,6 @@
 export { default as Banner } from './dist/admin/components/elements/Banner';
 export { default as Button } from './dist/admin/components/elements/Button';
+export { ErrorPill } from './dist/admin/components/elements/ErrorPill';
 export { default as Pill } from './dist/admin/components/elements/Pill';
 export { default as Popup } from './dist/admin/components/elements/Popup';
 export { ShimmerEffect } from './dist/admin/components/elements/ShimmerEffect';

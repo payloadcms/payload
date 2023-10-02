@@ -6,5 +6,6 @@ export { createArrayFromCommaDelineated } from './dist/utilities/createArrayFrom
 export { deepCopyObject } from './dist/utilities/deepCopyObject';
 export { deepMerge } from './dist/utilities/deepMerge';
 export { default as flattenTopLevelFields } from './dist/utilities/flattenTopLevelFields';
+export { formatLabels, formatNames, toWords } from './dist/utilities/formatLabels';
 export { getTranslation } from './dist/utilities/getTranslation';
 //# sourceMappingURL=utilities.d.ts.map
