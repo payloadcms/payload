@@ -1,8 +1,8 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
 import httpStatus from 'http-status'
 
+import type { GeneratedTypes } from '../../'
 import type { AccessResult } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Where } from '../../types'
@@ -40,7 +40,8 @@ export type Arguments<T extends CreateUpdateType> = {
   showHiddenFields?: boolean
   where: Where
 }
-async function update<TSlug extends keyof GeneratedTypes['collections']>(
+
+async function update<TSlug extends keyof GeneratedTypes['collections']> (
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<BulkOperationResult<TSlug>> {
   let args = incomingArgs
@@ -97,7 +98,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     }, Promise.resolve())
 
     if (!where) {
-      throw new APIError("Missing 'where' query of documents to update.", httpStatus.BAD_REQUEST)
+      throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST)
     }
 
     const { data: bulkUpdateData } = args

@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 import type { Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { MarkOptional } from 'ts-essentials'
 
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
@@ -24,10 +24,10 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   },
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export default function createResolver<TSlug extends keyof GeneratedTypes['collections']>(
+export default function createResolver<TSlug extends keyof GeneratedTypes['collections']> (
   collection: Collection,
 ): Resolver<TSlug> {
-  return async function resolver(_, args, context) {
+  return async function resolver (_, args, context) {
     if (args.locale) {
       context.req.locale = args.locale
     }
