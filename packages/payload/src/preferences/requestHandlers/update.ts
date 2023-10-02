@@ -8,7 +8,7 @@ import type { PayloadRequest } from '../../express/types'
 import formatSuccessResponse from '../../express/responses/formatSuccess'
 import update from '../operations/update'
 
-export default async function updateHandler (
+export default async function updateHandler(
   req: PayloadRequest,
   res: Response,
   next: NextFunction,

@@ -18,10 +18,10 @@ export type Resolver<T> = (
   },
 ) => Promise<T>
 
-export default function findByIDResolver<T extends keyof GeneratedTypes['collections']> (
+export default function findByIDResolver<T extends keyof GeneratedTypes['collections']>(
   collection: Collection,
 ): Resolver<GeneratedTypes['collections'][T]> {
-  return async function resolver (_, args, context) {
+  return async function resolver(_, args, context) {
     const { req } = context
     if (args.locale) req.locale = args.locale
     if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale

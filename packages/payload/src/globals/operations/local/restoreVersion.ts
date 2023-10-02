@@ -20,7 +20,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
   user?: Document
 }
 
-export default async function restoreVersionLocal<T extends keyof GeneratedTypes['globals']> (
+export default async function restoreVersionLocal<T extends keyof GeneratedTypes['globals']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {

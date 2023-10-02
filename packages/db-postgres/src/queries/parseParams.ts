@@ -27,7 +27,7 @@ type Args = {
   where: Where
 }
 
-export async function parseParams ({
+export async function parseParams({
   adapter,
   fields,
   joinAliases,
@@ -156,7 +156,7 @@ export async function parseParams ({
                       isNull(rawColumn || table[columnName]),
                       /* eslint-disable @typescript-eslint/no-explicit-any */
                       ne<any>(rawColumn || table[columnName], queryValue),
-                    )
+                    ),
                   )
                 } else {
                   constraints.push(

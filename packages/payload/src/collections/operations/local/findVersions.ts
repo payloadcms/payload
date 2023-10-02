@@ -30,7 +30,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   where?: Where
 }
 
-export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']> (
+export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['collections'][T]>>> {

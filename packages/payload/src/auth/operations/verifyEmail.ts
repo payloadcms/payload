@@ -13,7 +13,7 @@ export type Args = {
   token: string
 }
 
-async function verifyEmail (args: Args): Promise<boolean> {
+async function verifyEmail(args: Args): Promise<boolean> {
   const { collection, req, token } = args
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)

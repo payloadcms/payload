@@ -19,21 +19,13 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
       <div className={baseClass}>
         <ul className={`${baseClass}__tabs`}>
           {tabs?.map((Tab, index) => {
-            return (
-              <li className={`${baseClass}__tab`} key={`tab-${index}`}>
-                <DocumentTab {...props} {...Tab} />
-              </li>
-            )
+            return <DocumentTab {...props} {...Tab} key={`tab-${index}`} />
           })}
           {customViews?.map((CustomView, index) => {
             const { Tab, path } = CustomView
 
             if (typeof Tab === 'function') {
-              return (
-                <li className={`${baseClass}__tab`} key={`tab-custom-${index}`}>
-                  <Tab path={path} {...props} />
-                </li>
-              )
+              return <Tab path={path} {...props} key={`tab-custom-${index}`} />
             }
 
             return <DocumentTab {...props} {...Tab} key={`tab-custom-${index}`} />

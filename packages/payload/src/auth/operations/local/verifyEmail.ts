@@ -10,7 +10,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   token: string
 }
 
-async function localVerifyEmail<T extends keyof GeneratedTypes['collections']> (
+async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {

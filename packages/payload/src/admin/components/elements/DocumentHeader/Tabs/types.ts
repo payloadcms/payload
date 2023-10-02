@@ -43,10 +43,10 @@ export type DocumentTabConfig = {
     | string
 }
 
-export type DocumentTab =
-  | DocumentTabConfig
-  | React.ComponentType<
-      DocumentTabProps & {
-        path: string
-      }
-    >
+export type DocumentTabComponent = React.ComponentType<
+  DocumentTabProps & {
+    path: string
+  }
+>
+
+export type DocumentTab = DocumentTabComponent | DocumentTabConfig

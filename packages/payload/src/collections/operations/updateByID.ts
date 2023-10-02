@@ -40,7 +40,7 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
   showHiddenFields?: boolean
 }
 
-async function updateByID<TSlug extends keyof GeneratedTypes['collections']> (
+async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs

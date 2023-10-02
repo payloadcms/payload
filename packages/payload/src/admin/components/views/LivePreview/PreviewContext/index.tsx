@@ -1,28 +1,28 @@
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect } from 'react'
 
+import type { LivePreview } from '../../../../../exports/config'
+import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
 
-import { EditViewProps } from '../../types'
-import { LivePreviewContext } from './context'
-import { customCollisionDetection } from './collisionDetection'
-import { LivePreview } from '../../../../../exports/config'
 import { useResize } from '../../../../utilities/useResize'
+import { customCollisionDetection } from './collisionDetection'
+import { LivePreviewContext } from './context'
 import { sizeReducer } from './sizeReducer'
 
 export type ToolbarProviderProps = EditViewProps & {
   breakpoints?: LivePreview['breakpoints']
+  children: React.ReactNode
   deviceSize?: {
     height: number
     width: number
   }
   popupState: ReturnType<typeof usePopupWindow>
   url?: string
-  children: React.ReactNode
 }
 
 export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
-  const { children, breakpoints } = props
+  const { breakpoints, children } = props
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
@@ -34,7 +34,7 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
 
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
 
-  const [size, setSize] = React.useReducer(sizeReducer, { width: 0, height: 0 })
+  const [size, setSize] = React.useReducer(sizeReducer, { height: 0, width: 0 })
 
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreview['breakpoints'][0]['name']>('responsive')
@@ -54,16 +54,6 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
       // keep it centered horizontally
       margin = `0 ${foundBreakpoint.width / 2 / zoom}px`
     }
-  }
-
-  let url
-
-  if ('collection' in props) {
-    url = props?.collection.admin.livePreview.url
-  }
-
-  if ('global' in props) {
-    url = props?.global.admin.livePreview.url
   }
 
   // The toolbar needs to freely drag and drop around the page
@@ -104,8 +94,8 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
       setSize({
         type: 'reset',
         value: {
-          width: Number(actualDeviceSize.width.toFixed(0)),
           height: Number(actualDeviceSize.height.toFixed(0)),
+          width: Number(actualDeviceSize.width.toFixed(0)),
         },
       })
     }
@@ -114,21 +104,21 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
   return (
     <LivePreviewContext.Provider
       value={{
-        zoom,
-        setZoom,
-        size,
-        setWidth,
-        setHeight,
-        setSize,
         breakpoint,
-        iframeRef,
+        breakpoints,
         deviceFrameRef,
         iframeHasLoaded,
-        setIframeHasLoaded,
-        toolbarPosition: position,
-        setToolbarPosition: setPosition,
-        breakpoints,
+        iframeRef,
         setBreakpoint,
+        setHeight,
+        setIframeHasLoaded,
+        setSize,
+        setToolbarPosition: setPosition,
+        setWidth,
+        setZoom,
+        size,
+        toolbarPosition: position,
+        zoom,
       }}
     >
       <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>

@@ -23,7 +23,7 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   user?: Document
 }
 
-export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']> (
+export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {

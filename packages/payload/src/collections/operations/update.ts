@@ -41,7 +41,7 @@ export type Arguments<T extends CreateUpdateType> = {
   where: Where
 }
 
-async function update<TSlug extends keyof GeneratedTypes['collections']> (
+async function update<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<BulkOperationResult<TSlug>> {
   let args = incomingArgs
@@ -98,7 +98,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']> (
     }, Promise.resolve())
 
     if (!where) {
-      throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST)
+      throw new APIError("Missing 'where' query of documents to update.", httpStatus.BAD_REQUEST)
     }
 
     const { data: bulkUpdateData } = args
