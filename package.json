@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.15.6",
+  "version": "1.15.7",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {

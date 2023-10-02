@@ -1,5 +1,12 @@
 
 
+## [1.15.7](https://github.com/payloadcms/payload/compare/v1.15.6...v1.15.7) (2023-10-02)
+
+
+### Bug Fixes
+
+* hotkey's pressed keys are not unset when window is not focused ([#3400](https://github.com/payloadcms/payload/issues/3400)) ([8586c85](https://github.com/payloadcms/payload/commit/8586c85fab3009a09be9bf86c22952f85aa0ad82))
+
 ## [1.15.6](https://github.com/payloadcms/payload/compare/v1.15.5...v1.15.6) (2023-09-13)
 
 
