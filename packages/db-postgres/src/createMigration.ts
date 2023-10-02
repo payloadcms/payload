@@ -78,7 +78,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
 
-  const hasMigrationTable = await migrationTableExists(this.db)
+  const hasMigrationTable = await migrationTableExists(this.drizzle)
 
   if (hasMigrationTable) {
     const migrationQuery = await payload.find({
