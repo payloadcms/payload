@@ -1,7 +1,7 @@
 import type { Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 
 import type { PayloadRequest } from '../../../express/types'
+import type { GeneratedTypes } from '../../../index'
 import type { Payload } from '../../../payload'
 import type { Result } from '../login'
 
@@ -26,7 +26,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
 }
 
-async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
+async function localLogin<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {

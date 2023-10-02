@@ -1,10 +1,10 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../express/types'
+import type { GeneratedTypes } from '../../index'
 import type { Collection } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'
@@ -40,7 +40,7 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
   showHiddenFields?: boolean
 }
 
-async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
+async function updateByID<TSlug extends keyof GeneratedTypes['collections']> (
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs

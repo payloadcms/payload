@@ -1,5 +1,4 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Document } from '../../../types'
@@ -29,7 +28,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   user?: Document
 }
 
-export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
+export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {

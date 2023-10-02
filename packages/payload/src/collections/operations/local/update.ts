@@ -1,6 +1,6 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Document, Where } from '../../../types'
@@ -50,19 +50,19 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> =
   | ByIDOptions<TSlug>
   | ManyOptions<TSlug>
 
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: ByIDOptions<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: ManyOptions<TSlug>,
 ): Promise<BulkOperationResult<TSlug>>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {

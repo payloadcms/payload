@@ -1,6 +1,6 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
+import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../express/types'
 import type { Where } from '../../types'
 import type { SanitizedGlobalConfig } from '../config/types'
@@ -27,7 +27,7 @@ type Args<T extends { [field: number | string | symbol]: unknown }> = {
   slug: string
 }
 
-async function update<TSlug extends keyof GeneratedTypes['globals']>(
+async function update<TSlug extends keyof GeneratedTypes['globals']> (
   args: Args<GeneratedTypes['globals'][TSlug]>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
@@ -55,12 +55,12 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
     const accessResults = !overrideAccess
       ? await executeAccess(
-          {
-            data,
-            req,
-          },
-          globalConfig.access.update,
-        )
+        {
+          data,
+          req,
+        },
+        globalConfig.access.update,
+      )
       : true
 
     // /////////////////////////////////////

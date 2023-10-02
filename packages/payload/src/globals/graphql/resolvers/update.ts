@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
@@ -21,10 +21,10 @@ type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   },
 ) => Promise<GeneratedTypes['globals'][TSlug]>
 
-export default function updateResolver<TSlug extends keyof GeneratedTypes['globals']>(
+export default function updateResolver<TSlug extends keyof GeneratedTypes['globals']> (
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
-  return async function resolver(_, args, context) {
+  return async function resolver (_, args, context) {
     if (args.locale) context.req.locale = args.locale
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 

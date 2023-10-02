@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import type { Payload } from '../../index'
+import type { Payload } from '../../'
 import type { Migration } from '../types'
 
 /**

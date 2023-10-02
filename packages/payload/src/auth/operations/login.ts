@@ -1,8 +1,8 @@
 import type { CookieOptions, Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 
 import jwt from 'jsonwebtoken'
 
+import type { GeneratedTypes } from '../../'
 import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { User } from '../types'
@@ -39,7 +39,7 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function login<TSlug extends keyof GeneratedTypes['collections']>(
+async function login<TSlug extends keyof GeneratedTypes['collections']> (
   incomingArgs: Arguments,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   let args = incomingArgs
