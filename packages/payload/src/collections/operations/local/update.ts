@@ -50,19 +50,19 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> =
   | ByIDOptions<TSlug>
   | ManyOptions<TSlug>
 
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: ByIDOptions<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: ManyOptions<TSlug>,
 ): Promise<BulkOperationResult<TSlug>>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']> (
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {

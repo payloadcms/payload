@@ -10,7 +10,7 @@ import type { PostgresAdapter } from './types'
 
 import { upsertRow } from './upsertRow'
 
-export async function createGlobalVersion<T extends TypeWithID> (
+export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,
   { autosave, globalSlug, req = {} as PayloadRequest, versionData }: CreateGlobalVersionArgs,
 ) {

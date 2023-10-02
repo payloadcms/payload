@@ -26,7 +26,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
 }
 
-async function localLogin<TSlug extends keyof GeneratedTypes['collections']> (
+async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {

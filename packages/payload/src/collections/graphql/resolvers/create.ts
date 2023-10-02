@@ -24,10 +24,10 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   },
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export default function createResolver<TSlug extends keyof GeneratedTypes['collections']> (
+export default function createResolver<TSlug extends keyof GeneratedTypes['collections']>(
   collection: Collection,
 ): Resolver<TSlug> {
-  return async function resolver (_, args, context) {
+  return async function resolver(_, args, context) {
     if (args.locale) {
       context.req.locale = args.locale
     }

@@ -7,7 +7,7 @@ import type { PayloadRequest } from '../../express/types'
 
 import findOne from '../operations/findOne'
 
-export default async function findOneHandler (
+export default async function findOneHandler(
   req: PayloadRequest,
   res: Response,
   next: NextFunction,
