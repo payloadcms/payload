@@ -1,4 +1,5 @@
 export {
+  BaseDatabaseAdapter,
   BeginTransaction,
   CommitTransaction,
   Connect,
@@ -11,7 +12,6 @@ export {
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
-  DatabaseAdapter,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,

@@ -3,13 +3,12 @@ import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks this import
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler'
 import type { SendMailOptions } from 'nodemailer'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type pino from 'pino'
 
 import crypto from 'crypto'
 import path from 'path'
 
-import type { DatabaseAdapter } from './'
+import type { DatabaseAdapter, GeneratedTypes } from './' // Must import from Payload to support declare module
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword'
 import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword'
 import type { Options as LoginOptions } from './auth/operations/local/login'
@@ -62,7 +61,7 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
 /**
  * @description Payload
  */
-export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
+export class BasePayload {
   Mutation: { fields: { [key: string]: any }; name: string } = { name: 'Mutation', fields: {} }
 
   Query: { fields: { [key: string]: any }; name: string } = { name: 'Query', fields: {} }
@@ -80,9 +79,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns created document
    */
-  create = async <T extends keyof TGeneratedTypes['collections']>(
+  create = async <T extends keyof GeneratedTypes['collections']>(
     options: CreateOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  ): Promise<GeneratedTypes['collections'][T]> => {
     const { create } = localOperations
     return create<T>(this, options)
   }
@@ -112,23 +111,23 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <T extends keyof TGeneratedTypes['collections']>(
+  find = async <T extends keyof GeneratedTypes['collections']>(
     options: FindOptions<T>,
-  ): Promise<PaginatedDocs<TGeneratedTypes['collections'][T]>> => {
+  ): Promise<PaginatedDocs<GeneratedTypes['collections'][T]>> => {
     const { find } = localOperations
     return find<T>(this, options)
   }
 
-  findByID = async <T extends keyof TGeneratedTypes['collections']>(
+  findByID = async <T extends keyof GeneratedTypes['collections']>(
     options: FindByIDOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  ): Promise<GeneratedTypes['collections'][T]> => {
     const { findByID } = localOperations
     return findByID<T>(this, options)
   }
 
-  findGlobal = async <T extends keyof TGeneratedTypes['globals']>(
+  findGlobal = async <T extends keyof GeneratedTypes['globals']>(
     options: FindGlobalOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
+  ): Promise<GeneratedTypes['globals'][T]> => {
     const { findOne } = localGlobalOperations
     return findOne<T>(this, options)
   }
@@ -138,9 +137,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns global version with specified ID
    */
-  findGlobalVersionByID = async <T extends keyof TGeneratedTypes['globals']>(
+  findGlobalVersionByID = async <T extends keyof GeneratedTypes['globals']>(
     options: FindGlobalVersionByIDOptions<T>,
-  ): Promise<TypeWithVersion<TGeneratedTypes['globals'][T]>> => {
+  ): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> => {
     const { findVersionByID } = localGlobalOperations
     return findVersionByID<T>(this, options)
   }
@@ -150,9 +149,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns versions satisfying query
    */
-  findGlobalVersions = async <T extends keyof TGeneratedTypes['globals']>(
+  findGlobalVersions = async <T extends keyof GeneratedTypes['globals']>(
     options: FindGlobalVersionsOptions<T>,
-  ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['globals'][T]>>> => {
+  ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> => {
     const { findVersions } = localGlobalOperations
     return findVersions<T>(this, options)
   }
@@ -162,9 +161,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  findVersionByID = async <T extends keyof TGeneratedTypes['collections']>(
+  findVersionByID = async <T extends keyof GeneratedTypes['collections']>(
     options: FindVersionByIDOptions<T>,
-  ): Promise<TypeWithVersion<TGeneratedTypes['collections'][T]>> => {
+  ): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> => {
     const { findVersionByID } = localOperations
     return findVersionByID<T>(this, options)
   }
@@ -174,14 +173,14 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns versions satisfying query
    */
-  findVersions = async <T extends keyof TGeneratedTypes['collections']>(
+  findVersions = async <T extends keyof GeneratedTypes['collections']>(
     options: FindVersionsOptions<T>,
-  ): Promise<PaginatedDocs<TypeWithVersion<TGeneratedTypes['collections'][T]>>> => {
+  ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['collections'][T]>>> => {
     const { findVersions } = localOperations
     return findVersions<T>(this, options)
   }
 
-  forgotPassword = async <T extends keyof TGeneratedTypes['collections']>(
+  forgotPassword = async <T extends keyof GeneratedTypes['collections']>(
     options: ForgotPasswordOptions<T>,
   ): Promise<ForgotPasswordResult> => {
     const { forgotPassword } = localOperations.auth
@@ -198,9 +197,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   logger: pino.Logger
 
-  login = async <T extends keyof TGeneratedTypes['collections']>(
+  login = async <T extends keyof GeneratedTypes['collections']>(
     options: LoginOptions<T>,
-  ): Promise<LoginResult & { user: TGeneratedTypes['collections'][T] }> => {
+  ): Promise<LoginResult & { user: GeneratedTypes['collections'][T] }> => {
     const { login } = localOperations.auth
     return login<T>(this, options)
   }
@@ -211,7 +210,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @returns document with specified ID
    */
 
-  resetPassword = async <T extends keyof TGeneratedTypes['collections']>(
+  resetPassword = async <T extends keyof GeneratedTypes['collections']>(
     options: ResetPasswordOptions<T>,
   ): Promise<ResetPasswordResult> => {
     const { resetPassword } = localOperations.auth
@@ -223,9 +222,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  restoreGlobalVersion = async <T extends keyof TGeneratedTypes['globals']>(
+  restoreGlobalVersion = async <T extends keyof GeneratedTypes['globals']>(
     options: RestoreGlobalVersionOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
+  ): Promise<GeneratedTypes['globals'][T]> => {
     const { restoreVersion } = localGlobalOperations
     return restoreVersion<T>(this, options)
   }
@@ -235,9 +234,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns version with specified ID
    */
-  restoreVersion = async <T extends keyof TGeneratedTypes['collections']>(
+  restoreVersion = async <T extends keyof GeneratedTypes['collections']>(
     options: RestoreVersionOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]> => {
+  ): Promise<GeneratedTypes['collections'][T]> => {
     const { restoreVersion } = localOperations
     return restoreVersion<T>(this, options)
   }
@@ -260,23 +259,23 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     tabTypes: any
   }
 
-  unlock = async <T extends keyof TGeneratedTypes['collections']>(
+  unlock = async <T extends keyof GeneratedTypes['collections']>(
     options: UnlockOptions<T>,
   ): Promise<boolean> => {
     const { unlock } = localOperations.auth
     return unlock(this, options)
   }
 
-  updateGlobal = async <T extends keyof TGeneratedTypes['globals']>(
+  updateGlobal = async <T extends keyof GeneratedTypes['globals']>(
     options: UpdateGlobalOptions<T>,
-  ): Promise<TGeneratedTypes['globals'][T]> => {
+  ): Promise<GeneratedTypes['globals'][T]> => {
     const { update } = localGlobalOperations
     return update<T>(this, options)
   }
 
   validationRules: (args: OperationArgs<any>) => ValidationRule[]
 
-  verifyEmail = async <T extends keyof TGeneratedTypes['collections']>(
+  verifyEmail = async <T extends keyof GeneratedTypes['collections']>(
     options: VerifyEmailOptions<T>,
   ): Promise<boolean> => {
     const { verifyEmail } = localOperations.auth
@@ -287,9 +286,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     [slug: string]: any // TODO: Type this
   } = {}
 
-  delete<T extends keyof TGeneratedTypes['collections']>(
+  delete<T extends keyof GeneratedTypes['collections']>(
     options: DeleteOptions<T>,
-  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
+  ): Promise<BulkOperationResult<T> | GeneratedTypes['collections'][T]> {
     const { deleteLocal } = localOperations
     return deleteLocal<T>(this, options)
   }
@@ -299,11 +298,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  delete<T extends keyof TGeneratedTypes['collections']>(
+  delete<T extends keyof GeneratedTypes['collections']>(
     options: DeleteByIDOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]>
+  ): Promise<GeneratedTypes['collections'][T]>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(
+  delete<T extends keyof GeneratedTypes['collections']>(
     options: DeleteManyOptions<T>,
   ): Promise<BulkOperationResult<T>>
 
@@ -388,7 +387,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return this
   }
 
-  update<T extends keyof TGeneratedTypes['collections']>(
+  update<T extends keyof GeneratedTypes['collections']>(
     options: UpdateManyOptions<T>,
   ): Promise<BulkOperationResult<T>>
 
@@ -397,19 +396,19 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  update<T extends keyof TGeneratedTypes['collections']>(
+  update<T extends keyof GeneratedTypes['collections']>(
     options: UpdateByIDOptions<T>,
-  ): Promise<TGeneratedTypes['collections'][T]>
+  ): Promise<GeneratedTypes['collections'][T]>
 
-  update<T extends keyof TGeneratedTypes['collections']>(
+  update<T extends keyof GeneratedTypes['collections']>(
     options: UpdateOptions<T>,
-  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
+  ): Promise<BulkOperationResult<T> | GeneratedTypes['collections'][T]> {
     const { update } = localOperations
     return update<T>(this, options)
   }
 }
 
-export type Payload = BasePayload<GeneratedTypes>
+export type Payload = BasePayload
 
 let cached = global._payload
 
@@ -424,7 +423,7 @@ export const getPayload = async (options: InitOptions): Promise<Payload> => {
   }
 
   if (!cached.promise) {
-    cached.promise = new BasePayload<GeneratedTypes>().init(options)
+    cached.promise = new BasePayload().init(options)
   }
 
   try {
