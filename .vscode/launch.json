@@ -14,10 +14,7 @@
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
       "request": "launch",
-      "type": "node-terminal",
-      "env": {
-        "NODE_ENV": "production"
-      }
+      "type": "node-terminal"
     },
     {
       "command": "pnpm run dev:postgres collections-graphql -- -I", // Allow input
