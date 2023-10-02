@@ -62,9 +62,7 @@ const startDev = async () => {
   externalRouter.use(payload.authenticate)
 
   if (testSuiteDir === 'live-preview') {
-    // start the Next.js app automatically
     await startLivePreviewDemo({
-      expressApp,
       payload,
     })
   }

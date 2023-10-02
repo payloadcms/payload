@@ -1,28 +1,18 @@
-import next from 'next'
-import path from 'path'
 import payload, { Payload } from '../../packages/payload/src'
-import express from 'express'
+import { exec, execSync } from 'child_process'
+import path from 'path'
 
-export const startLivePreviewDemo = async (args: {
-  expressApp: express.Express
-  payload: Payload
-}): Promise<void> => {
-  const { expressApp, payload } = args
+export const startLivePreviewDemo = async (args: { payload: Payload }): Promise<void> => {
+  payload.logger.info('Starting Next.js...')
 
-  const nextApp = next({
-    dev: process.env.NODE_ENV !== 'production',
-    dir: path.resolve(__dirname, './next-app'),
+  await exec(`cd ${path.resolve(__dirname, './next-app')} && yarn dev`, (err, stdout, stderr) => {
+    if (err) {
+      payload.logger.error(err)
+      return
+    }
+
+    // Do not log here because the Next.js app does not send a response
   })
 
-  const nextHandler = nextApp.getRequestHandler()
-
-  expressApp.get('*', (req, res) => nextHandler(req, res))
-
-  nextApp.prepare().then(() => {
-    payload.logger.info('Next.js started')
-
-    expressApp.listen(3001, async () => {
-      payload.logger.info(`Next.js App URL: http://localhost:3001`)
-    })
-  })
+  payload.logger.info(`Next.js App URL: http://localhost:3001`)
 }

@@ -13,14 +13,13 @@ describe('Live Preview', () => {
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    const { serverURL, expressApp, payload } = await initPayloadE2E(__dirname)
+    const { serverURL, payload } = await initPayloadE2E(__dirname)
     url = new AdminUrlUtil(serverURL, 'posts')
 
     const context = await browser.newContext()
     page = await context.newPage()
 
     await startLivePreviewDemo({
-      expressApp,
       payload,
     })
   })

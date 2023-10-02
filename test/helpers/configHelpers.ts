@@ -15,7 +15,7 @@ type Options = {
   init?: Partial<InitOptions>
 }
 
-type InitializedPayload = { serverURL: string; expressApp: express.Express; payload: Payload }
+type InitializedPayload = { serverURL: string; payload: Payload }
 
 export async function initPayloadE2E(__dirname: string): Promise<InitializedPayload> {
   const webpackCachePath = path.resolve(__dirname, '../../node_modules/.cache/webpack')
@@ -67,7 +67,7 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
     initOptions.express.listen(port)
   }
 
-  return { serverURL: `http://localhost:${port}`, expressApp: initOptions.express, payload }
+  return { serverURL: `http://localhost:${port}`, payload }
 }
 
 export const openAccess: CollectionConfig['access'] = {
