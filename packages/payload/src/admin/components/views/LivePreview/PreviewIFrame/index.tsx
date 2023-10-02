@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import { useLivePreviewToolbarContext } from '../ToolbarProvider/context'
+import { useLivePreviewContext } from '../PreviewContext/context'
 
 import './index.scss'
 
@@ -12,7 +12,7 @@ export const IFrame: React.FC<{
 }> = forwardRef((props, ref) => {
   const { url, setIframeHasLoaded } = props
 
-  const { zoom } = useLivePreviewToolbarContext()
+  const { zoom } = useLivePreviewContext()
 
   return (
     <iframe

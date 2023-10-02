@@ -1,32 +1,32 @@
 import { useDraggable } from '@dnd-kit/core'
 import React from 'react'
 
-import type { ToolbarProviderProps } from '../ToolbarProvider'
+import type { ToolbarProviderProps } from '../PreviewContext'
 
 import { X } from '../../..'
 import { ExternalLinkIcon } from '../../../graphics/ExternalLink'
 import DragHandle from '../../../icons/Drag'
+import { useLivePreviewContext } from '../PreviewContext/context'
+import { PreviewFrameSizeInput } from './SizeInput'
+
 import './index.scss'
-import { useLivePreviewToolbarContext } from '../ToolbarProvider/context'
+
 const baseClass = 'live-preview-toolbar'
 
 export const LivePreviewToolbar: React.FC<
-  ToolbarProviderProps & {
+  Omit<ToolbarProviderProps, 'children'> & {
     iframeRef: React.RefObject<HTMLIFrameElement>
     style?: React.CSSProperties
   }
 > = (props) => {
   const {
-    breakpoint,
-    breakpoints,
     deviceSize,
     popupState: { openPopupWindow },
-    setBreakpoint,
     style,
     url,
   } = props
 
-  const { zoom, setZoom } = useLivePreviewToolbarContext()
+  const { zoom, setZoom, breakpoint, breakpoints, setBreakpoint } = useLivePreviewContext()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',
@@ -66,21 +66,11 @@ export const LivePreviewToolbar: React.FC<
           </select>
         )}
         <div className={`${baseClass}__device-size`}>
-          <input
-            className={`${baseClass}__size`}
-            disabled
-            type="number"
-            value={deviceSize?.width.toFixed(0)}
-          />
+          <PreviewFrameSizeInput axis="x" />
           <span className={`${baseClass}__size-divider`}>
             <X />
           </span>
-          <input
-            className={`${baseClass}__size`}
-            disabled
-            type="number"
-            value={deviceSize?.height.toFixed(0)}
-          />
+          <PreviewFrameSizeInput axis="y" />
         </div>
         <select
           className={`${baseClass}__zoom`}

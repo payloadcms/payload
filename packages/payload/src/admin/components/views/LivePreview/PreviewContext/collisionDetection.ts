@@ -8,7 +8,7 @@ export const customCollisionDetection: CollisionDetection = ({
   ...args
 }) => {
   const droppableContainer = droppableContainers.find(({ id }) => id === 'live-preview-area')
-  console.log('droppableContainer', droppableContainer)
+
   const rectIntersectionCollisions = rectIntersection({
     ...args,
     collisionRect,

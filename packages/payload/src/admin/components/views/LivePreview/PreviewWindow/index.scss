@@ -7,18 +7,17 @@
   height: calc(100vh - var(--doc-controls-height));
   overflow: hidden;
 
+  &--has-breakpoint {
+    margin-top: var(--base);
+
+    .live-preview-iframe {
+      border: 1px solid var(--theme-elevation-100);
+    }
+  }
+
   &__wrapper {
     height: 100%;
     width: 100%;
-    display: flex;
-    justify-content: center;
-
-    &--has-breakpoint {
-      .live-preview-iframe {
-        margin-top: var(--base);
-        border: 1px solid var(--theme-elevation-100);
-      }
-    }
   }
 
   @include mid-break {

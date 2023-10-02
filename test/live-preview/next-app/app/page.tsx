@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 export default async function Home() {
   const page = await getPage('home')
 
-  if (page) {
+  if (!page) {
     notFound()
   }
 
