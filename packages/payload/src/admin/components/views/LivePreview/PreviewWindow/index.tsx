@@ -25,6 +25,7 @@ const ResponsiveWindow: React.FC<{
   const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
 
   let x = '0'
+  let margin = '0'
 
   if (foundBreakpoint && breakpoint !== 'responsive') {
     x = '-50%'
@@ -34,8 +35,10 @@ const ResponsiveWindow: React.FC<{
       typeof foundBreakpoint.width === 'number' &&
       typeof foundBreakpoint.height === 'number'
     ) {
-      // keep it centered horizontally
-      x = `${foundBreakpoint.width / 2}px`
+      const scaledWidth = foundBreakpoint.width / zoom
+      const difference = scaledWidth - foundBreakpoint.width
+      x = `${difference / 2}px`
+      margin = 'auto'
     }
   }
 
@@ -50,6 +53,7 @@ const ResponsiveWindow: React.FC<{
             : typeof zoom === 'number'
             ? `${100 / zoom}%`
             : '100%',
+        margin,
         transform: `translate3d(${x}, 0, 0)`,
         width:
           foundBreakpoint && typeof foundBreakpoint?.width === 'number'
