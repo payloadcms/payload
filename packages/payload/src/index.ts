@@ -1,13 +1,12 @@
 import type { Config as GeneratedTypes } from 'payload/generated-types'
 
 import type { InitOptions } from './config/types'
+import type { DatabaseAdapter } from './database/types'
 import type { RequestContext } from './express/types'
 import type { Payload as LocalPayload } from './payload'
 
 import { initHTTP } from './initHTTP'
 import { BasePayload } from './payload'
-
-export { DatabaseAdapter } from './database/types'
 
 export { getPayload } from './payload'
 
@@ -33,3 +32,6 @@ export default payload
 module.exports = payload
 // Export RequestContext type
 export type { RequestContext }
+
+// Export DatabaseAdapter type
+export type { DatabaseAdapter }
