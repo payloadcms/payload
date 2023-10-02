@@ -10,7 +10,7 @@ export const PreviewFrameSizeInput: React.FC<{
 }> = (props) => {
   const { axis } = props
 
-  const { setHeight, setWidth, size } = useLivePreviewContext()
+  const { actualDeviceSize, setBreakpoint, setHeight, setWidth, size } = useLivePreviewContext()
 
   // const [size, setSize] = React.useState<string>(() => {
   //   if (sizeToUse === 'width') {
@@ -30,24 +30,29 @@ export const PreviewFrameSizeInput: React.FC<{
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      // setBreakpoint('custom')
+
+      console.log(Number(e.target.value))
+
       if (axis === 'x') {
         setWidth(Number(e.target.value))
       } else {
         setHeight(Number(e.target.value))
       }
     },
-    [axis, setWidth, setHeight],
+    [axis, setWidth, setHeight, setBreakpoint],
   )
 
-  const sizeValue = axis === 'x' ? size?.width : size?.height
+  console.log(actualDeviceSize)
+
+  const sizeValue = axis === 'x' ? actualDeviceSize?.width : actualDeviceSize?.height
 
   return (
     <input
       className={`${baseClass}__size`}
-      disabled // enable this once its wired up properly
       onChange={handleChange}
       type="number"
-      value={sizeValue}
+      value={sizeValue || 0}
     />
   )
 }

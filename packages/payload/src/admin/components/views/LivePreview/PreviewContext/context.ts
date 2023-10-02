@@ -6,6 +6,10 @@ import type { LivePreview } from '../../../../../exports/config'
 import type { SizeReducerAction } from './sizeReducer'
 
 export interface LivePreviewContextType {
+  actualDeviceSize: {
+    height: number
+    width: number
+  }
   breakpoint: LivePreview['breakpoints'][number]['name']
   breakpoints: LivePreview['breakpoints']
   deviceFrameRef: React.RefObject<HTMLDivElement>
@@ -30,6 +34,10 @@ export interface LivePreviewContextType {
 }
 
 export const LivePreviewContext = createContext<LivePreviewContextType>({
+  actualDeviceSize: {
+    height: 0,
+    width: 0,
+  },
   breakpoint: undefined,
   breakpoints: undefined,
   deviceFrameRef: undefined,

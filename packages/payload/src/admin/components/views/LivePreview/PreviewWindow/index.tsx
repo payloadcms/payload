@@ -20,7 +20,7 @@ const ResponsiveWindow: React.FC<{
 }> = (props) => {
   const { children } = props
 
-  const { breakpoint, breakpoints, deviceFrameRef, zoom } = useLivePreviewContext()
+  const { breakpoint, breakpoints, deviceFrameRef, size, zoom } = useLivePreviewContext()
 
   const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
 
@@ -32,11 +32,11 @@ const ResponsiveWindow: React.FC<{
 
     if (
       typeof zoom === 'number' &&
-      typeof foundBreakpoint.width === 'number' &&
-      typeof foundBreakpoint.height === 'number'
+      typeof size.width === 'number' &&
+      typeof size.height === 'number'
     ) {
-      const scaledWidth = foundBreakpoint.width / zoom
-      const difference = scaledWidth - foundBreakpoint.width
+      const scaledWidth = size.width / zoom
+      const difference = scaledWidth - size.width
       x = `${difference / 2}px`
       margin = 'auto'
     }
@@ -48,16 +48,16 @@ const ResponsiveWindow: React.FC<{
       ref={deviceFrameRef}
       style={{
         height:
-          foundBreakpoint && typeof foundBreakpoint?.height === 'number'
-            ? `${foundBreakpoint?.height / (typeof zoom === 'number' ? zoom : 1)}px`
+          foundBreakpoint && foundBreakpoint?.name !== 'responsive'
+            ? `${size?.height / (typeof zoom === 'number' ? zoom : 1)}px`
             : typeof zoom === 'number'
             ? `${100 / zoom}%`
             : '100%',
         margin,
         transform: `translate3d(${x}, 0, 0)`,
         width:
-          foundBreakpoint && typeof foundBreakpoint?.width === 'number'
-            ? `${foundBreakpoint?.width / (typeof zoom === 'number' ? zoom : 1)}px`
+          foundBreakpoint && foundBreakpoint?.name !== 'responsive'
+            ? `${size?.width / (typeof zoom === 'number' ? zoom : 1)}px`
             : typeof zoom === 'number'
             ? `${100 / zoom}%`
             : '100%',
