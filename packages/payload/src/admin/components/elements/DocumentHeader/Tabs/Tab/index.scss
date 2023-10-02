@@ -2,12 +2,15 @@
 
 .doc-tab {
   @extend %h5;
-  text-decoration: none;
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: calc(var(--base) / 2) calc(var(--base));
+
+  &__link {
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+  }
 
   &:focus:not(:focus-visible) {
     opacity: 1;
@@ -60,10 +63,13 @@
     position: relative;
     align-items: center;
     gap: 4px;
+    width: 100%;
+    height: 100%;
+    padding: calc(var(--base) / 2) calc(var(--base));
   }
 
   &__count {
-    padding: 0px 6px;
+    padding: 0px 7px;
     background-color: var(--theme-elevation-100);
     border-radius: 1px;
   }
