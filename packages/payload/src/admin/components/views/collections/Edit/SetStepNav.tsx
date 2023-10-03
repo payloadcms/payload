@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../../../exports/types'
-import type { StepNavItem } from './types'
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
+import type { SanitizedGlobalConfig } from '../../../../../exports/types'
+import type { StepNavItem } from '../../../elements/StepNav/types'
 
-import { useStepNav } from '.'
-import { getTranslation } from '../../../../utilities/getTranslation'
-import useTitle from '../../../hooks/useTitle'
-import { useConfig } from '../../utilities/Config'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import useTitle from '../../../../hooks/useTitle'
+import { useStepNav } from '../../../elements/StepNav'
+import { useConfig } from '../../../utilities/Config'
 
 export const SetStepNav: React.FC<
   | {
@@ -18,7 +18,6 @@ export const SetStepNav: React.FC<
     }
   | {
       global: SanitizedGlobalConfig
-      slug: string
     }
 > = (props) => {
   let collection: SanitizedCollectionConfig | undefined
@@ -48,9 +47,9 @@ export const SetStepNav: React.FC<
   }
 
   if ('global' in props) {
-    const { global: globalFromProps, slug: slugFromProps } = props
+    const { global: globalFromProps } = props
     global = globalFromProps
-    slug = slugFromProps
+    slug = globalFromProps?.slug
   }
 
   const { setStepNav } = useStepNav()

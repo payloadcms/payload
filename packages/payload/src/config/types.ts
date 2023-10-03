@@ -13,7 +13,7 @@ import type { InlineConfig } from 'vite'
 
 import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
-import type { EditViewProps } from '../admin/components/views/types'
+import type { CollectionEditViewProps, GlobalEditViewProps } from '../admin/components/views/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -241,7 +241,7 @@ export type EditViewConfig = {
   path: string
 }
 
-export type EditViewComponent = React.ComponentType<EditViewProps>
+export type EditViewComponent = React.ComponentType<CollectionEditViewProps | GlobalEditViewProps>
 
 export type EditView = EditViewComponent | EditViewConfig
 

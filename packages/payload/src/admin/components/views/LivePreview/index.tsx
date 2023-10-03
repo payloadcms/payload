@@ -7,12 +7,12 @@ import type { EditViewProps } from '../types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { Gutter } from '../../elements/Gutter'
-import { SetStepNav } from '../../elements/StepNav/SetStepNav'
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../forms/field-types'
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
 import Meta from '../../utilities/Meta'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { LivePreview } from './Preview'
 import './index.scss'
 import { usePopupWindow } from './usePopupWindow'
@@ -72,7 +72,7 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
 
   return (
     <Fragment>
-      <SetStepNav collection={collection} id={id} isEditing={isEditing} />
+      <SetStepNav collection={collection} global={global} id={id} isEditing={isEditing} />
       <DocumentControls
         apiURL={apiURL}
         collection={collection}
