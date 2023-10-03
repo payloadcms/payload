@@ -28,6 +28,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
     buildTable({
       adapter: this,
       buildRelationships: true,
+      collectionIndexes: collection.indexes,
       disableUnique: false,
       fields: collection.fields,
       tableName,
