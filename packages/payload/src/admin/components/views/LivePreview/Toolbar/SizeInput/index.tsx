@@ -10,8 +10,7 @@ export const PreviewFrameSizeInput: React.FC<{
 }> = (props) => {
   const { axis } = props
 
-  const { breakpoint, measuredDeviceSize, setBreakpoint, setHeight, setWidth, size } =
-    useLivePreviewContext()
+  const { breakpoint, measuredDeviceSize, setBreakpoint, setSize, size } = useLivePreviewContext()
 
   const [internalState, setInternalState] = React.useState<number>(
     (axis === 'x' ? measuredDeviceSize?.width : measuredDeviceSize?.height) || 0,
@@ -23,16 +22,22 @@ export const PreviewFrameSizeInput: React.FC<{
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = Number(e.target.value)
       setInternalState(newValue)
-
       setBreakpoint('custom')
 
-      if (axis === 'x') setWidth(newValue)
-      else setHeight(newValue)
+      // be sure to set _both_ axis values to so that the other axis doesn't fallback to 0 on initial change
+      // this is because the `responsive` size is '100%' in CSS, and `0` in initial state
+      setSize({
+        type: 'reset',
+        value: {
+          height: axis === 'y' ? newValue : measuredDeviceSize?.height,
+          width: axis === 'x' ? newValue : measuredDeviceSize?.width,
+        },
+      })
     },
-    [axis, setWidth, setHeight, setBreakpoint],
+    [axis, setBreakpoint, measuredDeviceSize, setSize],
   )
 
-  // if the breakpoint is `responsive` then the div will have `100%` width and height
+  // if the breakpoint is `responsive` then the device's div will have `100%` width and height
   // so we need to take the measurements provided by `actualDeviceSize` and sync internal state
   useEffect(() => {
     if (breakpoint === 'responsive' && measuredDeviceSize) {
