@@ -85,7 +85,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       ? originalDocFetchURL
       : `${compareBaseURL}/${compareValue.value}`
 
-  const [{ data: doc, isError, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, {
+  const [{ data: doc, isError }] = usePayloadAPI(versionFetchURL, {
     initialParams: { depth: 1, locale: '*' },
   })
   const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, {
