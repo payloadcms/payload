@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/nodemon.json",
   "exec": "ts-node ../../test/dev.ts",
   "ext": "ts,js,json",
   "ignore": [
