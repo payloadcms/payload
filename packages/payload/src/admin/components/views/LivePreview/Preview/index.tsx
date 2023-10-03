@@ -1,72 +1,20 @@
 import React, { useEffect } from 'react'
 
-import type { LivePreview } from '../../../../../exports/config'
+import type { LivePreview as LivePreviewType } from '../../../../../exports/config'
 import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
 
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
-import { LivePreviewProvider } from '../PreviewContext'
-import { useLivePreviewContext } from '../PreviewContext/context'
-import { IFrame } from '../PreviewIFrame'
+import { LivePreviewProvider } from '../Context'
+import { useLivePreviewContext } from '../Context/context'
+import { DeviceContainer } from '../Device'
+import { IFrame } from '../IFrame'
 import { LivePreviewToolbar } from '../Toolbar'
 import { ToolbarArea } from '../ToolbarArea'
 import './index.scss'
 
 const baseClass = 'live-preview-window'
-
-const ResponsiveWindow: React.FC<{
-  children: React.ReactNode
-}> = (props) => {
-  const { children } = props
-
-  const { breakpoint, breakpoints, deviceFrameRef, size, zoom } = useLivePreviewContext()
-
-  const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
-
-  let x = '0'
-  let margin = '0'
-
-  if (foundBreakpoint && breakpoint !== 'responsive') {
-    x = '-50%'
-
-    if (
-      typeof zoom === 'number' &&
-      typeof size.width === 'number' &&
-      typeof size.height === 'number'
-    ) {
-      const scaledWidth = size.width / zoom
-      const difference = scaledWidth - size.width
-      x = `${difference / 2}px`
-      margin = 'auto'
-    }
-  }
-
-  return (
-    <div
-      className={`${baseClass}__responsive-window`}
-      ref={deviceFrameRef}
-      style={{
-        height:
-          foundBreakpoint && foundBreakpoint?.name !== 'responsive'
-            ? `${size?.height / (typeof zoom === 'number' ? zoom : 1)}px`
-            : typeof zoom === 'number'
-            ? `${100 / zoom}%`
-            : '100%',
-        margin,
-        transform: `translate3d(${x}, 0, 0)`,
-        width:
-          foundBreakpoint && foundBreakpoint?.name !== 'responsive'
-            ? `${size?.width / (typeof zoom === 'number' ? zoom : 1)}px`
-            : typeof zoom === 'number'
-            ? `${100 / zoom}%`
-            : '100%',
-      }}
-    >
-      {children}
-    </div>
-  )
-}
 
 const Preview: React.FC<
   EditViewProps & {
@@ -133,9 +81,9 @@ const Preview: React.FC<
       >
         <ToolbarArea>
           <div className={`${baseClass}__wrapper`}>
-            <ResponsiveWindow>
+            <DeviceContainer>
               <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
-            </ResponsiveWindow>
+            </DeviceContainer>
           </div>
           <LivePreviewToolbar
             {...props}
@@ -152,7 +100,7 @@ const Preview: React.FC<
   }
 }
 
-export const PreviewWindow: React.FC<
+export const LivePreview: React.FC<
   EditViewProps & {
     popupState: ReturnType<typeof usePopupWindow>
     url?: string
@@ -160,7 +108,7 @@ export const PreviewWindow: React.FC<
 > = (props) => {
   let url
 
-  let breakpoints: LivePreview['breakpoints'] = [
+  let breakpoints: LivePreviewType['breakpoints'] = [
     {
       name: 'responsive',
       height: '100%',

@@ -1,12 +1,12 @@
 import { useDraggable } from '@dnd-kit/core'
 import React from 'react'
 
-import type { ToolbarProviderProps } from '../PreviewContext'
+import type { ToolbarProviderProps } from '../Context'
 
 import { X } from '../../..'
 import { ExternalLinkIcon } from '../../../graphics/ExternalLink'
 import DragHandle from '../../../icons/Drag'
-import { useLivePreviewContext } from '../PreviewContext/context'
+import { useLivePreviewContext } from '../Context/context'
 import { PreviewFrameSizeInput } from './SizeInput'
 import './index.scss'
 

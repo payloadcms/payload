@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 
-import { useLivePreviewContext } from '../../PreviewContext/context'
+import { useLivePreviewContext } from '../../Context/context'
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar'
