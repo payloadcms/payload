@@ -6,7 +6,6 @@ import { useHistory } from 'react-router-dom'
 import type { Props } from './types'
 
 import Button from '../../elements/Button'
-import MinimalTemplate from '../../templates/Minimal'
 import { useConfig } from '../../utilities/Config'
 import './index.scss'
 
@@ -27,10 +26,12 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
 
   return (
     <Modal className={baseClass} slug="stay-logged-in">
-      <MinimalTemplate className={`${baseClass}__template`}>
-        <h1>{t('stayLoggedIn')}</h1>
-        <p>{t('youAreInactive')}</p>
-        <div className={`${baseClass}__actions`}>
+      <div className={`${baseClass}__wrapper`}>
+        <div className={`${baseClass}__content`}>
+          <h1>{t('stayLoggedIn')}</h1>
+          <p>{t('youAreInactive')}</p>
+        </div>
+        <div className={`${baseClass}__controls`}>
           <Button
             buttonStyle="secondary"
             onClick={() => {
@@ -49,7 +50,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
             {t('stayLoggedIn')}
           </Button>
         </div>
-      </MinimalTemplate>
+      </div>
     </Modal>
   )
 }
