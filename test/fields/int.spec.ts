@@ -41,7 +41,7 @@ describe('Fields', () => {
     ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
     config = await configPromise
 
-    client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' })
+    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
     const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
     graphQLClient = new GraphQLClient(graphQLURL)
     token = await client.login()
@@ -64,7 +64,7 @@ describe('Fields', () => {
     })
 
     it('should populate default values in beforeValidate hook', async () => {
-      const { fieldWithDefaultValue, dependentOnFieldWithDefaultValue } = await payload.create({
+      const { dependentOnFieldWithDefaultValue, fieldWithDefaultValue } = await payload.create({
         collection: 'text-fields',
         data: { text },
       })
@@ -89,10 +89,6 @@ describe('Fields', () => {
         depth: 0,
         where: {
           updatedAt: {
-            // TODO:
-            //  drizzle is not adjusting for timezones
-            //  tenMinutesAgo: "2023-08-29T15:49:39.897Z" UTC
-            //  doc.updatedAt: "2023-08-29T11:59:43.738Z" GMT -4
             greater_than_equal: tenMinutesAgo,
           },
         },
@@ -121,15 +117,15 @@ describe('Fields', () => {
     beforeAll(async () => {
       const { id } = await payload.create({
         collection: 'select-fields',
-        locale: 'en',
         data: {
           selectHasManyLocalized: ['one', 'two'],
         },
+        locale: 'en',
       })
       doc = await payload.findByID({
+        id,
         collection: 'select-fields',
         locale: 'all',
-        id,
       })
     })
 
@@ -146,8 +142,8 @@ describe('Fields', () => {
       })
 
       const updatedDoc = await payload.update({
-        collection: 'select-fields',
         id,
+        collection: 'select-fields',
         data: {
           select: 'one',
         },
@@ -245,15 +241,15 @@ describe('Fields', () => {
       const localizedHasMany = [5, 10]
       const { id } = await payload.create({
         collection: 'number-fields',
-        locale: 'en',
         data: {
           localizedHasMany,
         },
+        locale: 'en',
       })
       const localizedDoc = await payload.findByID({
+        id,
         collection: 'number-fields',
         locale: 'all',
-        id,
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -296,15 +292,15 @@ describe('Fields', () => {
       })
       it('should have a sparse index on a unique localized field in a group', () => {
         expect(definitions['group.localizedUnique.en']).toEqual(1)
-        expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true })
+        expect(options['group.localizedUnique.en']).toMatchObject({ sparse: true, unique: true })
         expect(definitions['group.localizedUnique.es']).toEqual(1)
-        expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true })
+        expect(options['group.localizedUnique.es']).toMatchObject({ sparse: true, unique: true })
       })
       it('should have unique indexes in a collapsible', () => {
         expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1)
         expect(options['collapsibleLocalizedUnique.en']).toMatchObject({
-          unique: true,
           sparse: true,
+          unique: true,
         })
         expect(definitions.collapsibleTextUnique).toEqual(1)
         expect(options.collapsibleTextUnique).toMatchObject({ unique: true })
@@ -312,9 +308,9 @@ describe('Fields', () => {
       it('should have unique compound indexes', () => {
         expect(definitions.partOne).toEqual(1)
         expect(options.partOne).toMatchObject({
-          unique: true,
           name: 'compound-index',
           sparse: true,
+          unique: true,
         })
       })
       it('should throw validation error saving on unique fields', async () => {
@@ -337,16 +333,16 @@ describe('Fields', () => {
       it('should throw validation error saving on unique combined fields', async () => {
         await payload.delete({ collection: 'indexed-fields', where: {} })
         const data1 = {
+          partOne: 'u',
+          partTwo: 'u',
           text: 'a',
           uniqueText: 'a',
-          partOne: 'u',
-          partTwo: 'u',
         }
         const data2 = {
-          text: 'b',
-          uniqueText: 'b',
           partOne: 'u',
           partTwo: 'u',
+          text: 'b',
+          uniqueText: 'b',
         }
         await payload.create({
           collection: 'indexed-fields',
@@ -386,9 +382,9 @@ describe('Fields', () => {
       it('should have version indexes from collection indexes', () => {
         expect(definitions['version.partOne']).toEqual(1)
         expect(options['version.partOne']).toMatchObject({
-          unique: true,
           name: 'compound-index',
           sparse: true,
+          unique: true,
         })
       })
     })
@@ -424,9 +420,9 @@ describe('Fields', () => {
         doc = await payload.create({
           collection: 'point-fields',
           data: {
-            point,
-            localized,
             group,
+            localized,
+            point,
           },
         })
 
@@ -440,9 +436,9 @@ describe('Fields', () => {
           payload.create({
             collection: 'point-fields',
             data: {
-              point,
-              localized,
               group,
+              localized,
+              point,
             },
           }),
         ).rejects.toThrow(Error)
@@ -499,26 +495,26 @@ describe('Fields', () => {
       })
 
       const enDoc = await payload.update({
-        collection,
         id,
-        locale: 'en',
+        collection,
         data: {
           localized: [{ text: enText }],
         },
+        locale: 'en',
       })
 
       const esDoc = await payload.update({
-        collection,
         id,
-        locale: 'es',
+        collection,
         data: {
           localized: [{ text: esText }],
         },
+        locale: 'es',
       })
 
       const allLocales = (await payload.findByID({
-        collection,
         id,
+        collection,
         locale: 'all',
       })) as unknown as { localized: { en: unknown; es: unknown } }
 
@@ -569,8 +565,8 @@ describe('Fields', () => {
 
     it('should create with localized text inside a named tab', async () => {
       document = await payload.findByID({
-        collection: tabsSlug,
         id: document.id,
+        collection: tabsSlug,
         locale: 'all',
       })
       expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue)
@@ -578,8 +574,8 @@ describe('Fields', () => {
 
     it('should allow access control on a named tab', async () => {
       document = await payload.findByID({
-        collection: tabsSlug,
         id: document.id,
+        collection: tabsSlug,
         overrideAccess: false,
       })
       expect(document.accessControlTab).toBeUndefined()
@@ -735,8 +731,8 @@ describe('Fields', () => {
       expect(jsonFieldsDoc.json.state).toEqual({})
 
       const updatedJsonFieldsDoc = await payload.update({
-        collection: 'json-fields',
         id: jsonFieldsDoc.id,
+        collection: 'json-fields',
         data: {
           json: {
             state: {},
@@ -800,8 +796,8 @@ describe('Fields', () => {
       expect(nodes).toBeDefined()
       const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
       expect(child).toMatchObject({
-        type: 'link',
         linkType: 'internal',
+        type: 'link',
       })
       expect(child.doc.relationTo).toEqual('array-fields')
 
