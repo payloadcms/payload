@@ -18,7 +18,7 @@ import { sql } from 'drizzle-orm'
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ${
   upSQL
-    ? `await payload.db.db.execute(sql\`
+    ? `await payload.db.drizzle.execute(sql\`
 
 ${upSQL}\`);
 `
@@ -29,7 +29,7 @@ ${upSQL}\`);
 export async function down({ payload }: MigrateDownArgs): Promise<void> {
 ${
   downSQL
-    ? `await payload.db.db.execute(sql\`
+    ? `await payload.db.drizzle.execute(sql\`
 
 ${downSQL}\`);
 `
@@ -78,7 +78,7 @@ export const createMigration: CreateMigration = async function createMigration(
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
 
-  const hasMigrationTable = await migrationTableExists(this.db)
+  const hasMigrationTable = await migrationTableExists(this.drizzle)
 
   if (hasMigrationTable) {
     const migrationQuery = await payload.find({

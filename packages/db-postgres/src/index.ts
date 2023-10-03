@@ -43,7 +43,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       name: 'postgres',
 
       // Postgres-specific
-      db: undefined,
+      drizzle: undefined,
       enums: {},
       pool: undefined,
       relations: {},

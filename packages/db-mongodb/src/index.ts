@@ -1,6 +1,6 @@
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
-import type { DatabaseAdapter } from 'payload/database'
+import type { BaseDatabaseAdapter } from 'payload/database'
 
 import mongoose from 'mongoose'
 import { createDatabaseAdapter } from 'payload/database'
@@ -48,7 +48,7 @@ export interface Args {
   url: false | string
 }
 
-export type MongooseAdapter = DatabaseAdapter &
+export type MongooseAdapter = BaseDatabaseAdapter &
   Args & {
     collections: {
       [slug: string]: CollectionModel
@@ -63,6 +63,21 @@ export type MongooseAdapter = DatabaseAdapter &
   }
 
 type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
+
+declare module 'payload' {
+  export interface DatabaseAdapter extends Args {
+    collections: {
+      [slug: string]: CollectionModel
+    }
+    connection: Connection
+    globals: GlobalModel
+    mongoMemoryServer: any
+    sessions: Record<number | string, ClientSession>
+    versions: {
+      [slug: string]: CollectionModel
+    }
+  }
+}
 
 export function mongooseAdapter({
   autoPluralization = true,

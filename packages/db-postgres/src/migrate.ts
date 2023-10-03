@@ -15,7 +15,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
   let latestBatch = 0
   let existingMigrations = []
 
-  const hasMigrationTable = await migrationTableExists(this.db)
+  const hasMigrationTable = await migrationTableExists(this.drizzle)
 
   if (hasMigrationTable) {
     ;({ docs: existingMigrations } = await payload.find({
@@ -27,7 +27,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
       latestBatch = Number(existingMigrations[0]?.batch)
     }
   } else {
-    await createMigrationTable(this.db)
+    await createMigrationTable(this.drizzle)
   }
 
   const newBatch = latestBatch + 1
@@ -47,7 +47,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
 
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
-    const pgAdapter = payload.db as PostgresAdapter // TODO: Fix this typing
+    const pgAdapter = payload.db
     const drizzleJSON = generateDrizzleJson(pgAdapter.schema)
 
     try {

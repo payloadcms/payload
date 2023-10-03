@@ -24,7 +24,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
     // and will call them in our respective transaction methods
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.db
+    this.drizzle
       .transaction(async (tx) => {
         transaction = tx
         await new Promise((res, rej) => {
