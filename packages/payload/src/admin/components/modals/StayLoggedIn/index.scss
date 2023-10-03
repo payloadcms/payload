@@ -4,20 +4,33 @@
   @include blur-bg;
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 100%;
 
-  &__template {
-    position: relative;
+  &__wrapper {
     z-index: 1;
-  }
-
-  .btn {
-    margin: 0;
-  }
-
-  &__actions {
+    position: relative;
     display: flex;
-    flex-wrap: wrap;
-    gap: $baseline;
+    flex-direction: column;
+    gap: var(--base);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+
+    > * {
+      margin: 0;
+    }
+  }
+
+  &__controls {
+    display: flex;
+    gap: var(--base);
+
+    .btn {
+      margin: 0;
+    }
   }
 }
