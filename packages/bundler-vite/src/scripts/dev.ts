@@ -15,7 +15,6 @@ type DevAdminType = (options: {
   viteConfig: InlineConfig
 }) => Promise<PayloadHandler>
 export const devAdmin: DevAdminType = async ({ payload, viteConfig: viteConfigArg }) => {
-  // TODO: merge vite configs (https://vitejs.dev/guide/api-javascript.html#mergeconfig)
   const vite = await import('vite')
 
   try {

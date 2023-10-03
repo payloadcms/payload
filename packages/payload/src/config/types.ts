@@ -8,6 +8,8 @@ import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 import type { Configuration } from 'webpack'
+// @ts-expect-error
+import type { InlineConfig } from 'vite'
 
 import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
@@ -455,6 +457,8 @@ export type Config = {
     user?: string
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration
+    /** Customize the Vite config that's used to generate the Admin panel. */
+    vite?: (config: InlineConfig) => InlineConfig
   }
   /**
    * Manage the datamodel of your application

@@ -60,7 +60,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     }
   }
 
-  return {
+  let viteConfig: InlineConfig = {
     base: payloadConfig.routes.admin,
     build: {
       chunkSizeWarningLimit: 4000,
@@ -129,4 +129,10 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       middlewareMode: true,
     },
   }
+
+  if (payloadConfig.admin.vite && typeof payloadConfig.admin.vite === 'function') {
+    viteConfig = payloadConfig.admin.vite(viteConfig)
+  }
+
+  return viteConfig
 }
