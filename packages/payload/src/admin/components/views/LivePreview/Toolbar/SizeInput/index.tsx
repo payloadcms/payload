@@ -20,7 +20,10 @@ export const PreviewFrameSizeInput: React.FC<{
   // this will then allow us to set an explicit width and height
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = Number(e.target.value)
+      let newValue = Number(e.target.value)
+
+      if (newValue < 0) newValue = 0
+
       setInternalState(newValue)
       setBreakpoint('custom')
 
@@ -51,6 +54,13 @@ export const PreviewFrameSizeInput: React.FC<{
   }, [breakpoint, axis, measuredDeviceSize, size])
 
   return (
-    <input className={baseClass} onChange={handleChange} type="number" value={internalState || 0} />
+    <input
+      className={baseClass}
+      min={0}
+      onChange={handleChange}
+      step={1}
+      type="number"
+      value={internalState || 0}
+    />
   )
 }
