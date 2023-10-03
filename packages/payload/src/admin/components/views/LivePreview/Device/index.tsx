@@ -7,14 +7,12 @@ export const DeviceContainer: React.FC<{
 }> = (props) => {
   const { children } = props
 
-  const { breakpoint, breakpoints, deviceFrameRef, size, zoom } = useLivePreviewContext()
-
-  const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
+  const { breakpoint, deviceFrameRef, size, zoom } = useLivePreviewContext()
 
   let x = '0'
   let margin = '0'
 
-  if (foundBreakpoint && breakpoint !== 'responsive') {
+  if (breakpoint && breakpoint !== 'responsive') {
     x = '-50%'
 
     if (
@@ -29,24 +27,22 @@ export const DeviceContainer: React.FC<{
     }
   }
 
+  let width = zoom ? `${100 / zoom}%` : '100%'
+  let height = zoom ? `${100 / zoom}%` : '100%'
+
+  if (breakpoint !== 'responsive') {
+    width = `${size?.width / (typeof zoom === 'number' ? zoom : 1)}px`
+    height = `${size?.height / (typeof zoom === 'number' ? zoom : 1)}px`
+  }
+
   return (
     <div
       ref={deviceFrameRef}
       style={{
-        height:
-          foundBreakpoint && foundBreakpoint?.name !== 'responsive'
-            ? `${size?.height / (typeof zoom === 'number' ? zoom : 1)}px`
-            : typeof zoom === 'number'
-            ? `${100 / zoom}%`
-            : '100%',
+        height,
         margin,
         transform: `translate3d(${x}, 0, 0)`,
-        width:
-          foundBreakpoint && foundBreakpoint?.name !== 'responsive'
-            ? `${size?.width / (typeof zoom === 'number' ? zoom : 1)}px`
-            : typeof zoom === 'number'
-            ? `${100 / zoom}%`
-            : '100%',
+        width,
       }}
     >
       {children}

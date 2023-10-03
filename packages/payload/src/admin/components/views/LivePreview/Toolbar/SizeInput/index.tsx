@@ -1,58 +1,51 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import { useLivePreviewContext } from '../../Context/context'
 import './index.scss'
 
-const baseClass = 'live-preview-toolbar'
+const baseClass = 'toolbar-input'
 
 export const PreviewFrameSizeInput: React.FC<{
   axis?: 'x' | 'y'
 }> = (props) => {
   const { axis } = props
 
-  const { actualDeviceSize, setBreakpoint, setHeight, setWidth, size } = useLivePreviewContext()
+  const { breakpoint, measuredDeviceSize, setBreakpoint, setHeight, setWidth, size } =
+    useLivePreviewContext()
 
-  // const [size, setSize] = React.useState<string>(() => {
-  //   if (sizeToUse === 'width') {
-  //     return deviceSize?.width.toFixed(0)
-  //   }
+  const [internalState, setInternalState] = React.useState<number>(
+    (axis === 'x' ? measuredDeviceSize?.width : measuredDeviceSize?.height) || 0,
+  )
 
-  //   return deviceSize?.height.toFixed(0)
-  // })
-
-  // useEffect(() => {
-  //   if (sizeToUse === 'width') {
-  //     setSize(deviceSize?.width.toFixed(0))
-  //   } else {
-  //     setSize(deviceSize?.height.toFixed(0))
-  //   }
-  // }, [deviceSize])
-
+  // when the input is changed manually, we need to set the breakpoint as `custom`
+  // this will then allow us to set an explicit width and height
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      // setBreakpoint('custom')
+      const newValue = Number(e.target.value)
+      setInternalState(newValue)
 
-      console.log(Number(e.target.value))
+      setBreakpoint('custom')
 
-      if (axis === 'x') {
-        setWidth(Number(e.target.value))
-      } else {
-        setHeight(Number(e.target.value))
-      }
+      if (axis === 'x') setWidth(newValue)
+      else setHeight(newValue)
     },
     [axis, setWidth, setHeight, setBreakpoint],
   )
 
-  console.log(actualDeviceSize)
+  // if the breakpoint is `responsive` then the div will have `100%` width and height
+  // so we need to take the measurements provided by `actualDeviceSize` and sync internal state
+  useEffect(() => {
+    if (breakpoint === 'responsive' && measuredDeviceSize) {
+      if (axis === 'x') setInternalState(Number(measuredDeviceSize.width.toFixed(0)))
+      else setInternalState(Number(measuredDeviceSize.height.toFixed(0)))
+    }
 
-  const sizeValue = axis === 'x' ? actualDeviceSize?.width : actualDeviceSize?.height
+    if (breakpoint !== 'responsive' && size) {
+      setInternalState(axis === 'x' ? size.width : size.height)
+    }
+  }, [breakpoint, axis, measuredDeviceSize, size])
 
   return (
-    <input
-      className={`${baseClass}__size`}
-      onChange={handleChange}
-      type="number"
-      value={sizeValue || 0}
-    />
+    <input className={baseClass} onChange={handleChange} type="number" value={internalState || 0} />
   )
 }

@@ -61,6 +61,11 @@ export const LivePreviewToolbar: React.FC<
                 {bp.label}
               </option>
             ))}
+            {breakpoint === 'custom' && (
+              // Dynamically add this option so that it only appears when the width and height inputs are explicitly changed
+              // TODO: Translate this string
+              <option value="custom">Custom</option>
+            )}
           </select>
         )}
         <div className={`${baseClass}__device-size`}>

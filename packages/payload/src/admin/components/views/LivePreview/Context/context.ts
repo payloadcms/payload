@@ -6,15 +6,15 @@ import type { LivePreview } from '../../../../../exports/config'
 import type { SizeReducerAction } from './sizeReducer'
 
 export interface LivePreviewContextType {
-  actualDeviceSize: {
-    height: number
-    width: number
-  }
   breakpoint: LivePreview['breakpoints'][number]['name']
   breakpoints: LivePreview['breakpoints']
   deviceFrameRef: React.RefObject<HTMLDivElement>
   iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement>
+  measuredDeviceSize: {
+    height: number
+    width: number
+  }
   setBreakpoint: (breakpoint: LivePreview['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
   setIframeHasLoaded: (loaded: boolean) => void
@@ -34,15 +34,15 @@ export interface LivePreviewContextType {
 }
 
 export const LivePreviewContext = createContext<LivePreviewContextType>({
-  actualDeviceSize: {
-    height: 0,
-    width: 0,
-  },
   breakpoint: undefined,
   breakpoints: undefined,
   deviceFrameRef: undefined,
   iframeHasLoaded: false,
   iframeRef: undefined,
+  measuredDeviceSize: {
+    height: 0,
+    width: 0,
+  },
   setBreakpoint: () => {},
   setHeight: () => {},
   setIframeHasLoaded: () => {},

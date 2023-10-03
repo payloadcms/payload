@@ -71,11 +71,14 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
   )
 
   // explicitly set new width and height when as new breakpoints are selected
+  // exclude `custom` breakpoint as it is handled by the `setWidth` and `setHeight` directly
   useEffect(() => {
     const foundBreakpoint = breakpoints?.find((bp) => bp.name === breakpoint)
 
     if (
       foundBreakpoint &&
+      breakpoint !== 'responsive' &&
+      breakpoint !== 'custom' &&
       typeof foundBreakpoint?.width === 'number' &&
       typeof foundBreakpoint?.height === 'number'
     ) {
@@ -91,17 +94,17 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
 
   // keep an accurate measurement of the actual device size as it is truly rendered
   // this is helpful when `sizes` are non-number units like percentages, etc.
-  const { size: actualDeviceSize } = useResize(deviceFrameRef)
+  const { size: measuredDeviceSize } = useResize(deviceFrameRef)
 
   return (
     <LivePreviewContext.Provider
       value={{
-        actualDeviceSize,
         breakpoint,
         breakpoints,
         deviceFrameRef,
         iframeHasLoaded,
         iframeRef,
+        measuredDeviceSize,
         setBreakpoint,
         setHeight,
         setIframeHasLoaded,
