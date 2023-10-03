@@ -5,6 +5,8 @@ import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
+
 import { connect } from './connect'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
@@ -35,13 +37,13 @@ import { webpack } from './webpack'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
-    const migrationDir = args.migrationDir || path.resolve(__dirname, '../../../migrations')
+    const migrationDir = args.migrationDir || path.resolve(process.cwd(), 'src/migrations')
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       name: 'postgres',
 
       // Postgres-specific
-      db: undefined,
+      drizzle: undefined,
       enums: {},
       pool: undefined,
       relations: {},

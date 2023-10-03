@@ -1,0 +1,45 @@
+@import '../../../../scss/styles.scss';
+
+.localizer-button {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  display: flex;
+
+  &__label {
+    color: var(--theme-elevation-500);
+  }
+
+  &__chevron {
+    .stroke {
+      stroke: currentColor;
+    }
+  }
+
+  button {
+    color: currentColor;
+    padding: 0;
+    font-size: 1rem;
+    line-height: base(1);
+    background: transparent;
+    border: 0;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+
+    &:active,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  @include small-break {
+    &__label {
+      display: none;
+    }
+  }
+}

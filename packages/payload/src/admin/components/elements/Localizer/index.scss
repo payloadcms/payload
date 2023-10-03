@@ -5,44 +5,4 @@
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-
-  &__label {
-    color: var(--theme-elevation-500);
-  }
-
-  &__chevron {
-    .stroke {
-      stroke: var(--theme-elevation-500);
-    }
-  }
-
-  button {
-    color: currentColor;
-    padding: 0;
-    font-size: 1rem;
-    line-height: base(1);
-    background: transparent;
-    border: 0;
-    font-weight: 600;
-    cursor: pointer;
-
-    &:hover,
-    &:focus-visible {
-      text-decoration: underline;
-    }
-
-    &:active,
-    &:focus {
-      outline: none;
-    }
-  }
-
-  &__button {
-    white-space: nowrap;
-    display: flex;
-  }
-
-  span {
-    color: var(--theme-elevation-400);
-  }
 }

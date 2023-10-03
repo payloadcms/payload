@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { PayloadRequest } from '../../express/types'
-import type { DatabaseAdapter } from '../types'
+import type { BaseDatabaseAdapter } from '../types'
 
 import { getMigrations } from './getMigrations'
 import { readMigrationFiles } from './readMigrationFiles'
 
-export async function migrate(this: DatabaseAdapter): Promise<void> {
+export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
   const { existingMigrations, latestBatch } = await getMigrations({ payload })

@@ -60,6 +60,13 @@ export const CollectionRoutes: React.FC<EditViewProps> = (props) => {
             <Unauthorized />
           )}
         </Route>
+        <Route
+          exact
+          key={`${collection.slug}-live-preview`}
+          path={`${adminRoute}/collections/${collection.slug}/:id/preview`}
+        >
+          <CustomCollectionComponent view="LivePreview" {...props} />
+        </Route>
         {collectionCustomRoutes({
           collection,
           match,

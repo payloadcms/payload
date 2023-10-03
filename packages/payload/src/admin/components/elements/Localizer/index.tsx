@@ -2,12 +2,13 @@ import qs from 'qs'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Chevron } from '../..'
 import { useConfig } from '../../utilities/Config'
 import { useLocale } from '../../utilities/Locale'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Popup from '../Popup'
 import * as PopupList from '../Popup/PopupButtonList'
+import { LocalizerLabel } from './LocalizerLabel'
+
 import './index.scss'
 
 const baseClass = 'localizer'
@@ -28,15 +29,8 @@ const Localizer: React.FC<{
 
     return (
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
-        <div className={`${baseClass}__label`}>{`${t('locale')}:`}</div>
-        &nbsp;&nbsp;
         <Popup
-          button={
-            <div className={`${baseClass}__button`}>
-              {`${locale.label}`}
-              <Chevron className={`${baseClass}__chevron`} />
-            </div>
-          }
+          button={<LocalizerLabel />}
           horizontalAlign="right"
           render={({ close }) => (
             <PopupList.ButtonGroup>

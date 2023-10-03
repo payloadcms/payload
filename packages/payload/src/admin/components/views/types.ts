@@ -1,14 +1,20 @@
-import { CollectionPermission, GlobalPermission, User } from '../../../auth'
-import { Fields, SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../exports/types'
+import type { CollectionPermission, GlobalPermission, User } from '../../../auth'
+import type {
+  Fields,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from '../../../exports/types'
 
 export type EditViewProps = (
   | {
-      id: string
       collection: SanitizedCollectionConfig
+      disableActions?: boolean
+      disableLeaveWithoutSaving?: boolean
       hasSavePermission: boolean
-      isEditing: boolean
-      internalState: Fields
+      id: string
       initialState?: Fields
+      internalState: Fields
+      isEditing: boolean
       permissions: CollectionPermission
     }
   | {
@@ -17,12 +23,12 @@ export type EditViewProps = (
       permissions: GlobalPermission
     }
 ) & {
+  action: string
+  apiURL: string
+  canAccessAdmin: boolean
+  data: any
   isLoading: boolean
   onSave: (json: any) => void
   updatedAt: string
-  data: any
   user: User
-  canAccessAdmin: boolean
-  action: string
-  apiURL: string
 }

@@ -1,7 +1,6 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
 import httpStatus from 'http-status'
 
+import type { GeneratedTypes } from '../../'
 import type { AccessResult } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Where } from '../../types'

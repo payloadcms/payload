@@ -1,5 +1,4 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
+import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../express/types'
 import type { Document } from '../../types'
 import type { BeforeOperationHook, Collection } from '../config/types'

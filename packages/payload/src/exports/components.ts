@@ -1,6 +1,7 @@
 export { default as Banner } from '../admin/components/elements/Banner'
 export { default as Button } from '../admin/components/elements/Button'
 
+export { ErrorPill } from '../admin/components/elements/ErrorPill'
 export { default as Pill } from '../admin/components/elements/Pill'
 
 export { default as Popup } from '../admin/components/elements/Popup'

@@ -598,6 +598,9 @@
         "close": {
           "type": "string"
         },
+        "collapse": {
+          "type": "string"
+        },
         "collections": {
           "type": "string"
         },
@@ -734,6 +737,9 @@
           "type": "string"
         },
         "light": {
+          "type": "string"
+        },
+        "livePreview": {
           "type": "string"
         },
         "loading": {

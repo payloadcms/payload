@@ -8,7 +8,7 @@ import type { TypeWithVersion } from '../versions/types'
 
 export type { TypeWithVersion }
 
-export interface DatabaseAdapter {
+export interface BaseDatabaseAdapter {
   /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
@@ -388,7 +388,7 @@ export type DeleteManyArgs = {
   where: Where
 }
 
-export type DeleteMany = (args: DeleteManyArgs) => Promise<PaginatedDocs>
+export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = MigrationData & {
   down: ({ payload }: { payload }) => Promise<boolean>

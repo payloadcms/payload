@@ -38,7 +38,7 @@ const DefaultGlobalView: React.FC<
     const hasSavePermission = permissions?.update?.permission
 
     return (
-      <div className={baseClass}>
+      <main className={baseClass}>
         <OperationContext.Provider value="update">
           <Form
             action={action}
@@ -65,7 +65,7 @@ const DefaultGlobalView: React.FC<
             )}
           </Form>
         </OperationContext.Provider>
-      </div>
+      </main>
     )
   }
 

@@ -5,6 +5,7 @@ import path from 'path'
 import { v4 as uuid } from 'uuid'
 
 import payload from '../packages/payload/src'
+import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
 
 dotenv.config()
 
@@ -59,6 +60,12 @@ const startDev = async () => {
   const externalRouter = express.Router()
 
   externalRouter.use(payload.authenticate)
+
+  if (testSuiteDir === 'live-preview') {
+    await startLivePreviewDemo({
+      payload,
+    })
+  }
 
   expressApp.listen(3000, async () => {
     payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`)

@@ -20,7 +20,7 @@
     margin-top: calc(var(--base) * 2);
   }
 
-  @include mid-break {
+  @include large-break {
     &--margin-top-large {
       margin-top: var(--base);
     }

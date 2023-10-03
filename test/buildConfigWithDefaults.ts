@@ -2,14 +2,19 @@ import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
-// import { viteBundler } from '../packages/bundler-vite/src'
+import { viteBundler } from '../packages/bundler-vite/src'
 import { webpackBundler } from '../packages/bundler-webpack/src'
-import { mongooseAdapter } from '../packages/db-mongodb/src/index'
-import { postgresAdapter } from '../packages/db-postgres/src/index'
+import { mongooseAdapter } from '../packages/db-mongodb/src'
+import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 import { createSlate } from '../packages/richtext-slate/src'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
+
+const bundlerAdapters = {
+  vite: viteBundler(),
+  webpack: webpackBundler(),
+}
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
@@ -46,8 +51,8 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             password: 'test',
           },
     ...(config.admin || {}),
-    // bundler: viteBundler(),
-    bundler: webpackBundler(),
+    buildPath: path.resolve(__dirname, '../build'),
+    bundler: bundlerAdapters[process.env.PAYLOAD_BUNDLER || 'webpack'],
     webpack: (webpackConfig) => {
       const existingConfig =
         typeof testConfig?.admin?.webpack === 'function'
@@ -81,8 +86,10 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
               __dirname,
               '../packages/bundler-webpack/src/mocks/emptyModule.js',
             ),
-            '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
-            '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),
+            [path.resolve(__dirname, '../packages/bundler-vite/src/index')]: path.resolve(
+              __dirname,
+              '../packages/bundler-vite/src/mock.js',
+            ),
             react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },
         },

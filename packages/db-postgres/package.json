@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "0.0.1",
+  "version": "0.1.0-beta.8",
   "description": "The officially supported Postgres database adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -15,7 +15,9 @@
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist"
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
     "@libsql/client": "^0.3.1",
@@ -30,7 +32,6 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
-    "better-sqlite3": "^8.5.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -40,5 +41,8 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }

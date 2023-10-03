@@ -1,8 +1,8 @@
 import type { CookieOptions, Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 
 import jwt from 'jsonwebtoken'
 
+import type { GeneratedTypes } from '../../'
 import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { User } from '../types'

@@ -19,10 +19,10 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     this.pool = new Pool(this.client)
     await this.pool.connect()
 
-    this.db = drizzle(this.pool, { schema: this.schema })
+    this.drizzle = drizzle(this.pool, { schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING TABLES ----')
-      await this.db.execute(sql`drop schema public cascade;\ncreate schema public;`)
+      await this.drizzle.execute(sql`drop schema public cascade;\ncreate schema public;`)
       this.payload.logger.info('---- DROPPED TABLES ----')
     }
   } catch (err) {
@@ -30,7 +30,8 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     process.exit(1)
   }
 
-  this.payload.logger.info('Connected to Postgres successfully')
+  // TODO: Bring this log back once we figure out logging issues
+  // this.payload.logger.info('Connected to Postgres successfully')
 
   // Only push schema if not in production
   if (process.env.NODE_ENV === 'production' || process.env.PAYLOAD_MIGRATING === 'true') return
@@ -38,24 +39,25 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
     this.schema,
-    this.db,
+    this.drizzle,
   )
 
-  this.payload.logger.debug({
-    hasDataLoss,
-    msg: 'Schema push results',
-    statementsToExecute,
-    warnings,
-  })
+  // this.payload.logger.debug({
+  //   hasDataLoss,
+  //   msg: 'Schema push results',
+  //   statementsToExecute,
+  //   warnings,
+  // })
 
   if (warnings.length) {
-    this.payload.logger.warn({
+    console.log({
       msg: `Warnings detected during schema push: ${warnings.join('\n')}`,
       warnings,
     })
 
     if (hasDataLoss) {
-      this.payload.logger.warn({
+      // TODO: Bring this log back once we figure out logging issues
+      console.log({
         msg: 'DATA LOSS WARNING: Possible data loss detected if schema is pushed.',
       })
     }

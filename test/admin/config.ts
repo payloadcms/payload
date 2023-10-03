@@ -119,6 +119,11 @@ export default buildConfigWithDefaults({
           type: 'number',
         },
         {
+          type: 'relationship',
+          relationTo: slug,
+          name: 'circularRelationship',
+        },
+        {
           name: 'richText',
           type: 'richText',
           editor: createSlate({

@@ -31,10 +31,8 @@
     }
   }
 
-  &__toggle-more-info.open {
-    .icon--chevron {
-      transform: rotate(180deg);
-    }
+  &__toggle-icon {
+    padding: calc(var(--base) / 4);
   }
 
   &__sizes {

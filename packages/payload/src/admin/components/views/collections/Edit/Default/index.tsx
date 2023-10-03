@@ -17,12 +17,7 @@ import { EditViewProps } from '../../../types'
 
 const baseClass = 'collection-default-edit'
 
-export const DefaultCollectionEdit: React.FC<
-  EditViewProps & {
-    disableLeaveWithoutSaving?: boolean
-    disableActions?: boolean
-  }
-> = (props) => {
+export const DefaultCollectionEdit: React.FC<EditViewProps> = (props) => {
   if ('collection' in props) {
     const { i18n, t } = useTranslation('general')
 

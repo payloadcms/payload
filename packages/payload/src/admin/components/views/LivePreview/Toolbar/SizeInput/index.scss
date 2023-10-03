@@ -1,0 +1,14 @@
+@import '../../../../../scss/styles.scss';
+
+.live-preview-toolbar {
+  &__size {
+    width: 50px;
+    height: var(--base);
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--theme-elevation-200);
+    background: var(--theme-elevation-100);
+    border-radius: 2px;
+    font-size: small;
+  }
+}

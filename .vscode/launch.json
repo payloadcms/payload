@@ -31,14 +31,46 @@
       "type": "node-terminal"
     },
     {
-      "command": "ts-node ./packages/payload/src/bin/index.ts migrate",
+      "command": "PAYLOAD_BUNDLER=vite pnpm run dev fields -- -I", // Allow input
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Fields (Vite)",
+      "request": "launch",
+      "type": "node-terminal",
       "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts build",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/fields/config.ts",
+        "PAYLOAD_BUNDLER": "vite",
         "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
-        // "PAYLOAD_DROP_DATABASE": "true",
       },
-      "name": "Migrate CLI - migrate",
+      "name": "Build CLI - Vite",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts build",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/fields/config.ts",
+        "PAYLOAD_ANALYZE_BUNDLE": "true",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+      },
+      "name": "Build CLI - Webpack",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts generate:types",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/_community/config.ts",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+      },
+      "name": "Generate Types CLI",
       "outputCapture": "std",
       "request": "launch",
       "type": "node-terminal"

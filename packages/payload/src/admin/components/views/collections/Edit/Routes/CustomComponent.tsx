@@ -3,6 +3,7 @@ import React from 'react'
 import type { EditViewProps } from '../../../types'
 
 import { API } from '../../../API'
+import { LivePreviewView } from '../../../LivePreview'
 import VersionView from '../../../Version/Version'
 import VersionsView from '../../../Versions'
 import { DefaultCollectionEdit } from '../Default/index'
@@ -21,7 +22,7 @@ export const defaultCollectionViews: {
 } = {
   API,
   Default: DefaultCollectionEdit,
-  LivePreview: null,
+  LivePreview: LivePreviewView,
   References: null,
   Relationships: null,
   Version: VersionView,

@@ -59,6 +59,17 @@ const collectionSchema = joi.object().keys({
       beforeDuplicate: joi.func(),
     }),
     listSearchableFields: joi.array().items(joi.string()),
+    livePreview: joi.object({
+      breakpoints: joi.array().items(
+        joi.object({
+          name: joi.string(),
+          height: joi.alternatives().try(joi.number(), joi.string()),
+          label: joi.string(),
+          width: joi.alternatives().try(joi.number(), joi.string()),
+        }),
+      ),
+      url: joi.string(),
+    }),
     pagination: joi.object({
       defaultLimit: joi.number(),
       limits: joi.array().items(joi.number()),

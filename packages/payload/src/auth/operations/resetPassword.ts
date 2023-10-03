@@ -30,7 +30,7 @@ export type Arguments = {
   res?: Response
 }
 
-async function resetPassword (args: Arguments): Promise<Result> {
+async function resetPassword(args: Arguments): Promise<Result> {
   if (
     !Object.prototype.hasOwnProperty.call(args.data, 'token') ||
     !Object.prototype.hasOwnProperty.call(args.data, 'password')

@@ -10,11 +10,11 @@ import type { PostgresAdapter } from './types'
 
 import { upsertRow } from './upsertRow'
 
-export async function createGlobalVersion<T extends TypeWithID> (
+export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,
   { autosave, globalSlug, req = {} as PayloadRequest, versionData }: CreateGlobalVersionArgs,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.db
+  const db = this.sessions[req.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
   const globalTableName = toSnakeCase(globalSlug)
   const tableName = `_${globalTableName}_v`

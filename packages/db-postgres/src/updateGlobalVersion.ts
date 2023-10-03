@@ -21,7 +21,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.db
+  const db = this.sessions[req.transactionID]?.db || this.drizzle
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
   )

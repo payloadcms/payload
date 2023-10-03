@@ -1,10 +1,10 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../express/types'
+import type { GeneratedTypes } from '../../index'
 import type { Collection } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'

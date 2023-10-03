@@ -10,6 +10,8 @@ import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
+import NotFound from '../NotFound'
+import Unauthorized from '../Unauthorized'
 import { collectionRoutes } from './collections'
 import { customRoutes } from './custom'
 import { globalRoutes } from './globals'
@@ -23,15 +25,11 @@ const Login = lazy(() => import('../Login'))
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Logout = lazy(() => import('../Logout'))
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
-const NotFound = lazy(() => import('../NotFound'))
-// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Verify = lazy(() => import('../Verify'))
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const CreateFirstUser = lazy(() => import('../CreateFirstUser'))
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const ResetPassword = lazy(() => import('../ResetPassword'))
-// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
-const Unauthorized = lazy(() => import('../Unauthorized'))
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Account = lazy(() => import('../Account'))
 

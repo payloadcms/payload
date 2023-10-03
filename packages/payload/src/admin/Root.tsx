@@ -10,6 +10,7 @@ import React from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { Slide, ToastContainer } from 'react-toastify'
 
+import { NavProvider } from './components/elements/Nav/context'
 import { StepNavProvider } from './components/elements/StepNav'
 import { AuthProvider } from './components/utilities/Auth'
 import { ConfigProvider } from './components/utilities/Config'
@@ -46,9 +47,11 @@ const Root = () => {
                         <LocaleProvider>
                           <StepNavProvider>
                             <LoadingOverlayProvider>
-                              <CustomProvider>
-                                <Routes />
-                              </CustomProvider>
+                              <NavProvider>
+                                <CustomProvider>
+                                  <Routes />
+                                </CustomProvider>
+                              </NavProvider>
                             </LoadingOverlayProvider>
                           </StepNavProvider>
                         </LocaleProvider>

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-vite",
-  "version": "0.0.1",
+  "version": "0.1.0-beta.0",
   "description": "The officially supported Vite bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -15,18 +15,18 @@
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist"
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "@rollup/plugin-commonjs": "^25.0.4",
     "@rollup/plugin-image": "^3.0.2",
     "@vitejs/plugin-react": "^4.0.4",
     "compression": "1.7.4",
     "connect-history-api-fallback": "1.6.0",
     "get-port": "5.1.1",
-    "rollup-plugin-scss": "^4.0.0",
+    "path-browserify": "1.0.1",
     "vite": "^4.4.9",
-    "vite-plugin-commonjs": "^0.8.2",
     "vite-plugin-virtual": "^0.2.0"
   },
   "devDependencies": {

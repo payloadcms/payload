@@ -1,18 +1,17 @@
 @import '../../../scss/styles.scss';
 
 .sort-column {
+  display: flex;
+  gap: calc(var(--base) / 4);
+  align-items: center;
+
   &__label {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  &__buttons {
-    flex-shrink: 0;
-  }
-
   &__label,
-  &__buttons,
   .btn {
     vertical-align: middle;
     display: inline-block;
@@ -22,9 +21,22 @@
     cursor: default;
   }
 
-  button.btn {
+  &__buttons {
+    display: flex;
+    align-items: center;
+  }
+
+  &__button {
     margin: 0;
     opacity: 0.3;
+    padding: calc(var(--base) / 4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
 
     &.sort-column--active {
       opacity: 1;
@@ -33,12 +45,6 @@
 
     &:hover {
       opacity: 0.7;
-    }
-  }
-
-  &__asc {
-    svg {
-      transform: rotate(180deg);
     }
   }
 
