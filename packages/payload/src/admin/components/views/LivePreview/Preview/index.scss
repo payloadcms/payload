@@ -8,7 +8,7 @@
   overflow: hidden;
 
   &--has-breakpoint {
-    padding-top: var(--base);
+    padding: var(--base);
 
     .live-preview-iframe {
       border: 1px solid var(--theme-elevation-100);

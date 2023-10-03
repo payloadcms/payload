@@ -12,7 +12,7 @@ import { filterFields } from '../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../forms/field-types'
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
 import Meta from '../../utilities/Meta'
-import { PreviewWindow } from './PreviewWindow'
+import { LivePreview } from './Preview'
 import './index.scss'
 import { usePopupWindow } from './usePopupWindow'
 
@@ -111,7 +111,7 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
             )}
           </Gutter>
         </div>
-        <PreviewWindow {...props} popupState={popupState} url={url} />
+        <LivePreview {...props} popupState={popupState} url={url} />
       </div>
     </Fragment>
   )
