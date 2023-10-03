@@ -1,0 +1,118 @@
+@import '../../../scss/styles.scss';
+
+.query-inspector {
+  --string-color: #11b102;
+  --number-color: #62c3f3;
+  display: flex;
+  gap: var(--base);
+
+  @include mid-break {
+    flex-direction: column;
+  }
+}
+
+.query-inspector__configuration {
+  margin-top: calc(var(--base) * 2);
+  width: 60%;
+}
+
+.query-inspector__results-container {
+  font-family: var(--font-mono);
+  width: 100%;
+  ul {
+    margin: 0;
+  }
+  li {
+    list-style: none;
+  }
+}
+
+.query-inspector__data-wrap {
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 8px;
+    width: 1px;
+    height: 100%;
+    border-left: 1px dashed var(--theme-elevation-200);
+  }
+}
+
+.query-inspector__list-wrap {
+  position: relative;
+}
+
+.query-inspector__list-toggle {
+  all: unset;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 3px;
+  position: relative;
+  display: flex;
+  left: -3px;
+  width: calc(100% + 3px);
+
+  svg .stroke {
+    stroke: var(--theme-elevation-400);
+  }
+
+  &:hover {
+    background-color: var(--theme-elevation-100);
+  }
+
+  &--empty {
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.query-inspector__toggle-icon {
+  &--open {
+    transform: rotate(0deg);
+  }
+  &--closed {
+    transform: rotate(-90deg);
+  }
+}
+
+.query-inspector__data-type {
+  &--number {
+    .query-inspector__value {
+      color: var(--number-color);
+    }
+  }
+
+  &--string {
+    .query-inspector__value {
+      color: var(--string-color);
+    }
+  }
+}
+
+.query-inspector__bracket {
+  position: relative;
+
+  &--position-end {
+    left: 5px;
+    width: calc(100% - 5px);
+  }
+}
+
+.query-inspector__results-container {
+  --inspector-bg: var(--theme-elevation-50);
+  overflow: auto;
+  background-color: var(--inspector-bg);
+  flex-grow: 1;
+  padding-top: calc(var(--base) * 0.5);
+  padding-left: calc(var(--base) * 0.5);
+  padding-bottom: calc(var(--base) * 0.5);
+}
+
+html[data-theme='dark'] {
+  .query-inspector__results-container {
+  }
+}
