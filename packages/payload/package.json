@@ -31,7 +31,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
-    "clean": "rimraf dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "dev": "nodemon",
