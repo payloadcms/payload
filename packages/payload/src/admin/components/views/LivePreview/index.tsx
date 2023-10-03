@@ -7,6 +7,7 @@ import type { EditViewProps } from '../types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { Gutter } from '../../elements/Gutter'
+import { SetStepNav } from '../../elements/StepNav/SetStepNav'
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../forms/field-types'
@@ -71,6 +72,7 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
 
   return (
     <Fragment>
+      <SetStepNav collection={collection} id={id} isEditing={isEditing} />
       <DocumentControls
         apiURL={apiURL}
         collection={collection}

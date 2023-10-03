@@ -6,6 +6,7 @@ import type { EditViewProps } from '../../types'
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentControls } from '../../../elements/DocumentControls'
 import { Gutter } from '../../../elements/Gutter'
+import { SetStepNav } from '../../../elements/StepNav/SetStepNav'
 import ViewDescription from '../../../elements/ViewDescription'
 import RenderFields from '../../../forms/RenderFields'
 import { filterFields } from '../../../forms/RenderFields/filterFields'
@@ -17,10 +18,10 @@ import './index.scss'
 const baseClass = 'global-default-edit'
 
 export const DefaultGlobalEdit: React.FC<EditViewProps> = (props) => {
+  const { i18n } = useTranslation('general')
+
   if ('global' in props) {
     const { apiURL, data, global, permissions } = props
-
-    const { i18n } = useTranslation('general')
 
     const { admin: { description } = {}, fields, label } = global
 
@@ -38,7 +39,7 @@ export const DefaultGlobalEdit: React.FC<EditViewProps> = (props) => {
 
     return (
       <React.Fragment>
-        {/* <SetStepNav collection={collection} id={id} isEditing={isEditing} /> */}
+        <SetStepNav global={global} slug={global?.slug} />
         <DocumentControls
           apiURL={apiURL}
           data={data}
