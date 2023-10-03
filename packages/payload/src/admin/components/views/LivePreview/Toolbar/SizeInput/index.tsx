@@ -29,8 +29,8 @@ export const PreviewFrameSizeInput: React.FC<{
       setSize({
         type: 'reset',
         value: {
-          height: axis === 'y' ? newValue : measuredDeviceSize?.height,
-          width: axis === 'x' ? newValue : measuredDeviceSize?.width,
+          height: axis === 'y' ? newValue : Number(measuredDeviceSize?.height.toFixed(0)),
+          width: axis === 'x' ? newValue : Number(measuredDeviceSize?.width.toFixed(0)),
         },
       })
     },
