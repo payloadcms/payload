@@ -2,7 +2,7 @@ import url from 'url';
 import jwt from 'jsonwebtoken';
 import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
-import { User, UserDocument } from '../types';
+import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 
 export type Result = {
@@ -27,8 +27,8 @@ async function me({
   };
 
   if (req.user) {
-    const parsedURL = url.parse(req.url);
-    const isGraphQL = parsedURL.pathname === req.payload.config.routes.graphQL;
+    const parsedURL = url.parse(req.originalUrl);
+    const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`;
 
     const user = await req.payload.findByID({
       id: req.user.id,
