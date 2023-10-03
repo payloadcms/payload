@@ -9,5 +9,6 @@
     "src/**/*.spec.ts",
     "test/**/payload-types.ts"
   ],
-  "watch": ["src/**/*.ts", "../../test/", "packages/**/*.ts"]
+  "watch": ["src/**/*.ts", "../../test/", "../../packages/**/*.ts"],
+  "stdin": true
 }

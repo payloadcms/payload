@@ -30,8 +30,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     process.exit(1)
   }
 
-  // TODO: Bring this log back once we figure out logging issues
-  // this.payload.logger.info('Connected to Postgres successfully')
+  this.payload.logger.info('Connected to Postgres successfully')
 
   // Only push schema if not in production
   if (process.env.NODE_ENV === 'production' || process.env.PAYLOAD_MIGRATING === 'true') return
@@ -50,14 +49,13 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   // })
 
   if (warnings.length) {
-    console.log({
+    this.payload.logger.info({
       msg: `Warnings detected during schema push: ${warnings.join('\n')}`,
       warnings,
     })
 
     if (hasDataLoss) {
-      // TODO: Bring this log back once we figure out logging issues
-      console.log({
+      this.payload.logger.info({
         msg: 'DATA LOSS WARNING: Possible data loss detected if schema is pushed.',
       })
     }
