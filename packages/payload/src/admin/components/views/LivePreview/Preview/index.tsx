@@ -29,7 +29,7 @@ const Preview: React.FC<
 
   const { iframeHasLoaded, iframeRef, setIframeHasLoaded } = useLivePreviewContext()
 
-  const { breakpoint, toolbarPosition } = useLivePreviewContext()
+  const { breakpoint } = useLivePreviewContext()
 
   const [fields] = useAllFormFields()
 
@@ -85,15 +85,7 @@ const Preview: React.FC<
               <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
             </DeviceContainer>
           </div>
-          <LivePreviewToolbar
-            {...props}
-            iframeRef={iframeRef}
-            style={{
-              left: `${toolbarPosition.x}px`,
-              top: `${toolbarPosition.y}px`,
-            }}
-            url={url}
-          />
+          <LivePreviewToolbar {...props} iframeRef={iframeRef} url={url} />
         </ToolbarArea>
       </div>
     )

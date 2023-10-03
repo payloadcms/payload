@@ -15,16 +15,15 @@ const baseClass = 'live-preview-toolbar'
 export const LivePreviewToolbar: React.FC<
   Omit<ToolbarProviderProps, 'children'> & {
     iframeRef: React.RefObject<HTMLIFrameElement>
-    style?: React.CSSProperties
   }
 > = (props) => {
   const {
     popupState: { openPopupWindow },
-    style,
     url,
   } = props
 
-  const { breakpoint, breakpoints, setBreakpoint, setZoom, zoom } = useLivePreviewContext()
+  const { breakpoint, breakpoints, setBreakpoint, setZoom, toolbarPosition, zoom } =
+    useLivePreviewContext()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',
@@ -34,10 +33,15 @@ export const LivePreviewToolbar: React.FC<
     <div
       className={baseClass}
       style={{
-        ...style,
-        transform: transform
-          ? `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`
-          : undefined,
+        left: `${toolbarPosition.x}px`,
+        top: `${toolbarPosition.y}px`,
+        ...(transform
+          ? {
+              transform: transform
+                ? `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`
+                : undefined,
+            }
+          : {}),
       }}
     >
       <button
