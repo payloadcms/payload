@@ -37,6 +37,15 @@ export default buildConfigWithDefaults({
       },
       fields: [
         {
+          name: 'adminOnlyField',
+          type: 'text',
+          access: {
+            read: ({ req: { user: { roles = [] } } }) => {
+              return roles.includes('admin');
+            },
+          },
+        },
+        {
           name: 'roles',
           label: 'Role',
           type: 'select',
