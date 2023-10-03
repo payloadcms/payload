@@ -280,31 +280,12 @@ describe('Fields', () => {
       it('should have indexes', () => {
         expect(definitions.text).toEqual(1)
       })
+
       it('should have unique indexes', () => {
         expect(definitions.uniqueText).toEqual(1)
         expect(options.uniqueText).toMatchObject({ unique: true })
       })
-      it('should have 2dsphere indexes on point fields', () => {
-        expect(definitions.point).toEqual('2dsphere')
-      })
-      it('should have 2dsphere indexes on point fields in groups', () => {
-        expect(definitions['group.point']).toEqual('2dsphere')
-      })
-      it('should have a sparse index on a unique localized field in a group', () => {
-        expect(definitions['group.localizedUnique.en']).toEqual(1)
-        expect(options['group.localizedUnique.en']).toMatchObject({ sparse: true, unique: true })
-        expect(definitions['group.localizedUnique.es']).toEqual(1)
-        expect(options['group.localizedUnique.es']).toMatchObject({ sparse: true, unique: true })
-      })
-      it('should have unique indexes in a collapsible', () => {
-        expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1)
-        expect(options['collapsibleLocalizedUnique.en']).toMatchObject({
-          sparse: true,
-          unique: true,
-        })
-        expect(definitions.collapsibleTextUnique).toEqual(1)
-        expect(options.collapsibleTextUnique).toMatchObject({ unique: true })
-      })
+
       it('should have unique compound indexes', () => {
         expect(definitions.partOne).toEqual(1)
         expect(options.partOne).toMatchObject({
@@ -313,48 +294,30 @@ describe('Fields', () => {
           unique: true,
         })
       })
-      it('should throw validation error saving on unique fields', async () => {
-        const data = {
-          text: 'a',
-          uniqueText: 'a',
-        }
-        await payload.create({
-          collection: 'indexed-fields',
-          data,
-        })
-        expect(async () => {
-          const result = await payload.create({
-            collection: 'indexed-fields',
-            data,
-          })
-          return result.error
-        }).toBeDefined()
+
+      it('should have 2dsphere indexes on point fields', () => {
+        expect(definitions.point).toEqual('2dsphere')
       })
-      it('should throw validation error saving on unique combined fields', async () => {
-        await payload.delete({ collection: 'indexed-fields', where: {} })
-        const data1 = {
-          partOne: 'u',
-          partTwo: 'u',
-          text: 'a',
-          uniqueText: 'a',
-        }
-        const data2 = {
-          partOne: 'u',
-          partTwo: 'u',
-          text: 'b',
-          uniqueText: 'b',
-        }
-        await payload.create({
-          collection: 'indexed-fields',
-          data: data1,
+
+      it('should have 2dsphere indexes on point fields in groups', () => {
+        expect(definitions['group.point']).toEqual('2dsphere')
+      })
+
+      it('should have a sparse index on a unique localized field in a group', () => {
+        expect(definitions['group.localizedUnique.en']).toEqual(1)
+        expect(options['group.localizedUnique.en']).toMatchObject({ sparse: true, unique: true })
+        expect(definitions['group.localizedUnique.es']).toEqual(1)
+        expect(options['group.localizedUnique.es']).toMatchObject({ sparse: true, unique: true })
+      })
+
+      it('should have unique indexes in a collapsible', () => {
+        expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1)
+        expect(options['collapsibleLocalizedUnique.en']).toMatchObject({
+          sparse: true,
+          unique: true,
         })
-        expect(async () => {
-          const result = await payload.create({
-            collection: 'indexed-fields',
-            data: data2,
-          })
-          return result.error
-        }).toBeDefined()
+        expect(definitions.collapsibleTextUnique).toEqual(1)
+        expect(options.collapsibleTextUnique).toMatchObject({ unique: true })
       })
     })
 
@@ -458,6 +421,52 @@ describe('Fields', () => {
       })
     })
   }
+
+  describe('unique indexes', () => {
+    it('should throw validation error saving on unique fields', async () => {
+      const data = {
+        text: 'a',
+        uniqueText: 'a',
+      }
+      await payload.create({
+        collection: 'indexed-fields',
+        data,
+      })
+      expect(async () => {
+        const result = await payload.create({
+          collection: 'indexed-fields',
+          data,
+        })
+        return result.error
+      }).toBeDefined()
+    })
+    it('should throw validation error saving on unique combined fields', async () => {
+      await payload.delete({ collection: 'indexed-fields', where: {} })
+      const data1 = {
+        partOne: 'u',
+        partTwo: 'u',
+        text: 'a',
+        uniqueText: 'a',
+      }
+      const data2 = {
+        partOne: 'u',
+        partTwo: 'u',
+        text: 'b',
+        uniqueText: 'b',
+      }
+      await payload.create({
+        collection: 'indexed-fields',
+        data: data1,
+      })
+      expect(async () => {
+        const result = await payload.create({
+          collection: 'indexed-fields',
+          data: data2,
+        })
+        return result.error
+      }).toBeDefined()
+    })
+  })
 
   describe('array', () => {
     let doc
