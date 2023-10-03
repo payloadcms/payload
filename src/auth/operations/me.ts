@@ -1,10 +1,9 @@
+import url from 'url';
 import jwt from 'jsonwebtoken';
 import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
-import { User } from '../types';
+import { User, UserDocument } from '../types';
 import { Collection } from '../../collections/config/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { isNumber } from '../../utilities/isNumber';
 
 export type Result = {
   user?: User,
@@ -28,23 +27,23 @@ async function me({
   };
 
   if (req.user) {
-    const user = await afterRead({
-      doc: req.user,
-      depth: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
-      entityConfig: collection.config,
-      overrideAccess: false,
-      req,
-      showHiddenFields: false,
-      context: req.context,
-    });
+    const parsedURL = url.parse(req.url);
+    const isGraphQL = parsedURL.pathname === req.payload.config.routes.graphQL;
 
-    if (user.collection !== collection.config.slug) {
+    const user = await req.payload.findByID({
+      id: req.user.id,
+      collection: collection.config.slug,
+      req,
+      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      overrideAccess: false,
+      showHiddenFields: false,
+    }) as User;
+
+    if (req.user.collection !== collection.config.slug) {
       return {
         user: null,
       };
     }
-
-    delete user.collection;
 
     response = {
       user,
