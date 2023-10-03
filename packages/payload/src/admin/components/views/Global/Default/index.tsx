@@ -1,6 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { EditViewProps } from '../../types'
+
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentControls } from '../../../elements/DocumentControls'
 import { Gutter } from '../../../elements/Gutter'
@@ -11,7 +13,6 @@ import { fieldTypes } from '../../../forms/field-types'
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving'
 import Meta from '../../../utilities/Meta'
 import './index.scss'
-import { EditViewProps } from '../../types'
 
 const baseClass = 'global-default-edit'
 

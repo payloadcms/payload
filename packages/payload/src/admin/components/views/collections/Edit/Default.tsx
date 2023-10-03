@@ -1,6 +1,8 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { EditViewProps } from '../../types'
+
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
@@ -9,15 +11,14 @@ import { useAuth } from '../../../utilities/Auth'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import { CollectionRoutes } from './Routes'
 import { CustomCollectionComponent } from './Routes/CustomComponent'
-import { EditViewProps } from '../../types'
 import './index.scss'
 
 const baseClass = 'collection-edit'
 
 const DefaultEditView: React.FC<
   EditViewProps & {
-    disableRoutes?: boolean
     customHeader?: React.ReactNode
+    disableRoutes?: boolean
   }
 > = (props) => {
   const { i18n } = useTranslation('general')

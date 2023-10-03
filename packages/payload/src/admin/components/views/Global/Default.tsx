@@ -1,6 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { EditViewProps } from '../types'
+
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
@@ -9,7 +11,6 @@ import { OperationContext } from '../../utilities/OperationProvider'
 import { GlobalRoutes } from './Routes'
 import { CustomGlobalComponent } from './Routes/CustomComponent'
 import './index.scss'
-import { EditViewProps } from '../types'
 
 const baseClass = 'global-edit'
 
@@ -18,6 +19,8 @@ const DefaultGlobalView: React.FC<
     disableRoutes?: boolean
   }
 > = (props) => {
+  const { i18n } = useTranslation('general')
+
   if ('global' in props) {
     const {
       action,
@@ -30,8 +33,6 @@ const DefaultGlobalView: React.FC<
       onSave,
       permissions,
     } = props
-
-    const { i18n } = useTranslation('general')
 
     const { label } = global
 

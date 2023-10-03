@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 
 import type { Fields } from '../../forms/Form/types'
+import type { EditViewProps } from '../types'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
@@ -11,12 +12,11 @@ import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { EditDepthContext } from '../../utilities/EditDepth'
 import { useLocale } from '../../utilities/Locale'
 import { usePreferences } from '../../utilities/Preferences'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import DefaultGlobalView from './Default'
-import { EditDepthContext } from '../../utilities/EditDepth'
-import { EditViewProps } from '../types'
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { global } = props

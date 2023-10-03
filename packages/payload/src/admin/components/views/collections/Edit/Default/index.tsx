@@ -1,6 +1,8 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { EditViewProps } from '../../../types'
+
 import { getTranslation } from '../../../../../../utilities/getTranslation'
 import { DocumentControls } from '../../../../elements/DocumentControls'
 import { Gutter } from '../../../../elements/Gutter'
@@ -13,14 +15,13 @@ import Auth from '../Auth'
 import { SetStepNav } from '../SetStepNav'
 import Upload from '../Upload'
 import './index.scss'
-import { EditViewProps } from '../../../types'
 
 const baseClass = 'collection-default-edit'
 
 export const DefaultCollectionEdit: React.FC<EditViewProps> = (props) => {
-  if ('collection' in props) {
-    const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation('general')
 
+  if ('collection' in props) {
     const {
       id,
       apiURL,
@@ -100,12 +101,12 @@ export const DefaultCollectionEdit: React.FC<EditViewProps> = (props) => {
                 <Upload collection={collection} data={data} internalState={internalState} />
               )}
               <RenderFields
+                className={`${baseClass}__fields`}
                 fieldSchema={fields}
                 fieldTypes={fieldTypes}
                 filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
                 permissions={permissions.fields}
                 readOnly={!hasSavePermission}
-                className={`${baseClass}__fields`}
               />
             </Gutter>
           </div>
