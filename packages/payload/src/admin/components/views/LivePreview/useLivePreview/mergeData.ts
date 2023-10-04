@@ -9,7 +9,7 @@ export type MergeLiveDataArgs<T> = {
   serverURL: string
 }
 
-export const mergeLiveData = async <T>({
+export const mergeLivePreviewData = async <T>({
   apiRoute,
   depth,
   existingData,

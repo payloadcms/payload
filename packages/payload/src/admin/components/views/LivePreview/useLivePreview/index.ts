@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { mergeLiveData } from './mergeData'
+import { mergeLivePreviewData } from './mergeData'
 
 // To prevent the flicker of missing data on initial load,
 // you can pass in the initial page data from the server
@@ -25,7 +25,7 @@ export const useLivePreview = <T extends any>(props: {
         const eventData = JSON.parse(event?.data)
 
         if (eventData.type === 'livePreview') {
-          const mergedData = await mergeLiveData<T>({
+          const mergedData = await mergeLivePreviewData<T>({
             depth,
             existingData: data,
             fieldSchema: eventData.fieldSchemaJSON,
