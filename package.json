@@ -83,7 +83,7 @@
     "pnpm": ">=8"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json}": [
+    "*.{js,jsx,ts,tsx}": [
       "prettier --write"
     ]
   }
