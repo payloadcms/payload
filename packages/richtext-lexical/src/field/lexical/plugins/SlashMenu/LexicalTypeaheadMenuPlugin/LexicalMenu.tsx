@@ -527,11 +527,17 @@ export function useMenuAnchorRef(
         if (left + menuWidth > rootElementRect.right) {
           containerDiv.style.left = `${rootElementRect.right - menuWidth + window.scrollX}px`
         }
-        const margin = 10
+
+        const wouldGoOffTopOfScreen = top < menuHeight
+        const wouldGoOffBottomOfContainer = top + menuHeight > rootElementRect.bottom
+
+        // Position slash menu above the cursor instead of below (default) if it would otherwise go off the bottom of the screen.
         if (
-          (top + menuHeight > window.innerHeight || top + menuHeight > rootElementRect.bottom) &&
+          (top + menuHeight > window.innerHeight ||
+            (wouldGoOffBottomOfContainer && !wouldGoOffTopOfScreen)) &&
           top - rootElementRect.top > menuHeight
         ) {
+          const margin = 24
           containerDiv.style.top = `${
             top + VERTICAL_OFFSET - menuHeight + window.scrollY - (height + margin)
           }px`

@@ -12,6 +12,9 @@ html[data-theme='light'] {
   color: var(--color-base-800);
   border-radius: 4px;
   list-style: none;
+  font-family: var(--font-body);
+  max-height: 300px;
+  overflow-y: scroll;
 
   .group {
     padding-bottom: 8px;
@@ -24,7 +27,10 @@ html[data-theme='light'] {
   }
 
   .item {
-    padding-left: 8px;
+    all: unset;
+    padding-left: 12px;
+    font-size: 13px;
+    box-sizing: border-box;
     background: none;
     border: none;
     color: var(--color-base-900);
