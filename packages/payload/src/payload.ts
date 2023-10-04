@@ -357,7 +357,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       await this.db.init(this)
     }
 
-    if (this.db.connect) {
+    if (!options.disableDBConnect && this.db.connect) {
       await this.db.connect(this)
     }
 

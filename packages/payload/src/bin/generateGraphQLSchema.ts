@@ -14,6 +14,7 @@ export async function generateGraphQLSchema(): Promise<void> {
 
   await payload.init({
     disableOnInit: true,
+    disableDBConnect: true,
     local: true,
     secret: '--unused--',
   })
