@@ -56,7 +56,7 @@ const Preview: React.FC<
   // We need to transmit data to both accordingly
   useEffect(() => {
     if (fields && window && 'postMessage' in window) {
-      const values = reduceFieldsToValues(fields)
+      const values = reduceFieldsToValues(fields, true)
 
       // TODO: only send `fieldSchemaToJSON` one time
       const message = JSON.stringify({ data: values, fieldSchemaJSON, type: 'livePreview' })

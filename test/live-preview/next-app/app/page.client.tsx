@@ -21,8 +21,6 @@ export const Page: React.FC<Props> = (props) => {
     serverURL: PAYLOAD_SERVER_URL,
   })
 
-  console.log(data)
-
   return (
     <main className={styles.main}>
       {isLoading && <Fragment>Loading...</Fragment>}

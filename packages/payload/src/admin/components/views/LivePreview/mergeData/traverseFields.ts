@@ -104,56 +104,52 @@ export const traverseFields = <T>({
         case 'relationship':
           if (field.hasMany && Array.isArray(incomingData[fieldName])) {
             const existingValue = Array.isArray(result[fieldName]) ? [...result[fieldName]] : []
-            result[fieldName] = []
+            result[fieldName] = Array.isArray(result[fieldName])
+              ? [...result[fieldName]].slice(0, incomingData[fieldName].length)
+              : []
 
             incomingData[fieldName].forEach((relation, i) => {
-              if (typeof existingValue[i] === 'object' && existingValue[i] !== null) {
-                // Handle `hasMany` polymorphic
-                if (Array.isArray(field.relationTo)) {
-                  if (typeof existingValue[i].value === 'object') {
-                    const existingID = existingValue[i].value.id
+              // Handle `hasMany` polymorphic
+              if (Array.isArray(field.relationTo)) {
+                const existingID = existingValue[i]?.value?.id
 
-                    if (
-                      existingID !== relation.value ||
-                      existingValue[i].relationTo !== relation.relationTo
-                    ) {
-                      result[fieldName][i] = {
-                        relationTo: relation.relationTo,
-                      }
-
-                      populationPromises.push(
-                        promise({
-                          id: relation.value,
-                          accessor: 'value',
-                          apiRoute,
-                          collection: relation.relationTo,
-                          depth,
-                          ref: result[fieldName][i],
-                          serverURL,
-                        }),
-                      )
-                    }
+                if (
+                  existingID !== relation.value ||
+                  existingValue[i]?.relationTo !== relation.relationTo
+                ) {
+                  result[fieldName][i] = {
+                    relationTo: relation.relationTo,
                   }
-                } else {
-                  // Handle `hasMany` singular
-                  const existingID = existingValue[i].id
 
-                  if (existingID !== relation) {
-                    populationPromises.push(
-                      promise({
-                        id: relation,
-                        accessor: i,
-                        apiRoute,
-                        collection: String(field.relationTo),
-                        depth,
-                        ref: result[fieldName],
-                        serverURL,
-                      }),
-                    )
-                  }
+                  populationPromises.push(
+                    promise({
+                      id: relation.value,
+                      accessor: 'value',
+                      apiRoute,
+                      collection: relation.relationTo,
+                      depth,
+                      ref: result[fieldName][i],
+                      serverURL,
+                    }),
+                  )
                 }
               } else {
-                // TODO: populate new ID
+                // Handle `hasMany` singular
+                const existingID = existingValue[i]?.id
+
+                if (existingID !== relation) {
+                  populationPromises.push(
+                    promise({
+                      id: relation,
+                      accessor: i,
+                      apiRoute,
+                      collection: String(field.relationTo),
+                      depth,
+                      ref: result[fieldName],
+                      serverURL,
+                    }),
+                  )
+                }
               }
             })
           } else {
