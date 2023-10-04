@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { Config } from '../../config/types'
 import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors'
-import sanitizeFields from './sanitize'
+import { sanitizeFields } from './sanitize'
 import { DatabaseAdapter } from '../..'
 
 const dummyConfig: Config = {

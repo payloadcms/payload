@@ -15,7 +15,7 @@ type Args = {
   validRelationships: string[]
 }
 
-const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] => {
+export const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] => {
   if (!fields) return []
 
   return fields.map((unsanitizedField) => {
@@ -155,5 +155,3 @@ const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] =
     return field
   })
 }
-
-export default sanitizeFields
