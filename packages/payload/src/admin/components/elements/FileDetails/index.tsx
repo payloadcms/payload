@@ -2,6 +2,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
+import isImage from '../../../../uploads/isImage'
 import { UploadActions } from '../../views/collections/Edit/Upload'
 import Button from '../Button'
 import Thumbnail from '../Thumbnail'
@@ -37,7 +38,7 @@ const FileDetails: React.FC<Props> = (props) => {
             width={width as number}
           />
 
-          <UploadActions showSizePreviews={hasSizes} />
+          {isImage(mimeType as string) && <UploadActions showSizePreviews={hasSizes} />}
         </div>
         {handleRemove && (
           <Button

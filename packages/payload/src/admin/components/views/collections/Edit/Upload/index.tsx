@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
+import isImage from '../../../../../../uploads/isImage'
 import Button from '../../../../elements/Button'
 import { Drawer, DrawerToggler } from '../../../../elements/Drawer'
 import { Dropzone } from '../../../../elements/Dropzone'
@@ -33,7 +34,7 @@ export const UploadActions = ({ showSizePreviews }) => {
   return (
     <div className={`${baseClass}__file-mutation`}>
       {showSizePreviews && (
-        <DrawerToggler className={`${baseClass}__edit`} slug={sizePreviewSlug}>
+        <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
           Preview Sizes
         </DrawerToggler>
       )}
@@ -111,11 +112,7 @@ export const Upload: React.FC<Props> = (props) => {
   const hasSizes = collection?.upload?.imageSizes?.length > 0
 
   return (
-    <div
-      className={[fieldBaseClass, baseClass]
-        .filter(Boolean)
-        .join(' ')}
-    >
+    <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <Error message={errorMessage} showError={showError} />
 
       {doc.filename && !replacingFile && (
@@ -139,8 +136,19 @@ export const Upload: React.FC<Props> = (props) => {
 
           {value && (
             <React.Fragment>
-              <div className={`${baseClass}__file-preview`}>
-                {fileSrc ? <img alt={value.name} src={fileSrc} /> : <FileGraphic />}
+              <div
+                className={[
+                  `${baseClass}__file-preview`,
+                  value && isImage(value?.type) && `${baseClass}__image-preview`,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {fileSrc && isImage(value.type) ? (
+                  <img alt={value.name} src={fileSrc} />
+                ) : (
+                  <FileGraphic />
+                )}
               </div>
 
               <div className={`${baseClass}__file-adjustments`}>
@@ -156,9 +164,11 @@ export const Upload: React.FC<Props> = (props) => {
                   />
                 </div>
 
-                <UploadActions
-                  showSizePreviews={Boolean(hasSizes && doc.filename && !replacingFile)}
-                />
+                {isImage(value.type) && (
+                  <UploadActions
+                    showSizePreviews={Boolean(hasSizes && doc.filename && !replacingFile)}
+                  />
+                )}
               </div>
             </React.Fragment>
           )}
