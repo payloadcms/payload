@@ -2,7 +2,7 @@ import type { Block, Data } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getNodeByKey } from 'lexical'
-import { ErrorPill, Pill } from 'payload/components'
+import { Button, ErrorPill, Pill } from 'payload/components'
 import { Collapsible } from 'payload/components/elements'
 import { SectionTitle } from 'payload/components/fields/Blocks'
 import { RenderFields, createNestedFieldPath, useFormSubmitted } from 'payload/components/forms'
@@ -68,6 +68,12 @@ export const BlockContent: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey, collapsed])
 
+  const removeBlock = useCallback(() => {
+    editor.update(() => {
+      $getNodeByKey(nodeKey).remove()
+    })
+  }, [editor, nodeKey])
+
   return (
     <React.Fragment>
       <Collapsible
@@ -76,14 +82,28 @@ export const BlockContent: React.FC<Props> = (props) => {
         collapsibleStyle={false ? 'error' : 'default'}
         header={
           <div className={`${baseClass}__block-header`}>
-            <Pill
-              className={`${baseClass}__block-pill ${baseClass}__block-pill-${fields?.data?.blockType}`}
-              pillStyle="white"
-            >
-              {getTranslation(block.labels.singular, i18n)}
-            </Pill>
-            <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
-            {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
+            <div>
+              <Pill
+                className={`${baseClass}__block-pill ${baseClass}__block-pill-${fields?.data?.blockType}`}
+                pillStyle="white"
+              >
+                {getTranslation(block.labels.singular, i18n)}
+              </Pill>
+              <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
+              {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
+            </div>
+            <Button
+              buttonStyle="icon-label"
+              className={`${baseClass}__removeButton`}
+              disabled={field?.admin?.readOnly}
+              icon="x"
+              onClick={(e) => {
+                e.preventDefault()
+                removeBlock()
+              }}
+              round
+              tooltip="Remove Block"
+            />
           </div>
         }
         key={0}
