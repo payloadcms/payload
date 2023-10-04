@@ -66,6 +66,7 @@ export const generateFileData = async <T>({
     const filePath = `${staticPath}/${filename}`
     const response = await getFileByPath(filePath)
 
+    overwriteExistingFiles = true
     file = response as UploadedFile
   }
 
