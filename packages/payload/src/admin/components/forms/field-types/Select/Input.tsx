@@ -10,8 +10,8 @@ import ReactSelect from '../../../elements/ReactSelect'
 import Error from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import Label from '../../Label'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> & {
   className?: string
@@ -34,6 +34,7 @@ export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> &
 const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
     className,
+    defaultValue,
     description,
     errorMessage,
     hasMany,
@@ -53,7 +54,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  let valueToRender
+  let valueToRender = defaultValue
 
   if (hasMany && Array.isArray(value)) {
     valueToRender = value.map((val) => {

@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 
 import { Chevron } from '../..'
 import { requests } from '../../../api'
+import CopyToClipboard from '../../elements/CopyToClipboard'
 import { Gutter } from '../../elements/Gutter'
-import TextInput from '../../forms/field-types/Text/Input'
+import { CheckboxInput } from '../../forms/field-types/Checkbox/Input'
+import SelectInput from '../../forms/field-types/Select/Input'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useLocale } from '../../utilities/Locale'
 import './index.scss'
 
 const chars = {
@@ -72,11 +75,11 @@ const RecursivelyRenderObjectData = ({
             }`}
           />
         )}
-        <li>
+        <span>
           {objectKey && `"${objectKey}": `}
           <Bracket position="start" type={parentType} />
           {isEmpty ? <Bracket comma={trailingComma} position="end" type={parentType} /> : null}
-        </li>
+        </span>
       </button>
 
       <ul className={`${baseClass}__data-wrap`}>
@@ -105,6 +108,7 @@ const RecursivelyRenderObjectData = ({
               return (
                 <RecursivelyRenderObjectData
                   isEmpty={value.length === 0 || Object.keys(value).length === 0}
+                  key={`${key}-${keyIndex}`}
                   object={value}
                   objectKey={key}
                   parentType={type === 'array' ? 'array' : 'object'}
@@ -115,7 +119,10 @@ const RecursivelyRenderObjectData = ({
 
             if (type === 'date' || type === 'string' || type === 'null' || type === 'number') {
               return (
-                <li className={`${baseClass}__row-line ${baseClass}__data-type--${type}`}>
+                <li
+                  className={`${baseClass}__row-line ${baseClass}__data-type--${type}`}
+                  key={`${key}-${keyIndex}`}
+                >
                   {parentType === 'object' ? <span>{`"${key}": `}</span> : null}
 
                   {type === 'string' ? (
@@ -131,53 +138,137 @@ const RecursivelyRenderObjectData = ({
       </ul>
 
       {!isEmpty && (
-        <li>
+        <span>
           <Bracket comma={trailingComma} position="end" type={parentType} />
-        </li>
+        </span>
       )}
     </li>
   )
 }
 
-export const API = () => {
-  const { id, collection } = useDocumentInfo()
-  const { serverURL } = useConfig()
+function createURL(url: string) {
+  if (url.startsWith('/')) {
+    const domain = window.location.origin
+    return new URL(url, domain)
+  } else {
+    return new URL(url)
+  }
+}
+
+export const API = ({ apiURL }) => {
   const { i18n } = useTranslation()
+  const {
+    localization,
+    routes: { api },
+    serverURL,
+  } = useConfig()
+  const { id, collection, global } = useDocumentInfo()
+  const { code } = useLocale()
+  const url = createURL(apiURL)
+
+  const draftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
+  const docEndpoint = global ? `/globals/${global.slug}` : `/${collection.slug}/${id}`
 
   const [data, setData] = React.useState<any>({})
-  const [query, setQuery] = React.useState<string>('')
+  const [draft, setDraft] = React.useState<boolean>(url.searchParams.get('draft') === 'true')
+  const [locale, setLocale] = React.useState<string>(url.searchParams.get('locale') || code)
+  const [depth, setDepth] = React.useState<string>(url.searchParams.get('depth') || '1')
+  const [authenticated, setAuthenticated] = React.useState<boolean>(true)
+
+  const fetchURL = `${serverURL}${api}${docEndpoint}?locale=${locale}&draft=${draft}&depth=${depth}`
 
   React.useEffect(() => {
     const fetchData = async () => {
-      if (id) {
-        const request = await requests.get(
-          `${serverURL}/api/${collection.slug}/${id}${query ? `${query}` : ''}`,
-          {
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          },
-        )
+      const request = await requests.get(fetchURL, {
+        credentials: authenticated ? 'include' : 'omit',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      })
 
-        const json = await request.json()
-        setData(json)
-      }
+      const json = await request.json()
+      setData(json)
     }
 
     fetchData()
-  }, [id, collection, serverURL, i18n.language, query])
+  }, [i18n.language, fetchURL, authenticated])
+
+  const localeOptions =
+    localization &&
+    localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
   return (
     <Gutter className={baseClass} right={false}>
       <div className={`${baseClass}__configuration`}>
-        <h3 className={`${baseClass}__configuration-title`}>Query Builder</h3>
-        <TextInput
-          name="query"
-          onChange={(e) => setQuery(e.target.value)}
-          path="query"
-          placeholder="?depth=1"
-          value={query}
-        />
+        <div className={`${baseClass}__api-url`}>
+          <span className={`${baseClass}__label`}>
+            API URL <CopyToClipboard value={fetchURL} />
+          </span>
+          <a href={fetchURL} rel="noopener noreferrer" target="_blank">
+            {fetchURL}
+          </a>
+        </div>
+
+        <h3 className={`${baseClass}__configuration-title`}>Filter Query</h3>
+
+        <div className={`${baseClass}__form-fields`}>
+          <div className={`${baseClass}__filter-query-checkboxes`}>
+            {draftsEnabled && (
+              <CheckboxInput checked={draft} label="Draft" onToggle={() => setDraft(!draft)} />
+            )}
+            <CheckboxInput
+              checked={authenticated}
+              label="Authenticated"
+              onToggle={() => setAuthenticated(!authenticated)}
+            />
+          </div>
+
+          {localeOptions && (
+            <SelectInput
+              defaultValue={{
+                label: locale,
+                value: locale,
+              }}
+              label="Locale"
+              name="locale"
+              onChange={(e) => setLocale(e.value as string)}
+              options={localeOptions}
+              path="locale"
+            />
+          )}
+          <SelectInput
+            defaultValue={{
+              label: depth,
+              value: depth,
+            }}
+            label="Depth"
+            name="depth"
+            onChange={(e) => setDepth(e.value as string)}
+            options={[
+              {
+                label: '0',
+                value: '0',
+              },
+              {
+                label: '1',
+                value: '1',
+              },
+              {
+                label: '2',
+                value: '2',
+              },
+              {
+                label: '3',
+                value: '3',
+              },
+              {
+                label: '4',
+                value: '4',
+              },
+            ]}
+            path="depth"
+          />
+        </div>
       </div>
 
       <div className={`${baseClass}__results-container`}>
