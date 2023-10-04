@@ -2,7 +2,7 @@ import type { Config } from '../../config/types'
 import type { SanitizedGlobalConfig } from './types'
 
 import defaultAccess from '../../auth/defaultAccess'
-import sanitizeFields from '../../fields/config/sanitize'
+import { sanitizeFields } from '../../fields/config/sanitize'
 import { fieldAffectsData } from '../../fields/config/types'
 import mergeBaseFields from '../../fields/mergeBaseFields'
 import translations from '../../translations'
@@ -92,7 +92,7 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
       })
     }
 
-    const validRelationships = collections.map((c) => c.slug)
+    const validRelationships = collections.map((c) => c.slug) || []
     sanitizedGlobal.fields = sanitizeFields({
       config,
       fields: sanitizedGlobal.fields,

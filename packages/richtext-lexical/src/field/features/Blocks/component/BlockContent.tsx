@@ -68,8 +68,6 @@ export const BlockContent: React.FC<Props> = (props) => {
     })
   }, [editor, nodeKey, collapsed])
 
-  console.log('BLOCK', block)
-
   return (
     <React.Fragment>
       <Collapsible

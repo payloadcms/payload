@@ -101,6 +101,7 @@ const Component: React.FC<Props> = (props) => {
       <div className={`${baseClass}__actions`}>
         <Button
           buttonStyle="icon-label"
+          className={`${baseClass}__swapButton`}
           disabled={field?.admin?.readOnly}
           el="div"
           icon="swap"
