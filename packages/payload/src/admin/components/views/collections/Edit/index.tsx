@@ -1,12 +1,11 @@
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useHistory, useRouteMatch } from 'react-router-dom'
+import { Redirect, useHistory, useRouteMatch } from 'react-router-dom'
 
 import type { CollectionPermission } from '../../../../../auth'
 import type { Fields } from '../../../forms/Form/types'
 import type { QueryParamTypes } from '../../../utilities/FormQueryParams'
-import type { CollectionEditViewProps } from '../../types'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
@@ -18,7 +17,6 @@ import { EditDepthContext } from '../../../utilities/EditDepth'
 import { FormQueryParams } from '../../../utilities/FormQueryParams'
 import { useLocale } from '../../../utilities/Locale'
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
-import NotFound from '../../NotFound'
 import DefaultEdit from './Default'
 import formatFields from './formatFields'
 
@@ -130,7 +128,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   }, [locale])
 
   if (isError) {
-    return <NotFound marginTop="large" />
+    return <Redirect to={`${admin}/not-found`} />
   }
 
   const apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
@@ -147,30 +145,28 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const isLoading = !internalState || !docPermissions || isLoadingData
 
-  const componentProps: CollectionEditViewProps = {
-    id,
-    action,
-    apiURL,
-    canAccessAdmin: permissions?.canAccessAdmin,
-    collection,
-    data,
-    hasSavePermission,
-    internalState,
-    isEditing,
-    isLoading,
-    onSave,
-    permissions: docPermissions as CollectionPermission,
-    updatedAt: updatedAt || data?.updatedAt,
-    user,
-  }
-
   return (
     <EditDepthContext.Provider value={1}>
       <FormQueryParams.Provider value={{ formQueryParams, setFormQueryParams }}>
         <RenderCustomComponent
           CustomComponent={typeof Edit === 'function' ? Edit : undefined}
           DefaultComponent={DefaultEdit}
-          componentProps={componentProps}
+          componentProps={{
+            id,
+            action,
+            apiURL,
+            canAccessAdmin: permissions?.canAccessAdmin,
+            collection,
+            data,
+            hasSavePermission,
+            internalState,
+            isEditing,
+            isLoading,
+            onSave,
+            permissions: docPermissions as CollectionPermission,
+            updatedAt: updatedAt || data?.updatedAt,
+            user,
+          }}
         />
       </FormQueryParams.Provider>
     </EditDepthContext.Provider>
