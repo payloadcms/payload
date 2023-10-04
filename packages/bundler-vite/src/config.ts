@@ -63,6 +63,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     'module.hot': 'undefined',
     'process.argv': '[]',
     'process.cwd': '() => ""',
+    'process.env': '{}',
   }
 
   Object.entries(process.env).forEach(([key, val]) => {
