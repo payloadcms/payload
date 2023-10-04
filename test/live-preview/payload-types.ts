@@ -34,6 +34,13 @@ export interface Page {
   title: string
   description: string
   slug: string
+  layout?: {
+    title: string
+    description: string
+    id?: string
+    blockName?: string
+    blockType: 'hero'
+  }[]
   featuredPosts?: string[] | Post[]
   updatedAt: string
   createdAt: string

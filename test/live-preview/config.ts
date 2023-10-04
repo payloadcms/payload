@@ -65,6 +65,34 @@ export default buildConfigWithDefaults({
           name: 'slug',
           type: 'text',
           required: true,
+          admin: {
+            position: 'sidebar',
+          },
+        },
+        {
+          name: 'layout',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'hero',
+              labels: {
+                singular: 'Hero',
+                plural: 'Hero',
+              },
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  required: true,
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'featuredPosts',
@@ -116,6 +144,13 @@ export default buildConfigWithDefaults({
         title: 'Hello, world!',
         description: 'This is an example of live preview.',
         slug: 'home',
+        layout: [
+          {
+            blockType: 'hero',
+            title: 'Hello, world!',
+            description: 'This is an example of live preview.',
+          },
+        ],
         featuredPosts: [post1.id],
       },
     })

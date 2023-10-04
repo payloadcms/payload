@@ -15,6 +15,7 @@ export type Props = {
 
 export const Page: React.FC<Props> = (props) => {
   const { initialPage } = props
+
   const { data, isLoading } = useLivePreview<PageType>({
     initialPage,
     serverURL: PAYLOAD_SERVER_URL,
@@ -25,8 +26,24 @@ export const Page: React.FC<Props> = (props) => {
       {isLoading && <Fragment>Loading...</Fragment>}
       {!isLoading && (
         <Fragment>
-          <h1>{data?.title}</h1>
-          <p>{data?.description}</p>
+          <h1>{data.title}</h1>
+          <p>{data.description}</p>
+          {data.layout && (
+            <div>
+              <p>Blocks</p>
+              <div className={styles.blocks}>
+                {data.layout.map((block, index) => {
+                  const { title, description } = block
+                  return (
+                    <div key={index}>
+                      <h2>{title}</h2>
+                      <p>{description}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
           <br />
           <hr />
           <br />
