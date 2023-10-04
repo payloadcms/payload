@@ -40,8 +40,8 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = args.migrationDir || path.resolve(process.cwd(), 'src/migrations')
 
-    extendWebpackConfig(this.payload.config)
-    extendViteConfig(this.payload.config)
+    extendWebpackConfig(payload.config)
+    extendViteConfig(payload.config)
 
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
