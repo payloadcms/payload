@@ -1,15 +1,10 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+import { Pages } from './collections/Pages'
+import { Posts, postsSlug } from './collections/Posts'
 
-export interface Post {
-  createdAt: Date
-  description: string
-  id: string
-  title: string
-  updatedAt: Date
-}
+export const pagesSlug = 'pages'
 
-export const slug = 'pages'
 export default buildConfigWithDefaults({
   admin: {},
   cors: ['http://localhost:3001'],
@@ -23,104 +18,8 @@ export default buildConfigWithDefaults({
       },
       fields: [],
     },
-    {
-      slug,
-      access: {
-        read: () => true,
-        create: () => true,
-        update: () => true,
-        delete: () => true,
-      },
-      admin: {
-        livePreview: {
-          url: 'http://localhost:3001',
-          breakpoints: [
-            {
-              label: 'Mobile',
-              name: 'mobile',
-              width: 375,
-              height: 667,
-            },
-            // {
-            //   label: 'Desktop',
-            //   name: 'desktop',
-            //   width: 1440,
-            //   height: 900,
-            // },
-          ],
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-          required: true,
-        },
-        {
-          name: 'slug',
-          type: 'text',
-          required: true,
-          admin: {
-            position: 'sidebar',
-          },
-        },
-        {
-          name: 'layout',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'hero',
-              labels: {
-                singular: 'Hero',
-                plural: 'Hero',
-              },
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  required: true,
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'featuredPosts',
-          type: 'relationship',
-          relationTo: 'posts',
-          hasMany: true,
-        },
-      ],
-    },
-    {
-      slug: 'posts',
-      access: {
-        read: () => true,
-        create: () => true,
-        update: () => true,
-        delete: () => true,
-      },
-      admin: {
-        useAsTitle: 'title',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
+    Pages,
+    Posts,
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -132,23 +31,70 @@ export default buildConfigWithDefaults({
     })
 
     const post1 = await payload.create({
-      collection: 'posts',
+      collection: postsSlug,
       data: {
         title: 'Post 1',
+        meta: {
+          description: 'This is an example of live preview on a post.',
+        },
+        slug: 'post-1',
+        hero: {
+          type: 'lowImpact',
+          richText: [
+            {
+              type: 'h1',
+              children: [{ text: 'Hello, world!' }],
+            },
+            {
+              type: 'p',
+              children: [
+                {
+                  text: 'This is an example of live preview on a post. You can edit this post in the admin panel and see the changes reflected here.',
+                },
+              ],
+            },
+          ],
+        },
+        layout: [
+          {
+            blockType: 'block-1',
+            title: 'Post 1',
+            description: 'This is an example of live preview on a post.',
+          },
+        ],
       },
     })
 
     await payload.create({
-      collection: slug,
+      collection: pagesSlug,
       data: {
         title: 'Hello, world!',
-        description: 'This is an example of live preview.',
+        meta: {
+          description: 'This is an example of live preview on a page.',
+        },
         slug: 'home',
+        hero: {
+          type: 'lowImpact',
+          richText: [
+            {
+              type: 'h1',
+              children: [{ text: 'Hello, world!' }],
+            },
+            {
+              type: 'p',
+              children: [
+                {
+                  text: 'This is an example of live preview on a page. You can edit this page in the admin panel and see the changes reflected here.',
+                },
+              ],
+            },
+          ],
+        },
         layout: [
           {
-            blockType: 'hero',
+            blockType: 'block-1',
             title: 'Hello, world!',
-            description: 'This is an example of live preview.',
+            description: 'This is an example of live preview on a page.',
           },
         ],
         featuredPosts: [post1.id],

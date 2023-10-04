@@ -15,8 +15,8 @@ export async function generateMetadata(
   const page = await getPage('home')
 
   return {
-    title: page.title,
-    description: page.description,
+    title: page.metaTitle || page.title,
+    description: page.metaDescription,
   }
 }
 

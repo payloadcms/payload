@@ -26,11 +26,8 @@ export const Page: React.FC<Props> = (props) => {
       {isLoading && <Fragment>Loading...</Fragment>}
       {!isLoading && (
         <Fragment>
-          <h1>{data.title}</h1>
-          <p>{data.description}</p>
           {data.layout && (
             <div>
-              <p>Blocks</p>
               <div className={styles.blocks}>
                 {data.layout.map((block, index) => {
                   const { title, description } = block
