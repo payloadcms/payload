@@ -7,6 +7,7 @@ import CopyToClipboard from '../../elements/CopyToClipboard'
 import { Gutter } from '../../elements/Gutter'
 import { CheckboxInput } from '../../forms/field-types/Checkbox/Input'
 import SelectInput from '../../forms/field-types/Select/Input'
+import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
@@ -70,7 +71,7 @@ const RecursivelyRenderObjectData = ({
       >
         {isEmpty ? null : (
           <Chevron
-            className={`${baseClass}__toggle-icon ${baseClass}__toggle-icon--${
+            className={`${baseClass}__toggle-row-icon ${baseClass}__toggle-row-icon--${
               isOpen ? 'open' : 'closed'
             }`}
           />
@@ -82,7 +83,7 @@ const RecursivelyRenderObjectData = ({
         </span>
       </button>
 
-      <ul className={`${baseClass}__data-wrap`}>
+      <ul className={`${baseClass}__json-children`}>
         {isOpen &&
           objectKeys.map((key, keyIndex) => {
             let value = object[key]
@@ -120,7 +121,7 @@ const RecursivelyRenderObjectData = ({
             if (type === 'date' || type === 'string' || type === 'null' || type === 'number') {
               return (
                 <li
-                  className={`${baseClass}__row-line ${baseClass}__data-type--${type}`}
+                  className={`${baseClass}__row-line ${baseClass}__value-type--${type}`}
                   key={`${key}-${keyIndex}`}
                 >
                   {parentType === 'object' ? <span>{`"${key}": `}</span> : null}
@@ -174,6 +175,7 @@ export const API = ({ apiURL }) => {
   const [locale, setLocale] = React.useState<string>(url.searchParams.get('locale') || code)
   const [depth, setDepth] = React.useState<string>(url.searchParams.get('depth') || '1')
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
+  const [fullscreen, setFullscreen] = React.useState<boolean>(false)
 
   const fetchURL = `${serverURL}${api}${docEndpoint}?locale=${locale}&draft=${draft}&depth=${depth}`
 
@@ -197,8 +199,10 @@ export const API = ({ apiURL }) => {
     localization &&
     localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
+  const classes = [baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')
+
   return (
-    <Gutter className={baseClass} right={false}>
+    <Gutter className={classes} right={false}>
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>
@@ -271,8 +275,20 @@ export const API = ({ apiURL }) => {
         </div>
       </div>
 
-      <div className={`${baseClass}__results-container`}>
-        <RecursivelyRenderObjectData object={data} />
+      <div className={`${baseClass}__results-wrapper`}>
+        <div className={`${baseClass}__toggle-fullscreen-button-container`}>
+          <button
+            aria-label="toggle fullscreen"
+            className={`${baseClass}__toggle-fullscreen-button`}
+            onClick={() => setFullscreen(!fullscreen)}
+            type="button"
+          >
+            <MinimizeMaximize isMinimized={!fullscreen} />
+          </button>
+        </div>
+        <div className={`${baseClass}__results`}>
+          <RecursivelyRenderObjectData object={data} />
+        </div>
       </div>
     </Gutter>
   )
