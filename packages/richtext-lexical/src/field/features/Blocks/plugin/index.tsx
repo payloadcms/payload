@@ -26,9 +26,9 @@ export function BlocksPlugin(): JSX.Element | null {
         INSERT_BLOCK_COMMAND,
         (payload: InsertBlockPayload) => {
           editor.update(() => {
-            const uploadNode = $createBlockNode(payload)
+            const blockNode = $createBlockNode(payload)
 
-            $insertNodeToNearestRoot(uploadNode)
+            $insertNodeToNearestRoot(blockNode)
           })
 
           return true

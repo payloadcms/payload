@@ -5,11 +5,21 @@ import path from 'path'
 import { v4 as uuid } from 'uuid'
 
 import payload from '../packages/payload/src'
+import { prettySyncLoggerDestination } from '../packages/payload/src/utilities/logger'
 import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
 
 dotenv.config()
 
 const [testSuiteDir] = process.argv.slice(2)
+
+/**
+ * The default logger's options did not allow for forcing sync logging
+ * Using these options, to force both pretty print and sync logging
+ */
+const prettySyncLogger = {
+  loggerDestination: prettySyncLoggerDestination,
+  loggerOptions: {},
+}
 
 if (!testSuiteDir) {
   console.error('ERROR: You must provide an argument for "testSuiteDir"')
@@ -47,6 +57,7 @@ const startDev = async () => {
       fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
     },
+    ...prettySyncLogger,
     onInit: async (payload) => {
       payload.logger.info('Payload Dev Server Initialized')
     },

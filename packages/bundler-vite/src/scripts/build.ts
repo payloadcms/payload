@@ -12,8 +12,6 @@ export const buildAdmin: BuildAdminType = async ({ payloadConfig, viteConfig: vi
   const vite = await import('vite')
   const viteConfig = await getViteConfig(payloadConfig)
 
-  // TODO: merge vite configs (https://vitejs.dev/guide/api-javascript.html#mergeconfig)
-
   try {
     await vite.build(viteConfig)
   } catch (e) {

@@ -11,6 +11,10 @@ export interface LivePreviewContextType {
   deviceFrameRef: React.RefObject<HTMLDivElement>
   iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement>
+  measuredDeviceSize: {
+    height: number
+    width: number
+  }
   setBreakpoint: (breakpoint: LivePreview['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
   setIframeHasLoaded: (loaded: boolean) => void
@@ -35,6 +39,10 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   deviceFrameRef: undefined,
   iframeHasLoaded: false,
   iframeRef: undefined,
+  measuredDeviceSize: {
+    height: 0,
+    width: 0,
+  },
   setBreakpoint: () => {},
   setHeight: () => {},
   setIframeHasLoaded: () => {},

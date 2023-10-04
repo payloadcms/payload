@@ -52,10 +52,19 @@ export const formatUseAsTitle = (args: {
   return title
 }
 
-const useTitle = (collection: SanitizedCollectionConfig): string => {
+// Keep `collection` optional so that component do need to worry about conditionally rendering hooks
+// This is so that components which take both `collection` and `global` props can use this hook
+const useTitle = (collection?: SanitizedCollectionConfig): string => {
   const { i18n } = useTranslation()
-  const field = useFormFields(([formFields]) => formFields[collection?.admin?.useAsTitle])
+
+  const field = useFormFields(([formFields]) => {
+    if (!collection) return
+    return formFields[collection?.admin?.useAsTitle]
+  })
+
   const config = useConfig()
+
+  if (!collection) return ''
 
   return formatUseAsTitle({ collection, config, field, i18n })
 }

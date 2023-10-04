@@ -1,9 +1,10 @@
 import React, { Fragment, useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 
+import type { EditViewComponent } from '../../../../../packages/payload/src/config/types'
+
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
-import { EditViewComponent } from '../../../../../packages/payload/src/config/types'
 
 const CustomDefaultView: EditViewComponent = ({
   canAccessAdmin,

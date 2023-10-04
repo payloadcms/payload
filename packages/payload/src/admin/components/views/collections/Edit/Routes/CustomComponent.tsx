@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { EditViewProps } from '../../../types'
+import type { CollectionEditViewProps } from '../../../types'
 
 import { API } from '../../../API'
 import { LivePreviewView } from '../../../LivePreview'
@@ -30,37 +30,33 @@ export const defaultCollectionViews: {
 }
 
 export const CustomCollectionComponent = (
-  args: EditViewProps & {
+  args: CollectionEditViewProps & {
     view: collectionViewType
   },
 ) => {
-  if ('collection' in args) {
-    const { collection, view } = args
+  const { collection, view } = args
 
-    const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collection
+  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collection
 
-    // Overriding components may come from multiple places in the config
-    // Need to cascade through the hierarchy to find the correct component to render
-    // For example, the Edit view:
-    // 1. Edit?.Default
-    // 2. Edit?.Default?.Component
-    // TODO: Remove the `@ts-ignore` when a Typescript wizard arrives
-    // For some reason `Component` does not exist on type `Edit[view]` no matter how narrow the type is
-    const Component =
-      typeof Edit === 'object' && typeof Edit[view] === 'function'
-        ? Edit[view]
-        : typeof Edit === 'object' &&
-          typeof Edit?.[view] === 'object' &&
-          // @ts-ignore
-          typeof Edit[view].Component === 'function'
-        ? // @ts-ignore
-          Edit[view].Component
-        : defaultCollectionViews[view]
+  // Overriding components may come from multiple places in the config
+  // Need to cascade through the hierarchy to find the correct component to render
+  // For example, the Edit view:
+  // 1. Edit?.Default
+  // 2. Edit?.Default?.Component
+  // TODO: Remove the `@ts-ignore` when a Typescript wizard arrives
+  // For some reason `Component` does not exist on type `Edit[view]` no matter how narrow the type is
+  const Component =
+    typeof Edit === 'object' && typeof Edit[view] === 'function'
+      ? Edit[view]
+      : typeof Edit === 'object' &&
+        typeof Edit?.[view] === 'object' &&
+        // @ts-ignore
+        typeof Edit[view].Component === 'function'
+      ? // @ts-ignore
+        Edit[view].Component
+      : defaultCollectionViews[view]
 
-    if (Component) {
-      return <Component {...args} />
-    }
+  if (Component) {
+    return <Component {...args} />
   }
-
-  return null
 }

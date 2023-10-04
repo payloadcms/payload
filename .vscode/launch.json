@@ -17,7 +17,7 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev:postgres collections-graphql -- -I", // Allow input
+      "command": "pnpm run dev:postgres collections-graphql",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",
@@ -31,7 +31,7 @@
       "type": "node-terminal"
     },
     {
-      "command": "PAYLOAD_BUNDLER=vite pnpm run dev fields -- -I", // Allow input
+      "command": "PAYLOAD_BUNDLER=vite pnpm run dev fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields (Vite)",
       "request": "launch",

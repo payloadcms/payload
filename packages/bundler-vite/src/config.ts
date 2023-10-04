@@ -60,7 +60,20 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     }
   }
 
-  return {
+  const define = {
+    __dirname: '"/"',
+    'module.hot': 'undefined',
+    'process.argv': '[]',
+    'process.cwd': '() => ""',
+  }
+
+  Object.entries(process.env).forEach(([key, val]) => {
+    if (key.indexOf('PAYLOAD_PUBLIC_') === 0) {
+      define[`process.env.${key}`] = `'${val}'`
+    }
+  })
+
+  let viteConfig: InlineConfig = {
     base: payloadConfig.routes.admin,
     build: {
       chunkSizeWarningLimit: 4000,
@@ -71,13 +84,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       },
     },
     customLogger: logger,
-    define: {
-      __dirname: '"/"',
-      'module.hot': 'undefined',
-      'process.argv': '[]',
-      'process.cwd': '() => ""',
-      'process.env': '{}',
-    },
+    define,
     optimizeDeps: {
       exclude: [
         // Dependencies that need aliases should be excluded
@@ -129,4 +136,10 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       middlewareMode: true,
     },
   }
+
+  if (payloadConfig.admin.vite && typeof payloadConfig.admin.vite === 'function') {
+    viteConfig = payloadConfig.admin.vite(viteConfig)
+  }
+
+  return viteConfig
 }

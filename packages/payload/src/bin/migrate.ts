@@ -1,4 +1,14 @@
 import payload from '..'
+import { prettySyncLoggerDestination } from '../utilities/logger'
+
+/**
+ * The default logger's options did not allow for forcing sync logging
+ * Using these options, to force both pretty print and sync logging
+ */
+const prettySyncLogger = {
+  loggerDestination: prettySyncLoggerDestination,
+  loggerOptions: {},
+}
 
 const availableCommands = [
   'migrate',
@@ -20,6 +30,7 @@ export const migrate = async (args: string[]): Promise<void> => {
     disableOnInit: true,
     local: true,
     secret: process.env.PAYLOAD_SECRET || '--unused--',
+    ...prettySyncLogger,
   })
 
   const adapter = payload.db
