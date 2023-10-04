@@ -67,13 +67,13 @@ export const bundlerPackages: Record<BundlerType, BundlerReplacement> = {
 export const editorPackages: Record<EditorType, EditorReplacement> = {
   slate: {
     packageName: '@payloadcms/richtext-slate',
-    importReplacement: "import { createSlate } from '@payloadcms/richtext-slate'",
-    configReplacement: '  editor: createSlate({}),',
+    importReplacement: "import { slateEditor } from '@payloadcms/richtext-slate'",
+    configReplacement: '  editor: slateEditor({}),',
   },
   lexical: {
     packageName: '@payloadcms/richtext-lexical',
     importReplacement:
-      "import { createLexical } from '@payloadcms/richtext-lexical'",
-    configReplacement: '  editor: createLexical({}),',
+      "import { lexicalEditor } from '@payloadcms/richtext-lexical'",
+    configReplacement: '  editor: lexicalEditor({}),',
   },
 }
