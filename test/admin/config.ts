@@ -1,7 +1,7 @@
 import path from 'path'
 
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { createSlate } from '../../packages/richtext-slate/src'
+import { slateEditor } from '../../packages/richtext-slate/src'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import AfterDashboard from './components/AfterDashboard'
@@ -121,7 +121,7 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          editor: createSlate({
+          editor: slateEditor({
             admin: {
               elements: ['relationship'],
             },

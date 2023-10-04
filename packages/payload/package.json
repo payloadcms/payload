@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.0.0-beta.5",
+  "version": "2.0.0-beta.8",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./src/index.ts",
@@ -140,7 +140,6 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@release-it/conventional-changelog": "7.0.0",
-    "@types/sharp": "0.31.1",
     "@types/asap": "2.0.0",
     "@types/body-parser": "1.19.2",
     "@types/body-scroll-lock": "^3.1.0",
@@ -177,6 +176,7 @@
     "@types/react-dom": "18.2.7",
     "@types/react-helmet": "6.1.6",
     "@types/react-router-dom": "5.3.3",
+    "@types/sharp": "0.31.1",
     "@types/shelljs": "0.8.12",
     "@types/uuid": "8.3.4",
     "confusing-browser-globals": "1.0.11",
