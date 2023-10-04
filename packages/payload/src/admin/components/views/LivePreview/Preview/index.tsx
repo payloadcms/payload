@@ -41,6 +41,8 @@ const Preview: React.FC<
       const values = reduceFieldsToValues(fields)
       const message = JSON.stringify({ data: values, type: 'livePreview' })
 
+      // TODO: populate all relationships before sending data to the preview
+
       // external window
       if (isPopupOpen) {
         setIframeHasLoaded(false)

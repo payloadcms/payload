@@ -4,15 +4,16 @@ import { useCallback, useEffect, useState } from 'react'
 // you can pass in the initial page data from the server
 // To prevent the flicker of stale data while the post message is being sent,
 // you can conditionally render loading UI based on the `isLoading` state
-export const useLivePreview = (props: {
-  initialPage: any
+
+export const useLivePreview = <T extends any>(props: {
+  initialPage: T
   serverURL: string
 }): {
-  data: any
+  data: T
   isLoading: boolean
 } => {
   const { initialPage, serverURL } = props
-  const [data, setData] = useState<any>(initialPage)
+  const [data, setData] = useState<T>(initialPage)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const handleMessage = useCallback(

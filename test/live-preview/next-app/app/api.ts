@@ -1,11 +1,8 @@
-export type PageType = {
-  title?: string
-  description?: string
-}
+import { Page } from '@/payload-types'
 
 export const PAYLOAD_SERVER_URL = 'http://localhost:3000'
 
-export const getPage = async (slug: string): Promise<PageType> => {
+export const getPage = async (slug: string): Promise<Page> => {
   return await fetch(`http://localhost:3000/api/pages?where[slug][equals]=${slug}`, {
     method: 'GET',
     cache: 'no-store',

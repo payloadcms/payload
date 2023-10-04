@@ -66,6 +66,31 @@ export default buildConfigWithDefaults({
           type: 'text',
           required: true,
         },
+        {
+          name: 'featuredPosts',
+          type: 'relationship',
+          relationTo: 'posts',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      slug: 'posts',
+      access: {
+        read: () => true,
+        create: () => true,
+        update: () => true,
+        delete: () => true,
+      },
+      admin: {
+        useAsTitle: 'title',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
       ],
     },
   ],
@@ -78,12 +103,20 @@ export default buildConfigWithDefaults({
       },
     })
 
+    const post1 = await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'Post 1',
+      },
+    })
+
     await payload.create({
       collection: slug,
       data: {
         title: 'Hello, world!',
         description: 'This is an example of live preview.',
         slug: 'home',
+        featuredPosts: [post1.id],
       },
     })
   },
