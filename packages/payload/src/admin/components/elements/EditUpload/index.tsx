@@ -1,260 +1,238 @@
-import type { PixelCrop } from 'react-image-crop'
-
-import React, { useEffect, useRef, useState } from 'react'
+import { useModal } from '@faceless-ui/modal'
+import { t } from 'i18next'
+import React, { useRef, useState } from 'react'
 import ReactCrop, { type Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
+import type { Data } from '../../forms/Form/types'
+
 import Plus from '../../icons/Plus'
 import { useFormQueryParams } from '../../utilities/FormQueryParams'
+import { editDrawerSlug } from '../../views/collections/Edit/Upload'
+import Button from '../Button'
 import './index.scss'
 
 const baseClass = 'edit-upload'
 
-const EditUpload: React.FC<{ fileSrc: string }> = (props) => {
-  const { fileSrc } = props
+const Input: React.FC<{ name: string; onChange: (value: string) => void; value: string }> = ({
+  name,
+  onChange,
+  value,
+}) => (
+  <div className={`${baseClass}__input`}>
+    {name}
+    <input name={name} onChange={(e) => onChange(e.target.value)} type="number" value={value} />
+  </div>
+)
+
+const EditUpload: React.FC<{
+  doc?: Data
+  fileName: string
+  fileSrc: string
+  hasSizes?: boolean
+}> = ({ fileName, fileSrc, hasSizes = false }) => {
+  const { closeModal } = useModal()
+
   const { formQueryParams, setFormQueryParams } = useFormQueryParams()
-  const [crop, setCrop] = useState<CropType>(null)
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>(null)
-  const [output, setOutput] = useState<null | string>(null)
-  const [pointPosition, setPointPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
+  const { uploadEdits } = formQueryParams || {}
+  const [crop, setCrop] = useState<CropType>({
+    height: uploadEdits?.crop?.height || 100,
+    unit: '%',
+    width: uploadEdits?.crop?.width || 100,
+    x: uploadEdits?.crop?.x || 0,
+    y: uploadEdits?.crop?.y || 0,
+  })
+
+  const [pointPosition, setPointPosition] = useState<{ x: number; y: number }>({
+    x: uploadEdits?.focalPoint?.x || 50,
+    y: uploadEdits?.focalPoint?.y || 50,
+  })
+
   const [isDragging, setIsDragging] = useState<boolean>(false)
+  const showFocalPoint = hasSizes && !isDragging
 
-  const offsetRef = useRef({ x: 0, y: 0 })
   const imageRef = useRef<HTMLImageElement | undefined>()
-  const cropRef = useRef<HTMLImageElement | undefined>()
+  const cropRef = useRef<HTMLDivElement | undefined>()
 
-  // Calculate original dimensions as a fraction of the total size
-  const originalHeight = cropRef.current ? cropRef.current.naturalHeight / 100 : 0
-  const originalWidth = cropRef.current ? cropRef.current.naturalWidth / 100 : 0
+  const originalHeight = imageRef.current ? imageRef.current.naturalHeight / 100 : 0
+  const originalWidth = imageRef.current ? imageRef.current.naturalWidth / 100 : 0
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && imageRef.current) {
-        const rect = imageRef.current.getBoundingClientRect()
-        let x = ((e.clientX - offsetRef.current.x - rect.left) / rect.width) * 100
-        let y = ((e.clientY - offsetRef.current.y - rect.top) / rect.height) * 100
+  const handleInputChange = (name: string, value: string) => {
+    if (name === 'width' || name === 'height') {
+      const dimension = name === 'width' ? 'width' : 'height'
+      const val = parseFloat(value) / (dimension === 'width' ? originalWidth : originalHeight)
 
-        x = Math.max(0, Math.min(100, x))
-        y = Math.max(0, Math.min(100, y))
-
-        setPointPosition({ x, y })
-
-        setFormQueryParams({
-          ...formQueryParams,
-          uploadEdits: {
-            ...formQueryParams.uploadEdits,
-            focalPoint: { x: x, y: y },
-          },
-        })
+      const maxCrop = {
+        height: (crop.y + val).toFixed(0) >= 100,
+        width: (crop.x + val).toFixed(0) >= 100,
       }
-    }
 
-    const handleMouseUp = () => {
-      if (isDragging) {
-        setIsDragging(false)
-      }
-    }
+      const maxReached =
+        dimension === 'height'
+          ? crop.y === 0 && crop.height >= 100
+          : crop.x === 0 && crop.width >= 100
 
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove)
-      window.addEventListener('mouseup', handleMouseUp)
-    }
+      if (maxReached) return null
 
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isDragging, setFormQueryParams])
-
-  const handlePointMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    if (imageRef.current) {
-      const rect = imageRef.current.getBoundingClientRect()
-      offsetRef.current = {
-        x: e.clientX - rect.left - (pointPosition.x / 100) * rect.width,
-        y: e.clientY - rect.top - (pointPosition.y / 100) * rect.height,
-      }
-      setIsDragging(true)
-    }
-  }
-
-  const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
-    if (!isDragging && imageRef.current) {
-      const rect = imageRef.current.getBoundingClientRect()
-      let x = ((e.clientX - rect.left) / rect.width) * 100
-      let y = ((e.clientY - rect.top) / rect.height) * 100
-
-      x = Math.max(0, Math.min(100, x))
-      y = Math.max(0, Math.min(100, y))
-
-      setPointPosition({ x, y })
-
-      setFormQueryParams({
-        ...formQueryParams,
-        uploadEdits: {
-          ...formQueryParams.uploadEdits,
-          focalPoint: { x: x, y: y },
-        },
-      })
-    }
-  }
-
-  useEffect(() => {
-    if (completedCrop) {
-      setFormQueryParams({
-        ...formQueryParams,
-        uploadEdits: { ...formQueryParams.uploadEdits, crop: completedCrop },
-      })
-    }
-  }, [completedCrop, setFormQueryParams])
-
-  const handleDimensionChange = (dimensionName: string, value: string) => {
-    const val = parseFloat(value) / (dimensionName === 'width' ? originalWidth : originalHeight)
-    if (val >= 0 && val <= 100) {
-      setCrop({
+      const updatedCrop = {
         ...crop,
-        [dimensionName]: val,
-      })
-    }
-  }
-
-  const generateCroppedPreview = async (cropData: CropType | null) => {
-    try {
-      if (!cropData.width || !cropData.height || !cropRef.current) {
-        return null
+        [dimension]: val,
+        ...(maxCrop.width && name !== 'height' ? { x: 100 - val } : {}),
+        ...(maxCrop.height && name !== 'width' ? { y: 100 - val } : {}),
       }
 
-      const { height, width, x, y } = cropData
-
-      const img = new Image()
-      img.src = fileSrc
-
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-
-      const canvasWidth = width * originalWidth
-      const canvasHeight = height * originalHeight
-
-      canvas.width = canvasWidth
-      canvas.height = canvasHeight
-
-      ctx.drawImage(
-        img,
-        x * originalWidth,
-        y * originalHeight,
-        canvasWidth,
-        canvasHeight,
-        0,
-        0,
-        canvasWidth,
-        canvasHeight,
-      )
-
-      const croppedDataURL = canvas.toDataURL('image/png')
-
-      return croppedDataURL
-    } catch (error) {
-      console.error('Error generating cropped preview:', error)
-      throw error
+      setCrop(updatedCrop)
+    } else if (name === 'x' || name === 'y') {
+      const coordinate = name === 'x' ? 'x' : 'y'
+      const newValue = parseInt(value)
+      if (newValue >= 0 && newValue <= 100) {
+        setPointPosition((prevPosition) => ({ ...prevPosition, [coordinate]: newValue }))
+      }
     }
   }
 
-  const handleCropComplete = async (newCrop: CropType | null) => {
-    setCompletedCrop(newCrop)
+  const setFocalPoint = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect =
+      cropRef.current?.getBoundingClientRect() || imageRef.current?.getBoundingClientRect()
 
-    if (!newCrop) return
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100))
 
-    const data = await generateCroppedPreview(newCrop)
-    setOutput(data)
+    setPointPosition({ x, y })
+  }
+
+  const saveEdits = () => {
+    setFormQueryParams({
+      ...formQueryParams,
+      uploadEdits: {
+        crop: crop ? crop : undefined,
+        focalPoint: pointPosition ? pointPosition : undefined,
+      },
+    })
+    closeModal(editDrawerSlug)
   }
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__toolWrap`}>
-        <ReactCrop
-          className={`${baseClass}__crop`}
-          crop={crop}
-          onChange={(_, c) => setCrop(c)}
-          onComplete={(_, c) => handleCropComplete(c)}
-        >
-          <img alt="Upload Preview" ref={cropRef} src={fileSrc} />
-        </ReactCrop>
-
-        <div className={`${baseClass}__focalPoint`}>
-          <img
-            alt="Crop Preview and Focal Point selection"
-            className={`${baseClass}__imageRef`}
-            onClick={handleImageClick}
-            ref={imageRef}
-            role="presentation"
-            src={output || fileSrc}
-          />
-          <div
-            className={`${baseClass}__point`}
-            onMouseDown={handlePointMouseDown}
-            role="presentation"
-            style={{ left: `${pointPosition.x}%`, top: `${pointPosition.y}%` }}
+      <div className={`${baseClass}__header`}>
+        <h2>Editing {fileName}</h2>
+        <div className={`${baseClass}__actions`}>
+          <Button
+            aria-label={t('close')}
+            buttonStyle="secondary"
+            className={`${baseClass}__cancel`}
+            onClick={() => closeModal(editDrawerSlug)}
           >
-            <Plus />
-          </div>
+            Cancel
+          </Button>
+          <Button
+            buttonStyle="primary"
+            className={`${baseClass}__save`}
+            onClick={() => saveEdits()}
+          >
+            Apply Changes
+          </Button>
         </div>
       </div>
-      <div className={`${baseClass}__sidebar`}>
-        <div>
-          <h3>Crop</h3>
-          <div className={`${baseClass}__inputsWrap`}>
-            <div className={`${baseClass}__input`}>
-              Width (px)
-              <input
-                name="width"
-                onChange={(e) => handleDimensionChange('width', e.target.value)}
-                type="number"
-                value={(originalWidth * (crop?.width || 0)).toFixed(0)}
-              />
-            </div>
-            <div className={`${baseClass}__input`}>
-              Height (px)
-              <input
-                name="height"
-                onChange={(e) => handleDimensionChange('height', e.target.value)}
-                type="number"
-                value={(originalHeight * (crop?.height || 0)).toFixed(0)}
-              />
-            </div>
-          </div>
+      <div className={`${baseClass}__toolWrap`}>
+        <div className={`${baseClass}__crop`}>
+          <ReactCrop
+            className={`${baseClass}__reactCrop`}
+            crop={crop}
+            onChange={(_, c) => setCrop(c)}
+            onDragEnd={() => setIsDragging(false)}
+            onDragStart={() => setIsDragging(true)}
+            renderSelectionAddon={() => {
+              return (
+                <div
+                  className={`${baseClass}__focalPoint`}
+                  onClick={setFocalPoint}
+                  ref={cropRef}
+                  role="presentation"
+                >
+                  <div
+                    className={`${baseClass}__point`}
+                    style={{
+                      left: `${pointPosition.x}%`,
+                      opacity: showFocalPoint ? 1 : 0,
+                      top: `${pointPosition.y}%`,
+                    }}
+                  >
+                    <Plus />
+                  </div>
+                </div>
+              )
+            }}
+          >
+            <img alt="Upload Preview" ref={imageRef} src={fileSrc} />
+          </ReactCrop>
         </div>
-        <div>
-          <h3>Focal Point</h3>
-          <div className={`${baseClass}__inputsWrap`}>
-            <div className={`${baseClass}__input`}>
-              X %
-              <input
-                name="x"
-                onChange={(e) => {
-                  const x = parseInt(e.target.value)
-                  if (x >= 0 && x <= 100) {
-                    setPointPosition({ ...pointPosition, x })
-                  }
-                }}
-                type="number"
-                value={pointPosition.x.toFixed(0)}
-              />
+        <div className={`${baseClass}__sidebar`}>
+          <div className={`${baseClass}__groupWrap`}>
+            <div className={`${baseClass}__titleWrap`}>
+              <h3>Crop</h3>
+              <Button
+                buttonStyle="none"
+                className={`${baseClass}__reset`}
+                onClick={() =>
+                  setCrop({
+                    height: 100,
+                    unit: '%',
+                    width: 100,
+                    x: 0,
+                    y: 0,
+                  })
+                }
+              >
+                Reset
+              </Button>
             </div>
-            <div className={`${baseClass}__input`}>
-              Y %
-              <input
-                name="y"
-                onChange={(e) => {
-                  const y = parseInt(e.target.value)
-                  if (y >= 0 && y <= 100) {
-                    setPointPosition({ ...pointPosition, y })
-                  }
-                }}
-                type="number"
-                value={pointPosition.y.toFixed(0)}
+            <span className={`${baseClass}__description`}>
+              Draw an area to crop, adjust by dragging the corners or updating the values below.
+            </span>
+            <div className={`${baseClass}__inputsWrap`}>
+              <Input
+                name="Width (px)"
+                onChange={(value) => handleInputChange('width', value)}
+                value={(originalWidth * crop.width).toFixed(0)}
+              />
+              <Input
+                name="Height (px)"
+                onChange={(value) => handleInputChange('height', value)}
+                value={(originalHeight * crop.height).toFixed(0)}
               />
             </div>
           </div>
+          {hasSizes && (
+            <div className={`${baseClass}__groupWrap`}>
+              <div className={`${baseClass}__titleWrap`}>
+                <h3>Focal Point</h3>
+                <Button
+                  buttonStyle="none"
+                  className={`${baseClass}__reset`}
+                  onClick={() => setPointPosition({ x: 50, y: 50 })}
+                >
+                  Reset
+                </Button>
+              </div>
+              <span className={`${baseClass}__description`}>
+                Click within the cropped area to position the focal point or adjust the values
+                below.
+              </span>
+              <div className={`${baseClass}__inputsWrap`}>
+                <Input
+                  name="X %"
+                  onChange={(value) => handleInputChange('x', value)}
+                  value={pointPosition.x.toFixed(0)}
+                />
+                <Input
+                  name="Y %"
+                  onChange={(value) => handleInputChange('y', value)}
+                  value={pointPosition.y.toFixed(0)}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

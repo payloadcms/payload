@@ -83,12 +83,17 @@ const EditView: React.FC<IndexProps> = (props) => {
       getVersions()
       getDocPermissions()
       setUpdatedAt(json?.doc?.updatedAt)
+
       if (!isEditing) {
         setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`)
       } else {
         buildState(json.doc, {
           fieldSchema: collection.fields,
         })
+        setFormQueryParams((params) => ({
+          ...params,
+          uploadEdits: undefined,
+        }))
       }
     },
     [admin, getVersions, isEditing, buildState, getDocPermissions, collection],

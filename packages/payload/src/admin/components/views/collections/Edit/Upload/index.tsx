@@ -8,6 +8,7 @@ import { Drawer, DrawerToggler } from '../../../../elements/Drawer'
 import { Dropzone } from '../../../../elements/Dropzone'
 import EditUpload from '../../../../elements/EditUpload'
 import FileDetails from '../../../../elements/FileDetails'
+import PreviewSizes from '../../../../elements/PreviewSizes'
 import Error from '../../../../forms/Error'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import useField from '../../../../forms/useField'
@@ -16,7 +17,8 @@ import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
 import './index.scss'
 
 const baseClass = 'file-field'
-const drawerSlug = 'edit-upload'
+export const editDrawerSlug = 'edit-upload'
+export const sizePreviewSlug = 'preview-sizes'
 
 const validate = (value) => {
   if (!value && value !== undefined) {
@@ -26,6 +28,21 @@ const validate = (value) => {
   return true
 }
 
+export const UploadActions = ({ showSizePreviews }) => {
+  return (
+    <div className={`${baseClass}__file-mutation`}>
+      {showSizePreviews && (
+        <DrawerToggler className={`${baseClass}__edit`} slug={sizePreviewSlug}>
+          Preview Sizes
+        </DrawerToggler>
+      )}
+      <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+        Edit Image
+      </DrawerToggler>
+    </div>
+  )
+}
+
 export const Upload: React.FC<Props> = (props) => {
   const { collection, internalState, onChange } = props
   const [replacingFile, setReplacingFile] = useState(false)
@@ -33,7 +50,6 @@ export const Upload: React.FC<Props> = (props) => {
   const { t } = useTranslation(['upload', 'general'])
   const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true))
   const { docPermissions } = useDocumentInfo()
-
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
@@ -93,6 +109,8 @@ export const Upload: React.FC<Props> = (props) => {
     'delete' in docPermissions &&
     docPermissions?.delete?.permission
 
+  const hasSizes = collection?.upload?.imageSizes?.length > 0
+
   return (
     <div className={classes}>
       <Error message={errorMessage} showError={showError} />
@@ -102,11 +120,20 @@ export const Upload: React.FC<Props> = (props) => {
           collection={collection}
           doc={doc}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
+          hasSizes={hasSizes}
         />
       )}
 
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
+          {!value && (
+            <Dropzone
+              className={`${baseClass}__dropzone`}
+              mimeTypes={collection?.upload?.mimeTypes}
+              onChange={handleFileSelection}
+            />
+          )}
+
           {value && (
             <React.Fragment>
               <div className={`${baseClass}__file-preview`}>
@@ -126,27 +153,29 @@ export const Upload: React.FC<Props> = (props) => {
                   />
                 </div>
 
-                <div className={`${baseClass}__file-mutation`}>
-                  <DrawerToggler className={`${baseClass}__edit`} slug={drawerSlug}>
-                    Edit Image
-                  </DrawerToggler>
-                </div>
+                <UploadActions
+                  showSizePreviews={Boolean(hasSizes && doc.filename && !replacingFile)}
+                />
               </div>
             </React.Fragment>
           )}
-
-          <Drawer slug={drawerSlug} title={`Editing ${value?.name}`}>
-            <EditUpload fileSrc={fileSrc} />
-          </Drawer>
-
-          {!value && (
-            <Dropzone
-              className={`${baseClass}__dropzone`}
-              mimeTypes={collection?.upload?.mimeTypes}
-              onChange={handleFileSelection}
-            />
-          )}
         </div>
+      )}
+
+      {(value || doc.filename) && (
+        <Drawer header={null} slug={editDrawerSlug}>
+          <EditUpload
+            doc={doc || undefined}
+            fileName={value?.name || doc?.filename}
+            fileSrc={fileSrc || doc?.url}
+            hasSizes={hasSizes}
+          />
+        </Drawer>
+      )}
+      {doc && hasSizes && (
+        <Drawer slug={sizePreviewSlug} title={`Sizes for ${doc.filename}`}>
+          <PreviewSizes collection={collection} doc={doc} />
+        </Drawer>
       )}
     </div>
   )

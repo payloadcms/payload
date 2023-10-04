@@ -1,33 +1,67 @@
 @import '../../../scss/styles.scss';
 
+$header-height: base(5);
+$sidebar-width: 350px;
+
 .edit-upload {
-  display: flex;
-  margin: 0 calc(var(--gutter-h) * -1);
-  border-top: 1px solid var(--theme-elevation-150);
-  padding: 0 var(--gutter-h);
   height: 100%;
 
-  &__crop {
-    margin-bottom: base(2);
+  // cropped area from react-image-crop
+  & .ReactCrop__selection-addon {
+    height: 100%;
+    padding: base(0.25);
+  }
+
+  &__header {
+    height: $header-height;
+    margin: 0 calc(var(--gutter-h) * -1);
+    border-bottom: 1px solid var(--theme-elevation-150);
+    padding: 0 var(--gutter-h);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & h2 {
+      margin: 0;
+    }
+  }
+
+  &__actions {
+    border-left: 1px solid var(--theme-elevation-150);
+    min-width: $sidebar-width;
+    margin-left: auto;
+    padding: base(0.5) 0 base(0.5) base(1.5);
+    justify-content: flex-end;
+    display: flex;
+    gap: base(1);
+  }
+
+  &__cancel,
+  &__save {
+    width: 50%;
   }
 
   &__toolWrap {
-    border-right: 1px solid var(--theme-elevation-150);
-    padding: base(2) base(1.5) 0 0;
+    display: flex;
+    height: (calc(100% - #{$header-height}));
   }
 
   &__focalPoint {
     position: relative;
+    width: 100%;
+    height: 100%;
   }
 
-  &__imgRef {
-    width: 100%;
+  &__crop {
+    padding: base(1.5) base(1.5) base(1.5) 0;
   }
 
   &__point {
     cursor: move;
     position: absolute;
     transform: translate3d(-50%, -50%, 0);
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 100%;
 
     & svg {
       width: base(2);
@@ -36,23 +70,47 @@
   }
 
   &__sidebar {
+    border-left: 1px solid var(--theme-elevation-150);
     padding: base(2) 0 0 base(1.5);
-    min-width: 350px;
+    width: $sidebar-width;
+    min-width: $sidebar-width;
 
     & > div:first-child {
-      margin-bottom: base(2);
+      margin-bottom: base(1);
     }
   }
 
-  &__inputsWrap {
+  &__groupWrap {
+    display: flex;
+    flex-direction: column;
+    gap: base(1);
+  }
+
+  &__inputsWrap,
+  &__titleWrap {
     display: flex;
     gap: base(1);
+  }
+
+  &__titleWrap {
+    justify-content: space-between;
+    align-items: center;
+
+    & h3 {
+      margin: 0;
+    }
+  }
+
+  &__reset {
+    height: fit-content;
+    border-radius: var(--style-radius-s);
+    background-color: var(--theme-elevation-150);
+    padding: 0 base(0.25);
   }
 
   &__input {
     & input {
       @include formInput;
-      margin-top: base(0.25);
     }
   }
 

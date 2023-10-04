@@ -8,4 +8,5 @@ export type Props = {
     sizes?: FileSizes
   }
   handleRemove?: () => void
+  hasSizes?: boolean
 }

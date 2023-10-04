@@ -18,7 +18,10 @@
     width: auto;
     flex-grow: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
     align-self: center;
+    gap: base(0.25);
   }
 
   &__toggle-more-info {

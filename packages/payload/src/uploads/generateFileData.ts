@@ -1,3 +1,4 @@
+import type { UploadedFile } from 'express-fileupload'
 import type { Sharp } from 'sharp'
 
 import { fromBuffer } from 'file-type'
@@ -14,6 +15,7 @@ import type { FileData, FileToSave, ProbedImageSize } from './types'
 import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
+import getFileByPath from './getFileByPath'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -48,15 +50,8 @@ export const generateFileData = async <T>({
     }
   }
 
-  const { file } = req.files || {}
-  if (!file) {
-    if (throwOnMissingFile) throw new MissingFile(req.t)
-
-    return {
-      data,
-      files: [],
-    }
-  }
+  let file = req.files?.file || undefined
+  const { uploadEdits } = req.query || {}
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload
@@ -64,6 +59,23 @@ export const generateFileData = async <T>({
   let staticPath = staticDir
   if (staticDir.indexOf('/') !== 0) {
     staticPath = path.resolve(config.paths.configDir, staticDir)
+  }
+
+  if (!file && uploadEdits && data) {
+    const { filename } = data as FileData
+    const filePath = `${staticPath}/${filename}`
+    const response = await getFileByPath(filePath)
+
+    file = response as UploadedFile
+  }
+
+  if (!file) {
+    if (throwOnMissingFile) throw new MissingFile(req.t)
+
+    return {
+      data,
+      files: [],
+    }
   }
 
   if (!disableLocalStorage) {
@@ -75,9 +87,7 @@ export const generateFileData = async <T>({
   const fileData: Partial<FileData> = {}
   const fileIsAnimated = file.mimetype === 'image/gif' || file.mimetype === 'image/webp'
   const cropData =
-    typeof req.query?.uploadEdits === 'object' && 'crop' in req.query.uploadEdits
-      ? req.query?.uploadEdits.crop
-      : undefined
+    typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
   try {
     const fileSupportsResize = canResizeImage(file.mimetype)

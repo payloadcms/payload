@@ -57,6 +57,7 @@
   &__file-mutation {
     display: flex;
     gap: calc(var(--base) / 2);
+    flex-wrap: wrap;
   }
 
   &__edit {
@@ -65,6 +66,9 @@
     border: none;
     border-radius: $style-radius-s;
     padding: base(0.25) base(0.5);
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &:hover {
       background-color: var(--theme-elevation-100);
