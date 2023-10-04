@@ -29,8 +29,9 @@ const EditUpload: React.FC<{
   doc?: Data
   fileName: string
   fileSrc: string
-  hasSizes?: boolean
-}> = ({ fileName, fileSrc, hasSizes = false }) => {
+  showCrop?: boolean
+  showFocalPoint?: boolean
+}> = ({ fileName, fileSrc, showCrop, showFocalPoint: hasFocalPoint }) => {
   const { closeModal } = useModal()
 
   const { formQueryParams, setFormQueryParams } = useFormQueryParams()
@@ -49,7 +50,7 @@ const EditUpload: React.FC<{
   })
 
   const [isDragging, setIsDragging] = useState<boolean>(false)
-  const showFocalPoint = hasSizes && !isDragging
+  const showFocalPoint = hasFocalPoint && !isDragging
 
   const imageRef = useRef<HTMLImageElement | undefined>()
   const cropRef = useRef<HTMLDivElement | undefined>()
@@ -135,75 +136,101 @@ const EditUpload: React.FC<{
         </div>
       </div>
       <div className={`${baseClass}__toolWrap`}>
-        <div className={`${baseClass}__crop`}>
-          <ReactCrop
-            className={`${baseClass}__reactCrop`}
-            crop={crop}
-            onChange={(_, c) => setCrop(c)}
-            onDragEnd={() => setIsDragging(false)}
-            onDragStart={() => setIsDragging(true)}
-            renderSelectionAddon={() => {
-              return (
-                <div
-                  className={`${baseClass}__focalPoint`}
-                  onClick={setFocalPoint}
-                  ref={cropRef}
-                  role="presentation"
-                >
+        {showCrop ? (
+          <div className={`${baseClass}__crop`}>
+            <ReactCrop
+              className={`${baseClass}__reactCrop`}
+              crop={crop}
+              onChange={(_, c) => setCrop(c)}
+              onDragEnd={() => setIsDragging(false)}
+              onDragStart={() => setIsDragging(true)}
+              renderSelectionAddon={() => {
+                return (
                   <div
-                    className={`${baseClass}__point`}
-                    style={{
-                      left: `${pointPosition.x}%`,
-                      opacity: showFocalPoint ? 1 : 0,
-                      top: `${pointPosition.y}%`,
-                    }}
+                    className={`${baseClass}__focalPoint`}
+                    onClick={setFocalPoint}
+                    ref={cropRef}
+                    role="presentation"
                   >
-                    <Plus />
+                    <div
+                      className={`${baseClass}__point`}
+                      style={{
+                        left: `${pointPosition.x}%`,
+                        opacity: showFocalPoint ? 1 : 0,
+                        top: `${pointPosition.y}%`,
+                      }}
+                    >
+                      <Plus />
+                    </div>
                   </div>
-                </div>
-              )
-            }}
-          >
-            <img alt="Upload Preview" ref={imageRef} src={fileSrc} />
-          </ReactCrop>
-        </div>
-        <div className={`${baseClass}__sidebar`}>
-          <div className={`${baseClass}__groupWrap`}>
-            <div className={`${baseClass}__titleWrap`}>
-              <h3>Crop</h3>
-              <Button
-                buttonStyle="none"
-                className={`${baseClass}__reset`}
-                onClick={() =>
-                  setCrop({
-                    height: 100,
-                    unit: '%',
-                    width: 100,
-                    x: 0,
-                    y: 0,
-                  })
-                }
+                )
+              }}
+            >
+              <img alt="Upload Preview" ref={imageRef} src={fileSrc} />
+            </ReactCrop>
+          </div>
+        ) : (
+          <div className={`${baseClass}__focalOnly`}>
+            <div
+              className={`${baseClass}__imageWrap`}
+              onClick={setFocalPoint}
+              ref={cropRef}
+              role="presentation"
+            >
+              <img alt="Upload Preview" ref={imageRef} src={fileSrc} />
+              <div
+                className={`${baseClass}__point`}
+                style={{
+                  left: `${pointPosition.x}%`,
+                  opacity: showFocalPoint ? 1 : 0,
+                  top: `${pointPosition.y}%`,
+                }}
               >
-                Reset
-              </Button>
-            </div>
-            <span className={`${baseClass}__description`}>
-              Draw an area to crop, adjust by dragging the corners or updating the values below.
-            </span>
-            <div className={`${baseClass}__inputsWrap`}>
-              <Input
-                name="Width (px)"
-                onChange={(value) => handleInputChange('width', value)}
-                value={(originalWidth * crop.width).toFixed(0)}
-              />
-              <Input
-                name="Height (px)"
-                onChange={(value) => handleInputChange('height', value)}
-                value={(originalHeight * crop.height).toFixed(0)}
-              />
+                <Plus />
+              </div>
             </div>
           </div>
-          {hasSizes && (
+        )}
+        <div className={`${baseClass}__sidebar`}>
+          {showCrop && (
+            <div className={`${baseClass}__groupWrap`}>
+              <div className={`${baseClass}__titleWrap`}>
+                <h3>Crop</h3>
+                <Button
+                  buttonStyle="none"
+                  className={`${baseClass}__reset`}
+                  onClick={() =>
+                    setCrop({
+                      height: 100,
+                      unit: '%',
+                      width: 100,
+                      x: 0,
+                      y: 0,
+                    })
+                  }
+                >
+                  Reset
+                </Button>
+              </div>
+              <span className={`${baseClass}__description`}>
+                Draw an area to crop, adjust by dragging the corners or updating the values below.
+              </span>
+              <div className={`${baseClass}__inputsWrap`}>
+                <Input
+                  name="Width (px)"
+                  onChange={(value) => handleInputChange('width', value)}
+                  value={(originalWidth * crop.width).toFixed(0)}
+                />
+                <Input
+                  name="Height (px)"
+                  onChange={(value) => handleInputChange('height', value)}
+                  value={(originalHeight * crop.height).toFixed(0)}
+                />
+              </div>
+            </div>
+          )}
+
+          {showFocalPoint && (
             <div className={`${baseClass}__groupWrap`}>
               <div className={`${baseClass}__titleWrap`}>
                 <h3>Focal Point</h3>

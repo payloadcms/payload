@@ -52,8 +52,13 @@ $sidebar-width: 350px;
     height: 100%;
   }
 
-  &__crop {
+  &__crop,
+  &__focalOnly {
     padding: base(1.5) base(1.5) base(1.5) 0;
+  }
+
+  &__imageWrap {
+    position: relative;
   }
 
   &__point {

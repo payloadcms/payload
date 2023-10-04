@@ -30,7 +30,7 @@ const validate = (value) => {
   return true
 }
 
-export const UploadActions = ({ showSizePreviews }) => {
+export const UploadActions = ({ canEdit, showSizePreviews }) => {
   return (
     <div className={`${baseClass}__file-mutation`}>
       {showSizePreviews && (
@@ -38,9 +38,11 @@ export const UploadActions = ({ showSizePreviews }) => {
           Preview Sizes
         </DrawerToggler>
       )}
-      <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
-        Edit Image
-      </DrawerToggler>
+      {canEdit && (
+        <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+          Edit Image
+        </DrawerToggler>
+      )}
     </div>
   )
 }
@@ -109,7 +111,12 @@ export const Upload: React.FC<Props> = (props) => {
     'delete' in docPermissions &&
     docPermissions?.delete?.permission
 
-  const hasSizes = collection?.upload?.imageSizes?.length > 0
+  const hasImageSizes = collection?.upload?.imageSizes?.length > 0
+  const hasResizeOptions = Boolean(collection?.upload?.resizeOptions)
+
+  const { collection: { upload: { crop: showCrop = true, focalPoint = true } } = {} } = props
+
+  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions)
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
@@ -117,10 +124,11 @@ export const Upload: React.FC<Props> = (props) => {
 
       {doc.filename && !replacingFile && (
         <FileDetails
+          canEdit={showCrop || showFocalPoint}
           collection={collection}
           doc={doc}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
-          hasSizes={hasSizes}
+          hasImageSizes={hasImageSizes}
         />
       )}
 
@@ -166,7 +174,8 @@ export const Upload: React.FC<Props> = (props) => {
 
                 {isImage(value.type) && (
                   <UploadActions
-                    showSizePreviews={Boolean(hasSizes && doc.filename && !replacingFile)}
+                    canEdit={showCrop || showFocalPoint}
+                    showSizePreviews={hasImageSizes && doc.filename}
                   />
                 )}
               </div>
@@ -181,11 +190,12 @@ export const Upload: React.FC<Props> = (props) => {
             doc={doc || undefined}
             fileName={value?.name || doc?.filename}
             fileSrc={fileSrc || doc?.url}
-            hasSizes={hasSizes}
+            showCrop={showCrop}
+            showFocalPoint={showFocalPoint}
           />
         </Drawer>
       )}
-      {doc && hasSizes && (
+      {doc && hasImageSizes && (
         <Drawer slug={sizePreviewSlug} title={`Sizes for ${doc.filename}`}>
           <PreviewSizes collection={collection} doc={doc} />
         </Drawer>

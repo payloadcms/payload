@@ -12,7 +12,7 @@ import './index.scss'
 const baseClass = 'file-details'
 
 const FileDetails: React.FC<Props> = (props) => {
-  const { collection, doc, handleRemove, hasSizes } = props
+  const { canEdit, collection, doc, handleRemove, hasImageSizes } = props
 
   const {
     slug: collectionSlug,
@@ -38,7 +38,9 @@ const FileDetails: React.FC<Props> = (props) => {
             width={width as number}
           />
 
-          {isImage(mimeType as string) && <UploadActions showSizePreviews={hasSizes} />}
+          {isImage(mimeType as string) && (
+            <UploadActions canEdit={canEdit} showSizePreviews={hasImageSizes && doc.filename} />
+          )}
         </div>
         {handleRemove && (
           <Button

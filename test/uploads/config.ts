@@ -82,10 +82,80 @@ export default buildConfigWithDefaults({
       fields: [],
     },
     {
+      slug: 'no-image-sizes',
+      upload: {
+        staticURL: '/no-image-sizes',
+        staticDir: './no-image-sizes',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+      },
+      fields: [],
+    },
+    {
+      slug: 'crop-only',
+      upload: {
+        focalPoint: false,
+        staticURL: '/crop-only',
+        staticDir: './crop-only',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        imageSizes: [
+          {
+            name: 'focalTest',
+            width: 400,
+            height: 300,
+          },
+          {
+            name: 'focalTest2',
+            width: 600,
+            height: 300,
+          },
+          {
+            name: 'focalTest3',
+            width: 900,
+            height: 300,
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
+      slug: 'focal-only',
+      upload: {
+        crop: false,
+        staticURL: '/focal-only',
+        staticDir: './focal-only',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        imageSizes: [
+          {
+            name: 'focalTest',
+            width: 400,
+            height: 300,
+          },
+          {
+            name: 'focalTest2',
+            width: 600,
+            height: 300,
+          },
+          {
+            name: 'focalTest3',
+            width: 900,
+            height: 300,
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
       slug: mediaSlug,
       upload: {
         staticURL: '/media',
         staticDir: './media',
+        // crop: false,
+        // focalPoint: false,
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -169,9 +239,6 @@ export default buildConfigWithDefaults({
             name: 'tablet',
             width: 640,
             height: 80,
-            resizeOptions: {
-              position: 'right bottom',
-            },
           },
           {
             name: 'mobile',
