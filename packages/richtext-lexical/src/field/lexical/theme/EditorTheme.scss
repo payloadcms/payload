@@ -298,6 +298,7 @@
     padding: 0;
     margin: 0;
     list-style-position: inside;
+    margin: 0 0 1.5em;
   }
 
   &__ol2 {
@@ -330,12 +331,12 @@
 
   &__ul {
     padding: 0;
-    margin: 0;
+    margin: 0 0 1.5em;
     list-style-position: inside;
   }
 
   &__listItem {
-    margin: 0 32px;
+    margin: 0 0px 0.4em 16px;
   }
 
   &__listItemChecked,
