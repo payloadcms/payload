@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 import type { MarkOptional } from 'ts-essentials'
-import type { Configuration } from 'webpack'
 
 import type {
   BaseDatabaseAdapter,
@@ -35,16 +34,6 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     | 'transaction'
   >,
 ): T {
-  // Need to implement DB Webpack config extensions here
-  if (args.webpack) {
-    const existingWebpackConfig = args.payload.config.admin.webpack
-      ? args.payload.config.admin.webpack
-      : (webpackConfig) => webpackConfig
-    args.payload.config.admin.webpack = (webpackConfig: Configuration) => {
-      return args.webpack(existingWebpackConfig(webpackConfig))
-    }
-  }
-
   return {
     // Default 'null' transaction functions
     beginTransaction,
