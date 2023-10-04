@@ -18,9 +18,6 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
 
   if (!this.connection.get('replicaSet')) {
     transactionsNotAvailable = true
-    this.payload.logger.warn(
-      'Database transactions for MongoDB are only available when connecting to a replica set. Operations will continue without using transactions.',
-    )
   } else {
     id = uuid()
     if (!this.sessions[id]) {

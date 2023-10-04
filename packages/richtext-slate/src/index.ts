@@ -8,7 +8,7 @@ import RichTextCell from './cell'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
 import RichTextField from './field'
 
-export function createSlate(args: AdapterArguments): RichTextAdapter<AdapterArguments> {
+export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArguments> {
   return {
     CellComponent: withMergedProps({
       Component: RichTextCell,

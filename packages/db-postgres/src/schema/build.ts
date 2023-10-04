@@ -157,7 +157,10 @@ export const buildTable = ({
           return acc
         },
         {
-          _localeParent: unique().on(cols._locale, cols._parentID),
+          _localeParent: unique(`${localeTableName}_locale_parent_id_unique`).on(
+            cols._locale,
+            cols._parentID,
+          ),
         },
       )
     })
@@ -254,14 +257,13 @@ export const buildTable = ({
 
         if (hasLocalizedRelationshipField) {
           result.localeIdx = index('locale_idx').on(cols.locale)
-          result.parentPathOrderLocale = unique().on(
-            cols.parent,
-            cols.path,
-            cols.order,
-            cols.locale,
-          )
+          result.parentPathOrderLocale = unique(
+            `${relationshipsTableName}_parent_id_path_order_locale_unique`,
+          ).on(cols.parent, cols.path, cols.order, cols.locale)
         } else {
-          result.parentPathOrder = unique().on(cols.parent, cols.path, cols.order)
+          result.parentPathOrder = unique(
+            `${relationshipsTableName}_parent_id_path_order_unique`,
+          ).on(cols.parent, cols.path, cols.order)
         }
 
         return result
