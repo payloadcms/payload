@@ -111,8 +111,8 @@ const RecursivelyRenderObjectData = ({
                   isEmpty={value.length === 0 || Object.keys(value).length === 0}
                   key={`${key}-${keyIndex}`}
                   object={value}
-                  objectKey={key}
-                  parentType={type === 'array' ? 'array' : 'object'}
+                  objectKey={parentType === 'object' ? key : undefined}
+                  parentType={type}
                   trailingComma={!isLastKey}
                 />
               )
