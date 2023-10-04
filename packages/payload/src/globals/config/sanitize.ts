@@ -92,7 +92,7 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
       })
     }
 
-    const validRelationships = collections.map((c) => c.slug)
+    const validRelationships = collections.map((c) => c.slug) || []
     sanitizedGlobal.fields = sanitizeFields({
       config,
       fields: sanitizedGlobal.fields,

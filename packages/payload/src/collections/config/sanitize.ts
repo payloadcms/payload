@@ -142,7 +142,7 @@ const sanitizeCollection = (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.map((c) => c.slug)
+  const validRelationships = config.collections.map((c) => c.slug) || []
   sanitized.fields = sanitizeFields({
     config,
     fields: sanitized.fields,
