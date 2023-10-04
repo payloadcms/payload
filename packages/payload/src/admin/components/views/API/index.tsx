@@ -213,8 +213,6 @@ export const API = ({ apiURL }) => {
           </a>
         </div>
 
-        <h3 className={`${baseClass}__configuration-title`}>Filter Query</h3>
-
         <div className={`${baseClass}__form-fields`}>
           <div className={`${baseClass}__filter-query-checkboxes`}>
             {draftsEnabled && (
