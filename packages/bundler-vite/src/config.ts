@@ -13,7 +13,7 @@ const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js')
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
-  const { createLogger } = await import('vite')
+  const { createLogger, searchForWorkspaceRoot } = await import('vite')
 
   const logger = createLogger('warn', { allowClearScreen: false, prefix: '[VITE-WARNING]' })
   const originalWarning = logger.warn
@@ -89,7 +89,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         // from pre-bundling
         '@payloadcms/bundler-vite',
       ],
-      include: ['payload/components/root'],
+      include: ['payload/components/root', 'react-dom/client'],
     },
     plugins: [
       {
@@ -130,6 +130,9 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     },
     root: path.resolve(__dirname, './'),
     server: {
+      fs: {
+        allow: [searchForWorkspaceRoot(process.cwd()), path.resolve(__dirname, '../../../payload')],
+      },
       hmr: {
         port: hmrPort,
       },
