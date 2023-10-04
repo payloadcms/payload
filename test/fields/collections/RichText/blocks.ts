@@ -1,6 +1,6 @@
 import type { Block } from '../../../../packages/payload/src/fields/config/types'
 
-import { createLexical } from '../../../../packages/richtext-lexical/src'
+import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
 
 export const TextBlock: Block = {
   fields: [
@@ -24,7 +24,7 @@ export const UploadAndRichTextBlock: Block = {
     {
       name: 'richText',
       type: 'richText',
-      editor: createLexical({}),
+      editor: lexicalEditor({}),
     },
   ],
   slug: 'uploadAndRichText',
