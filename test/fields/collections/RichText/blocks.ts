@@ -1,4 +1,4 @@
-import type { Block } from '../../../../packages/payload/types'
+import type { Block } from '../../../../packages/payload/src/fields/config/types'
 
 import { createLexical } from '../../../../packages/richtext-lexical/src'
 

@@ -1,53 +1,67 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
-import { useLivePreviewContext } from '../../PreviewContext/context'
+import { useLivePreviewContext } from '../../Context/context'
 import './index.scss'
 
-const baseClass = 'live-preview-toolbar'
+const baseClass = 'toolbar-input'
 
 export const PreviewFrameSizeInput: React.FC<{
   axis?: 'x' | 'y'
 }> = (props) => {
   const { axis } = props
 
-  const { setHeight, setWidth, size } = useLivePreviewContext()
+  const { breakpoint, measuredDeviceSize, setBreakpoint, setSize, size, zoom } =
+    useLivePreviewContext()
 
-  // const [size, setSize] = React.useState<string>(() => {
-  //   if (sizeToUse === 'width') {
-  //     return deviceSize?.width.toFixed(0)
-  //   }
-
-  //   return deviceSize?.height.toFixed(0)
-  // })
-
-  // useEffect(() => {
-  //   if (sizeToUse === 'width') {
-  //     setSize(deviceSize?.width.toFixed(0))
-  //   } else {
-  //     setSize(deviceSize?.height.toFixed(0))
-  //   }
-  // }, [deviceSize])
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (axis === 'x') {
-        setWidth(Number(e.target.value))
-      } else {
-        setHeight(Number(e.target.value))
-      }
-    },
-    [axis, setWidth, setHeight],
+  const [internalState, setInternalState] = React.useState<number>(
+    (axis === 'x' ? measuredDeviceSize?.width : measuredDeviceSize?.height) || 0,
   )
 
-  const sizeValue = axis === 'x' ? size?.width : size?.height
+  // when the input is changed manually, we need to set the breakpoint as `custom`
+  // this will then allow us to set an explicit width and height
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let newValue = Number(e.target.value)
+
+      if (newValue < 0) newValue = 0
+
+      setInternalState(newValue)
+      setBreakpoint('custom')
+
+      // be sure to set _both_ axis values to so that the other axis doesn't fallback to 0 on initial change
+      // this is because the `responsive` size is '100%' in CSS, and `0` in initial state
+      setSize({
+        type: 'reset',
+        value: {
+          height: axis === 'y' ? newValue : Number(measuredDeviceSize?.height.toFixed(0)) * zoom,
+          width: axis === 'x' ? newValue : Number(measuredDeviceSize?.width.toFixed(0)) * zoom,
+        },
+      })
+    },
+    [axis, setBreakpoint, measuredDeviceSize, setSize, zoom],
+  )
+
+  // if the breakpoint is `responsive` then the device's div will have `100%` width and height
+  // so we need to take the measurements provided by `actualDeviceSize` and sync internal state
+  useEffect(() => {
+    if (breakpoint === 'responsive' && measuredDeviceSize) {
+      if (axis === 'x') setInternalState(Number(measuredDeviceSize.width.toFixed(0)) * zoom)
+      else setInternalState(Number(measuredDeviceSize.height.toFixed(0)) * zoom)
+    }
+
+    if (breakpoint !== 'responsive' && size) {
+      setInternalState(axis === 'x' ? size.width : size.height)
+    }
+  }, [breakpoint, axis, measuredDeviceSize, size, zoom])
 
   return (
     <input
-      className={`${baseClass}__size`}
-      disabled // enable this once its wired up properly
+      className={baseClass}
+      min={0}
       onChange={handleChange}
+      step={1}
       type="number"
-      value={sizeValue}
+      value={internalState || 0}
     />
   )
 }

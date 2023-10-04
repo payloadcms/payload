@@ -39,23 +39,6 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreview['breakpoints'][0]['name']>('responsive')
 
-  const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
-
-  let margin = '0'
-
-  if (foundBreakpoint && breakpoint !== 'responsive') {
-    margin = '0 auto'
-
-    if (
-      typeof zoom === 'number' &&
-      typeof foundBreakpoint.width === 'number' &&
-      typeof foundBreakpoint.height === 'number'
-    ) {
-      // keep it centered horizontally
-      margin = `0 ${foundBreakpoint.width / 2 / zoom}px`
-    }
-  }
-
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
     // only update position if the toolbar is completely within the preview area
@@ -87,19 +70,31 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
     [setSize],
   )
 
-  const { size: actualDeviceSize } = useResize(deviceFrameRef)
-
+  // explicitly set new width and height when as new breakpoints are selected
+  // exclude `custom` breakpoint as it is handled by the `setWidth` and `setHeight` directly
   useEffect(() => {
-    if (actualDeviceSize) {
+    const foundBreakpoint = breakpoints?.find((bp) => bp.name === breakpoint)
+
+    if (
+      foundBreakpoint &&
+      breakpoint !== 'responsive' &&
+      breakpoint !== 'custom' &&
+      typeof foundBreakpoint?.width === 'number' &&
+      typeof foundBreakpoint?.height === 'number'
+    ) {
       setSize({
         type: 'reset',
         value: {
-          height: Number(actualDeviceSize.height.toFixed(0)),
-          width: Number(actualDeviceSize.width.toFixed(0)),
+          height: foundBreakpoint.height,
+          width: foundBreakpoint.width,
         },
       })
     }
-  }, [actualDeviceSize])
+  }, [breakpoint, breakpoints])
+
+  // keep an accurate measurement of the actual device size as it is truly rendered
+  // this is helpful when `sizes` are non-number units like percentages, etc.
+  const { size: measuredDeviceSize } = useResize(deviceFrameRef)
 
   return (
     <LivePreviewContext.Provider
@@ -109,6 +104,7 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
         deviceFrameRef,
         iframeHasLoaded,
         iframeRef,
+        measuredDeviceSize,
         setBreakpoint,
         setHeight,
         setIframeHasLoaded,

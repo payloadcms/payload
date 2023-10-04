@@ -1,12 +1,12 @@
 import { useDraggable } from '@dnd-kit/core'
 import React from 'react'
 
-import type { ToolbarProviderProps } from '../PreviewContext'
+import type { ToolbarProviderProps } from '../Context'
 
 import { X } from '../../..'
 import { ExternalLinkIcon } from '../../../graphics/ExternalLink'
 import DragHandle from '../../../icons/Drag'
-import { useLivePreviewContext } from '../PreviewContext/context'
+import { useLivePreviewContext } from '../Context/context'
 import { PreviewFrameSizeInput } from './SizeInput'
 import './index.scss'
 
@@ -15,16 +15,15 @@ const baseClass = 'live-preview-toolbar'
 export const LivePreviewToolbar: React.FC<
   Omit<ToolbarProviderProps, 'children'> & {
     iframeRef: React.RefObject<HTMLIFrameElement>
-    style?: React.CSSProperties
   }
 > = (props) => {
   const {
     popupState: { openPopupWindow },
-    style,
     url,
   } = props
 
-  const { breakpoint, breakpoints, setBreakpoint, setZoom, zoom } = useLivePreviewContext()
+  const { breakpoint, breakpoints, setBreakpoint, setZoom, toolbarPosition, zoom } =
+    useLivePreviewContext()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',
@@ -34,10 +33,15 @@ export const LivePreviewToolbar: React.FC<
     <div
       className={baseClass}
       style={{
-        ...style,
-        transform: transform
-          ? `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`
-          : undefined,
+        left: `${toolbarPosition.x}px`,
+        top: `${toolbarPosition.y}px`,
+        ...(transform
+          ? {
+              transform: transform
+                ? `translate3d(${transform?.x || 0}px, ${transform?.y || 0}px, 0)`
+                : undefined,
+            }
+          : {}),
       }}
     >
       <button
@@ -61,6 +65,11 @@ export const LivePreviewToolbar: React.FC<
                 {bp.label}
               </option>
             ))}
+            {breakpoint === 'custom' && (
+              // Dynamically add this option so that it only appears when the width and height inputs are explicitly changed
+              // TODO: Translate this string
+              <option value="custom">Custom</option>
+            )}
           </select>
         )}
         <div className={`${baseClass}__device-size`}>

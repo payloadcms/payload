@@ -70,6 +70,7 @@ export default joi.object({
       titleSuffix: joi.string(),
     }),
     user: joi.string(),
+    vite: joi.func(),
     webpack: joi.func(),
   }),
   collections: joi.array(),
