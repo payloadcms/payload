@@ -10,8 +10,9 @@ import { Gutter } from '../../elements/Gutter'
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../forms/field-types'
-import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
+import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
 import Meta from '../../utilities/Meta'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { LivePreview } from './Preview'
 import './index.scss'
 import { usePopupWindow } from './usePopupWindow'
@@ -71,6 +72,7 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
 
   return (
     <Fragment>
+      <SetStepNav collection={collection} global={global} id={id} isEditing={isEditing} />
       <DocumentControls
         apiURL={apiURL}
         collection={collection}

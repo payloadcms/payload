@@ -4,6 +4,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom'
 
 import type { CollectionPermission } from '../../../../../auth'
 import type { Fields } from '../../../forms/Form/types'
+import type { CollectionEditViewProps } from '../../types'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
@@ -17,7 +18,6 @@ import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
 import NotFound from '../../NotFound'
 import DefaultEdit from './Default'
 import formatFields from './formatFields'
-import { EditViewProps } from '../../types'
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props
@@ -125,7 +125,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const isLoading = !internalState || !docPermissions || isLoadingData
 
-  const componentProps: EditViewProps = {
+  const componentProps: CollectionEditViewProps = {
     id,
     action,
     apiURL,

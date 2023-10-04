@@ -9,21 +9,11 @@
 export interface Config {
   collections: {
     users: User
-    'hidden-collection': HiddenCollection
-    posts: Post
-    'group-one-collection-ones': GroupOneCollectionOne
-    'group-one-collection-twos': GroupOneCollectionTwo
-    'group-two-collection-ones': GroupTwoCollectionOne
-    'group-two-collection-twos': GroupTwoCollectionTwo
+    pages: Page
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
-  globals: {
-    'hidden-global': HiddenGlobal
-    global: Global
-    'group-globals-one': GroupGlobalsOne
-    'group-globals-two': GroupGlobalsTwo
-  }
+  globals: {}
 }
 export interface User {
   id: string
@@ -38,52 +28,19 @@ export interface User {
   lockUntil?: string
   password?: string
 }
-export interface HiddenCollection {
+export interface Page {
   id: string
-  title?: string
-  updatedAt: string
-  createdAt: string
-}
-export interface Post {
-  id: string
-  title?: string
-  description?: string
-  number?: number
-  richText?: {
-    [k: string]: unknown
-  }[]
-  updatedAt: string
-  createdAt: string
-}
-export interface GroupOneCollectionOne {
-  id: string
-  title?: string
-  updatedAt: string
-  createdAt: string
-}
-export interface GroupOneCollectionTwo {
-  id: string
-  title?: string
-  updatedAt: string
-  createdAt: string
-}
-export interface GroupTwoCollectionOne {
-  id: string
-  title?: string
-  updatedAt: string
-  createdAt: string
-}
-export interface GroupTwoCollectionTwo {
-  id: string
-  title?: string
+  title: string
+  description: string
+  slug: string
   updatedAt: string
   createdAt: string
 }
 export interface PayloadPreference {
   id: string
   user: {
-    value: string | User
     relationTo: 'users'
+    value: string | User
   }
   key?: string
   value?:
@@ -114,27 +71,14 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
-export interface HiddenGlobal {
-  id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
-}
-export interface Global {
-  id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
-}
-export interface GroupGlobalsOne {
-  id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
-}
-export interface GroupGlobalsTwo {
-  id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
+
+declare module 'payload' {
+  export interface GeneratedTypes {
+    collections: {
+      users: User
+      pages: Page
+      'payload-preferences': PayloadPreference
+      'payload-migrations': PayloadMigration
+    }
+  }
 }

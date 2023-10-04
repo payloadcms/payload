@@ -19,7 +19,7 @@ export default buildConfigWithDefaults({
       slug: 'users',
       auth: true,
       admin: {
-        useAsTitle: 'email',
+        useAsTitle: 'title',
       },
       fields: [],
     },

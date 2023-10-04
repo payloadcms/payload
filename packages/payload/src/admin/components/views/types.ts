@@ -5,24 +5,25 @@ import type {
   SanitizedGlobalConfig,
 } from '../../../exports/types'
 
-export type EditViewProps = (
-  | {
-      collection: SanitizedCollectionConfig
-      disableActions?: boolean
-      disableLeaveWithoutSaving?: boolean
-      hasSavePermission: boolean
-      id: string
-      initialState?: Fields
-      internalState: Fields
-      isEditing: boolean
-      permissions: CollectionPermission
-    }
-  | {
-      global: SanitizedGlobalConfig
-      initialState: Fields
-      permissions: GlobalPermission
-    }
-) & {
+export type CollectionEditViewProps = BaseEditViewProps & {
+  collection: SanitizedCollectionConfig
+  disableActions?: boolean
+  disableLeaveWithoutSaving?: boolean
+  hasSavePermission: boolean
+  id: string
+  initialState?: Fields
+  internalState: Fields
+  isEditing: boolean
+  permissions: CollectionPermission
+}
+
+export type GlobalEditViewProps = BaseEditViewProps & {
+  global: SanitizedGlobalConfig
+  initialState: Fields
+  permissions: GlobalPermission
+}
+
+export type BaseEditViewProps = {
   action: string
   apiURL: string
   canAccessAdmin: boolean
@@ -32,3 +33,5 @@ export type EditViewProps = (
   updatedAt: string
   user: User
 }
+
+export type EditViewProps = CollectionEditViewProps | GlobalEditViewProps
