@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { LivePreview as LivePreviewType } from '../../../../../exports/config'
+import type { Field } from '../../../../../fields/config/types'
 import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
 
+import { fieldSchemaToJSON } from '../../../../../utilities/fieldSchemaToJSON'
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
 import { LivePreviewProvider } from '../Context'
@@ -33,15 +35,31 @@ const Preview: React.FC<
 
   const [fields] = useAllFormFields()
 
+  const [fieldSchemaJSON] = useState(() => {
+    let fields: Field[]
+
+    if ('collection' in props) {
+      const { collection } = props
+      fields = collection.fields
+    }
+
+    if ('global' in props) {
+      const { global } = props
+      fields = global.fields
+    }
+
+    return fieldSchemaToJSON(fields)
+  })
+
   // The preview could either be an iframe embedded on the page
   // Or it could be a separate popup window
   // We need to transmit data to both accordingly
   useEffect(() => {
     if (fields && window && 'postMessage' in window) {
       const values = reduceFieldsToValues(fields)
-      const message = JSON.stringify({ data: values, type: 'livePreview' })
 
-      // TODO: populate all relationships before sending data to the preview
+      // TODO: only send `fieldSchemaToJSON` one time
+      const message = JSON.stringify({ data: values, fieldSchemaJSON, type: 'livePreview' })
 
       // external window
       if (isPopupOpen) {
@@ -68,6 +86,7 @@ const Preview: React.FC<
     popupHasLoaded,
     iframeRef,
     setIframeHasLoaded,
+    fieldSchemaJSON,
   ])
 
   if (!isPopupOpen) {
