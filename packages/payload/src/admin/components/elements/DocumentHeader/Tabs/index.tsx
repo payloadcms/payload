@@ -17,20 +17,22 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
   if ((collection && isEditing) || global) {
     return (
       <div className={baseClass}>
-        <ul className={`${baseClass}__tabs`}>
-          {tabs?.map((Tab, index) => {
-            return <DocumentTab {...props} {...Tab} key={`tab-${index}`} />
-          })}
-          {customViews?.map((CustomView, index) => {
-            const { Tab, path } = CustomView
+        <div className={`${baseClass}__tabs-container`}>
+          <ul className={`${baseClass}__tabs`}>
+            {tabs?.map((Tab, index) => {
+              return <DocumentTab {...props} {...Tab} key={`tab-${index}`} />
+            })}
+            {customViews?.map((CustomView, index) => {
+              const { Tab, path } = CustomView
 
-            if (typeof Tab === 'function') {
-              return <Tab path={path} {...props} key={`tab-custom-${index}`} />
-            }
+              if (typeof Tab === 'function') {
+                return <Tab path={path} {...props} key={`tab-custom-${index}`} />
+              }
 
-            return <DocumentTab {...props} {...Tab} key={`tab-custom-${index}`} />
-          })}
-        </ul>
+              return <DocumentTab {...props} {...Tab} key={`tab-custom-${index}`} />
+            })}
+          </ul>
+        </div>
       </div>
     )
   }
