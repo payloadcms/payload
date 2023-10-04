@@ -36,7 +36,7 @@ export const ThemeSelector: React.FC = () => {
       <label htmlFor="theme">
         <select
           id="theme"
-          onChange={e => onThemeChange(e.target.value as Theme & 'auto')}
+          onChange={(e) => onThemeChange(e.target.value as Theme & 'auto')}
           ref={selectRef}
           className={classes.select}
         >

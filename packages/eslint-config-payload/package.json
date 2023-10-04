@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "description": "Payload styles for ESLint and Prettier",
+  "license": "MIT",
+  "author": {
+    "email": "info@payloadcms.com",
+    "name": "Payload",
+    "url": "https://payloadcms.com"
+  },
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,7 +30,5 @@
     "eslint-plugin-react-hooks": "4.6.0",
     "eslint-plugin-regexp": "1.15.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT"
+  "keywords": []
 }

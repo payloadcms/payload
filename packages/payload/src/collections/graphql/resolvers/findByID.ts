@@ -28,10 +28,10 @@ export default function findByIDResolver<T extends keyof SchemaConfig['collectio
     if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale
 
     const options = {
+      id: args.id,
       collection,
       depth: 0,
       draft: args.draft,
-      id: args.id,
       req,
     }
 

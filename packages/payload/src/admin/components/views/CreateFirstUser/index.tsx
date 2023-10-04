@@ -7,7 +7,7 @@ import type { Props } from './types'
 import Form from '../../forms/Form'
 import RenderFields from '../../forms/RenderFields'
 import FormSubmit from '../../forms/Submit'
-import fieldTypes from '../../forms/field-types'
+import { fieldTypes } from '../../forms/field-types'
 import MinimalTemplate from '../../templates/Minimal'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
@@ -18,7 +18,7 @@ const baseClass = 'create-first-user'
 
 const CreateFirstUser: React.FC<Props> = (props) => {
   const { setInitialized } = props
-  const { setToken } = useAuth()
+  const { fetchFullUser } = useAuth()
   const {
     admin: { user: userSlug },
     collections,
@@ -29,9 +29,9 @@ const CreateFirstUser: React.FC<Props> = (props) => {
 
   const userConfig = collections.find((collection) => collection.slug === userSlug)
 
-  const onSuccess = (json) => {
+  const onSuccess = async (json) => {
     if (json?.user?.token) {
-      setToken(json.user.token)
+      await fetchFullUser()
     }
 
     setInitialized(true)
@@ -39,20 +39,20 @@ const CreateFirstUser: React.FC<Props> = (props) => {
 
   const fields = [
     {
-      label: t('general:emailAddress'),
       name: 'email',
+      label: t('general:emailAddress'),
       required: true,
       type: 'email',
     },
     {
-      label: t('general:password'),
       name: 'password',
+      label: t('general:password'),
       required: true,
       type: 'password',
     },
     {
-      label: t('confirmPassword'),
       name: 'confirm-password',
+      label: t('confirmPassword'),
       required: true,
       type: 'confirmPassword',
     },

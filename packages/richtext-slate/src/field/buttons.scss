@@ -1,0 +1,15 @@
+@import 'payload/scss';
+
+.rich-text__button {
+  position: relative;
+  cursor: pointer;
+
+  svg {
+    width: base(0.75);
+    height: base(0.75);
+  }
+
+  &--disabled {
+    opacity: 0.4;
+  }
+}

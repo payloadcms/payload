@@ -11,7 +11,7 @@ const heroes = {
   lowImpact: LowImpactHero,
 }
 
-export const Hero: React.FC<Page['hero']> = props => {
+export const Hero: React.FC<Page['hero']> = (props) => {
   const { type } = props || {}
 
   if (!type || type === 'none') return null

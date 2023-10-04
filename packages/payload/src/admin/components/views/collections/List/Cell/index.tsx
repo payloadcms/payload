@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import type { Props } from './types'
+import type { CellComponentProps, Props } from './types'
 
 import { fieldAffectsData } from '../../../../../../fields/config/types'
 import { getTranslation } from '../../../../../../utilities/getTranslation'
@@ -52,7 +52,7 @@ const DefaultCell: React.FC<Props> = (props) => {
     }
   }
 
-  let CellComponent = cellData && cellComponents[field.type]
+  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[field.type]
 
   if (!CellComponent) {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
@@ -100,16 +100,18 @@ const Cell: React.FC<Props> = (props) => {
     <RenderCustomComponent
       CustomComponent={CustomCell}
       DefaultComponent={DefaultCell}
-      componentProps={{
-        cellData,
-        className,
-        colIndex,
-        collection,
-        field,
-        link,
-        onClick,
-        rowData,
-      }}
+      componentProps={
+        {
+          cellData,
+          className,
+          colIndex,
+          collection,
+          field,
+          link,
+          onClick,
+          rowData,
+        } as Props
+      }
     />
   )
 }

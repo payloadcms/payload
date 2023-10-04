@@ -21,8 +21,8 @@ const withCondition = <P extends Record<string, unknown>>(
 
   const WithCondition: React.FC<P> = (props) => {
     const {
-      admin: { condition } = {},
       name,
+      admin: { condition } = {},
       path,
     } = props as Partial<FieldBase> & {
       path?: string

@@ -27,8 +27,8 @@ export async function migrateRefresh(this: DatabaseAdapter) {
       await payload.create({
         collection: 'payload-migrations',
         data: {
-          executed: true,
           name: migration.name,
+          executed: true,
         },
         req: {
           transactionID,

@@ -1,6 +1,5 @@
 import type { FindOne } from 'payload/database'
-import type { SanitizedCollectionConfig } from 'payload/types'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -12,38 +11,34 @@ export const findOne: FindOne = async function findOne({
   collection,
   locale,
   req = {} as PayloadRequest,
-  where,
+  where: incomingWhere,
 }) {
+  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 
-  const query = await buildQuery({
+  const { where } = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
+    fields: collectionConfig.fields,
     locale,
-    where,
+    tableName,
+    where: incomingWhere,
   })
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
-    collection: collectionConfig,
-    config: this.payload.config,
     depth: 0,
-    fallbackLocale: req.fallbackLocale,
-    locale: req.locale,
+    fields: collectionConfig.fields,
+    tableName,
   })
 
-  findManyArgs.where = query
+  findManyArgs.where = where
 
-  const doc = await this.db.query[tableName].findFirst(findManyArgs)
+  const doc = await db.query[tableName].findFirst(findManyArgs)
 
-  const result = transform({
+  return transform({
     config: this.payload.config,
     data: doc,
-    fallbackLocale: req.fallbackLocale,
     fields: collectionConfig.fields,
-    locale: req.locale,
   })
-
-  return result
 }

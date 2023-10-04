@@ -14,13 +14,13 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import { usePreferences } from '../../utilities/Preferences'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import DefaultGlobal from './Default'
+import DefaultGlobalView from './Default'
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>()
   const { code: locale } = useLocale()
   const { setStepNav } = useStepNav()
-  const { user } = useAuth()
+  const { permissions, user } = useAuth()
   const [initialState, setInitialState] = useState<Fields>()
   const [updatedAt, setUpdatedAt] = useState<string>()
   const { docPermissions, getDocPermissions, getDocPreferences, getVersions, preferencesKey } =
@@ -36,7 +36,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { global } = props
 
   const {
-    admin: { components: { views: { Edit: CustomEdit } = {} } = {} } = {},
+    admin: { components: { views: { Edit: Edit } = {} } = {} } = {},
     fields,
     label,
     slug,
@@ -102,13 +102,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   return (
     <RenderCustomComponent
-      CustomComponent={CustomEdit}
-      DefaultComponent={DefaultGlobal}
+      CustomComponent={typeof Edit === 'function' ? Edit : undefined}
+      DefaultComponent={DefaultGlobalView}
       componentProps={{
-        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
+        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
         apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
           global.versions?.drafts ? '&draft=true' : ''
         }`,
+        canAccessAdmin: permissions?.canAccessAdmin,
         data: dataToRender,
         global,
         initialState,
@@ -116,6 +117,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         onSave,
         permissions: docPermissions,
         updatedAt: updatedAt || dataToRender?.updatedAt,
+        user,
       }}
     />
   )

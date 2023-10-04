@@ -8,26 +8,21 @@ import { traverseFields } from './traverseFields'
 type Args = {
   data: Record<string, unknown>
   fields: Field[]
-  locale: string
   path?: string
   tableName: string
 }
 
-export const transformForWrite = ({
-  data,
-  fields,
-  locale,
-  path = '',
-  tableName,
-}: Args): RowToInsert => {
+export const transformForWrite = ({ data, fields, path = '', tableName }: Args): RowToInsert => {
   // Split out the incoming data into the corresponding:
   // base row, locales, relationships, blocks, and arrays
   const rowToInsert: RowToInsert = {
     arrays: {},
     blocks: {},
-    locale: {},
+    locales: {},
+    numbers: [],
     relationships: [],
     row: {},
+    selects: {},
   }
 
   // This function is responsible for building up the
@@ -38,13 +33,14 @@ export const transformForWrite = ({
     columnPrefix: '',
     data,
     fields,
-    locale,
-    localeRow: rowToInsert.locale,
+    locales: rowToInsert.locales,
     newTableName: tableName,
+    numbers: rowToInsert.numbers,
     parentTableName: tableName,
     path,
     relationships: rowToInsert.relationships,
     row: rowToInsert.row,
+    selects: rowToInsert.selects,
   })
 
   return rowToInsert

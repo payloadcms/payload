@@ -23,6 +23,6 @@ describe('Collections - Plugins', () => {
       },
     })
 
-    expect(id).toEqual(expect.any(String))
+    expect(id).toBeDefined()
   })
 })

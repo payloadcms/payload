@@ -7,7 +7,8 @@ import payload from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
-import configPromise, { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './config'
+import configPromise from './config'
+import { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
 
 const stat = promisify(fs.stat)
 

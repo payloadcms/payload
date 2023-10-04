@@ -17,7 +17,7 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev:postgres postgres -- -I", // Allow input
+      "command": "pnpm run dev:postgres collections-graphql -- -I", // Allow input
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",
@@ -31,10 +31,11 @@
       "type": "node-terminal"
     },
     {
-      "command": "ts-node src/bin/migrate.ts migrate",
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "postgres"
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
       "name": "Migrate CLI - migrate",
@@ -43,10 +44,11 @@
       "type": "node-terminal"
     },
     {
-      "command": "ts-node src/bin/migrate.ts migrate:status",
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:status",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "postgres"
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
       "name": "Migrate CLI - status",
@@ -55,11 +57,11 @@
       "type": "node-terminal"
     },
     {
-      "command": "ts-node src/bin/migrate.ts migrate:create yass",
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:create yass",
       "env": {
-        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres"
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
       "name": "Migrate CLI - create",
@@ -68,11 +70,11 @@
       "type": "node-terminal"
     },
     {
-      "command": "ts-node src/bin/migrate.ts migrate:down",
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:down",
       "env": {
-        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres"
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
       "name": "Migrate CLI - down",
@@ -81,11 +83,11 @@
       "type": "node-terminal"
     },
     {
-      "command": "ts-node src/bin/migrate.ts migrate:reset",
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:reset",
       "env": {
-        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres"
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
       "name": "Migrate CLI - reset",
@@ -94,11 +96,11 @@
       "type": "node-terminal"
     },
     {
-      "command": "ts-node src/bin/migrate.ts migrate:refresh",
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:refresh",
       "env": {
-        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres"
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
       "name": "Migrate CLI - refresh",

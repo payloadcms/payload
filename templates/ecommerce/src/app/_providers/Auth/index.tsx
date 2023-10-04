@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // used to track the single event of logging in or logging out
   // useful for `useEffect` hooks that should only run once
   const [status, setStatus] = useState<undefined | 'loggedOut' | 'loggedIn'>()
-  const create = useCallback<Create>(async args => {
+  const create = useCallback<Create>(async (args) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/create`, {
         method: 'POST',
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [])
 
-  const login = useCallback<Login>(async args => {
+  const login = useCallback<Login>(async (args) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/login`, {
         method: 'POST',
@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchMe()
   }, [])
 
-  const forgotPassword = useCallback<ForgotPassword>(async args => {
+  const forgotPassword = useCallback<ForgotPassword>(async (args) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/forgot-password`, {
         method: 'POST',
@@ -167,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [])
 
-  const resetPassword = useCallback<ResetPassword>(async args => {
+  const resetPassword = useCallback<ResetPassword>(async (args) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/reset-password`, {
         method: 'POST',

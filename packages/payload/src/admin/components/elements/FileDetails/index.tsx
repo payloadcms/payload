@@ -18,7 +18,7 @@ const FileDetails: React.FC<Props> = (props) => {
     upload: { staticURL },
   } = collection
 
-  const { filename, filesize, height, id, mimeType, url, width } = doc
+  const { id, filename, filesize, height, mimeType, url, width } = doc
 
   return (
     <div className={baseClass}>

@@ -2,14 +2,18 @@
 
 .view-version {
   width: 100%;
-  margin-bottom: base(2);
+  margin-bottom: calc(var(--base) * 2);
 
   &__wrap {
-    padding-top: base(1);
+    padding-top: var(--base);
+  }
+
+  &__intro {
+    margin-bottom: calc(var(--base) / 2);
   }
 
   &__header {
-    margin-bottom: $baseline;
+    margin-bottom: var(--base);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -21,13 +25,10 @@
 
   &__controls {
     display: flex;
-    margin-bottom: $baseline;
-    margin-left: base(-0.5);
-    margin-right: base(-0.5);
+    margin-bottom: var(--base);
+    gap: var(--base);
 
     > * {
-      margin-left: base(0.5);
-      margin-right: base(0.5);
       flex-basis: 100%;
     }
   }

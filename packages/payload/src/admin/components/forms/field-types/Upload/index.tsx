@@ -17,11 +17,11 @@ const Upload: React.FC<Props> = (props) => {
   } = useConfig()
 
   const {
+    name,
     admin: { className, condition, description, readOnly, style, width } = {},
     fieldTypes,
     filterOptions,
     label,
-    name,
     path,
     relationTo,
     required,

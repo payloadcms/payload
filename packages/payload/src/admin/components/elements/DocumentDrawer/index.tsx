@@ -14,9 +14,9 @@ import './index.scss'
 export const baseClass = 'doc-drawer'
 
 const formatDocumentDrawerSlug = ({
+  id,
   collectionSlug,
   depth,
-  id,
   uuid,
 }: {
   collectionSlug: string
@@ -26,12 +26,12 @@ const formatDocumentDrawerSlug = ({
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
+  id,
   children,
   className,
   collectionSlug,
   disabled,
   drawerSlug,
-  id,
   ...rest
 }) => {
   const { i18n, t } = useTranslation(['fields', 'general'])
@@ -62,15 +62,15 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   )
 }
 
-export const useDocumentDrawer: UseDocumentDrawer = ({ collectionSlug, id }) => {
+export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
   const [isOpen, setIsOpen] = useState(false)
   const drawerSlug = formatDocumentDrawerSlug({
+    id,
     collectionSlug,
     depth: drawerDepth,
-    id,
     uuid,
   })
 

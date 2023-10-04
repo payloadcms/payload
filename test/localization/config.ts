@@ -6,12 +6,16 @@ import { ArrayCollection } from './collections/Array'
 import {
   defaultLocale,
   englishTitle,
+  localizedPostsSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationSpanishTitle,
   relationSpanishTitle2,
+  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
+  withLocalizedRelSlug,
+  withRequiredLocalizedFields,
 } from './shared'
 
 export type LocalizedPostAllLocale = LocalizedPost & {
@@ -20,11 +24,6 @@ export type LocalizedPostAllLocale = LocalizedPost & {
     es?: string
   }
 }
-
-export const localizedPostsSlug = 'localized-posts'
-export const withLocalizedRelSlug = 'with-localized-relationship'
-export const relationshipLocalizedSlug = 'relationship-localized'
-export const withRequiredLocalizedFields = 'localized-required'
 
 const openAccess = {
   read: () => true,
@@ -37,17 +36,17 @@ export default buildConfigWithDefaults({
   localization: {
     locales: [
       {
-        label: 'en',
+        label: 'English',
         code: defaultLocale,
         rtl: false,
       },
       {
-        label: 'es',
+        label: 'Spanish',
         code: spanishLocale,
         rtl: false,
       },
       {
-        label: 'ar',
+        label: 'Arabic',
         code: 'ar',
         rtl: true,
       },

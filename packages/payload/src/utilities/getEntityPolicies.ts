@@ -32,7 +32,7 @@ type CreateAccessPromise = (args: {
 }) => Promise<void>
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { entity, id, operations, req, type } = args
+  const { id, entity, operations, req, type } = args
   const isLoggedIn = !!req.user
   // ---- ---- ---- ---- ---- ---- ---- ---- ----
   // `policies` and `promises` get mutated in
@@ -76,8 +76,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         }
 
         return req.payload.findByID({
-          collection: entity.slug,
           id,
+          collection: entity.slug,
           overrideAccess: true,
         })
       }
@@ -98,7 +98,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
       docBeingAccessed = await getEntityDoc()
     }
-    const accessResult = await access({ doc: docBeingAccessed, id, req })
+    const accessResult = await access({ id, doc: docBeingAccessed, req })
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {

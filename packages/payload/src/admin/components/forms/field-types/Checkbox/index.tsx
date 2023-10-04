@@ -16,10 +16,10 @@ const baseClass = 'checkbox'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, condition, description, readOnly, style, width } = {},
     disableFormData,
     label,
-    name,
     onChange,
     path: pathFromProps,
     required,

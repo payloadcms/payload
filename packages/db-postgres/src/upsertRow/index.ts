@@ -1,20 +1,22 @@
 /* eslint-disable no-param-reassign */
-import { and, eq, inArray } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 import type { BlockRowToInsert } from '../transform/write/types'
 import type { Args } from './types'
 
-import { insertArrays } from '../insertArrays'
+import { buildFindManyArgs } from '../find/buildFindManyArgs'
 import { transform } from '../transform/read'
 import { transformForWrite } from '../transform/write'
+import { deleteExistingArrayRows } from './deleteExistingArrayRows'
+import { deleteExistingRowsByPath } from './deleteExistingRowsByPath'
+import { insertArrays } from './insertArrays'
 
 export const upsertRow = async ({
+  id,
   adapter,
   data,
-  fallbackLocale,
+  db,
   fields,
-  id,
-  locale,
   operation,
   path = '',
   tableName,
@@ -26,7 +28,6 @@ export const upsertRow = async ({
   const rowToInsert = transformForWrite({
     data,
     fields,
-    locale,
     path,
     tableName,
   })
@@ -39,38 +40,39 @@ export const upsertRow = async ({
 
     if (id) {
       rowToInsert.row.id = id
-      ;[insertedRow] = await adapter.db
+      ;[insertedRow] = await db
         .insert(adapter.tables[tableName])
         .values(rowToInsert.row)
         .onConflictDoUpdate({ set: rowToInsert.row, target })
         .returning()
     } else {
-      ;[insertedRow] = await adapter.db
+      ;[insertedRow] = await db
         .insert(adapter.tables[tableName])
         .values(rowToInsert.row)
         .onConflictDoUpdate({ set: rowToInsert.row, target, where })
         .returning()
     }
   } else {
-    ;[insertedRow] = await adapter.db
-      .insert(adapter.tables[tableName])
-      .values(rowToInsert.row)
-      .returning()
+    ;[insertedRow] = await db.insert(adapter.tables[tableName]).values(rowToInsert.row).returning()
   }
 
-  let localeToInsert: Record<string, unknown>
+  const localesToInsert: Record<string, unknown>[] = []
   const relationsToInsert: Record<string, unknown>[] = []
+  const numbersToInsert: Record<string, unknown>[] = []
   const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
+  const selectsToInsert: { [selectTableName: string]: Record<string, unknown>[] } = {}
 
   // Maintain a list of promises to run locale, blocks, and relationships
   // all in parallel
   const promises = []
 
-  // If there is a locale row with data, add the parent and locale
-  if (Object.keys(rowToInsert.locale).length > 0) {
-    rowToInsert.locale._parentID = insertedRow.id
-    rowToInsert.locale._locale = locale
-    localeToInsert = rowToInsert.locale
+  // If there are locale rows with data, add the parent and locale to each
+  if (Object.keys(rowToInsert.locales).length > 0) {
+    Object.entries(rowToInsert.locales).forEach(([locale, localeRow]) => {
+      localeRow._parentID = insertedRow.id
+      localeRow._locale = locale
+      localesToInsert.push(localeRow)
+    })
   }
 
   // If there are relationships, add parent to each
@@ -78,6 +80,26 @@ export const upsertRow = async ({
     rowToInsert.relationships.forEach((relation) => {
       relation.parent = insertedRow.id
       relationsToInsert.push(relation)
+    })
+  }
+
+  // If there are numbers, add parent to each
+  if (rowToInsert.numbers.length > 0) {
+    rowToInsert.numbers.forEach((numberRow) => {
+      numberRow.parent = insertedRow.id
+      numbersToInsert.push(numberRow)
+    })
+  }
+
+  // If there are selects, add parent to each, and then
+  // store by table name and rows
+  if (Object.keys(rowToInsert.selects).length > 0) {
+    Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
+      selectRows.forEach((row) => {
+        row.parent = insertedRow.id
+        if (!selectsToInsert[selectTableName]) selectsToInsert[selectTableName] = []
+        selectsToInsert[selectTableName].push(row)
+      })
     })
   }
 
@@ -95,27 +117,15 @@ export const upsertRow = async ({
   // INSERT LOCALES
   // //////////////////////////////////
 
-  let insertedLocaleRow: Record<string, unknown>
-
-  if (localeToInsert) {
-    const localeTableName = adapter.tables[`${tableName}_locales`]
+  if (localesToInsert.length > 0) {
+    const localeTable = adapter.tables[`${tableName}_locales`]
 
     promises.push(async () => {
       if (operation === 'update') {
-        ;[insertedLocaleRow] = await adapter.db
-          .insert(localeTableName)
-          .values(localeToInsert)
-          .onConflictDoUpdate({
-            set: localeToInsert,
-            target: [localeTableName._locale, localeTableName._parentID],
-          })
-          .returning()
-      } else {
-        ;[insertedLocaleRow] = await adapter.db
-          .insert(localeTableName)
-          .values(localeToInsert)
-          .returning()
+        await db.delete(localeTable).where(eq(localeTable._parentID, insertedRow.id))
       }
+
+      await db.insert(localeTable).values(localesToInsert)
     })
   }
 
@@ -123,61 +133,49 @@ export const upsertRow = async ({
   // INSERT RELATIONSHIPS
   // //////////////////////////////////
 
-  let insertedRelationshipRows: Record<string, unknown>[]
+  promises.push(async () => {
+    const relationshipsTableName = `${tableName}_relationships`
+    if (operation === 'update') {
+      await deleteExistingRowsByPath({
+        adapter,
+        localeColumnName: 'locale',
+        newRows: relationsToInsert,
+        parentColumnName: 'parent',
+        parentID: insertedRow.id,
+        pathColumnName: 'path',
+        tableName: relationshipsTableName,
+      })
+    }
 
-  if (relationsToInsert.length > 0) {
-    promises.push(async () => {
-      if (operation === 'update') {
-        // Delete any relationship rows for parent ID and paths that have been updated
-        // prior to recreating them
-        const localizedPathsToDelete = new Set<string>()
-        const pathsToDelete = new Set<string>()
+    if (relationsToInsert.length > 0) {
+      await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert).returning()
+    }
+  })
 
-        relationsToInsert.forEach((relation) => {
-          if (typeof relation.path === 'string') {
-            if (typeof relation.locale === 'string') {
-              localizedPathsToDelete.add(relation.path)
-            } else {
-              pathsToDelete.add(relation.path)
-            }
-          }
-        })
+  // //////////////////////////////////
+  // INSERT hasMany NUMBERS
+  // //////////////////////////////////
 
-        if (localizedPathsToDelete.size > 0) {
-          await adapter.db
-            .delete(adapter.tables[`${tableName}_relationships`])
-            .where(
-              and(
-                eq(adapter.tables[`${tableName}_relationships`].parent, insertedRow.id),
-                inArray(adapter.tables[`${tableName}_relationships`].path, [
-                  localizedPathsToDelete,
-                ]),
-                eq(adapter.tables[`${tableName}_relationships`].locale, locale),
-              ),
-            )
-        }
+  promises.push(async () => {
+    const numbersTableName = `${tableName}_numbers`
 
-        if (pathsToDelete.size > 0) {
-          await adapter.db
-            .delete(adapter.tables[`${tableName}_relationships`])
-            .where(
-              and(
-                eq(adapter.tables[`${tableName}_relationships`].parent, insertedRow.id),
-                inArray(
-                  adapter.tables[`${tableName}_relationships`].path,
-                  Array.from(pathsToDelete),
-                ),
-              ),
-            )
-        }
-      }
+    if (operation === 'update') {
+      await deleteExistingRowsByPath({
+        adapter,
+        db,
+        localeColumnName: 'locale',
+        newRows: numbersToInsert,
+        parentColumnName: 'parent',
+        parentID: insertedRow.id,
+        pathColumnName: 'path',
+        tableName: numbersTableName,
+      })
+    }
 
-      insertedRelationshipRows = await adapter.db
-        .insert(adapter.tables[`${tableName}_relationships`])
-        .values(relationsToInsert)
-        .returning()
-    })
-  }
+    if (numbersToInsert.length > 0) {
+      await db.insert(adapter.tables[numbersTableName]).values(numbersToInsert).returning()
+    }
+  })
 
   // //////////////////////////////////
   // INSERT BLOCKS
@@ -188,45 +186,54 @@ export const upsertRow = async ({
   Object.entries(blocksToInsert).forEach(([blockName, blockRows]) => {
     // For each block, push insert into promises to run parallel
     promises.push(async () => {
-      insertedBlockRows[blockName] = await adapter.db
+      if (operation === 'update') {
+        await deleteExistingRowsByPath({
+          adapter,
+          db,
+          newRows: blockRows.map(({ row }) => row),
+          parentID: insertedRow.id,
+          pathColumnName: '_path',
+          tableName: `${tableName}_${blockName}`,
+        })
+      }
+
+      insertedBlockRows[blockName] = await db
         .insert(adapter.tables[`${tableName}_${blockName}`])
         .values(blockRows.map(({ row }) => row))
         .returning()
 
       insertedBlockRows[blockName].forEach((row, i) => {
-        delete row._parentID
         blockRows[i].row = row
       })
 
       const blockLocaleIndexMap: number[] = []
 
       const blockLocaleRowsToInsert = blockRows.reduce((acc, blockRow, i) => {
-        if (Object.keys(blockRow.locale).length > 0) {
-          blockRow.locale._parentID = blockRow.row.id
-          blockRow.locale._locale = locale
-          acc.push(blockRow.locale)
-          blockLocaleIndexMap.push(i)
-          return acc
+        if (Object.entries(blockRow.locales).length > 0) {
+          Object.entries(blockRow.locales).forEach(([blockLocale, blockLocaleData]) => {
+            if (Object.keys(blockLocaleData).length > 0) {
+              blockLocaleData._parentID = blockRow.row.id
+              blockLocaleData._locale = blockLocale
+              acc.push(blockLocaleData)
+              blockLocaleIndexMap.push(i)
+            }
+          })
         }
 
         return acc
       }, [])
 
       if (blockLocaleRowsToInsert.length > 0) {
-        const insertedBlockLocaleRows = await adapter.db
+        await db
           .insert(adapter.tables[`${tableName}_${blockName}_locales`])
           .values(blockLocaleRowsToInsert)
           .returning()
-
-        insertedBlockLocaleRows.forEach((blockLocaleRow, i) => {
-          delete blockLocaleRow._parentID
-          insertedBlockRows[blockName][blockLocaleIndexMap[i]]._locales = [blockLocaleRow]
-        })
       }
 
       await insertArrays({
         adapter,
         arrays: blockRows.map(({ arrays }) => arrays),
+        db,
         parentRows: insertedBlockRows[blockName],
       })
     })
@@ -237,32 +244,68 @@ export const upsertRow = async ({
   // //////////////////////////////////
 
   promises.push(async () => {
+    if (operation === 'update') {
+      await Promise.all(
+        Object.entries(rowToInsert.arrays).map(async ([arrayTableName]) => {
+          await deleteExistingArrayRows({
+            adapter,
+            db,
+            parentID: insertedRow.id,
+            tableName: arrayTableName,
+          })
+        }),
+      )
+    }
+
     await insertArrays({
       adapter,
       arrays: [rowToInsert.arrays],
+      db,
       parentRows: [insertedRow],
     })
+  })
+
+  // //////////////////////////////////
+  // INSERT hasMany SELECTS
+  // //////////////////////////////////
+
+  promises.push(async () => {
+    await Promise.all(
+      Object.entries(selectsToInsert).map(async ([selectTableName, tableRows]) => {
+        const selectTable = adapter.tables[selectTableName]
+        if (operation === 'update') {
+          await db.delete(selectTable).where(eq(selectTable.id, insertedRow.id))
+        }
+        await db.insert(selectTable).values(tableRows).returning()
+      }),
+    )
   })
 
   await Promise.all(promises.map((promise) => promise()))
 
   // //////////////////////////////////
+  // RETRIEVE NEWLY UPDATED ROW
+  // //////////////////////////////////
+
+  const findManyArgs = buildFindManyArgs({
+    adapter,
+    depth: 0,
+    fields,
+    tableName,
+  })
+
+  findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+
+  const doc = await db.query[tableName].findFirst(findManyArgs)
+
+  // //////////////////////////////////
   // TRANSFORM DATA
   // //////////////////////////////////
 
-  if (insertedLocaleRow) insertedRow._locales = [insertedLocaleRow]
-  if (insertedRelationshipRows?.length > 0) insertedRow._relationships = insertedRelationshipRows
-
-  Object.entries(insertedBlockRows).forEach(([blockName, blocks]) => {
-    if (blocks.length > 0) insertedRow[`_blocks_${blockName}`] = blocks
-  })
-
   const result = transform({
     config: adapter.payload.config,
-    data: insertedRow,
-    fallbackLocale,
+    data: doc,
     fields,
-    locale,
   })
 
   return result

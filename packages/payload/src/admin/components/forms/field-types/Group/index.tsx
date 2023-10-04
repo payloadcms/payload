@@ -21,12 +21,12 @@ const baseClass = 'group-field'
 
 const Group: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, description, hideGutter = false, readOnly, style, width },
     fieldTypes,
     fields,
     indexPath,
     label,
-    name,
     path: pathFromProps,
     permissions,
   } = props

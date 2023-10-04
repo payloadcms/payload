@@ -13,7 +13,7 @@ import type {
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert } from '../helpers'
+import { openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -135,6 +135,32 @@ describe('fields - relationship', () => {
     await saveDocAndAssert(page)
   })
 
+  test('should create relations to multiple collections', async () => {
+    await page.goto(url.create)
+
+    const field = page.locator('#field-relationshipMultiple')
+    const value = page.locator('#field-relationshipMultiple .relationship--single-value__text')
+
+    await field.click({ delay: 100 })
+
+    const options = page.locator('.rs__option')
+
+    await expect(options).toHaveCount(3) // 3 docs
+
+    // Add one relationship
+    await options.locator(`text=${relationOneDoc.id}`).click()
+    await expect(value).toContainText(relationOneDoc.id)
+
+    // Add relationship of different collection
+    await field.click({ delay: 100 })
+    await options.locator(`text=${relationTwoDoc.id}`).click()
+    await expect(value).toContainText(relationTwoDoc.id)
+
+    await saveDocAndAssert(page)
+    await wait(200)
+    await expect(value).toContainText(relationTwoDoc.id)
+  })
+
   test('should create hasMany relationship', async () => {
     await page.goto(url.create)
 
@@ -162,36 +188,42 @@ describe('fields - relationship', () => {
     await expect(page.locator('.rs__menu')).toHaveText('No options')
 
     await saveDocAndAssert(page)
+    await wait(200)
+    await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
   })
 
-  test('should create relations to multiple collections', async () => {
+  test('should create many relations to multiple collections', async () => {
     await page.goto(url.create)
 
-    const field = page.locator('#field-relationshipMultiple')
-    const value = page.locator('#field-relationshipMultiple .relationship--single-value__text')
-
+    const field = page.locator('#field-relationshipHasManyMultiple')
     await field.click({ delay: 100 })
 
     const options = page.locator('.rs__option')
+    await expect(options).toHaveCount(3)
 
-    await expect(options).toHaveCount(3) // 3 docs
+    const values = page.locator(
+      '#field-relationshipHasManyMultiple .relationship--multi-value-label__text',
+    )
 
     // Add one relationship
     await options.locator(`text=${relationOneDoc.id}`).click()
-    await expect(value).toContainText(relationOneDoc.id)
+    await expect(values).toHaveText([relationOneDoc.id])
 
-    // Add relationship of different collection
+    // Add second relationship
     await field.click({ delay: 100 })
     await options.locator(`text=${relationTwoDoc.id}`).click()
-    await expect(value).toContainText(relationTwoDoc.id)
+    await expect(values).toHaveText([relationOneDoc.id, relationTwoDoc.id])
 
     await saveDocAndAssert(page)
+    await wait(200)
+    await expect(values).toHaveText([relationOneDoc.id, relationTwoDoc.id])
   })
 
   test('should duplicate document with relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
 
-    await page.locator('.btn.duplicate').first().click()
+    await openDocControls(page)
+    await page.locator('#action-duplicate').click()
     await expect(page.locator('.Toastify')).toContainText('successfully')
     const field = page.locator('#field-relationship .relationship--single-value__text')
 

@@ -8,15 +8,14 @@ import fs from 'fs'
 import { configToJSONSchema } from 'payload/utilities'
 import { Client, Pool } from 'pg'
 import prompts from 'prompts'
+import { v4 as uuid } from 'uuid'
 
 import type { DrizzleDB, PostgresAdapter } from './types'
 
-import { GenericEnum, GenericRelation, GenericTable } from './types'
-
 // Migration table def in order to use query using drizzle
 const migrationsSchema = pgTable('payload_migrations', {
-  batch: numeric('batch'),
   name: varchar('name'),
+  batch: numeric('batch'),
   schema: jsonb('schema'),
 })
 
@@ -30,6 +29,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   }
 
   try {
+    const sessionID = uuid()
     if ('pool' in this && this.pool !== false) {
       const pool = new Pool(this.pool)
       db = drizzle(pool, { schema: this.schema })
@@ -41,6 +41,8 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
       db = drizzle(client, { schema: this.schema })
       await client.connect()
     }
+
+    this.sessions[sessionID] = db
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING TABLES ----')
@@ -85,9 +87,9 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
 
     const { confirm: acceptWarnings } = await prompts(
       {
+        name: 'confirm',
         initial: false,
         message: 'Accept warnings and push schema to database?',
-        name: 'confirm',
         type: 'confirm',
       },
       {
@@ -132,8 +134,8 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
 
   if (!devPush.length) {
     await this.db.insert(migrationsSchema).values({
-      batch: '-1',
       name: 'dev',
+      batch: '-1',
       schema: JSON.stringify(jsonSchema),
     })
   } else {

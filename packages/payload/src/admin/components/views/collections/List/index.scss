@@ -2,11 +2,11 @@
 
 .collection-list {
   width: 100%;
+  margin-top: base(0.5);
   margin-bottom: base(2);
 
   &__wrap {
-    padding-top: $baseline;
-    padding-bottom: $baseline;
+    padding-bottom: base(4);
   }
 
   &__header {
@@ -25,7 +25,9 @@
     }
 
     .pill {
-      margin: base(0.5) 0 base(0.25);
+      position: relative;
+      top: -8px;
+      margin: 0;
     }
   }
 
@@ -106,15 +108,19 @@
   }
 
   @include mid-break {
+    margin-top: base(0.25);
+
     &__wrap {
       padding-top: 0;
       padding-bottom: 0;
     }
 
     &__header {
-      .pill {
-        margin-bottom: base(0.0625);
-      }
+      gap: base(0.5);
+    }
+
+    &__sub-header {
+      margin-top: 0;
     }
 
     &__search-input {
@@ -136,6 +142,13 @@
   }
 
   @include small-break {
+    margin-top: 0;
     margin-bottom: base(3);
+
+    &__header {
+      .pill {
+        top: -2px;
+      }
+    }
   }
 }

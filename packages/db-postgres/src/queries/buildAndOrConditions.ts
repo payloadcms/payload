@@ -1,24 +1,28 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field } from 'payload/types'
-import type { Where } from 'payload/types'
+import type { Field, Where } from 'payload/types'
 
-import type { PostgresAdapter } from '../types'
+import type { GenericColumn, PostgresAdapter } from '../types'
+import type { BuildQueryJoins } from './buildQuery'
 
 import { parseParams } from './parseParams'
 
 export async function buildAndOrConditions({
   adapter,
-  collectionSlug,
   fields,
-  globalSlug,
+  joins,
   locale,
+  selectFields,
+  tableName,
   where,
 }: {
   adapter: PostgresAdapter
   collectionSlug?: string
   fields: Field[]
   globalSlug?: string
+  joins: BuildQueryJoins
   locale?: string
+  selectFields: Record<string, GenericColumn>
+  tableName: string
   where: Where[]
 }): Promise<SQL[]> {
   const completedConditions = []
@@ -31,13 +35,14 @@ export async function buildAndOrConditions({
       // eslint-disable-next-line no-await-in-loop
       const result = await parseParams({
         adapter,
-        collectionSlug,
         fields,
-        globalSlug,
+        joins,
         locale,
+        selectFields,
+        tableName,
         where: condition,
       })
-      if (Object.keys(result).length > 0) {
+      if (result && Object.keys(result).length > 0) {
         completedConditions.push(result)
       }
     }

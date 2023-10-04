@@ -12,12 +12,14 @@
     z-index: var(--z-popup);
     max-width: calc(100vw - #{$baseline});
 
-    &:after {
-      content: ' ';
-      position: absolute;
-      top: calc(100% - 1px);
-      border: 12px solid transparent;
-      border-top-color: var(--theme-input-bg);
+    &--caret {
+      &:after {
+        content: ' ';
+        position: absolute;
+        top: calc(100% - 1px);
+        border: 12px solid transparent;
+        border-top-color: var(--theme-input-bg);
+      }
     }
   }
 
@@ -80,7 +82,7 @@
     }
 
     .popup__scroll {
-      padding: base(1.5) calc(var(--scrollbar-width) + #{base(1.5)}) base(1) base(1.5);
+      padding: base(1) calc(var(--scrollbar-width) + #{base(1.5)}) base(1) base(1.5);
     }
   }
 

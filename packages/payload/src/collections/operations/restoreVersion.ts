@@ -28,9 +28,9 @@ export type Arguments = {
 
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
+    id,
     collection: { config: collectionConfig },
     depth,
-    id,
     overrideAccess = false,
     req,
     req: { locale, payload, t },
@@ -94,8 +94,8 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // /////////////////////////////////////
 
     const prevDocWithLocales = await getLatestCollectionVersion({
-      config: collectionConfig,
       id: parentDocID,
+      config: collectionConfig,
       payload,
       query: findOneArgs,
       req,
@@ -106,9 +106,9 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // /////////////////////////////////////
 
     let result = await req.payload.db.updateOne({
+      id: parentDocID,
       collection: collectionConfig.slug,
       data: rawVersion.version,
-      id: parentDocID,
       req,
     })
 

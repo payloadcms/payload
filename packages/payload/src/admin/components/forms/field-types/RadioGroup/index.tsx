@@ -9,6 +9,7 @@ import RadioGroupInput from './Input'
 
 const RadioGroup: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       className,
       condition,
@@ -19,7 +20,6 @@ const RadioGroup: React.FC<Props> = (props) => {
       width,
     } = {},
     label,
-    name,
     options,
     path: pathFromProps,
     required,

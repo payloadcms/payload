@@ -20,9 +20,9 @@ export type Arguments = {
 
 async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
+    id,
     depth,
     globalConfig,
-    id,
     overrideAccess,
     req: { payload, t },
     req,

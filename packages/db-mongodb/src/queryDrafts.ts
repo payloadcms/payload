@@ -2,20 +2,13 @@ import type { PaginateOptions } from 'mongoose'
 import type { QueryDrafts } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { flattenWhereToOperators } from 'payload/database'
+import { combineQueries, flattenWhereToOperators } from 'payload/database'
 
 import type { MongooseAdapter } from '.'
 
 import { buildSortParam } from './queries/buildSortParam'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
-
-type AggregateVersion<T> = {
-  _id: string
-  createdAt: string
-  updatedAt: string
-  version: T
-}
 
 export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   this: MongooseAdapter,
@@ -25,20 +18,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   const collectionConfig = this.payload.collections[collection].config
   const options = withSession(this, req.transactionID)
 
-  const versionQuery = await VersionModel.buildQuery({
-    locale,
-    payload: this.payload,
-    where,
-  })
-
-  let hasNearConstraint = false
+  let hasNearConstraint
+  let sort
 
   if (where) {
     const constraints = flattenWhereToOperators(where)
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
@@ -49,61 +36,32 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
     })
   }
 
-  const aggregate = VersionModel.aggregate<AggregateVersion<T>>(
-    [
-      // Sort so that newest are first
-      { $sort: { updatedAt: -1 } },
-      // Group by parent ID, and take the first of each
-      {
-        $group: {
-          _id: '$parent',
-          createdAt: { $first: '$createdAt' },
-          updatedAt: { $first: '$updatedAt' },
-          version: { $first: '$version' },
-        },
-      },
-      // Filter based on incoming query
-      { $match: versionQuery },
-    ],
-    {
-      ...options,
-      allowDiskUse: true,
-    },
-  )
+  const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
-  let result
+  const versionQuery = await VersionModel.buildQuery({
+    locale,
+    payload: this.payload,
+    where: combinedWhere,
+  })
 
-  if (pagination) {
-    let useEstimatedCount
-
-    if (where) {
-      const constraints = flattenWhereToOperators(where)
-      useEstimatedCount = constraints.some((prop) =>
-        Object.keys(prop).some((key) => key === 'near'),
-      )
-    }
-
-    const aggregatePaginateOptions: PaginateOptions = {
-      lean: true,
-      leanWithId: true,
-      limit,
-      options: {
-        ...options,
-        limit,
-      },
-      page,
-      pagination,
-      sort,
-      useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
-      useEstimatedCount,
-      useFacet: this.connectOptions.useFacet,
-    }
-
-    result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions)
-  } else {
-    result = aggregate.exec()
+  const paginationOptions: PaginateOptions = {
+    forceCountFn: hasNearConstraint,
+    lean: true,
+    leanWithId: true,
+    options,
+    page,
+    pagination,
+    sort,
+    useEstimatedCount: hasNearConstraint,
   }
 
+  if (limit > 0) {
+    paginationOptions.limit = limit
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit
+  }
+
+  const result = await VersionModel.paginate(versionQuery, paginationOptions)
   const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
@@ -111,8 +69,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
       doc = {
-        _id: doc._id,
-        id: doc._id,
+        _id: doc.parent,
+        id: doc.parent,
         ...doc.version,
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,

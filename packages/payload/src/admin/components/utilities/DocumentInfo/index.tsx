@@ -19,10 +19,10 @@ const Context = createContext({} as ContextType)
 export const useDocumentInfo = (): ContextType => useContext(Context)
 
 export const DocumentInfoProvider: React.FC<Props> = ({
+  id: idFromProps,
   children,
   collection,
   global,
-  id: idFromProps,
   idFromParams: getIDFromParams,
 }) => {
   const { id: idFromParams } = useParams<{ id: string }>()
@@ -251,13 +251,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }, [getDocPermissions])
 
   const value: ContextType = {
+    id,
     collection,
     docPermissions,
     getDocPermissions,
     getDocPreferences,
     getVersions,
     global,
-    id,
     preferencesKey,
     publishedDoc,
     setDocFieldPreferences,

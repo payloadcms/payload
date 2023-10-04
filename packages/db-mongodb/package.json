@@ -1,5 +1,22 @@
 {
-  "author": "Payload CMS, Inc.",
+  "name": "@payloadcms/db-mongodb",
+  "version": "0.0.1",
+  "description": "The officially supported MongoDB database adapter for Payload",
+  "repository": "https://github.com/payloadcms/payload",
+  "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "author": {
+    "email": "info@payloadcms.com",
+    "name": "Payload",
+    "url": "https://payloadcms.com"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist"
+  },
   "dependencies": {
     "bson-objectid": "2.0.4",
     "deepmerge": "4.3.1",
@@ -9,39 +26,15 @@
     "mongoose-paginate-v2": "1.7.22",
     "uuid": "9.0.0"
   },
-  "description": "The officially supported MongoDB database adapter for Payload",
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
     "mongodb-memory-server": "8.13.0",
     "payload": "workspace:*"
   },
-  "exports": {
-    ".": {
-      "default": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
-  },
-  "license": "MIT",
-  "main": "./src/index.ts",
-  "name": "@payloadcms/db-mongodb",
   "publishConfig": {
-    "exports": {
-      ".": {
-        "default": "./dist/index.js",
-        "types": "./dist/index.js"
-      }
-    },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  },
-  "repository": "https://github.com/payloadcms/payload",
-  "scripts": {
-    "build": "pnpm build:swc && pnpm build:types",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist"
-  },
-  "types": "./src/index.ts",
-  "version": "0.0.1"
+  }
 }

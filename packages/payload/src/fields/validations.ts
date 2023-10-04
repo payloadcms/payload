@@ -11,7 +11,6 @@ import type {
   RadioField,
   RelationshipField,
   RelationshipValue,
-  RichTextField,
   SelectField,
   TextField,
   TextareaField,
@@ -23,7 +22,6 @@ import canUseDOM from '../utilities/canUseDOM'
 import { getIDType } from '../utilities/getIDType'
 import { isValidID } from '../utilities/isValidID'
 import { fieldAffectsData } from './config/types'
-import defaultRichTextValue from './richText/defaultValue'
 
 export const number: Validate<unknown, unknown, NumberField> = (
   value: number | number[],
@@ -186,16 +184,6 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
   return true
 }
 
-export const richText: Validate<unknown, unknown, RichTextField> = (value, { required, t }) => {
-  if (required) {
-    const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue)
-    if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true
-    return t('validation:required')
-  }
-
-  return true
-}
-
 export const checkbox: Validate<unknown, unknown, CheckboxField> = (
   value: boolean,
   { required, t },
@@ -226,7 +214,7 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required, t
 
 const validateFilterOptions: Validate = async (
   value,
-  { data, filterOptions, id, payload, relationTo, siblingData, t, user },
+  { id, data, filterOptions, payload, relationTo, siblingData, t, user },
 ) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -241,8 +229,8 @@ const validateFilterOptions: Validate = async (
         const optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
-                data,
                 id,
+                data,
                 relationTo: collection,
                 siblingData,
                 user,
@@ -382,8 +370,6 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         type = 'ObjectID'
       }
 
-      if (typeof requestedID === 'number') return false
-
       return !isValidID(requestedID, type)
     })
 
@@ -521,7 +507,6 @@ export default {
   point,
   radio,
   relationship,
-  richText,
   select,
   text,
   textarea,

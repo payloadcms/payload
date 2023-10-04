@@ -21,13 +21,13 @@ import {
 } from './collections/Group'
 import { defaultNumber, numberDoc } from './collections/Number'
 import { pointDoc } from './collections/Point'
+import { tabsDoc } from './collections/Tabs'
 import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
-  tabsDoc,
   tabsSlug,
-} from './collections/Tabs'
+} from './collections/Tabs/constants'
 import { defaultText } from './collections/Text'
 
 let client
@@ -89,6 +89,10 @@ describe('Fields', () => {
         depth: 0,
         where: {
           updatedAt: {
+            // TODO:
+            //  drizzle is not adjusting for timezones
+            //  tenMinutesAgo: "2023-08-29T15:49:39.897Z" UTC
+            //  doc.updatedAt: "2023-08-29T11:59:43.738Z" GMT -4
             greater_than_equal: tenMinutesAgo,
           },
         },

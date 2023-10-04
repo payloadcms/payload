@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto'
-import mongoose from 'mongoose'
 
 import type { Relation } from './config'
 import type { ErrorOnHook, Post } from './payload-types'
@@ -23,6 +22,17 @@ describe('collections-rest', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
     client = new RESTClient(await config, { serverURL, defaultSlug: slug })
+
+    // Wait for indexes to be created,
+    // as we need them to query by point
+    if (payload.db.name === 'mongoose') {
+      await new Promise((resolve, reject) => {
+        payload.db.collections[pointSlug].ensureIndexes(function (err) {
+          if (err) reject(err)
+          resolve(true)
+        })
+      })
+    }
   })
 
   afterAll(async () => {
@@ -78,6 +88,7 @@ describe('collections-rest', () => {
       const { docs, totalDocs } = await payload.find({
         collection: slug,
         pagination: false,
+        overrideAccess: false,
       })
 
       const expectedDocs = [post1, post2]
@@ -108,11 +119,12 @@ describe('collections-rest', () => {
         })
 
         const description = 'updated'
-        const { status, docs } = await client.updateMany<Post>({
+        const { status, docs, errors } = await client.updateMany({
           where: { title: { equals: 'title' } },
           data: { description },
         })
 
+        expect(errors).toHaveLength(0)
         expect(status).toEqual(200)
         expect(docs[0].title).toEqual('title') // Check was not modified
         expect(docs[0].description).toEqual(description)
@@ -201,7 +213,7 @@ describe('collections-rest', () => {
         expect(result.errors[0].message).toEqual(
           'The following path cannot be queried: restrictedField',
         )
-        expect(doc.description).toBeUndefined()
+        expect(doc.description).toBeFalsy()
       })
 
       it('should return formatted errors for bulk updates', async () => {
@@ -245,7 +257,7 @@ describe('collections-rest', () => {
         })
 
         const { status, docs } = await client.deleteMany<Post>({
-          where: { title: { eq: 'title' } },
+          where: { title: { equals: 'title' } },
         })
 
         expect(status).toEqual(200)
@@ -306,7 +318,21 @@ describe('collections-rest', () => {
           expect(foundDoc.id).toEqual(doc.id)
         })
 
-        it('should query', async () => {
+        it('should query - equals', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
+          const { doc } = await client.create({
+            slug: customIdSlug,
+            data: { id: customId, name: 'custom-id-name' },
+          })
+          const { result } = await client.find({
+            slug: customIdSlug,
+            query: { id: { equals: customId } },
+          })
+
+          expect(result.docs.map(({ id }) => id)).toContain(doc.id)
+        })
+
+        it('should query - like', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const { doc } = await client.create({
             slug: customIdSlug,
@@ -848,162 +874,164 @@ describe('collections-rest', () => {
         })
       })
 
-      describe('near', () => {
-        const point = [10, 20]
-        const [lat, lng] = point
-        it('should return a document near a point', async () => {
-          const near = `${lat + 0.01}, ${lng + 0.01}, 10000`
-          const { status, result } = await client.find({
-            slug: pointSlug,
-            query: {
-              point: {
-                near,
-              },
-            },
-          })
-
-          expect(status).toEqual(200)
-          expect(result.docs).toHaveLength(1)
-        })
-
-        it('should not return a point far away', async () => {
-          const near = `${lng + 1}, ${lat - 1}, 5000`
-          const { status, result } = await client.find({
-            slug: pointSlug,
-            query: {
-              point: {
-                near,
-              },
-            },
-          })
-
-          expect(status).toEqual(200)
-          expect(result.docs).toHaveLength(0)
-        })
-
-        it('should sort find results by nearest distance', async () => {
-          // creating twice as many records as we are querying to get a random sample
-          await mapAsync([...Array(10)], async () => {
-            // setTimeout used to randomize the creation timestamp
-            setTimeout(async () => {
-              await payload.create({
-                collection: pointSlug,
-                data: {
-                  // only randomize longitude to make distance comparison easy
-                  point: [Math.random(), 0],
-                },
-              })
-            }, Math.random())
-          })
-
-          const { result } = await client.find({
-            slug: pointSlug,
-            query: {
-              // querying large enough range to include all docs
-              point: { near: '0, 0, 100000, 0' },
-            },
-            limit: 5,
-          })
-          const { docs } = result
-          let previous = 0
-          docs.forEach(({ point: coordinates }) => {
-            // the next document point should always be greater than the one before
-            expect(previous).toBeLessThanOrEqual(coordinates[0])
-            ;[previous] = coordinates
-          })
-        })
-      })
-
-      describe('within', () => {
-        type Point = [number, number]
-        const polygon: Point[] = [
-          [9.0, 19.0], // bottom-left
-          [9.0, 21.0], // top-left
-          [11.0, 21.0], // top-right
-          [11.0, 19.0], // bottom-right
-          [9.0, 19.0], // back to starting point to close the polygon
-        ]
-        it('should return a document with the point inside the polygon', async () => {
-          // There should be 1 total points document populated by default with the point [10, 20]
-          const { status, result } = await client.find({
-            slug: pointSlug,
-            query: {
-              point: {
-                within: {
-                  type: 'Polygon',
-                  coordinates: [polygon],
+      if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+        describe('near', () => {
+          const point = [10, 20]
+          const [lat, lng] = point
+          it('should return a document near a point', async () => {
+            const near = `${lat + 0.01}, ${lng + 0.01}, 10000`
+            const { status, result } = await client.find({
+              slug: pointSlug,
+              query: {
+                point: {
+                  near,
                 },
               },
-            },
+            })
+
+            expect(status).toEqual(200)
+            expect(result.docs).toHaveLength(1)
           })
 
-          expect(status).toEqual(200)
-          expect(result.docs).toHaveLength(1)
-        })
-
-        it('should not return a document with the point outside a smaller polygon', async () => {
-          const { status, result } = await client.find({
-            slug: pointSlug,
-            query: {
-              point: {
-                within: {
-                  type: 'Polygon',
-                  coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+          it('should not return a point far away', async () => {
+            const near = `${lng + 1}, ${lat - 1}, 5000`
+            const { status, result } = await client.find({
+              slug: pointSlug,
+              query: {
+                point: {
+                  near,
                 },
               },
-            },
+            })
+
+            expect(status).toEqual(200)
+            expect(result.docs).toHaveLength(0)
           })
 
-          expect(status).toEqual(200)
-          expect(result.docs).toHaveLength(0)
+          it('should sort find results by nearest distance', async () => {
+            // creating twice as many records as we are querying to get a random sample
+            await mapAsync([...Array(10)], async () => {
+              // setTimeout used to randomize the creation timestamp
+              setTimeout(async () => {
+                await payload.create({
+                  collection: pointSlug,
+                  data: {
+                    // only randomize longitude to make distance comparison easy
+                    point: [Math.random(), 0],
+                  },
+                })
+              }, Math.random())
+            })
+
+            const { result } = await client.find({
+              slug: pointSlug,
+              query: {
+                // querying large enough range to include all docs
+                point: { near: '0, 0, 100000, 0' },
+              },
+              limit: 5,
+            })
+            const { docs } = result
+            let previous = 0
+            docs.forEach(({ point: coordinates }) => {
+              // the next document point should always be greater than the one before
+              expect(previous).toBeLessThanOrEqual(coordinates[0])
+              ;[previous] = coordinates
+            })
+          })
         })
-      })
 
-      describe('intersects', () => {
-        type Point = [number, number]
-        const polygon: Point[] = [
-          [9.0, 19.0], // bottom-left
-          [9.0, 21.0], // top-left
-          [11.0, 21.0], // top-right
-          [11.0, 19.0], // bottom-right
-          [9.0, 19.0], // back to starting point to close the polygon
-        ]
-
-        it('should return a document with the point intersecting the polygon', async () => {
-          // There should be 1 total points document populated by default with the point [10, 20]
-          const { status, result } = await client.find({
-            slug: pointSlug,
-            query: {
-              point: {
-                intersects: {
-                  type: 'Polygon',
-                  coordinates: [polygon],
+        describe('within', () => {
+          type Point = [number, number]
+          const polygon: Point[] = [
+            [9.0, 19.0], // bottom-left
+            [9.0, 21.0], // top-left
+            [11.0, 21.0], // top-right
+            [11.0, 19.0], // bottom-right
+            [9.0, 19.0], // back to starting point to close the polygon
+          ]
+          it('should return a document with the point inside the polygon', async () => {
+            // There should be 1 total points document populated by default with the point [10, 20]
+            const { status, result } = await client.find({
+              slug: pointSlug,
+              query: {
+                point: {
+                  within: {
+                    type: 'Polygon',
+                    coordinates: [polygon],
+                  },
                 },
               },
-            },
+            })
+
+            expect(status).toEqual(200)
+            expect(result.docs).toHaveLength(1)
           })
 
-          expect(status).toEqual(200)
-          expect(result.docs).toHaveLength(1)
-        })
-
-        it('should not return a document with the point not intersecting a smaller polygon', async () => {
-          const { status, result } = await client.find({
-            slug: pointSlug,
-            query: {
-              point: {
-                intersects: {
-                  type: 'Polygon',
-                  coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+          it('should not return a document with the point outside a smaller polygon', async () => {
+            const { status, result } = await client.find({
+              slug: pointSlug,
+              query: {
+                point: {
+                  within: {
+                    type: 'Polygon',
+                    coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                  },
                 },
               },
-            },
+            })
+
+            expect(status).toEqual(200)
+            expect(result.docs).toHaveLength(0)
+          })
+        })
+
+        describe('intersects', () => {
+          type Point = [number, number]
+          const polygon: Point[] = [
+            [9.0, 19.0], // bottom-left
+            [9.0, 21.0], // top-left
+            [11.0, 21.0], // top-right
+            [11.0, 19.0], // bottom-right
+            [9.0, 19.0], // back to starting point to close the polygon
+          ]
+
+          it('should return a document with the point intersecting the polygon', async () => {
+            // There should be 1 total points document populated by default with the point [10, 20]
+            const { status, result } = await client.find({
+              slug: pointSlug,
+              query: {
+                point: {
+                  intersects: {
+                    type: 'Polygon',
+                    coordinates: [polygon],
+                  },
+                },
+              },
+            })
+
+            expect(status).toEqual(200)
+            expect(result.docs).toHaveLength(1)
           })
 
-          expect(status).toEqual(200)
-          expect(result.docs).toHaveLength(0)
+          it('should not return a document with the point not intersecting a smaller polygon', async () => {
+            const { status, result } = await client.find({
+              slug: pointSlug,
+              query: {
+                point: {
+                  intersects: {
+                    type: 'Polygon',
+                    coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                  },
+                },
+              },
+            })
+
+            expect(status).toEqual(200)
+            expect(result.docs).toHaveLength(0)
+          })
         })
-      })
+      }
 
       it('or', async () => {
         const post1 = await createPost({ title: 'post1' })

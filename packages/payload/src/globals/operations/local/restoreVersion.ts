@@ -26,9 +26,9 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {
+    id,
     depth,
     fallbackLocale = null,
-    id,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     showHiddenFields,
@@ -57,9 +57,9 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return restoreVersion({
+    id,
     depth,
     globalConfig,
-    id,
     overrideAccess,
     req,
     showHiddenFields,

@@ -17,7 +17,6 @@ export const createBlocksMap = (data: Record<string, unknown>): BlocksMap => {
           row.blockType = blockType
           blocksMap[row._path].push(row)
 
-          delete row._locale
           delete row._path
         }
       })

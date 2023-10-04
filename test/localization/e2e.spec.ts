@@ -5,11 +5,10 @@ import { expect, test } from '@playwright/test'
 import type { LocalizedPost } from './payload-types'
 
 import payload from '../../packages/payload/src'
-import { saveDocAndAssert } from '../helpers'
+import { changeLocale, openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { localizedPostsSlug } from './config'
-import { englishTitle, spanishLocale } from './shared'
+import { englishTitle, localizedPostsSlug, spanishLocale } from './shared'
 
 /**
  * TODO: Localization
@@ -30,6 +29,7 @@ const arabicTitle = 'arabic title'
 const description = 'description'
 
 let page: Page
+
 describe('Localization', () => {
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadTest({
@@ -53,7 +53,7 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale('es')
+      await changeLocale(page, 'es')
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -61,7 +61,7 @@ describe('Localization', () => {
 
       await fillValues({ title: spanishTitle, description })
       await saveDocAndAssert(page)
-      await changeLocale(defaultLocale)
+      await changeLocale(page, defaultLocale)
 
       // Expect english title
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -74,13 +74,13 @@ describe('Localization', () => {
       const newLocale = 'es'
 
       // Change to Spanish
-      await changeLocale(newLocale)
+      await changeLocale(page, newLocale)
 
       await fillValues({ title: spanishTitle, description })
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(defaultLocale)
+      await changeLocale(page, defaultLocale)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -102,13 +102,13 @@ describe('Localization', () => {
       const newLocale = 'ar'
 
       // Change to Arabic
-      await changeLocale(newLocale)
+      await changeLocale(page, newLocale)
 
       await fillValues({ title: arabicTitle, description })
       await saveDocAndAssert(page)
 
       // Change back to English
-      await changeLocale(defaultLocale)
+      await changeLocale(page, defaultLocale)
 
       // Localized field should not be populated
       await expect(page.locator('#field-title')).toBeEmpty()
@@ -126,16 +126,16 @@ describe('Localization', () => {
   })
 
   describe('localized duplicate', () => {
-    let id
-
-    beforeAll(async () => {
+    test('should duplicate data for all locales', async () => {
       const localizedPost = await payload.create({
         collection: localizedPostsSlug,
         data: {
           title: englishTitle,
         },
       })
-      id = localizedPost.id
+
+      const id = localizedPost.id.toString()
+
       await payload.update({
         collection: localizedPostsSlug,
         id,
@@ -144,17 +144,13 @@ describe('Localization', () => {
           title: spanishTitle,
         },
       })
-    })
 
-    test('should duplicate data for all locales', async () => {
       await page.goto(url.edit(id))
-
-      await page.locator('.btn.duplicate').first().click()
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
-
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
-
-      await changeLocale(spanishLocale)
+      await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
     })
   })
@@ -165,10 +161,4 @@ async function fillValues(data: Partial<LocalizedPost>) {
 
   if (titleVal) await page.locator('#field-title').fill(titleVal)
   if (descVal) await page.locator('#field-description').fill(descVal)
-}
-
-async function changeLocale(newLocale: string) {
-  await page.locator('.localizer >> button').first().click()
-  await page.locator(`.localizer >> a:has-text("${newLocale}")`).click()
-  expect(page.url()).toContain(`locale=${newLocale}`)
 }

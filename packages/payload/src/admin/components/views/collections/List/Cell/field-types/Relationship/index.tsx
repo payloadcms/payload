@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Props as DefaultCellProps } from '../../types'
+import type { RelationshipField } from '../../../../../../../../exports/types'
+import type { CellComponentProps } from '../../types'
 
 import { getTranslation } from '../../../../../../../../utilities/getTranslation'
 import useIntersect from '../../../../../../../hooks/useIntersect'
@@ -14,10 +15,7 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-const RelationshipCell: React.FC<{
-  data: DefaultCellProps['cellData']
-  field: DefaultCellProps['field']
-}> = (props) => {
+const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props) => {
   const { data: cellData, field } = props
   const config = useConfig()
   const { collections, routes } = config

@@ -9,7 +9,7 @@ import Form from '../../forms/Form'
 import { useForm } from '../../forms/Form/context'
 import RenderFields from '../../forms/RenderFields'
 import FormSubmit from '../../forms/Submit'
-import fieldTypes from '../../forms/field-types'
+import { fieldTypes } from '../../forms/field-types'
 import X from '../../icons/X'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
@@ -143,11 +143,7 @@ const EditMany: React.FC<Props> = (props) => {
                 <div className={`${baseClass}__sidebar`}>
                   <div className={`${baseClass}__sidebar-sticky-wrap`}>
                     <div className={`${baseClass}__document-actions`}>
-                      <Submit
-                        action={`${serverURL}${api}/${slug}${getQueryParams()}`}
-                        disabled={selected.length === 0}
-                      />
-                      {collection.versions && (
+                      {collection.versions ? (
                         <React.Fragment>
                           <Publish
                             action={`${serverURL}${api}/${slug}${getQueryParams()}`}
@@ -158,6 +154,11 @@ const EditMany: React.FC<Props> = (props) => {
                             disabled={selected.length === 0}
                           />
                         </React.Fragment>
+                      ) : (
+                        <Submit
+                          action={`${serverURL}${api}/${slug}${getQueryParams()}`}
+                          disabled={selected.length === 0}
+                        />
                       )}
                     </div>
                   </div>

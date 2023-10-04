@@ -17,6 +17,7 @@ import './index.scss'
 
 const NumberField: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, condition, description, placeholder, readOnly, step, style, width } = {},
     hasMany,
     label,
@@ -24,7 +25,6 @@ const NumberField: React.FC<Props> = (props) => {
     maxRows,
     min,
     minRows,
-    name,
     path: pathFromProps,
     required,
     validate = number,

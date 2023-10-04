@@ -1,10 +1,17 @@
 import React from 'react'
 
-const RichTextCell = ({ data }) => {
-  const flattenedText = data?.map((i) => i?.children?.map((c) => c.text)).join(' ')
-  const textToShow =
-    flattenedText?.length > 100 ? `${flattenedText.slice(0, 100)}\u2026` : flattenedText
-  return <span>{textToShow}</span>
+import type { RichTextField } from '../../../../../../../../fields/config/types'
+import type { RichTextAdapter } from '../../../../../../forms/field-types/RichText/types'
+import type { CellComponentProps } from '../../types'
+
+import { useConfig } from '../../../../../../utilities/Config'
+
+const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
+  const config = useConfig()
+  // eslint-disable-next-line react/destructuring-assignment
+  const editor: RichTextAdapter = props.field.editor || config.editor
+
+  return <editor.CellComponent {...props} />
 }
 
 export default RichTextCell

@@ -7,7 +7,7 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
   // then hydrate it on your front-end
 
   const layoutWithArchive = await Promise.all(
-    doc.layout.map(async block => {
+    doc.layout.map(async (block) => {
       if (block.blockType === 'archive') {
         const archiveBlock = block as Extract<Page['layout'][0], { blockType: 'archive' }> & {
           populatedDocs: Array<{
@@ -25,7 +25,7 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
                 ? {
                     categories: {
                       in: archiveBlock.categories
-                        .map(cat => {
+                        .map((cat) => {
                           if (typeof cat === 'string') return cat
                           return cat.id
                         })

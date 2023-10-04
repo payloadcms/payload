@@ -82,9 +82,9 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
   user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000) // 1 hour
 
   user = await payload.update({
+    id: user.id,
     collection: collectionConfig.slug,
     data: user,
-    id: user.id,
   })
 
   if (!disableEmail) {

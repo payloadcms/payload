@@ -29,10 +29,10 @@ type Args = {
 }
 
 export const addFieldStatePromise = async ({
+  id,
   data,
   field,
   fullData,
-  id,
   locale,
   operation,
   passesCondition,
@@ -67,8 +67,8 @@ export const addFieldStatePromise = async ({
     if (typeof fieldState.validate === 'function') {
       validationResult = await fieldState.validate(data?.[field.name], {
         ...field,
-        data: fullData,
         id,
+        data: fullData,
         operation,
         siblingData: data,
         t,
@@ -99,10 +99,10 @@ export const addFieldStatePromise = async ({
 
             acc.promises.push(
               iterateFields({
+                id,
                 data: row,
                 fields: field.fields,
                 fullData,
-                id,
                 locale,
                 operation,
                 parentPassesCondition: passesCondition,
@@ -117,12 +117,12 @@ export const addFieldStatePromise = async ({
             const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed
 
             acc.rowMetadata.push({
+              id: row.id,
               childErrorPaths: new Set(),
               collapsed:
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
                   : collapsedRowIDs.includes(row.id),
-              id: row.id,
             })
 
             return acc
@@ -187,10 +187,10 @@ export const addFieldStatePromise = async ({
 
               acc.promises.push(
                 iterateFields({
+                  id,
                   data: row,
                   fields: block.fields,
                   fullData,
-                  id,
                   locale,
                   operation,
                   parentPassesCondition: passesCondition,
@@ -205,13 +205,13 @@ export const addFieldStatePromise = async ({
               const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed
 
               acc.rowMetadata.push({
+                id: row.id,
                 blockType: row.blockType,
                 childErrorPaths: new Set(),
                 collapsed:
                   collapsedRowIDs === undefined
                     ? field.admin.initCollapsed
                     : collapsedRowIDs.includes(row.id),
-                id: row.id,
               })
             }
 
@@ -248,10 +248,10 @@ export const addFieldStatePromise = async ({
 
       case 'group': {
         await iterateFields({
+          id,
           data: data?.[field.name] || {},
           fields: field.fields,
           fullData,
-          id,
           locale,
           operation,
           parentPassesCondition: passesCondition,
@@ -261,6 +261,73 @@ export const addFieldStatePromise = async ({
           t,
           user,
         })
+
+        break
+      }
+
+      case 'relationship': {
+        if (field.hasMany) {
+          const relationshipValue = Array.isArray(valueWithDefault)
+            ? valueWithDefault.map((relationship) => {
+                if (Array.isArray(field.relationTo)) {
+                  return {
+                    relationTo: relationship.relationTo,
+                    value:
+                      typeof relationship.value === 'string'
+                        ? relationship.value
+                        : relationship.value?.id,
+                  }
+                }
+                if (typeof relationship === 'object' && relationship !== null) {
+                  return relationship.id
+                }
+                return relationship
+              })
+            : undefined
+
+          fieldState.value = relationshipValue
+          fieldState.initialValue = relationshipValue
+        } else if (Array.isArray(field.relationTo)) {
+          if (
+            valueWithDefault &&
+            typeof valueWithDefault === 'object' &&
+            'relationTo' in valueWithDefault &&
+            'value' in valueWithDefault
+          ) {
+            const value =
+              typeof valueWithDefault?.value === 'object' && 'id' in valueWithDefault.value
+                ? valueWithDefault.value.id
+                : valueWithDefault.value
+            const relationshipValue = {
+              relationTo: valueWithDefault?.relationTo,
+              value,
+            }
+            fieldState.value = relationshipValue
+            fieldState.initialValue = relationshipValue
+          }
+        } else {
+          const relationshipValue =
+            valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
+              ? valueWithDefault.id
+              : valueWithDefault
+          fieldState.value = relationshipValue
+          fieldState.initialValue = relationshipValue
+        }
+
+        state[`${path}${field.name}`] = fieldState
+
+        break
+      }
+
+      case 'upload': {
+        const relationshipValue =
+          valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
+            ? valueWithDefault.id
+            : valueWithDefault
+        fieldState.value = relationshipValue
+        fieldState.initialValue = relationshipValue
+
+        state[`${path}${field.name}`] = fieldState
 
         break
       }
@@ -278,10 +345,10 @@ export const addFieldStatePromise = async ({
   } else if (fieldHasSubFields(field)) {
     // Handle field types that do not use names (row, etc)
     await iterateFields({
+      id,
       data,
       fields: field.fields,
       fullData,
-      id,
       locale,
       operation,
       parentPassesCondition: passesCondition,
@@ -294,10 +361,10 @@ export const addFieldStatePromise = async ({
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) =>
       iterateFields({
+        id,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         fields: tab.fields,
         fullData,
-        id,
         locale,
         operation,
         parentPassesCondition: passesCondition,

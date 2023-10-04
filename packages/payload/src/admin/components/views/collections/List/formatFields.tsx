@@ -23,11 +23,11 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
       ? []
       : [
           {
+            name: 'id',
             admin: {
               disableBulkEdit: true,
             },
             label: 'ID',
-            name: 'id',
             type: 'text',
           },
         ],

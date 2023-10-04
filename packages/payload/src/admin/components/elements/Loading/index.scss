@@ -28,11 +28,6 @@
     animation: fade-out ease;
   }
 
-  &.loading-overlay--withoutNav {
-    left: var(--nav-width);
-    width: calc(100% - var(--nav-width));
-  }
-
   &:after {
     content: '';
     position: absolute;

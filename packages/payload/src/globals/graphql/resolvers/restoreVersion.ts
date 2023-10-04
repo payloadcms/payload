@@ -19,9 +19,9 @@ type Resolver = (
 export default function restoreVersionResolver(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context) {
     const options = {
+      id: args.id,
       depth: 0,
       globalConfig,
-      id: args.id,
       req: context.req,
     }
 

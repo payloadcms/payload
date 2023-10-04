@@ -24,11 +24,11 @@ export type Arguments = {
 
 async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
+    id,
     currentDepth,
     depth,
     disableErrors,
     globalConfig,
-    id,
     overrideAccess,
     req: { locale, payload, t },
     req,
@@ -43,7 +43,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ disableErrors, id, req }, globalConfig.access.readVersions)
+      ? await executeAccess({ id, disableErrors, req }, globalConfig.access.readVersions)
       : true
 
     // If errors are disabled, and access returns false, return null

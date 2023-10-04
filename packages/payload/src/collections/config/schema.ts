@@ -1,7 +1,7 @@
 import joi from 'joi'
 
 import { endpointsSchema } from '../../config/schema'
-import { componentSchema } from '../../utilities/componentSchema'
+import { componentSchema, customViewSchema } from '../../config/shared/componentSchema'
 
 const strategyBaseSchema = joi.object().keys({
   logout: joi.boolean(),
@@ -31,7 +31,19 @@ const collectionSchema = joi.object().keys({
         SaveDraftButton: componentSchema,
       }),
       views: joi.object({
-        Edit: componentSchema,
+        Edit: joi.alternatives().try(
+          componentSchema,
+          joi.object({
+            Default: joi.alternatives().try(componentSchema, customViewSchema),
+            Versions: joi.alternatives().try(componentSchema, customViewSchema),
+            // Version
+            // Preview
+            // Relationships
+            // References
+            // API
+            // :path
+          }),
+        ),
         List: componentSchema,
       }),
     }),
@@ -154,9 +166,9 @@ const collectionSchema = joi.object().keys({
         joi
           .object()
           .keys({
+            name: joi.string(),
             crop: joi.string(), // TODO: add further specificity with joi.xor
             height: joi.number().integer().allow(null),
-            name: joi.string(),
             width: joi.number().integer().allow(null),
           })
           .unknown(),

@@ -2,9 +2,18 @@
 
 .localizer {
   position: relative;
-  padding: base(0.125) base(1.5) base(0.125) 0;
-  [dir='rtl'] & {
-    padding: base(0.125) 0 base(0.125) base(1.5);
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+
+  &__label {
+    color: var(--theme-elevation-500);
+  }
+
+  &__chevron {
+    .stroke {
+      stroke: var(--theme-elevation-500);
+    }
   }
 
   button {
@@ -26,6 +35,10 @@
     &:focus {
       outline: none;
     }
+  }
+
+  &__button {
+    white-space: nowrap;
   }
 
   span {

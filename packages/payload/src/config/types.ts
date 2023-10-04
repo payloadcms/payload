@@ -9,6 +9,7 @@ import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 import type { Configuration } from 'webpack'
 
+import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -21,8 +22,6 @@ import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
-
-import { Validate } from '../fields/config/types'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -195,13 +194,15 @@ export type Endpoint = {
   root?: boolean
 }
 
-export type AdminView = React.ComponentType<{
+export type CustomAdminView = React.ComponentType<{
   canAccessAdmin: boolean
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
   user: User
 }>
 
 export type AdminRoute = {
-  Component: AdminView
+  Component: CustomAdminView
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   path: string
@@ -303,6 +304,7 @@ export type Config = {
           prefillOnly?: boolean
         }
       | false
+
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?: 'default' | 'gravatar' | React.ComponentType<any>
     /**
@@ -428,12 +430,12 @@ export type Config = {
    * @default "payload"
    */
   cookiePrefix?: string
-
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | string[]
 
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
+
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
   /** Pass in a database adapter for use on this project. */
@@ -454,6 +456,8 @@ export type Config = {
    * @default 40000
    */
   defaultMaxTextLength?: number
+  /** Default richtext editor to use for richText fields */
+  editor: RichTextAdapter
   /**
    * Email configuration options. This value is overridden by `email` in Payload.init if passed.
    *

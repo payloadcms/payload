@@ -7,18 +7,7 @@ import removeFiles from '../helpers/removeFiles'
 import { Uploads1 } from './collections/Upload1'
 import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
-
-export const mediaSlug = 'media'
-
-export const relationSlug = 'relation'
-
-export const audioSlug = 'audio'
-
-export const enlargeSlug = 'enlarge'
-
-export const reduceSlug = 'reduce'
-
-export const adminThumbnailSlug = 'admin-thumbnail'
+import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
 

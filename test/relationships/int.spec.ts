@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto'
-import mongoose from 'mongoose'
 
 import type {
   ChainedRelation,

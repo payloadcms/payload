@@ -30,12 +30,12 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
     const options = {
+      id: args.id,
       autosave: args.autosave,
       collection,
       data: args.data,
       depth: 0,
       draft: args.draft,
-      id: args.id,
       req: context.req,
     }
 

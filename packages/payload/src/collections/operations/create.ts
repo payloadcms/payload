@@ -278,10 +278,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (collectionConfig.versions) {
       await saveVersion({
+        id: result.id,
         autosave,
         collection: collectionConfig,
         docWithLocales: result,
-        id: result.id,
         payload,
         req,
       })

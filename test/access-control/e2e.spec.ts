@@ -6,6 +6,7 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
+import { openDocControls, openMainMenu } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -15,7 +16,7 @@ import {
   restrictedVersionsSlug,
   slug,
   unrestrictedSlug,
-} from './config'
+} from './shared'
 
 /**
  * TODO: Access Control
@@ -99,6 +100,7 @@ describe('access control', () => {
 
     test('should not show in nav', async () => {
       await page.goto(url.admin)
+      await openMainMenu(page)
       await expect(page.locator('.nav >> a:has-text("Restricteds")')).toHaveCount(0)
     })
 
@@ -137,7 +139,9 @@ describe('access control', () => {
 
     test('should show in nav', async () => {
       await page.goto(url.admin)
-      await expect(page.locator(`.nav a[href="/admin/collections/${readOnlySlug}"]`)).toHaveCount(1)
+      await expect(
+        page.locator(`.main-menu a[href="/admin/collections/${readOnlySlug}"]`),
+      ).toHaveCount(1)
     })
 
     test('should have collection url', async () => {
@@ -213,14 +217,16 @@ describe('access control', () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
 
       // validate that the delete action is not displayed
-      const duplicateAction = page.locator('.collection-edit__collection-actions >> li').last()
-      await expect(duplicateAction).toContainText('Duplicate')
+      await openDocControls(page)
+      const deleteAction = page.locator('#action-delete')
+      await expect(deleteAction).toBeHidden()
 
       await page.locator('#field-approvedForRemoval').check()
       await page.locator('#action-save').click()
 
-      const deleteAction = page.locator('.collection-edit__collection-actions >> li').last()
-      await expect(deleteAction).toContainText('Delete')
+      await openDocControls(page)
+      const deleteAction2 = page.locator('#action-delete')
+      await expect(deleteAction2).toBeVisible()
     })
   })
 

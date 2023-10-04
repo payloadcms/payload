@@ -1,4 +1,6 @@
 import { payloadCloud } from '@payloadcms/plugin-cloud'
+import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
+import { webpackBundler } from '@payloadcms/bundler-webpack' // bundler-import
 import nestedDocs from '@payloadcms/plugin-nested-docs'
 import seo from '@payloadcms/plugin-seo'
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
@@ -39,7 +41,7 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: [BeforeDashboard],
     },
-    webpack: config => ({
+    webpack: (config) => ({
       ...config,
       resolve: {
         ...config.resolve,
@@ -65,6 +67,12 @@ export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
+  // database-adapter-config-start
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
+  // database-adapter-config-end
+  bundler: webpackBundler(), // bundler-config
   cors: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
     Boolean,
   ),

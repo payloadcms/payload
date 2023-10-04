@@ -1,56 +1,108 @@
 import type { SQL } from 'drizzle-orm'
-import type { Where } from 'payload/types'
-import type { Field } from 'payload/types'
+import type { Field, Where } from 'payload/types'
 
-import { QueryError } from 'payload/errors'
+import { asc, desc } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../types'
+import type { GenericColumn, PostgresAdapter } from '../types'
 
+import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { parseParams } from './parseParams'
+
+export type BuildQueryJoins = Record<string, SQL>
 
 type BuildQueryArgs = {
   adapter: PostgresAdapter
-  collectionSlug?: string
-  globalSlug?: string
+  fields: Field[]
   locale?: string
-  versionsFields?: Field[]
+  sort?: string
+  tableName: string
   where: Where
 }
 
+type Result = {
+  joins: BuildQueryJoins
+  orderBy: {
+    column: GenericColumn
+    order: typeof asc | typeof desc
+  }
+  selectFields: Record<string, GenericColumn>
+  where: SQL
+}
 const buildQuery = async function buildQuery({
   adapter,
-  collectionSlug,
-  globalSlug,
+  fields,
   locale,
-  versionsFields,
-  where,
-}: BuildQueryArgs): Promise<SQL> {
-  let fields = versionsFields
-  if (!fields) {
-    if (globalSlug) {
-      const globalConfig = adapter.payload.globals.config.find(({ slug }) => slug === globalSlug)
-      fields = globalConfig.fields
+  sort,
+  tableName,
+  where: incomingWhere,
+}: BuildQueryArgs): Promise<Result> {
+  const selectFields: Record<string, GenericColumn> = {
+    id: adapter.tables[tableName].id,
+  }
+  const joins: BuildQueryJoins = {}
+  const orderBy: Result['orderBy'] = {
+    column: null,
+    order: null,
+  }
+
+  if (sort) {
+    let sortPath
+
+    if (sort[0] === '-') {
+      sortPath = sort.substring(1)
+      orderBy.order = desc
+    } else {
+      sortPath = sort
+      orderBy.order = asc
     }
-    if (collectionSlug) {
-      const collectionConfig = adapter.payload.collections[collectionSlug].config
-      fields = collectionConfig.fields
+
+    const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
+      adapter,
+      collectionPath: sortPath,
+      fields,
+      joins,
+      locale,
+      pathSegments: sortPath.replace(/__/g, '.').split('.'),
+      selectFields,
+      tableName,
+    })
+
+    orderBy.column = sortTable[sortTableColumnName]
+  } else {
+    orderBy.order = desc
+    const createdAt = adapter.tables[tableName]?.createdAt
+
+    if (createdAt) {
+      orderBy.column = createdAt
+    } else {
+      orderBy.column = adapter.tables[tableName].id
     }
   }
-  const errors = []
-  const result = await parseParams({
-    adapter,
-    collectionSlug,
-    fields,
-    globalSlug,
-    locale,
+
+  if (orderBy.column) {
+    selectFields.sort = orderBy.column
+  }
+
+  let where: SQL
+
+  if (Object.keys(incomingWhere).length > 0) {
+    where = await parseParams({
+      adapter,
+      fields,
+      joins,
+      locale,
+      selectFields,
+      tableName,
+      where: incomingWhere,
+    })
+  }
+
+  return {
+    joins,
+    orderBy,
+    selectFields,
     where,
-  })
-
-  if (errors.length > 0) {
-    throw new QueryError(errors)
   }
-
-  return result
 }
 
 export default buildQuery

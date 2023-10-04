@@ -36,7 +36,7 @@ export type Props = {
   categories?: ArchiveBlockProps['categories']
 }
 
-export const CollectionArchive: React.FC<Props> = props => {
+export const CollectionArchive: React.FC<Props> = (props) => {
   const {
     className,
     relationTo,
@@ -51,7 +51,7 @@ export const CollectionArchive: React.FC<Props> = props => {
 
   const [results, setResults] = useState<Result>({
     totalDocs: typeof populatedDocsTotal === 'number' ? populatedDocsTotal : 0,
-    docs: populatedDocs?.map(doc => doc.value) || [],
+    docs: populatedDocs?.map((doc) => doc.value) || [],
     page: 1,
     totalPages: 1,
     hasPrevPage: false,
@@ -101,7 +101,7 @@ export const CollectionArchive: React.FC<Props> = props => {
                   in:
                     typeof catsFromProps === 'string'
                       ? [catsFromProps]
-                      : catsFromProps.map(cat => cat.id).join(','),
+                      : catsFromProps.map((cat) => cat.id).join(','),
                 },
               }
             : {}),

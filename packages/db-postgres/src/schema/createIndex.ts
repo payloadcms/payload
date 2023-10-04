@@ -9,7 +9,7 @@ type CreateIndexArgs = {
   unique?: boolean
 }
 
-export const createIndex = ({ columnName, name, unique }: CreateIndexArgs) => {
+export const createIndex = ({ name, columnName, unique }: CreateIndexArgs) => {
   return (table: { [x: string]: GenericColumn }) => {
     if (unique) return uniqueIndex(`${columnName}_idx`).on(table[name])
     return index(`${columnName}_idx`).on(table[name])
