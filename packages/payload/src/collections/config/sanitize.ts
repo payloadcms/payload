@@ -9,7 +9,7 @@ import baseAPIKeyFields from '../../auth/baseFields/apiKey'
 import baseAuthFields from '../../auth/baseFields/auth'
 import baseVerificationFields from '../../auth/baseFields/verification'
 import TimestampsRequired from '../../errors/TimestampsRequired'
-import sanitizeFields from '../../fields/config/sanitize'
+import { sanitizeFields } from '../../fields/config/sanitize'
 import { fieldAffectsData } from '../../fields/config/types'
 import mergeBaseFields from '../../fields/mergeBaseFields'
 import { extractTranslations } from '../../translations/extractTranslations'
@@ -142,7 +142,7 @@ const sanitizeCollection = (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.map((c) => c.slug)
+  const validRelationships = config.collections.map((c) => c.slug) || []
   sanitized.fields = sanitizeFields({
     config,
     fields: sanitized.fields,

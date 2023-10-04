@@ -76,11 +76,11 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ...existingConfig.resolve?.alias,
             [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-postgres/src/mock.js',
+              '../packages/db-postgres/mock.js',
             ),
             [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-mongodb/src/mock.js',
+              '../packages/db-mongodb/mock.js',
             ),
             [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
               __dirname,
@@ -88,7 +88,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ),
             [path.resolve(__dirname, '../packages/bundler-vite/src/index')]: path.resolve(
               __dirname,
-              '../packages/bundler-vite/src/mock.js',
+              '../packages/bundler-vite/mock.js',
             ),
             react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },

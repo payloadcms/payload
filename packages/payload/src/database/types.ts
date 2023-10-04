@@ -1,5 +1,3 @@
-import type { Configuration } from 'webpack'
-
 import type { TypeWithID } from '../collections/config/types'
 import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types'
 import type { Payload } from '../payload'
@@ -140,10 +138,6 @@ export interface BaseDatabaseAdapter {
    * assign the transaction to use when making queries, defaults to the last started transaction
    */
   useTransaction?: (id: number | string) => void
-  /**
-   * Used to alias server only modules or make other changes to webpack configuration
-   */
-  webpack?: Webpack
 }
 
 export type Init = (payload: Payload) => Promise<void>
@@ -151,8 +145,6 @@ export type Init = (payload: Payload) => Promise<void>
 export type Connect = (payload: Payload) => Promise<void>
 
 export type Destroy = (payload: Payload) => Promise<void>
-
-export type Webpack = (config: Configuration) => Configuration
 
 export type CreateMigration = (payload: Payload, migrationName?: string) => Promise<void>
 

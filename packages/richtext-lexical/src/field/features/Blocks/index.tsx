@@ -30,12 +30,8 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         ? formatLabels(unsanitizedBlock.slug)
         : unsanitizedBlock.labels
 
-      // TODO
-      /*unsanitizedBlock.fields = sanitizeFields({
-        config,
-        fields: block.fields,
-        validRelationships,
-      })*/
+      // unsanitizedBlock.fields are sanitized in the React component and not here.
+      // That's because we do not have access to the payload config here.
 
       return unsanitizedBlock
     })

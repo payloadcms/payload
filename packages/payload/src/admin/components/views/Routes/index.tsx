@@ -105,6 +105,9 @@ export const Routes: React.FC = () => {
           if (initialized === true && !isLoadingUser) {
             return (
               <Switch>
+                <Route path={`${match.url}/create-first-user`}>
+                  <Redirect to={`${match.url}/`} />
+                </Route>
                 {customRoutes({
                   canAccessAdmin,
                   customRoutes: customRoutesConfig,

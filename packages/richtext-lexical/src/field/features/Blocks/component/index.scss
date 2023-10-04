@@ -8,6 +8,8 @@
     --font-body
   ); // Reset font to non-serif, body font, as the lexical editor parent uses a serif font.
 
+  margin: 0 0 1.5em;
+
   &__header {
     h3 {
       margin: 0;

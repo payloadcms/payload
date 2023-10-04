@@ -12,10 +12,14 @@ import { fieldAffectsData, tabHasName } from './types'
 type Args = {
   config: Config
   fields: Field[]
-  validRelationships: string[]
+  /**
+   * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
+   * This validation will be skipped if validRelationships is null.
+   */
+  validRelationships: null | string[]
 }
 
-const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] => {
+export const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] => {
   if (!fields) return []
 
   return fields.map((unsanitizedField) => {
@@ -48,12 +52,16 @@ const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] =
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
-      const relationships = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]
-      relationships.forEach((relationship: string) => {
-        if (!validRelationships.includes(relationship)) {
-          throw new InvalidFieldRelationship(field, relationship)
-        }
-      })
+      if (validRelationships) {
+        const relationships = Array.isArray(field.relationTo)
+          ? field.relationTo
+          : [field.relationTo]
+        relationships.forEach((relationship: string) => {
+          if (!validRelationships.includes(relationship)) {
+            throw new InvalidFieldRelationship(field, relationship)
+          }
+        })
+      }
 
       if (field.type === 'relationship') {
         if (field.min && !field.minRows) {
@@ -155,5 +163,3 @@ const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] =
     return field
   })
 }
-
-export default sanitizeFields
