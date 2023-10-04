@@ -6,6 +6,7 @@ import type {
   PaginateModel,
   SchemaOptions,
 } from 'mongoose'
+import type { Payload } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type {
   ArrayField,
@@ -137,3 +138,6 @@ export type FieldToSchemaMap<TSchema> = {
   textarea: FieldGeneratorFunction<TSchema, TextareaField>
   upload: FieldGeneratorFunction<TSchema, UploadField>
 }
+
+export type MigrateUpArgs = { payload: Payload }
+export type MigrateDownArgs = { payload: Payload }

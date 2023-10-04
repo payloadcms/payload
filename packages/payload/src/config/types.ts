@@ -8,8 +8,12 @@ import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 import type { Configuration } from 'webpack'
+// @ts-expect-error
+import type { InlineConfig } from 'vite'
 
+import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
+import type { CollectionEditViewProps, GlobalEditViewProps } from '../admin/components/views/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -17,7 +21,7 @@ import type {
   CollectionConfig,
   SanitizedCollectionConfig,
 } from '../collections/config/types'
-import type { DatabaseAdapter } from '../database/types'
+import type { BaseDatabaseAdapter } from '../database/types'
 import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
@@ -35,6 +39,27 @@ type Email = {
 
 // eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Config | Promise<Config>
+
+export type LivePreview = {
+  /**
+    Device breakpoints to use for the `iframe` of the Live Preview window.
+    Options are displayed in the Live Preview toolbar.
+    The `responsive` breakpoint is included by default.
+  */
+  breakpoints?: {
+    height: number | string
+    label: string
+    name: string
+    width: number | string
+  }[]
+  /**
+    The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+    Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+    The frontend application is responsible for receiving the message and updating the UI accordingly.
+    Use the `useLivePreview` hook to get started in React applications.
+  */
+  url?: string
+}
 
 type GeneratePreviewURLOptions = {
   locale: string
@@ -90,6 +115,16 @@ export type InitOptions = {
   config?: Promise<SanitizedConfig>
 
   /**
+   * Disable running of the `onInit` function
+   */
+  disableOnInit?: boolean
+
+  /**
+   * Disable connect to the database on init
+   */
+  disableDBConnect?: boolean
+
+  /**
    * Configuration for Payload's email functionality
    *
    * @see https://payloadcms.com/docs/email/overview
@@ -108,13 +143,13 @@ export type InitOptions = {
   local?: boolean
 
   loggerDestination?: DestinationStream
-
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
    *
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
+
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -200,6 +235,20 @@ export type CustomAdminView = React.ComponentType<{
   global?: SanitizedGlobalConfig
   user: User
 }>
+
+export type EditViewConfig = {
+  /**
+   * The component to render for this view
+   * + Replaces the default component
+   */
+  Component: EditViewComponent
+  Tab: DocumentTab
+  path: string
+}
+
+export type EditViewComponent = React.ComponentType<CollectionEditViewProps | GlobalEditViewProps>
+
+export type EditView = EditViewComponent | EditViewConfig
 
 export type AdminRoute = {
   Component: CustomAdminView
@@ -413,6 +462,8 @@ export type Config = {
     user?: string
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration
+    /** Customize the Vite config that's used to generate the Admin panel. */
+    vite?: (config: InlineConfig) => InlineConfig
   }
   /**
    * Manage the datamodel of your application
@@ -439,7 +490,7 @@ export type Config = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
   /** Pass in a database adapter for use on this project. */
-  db: (args: { payload: Payload }) => DatabaseAdapter
+  db: (args: { payload: Payload }) => BaseDatabaseAdapter
   /** Enable to expose more detailed error information. */
   debug?: boolean
   /**

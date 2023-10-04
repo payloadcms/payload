@@ -13,6 +13,8 @@ export async function generateGraphQLSchema(): Promise<void> {
   config.db = null
 
   await payload.init({
+    disableOnInit: true,
+    disableDBConnect: true,
     local: true,
     secret: '--unused--',
   })
@@ -24,5 +26,6 @@ export async function generateGraphQLSchema(): Promise<void> {
 
 // when generateGraphQLSchema.js is launched directly
 if (module.id === require.main.id) {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   generateGraphQLSchema()
 }

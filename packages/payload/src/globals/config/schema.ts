@@ -41,6 +41,17 @@ const globalSchema = joi
         .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
       hidden: joi.alternatives().try(joi.boolean(), joi.func()),
       hideAPIURL: joi.boolean(),
+      livePreview: joi.object({
+        breakpoints: joi.array().items(
+          joi.object({
+            name: joi.string(),
+            height: joi.alternatives().try(joi.number(), joi.string()),
+            label: joi.string(),
+            width: joi.alternatives().try(joi.number(), joi.string()),
+          }),
+        ),
+        url: joi.string(),
+      }),
       preview: joi.func(),
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),

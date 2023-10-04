@@ -106,11 +106,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
             result[field.name] = fieldData.reduce((arrayResult, row) => {
               if (typeof row._locale === 'string') {
                 if (!arrayResult[row._locale]) arrayResult[row._locale] = []
+                const locale = row._locale
+                const data = {}
+                delete row._locale
 
                 const rowResult = traverseFields<T>({
                   blocks,
                   config,
-                  dataRef: row,
+                  dataRef: data,
                   fieldPrefix: '',
                   fields: field.fields,
                   numbers,
@@ -119,8 +122,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   table: row,
                 })
 
-                arrayResult[row._locale].push(rowResult)
-                delete rowResult._locale
+                arrayResult[locale].push(rowResult)
               }
 
               return arrayResult
@@ -211,7 +213,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.type === 'relationship') {
+      if (field.type === 'relationship' || field.type === 'upload') {
         const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
         if (!relationPathMatch) return result
 
@@ -283,8 +285,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
         if (Array.isArray(fieldData)) {
           if (field.localized) {
             result[field.name] = fieldData.reduce((selectResult, row) => {
-              if (typeof row._locale === 'string') {
-                selectResult[row._locale] = row.value
+              if (typeof row.locale === 'string') {
+                if (!selectResult[row.locale]) selectResult[row.locale] = []
+                selectResult[row.locale].push(row.value)
               }
 
               return selectResult
@@ -318,10 +321,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'tab':
           case 'group': {
             const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
-            const groupData = {}
 
             if (field.localized) {
-              if (typeof locale === 'string' && !ref[locale]) ref[locale] = {}
+              if (typeof locale === 'string' && !ref[locale]) {
+                ref[locale] = {}
+                delete table._locale
+              }
 
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
                 ref[groupLocale] = traverseFields<Record<string, unknown>>({
@@ -337,6 +342,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 })
               })
             } else {
+              const groupData = {}
+
               ref[field.name] = traverseFields<Record<string, unknown>>({
                 blocks,
                 config,
@@ -355,7 +362,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           case 'number': {
             let val = fieldData
-            // TODO: handle hasMany
             if (typeof fieldData === 'string') {
               val = Number.parseFloat(fieldData)
             }
@@ -370,14 +376,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
 
           case 'date': {
-            if (fieldData instanceof Date) {
-              const val = fieldData.toISOString()
+            let val = fieldData
 
-              if (typeof locale === 'string') {
-                ref[locale] = val
-              } else {
-                result[field.name] = val
-              }
+            if (typeof fieldData === 'string') {
+              val = new Date(fieldData).toISOString()
+            }
+
+            if (typeof locale === 'string') {
+              ref[locale] = val
+            } else {
+              result[field.name] = val
             }
 
             break

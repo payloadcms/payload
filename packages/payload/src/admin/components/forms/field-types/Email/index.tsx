@@ -11,6 +11,7 @@ import Label from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const Email: React.FC<Props> = (props) => {
   const {
@@ -50,13 +51,11 @@ const Email: React.FC<Props> = (props) => {
 
   const { errorMessage, setValue, showError, value } = fieldType
 
-  const classes = ['field-type', 'email', className, showError && 'error', readOnly && 'read-only']
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

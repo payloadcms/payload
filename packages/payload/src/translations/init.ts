@@ -9,6 +9,7 @@ export function i18nInit(options: InitOptions): i18n {
   if (i18next.isInitialized) {
     return i18next
   }
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   i18next.init({
     ...deepmerge(defaultOptions, options || {}),
   })

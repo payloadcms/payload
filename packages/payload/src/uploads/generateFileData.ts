@@ -159,7 +159,12 @@ export const generateFileData = async <T>({
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
 
     if (!overwriteExistingFiles) {
-      fsSafeName = await getSafeFileName(req.payload, collectionConfig.slug, staticPath, fsSafeName)
+      fsSafeName = await getSafeFileName({
+        collectionSlug: collectionConfig.slug,
+        desiredFilename: fsSafeName,
+        req,
+        staticPath,
+      })
     }
 
     fileData.filename = fsSafeName

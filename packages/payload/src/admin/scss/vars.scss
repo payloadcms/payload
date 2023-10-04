@@ -57,8 +57,8 @@ $style-stroke-width-m: 2px !default;
 // MISC
 //////////////////////////////
 
-$top-header-offset: calc(#{base(4)} - 1px);
-$top-header-offset-m: base(3);
+$top-header-offset: calc(var(--base) - 1px);
+$top-header-offset-m: calc(var(--base) * 3);
 $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
 //////////////////////////////
@@ -85,8 +85,8 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
 @mixin shadow-lg-top {
   box-shadow:
-    0 -2px 20px 7px rgba(0, 2, 4, 0.1),
-    0 6px 4px -4px rgba(0, 2, 4, 0.02);
+    0 -20px 35px -10px rgba(0, 2, 4, 0.2),
+    0 -6px 4px -4px rgba(0, 2, 4, 0.02);
 }
 
 @mixin shadow {

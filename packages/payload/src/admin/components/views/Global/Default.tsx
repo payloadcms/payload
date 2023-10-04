@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types'
+import type { GlobalEditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../elements/DocumentHeader'
@@ -9,21 +9,36 @@ import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
 import { OperationContext } from '../../utilities/OperationProvider'
 import { GlobalRoutes } from './Routes'
+import { CustomGlobalComponent } from './Routes/CustomComponent'
 import './index.scss'
 
 const baseClass = 'global-edit'
 
-const DefaultGlobalView: React.FC<Props> = (props) => {
-  const { action, apiURL, data, global, initialState, isLoading, onSave, permissions } = props
-
+const DefaultGlobalView: React.FC<
+  GlobalEditViewProps & {
+    disableRoutes?: boolean
+  }
+> = (props) => {
   const { i18n } = useTranslation('general')
+
+  const {
+    action,
+    apiURL,
+    data,
+    disableRoutes,
+    global,
+    initialState,
+    isLoading,
+    onSave,
+    permissions,
+  } = props
 
   const { label } = global
 
   const hasSavePermission = permissions?.update?.permission
 
   return (
-    <div className={baseClass}>
+    <main className={baseClass}>
       <OperationContext.Provider value="update">
         <Form
           action={action}
@@ -41,12 +56,16 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           {!isLoading && (
             <React.Fragment>
               <DocumentHeader apiURL={apiURL} data={data} global={global} />
-              <GlobalRoutes {...props} />
+              {disableRoutes ? (
+                <CustomGlobalComponent view="Default" {...props} />
+              ) : (
+                <GlobalRoutes {...props} />
+              )}
             </React.Fragment>
           )}
         </Form>
       </OperationContext.Provider>
-    </div>
+    </main>
   )
 }
 

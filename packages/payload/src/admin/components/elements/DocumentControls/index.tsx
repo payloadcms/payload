@@ -1,6 +1,5 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
@@ -9,10 +8,12 @@ import { formatDate } from '../../../utilities/formatDate'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import Autosave from '../Autosave'
+import Button from '../Button'
 import DeleteDocument from '../DeleteDocument'
 import DuplicateDocument from '../DuplicateDocument'
 import { Gutter } from '../Gutter'
 import Popup from '../Popup'
+import * as PopupList from '../Popup/PopupButtonList'
 import PreviewButton from '../PreviewButton'
 import { Publish } from '../Publish'
 import { Save } from '../Save'
@@ -30,6 +31,7 @@ export const DocumentControls: React.FC<{
   global?: SanitizedGlobalConfig
   hasSavePermission?: boolean
   id?: string
+  isAccountView?: boolean
   isEditing?: boolean
   permissions?: CollectionPermission | GlobalPermission
 }> = (props) => {
@@ -40,6 +42,7 @@ export const DocumentControls: React.FC<{
     disableActions,
     global,
     hasSavePermission,
+    isAccountView,
     isEditing,
     permissions,
   } = props
@@ -71,50 +74,95 @@ export const DocumentControls: React.FC<{
       !global?.versions?.drafts?.autosave
   }
 
+  const showDotMenu = Boolean(collection && !disableActions)
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          {collection?.timestamps && (
-            <ul className={`${baseClass}__timestamps`}>
-              <li
-                className={`${baseClass}__timestamp`}
-                title={
-                  data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''
-                }
-              >
-                <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
-                {data?.updatedAt && (
-                  <p className={`${baseClass}__stamp`}>
-                    {formatDate(data.updatedAt, dateFormat, i18n?.language)}
-                  </p>
-                )}
+          <ul className={`${baseClass}__meta`}>
+            {collection && !isEditing && !isAccountView && (
+              <li className={`${baseClass}__list-item`}>
+                <p className={`${baseClass}__value`}>
+                  {t('creatingNewLabel', {
+                    label:
+                      typeof collection?.labels?.singular === 'string'
+                        ? collection.labels.singular
+                        : 'document',
+                  })}
+                </p>
               </li>
-              <li
-                className={`${baseClass}__timestamp`}
-                title={
-                  publishedDoc?.createdAt || data?.createdAt
-                    ? formatDate(
+            )}
+            {(collection?.versions?.drafts || global?.versions?.drafts) && (
+              <Fragment>
+                {(global || (collection && isEditing)) && (
+                  <li
+                    className={[`${baseClass}__status`, `${baseClass}__list-item`]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <Status />
+                  </li>
+                )}
+                {((collection?.versions?.drafts && collection?.versions?.drafts?.autosave) ||
+                  (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
+                  hasSavePermission && (
+                    <li className={`${baseClass}__list-item`}>
+                      <Autosave
+                        collection={collection}
+                        global={global}
+                        id={id}
+                        publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
+                      />
+                    </li>
+                  )}
+              </Fragment>
+            )}
+            {collection?.timestamps && (isEditing || isAccountView) && (
+              <Fragment>
+                <li
+                  className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
+                    .filter(Boolean)
+                    .join(' ')}
+                  title={
+                    data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''
+                  }
+                >
+                  <p className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</p>
+                  {data?.updatedAt && (
+                    <p className={`${baseClass}__value`}>
+                      {formatDate(data.updatedAt, dateFormat, i18n?.language)}
+                    </p>
+                  )}
+                </li>
+                <li
+                  className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
+                    .filter(Boolean)
+                    .join(' ')}
+                  title={
+                    publishedDoc?.createdAt || data?.createdAt
+                      ? formatDate(
+                          publishedDoc?.createdAt || data?.createdAt,
+                          dateFormat,
+                          i18n?.language,
+                        )
+                      : ''
+                  }
+                >
+                  <p className={`${baseClass}__label`}>{t('created')}:&nbsp;</p>
+                  {(publishedDoc?.createdAt || data?.createdAt) && (
+                    <p className={`${baseClass}__value`}>
+                      {formatDate(
                         publishedDoc?.createdAt || data?.createdAt,
                         dateFormat,
                         i18n?.language,
-                      )
-                    : ''
-                }
-              >
-                <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
-                {(publishedDoc?.createdAt || data?.createdAt) && (
-                  <p className={`${baseClass}__stamp`}>
-                    {formatDate(
-                      publishedDoc?.createdAt || data?.createdAt,
-                      dateFormat,
-                      i18n?.language,
-                    )}
-                  </p>
-                )}
-              </li>
-            </ul>
-          )}
+                      )}
+                    </p>
+                  )}
+                </li>
+              </Fragment>
+            )}
+          </ul>
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
@@ -142,7 +190,7 @@ export const DocumentControls: React.FC<{
               </React.Fragment>
             )}
           </div>
-          {Boolean(collection && !disableActions) && (
+          {showDotMenu && (
             <Popup
               button={
                 <div className={`${baseClass}__dots`}>
@@ -151,40 +199,38 @@ export const DocumentControls: React.FC<{
                   <div />
                 </div>
               }
-              caret={false}
               className={`${baseClass}__popup`}
-              horizontalAlign="center"
+              horizontalAlign="right"
               size="large"
               verticalAlign="bottom"
             >
-              <ul className={`${baseClass}__popup-actions`}>
+              <PopupList.ButtonGroup>
                 {'create' in permissions && permissions?.create?.permission && (
                   <React.Fragment>
-                    <li>
-                      <Link
-                        id="action-create"
-                        to={`${adminRoute}/collections/${collection?.slug}/create`}
-                      >
-                        {t('createNew')}
-                      </Link>
-                    </li>
+                    <PopupList.Button
+                      id="action-create"
+                      to={`${adminRoute}/collections/${collection?.slug}/create`}
+                    >
+                      {t('createNew')}
+                    </PopupList.Button>
+
                     {!collection?.admin?.disableDuplicate && isEditing && (
-                      <li>
+                      <PopupList.Button>
                         <DuplicateDocument
                           collection={collection}
                           id={id}
                           slug={collection?.slug}
                         />
-                      </li>
+                      </PopupList.Button>
                     )}
                   </React.Fragment>
                 )}
                 {'delete' in permissions && permissions?.delete?.permission && id && (
-                  <li>
+                  <PopupList.Button>
                     <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
-                  </li>
+                  </PopupList.Button>
                 )}
-              </ul>
+              </PopupList.ButtonGroup>
             </Popup>
           )}
         </div>

@@ -2,13 +2,16 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike } from 'drizzle-orm'
+import { and, ilike, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
+import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
 import type { GenericColumn, PostgresAdapter } from '../types'
-import type { BuildQueryJoins } from './buildQuery'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
+import { createJSONQuery } from './createJSONQuery'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { operatorMap } from './operatorMap'
 import { sanitizeQueryValue } from './sanitizeQueryValue'
@@ -16,6 +19,7 @@ import { sanitizeQueryValue } from './sanitizeQueryValue'
 type Args = {
   adapter: PostgresAdapter
   fields: Field[]
+  joinAliases: BuildQueryJoinAliases
   joins: BuildQueryJoins
   locale: string
   selectFields: Record<string, GenericColumn>
@@ -26,6 +30,7 @@ type Args = {
 export async function parseParams({
   adapter,
   fields,
+  joinAliases,
   joins,
   locale,
   selectFields,
@@ -50,6 +55,7 @@ export async function parseParams({
           const builtConditions = await buildAndOrConditions({
             adapter,
             fields,
+            joinAliases,
             joins,
             locale,
             selectFields,
@@ -75,12 +81,15 @@ export async function parseParams({
                   columnName,
                   constraints: queryConstraints,
                   field,
+                  getNotNullColumnByValue,
+                  pathSegments,
                   rawColumn,
                   table,
                 } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
+                  joinAliases,
                   joins,
                   locale,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
@@ -94,17 +103,62 @@ export async function parseParams({
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
 
+                if (['json', 'richText'].includes(field.type) && Array.isArray(pathSegments)) {
+                  const segments = pathSegments.slice(1)
+                  segments.unshift(table[columnName].name)
+
+                  if (field.type === 'richText') {
+                    const jsonQuery = createJSONQuery({
+                      operator,
+                      pathSegments: segments,
+                      treatAsArray: ['children'],
+                      treatRootAsArray: true,
+                      value: val,
+                    })
+
+                    constraints.push(sql.raw(jsonQuery))
+                  }
+
+                  if (field.type === 'json') {
+                    const jsonQuery = convertPathToJSONTraversal(pathSegments)
+                    constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
+                  }
+
+                  break
+                }
+
+                if (getNotNullColumnByValue) {
+                  const columnName = getNotNullColumnByValue(val)
+                  if (columnName) {
+                    constraints.push(isNotNull(table[columnName]))
+                  } else {
+                    throw new QueryError([{ path: relationOrPath }])
+                  }
+                  break
+                }
+
                 if (operator === 'like') {
                   constraints.push(
                     and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
                   )
-                } else {
-                  const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
-                    field,
-                    operator,
-                    val,
-                  })
+                  break
+                }
 
+                const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
+                  field,
+                  operator,
+                  val,
+                })
+
+                if (queryOperator === 'not_equals' && queryValue !== null) {
+                  constraints.push(
+                    or(
+                      isNull(rawColumn || table[columnName]),
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
+                      ne<any>(rawColumn || table[columnName], queryValue),
+                    ),
+                  )
+                } else {
                   constraints.push(
                     operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
                   )

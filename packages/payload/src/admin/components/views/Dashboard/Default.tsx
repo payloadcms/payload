@@ -74,7 +74,7 @@ const Dashboard: React.FC<Props> = (props) => {
           beforeDashboard.map((Component, i) => <Component key={i} />)}
         {groups.map(({ entities, label }, groupIndex) => {
           return (
-            <React.Fragment key={groupIndex}>
+            <div className={`${baseClass}__group`} key={groupIndex}>
               <h2 className={`${baseClass}__label`}>{label}</h2>
               <ul className={`${baseClass}__card-list`}>
                 {entities.map(({ entity, type }, entityIndex) => {
@@ -127,7 +127,7 @@ const Dashboard: React.FC<Props> = (props) => {
                   )
                 })}
               </ul>
-            </React.Fragment>
+            </div>
           )
         })}
         {Array.isArray(afterDashboard) &&

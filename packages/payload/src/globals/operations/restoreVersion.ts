@@ -72,6 +72,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     const global = await payload.db.findGlobal({
+      req,
       slug: globalConfig.slug,
     })
 
@@ -80,11 +81,13 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     if (global) {
       result = await payload.db.updateGlobal({
         data: result,
+        req,
         slug: globalConfig.slug,
       })
     } else {
       result = await payload.db.createGlobal({
         data: result,
+        req,
         slug: globalConfig.slug,
       })
     }

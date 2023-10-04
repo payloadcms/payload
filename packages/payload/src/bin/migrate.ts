@@ -1,4 +1,14 @@
 import payload from '..'
+import { prettySyncLoggerDestination } from '../utilities/logger'
+
+/**
+ * The default logger's options did not allow for forcing sync logging
+ * Using these options, to force both pretty print and sync logging
+ */
+const prettySyncLogger = {
+  loggerDestination: prettySyncLoggerDestination,
+  loggerOptions: {},
+}
 
 const availableCommands = [
   'migrate',
@@ -13,10 +23,14 @@ const availableCommands = [
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
 export const migrate = async (args: string[]): Promise<void> => {
+  process.env.PAYLOAD_MIGRATING = 'true'
+
   // Barebones instance to access database adapter
   await payload.init({
+    disableOnInit: true,
     local: true,
-    secret: '--unused--',
+    secret: process.env.PAYLOAD_SECRET || '--unused--',
+    ...prettySyncLogger,
   })
 
   const adapter = payload.db
@@ -53,7 +67,7 @@ export const migrate = async (args: string[]): Promise<void> => {
       break
     case 'migrate:create':
       try {
-        await adapter.createMigration(payload, '.migrations', args[1])
+        await adapter.createMigration(payload, args[1])
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }
@@ -65,11 +79,14 @@ export const migrate = async (args: string[]): Promise<void> => {
       })
       process.exit(1)
   }
+
+  payload.logger.info('Done.')
 }
 
 // When launched directly call migrate
 if (module.id === require.main.id) {
   const args = process.argv.slice(2)
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   migrate(args).then(() => {
     process.exit(0)
   })

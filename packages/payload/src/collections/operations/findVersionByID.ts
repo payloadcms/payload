@@ -58,7 +58,7 @@ async function findVersionByID<T extends TypeWithID = any>(
 
     const hasWhereAccess = typeof accessResults === 'object'
 
-    const fullWhere = combineQueries({ _id: { equals: id } }, accessResults)
+    const fullWhere = combineQueries({ id: { equals: id } }, accessResults)
 
     // /////////////////////////////////////
     // Find by ID

@@ -14,6 +14,7 @@ export type Props = {
   className?: string
   description?: Description
   value?: unknown
+  marginPlacement?: 'top' | 'bottom'
 }
 
 export function isComponent(description: Description): description is DescriptionComponent {

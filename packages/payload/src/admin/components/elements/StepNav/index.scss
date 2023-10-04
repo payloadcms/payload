@@ -2,8 +2,16 @@
 
 .step-nav {
   display: flex;
-  overflow: auto;
   gap: calc(var(--base) / 2);
+
+  &::after {
+    content: ' ';
+    position: sticky;
+    top: 0;
+    right: 0;
+    width: var(--base);
+    background: linear-gradient(to right, transparent, var(--theme-bg));
+  }
 
   * {
     display: block;
@@ -27,9 +35,13 @@
   }
 
   span {
-    max-width: base(6);
+    max-width: base(8);
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  @include small-break {
+    gap: calc(var(--base) / 4);
   }
 }

@@ -88,11 +88,13 @@ function initGlobalsGraphQL(payload: Payload): void {
     }
 
     if (global.versions) {
+      const idType = payload.db.defaultIDType === 'number' ? GraphQLInt : GraphQLString
+
       const versionGlobalFields: Field[] = [
         ...buildVersionGlobalFields(global),
         {
           name: 'id',
-          type: 'text',
+          type: payload.db.defaultIDType as 'text',
         },
         {
           name: 'createdAt',
@@ -116,7 +118,7 @@ function initGlobalsGraphQL(payload: Payload): void {
 
       payload.Query.fields[`version${formatName(formattedName)}`] = {
         args: {
-          id: { type: GraphQLString },
+          id: { type: idType },
           ...(payload.config.localization
             ? {
                 fallbackLocale: { type: payload.types.fallbackLocaleInputType },
@@ -130,11 +132,12 @@ function initGlobalsGraphQL(payload: Payload): void {
       payload.Query.fields[`versions${formattedName}`] = {
         args: {
           where: {
-            type: buildWhereInputType(
-              `versions${formattedName}`,
-              versionGlobalFields,
-              `versions${formattedName}`,
-            ),
+            type: buildWhereInputType({
+              name: `versions${formattedName}`,
+              fields: versionGlobalFields,
+              parentName: `versions${formattedName}`,
+              payload,
+            }),
           },
           ...(payload.config.localization
             ? {
@@ -154,7 +157,7 @@ function initGlobalsGraphQL(payload: Payload): void {
       }
       payload.Mutation.fields[`restoreVersion${formatName(formattedName)}`] = {
         args: {
-          id: { type: GraphQLString },
+          id: { type: idType },
         },
         resolve: restoreVersionResolver(global),
         type: payload.globals.graphQL[slug].type,

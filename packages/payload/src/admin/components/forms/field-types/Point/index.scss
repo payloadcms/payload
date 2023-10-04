@@ -2,11 +2,11 @@
 
 .point {
   position: relative;
-  margin-bottom: $baseline;
 
   &__wrap {
     display: flex;
     width: calc(100% + #{base(1)});
+    margin: 0;
     margin-left: base(-0.5);
     margin-right: base(-0.5);
     list-style: none;

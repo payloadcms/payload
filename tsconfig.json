@@ -35,6 +35,7 @@
     // if your tsconfig is something different
     { "path": "./packages/db-postgres" },
     { "path": "./packages/richtext-slate" },
+    { "path": "./packages/richtext-lexical" },
     { "path": "./packages/payload" }
   ]
 }

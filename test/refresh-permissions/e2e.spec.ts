@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { closeMainMenu, openMainMenu } from '../helpers'
+import { closeNav, openNav } from '../helpers'
 import { initPayloadE2E } from '../helpers/configHelpers'
 
 const { beforeAll, describe } = test
@@ -20,7 +20,7 @@ describe('refresh-permissions', () => {
   test('should show test global immediately after allowing access', async () => {
     await page.goto(`${serverURL}/admin/globals/settings`)
 
-    await openMainMenu(page)
+    await openNav(page)
 
     // Ensure that we have loaded accesses by checking that settings collection
     // at least is visible in the menu.
@@ -29,13 +29,13 @@ describe('refresh-permissions', () => {
     // Test collection should be hidden at first.
     await expect(page.locator('#nav-global-test')).toBeHidden()
 
-    await closeMainMenu(page)
+    await closeNav(page)
 
     // Allow access to test global.
-    await page.locator('.custom-checkbox:has(#field-test) input').check()
+    await page.locator('.checkbox-input:has(#field-test) input').check()
     await page.locator('#action-save').click()
 
-    await openMainMenu(page)
+    await openNav(page)
 
     // Now test collection should appear in the menu.
     await expect(page.locator('#nav-global-test')).toBeVisible()

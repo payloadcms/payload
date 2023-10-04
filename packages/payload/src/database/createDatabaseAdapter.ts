@@ -3,9 +3,9 @@ import type { MarkOptional } from 'ts-essentials'
 import type { Configuration } from 'webpack'
 
 import type {
+  BaseDatabaseAdapter,
   BeginTransaction,
   CommitTransaction,
-  DatabaseAdapter,
   RollbackTransaction,
 } from './types'
 
@@ -21,7 +21,7 @@ const beginTransaction: BeginTransaction = async () => null
 const rollbackTransaction: RollbackTransaction = async () => null
 const commitTransaction: CommitTransaction = async () => null
 
-export function createDatabaseAdapter<T extends DatabaseAdapter>(
+export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
   args: MarkOptional<
     T,
     | 'createMigration'
@@ -62,6 +62,6 @@ export function createDatabaseAdapter<T extends DatabaseAdapter>(
     ...args,
 
     // Ensure migrationDir is set
-    migrationDir: args.migrationDir || '.migrations',
+    migrationDir: args.migrationDir || 'migrations',
   } as T
 }

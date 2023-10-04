@@ -5,7 +5,7 @@ import Line from '../../../icons/Line'
 import Label from '../../Label'
 import './index.scss'
 
-const baseClass = 'custom-checkbox'
+const baseClass = 'checkbox-input'
 
 type CheckboxInputProps = {
   'aria-label'?: string
@@ -18,6 +18,7 @@ type CheckboxInputProps = {
   partialChecked?: boolean
   readOnly?: boolean
   required?: boolean
+  className?: string
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
@@ -32,12 +33,14 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     partialChecked,
     readOnly,
     required,
+    className,
   } = props
 
   return (
     <div
       className={[
         baseClass,
+        className,
         (checked || partialChecked) && `${baseClass}--checked`,
         readOnly && `${baseClass}--read-only`,
       ]

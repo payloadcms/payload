@@ -1,11 +1,11 @@
 import { Table } from 'console-table-printer'
 
-import type { DatabaseAdapter } from '../types'
+import type { BaseDatabaseAdapter } from '../types'
 
 import { getMigrations } from './getMigrations'
 import { readMigrationFiles } from './readMigrationFiles'
 
-export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
+export async function migrateStatus(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -24,8 +24,9 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
   const statuses = migrationFiles.map((migration) => {
     const existingMigration = existingMigrations.find((m) => m.name === migration.name)
     return {
-      Batch: existingMigration?.batch,
       Name: migration.name,
+      // eslint-disable-next-line perfectionist/sort-objects
+      Batch: existingMigration?.batch,
       Ran: existingMigration ? 'Yes' : 'No',
     }
   })

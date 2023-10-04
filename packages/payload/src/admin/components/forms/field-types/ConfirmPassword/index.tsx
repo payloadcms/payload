@@ -9,6 +9,7 @@ import { useFormFields } from '../../Form/context'
 import Label from '../../Label'
 import useField from '../../useField'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const ConfirmPassword: React.FC<Props> = (props) => {
   const { disabled } = props
@@ -37,10 +38,12 @@ const ConfirmPassword: React.FC<Props> = (props) => {
     validate,
   })
 
-  const classes = ['field-type', 'confirm-password', showError && 'error'].filter(Boolean).join(' ')
-
   return (
-    <div className={classes}>
+    <div
+      className={[fieldBaseClass, 'confirm-password', showError && 'error']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <Error message={errorMessage} showError={showError} />
       <Label
         htmlFor="field-confirm-password"

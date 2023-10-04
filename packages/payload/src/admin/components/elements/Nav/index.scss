@@ -1,128 +1,155 @@
 @import '../../../scss/styles.scss';
 
 .nav {
-  position: relative;
-  width: 100%;
-  height: calc(var(--base) * 3);
-  z-index: var(--z-modal);
+  position: sticky;
+  top: 0;
+  left: 0;
+  flex-shrink: 0;
+  height: 100vh;
+  width: var(--nav-width);
+  border-right: 1px solid var(--theme-elevation-100);
+  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
 
-  &__bg {
+  &--nav-open {
+    transform: translate3d(0, 0, 0);
+    transition: transform var(--nav-trans-time) linear;
+  }
+
+  &__header {
     @include blur-bg;
-    opacity: 0;
     position: absolute;
-    left: 0;
     top: 0;
     width: 100%;
+    height: var(--app-header-height);
+  }
+
+  &__header-content {
+    z-index: 1;
+    position: relative;
     height: 100%;
-    pointer-events: none;
   }
 
-  &--show-bg {
-    opacity: 1;
+  &__mobile-close {
+    display: none;
+    background: none;
+    border: 0;
+    outline: 0;
+    padding: calc(var(--base) * 0.75) var(--gutter-h);
   }
 
-  // when the modal is open, the nav overlays the top portion
-  // we need to make sure the modal content is clickable
-  // so we disable pointer events on the nav
-  // but reenable them on the modal toggler
-  &--main-menu-open {
-    pointer-events: none;
-    z-index: calc(var(--z-modal) + 2);
+  &__scroll {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: var(--app-header-height) base(1.5) base(2) base(1.25);
+    overflow-y: auto;
 
-    .nav__modalToggler {
-      pointer-events: all;
-    }
-
-    .nav__nav-wrapper {
+    // remove the scrollbar here to prevent layout shift as nav groups are toggled
+    &::-webkit-scrollbar {
       display: none;
     }
   }
 
-  &__content {
+  &__wrap {
+    width: 100%;
     display: flex;
-    align-items: center;
-    height: 100%;
-    padding: 0 calc(var(--base) * 1.5);
-    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
     flex-grow: 1;
   }
 
-  &__nav-wrapper {
-    margin-left: calc(var(--base) / 1.25);
-    display: flex;
-    gap: calc(var(--base) / 2);
-    align-items: center;
-    height: 100%;
-    flex-grow: 1;
-    justify-content: space-between;
-  }
-
-  &__modalToggler {
-    pointer-events: all;
-    background-color: transparent;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    transform: translate3d(-50%, 0, 0);
-
-    &:focus {
-      outline: none;
-    }
-  }
-
-  &__account {
-    transform: translate3d(50%, 0, 0);
-    &:focus:not(:focus-visible) {
-      opacity: 1;
-    }
+  &__label {
+    color: var(--theme-elevation-400);
   }
 
   &__controls {
+    margin-top: auto;
+    margin-bottom: 0;
+
+    > * {
+      margin-top: base(1);
+    }
+
+    a:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+
+  &__log-out {
+    &:hover {
+      g {
+        transform: translateX(-#{base(0.125)});
+      }
+    }
+  }
+
+  nav {
+    a {
+      position: relative;
+      padding: base(0.125) base(1.5) base(0.125) 0;
+      display: flex;
+      text-decoration: none;
+
+      &:focus:not(:focus-visible) {
+        box-shadow: none;
+        font-weight: 600;
+      }
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+
+      &.active {
+        font-weight: normal;
+        padding-left: 0;
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__link {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) / 2);
-    flex-grow: 1;
-    justify-content: flex-end;
+
+    &.active {
+      .nav__link-icon {
+        display: block;
+      }
+    }
   }
 
-  // the icon has padding so we need to transform slightly
-  // so that it's bounding box aligns with the other elements
-  // this can be removed if we ever reformat our SVG icons
-  &__localizer {
-    transform: translate3d(8px, 0, 0);
-  }
-
-  @include large-break {
-    &__content {
-      padding: 0 calc(var(--gutter-h) / 2);
-    }
-
-    &__nav-wrapper {
-      margin-left: calc(var(--base) / 1.125);
-    }
+  &__link-icon {
+    display: none;
+    margin-right: calc(var(--base) * 0.25);
+    top: -1px;
+    position: relative;
   }
 
   @include mid-break {
-    height: calc(var(--base) * 2);
+    &__scroll {
+      padding: var(--app-header-height) base(0.75) base(2) base(0.75);
+    }
 
-    &__nav-wrapper {
-      margin-left: calc(var(--base) / 2.25);
+    nav a {
+      font-size: base(0.875);
+      line-height: base(1.5);
     }
   }
 
   @include small-break {
-    &__content {
-      padding: 0 var(--gutter-h);
+    &__scroll {
+      padding: var(--app-header-height) var(--gutter-h) base(2);
+    }
+  }
+
+  @include extra-small-break {
+    &--nav-open {
+      transition: none;
     }
 
-    &__modalToggler,
-    &__account {
-      transform: unset;
-    }
-
-    &__step-nav {
-      // TODO: overflow the step nav instead of hide it
-      display: none;
+    &__mobile-close {
+      display: block;
     }
   }
 }

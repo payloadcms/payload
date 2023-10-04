@@ -1,6 +1,14 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import {
+  BlocksFeature,
+  LinkFeature,
+  TreeviewFeature,
+  UploadFeature,
+  createLexical,
+} from '../../../../packages/richtext-lexical/src'
 import { createSlate } from '../../../../packages/richtext-slate/src'
+import { TextBlock, UploadAndRichTextBlock } from './blocks'
 import { loremIpsum } from './loremIpsum'
 
 const RichTextFields: CollectionConfig = {
@@ -8,11 +16,73 @@ const RichTextFields: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  access: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'richTextLexicalCustomFields',
+      type: 'richText',
+      editor: createLexical({
+        userConfig(defaultEditorConfig) {
+          defaultEditorConfig.features.push(TreeviewFeature())
+          defaultEditorConfig.features.push(
+            LinkFeature({
+              fields: [
+                {
+                  name: 'rel',
+                  label: 'Rel Attribute',
+                  type: 'select',
+                  hasMany: true,
+                  options: ['noopener', 'noreferrer', 'nofollow'],
+                  admin: {
+                    description:
+                      'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+                  },
+                },
+              ],
+            }),
+          )
+
+          defaultEditorConfig.features.push(
+            UploadFeature({
+              collections: {
+                uploads: {
+                  fields: [
+                    {
+                      name: 'caption',
+                      type: 'richText',
+                      editor: createLexical({}),
+                    },
+                  ],
+                },
+              },
+            }),
+          )
+
+          defaultEditorConfig.features.push(
+            BlocksFeature({
+              blocks: [TextBlock, UploadAndRichTextBlock],
+            }),
+          )
+          return defaultEditorConfig
+        },
+      }),
+    },
+    {
+      name: 'richTextLexical',
+      type: 'richText',
+      editor: createLexical({
+        userConfig(defaultEditorConfig) {
+          defaultEditorConfig.features.push(TreeviewFeature())
+          return defaultEditorConfig
+        },
+      }),
     },
     {
       name: 'selectHasMany',

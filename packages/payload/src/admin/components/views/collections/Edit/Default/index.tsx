@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Props } from '../types'
+import type { CollectionEditViewProps } from '../../../types'
 
 import { getTranslation } from '../../../../../../utilities/getTranslation'
 import { DocumentControls } from '../../../../elements/DocumentControls'
@@ -9,16 +9,16 @@ import { Gutter } from '../../../../elements/Gutter'
 import RenderFields from '../../../../forms/RenderFields'
 import { filterFields } from '../../../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../../../forms/field-types'
-import LeaveWithoutSaving from '../../../../modals/LeaveWithoutSaving'
+import { LeaveWithoutSaving } from '../../../../modals/LeaveWithoutSaving'
 import Meta from '../../../../utilities/Meta'
 import Auth from '../Auth'
 import { SetStepNav } from '../SetStepNav'
 import { Upload } from '../Upload'
 import './index.scss'
 
-const baseClass = 'collection-edit'
+const baseClass = 'collection-default-edit'
 
-export const DefaultCollectionEdit: React.FC<Props> = (props) => {
+export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) => {
   const { i18n, t } = useTranslation('general')
 
   const {
@@ -62,7 +62,10 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
         permissions={permissions}
       />
       <div
-        className={[`${baseClass}__wrapper`, hasSidebar && `${baseClass}__wrapper--has-sidebar`]
+        className={[
+          baseClass,
+          hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+        ]
           .filter(Boolean)
           .join(' ')}
       >
@@ -83,6 +86,7 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
           <Gutter className={`${baseClass}__edit`}>
             {auth && (
               <Auth
+                className={`${baseClass}__auth`}
                 collection={collection}
                 email={data?.email}
                 operation={operation}
@@ -94,6 +98,7 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
             )}
             {upload && <Upload collection={collection} internalState={internalState} />}
             <RenderFields
+              className={`${baseClass}__fields`}
               fieldSchema={fields}
               fieldTypes={fieldTypes}
               filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
@@ -102,7 +107,7 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
             />
           </Gutter>
         </div>
-        {sidebarFields && sidebarFields.length > 0 && (
+        {hasSidebar && (
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-sticky-wrap`}>

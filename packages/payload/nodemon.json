@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/nodemon.json",
   "exec": "ts-node ../../test/dev.ts",
   "ext": "ts,js,json",
   "ignore": [
@@ -9,5 +10,6 @@
     "src/**/*.spec.ts",
     "test/**/payload-types.ts"
   ],
-  "watch": ["src/**/*.ts", "../../test/", "packages/**/*.ts"]
+  "watch": ["src/**/*.ts", "../../test/", "../../packages/**/*.ts"],
+  "stdin": true
 }

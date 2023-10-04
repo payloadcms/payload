@@ -598,6 +598,9 @@
         "close": {
           "type": "string"
         },
+        "collapse": {
+          "type": "string"
+        },
         "collections": {
           "type": "string"
         },
@@ -629,6 +632,9 @@
           "type": "string"
         },
         "createNewLabel": {
+          "type": "string"
+        },
+        "creatingNewLabel": {
           "type": "string"
         },
         "created": {
@@ -731,6 +737,9 @@
           "type": "string"
         },
         "light": {
+          "type": "string"
+        },
+        "livePreview": {
           "type": "string"
         },
         "loading": {
@@ -922,6 +931,7 @@
         "create",
         "createNew",
         "createNewLabel",
+        "creatingNewLabel",
         "created",
         "createdAt",
         "creating",

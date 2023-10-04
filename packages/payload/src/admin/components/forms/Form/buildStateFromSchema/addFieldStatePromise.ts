@@ -295,7 +295,9 @@ export const addFieldStatePromise = async ({
             'value' in valueWithDefault
           ) {
             const value =
-              typeof valueWithDefault?.value === 'object' && 'id' in valueWithDefault.value
+              typeof valueWithDefault?.value === 'object' &&
+              valueWithDefault?.value &&
+              'id' in valueWithDefault.value
                 ? valueWithDefault.value.id
                 : valueWithDefault.value
             const relationshipValue = {

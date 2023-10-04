@@ -9,6 +9,7 @@ import useIntersect from '../../../hooks/useIntersect'
 import { useOperation } from '../../utilities/OperationProvider'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import { filterFields } from './filterFields'
+import './index.scss'
 
 const baseClass = 'render-fields'
 
@@ -21,7 +22,7 @@ const intersectionObserverOptions = {
 // This is so that we can conditionally render fields before reducing them, if desired
 // See the sidebar in '../collections/Edit/Default/index.tsx' for an example
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender } = props
+  const { className, fieldTypes, forceRender, margins } = props
 
   const { i18n, t } = useTranslation('general')
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
@@ -37,8 +38,6 @@ const RenderFields: React.FC<Props> = (props) => {
       setHasRendered(true)
     }
   }, [shouldRender, hasRendered])
-
-  const classes = [baseClass, className].filter(Boolean).join(' ')
 
   let fieldsToRender = 'fields' in props ? props?.fields : null
 
@@ -57,7 +56,17 @@ const RenderFields: React.FC<Props> = (props) => {
 
   if (fieldsToRender) {
     return (
-      <div className={classes} ref={intersectionRef}>
+      <div
+        className={[
+          baseClass,
+          className,
+          margins && `${baseClass}--margins-${margins}`,
+          margins === false && `${baseClass}--margins-none`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        ref={intersectionRef}
+      >
         {hasRendered &&
           fieldsToRender.map((reducedField, fieldIndex) => {
             const {

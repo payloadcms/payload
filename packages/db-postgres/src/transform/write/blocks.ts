@@ -3,36 +3,45 @@ import type { BlockField } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { BlockRowToInsert } from './types'
+import type { BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
   data: Record<string, unknown>[]
   field: BlockField
   locale?: string
+  numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
-  tableName
+  relationshipsToDelete: RelationshipToDelete[]
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
 }
 export const transformBlocks = ({
+  baseTableName,
   blocks,
   data,
   field,
   locale,
+  numbers,
   path,
   relationships,
-  tableName,
+  relationshipsToDelete,
+  selects,
 }: Args) => {
   data.forEach((blockRow, i) => {
     if (typeof blockRow.blockType !== 'string') return
     const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
     if (!matchedBlock) return
+    const blockType = toSnakeCase(blockRow.blockType)
 
-    if (!blocks[blockRow.blockType]) blocks[blockRow.blockType] = []
+    if (!blocks[blockType]) blocks[blockType] = []
 
     const newRow: BlockRowToInsert = {
       arrays: {},
@@ -45,22 +54,26 @@ export const transformBlocks = ({
 
     if (field.localized && locale) newRow.row._locale = locale
 
-    const blockTableName = `${tableName}_${toSnakeCase(blockRow.blockType)}`
+    const blockTableName = `${baseTableName}_blocks_${blockType}`
 
     traverseFields({
       arrays: newRow.arrays,
+      baseTableName,
       blocks,
       columnPrefix: '',
       data: blockRow,
+      fieldPrefix: '',
       fields: matchedBlock.fields,
       locales: newRow.locales,
-      newTableName: blockTableName,
+      numbers,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
       relationships,
+      relationshipsToDelete,
       row: newRow.row,
+      selects,
     })
 
-    blocks[blockRow.blockType].push(newRow)
+    blocks[blockType].push(newRow)
   })
 }

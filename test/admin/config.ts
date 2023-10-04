@@ -7,6 +7,7 @@ import { devUser } from '../credentials'
 import AfterDashboard from './components/AfterDashboard'
 import AfterNavLinks from './components/AfterNavLinks'
 import BeforeLogin from './components/BeforeLogin'
+import CustomTabComponent from './components/CustomTabComponent'
 import DemoUIFieldCell from './components/DemoUIField/Cell'
 import DemoUIFieldField from './components/DemoUIField/Field'
 import Logout from './components/Logout'
@@ -16,7 +17,7 @@ import CustomDefaultView from './components/views/CustomDefault'
 import CustomEditView from './components/views/CustomEdit'
 import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
-import { globalSlug, slug } from './shared'
+import { globalSlug, slug, slugPluralLabel, slugSingularLabel } from './shared'
 
 export interface Post {
   createdAt: Date
@@ -63,6 +64,7 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
+    defaultLocale: 'en',
     locales: ['en', 'es'],
   },
   collections: [
@@ -88,6 +90,10 @@ export default buildConfigWithDefaults({
     },
     {
       slug,
+      labels: {
+        singular: slugSingularLabel,
+        plural: slugPluralLabel,
+      },
       admin: {
         description: 'Description',
         listSearchableFields: ['title', 'description', 'number'],
@@ -132,6 +138,13 @@ export default buildConfigWithDefaults({
             },
           },
         },
+        {
+          name: 'sidebarField',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
+          },
+        },
       ],
     },
     {
@@ -164,9 +177,17 @@ export default buildConfigWithDefaults({
               Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
-                path: '/custom',
+                path: '/custom-tab-view',
                 Component: CustomView,
-                label: 'Custom',
+                Tab: {
+                  label: 'Custom',
+                  href: '/custom-tab-view',
+                },
+              },
+              MyCustomViewWithCustomTab: {
+                path: '/custom-tab-component',
+                Component: CustomView,
+                Tab: CustomTabComponent,
               },
             },
           },
@@ -263,6 +284,13 @@ export default buildConfigWithDefaults({
           name: 'title',
           type: 'text',
         },
+        {
+          name: 'sidebarField',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
+          },
+        },
       ],
     },
 
@@ -293,9 +321,17 @@ export default buildConfigWithDefaults({
               Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
-                path: '/custom',
+                path: '/custom-tab-view',
                 Component: CustomView,
-                label: 'Custom',
+                Tab: {
+                  label: 'Custom',
+                  href: '/custom-tab-view',
+                },
+              },
+              MyCustomViewWithCustomTab: {
+                path: '/custom-tab-component',
+                Component: CustomView,
+                Tab: CustomTabComponent,
               },
             },
           },

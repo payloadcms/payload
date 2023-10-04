@@ -28,25 +28,18 @@ export const saveVersion = async ({
   req,
 }: Args): Promise<TypeWithID> => {
   let result
-  let entityConfig
   let createNewVersion = true
   const now = new Date().toISOString()
-
-  if (collection) {
-    entityConfig = collection
-  }
-
-  if (global) {
-    entityConfig = global
-  }
   const versionData = { ...doc }
   if (draft) versionData._status = 'draft'
   if (versionData._id) delete versionData._id
 
   try {
     if (autosave) {
-      const { docs } = await payload.db.findVersions({
-        collection: entityConfig.slug,
+      let docs
+      const findVersionArgs = {
+        collectionSlug: collection.slug,
+        globalSlug: collection.slug,
         limit: 1,
         req,
         sort: '-updatedAt',
@@ -55,11 +48,24 @@ export const saveVersion = async ({
             equals: id,
           },
         },
-      })
+      }
+      if (collection) {
+        ;({ docs } = await payload.db.findVersions({
+          ...findVersionArgs,
+          collection: collection.slug,
+          req,
+        }))
+      } else {
+        ;({ docs } = await payload.db.findGlobalVersions({
+          ...findVersionArgs,
+          global: global.slug,
+          req,
+        }))
+      }
       const [latestVersion] = docs
 
       // overwrite the latest version if it's set to autosave
-      if ((latestVersion as any)?.autosave === true) {
+      if (latestVersion?.autosave === true) {
         createNewVersion = false
 
         const data: Record<string, unknown> = {
@@ -68,25 +74,52 @@ export const saveVersion = async ({
           version: versionData,
         }
 
-        result = await payload.db.updateVersion({
+        const updateVersionArgs = {
           id: latestVersion.id,
-          collectionSlug: entityConfig.slug,
           req,
-          versionData: data,
-        })
+          versionData: data as TypeWithID,
+        }
+
+        if (collection) {
+          result = await payload.db.updateVersion({
+            ...updateVersionArgs,
+            collection: collection.slug,
+            req,
+          })
+        } else {
+          result = await payload.db.updateGlobalVersion({
+            ...updateVersionArgs,
+            global: global.slug,
+            req,
+          })
+        }
       }
     }
 
     if (createNewVersion) {
-      result = await payload.db.createVersion({
-        autosave: Boolean(autosave),
-        collectionSlug: entityConfig.slug,
-        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-        parent: collection ? id : undefined,
-        req,
-        updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-        versionData,
-      })
+      if (collection) {
+        result = await payload.db.createVersion({
+          autosave: Boolean(autosave),
+          collectionSlug: collection.slug,
+          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+          parent: collection ? id : undefined,
+          req,
+          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          versionData,
+        })
+      }
+
+      if (global) {
+        result = await payload.db.createGlobalVersion({
+          autosave: Boolean(autosave),
+          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+          globalSlug: global.slug,
+          parent: collection ? id : undefined,
+          req,
+          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          versionData,
+        })
+      }
     }
   } catch (err) {
     let errorMessage: string
@@ -105,7 +138,7 @@ export const saveVersion = async ({
     max = collection.versions.maxPerDoc
   if (global && typeof global.versions.max === 'number') max = global.versions.max
 
-  if (createNewVersion && result.version.createdAt !== result.version.updatedAt && max > 0) {
+  if (createNewVersion && max > 0) {
     await enforceMaxVersions({
       id,
       collection,
@@ -115,8 +148,6 @@ export const saveVersion = async ({
       req,
     })
   }
-
-  result = JSON.parse(JSON.stringify(result))
 
   let createdVersion = result.version
   createdVersion.createdAt = result.createdAt

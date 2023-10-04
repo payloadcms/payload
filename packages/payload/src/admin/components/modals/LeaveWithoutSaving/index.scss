@@ -2,24 +2,35 @@
 
 .leave-without-saving {
   @include blur-bg;
-  position: fixed;
-  z-index: calc(var(--z-modal) + 1);
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 
-  &__template {
-    position: relative;
+  &__wrapper {
     z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
   }
 
-  .btn {
-    [dir='ltr'] & {
-      margin-right: $baseline;
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+
+    > * {
+      margin: 0;
     }
-    [dir='rtl'] & {
-      margin-left: $baseline;
+  }
+
+  &__controls {
+    display: flex;
+    gap: var(--base);
+
+    .btn {
+      margin: 0;
     }
   }
 }

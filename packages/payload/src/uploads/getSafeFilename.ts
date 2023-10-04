@@ -1,6 +1,6 @@
 import sanitize from 'sanitize-filename'
 
-import type { Payload } from '..'
+import type { PayloadRequest } from '../express/types'
 
 import docWithFilenameExists from './docWithFilenameExists'
 import fileExists from './fileExists'
@@ -22,17 +22,29 @@ const incrementName = (name: string) => {
   return `${incrementedName}.${extension}`
 }
 
-async function getSafeFileName(
-  payload: Payload,
-  collectionSlug: string,
-  staticPath: string,
-  desiredFilename: string,
-): Promise<string> {
+type Args = {
+  collectionSlug: string
+  desiredFilename: string
+  req: PayloadRequest
+  staticPath: string
+}
+
+async function getSafeFileName({
+  collectionSlug,
+  desiredFilename,
+  req,
+  staticPath,
+}: Args): Promise<string> {
   let modifiedFilename = desiredFilename
 
   // eslint-disable-next-line no-await-in-loop
   while (
-    (await docWithFilenameExists(payload, collectionSlug, staticPath, modifiedFilename)) ||
+    (await docWithFilenameExists({
+      collectionSlug,
+      filename: modifiedFilename,
+      path: staticPath,
+      req,
+    })) ||
     (await fileExists(`${staticPath}/${modifiedFilename}`))
   ) {
     modifiedFilename = incrementName(modifiedFilename)

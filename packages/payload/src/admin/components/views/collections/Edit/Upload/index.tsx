@@ -11,6 +11,7 @@ import FileDetails from '../../../../elements/FileDetails'
 import PreviewSizes from '../../../../elements/PreviewSizes'
 import Error from '../../../../forms/Error'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
+import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
 import FileGraphic from '../../../../graphics/File'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
@@ -102,8 +103,6 @@ export const Upload: React.FC<Props> = (props) => {
     }
   }, [value, onChange])
 
-  const classes = [baseClass, 'field-type'].filter(Boolean).join(' ')
-
   const canRemoveUpload =
     docPermissions?.update?.permission &&
     'delete' in docPermissions &&
@@ -112,7 +111,11 @@ export const Upload: React.FC<Props> = (props) => {
   const hasSizes = collection?.upload?.imageSizes?.length > 0
 
   return (
-    <div className={classes}>
+    <div
+      className={[fieldBaseClass, baseClass]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <Error message={errorMessage} showError={showError} />
 
       {doc.filename && !replacingFile && (

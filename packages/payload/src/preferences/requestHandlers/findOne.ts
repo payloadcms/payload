@@ -1,8 +1,8 @@
 import type { NextFunction, Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 
 import httpStatus from 'http-status'
 
+import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../express/types'
 
 import findOne from '../operations/findOne'

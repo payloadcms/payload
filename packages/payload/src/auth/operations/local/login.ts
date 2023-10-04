@@ -1,7 +1,7 @@
 import type { Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 
 import type { PayloadRequest } from '../../../express/types'
+import type { GeneratedTypes } from '../../../index'
 import type { Payload } from '../../../payload'
 import type { Result } from '../login'
 

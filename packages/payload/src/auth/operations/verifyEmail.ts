@@ -4,6 +4,8 @@ import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 
 import { APIError } from '../../errors'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
 
 export type Args = {
   collection: Collection
@@ -17,28 +19,39 @@ async function verifyEmail(args: Args): Promise<boolean> {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
   }
 
-  const user = await req.payload.db.findOne<any>({
-    collection: collection.config.slug,
-    where: {
-      _verificationToken: { equals: token },
-    },
-  })
+  try {
+    const shouldCommit = await initTransaction(req)
 
-  if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST)
-  if (user && user._verified === true)
-    throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
+    const user = await req.payload.db.findOne<any>({
+      collection: collection.config.slug,
+      req,
+      where: {
+        _verificationToken: { equals: token },
+      },
+    })
 
-  await req.payload.db.updateOne({
-    id: user.id,
-    collection: collection.config.slug,
-    data: {
-      _verificationToken: null,
-      _verified: true,
-    },
-    req,
-  })
+    if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST)
+    if (user && user._verified === true)
+      throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
 
-  return true
+    await req.payload.db.updateOne({
+      id: user.id,
+      collection: collection.config.slug,
+      data: {
+        ...user,
+        _verificationToken: null,
+        _verified: true,
+      },
+      req,
+    })
+
+    if (shouldCommit) await req.payload.db.commitTransaction(req.transactionID)
+
+    return true
+  } catch (error: unknown) {
+    await killTransaction(req)
+    throw error
+  }
 }
 
 export default verifyEmail

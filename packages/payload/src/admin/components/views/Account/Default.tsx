@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Translation } from '../../../../translations/type'
-import type { Props } from './types'
+import type { CollectionEditViewProps } from '../types'
 
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentHeader } from '../../elements/DocumentHeader'
@@ -13,7 +13,7 @@ import Form from '../../forms/Form'
 import Label from '../../forms/Label'
 import RenderFields from '../../forms/RenderFields'
 import { fieldTypes } from '../../forms/field-types'
-import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
+import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
 import { useAuth } from '../../utilities/Auth'
 import Meta from '../../utilities/Meta'
 import { OperationContext } from '../../utilities/OperationProvider'
@@ -23,7 +23,7 @@ import './index.scss'
 
 const baseClass = 'account'
 
-const DefaultAccount: React.FC<Props> = (props) => {
+const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
   const {
     action,
     apiURL,
@@ -49,7 +49,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
   const onSave = useCallback(async () => {
     await refreshCookieAsync()
     if (typeof onSaveFromProps === 'function') {
-      onSaveFromProps()
+      onSaveFromProps({})
     }
   }, [onSaveFromProps, refreshCookieAsync])
 
@@ -75,6 +75,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                 collection={collection}
                 data={data}
                 hasSavePermission={hasSavePermission}
+                isAccountView
                 permissions={permissions}
               />
               <div className={`${baseClass}__main`}>
@@ -89,6 +90,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                 <div className={`${baseClass}__edit`}>
                   <Gutter className={`${baseClass}__header`}>
                     <Auth
+                      className={`${baseClass}__auth`}
                       collection={collection}
                       email={data?.email}
                       operation="update"

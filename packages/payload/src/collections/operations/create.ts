@@ -1,10 +1,10 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { MarkOptional } from 'ts-essentials'
 
 import crypto from 'crypto'
 import fs from 'fs'
 import { promisify } from 'util'
 
+import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../express/types'
 import type { Document } from '../../types'
 import type {
@@ -91,7 +91,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
   try {
     const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -292,6 +291,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     if (collectionConfig.auth && collectionConfig.auth.verify) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,

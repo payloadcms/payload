@@ -1,7 +1,9 @@
 import React from 'react'
 
-import type { Props } from '../types'
+import type { CollectionEditViewProps } from '../../../types'
 
+import { LivePreviewView } from '../../../LivePreview'
+import { QueryInspector } from '../../../RestAPI'
 import VersionView from '../../../Version/Version'
 import VersionsView from '../../../Versions'
 import { DefaultCollectionEdit } from '../Default/index'
@@ -15,12 +17,12 @@ export type collectionViewType =
   | 'Version'
   | 'Versions'
 
-const defaultViews: {
+export const defaultCollectionViews: {
   [key in collectionViewType]: React.ComponentType<any>
 } = {
-  API: null,
+  API: QueryInspector,
   Default: DefaultCollectionEdit,
-  LivePreview: null,
+  LivePreview: LivePreviewView,
   References: null,
   Relationships: null,
   Version: VersionView,
@@ -28,7 +30,7 @@ const defaultViews: {
 }
 
 export const CustomCollectionComponent = (
-  args: Props & {
+  args: CollectionEditViewProps & {
     view: collectionViewType
   },
 ) => {
@@ -41,18 +43,20 @@ export const CustomCollectionComponent = (
   // For example, the Edit view:
   // 1. Edit?.Default
   // 2. Edit?.Default?.Component
+  // TODO: Remove the `@ts-ignore` when a Typescript wizard arrives
+  // For some reason `Component` does not exist on type `Edit[view]` no matter how narrow the type is
   const Component =
     typeof Edit === 'object' && typeof Edit[view] === 'function'
       ? Edit[view]
       : typeof Edit === 'object' &&
         typeof Edit?.[view] === 'object' &&
+        // @ts-ignore
         typeof Edit[view].Component === 'function'
-      ? Edit[view].Component
-      : defaultViews[view]
+      ? // @ts-ignore
+        Edit[view].Component
+      : defaultCollectionViews[view]
 
   if (Component) {
     return <Component {...args} />
   }
-
-  return null
 }

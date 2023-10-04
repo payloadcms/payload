@@ -131,6 +131,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           }))}
           fieldTypes={fieldTypes}
           indexPath={indexPath}
+          margins="small"
           permissions={permissions?.blocks?.[row.blockType]?.fields}
           readOnly={readOnly}
         />

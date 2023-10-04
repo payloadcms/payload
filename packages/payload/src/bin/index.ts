@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import swcRegister from '@swc/register'
+import dotenv from 'dotenv'
+import findUp from 'find-up'
+import fs from 'fs'
 import { getTsconfig as getTSconfig } from 'get-tsconfig'
 import minimist from 'minimist'
 import path from 'path'
@@ -7,6 +11,8 @@ import path from 'path'
 import { generateGraphQLSchema } from './generateGraphQLSchema'
 import { generateTypes } from './generateTypes'
 import { migrate } from './migrate'
+
+loadEnv()
 
 const tsConfig = getTSconfig()
 
@@ -73,5 +79,23 @@ if (script.startsWith('migrate')) {
     default:
       console.log(`Unknown script "${script}".`)
       break
+  }
+}
+
+/**
+ * Try to find user's .env and load it
+ */
+function loadEnv() {
+  const envPath = findUp.sync('.env')
+
+  if (envPath) {
+    dotenv.config({ path: envPath })
+  } else {
+    const cwdPath = path.resolve(process.cwd(), '.env')
+    if (fs.existsSync(cwdPath)) {
+      dotenv.config({
+        path: cwdPath,
+      })
+    }
   }
 }

@@ -18,6 +18,7 @@ import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import Meta from '../../utilities/Meta'
+import NotFound from '../NotFound'
 import CompareVersion from './Compare'
 import RenderFieldsToDiff from './RenderFieldsToDiff'
 import fieldComponents from './RenderFieldsToDiff/fields'
@@ -84,7 +85,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       ? originalDocFetchURL
       : `${compareBaseURL}/${compareValue.value}`
 
-  const [{ data: doc, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, {
+  const [{ data: doc, isError }] = usePayloadAPI(versionFetchURL, {
     initialParams: { depth: 1, locale: '*' },
   })
   const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, {
@@ -192,14 +193,20 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   const canUpdate = docPermissions?.update?.permission
 
+  if (isError) {
+    return <NotFound marginTop="large" />
+  }
+
   return (
-    <React.Fragment>
-      <div className={baseClass}>
-        <Meta description={metaDesc} title={metaTitle} />
-        <Gutter className={`${baseClass}__wrap`}>
-          <div className={`${baseClass}__intro`}>
-            {t('versionCreatedOn', { version: t(doc?.autosave ? 'autosavedVersion' : 'version') })}
-          </div>
+    <main className={baseClass}>
+      <Meta description={metaDesc} title={metaTitle} />
+      <Gutter className={`${baseClass}__wrap`}>
+        <div className={`${baseClass}__header-wrap`}>
+          <p className={`${baseClass}__created-at`}>
+            {t('versionCreatedOn', {
+              version: t(doc?.autosave ? 'autosavedVersion' : 'version'),
+            })}
+          </p>
           <header className={`${baseClass}__header`}>
             <h2>{formattedCreatedAt}</h2>
             {canUpdate && (
@@ -213,33 +220,33 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
               />
             )}
           </header>
-          <div className={`${baseClass}__controls`}>
-            <CompareVersion
-              baseURL={compareBaseURL}
-              onChange={setCompareValue}
-              parentID={parentID}
-              publishedDoc={publishedDoc}
-              value={compareValue}
-              versionID={versionID}
-            />
-            {localization && (
-              <SelectLocales onChange={setLocales} options={localeOptions} value={locales} />
-            )}
-          </div>
-
-          {doc?.version && (
-            <RenderFieldsToDiff
-              comparison={comparison}
-              fieldComponents={fieldComponents}
-              fieldPermissions={fieldPermissions}
-              fields={fields}
-              locales={locales ? locales.map(({ code }) => code) : []}
-              version={doc?.version}
-            />
+        </div>
+        <div className={`${baseClass}__controls`}>
+          <CompareVersion
+            baseURL={compareBaseURL}
+            onChange={setCompareValue}
+            parentID={parentID}
+            publishedDoc={publishedDoc}
+            value={compareValue}
+            versionID={versionID}
+          />
+          {localization && (
+            <SelectLocales onChange={setLocales} options={localeOptions} value={locales} />
           )}
-        </Gutter>
-      </div>
-    </React.Fragment>
+        </div>
+
+        {doc?.version && (
+          <RenderFieldsToDiff
+            comparison={comparison}
+            fieldComponents={fieldComponents}
+            fieldPermissions={fieldPermissions}
+            fields={fields}
+            locales={locales ? locales.map(({ code }) => code) : []}
+            version={doc?.version}
+          />
+        )}
+      </Gutter>
+    </main>
   )
 }
 

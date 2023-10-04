@@ -30,7 +30,7 @@ export const findMany = async function find({
   tableName,
   where: whereArg,
 }: Args) {
-  const db = adapter.sessions?.[req.transactionID] || adapter.db
+  const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
   const table = adapter.tables[tableName]
 
   let limit = limitArg
@@ -41,7 +41,7 @@ export const findMany = async function find({
   let pagingCounter: number
   let selectDistinctResult
 
-  const { joins, orderBy, selectFields, where } = await buildQuery({
+  const { joinAliases, joins, orderBy, selectFields, where } = await buildQuery({
     adapter,
     fields,
     locale,
@@ -69,10 +69,18 @@ export const findMany = async function find({
   })
 
   // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
-  if (Object.keys(joins).length > 0) {
+  if (Object.keys(joins).length > 0 || joinAliases.length > 0) {
     if (where) {
       selectDistinctMethods.push({ args: [where], method: 'where' })
     }
+
+    joinAliases.forEach(({ condition, table }) => {
+      selectDistinctMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
+    })
+
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
         selectDistinctMethods.push({
@@ -122,6 +130,14 @@ export const findMany = async function find({
 
   if (pagination !== false || selectDistinctResult?.length > limit) {
     const selectCountMethods: ChainedMethods = []
+
+    joinAliases.forEach(({ condition, table }) => {
+      selectCountMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
+    })
+
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
         selectCountMethods.push({
@@ -130,6 +146,7 @@ export const findMany = async function find({
         })
       }
     })
+
     const countResult = await chainMethods({
       methods: selectCountMethods,
       query: db

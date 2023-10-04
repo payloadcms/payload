@@ -61,7 +61,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       collection: collectionConfig.slug,
       req,
       where: {
-        resetPasswordExpiration: { greater_than: Date.now() },
+        resetPasswordExpiration: { greater_than: new Date() },
         resetPasswordToken: { equals: data.token },
       },
     })
@@ -74,7 +74,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user.salt = salt
     user.hash = hash
 
-    user.resetPasswordExpiration = Date.now()
+    user.resetPasswordExpiration = new Date().toISOString()
 
     if (collectionConfig.auth.verify) {
       user._verified = true

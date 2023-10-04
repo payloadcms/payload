@@ -8,6 +8,9 @@ type JSONField = {
 }
 
 const JSON: CollectionConfig = {
+  access: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'json',

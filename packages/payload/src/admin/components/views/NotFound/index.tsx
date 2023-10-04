@@ -6,10 +6,15 @@ import { Gutter } from '../../elements/Gutter'
 import { useStepNav } from '../../elements/StepNav'
 import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
+import './index.scss'
 
 const baseClass = 'not-found'
 
-const NotFound: React.FC = () => {
+const NotFound: React.FC<{
+  marginTop?: 'large'
+}> = (props) => {
+  const { marginTop } = props
+
   const { setStepNav } = useStepNav()
 
   const {
@@ -27,7 +32,11 @@ const NotFound: React.FC = () => {
   }, [setStepNav, t])
 
   return (
-    <div className={baseClass}>
+    <div
+      className={[baseClass, marginTop && `${baseClass}--margin-top-${marginTop}`]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <Meta
         description={t('pageNotFound')}
         keywords={`404 ${t('notFound')}`}
@@ -36,7 +45,7 @@ const NotFound: React.FC = () => {
       <Gutter className={`${baseClass}__wrap`}>
         <h1>{t('nothingFound')}</h1>
         <p>{t('sorryNotFound')}</p>
-        <Button el="link" to={`${admin}`}>
+        <Button className={`${baseClass}__button`} el="link" to={`${admin}`}>
           {t('backToDashboard')}
         </Button>
       </Gutter>

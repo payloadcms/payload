@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { Props } from '../types'
+import type { GlobalEditViewProps } from '../../types'
 
 import VersionView from '../../Version/Version'
 import VersionsView from '../../Versions'
@@ -15,7 +15,7 @@ export type globalViewType =
   | 'Version'
   | 'Versions'
 
-const defaultViews: {
+export const defaultGlobalViews: {
   [key in globalViewType]: React.ComponentType<any>
 } = {
   API: null,
@@ -28,7 +28,7 @@ const defaultViews: {
 }
 
 export const CustomGlobalComponent = (
-  args: Props & {
+  args: GlobalEditViewProps & {
     view: globalViewType
   },
 ) => {
@@ -41,18 +41,20 @@ export const CustomGlobalComponent = (
   // For example, the Edit view:
   // 1. Edit?.Default
   // 2. Edit?.Default?.Component
+  // TODO: Remove the `@ts-ignore` when a Typescript wizard arrives
+  // For some reason `Component` does not exist on type `Edit[view]` no matter how narrow the type is
   const Component =
     typeof Edit === 'object' && typeof Edit[view] === 'function'
       ? Edit[view]
       : typeof Edit === 'object' &&
         typeof Edit?.[view] === 'object' &&
+        // @ts-ignore
         typeof Edit[view].Component === 'function'
-      ? Edit[view].Component
-      : defaultViews[view]
+      ? // @ts-ignore
+        Edit[view].Component
+      : defaultGlobalViews[view]
 
   if (Component) {
     return <Component {...args} />
   }
-
-  return null
 }

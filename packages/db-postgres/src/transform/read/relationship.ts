@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import type { RelationshipField } from 'payload/types'
+import type { RelationshipField, UploadField } from 'payload/types'
 
 type Args = {
-  field: RelationshipField
+  field: RelationshipField | UploadField
   locale?: string
   ref: Record<string, unknown>
   relations: Record<string, unknown>[]
@@ -11,14 +11,15 @@ type Args = {
 export const transformRelationship = ({ field, locale, ref, relations }: Args) => {
   let result: unknown
 
-  if (!field.hasMany) {
+  if (!('hasMany' in field) || field.hasMany === false) {
     const relation = relations[0]
 
     if (relation) {
       // Handle hasOne Poly
       if (Array.isArray(field.relationTo)) {
         const matchedRelation = Object.entries(relation).find(
-          ([key, val]) => val !== null && !['id', 'locale', 'order', 'parent'].includes(key),
+          ([key, val]) =>
+            val !== null && !['id', 'locale', 'order', 'parent', 'path'].includes(key),
         )
 
         if (matchedRelation) {
@@ -49,7 +50,8 @@ export const transformRelationship = ({ field, locale, ref, relations }: Args) =
       } else {
         // Handle hasMany Poly
         const matchedRelation = Object.entries(relation).find(
-          ([key, val]) => val !== null && !['id', 'locale', 'order', 'parent'].includes(key),
+          ([key, val]) =>
+            val !== null && !['id', 'locale', 'order', 'parent', 'path'].includes(key),
         )
 
         if (matchedRelation) {

@@ -9,6 +9,7 @@ import More from '../../icons/More'
 import Plus from '../../icons/Plus'
 import X from '../../icons/X'
 import Popup from '../Popup'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'array-actions'
@@ -31,73 +32,73 @@ export const ArrayAction: React.FC<Props> = ({
       horizontalAlign="center"
       render={({ close }) => {
         return (
-          <React.Fragment>
+          <PopupList.ButtonGroup buttonSize="small">
             {index !== 0 && (
-              <button
+              <PopupList.Button
                 className={`${baseClass}__action ${baseClass}__move-up`}
                 onClick={() => {
                   moveRow(index, index - 1)
                   close()
                 }}
-                type="button"
               >
-                <Chevron />
+                <div className={`${baseClass}__action-chevron`}>
+                  <Chevron direction="up" />
+                </div>
                 {t('moveUp')}
-              </button>
+              </PopupList.Button>
             )}
             {index < rowCount - 1 && (
-              <button
-                className={`${baseClass}__action ${baseClass}__move-down`}
+              <PopupList.Button
+                className={`${baseClass}__action`}
                 onClick={() => {
                   moveRow(index, index + 1)
                   close()
                 }}
-                type="button"
               >
-                <Chevron />
+                <div className={`${baseClass}__action-chevron`}>
+                  <Chevron />
+                </div>
                 {t('moveDown')}
-              </button>
+              </PopupList.Button>
             )}
             {!hasMaxRows && (
               <React.Fragment>
-                <button
+                <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__add`}
                   onClick={() => {
                     addRow(index + 1)
                     close()
                   }}
-                  type="button"
                 >
                   <Plus />
                   {t('addBelow')}
-                </button>
-                <button
+                </PopupList.Button>
+                <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__duplicate`}
                   onClick={() => {
                     duplicateRow(index)
                     close()
                   }}
-                  type="button"
                 >
                   <Copy />
                   {t('duplicate')}
-                </button>
+                </PopupList.Button>
               </React.Fragment>
             )}
-            <button
+            <PopupList.Button
               className={`${baseClass}__action ${baseClass}__remove`}
               onClick={() => {
                 removeRow(index)
                 close()
               }}
-              type="button"
             >
               <X />
               {t('remove')}
-            </button>
-          </React.Fragment>
+            </PopupList.Button>
+          </PopupList.ButtonGroup>
         )
       }}
+      size="medium"
     />
   )
 }
