@@ -19,6 +19,8 @@ import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { destroy } from './destroy'
+import { extendViteConfig } from './extendViteConfig'
+import { extendWebpackConfig } from './extendWebpackConfig'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -33,7 +35,6 @@ import { updateGlobal } from './updateGlobal'
 import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateOne } from './updateOne'
 import { updateVersion } from './updateVersion'
-import { webpack } from './webpack'
 
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
@@ -88,6 +89,9 @@ export function mongooseAdapter({
   function adapter({ payload }: { payload: Payload }) {
     mongoose.set('strictQuery', false)
 
+    extendWebpackConfig(this.payload.config)
+    extendViteConfig(this.payload.config)
+
     return createDatabaseAdapter<MongooseAdapter>({
       autoPluralization,
       beginTransaction,
@@ -126,7 +130,6 @@ export function mongooseAdapter({
       updateVersion,
       url,
       versions: {},
-      webpack,
     })
   }
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field, TabAsField } from 'payload/types'
+import type { Field, SanitizedCollectionConfig, TabAsField } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -33,6 +33,7 @@ import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdent
 type Args = {
   adapter: PostgresAdapter
   buildRelationships: boolean
+  collectionIndexes: SanitizedCollectionConfig['indexes']
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
   disableUnique?: boolean
@@ -61,6 +62,7 @@ type Result = {
 export const traverseFields = ({
   adapter,
   buildRelationships,
+  collectionIndexes,
   columnPrefix,
   columns,
   disableUnique = false,
@@ -107,6 +109,24 @@ export const traverseFields = ({
         hasLocalizedField = true
         targetTable = localesColumns
         targetIndexes = localesIndexes
+      }
+
+      const collectionIndex = collectionIndexes
+        ? collectionIndexes.findIndex((index) => {
+            return Object.keys(index.fields).some((indexField) => indexField === fieldName)
+          })
+        : -1
+
+      if (collectionIndex > -1) {
+        const name = toSnakeCase(
+          `${Object.keys(collectionIndexes[collectionIndex].fields).join('_')}`,
+        )
+        targetIndexes[`${name}Idx`] = createIndex({
+          name: Object.keys(collectionIndexes[collectionIndex].fields),
+          columnName: name,
+          unique: collectionIndexes[collectionIndex].options.unique,
+        })
+        collectionIndexes.splice(collectionIndex)
       }
 
       if (
@@ -189,6 +209,7 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
+          const selectTableName = `${newTableName}_${toSnakeCase(fieldName)}`
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
             parent: parentIDColumnMap[parentIDColType]('parent_id')
@@ -205,7 +226,11 @@ export const traverseFields = ({
           if (field.localized) {
             baseColumns.locale = adapter.enums.enum__locales('locale').notNull()
             baseExtraConfig.parentOrderLocale = (cols) =>
-              unique().on(cols.parent, cols.order, cols.locale)
+              unique(`${selectTableName}_parent_id_order_locale_unique`).on(
+                cols.parent,
+                cols.order,
+                cols.locale,
+              )
           } else {
             baseExtraConfig.parent = (cols) => index('parent_idx').on(cols.parent)
             baseExtraConfig.order = (cols) => index('order_idx').on(cols.order)
@@ -214,8 +239,6 @@ export const traverseFields = ({
           if (field.index) {
             baseExtraConfig.value = (cols) => index('value_idx').on(cols.value)
           }
-
-          const selectTableName = `${newTableName}_${toSnakeCase(fieldName)}`
 
           buildTable({
             adapter,
@@ -252,6 +275,7 @@ export const traverseFields = ({
       }
 
       case 'array': {
+        const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
           _parentID: parentIDColumnMap[parentIDColType]('_parent_id')
@@ -267,12 +291,15 @@ export const traverseFields = ({
         if (field.localized && adapter.payload.config.localization) {
           baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
           baseExtraConfig._parentOrderLocale = (cols) =>
-            unique().on(cols._parentID, cols._order, cols._locale)
+            unique(`${arrayTableName}_parent_id_order_locale_unique`).on(
+              cols._parentID,
+              cols._order,
+              cols._locale,
+            )
         } else {
-          baseExtraConfig._parentOrder = (cols) => unique().on(cols._parentID, cols._order)
+          baseExtraConfig._parentOrder = (cols) =>
+            unique(`${arrayTableName}_parent_id_order_unique`).on(cols._parentID, cols._order)
         }
-
-        const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
 
         const { relationsToBuild: subRelationsToBuild } = buildTable({
           adapter,
@@ -332,10 +359,19 @@ export const traverseFields = ({
             if (field.localized && adapter.payload.config.localization) {
               baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
               baseExtraConfig._parentPathOrderLocale = (cols) =>
-                unique().on(cols._parentID, cols._path, cols._order, cols._locale)
+                unique(`${blockTableName}_parent_id_path_order_locale_unique`).on(
+                  cols._parentID,
+                  cols._path,
+                  cols._order,
+                  cols._locale,
+                )
             } else {
               baseExtraConfig._parentPathOrder = (cols) =>
-                unique().on(cols._parentID, cols._path, cols._order)
+                unique(`${blockTableName}_parent_id_path_order_unique`).on(
+                  cols._parentID,
+                  cols._path,
+                  cols._order,
+                )
             }
 
             const { relationsToBuild: subRelationsToBuild } = buildTable({
@@ -399,6 +435,7 @@ export const traverseFields = ({
           } = traverseFields({
             adapter,
             buildRelationships,
+            collectionIndexes,
             columnPrefix,
             columns,
             disableUnique,
@@ -432,6 +469,7 @@ export const traverseFields = ({
         } = traverseFields({
           adapter,
           buildRelationships,
+          collectionIndexes,
           columnPrefix: `${columnName}_`,
           columns,
           disableUnique,
@@ -466,6 +504,7 @@ export const traverseFields = ({
         } = traverseFields({
           adapter,
           buildRelationships,
+          collectionIndexes,
           columnPrefix,
           columns,
           disableUnique,
@@ -502,6 +541,7 @@ export const traverseFields = ({
         } = traverseFields({
           adapter,
           buildRelationships,
+          collectionIndexes,
           columnPrefix,
           columns,
           disableUnique,

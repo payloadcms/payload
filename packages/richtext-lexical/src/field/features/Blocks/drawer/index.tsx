@@ -36,10 +36,11 @@ const insertBlock = ({
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-      blockName: '',
       collapsed: false,
-      data: null,
-      type: blockType,
+      data: {
+        blockName: '',
+        blockType: blockType,
+      },
     })
   } else {
     editor.update(() => {
@@ -47,10 +48,11 @@ const insertBlock = ({
       if (node) {
         node.replace(
           $createBlockNode({
-            blockName: '',
             collapsed: false,
-            data: null,
-            type: blockType,
+            data: {
+              blockName: '',
+              blockType: blockType,
+            },
           }),
         )
       }

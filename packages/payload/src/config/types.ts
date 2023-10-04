@@ -120,6 +120,11 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   /**
+   * Disable connect to the database on init
+   */
+  disableDBConnect?: boolean
+
+  /**
    * Configuration for Payload's email functionality
    *
    * @see https://payloadcms.com/docs/email/overview

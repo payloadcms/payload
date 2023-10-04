@@ -12,7 +12,7 @@ import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
 
-export function createLexical({
+export function lexicalEditor({
   userConfig,
 }: {
   userConfig?: (defaultEditorConfig: EditorConfig) => EditorConfig
