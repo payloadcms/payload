@@ -5,9 +5,9 @@ import {
   LinkFeature,
   TreeviewFeature,
   UploadFeature,
-  createLexical,
+  lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
-import { createSlate } from '../../../../packages/richtext-slate/src'
+import { slateEditor } from '../../../../packages/richtext-slate/src'
 import { TextBlock, UploadAndRichTextBlock } from './blocks'
 import { loremIpsum } from './loremIpsum'
 
@@ -28,7 +28,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextLexicalCustomFields',
       type: 'richText',
-      editor: createLexical({
+      editor: lexicalEditor({
         userConfig(defaultEditorConfig) {
           defaultEditorConfig.features.push(TreeviewFeature())
           defaultEditorConfig.features.push(
@@ -57,7 +57,7 @@ const RichTextFields: CollectionConfig = {
                     {
                       name: 'caption',
                       type: 'richText',
-                      editor: createLexical({}),
+                      editor: lexicalEditor({}),
                     },
                   ],
                 },
@@ -77,7 +77,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextLexical',
       type: 'richText',
-      editor: createLexical({
+      editor: lexicalEditor({
         userConfig(defaultEditorConfig) {
           defaultEditorConfig.features.push(TreeviewFeature())
           return defaultEditorConfig
@@ -122,7 +122,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
-      editor: createSlate({
+      editor: slateEditor({
         admin: {
           elements: [
             'h1',
@@ -173,7 +173,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextCustomFields',
       type: 'richText',
-      editor: createSlate({
+      editor: slateEditor({
         admin: {
           elements: [
             'h1',
@@ -222,7 +222,7 @@ const RichTextFields: CollectionConfig = {
       admin: {
         readOnly: true,
       },
-      editor: createSlate({
+      editor: slateEditor({
         admin: {
           elements: [
             'h1',
