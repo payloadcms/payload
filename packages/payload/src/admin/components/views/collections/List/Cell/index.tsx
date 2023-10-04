@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom'
 
 import type { CellComponentProps, Props } from './types'
 
-import { fieldAffectsData } from '../../../../../../fields/config/types'
+import { CodeField, fieldAffectsData } from '../../../../../../fields/config/types'
 import { getTranslation } from '../../../../../../utilities/getTranslation'
 import { useConfig } from '../../../../utilities/Config'
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent'
 import cellComponents from './field-types'
+import CodeCell from './field-types/Code'
 
 const DefaultCell: React.FC<Props> = (props) => {
   const {
@@ -50,6 +51,19 @@ const DefaultCell: React.FC<Props> = (props) => {
     wrapElementProps.onClick = () => {
       onClick(props)
     }
+  }
+
+  if (field.name === 'id' && cellData.toString().length < 5) {
+    return (
+      <WrapElement {...wrapElementProps}>
+        <CodeCell
+          collection={collection}
+          data={`ID: ${cellData}`}
+          field={field as CodeField}
+          rowData={rowData}
+        />
+      </WrapElement>
+    )
   }
 
   let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[field.type]
