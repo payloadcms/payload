@@ -14,10 +14,6 @@ export const migrationsCollection: CollectionConfig = {
       type: 'number',
       // NOTE: This value is -1 if it is a "dev push"
     },
-    {
-      name: 'schema',
-      type: 'json',
-    },
     // TODO: do we need to persist the indexes separate from the schema?
     // {
     //   name: 'indexes',

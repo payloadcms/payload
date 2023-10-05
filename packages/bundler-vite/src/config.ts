@@ -62,8 +62,9 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     __dirname: '"/"',
     'module.hot': 'undefined',
     'process.argv': '[]',
-    'process.cwd': '() => ""',
+    'process.cwd': 'function () { return "/" }',
     'process.env': '{}',
+    'process?.cwd': 'function () { return "/" }',
   }
 
   Object.entries(process.env).forEach(([key, val]) => {
@@ -76,6 +77,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     base: payloadConfig.routes.admin,
     build: {
       chunkSizeWarningLimit: 4000,
+      emptyOutDir: true,
       outDir: payloadConfig.admin.buildPath,
       rollupOptions: {
         plugins: [image()],

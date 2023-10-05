@@ -3,21 +3,21 @@ import { traverseFields } from './traverseFields'
 export type MergeLiveDataArgs<T> = {
   apiRoute?: string
   depth: number
-  existingData: T
   fieldSchema: Record<string, unknown>[]
   incomingData: T
+  initialData: T
   serverURL: string
 }
 
-export const mergeLivePreviewData = async <T>({
+export const mergeData = async <T>({
   apiRoute,
   depth,
-  existingData,
   fieldSchema,
   incomingData,
+  initialData,
   serverURL,
 }: MergeLiveDataArgs<T>): Promise<T> => {
-  const result = { ...existingData }
+  const result = { ...initialData }
 
   const populationPromises: Promise<void>[] = []
 
