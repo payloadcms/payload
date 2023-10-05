@@ -11,7 +11,9 @@ import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 
 async function generateUsage() {
+  // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
   const schema = await import('./data/users')
+  // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
   const schemaAfter = await import('./data/users-after')
 
   const drizzleJsonBefore = generateDrizzleJson(schema)
@@ -23,6 +25,7 @@ async function generateUsage() {
 }
 
 async function pushUsage() {
+  // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
   const schemaAfter = await import('./data/users-after')
 
   const db = drizzle(new Pool({ connectionString: '' }))

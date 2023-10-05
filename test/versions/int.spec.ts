@@ -27,6 +27,9 @@ let globalGraphQLVersionID
 const globalGraphQLOriginalTitle = 'updated global title'
 const updatedTitle = 'Here is an updated post title in EN'
 
+const formatGraphQLID = (id: number | string) =>
+  payload.db.defaultIDType === 'number' ? id : `"${id}"`
+
 describe('Versions', () => {
   beforeAll(async () => {
     const config = await configPromise
@@ -633,7 +636,9 @@ describe('Versions', () => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
-          updateAutosavePost(id: "${collectionGraphQLPostID}", data: {title: "${updatedTitle2}"}) {
+          updateAutosavePost(id: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )}, data: {title: "${updatedTitle2}"}) {
             title
             updatedAt
             createdAt
@@ -643,7 +648,9 @@ describe('Versions', () => {
 
         // language=graphQL
         const query = `query {
-          versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
+          versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )} } }) {
             docs {
               id
             }
@@ -657,7 +664,7 @@ describe('Versions', () => {
 
       it('should allow read of versions by version id', async () => {
         const query = `query {
-          versionAutosavePost(id: "${collectionGraphQLVersionID}") {
+          versionAutosavePost(id: ${formatGraphQLID(collectionGraphQLVersionID)}) {
             id
             parent {
               id
@@ -709,7 +716,9 @@ describe('Versions', () => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
-          updateAutosavePost(id: "${collectionGraphQLPostID}", data: {title: "${collectionGraphQLOriginalTitle}"}) {
+          updateAutosavePost(id: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )}, data: {title: "${collectionGraphQLOriginalTitle}"}) {
             title
             updatedAt
             createdAt
@@ -719,7 +728,9 @@ describe('Versions', () => {
 
         // language=graphQL
         const query = `query {
-          versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
+          versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )} } }) {
             docs {
               id
             }
@@ -733,7 +744,9 @@ describe('Versions', () => {
       it('should allow a version to be restored', async () => {
         // Update it
         const update = `mutation {
-          updateAutosavePost(id: "${collectionGraphQLPostID}", data: {title: "${'Wrong title'}"}) {
+          updateAutosavePost(id: ${formatGraphQLID(
+            collectionGraphQLPostID,
+          )}, data: {title: "${'Wrong title'}"}) {
             title
             updatedAt
             createdAt
@@ -743,7 +756,7 @@ describe('Versions', () => {
 
         // restore a versionsPost
         const restore = `mutation {
-          restoreVersionAutosavePost(id: "${collectionGraphQLVersionID}") {
+          restoreVersionAutosavePost(id: ${formatGraphQLID(collectionGraphQLVersionID)}) {
             title
           }
         }`
@@ -751,7 +764,7 @@ describe('Versions', () => {
         await graphQLClient.request(restore)
 
         const query = `query {
-          AutosavePost(id: "${collectionGraphQLPostID}") {
+          AutosavePost(id: ${formatGraphQLID(collectionGraphQLPostID)}) {
             title
           }
         }`
@@ -1001,7 +1014,7 @@ describe('Versions', () => {
       it('should allow read of versions by version id', async () => {
         // language=graphql
         const query = `query {
-          versionAutosaveGlobal(id: "${globalGraphQLVersionID}") {
+          versionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
             id
             version {
               title
@@ -1044,7 +1057,7 @@ describe('Versions', () => {
       it('should allow a version to be restored', async () => {
         // language=graphql
         const restore = `mutation {
-          restoreVersionAutosaveGlobal(id: "${globalGraphQLVersionID}") {
+          restoreVersionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
             title
           }
         }`

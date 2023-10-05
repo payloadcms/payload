@@ -1,7 +1,7 @@
 import type { Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { MarkOptional } from 'ts-essentials'
 
+import type { GeneratedTypes } from '../../'
 import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 
@@ -64,11 +64,11 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     // auto-verify (if applicable)
     if (verify) {
       await payload.update({
+        id: result.id,
         collection: slug,
         data: {
           _verified: true,
         },
-        id: result.id,
       })
     }
 

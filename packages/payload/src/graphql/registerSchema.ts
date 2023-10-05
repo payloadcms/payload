@@ -32,13 +32,13 @@ export default function registerGraphQLSchema(payload: Payload): void {
   }
 
   payload.Query = {
-    fields: {},
     name: 'Query',
+    fields: {},
   }
 
   payload.Mutation = {
-    fields: {},
     name: 'Mutation',
+    fields: {},
   }
 
   initCollections(payload)

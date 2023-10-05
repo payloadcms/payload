@@ -1,11 +1,9 @@
 /* eslint-disable no-param-reassign */
 import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
-import type { TypeWithID } from 'payload/types'
+import type { Field, TypeWithID } from 'payload/types'
 
 import { createBlocksMap } from '../../utilities/createBlocksMap'
-import { createRelationshipMap } from '../../utilities/createRelationshipMap'
-import { mergeLocales } from './mergeLocales'
+import { createPathMap } from '../../utilities/createRelationshipMap'
 import { traverseFields } from './traverseFields'
 
 type TransformArgs = {
@@ -18,33 +16,35 @@ type TransformArgs = {
 
 // This is the entry point to transform Drizzle output data
 // into the shape Payload expects based on field schema
-export const transform = <T extends TypeWithID>({
-  config,
-  data,
-  fallbackLocale,
-  fields,
-  locale,
-}: TransformArgs): T => {
+export const transform = <T extends TypeWithID>({ config, data, fields }: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {}
+  let numbers: Record<string, Record<string, unknown>[]> = {}
 
   if ('_relationships' in data) {
-    relationships = createRelationshipMap(data._relationships)
+    relationships = createPathMap(data._relationships)
     delete data._relationships
+  }
+
+  if ('_numbers' in data) {
+    numbers = createPathMap(data._numbers)
+    delete data._numbers
   }
 
   const blocks = createBlocksMap(data)
 
-  const dataWithLocales = mergeLocales({ data, fallbackLocale, locale })
-
-  return traverseFields<T>({
+  const result = traverseFields<T>({
     blocks,
     config,
-    data,
+    dataRef: {
+      id: data.id,
+    },
+    fieldPrefix: '',
     fields,
-    locale,
+    numbers,
     path: '',
     relationships,
-    siblingData: dataWithLocales,
-    table: dataWithLocales,
+    table: data,
   })
+
+  return result
 }

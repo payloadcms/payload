@@ -1,7 +1,6 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
 import httpStatus from 'http-status'
 
+import type { GeneratedTypes } from '../../'
 import type { AccessResult } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Where } from '../../types'
@@ -144,8 +143,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           await priorHook
 
           return hook({
-            context: req.context,
             id,
+            context: req.context,
             req,
           })
         }, Promise.resolve())
@@ -177,7 +176,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         // /////////////////////////////////////
 
         if (collectionConfig.versions) {
-          deleteCollectionVersions({
+          await deleteCollectionVersions({
             id,
             payload,
             req,
@@ -223,9 +222,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
           result =
             (await hook({
+              id,
               context: req.context,
               doc: result,
-              id,
               req,
             })) || result
         }, Promise.resolve())
@@ -250,7 +249,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // Delete Preferences
     // /////////////////////////////////////
 
-    deleteUserPreferences({
+    await deleteUserPreferences({
       collectionConfig,
       ids: docs.map(({ id }) => id),
       payload,

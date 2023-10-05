@@ -598,6 +598,9 @@
         "close": {
           "type": "string"
         },
+        "collapse": {
+          "type": "string"
+        },
         "collections": {
           "type": "string"
         },
@@ -629,6 +632,9 @@
           "type": "string"
         },
         "createNewLabel": {
+          "type": "string"
+        },
+        "creatingNewLabel": {
           "type": "string"
         },
         "created": {
@@ -733,7 +739,13 @@
         "light": {
           "type": "string"
         },
+        "livePreview": {
+          "type": "string"
+        },
         "loading": {
+          "type": "string"
+        },
+        "locale": {
           "type": "string"
         },
         "locales": {
@@ -919,6 +931,7 @@
         "create",
         "createNew",
         "createNewLabel",
+        "creatingNewLabel",
         "created",
         "createdAt",
         "creating",

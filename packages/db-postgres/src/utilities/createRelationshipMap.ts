@@ -1,24 +1,22 @@
-// Flatten relationships to object with path keys
+// Flatten rows to object with path keys
 // for easier retrieval
-export const createRelationshipMap = (
-  rawRelationships: unknown,
-): Record<string, Record<string, unknown>[]> => {
-  let relationships = {}
+export const createPathMap = (rows: unknown): Record<string, Record<string, unknown>[]> => {
+  let rowsByPath = {}
 
-  if (Array.isArray(rawRelationships)) {
-    relationships = rawRelationships.reduce((res, relation) => {
-      const formattedRelation = {
-        ...relation,
+  if (Array.isArray(rows)) {
+    rowsByPath = rows.reduce((res, row) => {
+      const formattedRow = {
+        ...row,
       }
 
-      delete formattedRelation.path
+      delete formattedRow.path
 
-      if (!res[relation.path]) res[relation.path] = []
-      res[relation.path].push(formattedRelation)
+      if (!res[row.path]) res[row.path] = []
+      res[row.path].push(row)
 
       return res
     }, {})
   }
 
-  return relationships
+  return rowsByPath
 }

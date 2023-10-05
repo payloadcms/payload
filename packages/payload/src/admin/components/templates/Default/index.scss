@@ -3,26 +3,117 @@
 .template-default {
   min-height: 100vh;
   display: flex;
+  position: relative;
+  width: calc(100% + var(--nav-width));
+  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+
+  &--nav-open {
+    width: 100%;
+    transition:
+      width var(--nav-trans-time) linear,
+      transform var(--nav-trans-time) linear;
+    transform: translate3d(0, 0, 0);
+
+    .template-default {
+      &__nav-overlay {
+        transition: opacity var(--nav-trans-time) linear;
+      }
+    }
+  }
+
+  &__nav-toggler {
+    position: fixed;
+    z-index: var(--z-modal);
+    top: 0;
+    left: 0;
+    height: var(--app-header-height);
+    width: var(--gutter-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   &__wrap {
     min-width: 0;
     width: 100%;
     flex-grow: 1;
+    position: relative;
   }
 
-  @include mid-break {
-    display: block;
+  &__nav-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    [dir='ltr'] & {
-      margin-left: 0;
-    }
-    [dir='rtl'] & {
-      margin-right: 0;
-    }
-    padding-top: base(3);
+    height: 100%;
+    opacity: 0;
+    background: var(--theme-overlay);
+    padding: 0;
+    border: 0;
+    z-index: var(--z-modal);
+    cursor: pointer;
+    pointer-events: none;
+    display: none;
+  }
+
+  // on large break, push the document off the screen
+  // show an overlay to prevent clicking on the document
+  @include large-break {
+    width: calc(100% + var(--nav-width));
+    transform: translate3d(0, 0, 0);
 
     &__wrap {
-      padding: 0 0 $baseline;
+      transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+    }
+
+    &__nav-overlay {
+      display: block;
+    }
+
+    &--nav-open {
+      transform: translate3d(0, 0, 0);
+
+      .template-default {
+        &__wrap {
+          pointer-events: none;
+          transform: translate3d(0, 0, 0);
+          transition: transform var(--nav-trans-time) linear;
+        }
+
+        &__nav-overlay {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+    }
+  }
+
+  @include small-break {
+    &__nav-toggler {
+      width: auto;
+      padding-left: var(--gutter-h);
+    }
+  }
+
+  @include extra-small-break {
+    &__nav-toggler {
+      width: calc(var(--base) * 2);
+      height: calc(var(--base) * 2);
+      display: none;
+    }
+
+    &--nav-open {
+      transition: none;
+    }
+
+    .template-default {
+      &__wrap {
+        transition: none;
+      }
+
+      &__nav-overlay {
+        transition: none;
+      }
     }
   }
 }

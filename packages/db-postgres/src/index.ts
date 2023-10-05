@@ -1,67 +1,91 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
+
 import { connect } from './connect'
-import { createMigration } from './createMigration'
-import { init } from './init'
-import { webpack } from './webpack'
-// import { createGlobal } from './createGlobal';
-// import { createVersion } from './createVersion';
-// import { beginTransaction } from './transactions/beginTransaction';
-// import { rollbackTransaction } from './transactions/rollbackTransaction';
-// import { commitTransaction } from './transactions/commitTransaction';
-// import { queryDrafts } from './queryDrafts';
-import { find } from './find'
-// import { findGlobalVersions } from './findGlobalVersions';
-// import { findVersions } from './findVersions';
 import { create } from './create'
-// import { deleteOne } from './deleteOne';
-// import { deleteVersions } from './deleteVersions';
-// import { findGlobal } from './findGlobal';
+import { createGlobal } from './createGlobal'
+import { createGlobalVersion } from './createGlobalVersion'
+import { createMigration } from './createMigration'
+import { createVersion } from './createVersion'
+import { deleteMany } from './deleteMany'
+import { deleteOne } from './deleteOne'
+import { deleteVersions } from './deleteVersions'
+import { destroy } from './destroy'
+import { extendViteConfig } from './extendViteConfig'
+import { extendWebpackConfig } from './extendWebpackConfig'
+import { find } from './find'
+import { findGlobal } from './findGlobal'
+import { findGlobalVersions } from './findGlobalVersions'
 import { findOne } from './findOne'
-// import { updateGlobal } from './updateGlobal';
+import { findVersions } from './findVersions'
+import { init } from './init'
+import { migrate } from './migrate'
+import { migrateStatus } from './migrateStatus'
+import { queryDrafts } from './queryDrafts'
+import { beginTransaction } from './transactions/beginTransaction'
+import { commitTransaction } from './transactions/commitTransaction'
+import { rollbackTransaction } from './transactions/rollbackTransaction'
 import { updateOne } from './update'
-// import { updateVersion } from './updateVersion';
-// import { deleteMany } from './deleteMany';
-// import { destroy } from './destroy';
+import { updateGlobal } from './updateGlobal'
+import { updateGlobalVersion } from './updateGlobalVersion'
+import { updateVersion } from './updateVersion'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+    const migrationDir = args.migrationDir || path.resolve(process.cwd(), 'src/migrations')
+
+    extendWebpackConfig(payload.config)
+    extendViteConfig(payload.config)
+
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
+      name: 'postgres',
+
+      // Postgres-specific
+      drizzle: undefined,
+      enums: {},
+      pool: undefined,
+      relations: {},
+      schema: {},
+      sessions: {},
+      tables: {},
+
+      // DatabaseAdapter
+      beginTransaction,
+      commitTransaction,
       connect,
       create,
+      createGlobal,
+      createGlobalVersion,
       createMigration,
-      db: undefined,
-      enums: {},
+      createVersion,
+      defaultIDType: 'number',
+      deleteMany,
+      deleteOne,
+      deleteVersions,
+      destroy,
       find,
-      // queryDrafts,
+      findGlobal,
+      findGlobalVersions,
       findOne,
-      // destroy,
+      findVersions,
       init,
+      migrate,
+      migrateStatus,
+      migrationDir,
       payload,
-      // beginTransaction,
-      // rollbackTransaction,
-      // commitTransaction,
-      relations: {},
-      tables: {},
+      queryDrafts,
+      rollbackTransaction,
+      updateGlobal,
+      updateGlobalVersion,
       updateOne,
-      webpack,
-      // deleteOne,
-      // deleteMany,
-      // findGlobal,
-      // createGlobal,
-      // updateGlobal,
-      // findVersions,
-      // findGlobalVersions,
-      // createVersion,
-      // updateVersion,
-      // deleteVersions,
+      updateVersion,
     })
   }
 

@@ -19,6 +19,7 @@ import Error from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import Label from '../../Label'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'upload'
 
@@ -79,16 +80,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     filterOptions: filterOptionsResult,
   })
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   useEffect(() => {
     if (typeof value === 'string' && value !== '') {
       const fetchFile = async () => {
@@ -135,7 +126,15 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
 
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

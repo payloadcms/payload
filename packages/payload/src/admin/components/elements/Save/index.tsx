@@ -30,7 +30,7 @@ const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) =>
   })
 
   return (
-    <FormSubmit buttonId="action-save" onClick={save} ref={ref} type="button">
+    <FormSubmit buttonId="action-save" onClick={save} ref={ref} type="button" size="small">
       {label}
     </FormSubmit>
   )

@@ -11,16 +11,6 @@
     }
   }
 
-  &.popup--active .array-actions__button {
-    background: var(--theme-elevation-0);
-  }
-
-  &__button,
-  &__action {
-    @extend %btn-reset;
-    cursor: pointer;
-  }
-
   &__actions {
     list-style: none;
     margin: 0;
@@ -29,26 +19,30 @@
 
   &__action {
     @extend %btn-reset;
-    display: block;
+    display: flex;
+    gap: calc(var(--base) / 2);
+    align-items: center;
 
     svg {
       position: relative;
       top: -1px;
-      margin-right: base(0.25);
 
       .stroke {
         stroke-width: 1px;
       }
     }
-
-    &:hover {
-      opacity: 0.7;
-    }
   }
 
   &__move-up {
-    svg {
-      transform: rotate(180deg);
-    }
+    margin-bottom: 2px;
+  }
+
+  &__move-down {
+    margin-top: 6px;
+    margin-bottom: 2px;
+  }
+
+  &__action-chevron {
+    padding: 0 calc(var(--base) / 4);
   }
 }

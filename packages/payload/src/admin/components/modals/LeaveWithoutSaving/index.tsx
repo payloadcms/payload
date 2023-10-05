@@ -1,36 +1,57 @@
-import React from 'react'
+import { Modal, useModal } from '@faceless-ui/modal'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import NavigationPrompt from 'react-router-navigation-prompt'
 
 import Button from '../../elements/Button'
 import { useFormModified } from '../../forms/Form/context'
-import MinimalTemplate from '../../templates/Minimal'
 import { useAuth } from '../../utilities/Auth'
 import './index.scss'
 
 const modalSlug = 'leave-without-saving'
 
-const LeaveWithoutSaving: React.FC = () => {
-  const modified = useFormModified()
-  const { user } = useAuth()
+const baseClass = 'leave-without-saving'
+
+const Component: React.FC<{
+  isActive: boolean
+  onCancel: () => void
+  onConfirm: () => void
+}> = ({ isActive, onCancel, onConfirm }) => {
+  const { closeModal, openModal } = useModal()
   const { t } = useTranslation('general')
 
+  useEffect(() => {
+    if (isActive) openModal(modalSlug)
+    else closeModal(modalSlug)
+  }, [isActive, openModal, closeModal])
+
   return (
-    <NavigationPrompt when={Boolean(modified && user)}>
-      {({ onCancel, onConfirm }) => (
-        <div className={modalSlug}>
-          <MinimalTemplate className={`${modalSlug}__template`}>
-            <h1>{t('leaveWithoutSaving')}</h1>
-            <p>{t('changesNotSaved')}</p>
-            <Button buttonStyle="secondary" onClick={onCancel}>
-              {t('stayOnThisPage')}
-            </Button>
-            <Button onClick={onConfirm}>{t('leaveAnyway')}</Button>
-          </MinimalTemplate>
+    <Modal className={baseClass} onClose={onCancel} slug={modalSlug}>
+      <div className={`${baseClass}__wrapper`}>
+        <div className={`${baseClass}__content`}>
+          <h1>{t('leaveWithoutSaving')}</h1>
+          <p>{t('changesNotSaved')}</p>
         </div>
+        <div className={`${baseClass}__controls`}>
+          <Button buttonStyle="secondary" onClick={onCancel}>
+            {t('stayOnThisPage')}
+          </Button>
+          <Button onClick={onConfirm}>{t('leaveAnyway')}</Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+export const LeaveWithoutSaving: React.FC = () => {
+  const modified = useFormModified()
+  const { user } = useAuth()
+
+  return (
+    <NavigationPrompt renderIfNotActive when={Boolean(modified && user)}>
+      {({ isActive, onCancel, onConfirm }) => (
+        <Component isActive={isActive} onCancel={onCancel} onConfirm={onConfirm} />
       )}
     </NavigationPrompt>
   )
 }
-
-export default LeaveWithoutSaving

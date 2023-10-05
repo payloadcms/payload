@@ -1,4 +1,4 @@
-export { CustomPreviewButtonProps } from './PreviewButton'
-export { CustomPublishButtonProps } from './Publish'
-export { CustomSaveButtonProps } from './Save'
-export { CustomSaveDraftButtonProps } from './SaveDraft'
+export type { CustomPreviewButtonProps } from './PreviewButton'
+export type { CustomPublishButtonProps } from './Publish'
+export type { CustomSaveButtonProps } from './Save'
+export type { CustomSaveDraftButtonProps } from './SaveDraft'

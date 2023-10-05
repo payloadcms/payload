@@ -32,8 +32,10 @@
   "composite": true, // Required for references to work
   "references": [
     { "path": "./packages/db-mongodb" },
-    // if you tsconfig is something different
+    // if your tsconfig is something different
     { "path": "./packages/db-postgres" },
+    { "path": "./packages/richtext-slate" },
+    { "path": "./packages/richtext-lexical" },
     { "path": "./packages/payload" }
   ]
 }

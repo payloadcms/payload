@@ -1,26 +1,20 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import type { Translation } from '../../../../translations/type'
-import type { Props } from './types'
+import type { CollectionEditViewProps } from '../types'
 
-import { formatDate } from '../../../utilities/formatDate'
-import CopyToClipboard from '../../elements/CopyToClipboard'
-import Eyebrow from '../../elements/Eyebrow'
+import { DocumentControls } from '../../elements/DocumentControls'
+import { DocumentHeader } from '../../elements/DocumentHeader'
 import { Gutter } from '../../elements/Gutter'
 import { LoadingOverlayToggle } from '../../elements/Loading'
-import PreviewButton from '../../elements/PreviewButton'
 import ReactSelect from '../../elements/ReactSelect'
-import RenderTitle from '../../elements/RenderTitle'
-import { Save } from '../../elements/Save'
 import Form from '../../forms/Form'
 import Label from '../../forms/Label'
 import RenderFields from '../../forms/RenderFields'
-import fieldTypes from '../../forms/field-types'
-import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
+import { fieldTypes } from '../../forms/field-types'
+import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
 import { useAuth } from '../../utilities/Auth'
-import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
 import { OperationContext } from '../../utilities/OperationProvider'
 import Auth from '../collections/Edit/Auth'
@@ -29,7 +23,7 @@ import './index.scss'
 
 const baseClass = 'account'
 
-const DefaultAccount: React.FC<Props> = (props) => {
+const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
   const {
     action,
     apiURL,
@@ -42,19 +36,9 @@ const DefaultAccount: React.FC<Props> = (props) => {
     permissions,
   } = props
 
-  const {
-    admin: { preview, useAsTitle },
-    auth,
-    fields,
-    slug,
-    timestamps,
-  } = collection
+  const { auth, fields } = collection
 
   const { refreshCookieAsync } = useAuth()
-  const {
-    admin: { dateFormat },
-    routes: { admin },
-  } = useConfig()
   const { i18n, t } = useTranslation('authentication')
 
   const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => ({
@@ -65,7 +49,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
   const onSave = useCallback(async () => {
     await refreshCookieAsync()
     if (typeof onSaveFromProps === 'function') {
-      onSaveFromProps()
+      onSaveFromProps({})
     }
   }, [onSaveFromProps, refreshCookieAsync])
 
@@ -74,8 +58,8 @@ const DefaultAccount: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <LoadingOverlayToggle name="account" show={isLoading} type="withoutNav" />
-      <div className={classes}>
-        {!isLoading && (
+      {!isLoading && (
+        <div className={classes}>
           <OperationContext.Provider value="update">
             <Form
               action={action}
@@ -85,27 +69,28 @@ const DefaultAccount: React.FC<Props> = (props) => {
               method="patch"
               onSuccess={onSave}
             >
+              <DocumentHeader apiURL={apiURL} collection={collection} data={data} />
+              <DocumentControls
+                apiURL={apiURL}
+                collection={collection}
+                data={data}
+                hasSavePermission={hasSavePermission}
+                isAccountView
+                permissions={permissions}
+              />
               <div className={`${baseClass}__main`}>
                 <Meta
                   description={t('accountOfCurrentUser')}
                   keywords={t('account')}
                   title={t('account')}
                 />
-                <Eyebrow />
                 {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
                   <LeaveWithoutSaving />
                 )}
                 <div className={`${baseClass}__edit`}>
                   <Gutter className={`${baseClass}__header`}>
-                    <h1>
-                      <RenderTitle
-                        collection={collection}
-                        data={data}
-                        fallback={`[${t('general:untitled')}]`}
-                        useAsTitle={useAsTitle}
-                      />
-                    </h1>
                     <Auth
+                      className={`${baseClass}__auth`}
                       collection={collection}
                       email={data?.email}
                       operation="update"
@@ -138,33 +123,6 @@ const DefaultAccount: React.FC<Props> = (props) => {
               <div className={`${baseClass}__sidebar-wrap`}>
                 <div className={`${baseClass}__sidebar`}>
                   <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                    <ul className={`${baseClass}__collection-actions`}>
-                      {permissions?.create?.permission && (
-                        <React.Fragment>
-                          <li>
-                            <Link to={`${admin}/collections/${slug}/create`}>
-                              {t('general:createNew')}
-                            </Link>
-                          </li>
-                        </React.Fragment>
-                      )}
-                    </ul>
-                    <div
-                      className={`${baseClass}__document-actions${
-                        preview ? ` ${baseClass}__document-actions--with-preview` : ''
-                      }`}
-                    >
-                      {preview &&
-                        (!collection.versions?.drafts || collection.versions?.drafts?.autosave) && (
-                          <PreviewButton
-                            CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
-                            generatePreviewURL={preview}
-                          />
-                        )}
-                      {hasSavePermission && (
-                        <Save CustomComponent={collection?.admin?.components?.edit?.SaveButton} />
-                      )}
-                    </div>
                     <div className={`${baseClass}__sidebar-fields`}>
                       <RenderFields
                         fieldSchema={fields}
@@ -174,45 +132,13 @@ const DefaultAccount: React.FC<Props> = (props) => {
                         readOnly={!hasSavePermission}
                       />
                     </div>
-                    <ul className={`${baseClass}__meta`}>
-                      <li className={`${baseClass}__api-url`}>
-                        <span className={`${baseClass}__label`}>
-                          API URL <CopyToClipboard value={apiURL} />
-                        </span>
-                        <a href={apiURL} rel="noopener noreferrer" target="_blank">
-                          {apiURL}
-                        </a>
-                      </li>
-                      <li>
-                        <div className={`${baseClass}__label`}>ID</div>
-                        <div>{data?.id}</div>
-                      </li>
-                      {timestamps && (
-                        <React.Fragment>
-                          {data.updatedAt && (
-                            <li>
-                              <div className={`${baseClass}__label`}>
-                                {t('general:lastModified')}
-                              </div>
-                              <div>{formatDate(data.updatedAt, dateFormat, i18n?.language)}</div>
-                            </li>
-                          )}
-                          {data.createdAt && (
-                            <li>
-                              <div className={`${baseClass}__label`}>{t('general:created')}</div>
-                              <div>{formatDate(data.createdAt, dateFormat, i18n?.language)}</div>
-                            </li>
-                          )}
-                        </React.Fragment>
-                      )}
-                    </ul>
                   </div>
                 </div>
               </div>
             </Form>
           </OperationContext.Provider>
-        )}
-      </div>
+        </div>
+      )}
     </React.Fragment>
   )
 }

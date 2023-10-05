@@ -2,7 +2,11 @@
 
 .field-description {
   display: flex;
-  padding-top: base(0.25);
-  padding-bottom: base(0.25);
   color: var(--theme-elevation-400);
+  margin-top: calc(var(--base) / 4);
+
+  &--margin-bottom {
+    margin-top: 0;
+    margin-bottom: calc(var(--base) / 2);
+  }
 }

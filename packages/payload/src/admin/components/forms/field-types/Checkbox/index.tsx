@@ -11,15 +11,16 @@ import useField from '../../useField'
 import withCondition from '../../withCondition'
 import { CheckboxInput } from './Input'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'checkbox'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, condition, description, readOnly, style, width } = {},
     disableFormData,
     label,
-    name,
     onChange,
     path: pathFromProps,
     required,
@@ -56,7 +57,7 @@ const Checkbox: React.FC<Props> = (props) => {
   return (
     <div
       className={[
-        'field-type',
+        fieldBaseClass,
         baseClass,
         showError && 'error',
         className,

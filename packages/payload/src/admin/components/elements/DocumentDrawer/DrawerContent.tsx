@@ -35,13 +35,30 @@ const Content: React.FC<DocumentDrawerProps> = ({
   } = useConfig()
   const { closeModal, modalState, toggleModal } = useModal()
   const { code: locale } = useLocale()
-  const { permissions, user } = useAuth()
+  const { user } = useAuth()
   const [internalState, setInternalState] = useState<Fields>()
   const { i18n, t } = useTranslation(['fields', 'general'])
   const hasInitializedState = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const { docPermissions, getDocPreferences, id } = useDocumentInfo()
+
+  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
+
+  const { id, docPermissions, getDocPreferences } = useDocumentInfo()
+
+  // The component definition could come from multiple places in the config
+  // we need to cascade into the proper component from the top-down
+  // 1. "components.Edit"
+  // 2. "components.Edit.Default"
+  // 3. "components.Edit.Default.Component"
+  const CustomEditView =
+    typeof Edit === 'function'
+      ? Edit
+      : typeof Edit === 'object' && typeof Edit.Default === 'function'
+      ? Edit.Default
+      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
+      ? Edit.Default.Component
+      : undefined
 
   const [fields, setFields] = useState(() => formatFields(collectionConfig, true))
 
@@ -64,9 +81,9 @@ const Content: React.FC<DocumentDrawerProps> = ({
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        id,
         data,
         fieldSchema: fields,
-        id,
         locale,
         operation: id ? 'update' : 'create',
         preferences,
@@ -94,20 +111,25 @@ const Content: React.FC<DocumentDrawerProps> = ({
   if (isError) return null
 
   const isEditing = Boolean(id)
+
   const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}` : null
+
   const action = `${serverURL}${api}/${collectionSlug}${
     id ? `/${id}` : ''
-  }?locale=${locale}&depth=0&fallback-locale=null`
+  }?locale=${locale}&fallback-locale=null`
+
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
+
   const isLoading = !internalState || !docPermissions || isLoadingDocument
 
   return (
     <RenderCustomComponent
-      CustomComponent={collectionConfig.admin?.components?.views?.Edit}
+      CustomComponent={CustomEditView}
       DefaultComponent={DefaultEdit}
       componentProps={{
+        id,
         action,
         apiURL,
         collection: collectionConfig,
@@ -135,16 +157,15 @@ const Content: React.FC<DocumentDrawerProps> = ({
         ),
         data,
         disableActions: true,
-        disableEyebrow: true,
         disableLeaveWithoutSaving: true,
+        disableRoutes: true,
         hasSavePermission,
-        id,
         internalState,
         isEditing,
         isLoading,
         me: true,
         onSave,
-        permissions: permissions.collections[collectionConfig.slug],
+        permissions: docPermissions,
       }}
     />
   )
@@ -155,7 +176,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 // this drawer is used for both creating and editing documents
 // this means that the `id` may be unknown until the document is created
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
-  const { collectionSlug, id: idFromProps, onSave: onSaveFromProps } = props
+  const { id: idFromProps, collectionSlug, onSave: onSaveFromProps } = props
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const [id, setId] = useState<null | string>(idFromProps)
 

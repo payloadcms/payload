@@ -8,22 +8,16 @@
     cursor: pointer;
     color: var(--theme-elevation-400);
     background: transparent;
+    padding-left: 0;
     border: 0;
-    margin-top: base(0.25);
+    margin-bottom: base(0.25);
     width: 100%;
+    text-align: left;
     display: flex;
-    [dir='ltr'] & {
-      padding-right: base(0.5);
-      padding-left: 0;
-      align-items: flex-start;
-      text-align: left;
-    }
-    [dir='rtl'] & {
-      padding-left: base(0.5);
-      padding-right: 0;
-      align-items: flex-start;
-      text-align: right;
-    }
+    align-items: flex-start;
+    padding: 0;
+    gap: base(0.5);
+    justify-content: space-between;
 
     svg {
       flex-shrink: 0;
@@ -45,14 +39,10 @@
   }
 
   &__indicator {
-    [dir='ltr'] & {
-      margin-left: auto;
-    }
-    [dir='rtl'] & {
-      margin-right: auto;
-    }
+    position: relative;
+    flex-shrink: 0;
 
-    .stroke {
+    svg .stroke {
       stroke: var(--theme-elevation-200);
     }
   }
@@ -61,10 +51,6 @@
     .collapsible__toggle {
       border-bottom-right-radius: $style-radius-s;
       border-bottom-left-radius: $style-radius-s;
-    }
-
-    .nav-group__indicator {
-      transform: rotate(0.5turn);
     }
   }
 }

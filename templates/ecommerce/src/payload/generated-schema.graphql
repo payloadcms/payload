@@ -8,7 +8,12 @@ type Query {
   Products(where: Product_where, draft: Boolean, page: Int, limit: Int, sort: String): Products
   docAccessProduct(id: String!): productsDocAccess
   versionProduct(id: String): ProductVersion
-  versionsProducts(where: versionsProduct_where, page: Int, limit: Int, sort: String): versionsProducts
+  versionsProducts(
+    where: versionsProduct_where
+    page: Int
+    limit: Int
+    sort: String
+  ): versionsProducts
   Order(id: String!, draft: Boolean): Order
   Orders(where: Order_where, draft: Boolean, page: Int, limit: Int, sort: String): Orders
   docAccessOrder(id: String!): ordersDocAccess
@@ -3885,7 +3890,8 @@ type CartItems {
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Order_Items {
   product: Product
@@ -9443,17 +9449,37 @@ type Mutation {
   deletePage(id: String!): Page
   restoreVersionPage(id: String): Page
   createProduct(data: mutationProductInput!, draft: Boolean): Product
-  updateProduct(id: String!, data: mutationProductUpdateInput!, draft: Boolean, autosave: Boolean): Product
+  updateProduct(
+    id: String!
+    data: mutationProductUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Product
   deleteProduct(id: String!): Product
   restoreVersionProduct(id: String): Product
   createOrder(data: mutationOrderInput!, draft: Boolean): Order
-  updateOrder(id: String!, data: mutationOrderUpdateInput!, draft: Boolean, autosave: Boolean): Order
+  updateOrder(
+    id: String!
+    data: mutationOrderUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Order
   deleteOrder(id: String!): Order
   createMedia(data: mutationMediaInput!, draft: Boolean): Media
-  updateMedia(id: String!, data: mutationMediaUpdateInput!, draft: Boolean, autosave: Boolean): Media
+  updateMedia(
+    id: String!
+    data: mutationMediaUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Media
   deleteMedia(id: String!): Media
   createCategory(data: mutationCategoryInput!, draft: Boolean): Category
-  updateCategory(id: String!, data: mutationCategoryUpdateInput!, draft: Boolean, autosave: Boolean): Category
+  updateCategory(
+    id: String!
+    data: mutationCategoryUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Category
   deleteCategory(id: String!): Category
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User

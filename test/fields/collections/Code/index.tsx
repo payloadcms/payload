@@ -4,38 +4,38 @@ import type { CodeField } from '../../payload-types'
 const Code: CollectionConfig = {
   fields: [
     {
+      name: 'javascript',
       admin: {
         language: 'javascript',
       },
-      name: 'javascript',
       type: 'code',
     },
     {
+      name: 'typescript',
       admin: {
         language: 'typescript',
       },
-      name: 'typescript',
       type: 'code',
     },
     {
+      name: 'json',
       admin: {
         language: 'json',
       },
-      name: 'json',
       type: 'code',
     },
     {
+      name: 'html',
       admin: {
         language: 'html',
       },
-      name: 'html',
       type: 'code',
     },
     {
+      name: 'css',
       admin: {
         language: 'css',
       },
-      name: 'css',
       type: 'code',
     },
   ],

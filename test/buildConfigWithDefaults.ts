@@ -2,18 +2,29 @@ import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
-import { mongooseAdapter } from '../packages/db-mongodb/src/index'
-import { postgresAdapter } from '../packages/db-postgres/src/index'
+import { viteBundler } from '../packages/bundler-vite/src'
+import { webpackBundler } from '../packages/bundler-webpack/src'
+import { mongooseAdapter } from '../packages/db-mongodb/src'
+import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
+import { slateEditor } from '../packages/richtext-slate/src'
+
+// process.env.PAYLOAD_DATABASE = 'postgres'
+
+const bundlerAdapters = {
+  vite: viteBundler(),
+  webpack: webpackBundler(),
+}
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    url: 'mongodb://127.0.0.1/payload',
+    url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
     client: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payload',
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
+    migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
   }),
 }
 
@@ -21,6 +32,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const [name] = process.argv.slice(2)
 
   const config: Config = {
+    editor: slateEditor({}),
     telemetry: false,
     rateLimit: {
       window: 15 * 60 * 100, // 15min default,
@@ -39,6 +51,8 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             password: 'test',
           },
     ...(config.admin || {}),
+    buildPath: path.resolve(__dirname, '../build'),
+    bundler: bundlerAdapters[process.env.PAYLOAD_BUNDLER || 'webpack'],
     webpack: (webpackConfig) => {
       const existingConfig =
         typeof testConfig?.admin?.webpack === 'function'
@@ -46,6 +60,14 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           : webpackConfig
       return {
         ...existingConfig,
+        entry: {
+          main: [
+            `webpack-hot-middleware/client?path=${
+              testConfig?.routes?.admin || '/admin'
+            }/__webpack_hmr`,
+            path.resolve(__dirname, '../packages/payload/src/admin'),
+          ],
+        },
         name,
         cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
         resolve: {
@@ -54,14 +76,21 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ...existingConfig.resolve?.alias,
             [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-postgres/src/mock',
+              '../packages/db-postgres/mock.js',
             ),
             [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-mongodb/src/mock',
+              '../packages/db-mongodb/mock.js',
             ),
-            '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
-            '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),
+            [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
+              __dirname,
+              '../packages/bundler-webpack/src/mocks/emptyModule.js',
+            ),
+            [path.resolve(__dirname, '../packages/bundler-vite/src/index')]: path.resolve(
+              __dirname,
+              '../packages/bundler-vite/mock.js',
+            ),
+            react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },
         },
       }

@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import type { Payload } from '../../index'
+import type { Payload } from '../../'
 import type { Migration } from '../types'
 
 /**
@@ -12,7 +12,12 @@ export const readMigrationFiles = async ({
 }: {
   payload: Payload
 }): Promise<Migration[]> => {
-  if (!fs.existsSync(payload.db.migrationDir)) return []
+  if (!fs.existsSync(payload.db.migrationDir)) {
+    payload.logger.debug({
+      msg: `No migration directory found at ${payload.db.migrationDir}`,
+    })
+    return []
+  }
 
   const files = fs
     .readdirSync(payload.db.migrationDir)

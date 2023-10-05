@@ -1,42 +1,35 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Link, NavLink, useHistory } from 'react-router-dom'
-
-import type { EntityToGroup, Group } from '../../../utilities/groupNavItems'
-
-import { getTranslation } from '../../../../utilities/getTranslation'
-import { EntityType, groupNavItems } from '../../../utilities/groupNavItems'
-import Account from '../../graphics/Account'
-import Icon from '../../graphics/Icon'
-import Chevron from '../../icons/Chevron'
-import CloseMenu from '../../icons/CloseMenu'
-import Menu from '../../icons/Menu'
-import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
+import { useAuth } from '../../utilities/Auth'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import Localizer from '../Localizer'
+import Chevron from '../../icons/Chevron'
 import Logout from '../Logout'
+import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems'
+import { getTranslation } from '../../../../utilities/getTranslation'
 import NavGroup from '../NavGroup'
+import { useNav } from './context'
+
 import './index.scss'
+import { Hamburger } from '../Hamburger'
 
 const baseClass = 'nav'
 
-const DefaultNav = () => {
+const DefaultNav: React.FC = () => {
+  const { navOpen, setNavOpen, navRef } = useNav()
   const { permissions, user } = useAuth()
-  const [menuActive, setMenuActive] = useState(false)
   const [groups, setGroups] = useState<Group[]>([])
-  const history = useHistory()
-  const { i18n, t } = useTranslation('general')
+  const { t, i18n } = useTranslation('general')
+
   const {
-    admin: {
-      components: { afterNavLinks, beforeNavLinks },
-    },
     collections,
     globals,
     routes: { admin },
+    admin: {
+      components: { beforeNavLinks, afterNavLinks },
+    },
   } = useConfig()
-
-  const classes = [baseClass, menuActive && `${baseClass}--menu-active`].filter(Boolean).join(' ')
 
   useEffect(() => {
     setGroups(
@@ -49,8 +42,8 @@ const DefaultNav = () => {
             )
             .map((collection) => {
               const entityToGroup: EntityToGroup = {
-                entity: collection,
                 type: EntityType.collection,
+                entity: collection,
               }
 
               return entityToGroup
@@ -62,8 +55,8 @@ const DefaultNav = () => {
             )
             .map((global) => {
               const entityToGroup: EntityToGroup = {
-                entity: global,
                 type: EntityType.global,
+                entity: global,
               }
 
               return entityToGroup
@@ -75,34 +68,13 @@ const DefaultNav = () => {
     )
   }, [collections, globals, permissions, i18n, i18n.language, user])
 
-  useEffect(
-    () =>
-      history.listen(() => {
-        setMenuActive(false)
-      }),
-    [history],
-  )
-
   return (
-    <aside className={classes}>
-      <div className={`${baseClass}__scroll`}>
-        <header>
-          <Link aria-label={t('dashboard')} className={`${baseClass}__brand`} to={admin}>
-            <Icon />
-          </Link>
-          <button
-            className={`${baseClass}__mobile-menu-btn`}
-            onClick={() => setMenuActive(!menuActive)}
-            type="button"
-          >
-            {menuActive && <CloseMenu />}
-            {!menuActive && <Menu />}
-          </button>
-        </header>
+    <aside className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
+      <div className={`${baseClass}__scroll`} ref={navRef}>
         <nav className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) &&
             beforeNavLinks.map((Component, i) => <Component key={i} />)}
-          {groups.map(({ entities, label }, key) => {
+          {groups.map(({ label, entities }, key) => {
             return (
               <NavGroup {...{ key, label }}>
                 {entities.map(({ entity, type }, i) => {
@@ -124,14 +96,16 @@ const DefaultNav = () => {
 
                   return (
                     <NavLink
-                      activeClassName="active"
-                      className={`${baseClass}__link`}
                       id={id}
+                      className={`${baseClass}__link`}
+                      activeClassName="active"
                       key={i}
                       to={href}
                     >
-                      <Chevron />
-                      {entityLabel}
+                      <span className={`${baseClass}__link-icon`}>
+                        <Chevron direction="right" />
+                      </span>
+                      <span className={`${baseClass}__link-label`}>{entityLabel}</span>
                     </NavLink>
                   )
                 })}
@@ -141,23 +115,27 @@ const DefaultNav = () => {
           {Array.isArray(afterNavLinks) &&
             afterNavLinks.map((Component, i) => <Component key={i} />)}
           <div className={`${baseClass}__controls`}>
-            <Localizer />
-            <Link
-              aria-label={t('authentication:account')}
-              className={`${baseClass}__account`}
-              to={`${admin}/account`}
-            >
-              <Account />
-            </Link>
             <Logout />
           </div>
         </nav>
+      </div>
+      <div className={`${baseClass}__header`}>
+        <div className={`${baseClass}__header-content`}>
+          <button
+            className={`${baseClass}__mobile-close`}
+            onClick={() => {
+              setNavOpen(false)
+            }}
+          >
+            <Hamburger isActive />
+          </button>
+        </div>
       </div>
     </aside>
   )
 }
 
-const Nav: React.FC = () => {
+export const Nav: React.FC = () => {
   const {
     admin: {
       components: { Nav: CustomNav } = {
@@ -168,5 +146,3 @@ const Nav: React.FC = () => {
 
   return <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
 }
-
-export default Nav

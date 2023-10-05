@@ -61,7 +61,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       collection: collectionConfig.slug,
       req,
       where: {
-        resetPasswordExpiration: { greater_than: Date.now() },
+        resetPasswordExpiration: { greater_than: new Date() },
         resetPasswordToken: { equals: data.token },
       },
     })
@@ -74,16 +74,16 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user.salt = salt
     user.hash = hash
 
-    user.resetPasswordExpiration = Date.now()
+    user.resetPasswordExpiration = new Date().toISOString()
 
     if (collectionConfig.auth.verify) {
       user._verified = true
     }
 
     const doc = await payload.db.updateOne({
+      id: user.id,
       collection: collectionConfig.slug,
       data: user,
-      id: user.id,
       req,
     })
 
@@ -116,9 +116,9 @@ async function resetPassword(args: Arguments): Promise<Result> {
     }
 
     const fullUser = await payload.findByID({
+      id: user.id,
       collection: collectionConfig.slug,
       depth,
-      id: user.id,
       overrideAccess,
       req,
     })

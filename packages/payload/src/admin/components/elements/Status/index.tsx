@@ -17,7 +17,7 @@ import './index.scss'
 const baseClass = 'status'
 
 const Status: React.FC = () => {
-  const { collection, docPermissions, getVersions, global, id, publishedDoc, unpublishedVersions } =
+  const { id, collection, docPermissions, getVersions, global, publishedDoc, unpublishedVersions } =
     useDocumentInfo()
   const { toggleModal } = useModal()
   const {
@@ -61,11 +61,11 @@ const Status: React.FC = () => {
       }
 
       if (collection) {
-        url = `${serverURL}${api}/${collection.slug}/${id}?depth=0&locale=${locale}&fallback-locale=null`
+        url = `${serverURL}${api}/${collection.slug}/${id}?locale=${locale}&fallback-locale=null`
         method = 'patch'
       }
       if (global) {
-        url = `${serverURL}${api}/globals/${global.slug}?depth=0&locale=${locale}&fallback-locale=null`
+        url = `${serverURL}${api}/globals/${global.slug}?locale=${locale}&fallback-locale=null`
         method = 'post'
       }
 
@@ -130,8 +130,9 @@ const Status: React.FC = () => {
 
   if (statusToRender) {
     return (
-      <div className={baseClass}>
+      <div className={baseClass} title={`${t('status')}: ${t(statusToRender)}`}>
         <div className={`${baseClass}__value-wrap`}>
+          <span className={`${baseClass}__label`}>{t('status')}:&nbsp;</span>
           <span className={`${baseClass}__value`}>{t(statusToRender)}</span>
           {canUpdate && statusToRender === 'published' && (
             <React.Fragment>

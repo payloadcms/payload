@@ -10,6 +10,7 @@ import Label from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const prismToMonacoLanguageMap = {
   js: 'javascript',
@@ -20,6 +21,7 @@ const baseClass = 'code-field'
 
 const Code: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       className,
       condition,
@@ -31,7 +33,6 @@ const Code: React.FC<Props> = (props) => {
       width,
     } = {},
     label,
-    name,
     path: pathFromProps,
     required,
     validate = code,
@@ -52,19 +53,17 @@ const Code: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  const classes = [
-    baseClass,
-    'field-type',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

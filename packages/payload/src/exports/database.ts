@@ -1,4 +1,5 @@
 export {
+  BaseDatabaseAdapter,
   BeginTransaction,
   CommitTransaction,
   Connect,
@@ -6,10 +7,11 @@ export {
   CreateArgs,
   CreateGlobal,
   CreateGlobalArgs,
+  CreateGlobalVersion,
+  CreateGlobalVersionArgs,
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
-  DatabaseAdapter,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,
@@ -35,20 +37,22 @@ export {
   QueryDraftsArgs,
   RollbackTransaction,
   Transaction,
+  TypeWithVersion,
   UpdateGlobal,
   UpdateGlobalArgs,
+  UpdateGlobalVersion,
+  UpdateGlobalVersionArgs,
   UpdateOne,
   UpdateOneArgs,
   UpdateVersion,
   UpdateVersionArgs,
-  Webpack,
 } from '../database/types'
 
 export * from '../database/queryValidation/types'
 
 export { combineQueries } from '../database/combineQueries'
 
-export { createDatabaseAdapter } from '../database/createAdapter'
+export { createDatabaseAdapter } from '../database/createDatabaseAdapter'
 
 export { default as flattenWhereToOperators } from '../database/flattenWhereToOperators'
 

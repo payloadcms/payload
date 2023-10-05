@@ -14,7 +14,7 @@ import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
 import { pointFieldsSlug } from './collections/Point'
 import { relationshipFieldsSlug } from './collections/Relationship'
-import { tabsSlug } from './collections/Tabs'
+import { tabsSlug } from './collections/Tabs/constants'
 import { textDoc, textFieldsSlug } from './collections/Text'
 
 const { afterEach, beforeAll, describe } = test
@@ -324,9 +324,7 @@ describe('fields', () => {
     test('should render CollapsibleLabel using a component', async () => {
       const label = 'custom row label as component'
       await page.goto(url.create)
-      await page
-        .locator('#field-arrayWithCollapsibles >> .array-field__add-button-wrap >> button')
-        .click()
+      await page.locator('#field-arrayWithCollapsibles >> .array-field__add-row').click()
 
       await page
         .locator(
@@ -360,13 +358,13 @@ describe('fields', () => {
       const firstBlockSelector = blocksDrawer
         .locator('.blocks-drawer__blocks .blocks-drawer__block')
         .first()
-      await expect(firstBlockSelector).toContainText('Text')
+      await expect(firstBlockSelector).toContainText('Content')
       await firstBlockSelector.click()
 
       // ensure the block was appended to the rows
       const addedRow = page.locator('#field-blocks .blocks-field__row').last()
       await expect(addedRow).toBeVisible()
-      await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text')
+      await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content')
     })
 
     test('should open blocks drawer from block row and add below', async () => {
@@ -387,13 +385,13 @@ describe('fields', () => {
       const firstBlockSelector = blocksDrawer
         .locator('.blocks-drawer__blocks .blocks-drawer__block')
         .first()
-      await expect(firstBlockSelector).toContainText('Text')
+      await expect(firstBlockSelector).toContainText('Content')
       await firstBlockSelector.click()
 
       // ensure the block was inserted beneath the first in the rows
       const addedRow = page.locator('#field-blocks #blocks-row-1')
       await expect(addedRow).toBeVisible()
-      await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text') // went from `Number` to `Text`
+      await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content') // went from `Number` to `Content`
     })
 
     test('should use i18n block labels', async () => {
@@ -484,9 +482,7 @@ describe('fields', () => {
     test('should render RowLabel using a function', async () => {
       const label = 'custom row label as function'
       await page.goto(url.create)
-      await page
-        .locator('#field-rowLabelAsFunction >> .array-field__add-button-wrap >> button')
-        .click()
+      await page.locator('#field-rowLabelAsFunction >> .array-field__add-row').click()
 
       await page.locator('#field-rowLabelAsFunction__0__title').fill(label)
       await wait(100)
@@ -497,9 +493,7 @@ describe('fields', () => {
     test('should render RowLabel using a component', async () => {
       const label = 'custom row label as component'
       await page.goto(url.create)
-      await page
-        .locator('#field-rowLabelAsComponent >> .array-field__add-button-wrap >> button')
-        .click()
+      await page.locator('#field-rowLabelAsComponent >> .array-field__add-row').click()
 
       await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
       await wait(100)
@@ -513,12 +507,8 @@ describe('fields', () => {
       test('should add 2 new rows', async () => {
         await page.goto(url.create)
 
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
         await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
         await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2')
 
@@ -528,41 +518,29 @@ describe('fields', () => {
       test('should remove 2 new rows', async () => {
         await page.goto(url.create)
 
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
         await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
         await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2')
 
         await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
         await page
-          .locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__remove')
+          .locator('#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__remove')
           .click()
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
-          .locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__remove')
+          .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
           .click()
 
-        const rowsContainer = page.locator(
-          '#field-potentiallyEmptyArray > .array-field__draggable-rows',
-        )
-        const directChildDivCount = await rowsContainer.evaluate((element) => {
-          const childDivCount = element.querySelectorAll(':scope > div')
-          return childDivCount.length
-        })
+        const rows = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows')
 
-        expect(directChildDivCount).toBe(0)
+        await expect(rows).toBeHidden()
       })
 
       test('should remove existing row', async () => {
         await page.goto(url.create)
 
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
         await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
 
         await saveDocAndAssert(page)
@@ -570,30 +548,20 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
           .locator(
-            '#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__action.array-actions__remove',
+            '#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__action.array-actions__remove',
           )
           .click()
 
-        const rowsContainer = page.locator(
-          '#field-potentiallyEmptyArray > .array-field__draggable-rows',
-        )
-        const directChildDivCount = await rowsContainer.evaluate((element) => {
-          const childDivCount = element.querySelectorAll(':scope > div')
-          return childDivCount.length
-        })
+        const rows = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows')
 
-        expect(directChildDivCount).toBe(0)
+        await expect(rows).toBeHidden()
       })
 
       test('should add row after removing existing row', async () => {
         await page.goto(url.create)
 
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
         await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
         await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2')
 
@@ -602,12 +570,10 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
         await page
           .locator(
-            '#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__action.array-actions__remove',
+            '#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__action.array-actions__remove',
           )
           .click()
-        await page
-          .locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button')
-          .click()
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
 
         await page.locator('#field-potentiallyEmptyArray__1__text').fill('updated array row 2')
 
@@ -1066,7 +1032,9 @@ describe('fields', () => {
     test('should display formatted date in useAsTitle', async () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-default a').click()
-      await expect(page.locator('.collection-edit__header .render-title')).toContainText('August')
+      await expect(page.locator('.collection-edit .doc-header__title.render-title')).toContainText(
+        'August',
+      )
     })
 
     test('should clear date', async () => {

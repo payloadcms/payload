@@ -28,6 +28,7 @@ import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
+import { fieldBaseClass } from '../shared'
 
 const maxResultsPerRequest = 10
 
@@ -35,6 +36,7 @@ const baseClass = 'relationship'
 
 const Relationship: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       allowCreate = true,
       className,
@@ -48,7 +50,6 @@ const Relationship: React.FC<Props> = (props) => {
     filterOptions,
     hasMany,
     label,
-    name,
     path,
     relationTo,
     required,
@@ -389,23 +390,21 @@ const Relationship: React.FC<Props> = (props) => {
     return r.test(string.slice(-breakApartThreshold))
   }, [])
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    showError && 'error',
-    errorLoading && 'error-loading',
-    readOnly && `${baseClass}--read-only`,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   const valueToRender = findOptionsByValue({ options, value })
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
 
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        errorLoading && 'error-loading',
+        readOnly && `${baseClass}--read-only`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       id={`field-${pathOrName.replace(/\./g, '__')}`}
       style={{
         ...style,

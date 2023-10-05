@@ -17,10 +17,10 @@ export default async function findByIDHandler(
 ): Promise<Response<FindByIDResult> | void> {
   try {
     const doc = await findByID({
+      id: req.params.id,
       collection: req.collection,
       depth: Number(req.query.depth),
       draft: req.query.draft === 'true',
-      id: req.params.id,
       req,
     })
     return res.json(doc)

@@ -1,16 +1,49 @@
 import payload from '..'
+import { prettySyncLoggerDestination } from '../utilities/logger'
+
+/**
+ * The default logger's options did not allow for forcing sync logging
+ * Using these options, to force both pretty print and sync logging
+ */
+const prettySyncLogger = {
+  loggerDestination: prettySyncLoggerDestination,
+  loggerOptions: {},
+}
+
+const availableCommands = [
+  'migrate',
+  'migrate:create',
+  'migrate:down',
+  'migrate:refresh',
+  'migrate:reset',
+  'migrate:status',
+  'migration:fresh',
+]
+
+const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
 export const migrate = async (args: string[]): Promise<void> => {
+  process.env.PAYLOAD_MIGRATING = 'true'
+
   // Barebones instance to access database adapter
   await payload.init({
+    disableOnInit: true,
     local: true,
-    secret: '--unused--',
+    secret: process.env.PAYLOAD_SECRET || '--unused--',
+    ...prettySyncLogger,
   })
 
   const adapter = payload.db
 
   if (!adapter) {
     throw new Error('No database adapter found')
+  }
+
+  if (!args.length) {
+    payload.logger.error({
+      msg: `No migration command provided. ${availableCommandsMsg}`,
+    })
+    process.exit(1)
   }
 
   switch (args[0]) {
@@ -34,20 +67,26 @@ export const migrate = async (args: string[]): Promise<void> => {
       break
     case 'migrate:create':
       try {
-        await adapter.createMigration(payload, '.migrations', args[1])
+        await adapter.createMigration(payload, args[1])
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }
       break
 
     default:
-      throw new Error(`Unknown migration command: ${args[0]}`)
+      payload.logger.error({
+        msg: `Unknown migration command: ${args[0]}. ${availableCommandsMsg}`,
+      })
+      process.exit(1)
   }
+
+  payload.logger.info('Done.')
 }
 
 // When launched directly call migrate
 if (module.id === require.main.id) {
   const args = process.argv.slice(2)
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   migrate(args).then(() => {
     process.exit(0)
   })

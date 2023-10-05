@@ -1,6 +1,6 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Document, Where } from '../../../types'
@@ -67,19 +67,20 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {
+    id,
     autosave,
     collection: collectionSlug,
     context,
     data,
     depth,
     draft,
-    fallbackLocale = null,
+    fallbackLocale,
     file,
     filePath,
-    id,
     locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
+    req: incomingReq,
     showHiddenFields,
     user,
     where,
@@ -98,7 +99,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   const req = {
-    fallbackLocale: fallbackLocale ?? defaultLocale,
+    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     files: {
       file: file ?? (await getFileByPath(filePath)),
     },
@@ -106,6 +107,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req, context)
@@ -114,12 +116,12 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {
+    id,
     autosave,
     collection,
     data,
     depth,
     draft,
-    id,
     overrideAccess,
     overwriteExistingFiles,
     payload,

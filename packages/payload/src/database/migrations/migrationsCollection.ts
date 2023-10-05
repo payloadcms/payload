@@ -14,7 +14,6 @@ export const migrationsCollection: CollectionConfig = {
       type: 'number',
       // NOTE: This value is -1 if it is a "dev push"
     },
-    // TODO: determine how schema will impact migration workflow
     {
       name: 'schema',
       type: 'json',

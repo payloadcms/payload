@@ -1,14 +1,9 @@
 /* eslint-disable no-param-reassign */
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { blocksField, blocksFieldSeedData } from '../Blocks'
+import { getBlocksField, getBlocksFieldSeedData } from '../Blocks'
 import { UIField } from './UIField'
-
-export const tabsSlug = 'tabs-fields'
-
-export const namedTabText = 'Some text in a named tab'
-export const namedTabDefaultValue = 'default text inside of a named tab'
-export const localizedTextValue = 'localized text'
+import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsSlug } from './constants'
 
 const TabsFields: CollectionConfig = {
   slug: tabsSlug,
@@ -55,7 +50,7 @@ const TabsFields: CollectionConfig = {
         {
           label: 'Tab with Blocks',
           description: 'Blocks are rendered here to ensure they populate and render correctly.',
-          fields: [blocksField],
+          fields: [getBlocksField()],
         },
         {
           label: 'Tab with Group',
@@ -282,7 +277,7 @@ export const tabsDoc = {
       text: 'Here is some data for the third row',
     },
   ],
-  blocks: blocksFieldSeedData,
+  blocks: getBlocksFieldSeedData(),
   group: {
     number: 12,
   },

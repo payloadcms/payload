@@ -1,0 +1,26 @@
+@import '../../../../scss/styles.scss';
+
+.live-preview-window {
+  width: 60%;
+  position: sticky;
+  top: var(--doc-controls-height);
+  height: calc(100vh - var(--doc-controls-height));
+  overflow: hidden;
+
+  &--has-breakpoint {
+    padding: var(--base);
+
+    .live-preview-iframe {
+      border: 1px solid var(--theme-elevation-100);
+    }
+  }
+
+  &__wrapper {
+    height: 100%;
+    width: 100%;
+  }
+
+  @include mid-break {
+    width: 100%;
+  }
+}

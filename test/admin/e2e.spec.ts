@@ -8,10 +8,16 @@ import type { Post } from './config'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import {
+  exactText,
+  openDocControls,
+  openNav,
+  saveDocAndAssert,
+  saveDocHotkeyAndAssert,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { globalSlug, slug } from './shared'
+import { globalSlug, slug, slugPluralLabel } from './shared'
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
@@ -43,29 +49,31 @@ describe('admin', () => {
   })
 
   describe('Nav', () => {
-    test('should nav to collection - sidebar', async () => {
+    test('should nav to collection - nav', async () => {
       await page.goto(url.admin)
-      const collectionLink = page.locator(`#nav-${slug}`)
-      await collectionLink.click()
-
+      await openNav(page)
+      await page.locator(`#nav-${slug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
-    test('should nav to a global - sidebar', async () => {
+    test('should nav to a global - nav', async () => {
       await page.goto(url.admin)
+      await openNav(page)
       await page.locator(`#nav-global-${globalSlug}`).click()
-
       expect(page.url()).toContain(url.global(globalSlug))
     })
 
     test('should navigate to collection - card', async () => {
       await page.goto(url.admin)
+      await wait(200)
       await page.locator(`#card-${slug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
     test('should collapse and expand collection groups', async () => {
       await page.goto(url.admin)
+      await openNav(page)
+
       const navGroup = page.locator('#nav-group-One .nav-group__toggle')
       const link = page.locator('#nav-group-one-collection-ones')
 
@@ -81,6 +89,8 @@ describe('admin', () => {
 
     test('should collapse and expand globals groups', async () => {
       await page.goto(url.admin)
+      await openNav(page)
+
       const navGroup = page.locator('#nav-group-Group .nav-group__toggle')
       const link = page.locator('#nav-global-group-globals-one')
 
@@ -96,12 +106,9 @@ describe('admin', () => {
 
     test('should save nav group collapse preferences', async () => {
       await page.goto(url.admin)
-
-      const navGroup = page.locator('#nav-group-One .nav-group__toggle')
-      await navGroup.click()
-
+      await openNav(page)
+      await page.locator('#nav-group-One .nav-group__toggle').click()
       await page.goto(url.admin)
-
       const link = page.locator('#nav-group-one-collection-ones')
       await expect(link).toBeHidden()
     })
@@ -114,9 +121,10 @@ describe('admin', () => {
 
     test('breadcrumbs - from document to collection', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-      await page.locator(`.step-nav >> text=${slug}`).click()
+      const collectionBreadcrumb = page.locator(`.step-nav a[href="/admin/collections/${slug}"]`)
+      await expect(collectionBreadcrumb).toBeVisible()
+      await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
       expect(page.url()).toContain(url.list)
     })
 
@@ -144,34 +152,26 @@ describe('admin', () => {
       await page.goto(url.create)
       await page.locator('#field-title').fill(title)
       await page.locator('#field-description').fill(description)
-
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
     test('should read existing', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
     test('should update existing', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-
       const newTitle = 'new title'
       const newDesc = 'new description'
       await page.locator('#field-title').fill(newTitle)
       await page.locator('#field-description').fill(newDesc)
-
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(newTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDesc)
     })
@@ -179,23 +179,19 @@ describe('admin', () => {
     test('should save using hotkey', async () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
-
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
-
       await saveDocHotkeyAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(newTitle)
     })
 
     test('should delete existing', async () => {
-      const { id, ...post } = await createPost()
-
+      const { id, title } = await createPost()
       await page.goto(url.edit(id))
+      await openDocControls(page)
       await page.locator('#action-delete').click()
       await page.locator('#confirm-delete').click()
-
-      await expect(page.locator(`text=Post en "${post.title}" successfully deleted.`)).toBeVisible()
+      await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(url.list)
     })
 
@@ -213,7 +209,7 @@ describe('admin', () => {
       await page.locator('#confirm-delete').click()
 
       await expect(page.locator('.Toastify__toast--success')).toHaveText(
-        'Deleted 3 Posts en successfully.',
+        'Deleted 3 Posts successfully.',
       )
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
     })
@@ -230,9 +226,9 @@ describe('admin', () => {
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
       const options = page.locator('.rs__option')
-      const titleOption = options.locator('text=Title en')
+      const titleOption = options.locator('text=Title')
 
-      await expect(titleOption).toHaveText('Title en')
+      await expect(titleOption).toHaveText('Title')
 
       await titleOption.click()
       const titleInput = page.locator('#field-title')
@@ -241,9 +237,9 @@ describe('admin', () => {
 
       await titleInput.fill(bulkTitle)
 
-      await page.locator('.form-submit button[type="submit"]').click()
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
       await expect(page.locator('.Toastify__toast--success')).toContainText(
-        'Updated 3 Posts en successfully.',
+        'Updated 3 Posts successfully.',
       )
       await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle)
       await expect(page.locator('.row-2 .cell-title')).toContainText(bulkTitle)
@@ -270,7 +266,10 @@ describe('admin', () => {
       const options = page.locator('.rs__option')
       await options.locator('text=Español').click()
 
-      await expect(page.locator('.step-nav')).toContainText('Tablero')
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Tablero',
+      )
 
       await field.click()
       await options.locator('text=English').click()
@@ -280,12 +279,15 @@ describe('admin', () => {
 
     test('should allow custom translation', async () => {
       await page.goto(url.account)
-      await expect(page.locator('.step-nav')).toContainText('Home')
+      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
+        'title',
+        'Home',
+      )
     })
   })
 
   describe('list view', () => {
-    const tableRowLocator = 'table >> tbody >> tr'
+    const tableRowLocator = 'table > tbody > tr'
 
     beforeEach(async () => {
       await page.goto(url.list)
@@ -313,33 +315,37 @@ describe('admin', () => {
       })
 
       test('toggle columns', async () => {
-        const columnCountLocator = 'table >> thead >> tr >> th'
+        const columnCountLocator = 'table > thead > tr > th'
         await createPost()
 
         await page.locator('.list-controls__toggle-columns').click()
 
-        // wait until the column toggle UI is visible and fully expanded
-        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-
+        // track the number of columns before manipulating toggling any
         const numberOfColumns = await page.locator(columnCountLocator).count()
-        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID')
 
-        const idButton = page.locator('.column-selector >> text=ID')
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.column-selector')).toBeVisible()
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+
+        const idButton = page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('ID'),
+        })
 
         // Remove ID column
         await idButton.click()
+
         // wait until .cell-id is not present on the page:
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
-        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number')
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
 
         // Add back ID column
         await idButton.click()
         await expect(page.locator('.cell-id')).toBeVisible()
 
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
-        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID')
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
       })
 
       test('2nd cell is a link', async () => {
@@ -353,7 +359,12 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         // toggle off the ID column
-        await page.locator('.column-selector >> text=ID').click()
+        await page
+          .locator('.column-selector .column-selector__column', {
+            hasText: exactText('ID'),
+          })
+          .click()
+
         // wait until .cell-id is not present on the page:
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
@@ -367,12 +378,18 @@ describe('admin', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
+
         // wait until the column toggle UI is visible and fully expanded
-        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
         // ensure the ID column is active
-        const idButton = page.locator('.column-selector >> text=ID')
+        const idButton = page.locator('.column-selector .column-selector__column', {
+          hasText: exactText('ID'),
+        })
+
         const buttonClasses = await idButton.getAttribute('class')
+
         if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
           await idButton.click()
           await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
@@ -387,7 +404,7 @@ describe('admin', () => {
         await page.locator('.where-builder__add-first-filter').click()
 
         const operatorField = page.locator('.condition__operator')
-        const valueField = page.locator('.condition__value >> input')
+        const valueField = page.locator('.condition__value > input')
 
         await operatorField.click()
 
@@ -410,7 +427,7 @@ describe('admin', () => {
         await createPost({ title: 'post2' })
         await page.goto(`${url.list}?limit=10&page=1&where[or][0][and][0][title][equals]=post1`)
 
-        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en')
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
@@ -420,7 +437,7 @@ describe('admin', () => {
         // [title][equals]=post1 should be getting transformed into a valid where[or][0][and][0][title][equals]=post1
         await page.goto(`${url.list}?limit=10&page=1&where[title][equals]=post1`)
 
-        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en')
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
@@ -492,9 +509,17 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         const numberBoundingBox = await page
-          .locator('.column-selector >> text=Number')
+          .locator(`.column-selector .column-selector__column`, {
+            hasText: exactText('Number'),
+          })
+
           .boundingBox()
-        const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox()
+
+        const idBoundingBox = await page
+          .locator(`.column-selector .column-selector__column`, {
+            hasText: exactText('ID'),
+          })
+          .boundingBox()
 
         if (!numberBoundingBox || !idBoundingBox) return
 
@@ -548,11 +573,14 @@ describe('admin', () => {
           '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
         )
 
-        // select the "Post en" collection
+        // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('Post'),
+            },
           )
           .click()
 
@@ -593,22 +621,31 @@ describe('admin', () => {
         // deselect the "id" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=ID',
+            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+            {
+              hasText: exactText('ID'),
+            },
           )
           .click()
 
-        // select the "Post en" collection
+        // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('Post'),
+            },
           )
           .click()
 
         // deselect the "number" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=Number',
+            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+            {
+              hasText: exactText('Number'),
+            },
           )
           .click()
 
@@ -616,7 +653,10 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="User"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('User'),
+            },
           )
           .click()
 
@@ -629,11 +669,15 @@ describe('admin', () => {
             .first(),
         ).not.toHaveClass('column-selector__column--active')
 
-        // select the "Post en" collection again
+        // select the "Post" collection again
         await collectionSelector.click()
+
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('Post'),
+            },
           )
           .click()
 
@@ -650,7 +694,11 @@ describe('admin', () => {
       test('should render custom table cell component', async () => {
         await createPost()
         await page.goto(url.list)
-        await expect(page.locator('table >> thead >> tr >> th >> text=Demo UI Field')).toBeVisible()
+        await expect(
+          page.locator('table > thead > tr > th', {
+            hasText: exactText('Demo UI Field'),
+          }),
+        ).toBeVisible()
       })
     })
 
@@ -662,18 +710,18 @@ describe('admin', () => {
       })
 
       test('should select multiple rows', async () => {
-        const selectAll = page.locator('.custom-checkbox:has(#select-all)')
+        const selectAll = page.locator('.checkbox-input:has(#select-all)')
         await page.locator('.row-1 .cell-_select input').check()
 
-        const indeterminateSelectAll = selectAll.locator('.custom-checkbox__icon.partial')
+        const indeterminateSelectAll = selectAll.locator('.checkbox-input__icon.partial')
         expect(indeterminateSelectAll).toBeDefined()
 
         await selectAll.locator('input').click()
-        const emptySelectAll = selectAll.locator('.custom-checkbox__icon:not(.check):not(.partial)')
+        const emptySelectAll = selectAll.locator('.checkbox-input__icon:not(.check):not(.partial)')
         await expect(emptySelectAll).toHaveCount(0)
 
         await selectAll.locator('input').click()
-        const checkSelectAll = selectAll.locator('.custom-checkbox__icon.check')
+        const checkSelectAll = selectAll.locator('.checkbox-input__icon.check')
         expect(checkSelectAll).toBeDefined()
       })
 
@@ -724,7 +772,8 @@ describe('admin', () => {
     describe('custom css', () => {
       test('should see custom css in admin UI', async () => {
         await page.goto(url.admin)
-        const navControls = page.locator('.nav__controls')
+        await openNav(page)
+        const navControls = page.locator('#custom-css')
         await expect(navControls).toHaveCSS('font-family', 'monospace')
       })
     })
@@ -762,13 +811,13 @@ describe('admin', () => {
         await page.goto(url.list)
 
         // collection label
-        await expect(page.locator('#nav-posts')).toContainText('Posts en')
+        await expect(page.locator('#nav-posts')).toContainText('Posts')
 
         // global label
-        await expect(page.locator('#nav-global-global')).toContainText('Global en')
+        await expect(page.locator('#nav-global-global')).toContainText('Global')
 
         // view description
-        await expect(page.locator('.view-description')).toContainText('Description en')
+        await expect(page.locator('.view-description')).toContainText('Description')
       })
 
       test('should display translated field titles', async () => {
@@ -776,23 +825,22 @@ describe('admin', () => {
 
         // column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await expect(page.locator('.column-selector__column >> text=Title en')).toHaveText(
-          'Title en',
-        )
+        await expect(
+          page.locator('.column-selector__column', {
+            hasText: exactText('Title'),
+          }),
+        ).toHaveText('Title')
 
         // filters
         await page.locator('.list-controls__toggle-where').click()
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
-        await expect(options.locator('text=Title en')).toHaveText('Title en')
+        await expect(options.locator('text=Title')).toHaveText('Title')
 
         // list columns
-        await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title en')
-        await expect(page.locator('.search-filter input')).toHaveAttribute(
-          'placeholder',
-          /(Title en)/,
-        )
+        await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')
+        await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title)/)
       })
 
       test('should use fallback language on field titles', async () => {
@@ -806,9 +854,11 @@ describe('admin', () => {
         await page.goto(url.list)
         await page.locator('.list-controls__toggle-columns').click()
         // expecting the label to fall back to english as default fallbackLng
-        await expect(page.locator('.column-selector__column >> text=Title en')).toHaveText(
-          'Title en',
-        )
+        await expect(
+          page.locator('.column-selector__column', {
+            hasText: exactText('Title'),
+          }),
+        ).toHaveText('Title')
       })
     })
   })

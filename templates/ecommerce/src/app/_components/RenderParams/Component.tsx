@@ -19,7 +19,7 @@ export const RenderParamsComponent: React.FC<Props> = ({
   onParams,
 }) => {
   const searchParams = useSearchParams()
-  const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
+  const paramValues = params.map((param) => searchParams.get(param)).filter(Boolean)
 
   useEffect(() => {
     if (paramValues.length && onParams) {
@@ -30,7 +30,7 @@ export const RenderParamsComponent: React.FC<Props> = ({
   if (paramValues.length) {
     return (
       <div className={className}>
-        {paramValues.map(paramValue => (
+        {paramValues.map((paramValue) => (
           <Message key={paramValue} message={(message || 'PARAM')?.replace('PARAM', paramValue)} />
         ))}
       </div>

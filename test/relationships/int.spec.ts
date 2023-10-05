@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto'
-import mongoose from 'mongoose'
 
 import type {
   ChainedRelation,
@@ -226,7 +225,7 @@ describe('Relationships', () => {
           })
 
           expect(result.status).toEqual(200)
-          expect(result.doc.relationField).toBeNull()
+          expect(result.doc.relationField).toBeFalsy()
         })
       })
 

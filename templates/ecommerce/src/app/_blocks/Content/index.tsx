@@ -13,7 +13,7 @@ export const ContentBlock: React.FC<
   Props & {
     id?: string
   }
-> = props => {
+> = (props) => {
   const { columns } = props
 
   return (

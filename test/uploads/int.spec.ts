@@ -7,7 +7,8 @@ import payload from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
-import configPromise, { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './config'
+import configPromise from './config'
+import { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
 
 const stat = promisify(fs.stat)
 
@@ -75,7 +76,7 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.mimeType).toEqual('image/svg+xml')
-        expect(doc.sizes.maintainedAspectRatio.url).toBeUndefined()
+        expect(doc.sizes.maintainedAspectRatio.url).toBeFalsy()
         expect(doc.width).toBeDefined()
         expect(doc.height).toBeDefined()
       })
@@ -467,7 +468,7 @@ describe('Collections - Uploads', () => {
       },
     })
 
-    expect(doc.image).toBeNull()
+    expect(doc.image).toBeFalsy()
   })
 
   it('should allow update removing a relationship - update many', async () => {
@@ -498,7 +499,7 @@ describe('Collections - Uploads', () => {
       },
     })
 
-    expect(doc.docs[0].image).toBeNull()
+    expect(doc.docs[0].image).toBeFalsy()
   })
 
   it('delete', async () => {

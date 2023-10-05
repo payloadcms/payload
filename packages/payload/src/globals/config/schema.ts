@@ -1,7 +1,7 @@
 import joi from 'joi'
 
 import { endpointsSchema } from '../../config/schema'
-import { componentSchema } from '../../utilities/componentSchema'
+import { componentSchema, customViewSchema } from '../../config/shared/componentSchema'
 
 const globalSchema = joi
   .object()
@@ -20,7 +20,19 @@ const globalSchema = joi
           SaveDraftButton: componentSchema,
         }),
         views: joi.object({
-          Edit: componentSchema,
+          Edit: joi.alternatives().try(
+            componentSchema,
+            joi.object({
+              Default: joi.alternatives().try(componentSchema, customViewSchema),
+              Versions: joi.alternatives().try(componentSchema, customViewSchema),
+              // Version
+              // Preview
+              // Relationships
+              // References
+              // API
+              // :path
+            }),
+          ),
         }),
       }),
       description: joi.alternatives().try(joi.string(), componentSchema),
@@ -29,6 +41,17 @@ const globalSchema = joi
         .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
       hidden: joi.alternatives().try(joi.boolean(), joi.func()),
       hideAPIURL: joi.boolean(),
+      livePreview: joi.object({
+        breakpoints: joi.array().items(
+          joi.object({
+            name: joi.string(),
+            height: joi.alternatives().try(joi.number(), joi.string()),
+            label: joi.string(),
+            width: joi.alternatives().try(joi.number(), joi.string()),
+          }),
+        ),
+        url: joi.string(),
+      }),
       preview: joi.func(),
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),

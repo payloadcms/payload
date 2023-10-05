@@ -1,5 +1,4 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
+import type { GeneratedTypes } from '../../'
 import type { Where } from '../../types'
 import type { PreferenceRequest } from '../types'
 
@@ -11,6 +10,8 @@ async function findOne(
     req: { payload },
     user,
   } = args
+
+  if (!user) return null
 
   const where: Where = {
     and: [

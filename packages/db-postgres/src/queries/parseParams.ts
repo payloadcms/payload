@@ -1,83 +1,168 @@
-/* eslint-disable no-restricted-syntax */
-import type { SQL } from 'drizzle-orm'
 /* eslint-disable no-await-in-loop */
-import type { Operator, Where } from 'payload/types'
-import type { Field } from 'payload/types'
+import type { SQL } from 'drizzle-orm'
+import type { Field, Operator, Where } from 'payload/types'
 
-import { and } from 'drizzle-orm'
+import { and, ilike, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
+import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
-import type { PostgresAdapter } from '../types'
+import type { GenericColumn, PostgresAdapter } from '../types'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
-import { buildSearchParam } from './buildSearchParams'
+import { createJSONQuery } from './createJSONQuery'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
+import { getTableColumnFromPath } from './getTableColumnFromPath'
+import { operatorMap } from './operatorMap'
+import { sanitizeQueryValue } from './sanitizeQueryValue'
+
+type Args = {
+  adapter: PostgresAdapter
+  fields: Field[]
+  joinAliases: BuildQueryJoinAliases
+  joins: BuildQueryJoins
+  locale: string
+  selectFields: Record<string, GenericColumn>
+  tableName: string
+  where: Where
+}
 
 export async function parseParams({
   adapter,
-  collectionSlug,
   fields,
-  globalSlug,
+  joinAliases,
+  joins,
   locale,
+  selectFields,
+  tableName,
   where,
-}: {
-  adapter: PostgresAdapter
-  collectionSlug?: string
-  fields: Field[]
-  globalSlug?: string
-  locale: string
-  where: Where
-}): Promise<SQL> {
+}: Args): Promise<SQL> {
   let result: SQL
+  const constraints: SQL[] = []
 
-  if (typeof where === 'object') {
+  if (typeof where === 'object' && Object.keys(where).length > 0) {
     // We need to determine if the whereKey is an AND, OR, or a schema path
     for (const relationOrPath of Object.keys(where)) {
-      const condition = where[relationOrPath]
-      let conditionOperator: 'and' | 'or'
-      if (relationOrPath.toLowerCase() === 'and') {
-        conditionOperator = 'and'
-      } else if (relationOrPath.toLowerCase() === 'or') {
-        conditionOperator = 'or'
-      }
-      if (Array.isArray(condition)) {
-        const builtConditions = await buildAndOrConditions({
-          adapter,
-          collectionSlug,
-          fields,
-          globalSlug,
-          locale,
-          where: condition,
-        })
+      if (relationOrPath) {
+        const condition = where[relationOrPath]
+        let conditionOperator: 'and' | 'or'
+        if (relationOrPath.toLowerCase() === 'and') {
+          conditionOperator = 'and'
+        } else if (relationOrPath.toLowerCase() === 'or') {
+          conditionOperator = 'or'
+        }
+        if (Array.isArray(condition)) {
+          const builtConditions = await buildAndOrConditions({
+            adapter,
+            fields,
+            joinAliases,
+            joins,
+            locale,
+            selectFields,
+            tableName,
+            where: condition,
+          })
+          if (builtConditions.length > 0) {
+            if (result) {
+              result = operatorMap[conditionOperator](result, ...builtConditions)
+            } else {
+              result = operatorMap[conditionOperator](...builtConditions)
+            }
+          }
+        } else {
+          // It's a path - and there can be multiple comparisons on a single path.
+          // For example - title like 'test' and title not equal to 'tester'
+          // So we need to loop on keys again here to handle each operator independently
+          const pathOperators = where[relationOrPath]
+          if (typeof pathOperators === 'object') {
+            for (const operator of Object.keys(pathOperators)) {
+              if (validOperators.includes(operator as Operator)) {
+                const {
+                  columnName,
+                  constraints: queryConstraints,
+                  field,
+                  getNotNullColumnByValue,
+                  pathSegments,
+                  rawColumn,
+                  table,
+                } = getTableColumnFromPath({
+                  adapter,
+                  collectionPath: relationOrPath,
+                  fields,
+                  joinAliases,
+                  joins,
+                  locale,
+                  pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
+                  selectFields,
+                  tableName,
+                })
 
-        if (builtConditions.length > 0) result = and(result, ...builtConditions)
-      } else {
-        // It's a path - and there can be multiple comparisons on a single path.
-        // For example - title like 'test' and title not equal to 'tester'
-        // So we need to loop on keys again here to handle each operator independently
-        const pathOperators = where[relationOrPath]
-        if (typeof pathOperators === 'object') {
-          for (const operator of Object.keys(pathOperators)) {
-            if (validOperators.includes(operator as Operator)) {
-              const searchParam = await buildSearchParam({
-                adapter,
-                collectionSlug,
-                fields,
-                globalSlug,
-                incomingPath: relationOrPath,
-                locale,
-                operator,
-                val: pathOperators[operator],
-              })
+                const val = where[relationOrPath][operator]
 
-              if (searchParam?.value && searchParam?.path) {
-                result = and(result, searchParam.value)
-                // result = {
-                //   ...result,
-                //   [searchParam.path]: searchParam.value,
-                // };
-              } else if (typeof searchParam?.value === 'object') {
-                result = and(result, searchParam.value)
-                // result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge });
+                queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
+                  constraints.push(operatorMap.equals(constraintTable[col], value))
+                })
+
+                if (['json', 'richText'].includes(field.type) && Array.isArray(pathSegments)) {
+                  const segments = pathSegments.slice(1)
+                  segments.unshift(table[columnName].name)
+
+                  if (field.type === 'richText') {
+                    const jsonQuery = createJSONQuery({
+                      operator,
+                      pathSegments: segments,
+                      treatAsArray: ['children'],
+                      treatRootAsArray: true,
+                      value: val,
+                    })
+
+                    constraints.push(sql.raw(jsonQuery))
+                  }
+
+                  if (field.type === 'json') {
+                    const jsonQuery = convertPathToJSONTraversal(pathSegments)
+                    constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
+                  }
+
+                  break
+                }
+
+                if (getNotNullColumnByValue) {
+                  const columnName = getNotNullColumnByValue(val)
+                  if (columnName) {
+                    constraints.push(isNotNull(table[columnName]))
+                  } else {
+                    throw new QueryError([{ path: relationOrPath }])
+                  }
+                  break
+                }
+
+                if (operator === 'like') {
+                  constraints.push(
+                    and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
+                  )
+                  break
+                }
+
+                const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
+                  field,
+                  operator,
+                  val,
+                })
+
+                if (queryOperator === 'not_equals' && queryValue !== null) {
+                  constraints.push(
+                    or(
+                      isNull(rawColumn || table[columnName]),
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
+                      ne<any>(rawColumn || table[columnName], queryValue),
+                    ),
+                  )
+                } else {
+                  constraints.push(
+                    operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                  )
+                }
               }
             }
           }
@@ -85,13 +170,16 @@ export async function parseParams({
       }
     }
   }
-
-  // await db.select().from(users).where(
-  //   and(
-  //     eq(users.id, 42),
-  //     eq(users.name, 'Dan')
-  //   )
-  // );
+  if (constraints.length > 0) {
+    if (result) {
+      result = and(result, ...constraints)
+    } else {
+      result = and(...constraints)
+    }
+  }
+  if (constraints.length === 1 && !result) {
+    ;[result] = constraints
+  }
 
   return result
 }

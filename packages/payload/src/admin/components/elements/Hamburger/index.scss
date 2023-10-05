@@ -1,0 +1,118 @@
+@import '../../../scss/styles';
+
+.hamburger {
+  position: relative;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background-color: transparent;
+  outline: none;
+  width: calc(var(--base) / 1.75);
+  height: calc(var(--base) / 1.75);
+
+  &:focus {
+    outline: none;
+  }
+
+  &__icon {
+    position: relative;
+  }
+
+  &__icon,
+  &__x,
+  &__collapse {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__line {
+    background-color: var(--theme-text);
+    width: 100%;
+    height: 2px;
+    position: absolute;
+  }
+
+  &__top {
+    top: 1px;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+
+  &__middle {
+    top: 50%;
+    transform: translate3d(0, -50%, 0) rotate(0);
+  }
+
+  &__bottom {
+    bottom: 1px;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+
+  &__x,
+  &__collapse {
+    display: none;
+    opacity: 0;
+  }
+
+  &__x-left {
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0) rotate(45deg);
+  }
+
+  &__x-right {
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+  }
+
+  &__collapse {
+    position: relative;
+  }
+
+  &__collapse-label {
+    opacity: 0;
+    position: absolute;
+    left: calc(100% + 4px);
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+    font-weight: bold;
+  }
+
+  &__collapse-left {
+    height: 90%;
+    width: 2px;
+    left: 0;
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+  }
+
+  &__collapse-chevron {
+    position: relative;
+    top: -1px;
+  }
+
+  &--active {
+    .hamburger {
+      &__x,
+      &__collapse,
+      &__collapse-label {
+        display: block;
+        opacity: 1;
+      }
+
+      &__icon {
+        display: none;
+        opacity: 0;
+      }
+    }
+  }
+
+  @include mid-break {
+    &__collapse-chevron {
+      top: -2px;
+    }
+  }
+}

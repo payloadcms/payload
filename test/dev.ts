@@ -5,10 +5,21 @@ import path from 'path'
 import { v4 as uuid } from 'uuid'
 
 import payload from '../packages/payload/src'
+import { prettySyncLoggerDestination } from '../packages/payload/src/utilities/logger'
+import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
 
 dotenv.config()
 
 const [testSuiteDir] = process.argv.slice(2)
+
+/**
+ * The default logger's options did not allow for forcing sync logging
+ * Using these options, to force both pretty print and sync logging
+ */
+const prettySyncLogger = {
+  loggerDestination: prettySyncLoggerDestination,
+  loggerOptions: {},
+}
 
 if (!testSuiteDir) {
   console.error('ERROR: You must provide an argument for "testSuiteDir"')
@@ -24,7 +35,12 @@ if (!fs.existsSync(configPath)) {
 
 process.env.PAYLOAD_CONFIG_PATH = configPath
 
-process.env.PAYLOAD_DROP_DATABASE = 'true'
+// Default to true unless explicitly set to false
+if (process.env.PAYLOAD_DROP_DATABASE === 'false') {
+  process.env.PAYLOAD_DROP_DATABASE = 'false'
+} else {
+  process.env.PAYLOAD_DROP_DATABASE = 'true'
+}
 
 if (process.argv.includes('--no-auto-login') && process.env.NODE_ENV !== 'production') {
   process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN = 'true'
@@ -41,7 +57,8 @@ const startDev = async () => {
       fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
     },
-    onInit: async () => {
+    ...prettySyncLogger,
+    onInit: async (payload) => {
       payload.logger.info('Payload Dev Server Initialized')
     },
   })
@@ -54,6 +71,12 @@ const startDev = async () => {
   const externalRouter = express.Router()
 
   externalRouter.use(payload.authenticate)
+
+  if (testSuiteDir === 'live-preview') {
+    await startLivePreviewDemo({
+      payload,
+    })
+  }
 
   expressApp.listen(3000, async () => {
     payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`)

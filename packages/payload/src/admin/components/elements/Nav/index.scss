@@ -1,65 +1,53 @@
 @import '../../../scss/styles.scss';
 
 .nav {
-  flex-shrink: 0;
   position: sticky;
   top: 0;
   left: 0;
+  flex-shrink: 0;
   height: 100vh;
   width: var(--nav-width);
-  overflow: hidden;
-  [dir='ltr'] & {
-    border-right: 1px solid var(--theme-elevation-100);
-  }
-  [dir='rtl'] & {
-    border-left: 1px solid var(--theme-elevation-100);
+  border-right: 1px solid var(--theme-elevation-100);
+  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+
+  &--nav-open {
+    transform: translate3d(0, 0, 0);
+    transition: transform var(--nav-trans-time) linear;
   }
 
-  header {
+  &__header {
+    @include blur-bg;
+    position: absolute;
+    top: 0;
     width: 100%;
-    display: flex;
-    margin-bottom: base(1.5);
-
-    a,
-    button {
-      display: block;
-      padding: 0;
-
-      svg {
-        display: block;
-      }
-    }
+    height: var(--app-header-height);
   }
 
-  &__brand {
-    [dir='ltr'] & {
-      margin-right: base(1);
-    }
-    [dir='rtl'] & {
-      margin-left: base(1);
-    }
+  &__header-content {
+    z-index: 1;
+    position: relative;
+    height: 100%;
   }
 
-  &__mobile-menu-btn {
+  &__mobile-close {
+    display: none;
     background: none;
     border: 0;
-    opacity: 0;
-    visibility: hidden;
-    cursor: pointer;
-
-    &:active,
-    &:focus {
-      outline: none;
-    }
+    outline: 0;
+    padding: calc(var(--base) * 0.75) var(--gutter-h);
   }
 
   &__scroll {
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: base(1.5) base(1);
-    width: calc(100% + #{base(1)});
-    overflow-y: scroll;
+    padding: var(--app-header-height) base(1.5) base(2) base(1.25);
+    overflow-y: auto;
+
+    // remove the scrollbar here to prevent layout shift as nav groups are toggled
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__wrap {
@@ -101,9 +89,6 @@
       padding: base(0.125) base(1.5) base(0.125) 0;
       display: flex;
       text-decoration: none;
-      [dir='rtl'] & {
-        padding: base(0.125) 0 base(0.125) base(1.5);
-      }
 
       &:focus:not(:focus-visible) {
         box-shadow: none;
@@ -117,92 +102,54 @@
 
       &.active {
         font-weight: normal;
+        padding-left: 0;
         font-weight: 600;
-        [dir='ltr'] & {
-          padding-left: base(0.6);
-        }
-        [dir='rtl'] & {
-          padding-right: base(0.6);
-        }
       }
     }
   }
 
   &__link {
-    svg {
-      opacity: 0;
-      position: absolute;
-      [dir='ltr'] & {
-        left: - base(0.5);
-        transform: rotate(-90deg);
-      }
-      [dir='rtl'] & {
-        right: - base(0.5);
-        transform: rotate(90deg);
-      }
-    }
+    display: flex;
+    align-items: center;
 
     &.active {
-      svg {
-        opacity: 1;
+      .nav__link-icon {
+        display: block;
       }
     }
   }
 
+  &__link-icon {
+    display: none;
+    margin-right: calc(var(--base) * 0.25);
+    top: -1px;
+    position: relative;
+  }
+
   @include mid-break {
-    @include blur-bg;
-    position: fixed;
-    width: 100%;
-    height: base(3);
-    z-index: var(--z-modal);
-
     &__scroll {
-      padding: 0;
-      overflow: hidden;
-      width: 100%;
-      display: block;
-    }
-
-    header,
-    &__wrap {
-      position: relative;
-      z-index: 1;
-      padding: $baseline var(--gutter-h);
-    }
-
-    header {
-      justify-content: space-between;
-      margin: 0;
-    }
-
-    &__mobile-menu-btn {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    &__wrap {
-      padding-top: 0;
-      visibility: hidden;
-      opacity: 0;
-      overflow-y: scroll;
-      position: fixed;
-      top: base(4);
-      bottom: 0;
-    }
-
-    &.nav--menu-active {
-      height: 100vh;
-
-      .nav__wrap {
-        visibility: visible;
-        opacity: 1;
-      }
+      padding: var(--app-header-height) base(0.75) base(2) base(0.75);
     }
 
     nav a {
       font-size: base(0.875);
-      line-height: base(1.25);
-      font-weight: 600;
+      line-height: base(1.5);
+    }
+  }
+
+  @include small-break {
+    &__scroll {
+      padding: var(--app-header-height) var(--gutter-h) base(2);
+    }
+  }
+
+  @include extra-small-break {
+    &--nav-open {
+      transition: none;
+    }
+
+    &__mobile-close {
+      display: block;
     }
   }
 }

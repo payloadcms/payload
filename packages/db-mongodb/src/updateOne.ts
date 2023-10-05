@@ -11,7 +11,7 @@ import { withSession } from './withSession'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { collection, data, id, locale, req = {} as PayloadRequest, where: whereArg },
+  { id, collection, data, locale, req = {} as PayloadRequest, where: whereArg },
 ) {
   const where = id ? { id: { equals: id } } : whereArg
   const Model = this.collections[collection]

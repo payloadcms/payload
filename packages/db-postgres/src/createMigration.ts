@@ -1,39 +1,65 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/utils'
 import type { CreateMigration } from 'payload/database'
-import type { DatabaseAdapter, Init } from 'payload/database'
 
 import { generateDrizzleJson, generateMigration } from 'drizzle-kit/utils'
-import { eq } from 'drizzle-orm'
-import { jsonb, numeric, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core'
 import fs from 'fs'
-import { SanitizedCollectionConfig } from 'payload/types'
-import { configToJSONSchema } from 'payload/utilities'
-import prompts from 'prompts'
 
-import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types'
 
-import { buildTable } from './schema/build'
+import { migrationTableExists } from './utilities/migrationTableExists'
 
-const migrationTemplate = (upSQL?: string) => `
-import payload, { Payload } from 'payload';
+const migrationTemplate = (
+  upSQL?: string,
+  downSQL?: string,
+) => `import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres'
+import { sql } from 'drizzle-orm'
 
-export async function up(payload: Payload): Promise<void> {
-  ${upSQL ? `await payload.db.db.execute(\`${upSQL}\`);` : '// Migration code'}
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
+${
+  upSQL
+    ? `await payload.db.drizzle.execute(sql\`
+
+${upSQL}\`);
+`
+    : '// Migration code'
+}
 };
 
-export async function down(payload: Payload): Promise<void> {
-  // Migration code
+export async function down({ payload }: MigrateDownArgs): Promise<void> {
+${
+  downSQL
+    ? `await payload.db.drizzle.execute(sql\`
+
+${downSQL}\`);
+`
+    : '// Migration code'
+}
 };
 `
+
+const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
+  id: '00000000-0000-0000-0000-000000000000',
+  _meta: {
+    columns: {},
+    schemas: {},
+    tables: {},
+  },
+  dialect: 'pg',
+  enums: {},
+  prevId: '00000000-0000-0000-0000-00000000000',
+  schemas: {},
+  tables: {},
+  version: '5',
+})
 
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
   payload,
-  migrationDir,
   migrationName,
 ) {
-  payload.logger.info({ msg: 'Creating migration from postgres adapter...' })
-  const dir = migrationDir || '.migrations' // TODO: Verify path after linking
+  payload.logger.info({ msg: 'Creating new migration...' })
+  const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
@@ -44,26 +70,38 @@ export const createMigration: CreateMigration = async function createMigration(
 
   const timestamp = `${formattedDate}_${formattedTime}`
 
-  const formattedName = migrationName.replace(/\W/g, '_')
-  const fileName = `${timestamp}_${formattedName}.ts`
+  const fileName = migrationName
+    ? `${timestamp}_${migrationName.replace(/\W/g, '_')}.ts`
+    : `${timestamp}.ts`
+
   const filePath = `${dir}/${fileName}`
 
-  const snapshotJSON = fs.readFileSync(`${dir}/drizzle-snapshot.json`, 'utf8')
-  const drizzleJsonBefore = generateDrizzleJson(JSON.parse(snapshotJSON))
-  const drizzleJsonAfter = generateDrizzleJson(this.schema, drizzleJsonBefore.id)
-  const sqlStatements = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+  let drizzleJsonBefore = getDefaultDrizzleSnapshot()
+
+  const hasMigrationTable = await migrationTableExists(this.drizzle)
+
+  if (hasMigrationTable) {
+    const migrationQuery = await payload.find({
+      collection: 'payload-migrations',
+      limit: 1,
+      sort: '-name',
+    })
+
+    if (migrationQuery.docs?.[0]?.schema) {
+      drizzleJsonBefore = migrationQuery.docs[0]?.schema as DrizzleSnapshotJSON
+    }
+  }
+
+  const drizzleJsonAfter = generateDrizzleJson(this.schema)
+  const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+  const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+
   fs.writeFileSync(
     filePath,
-    migrationTemplate(sqlStatements.length ? sqlStatements?.join('\n') : undefined),
+    migrationTemplate(
+      sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
+      sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
+    ),
   )
-
-  // TODO:
-  // Get the most recent migration schema from the file system
-  // we will use that as the "before"
-  // then for after, we will call `connect` and `init` to create the new schema dynamically
-  // once we have new schema created, we will convert it to JSON using generateDrizzleJSON
-  // we then run `generateMigration` to get a list of SQL statements to pair 'em up
-  // and then inject them each into the `migrationTemplate` above,
-  // outputting the file into the migrations folder accordingly
-  // also make sure to output the JSON schema snapshot into a `./migrationsDir/meta` folder like Drizzle does
+  payload.logger.info({ msg: `Migration created at ${filePath}` })
 }

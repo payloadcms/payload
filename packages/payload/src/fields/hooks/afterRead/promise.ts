@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
+import type { RichTextAdapter } from '../../../admin/components/forms/field-types/RichText/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'
-import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise'
 import relationshipPopulationPromise from './relationshipPopulationPromise'
 import { traverseFields } from './traverseFields'
 
@@ -128,23 +128,21 @@ export const promise = async ({
     }
 
     case 'richText': {
-      if (
-        field.admin?.elements?.includes('relationship') ||
-        field.admin?.elements?.includes('upload') ||
-        field.admin?.elements?.includes('link') ||
-        !field?.admin?.elements
-      ) {
-        populationPromises.push(
-          richTextRelationshipPromise({
-            currentDepth,
-            depth,
-            field,
-            overrideAccess,
-            req,
-            showHiddenFields,
-            siblingDoc,
-          }),
-        )
+      const editor: RichTextAdapter = field?.editor || req?.payload?.config?.editor
+      if (editor?.afterReadPromise) {
+        const afterReadPromise = editor.afterReadPromise({
+          currentDepth,
+          depth,
+          field,
+          overrideAccess,
+          req,
+          showHiddenFields,
+          siblingDoc,
+        })
+
+        if (afterReadPromise) {
+          populationPromises.push(afterReadPromise)
+        }
       }
 
       break
@@ -221,9 +219,9 @@ export const promise = async ({
       const result = overrideAccess
         ? true
         : await field.access.read({
+            id: doc.id as number | string,
             data: doc,
             doc,
-            id: doc.id as number | string,
             req,
             siblingData: siblingDoc,
           })
@@ -315,6 +313,8 @@ export const promise = async ({
             })
           }
         })
+      } else {
+        siblingDoc[field.name] = []
       }
       break
     }
@@ -370,6 +370,8 @@ export const promise = async ({
             })
           }
         })
+      } else {
+        siblingDoc[field.name] = []
       }
 
       break

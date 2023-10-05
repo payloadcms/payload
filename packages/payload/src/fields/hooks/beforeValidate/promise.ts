@@ -29,11 +29,11 @@ type Args<T> = {
 // - Compute default values for undefined fields
 
 export const promise = async <T>({
+  id,
   context,
   data,
   doc,
   field,
-  id,
   operation,
   overrideAccess,
   req,
@@ -228,7 +228,7 @@ export const promise = async <T>({
     if (field.access && field.access[operation]) {
       const result = overrideAccess
         ? true
-        : await field.access[operation]({ data, doc, id, req, siblingData })
+        : await field.access[operation]({ id, data, doc, req, siblingData })
 
       if (!result) {
         delete siblingData[field.name]
@@ -255,18 +255,18 @@ export const promise = async <T>({
   // Traverse subfields
   switch (field.type) {
     case 'group': {
-      let groupData = siblingData[field.name] as Record<string, unknown>
-      let groupDoc = siblingDoc[field.name] as Record<string, unknown>
+      if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
+      if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
 
-      if (typeof siblingData[field.name] !== 'object') groupData = {}
-      if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
+      const groupData = siblingData[field.name] as Record<string, unknown>
+      const groupDoc = siblingDoc[field.name] as Record<string, unknown>
 
       await traverseFields({
+        id,
         context,
         data,
         doc,
         fields: field.fields,
-        id,
         operation,
         overrideAccess,
         req,
@@ -285,11 +285,11 @@ export const promise = async <T>({
         rows.forEach((row, i) => {
           promises.push(
             traverseFields({
+              id,
               context,
               data,
               doc,
               fields: field.fields,
-              id,
               operation,
               overrideAccess,
               req,
@@ -309,21 +309,25 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
+          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
+          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
 
           if (block) {
+            row.blockType = blockTypeToMatch
+
             promises.push(
               traverseFields({
+                id,
                 context,
                 data,
                 doc,
                 fields: block.fields,
-                id,
                 operation,
                 overrideAccess,
                 req,
                 siblingData: row,
-                siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+                siblingDoc: rowSiblingDoc,
               }),
             )
           }
@@ -337,11 +341,11 @@ export const promise = async <T>({
     case 'row':
     case 'collapsible': {
       await traverseFields({
+        id,
         context,
         data,
         doc,
         fields: field.fields,
-        id,
         operation,
         overrideAccess,
         req,
@@ -367,11 +371,11 @@ export const promise = async <T>({
       }
 
       await traverseFields({
+        id,
         context,
         data,
         doc,
         fields: field.fields,
-        id,
         operation,
         overrideAccess,
         req,
@@ -384,11 +388,11 @@ export const promise = async <T>({
 
     case 'tabs': {
       await traverseFields({
+        id,
         context,
         data,
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        id,
         operation,
         overrideAccess,
         req,

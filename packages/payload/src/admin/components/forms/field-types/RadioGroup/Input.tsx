@@ -10,6 +10,7 @@ import FieldDescription from '../../FieldDescription'
 import Label from '../../Label'
 import RadioInput from './RadioInput'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'radio-group'
 
@@ -31,12 +32,12 @@ export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
 
 const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
   const {
+    name,
     className,
     description,
     errorMessage,
     label,
     layout = 'horizontal',
-    name,
     onChange,
     options,
     path: pathFromProps,
@@ -50,20 +51,18 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
 
   const path = pathFromProps || name
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    `${baseClass}--layout-${layout}`,
-    showError && 'error',
-    readOnly && `${baseClass}--read-only`,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        `${baseClass}--layout-${layout}`,
+        showError && 'error',
+        readOnly && `${baseClass}--read-only`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

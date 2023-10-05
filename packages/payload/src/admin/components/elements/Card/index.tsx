@@ -8,7 +8,7 @@ import './index.scss'
 const baseClass = 'card'
 
 const Card: React.FC<Props> = (props) => {
-  const { actions, buttonAriaLabel, id, onClick, title, titleAs } = props
+  const { id, actions, buttonAriaLabel, onClick, title, titleAs } = props
 
   const classes = [baseClass, id, onClick && `${baseClass}--has-onclick`].filter(Boolean).join(' ')
 

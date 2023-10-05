@@ -45,12 +45,12 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
   }, Promise.resolve())
 
   const {
+    id,
     collection: { config: collectionConfig },
     currentDepth,
     depth,
     disableErrors,
     draft: draftEnabled = false,
-    id,
     overrideAccess = false,
     req: { locale, payload, t },
     req,
@@ -81,7 +81,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // /////////////////////////////////////
 
     const accessResult = !overrideAccess
-      ? await executeAccess({ disableErrors, id, req }, collectionConfig.access.read)
+      ? await executeAccess({ id, disableErrors, req }, collectionConfig.access.read)
       : true
 
     // If errors are disabled, and access returns false, return null

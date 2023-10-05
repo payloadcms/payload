@@ -1,17 +1,22 @@
 import qs from 'qs'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import { useConfig } from '../../utilities/Config'
 import { useLocale } from '../../utilities/Locale'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Popup from '../Popup'
+import * as PopupList from '../Popup/PopupButtonList'
+import { LocalizerLabel } from './LocalizerLabel'
+
 import './index.scss'
 
 const baseClass = 'localizer'
 
-const Localizer: React.FC = () => {
+const Localizer: React.FC<{
+  className?: string
+}> = (props) => {
+  const { className } = props
   const config = useConfig()
   const { localization } = config
 
@@ -23,47 +28,35 @@ const Localizer: React.FC = () => {
     const { locales } = localization
 
     return (
-      <div className={baseClass}>
+      <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Popup
-          button={locale.label}
-          horizontalAlign="left"
+          button={<LocalizerLabel />}
+          horizontalAlign="right"
           render={({ close }) => (
-            <div>
-              <span>{t('locales')}</span>
-              <ul>
-                {locales.map((localeOption) => {
-                  const baseLocaleClass = `${baseClass}__locale`
+            <PopupList.ButtonGroup>
+              {locales.map((localeOption) => {
+                const newParams = {
+                  ...searchParams,
+                  locale: localeOption.code,
+                }
 
-                  const localeClasses = [
-                    baseLocaleClass,
-                    locale.code === localeOption.code && `${baseLocaleClass}--active`,
-                  ]
-                    .filter(Boolean)
-                    .join('')
+                const search = qs.stringify(newParams)
 
-                  const newParams = {
-                    ...searchParams,
-                    locale: localeOption.code,
-                  }
+                if (localeOption.code !== locale.code) {
+                  return (
+                    <PopupList.Button key={localeOption.code} onClick={close} to={{ search }}>
+                      {localeOption.label}
+                      {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
+                    </PopupList.Button>
+                  )
+                }
 
-                  const search = qs.stringify(newParams)
-
-                  if (localeOption.code !== locale.code) {
-                    return (
-                      <li className={localeClasses} key={localeOption.code}>
-                        <Link onClick={close} to={{ search }}>
-                          {localeOption.label}
-                        </Link>
-                      </li>
-                    )
-                  }
-
-                  return null
-                })}
-              </ul>
-            </div>
+                return null
+              })}
+            </PopupList.ButtonGroup>
           )}
           showScrollbar
+          size="large"
         />
       </div>
     )

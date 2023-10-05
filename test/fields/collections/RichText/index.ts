@@ -1,17 +1,89 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { loremIpsum } from './loremIpsum'
+import {
+  BlocksFeature,
+  LinkFeature,
+  TreeviewFeature,
+  UploadFeature,
+  lexicalEditor,
+} from '../../../../packages/richtext-lexical/src'
+import { slateEditor } from '../../../../packages/richtext-slate/src'
+import { TextBlock, UploadAndRichTextBlock } from './blocks'
+import { generateLexicalRichText } from './generateLexicalRichText'
+import { generateSlateRichText } from './generateSlateRichText'
 
 const RichTextFields: CollectionConfig = {
   slug: 'rich-text-fields',
   admin: {
     useAsTitle: 'title',
   },
+  access: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'richTextLexicalCustomFields',
+      type: 'richText',
+      editor: lexicalEditor({
+        userConfig(defaultEditorConfig) {
+          defaultEditorConfig.features.push(TreeviewFeature())
+          defaultEditorConfig.features.push(
+            LinkFeature({
+              fields: [
+                {
+                  name: 'rel',
+                  label: 'Rel Attribute',
+                  type: 'select',
+                  hasMany: true,
+                  options: ['noopener', 'noreferrer', 'nofollow'],
+                  admin: {
+                    description:
+                      'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+                  },
+                },
+              ],
+            }),
+          )
+
+          defaultEditorConfig.features.push(
+            UploadFeature({
+              collections: {
+                uploads: {
+                  fields: [
+                    {
+                      name: 'caption',
+                      type: 'richText',
+                      editor: lexicalEditor({}),
+                    },
+                  ],
+                },
+              },
+            }),
+          )
+
+          defaultEditorConfig.features.push(
+            BlocksFeature({
+              blocks: [TextBlock, UploadAndRichTextBlock],
+            }),
+          )
+          return defaultEditorConfig
+        },
+      }),
+    },
+    {
+      name: 'richTextLexical',
+      type: 'richText',
+      editor: lexicalEditor({
+        userConfig(defaultEditorConfig) {
+          defaultEditorConfig.features.push(TreeviewFeature())
+          return defaultEditorConfig
+        },
+      }),
     },
     {
       name: 'selectHasMany',
@@ -51,143 +123,151 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
-      required: true,
-      admin: {
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'ul',
-          'ol',
-          'textAlign',
-          'indent',
-          'link',
-          'relationship',
-          'upload',
-        ],
-        link: {
-          fields: [
-            {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: ['noopener', 'noreferrer', 'nofollow'],
-              admin: {
-                description:
-                  'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-              },
-            },
+      editor: slateEditor({
+        admin: {
+          elements: [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'ul',
+            'ol',
+            'textAlign',
+            'indent',
+            'link',
+            'relationship',
+            'upload',
           ],
-        },
-        upload: {
-          collections: {
-            uploads: {
-              fields: [
-                {
-                  name: 'caption',
-                  type: 'richText',
+          link: {
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+                admin: {
+                  description:
+                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
                 },
-              ],
+              },
+            ],
+          },
+          upload: {
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                  },
+                ],
+              },
             },
           },
         },
-      },
+      }),
+      required: true,
     },
     {
       name: 'richTextCustomFields',
       type: 'richText',
-      admin: {
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'ul',
-          'ol',
-          'indent',
-          'link',
-          'relationship',
-          'upload',
-        ],
-        link: {
-          fields: ({ defaultFields }) => {
-            return [
-              ...defaultFields,
-              {
-                label: 'Custom',
-                name: 'customLinkField',
-                type: 'text',
-              },
-            ]
-          },
-        },
-        upload: {
-          collections: {
-            uploads: {
-              fields: [
+      editor: slateEditor({
+        admin: {
+          elements: [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'ul',
+            'ol',
+            'indent',
+            'link',
+            'relationship',
+            'upload',
+          ],
+          link: {
+            fields: ({ defaultFields }) => {
+              return [
+                ...defaultFields,
                 {
-                  name: 'caption',
-                  type: 'richText',
+                  label: 'Custom',
+                  name: 'customLinkField',
+                  type: 'text',
                 },
-              ],
+              ]
+            },
+          },
+          upload: {
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                  },
+                ],
+              },
             },
           },
         },
-      },
+      }),
     },
     {
       name: 'richTextReadOnly',
       type: 'richText',
       admin: {
         readOnly: true,
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'ul',
-          'ol',
-          'indent',
-          'link',
-          'relationship',
-          'upload',
-        ],
-        link: {
-          fields: [
-            {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: ['noopener', 'noreferrer', 'nofollow'],
-              admin: {
-                description:
-                  'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-              },
-            },
+      },
+      editor: slateEditor({
+        admin: {
+          elements: [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'ul',
+            'ol',
+            'indent',
+            'link',
+            'relationship',
+            'upload',
           ],
-        },
-        upload: {
-          collections: {
-            uploads: {
-              fields: [
-                {
-                  name: 'caption',
-                  type: 'richText',
+          link: {
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+                admin: {
+                  description:
+                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
                 },
-              ],
+              },
+            ],
+          },
+          upload: {
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                  },
+                ],
+              },
             },
           },
         },
-      },
+      }),
     },
     {
       name: 'blocks',
@@ -214,153 +294,6 @@ const RichTextFields: CollectionConfig = {
       ],
     },
   ],
-}
-
-function generateRichText() {
-  return [
-    {
-      children: [
-        {
-          text: "Hello, I'm a rich text field.",
-        },
-      ],
-      type: 'h1',
-      textAlign: 'center',
-    },
-    {
-      children: [
-        {
-          text: 'I can do all kinds of fun stuff like ',
-        },
-        {
-          type: 'link',
-          url: 'https://payloadcms.com',
-          newTab: true,
-          children: [
-            {
-              text: 'render links',
-            },
-          ],
-        },
-        {
-          text: ', ',
-        },
-        {
-          type: 'link',
-          linkType: 'internal',
-          doc: {
-            value: '{{ARRAY_DOC_ID}}',
-            relationTo: 'array-fields',
-          },
-          fields: {},
-          children: [
-            {
-              text: 'link to relationships',
-            },
-          ],
-        },
-        {
-          text: ', and store nested relationship fields:',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-      type: 'relationship',
-      value: {
-        id: '',
-      },
-      relationTo: 'text-fields',
-    },
-    {
-      children: [
-        {
-          text: 'You can build your own elements, too.',
-        },
-      ],
-    },
-    {
-      type: 'ul',
-      children: [
-        {
-          children: [
-            {
-              text: "It's built with SlateJS",
-            },
-          ],
-          type: 'li',
-        },
-        {
-          type: 'li',
-          children: [
-            {
-              text: 'It stores content as JSON so you can use it wherever you need',
-            },
-          ],
-        },
-        {
-          type: 'li',
-          children: [
-            {
-              text: "It's got a great editing experience for non-technical users",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: 'And a whole lot more.',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-      type: 'upload',
-      value: {
-        id: '',
-      },
-      relationTo: 'uploads',
-      fields: {
-        caption: [
-          ...[...Array(4)].map(() => {
-            return {
-              children: [
-                {
-                  text: loremIpsum,
-                },
-              ],
-            }
-          }),
-        ],
-      },
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-    },
-    ...[...Array(2)].map(() => {
-      return {
-        children: [
-          {
-            text: loremIpsum,
-          },
-        ],
-      }
-    }),
-  ]
 }
 
 export const richTextBulletsDoc = {
@@ -488,9 +421,10 @@ export const richTextBlocks = [
 export const richTextDoc = {
   title: 'Rich Text',
   selectHasMany: ['one', 'five'],
-  richText: generateRichText(),
-  richTextReadOnly: generateRichText(),
-  richTextCustomFields: generateRichText(),
+  richText: generateSlateRichText(),
+  richTextReadOnly: generateSlateRichText(),
+  richTextCustomFields: generateSlateRichText(),
+  richTextLexicalCustomFields: generateLexicalRichText(),
   blocks: richTextBlocks,
 }
 

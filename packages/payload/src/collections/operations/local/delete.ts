@@ -1,5 +1,5 @@
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Config as GeneratedTypes } from '../../../generated-types'
 import type { Payload } from '../../../payload'
 import type { Document, Where } from '../../../types'
 import type { BulkOperationResult } from '../../config/types'
@@ -57,13 +57,14 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {
+    id,
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale = null,
-    id,
+    fallbackLocale,
     locale = null,
     overrideAccess = true,
+    req: incomingReq,
     showHiddenFields,
     user,
     where,
@@ -81,11 +82,12 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   const req = {
-    fallbackLocale: fallbackLocale ?? defaultLocale,
+    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     i18n: i18nInit(payload.config.i18n),
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req, context)
@@ -94,9 +96,9 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {
+    id,
     collection,
     depth,
-    id,
     overrideAccess,
     req,
     showHiddenFields,

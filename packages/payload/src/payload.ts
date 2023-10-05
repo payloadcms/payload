@@ -3,12 +3,12 @@ import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks this import
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler'
 import type { SendMailOptions } from 'nodemailer'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type pino from 'pino'
 
 import crypto from 'crypto'
 import path from 'path'
 
+import type { DatabaseAdapter, GeneratedTypes } from './' // Must import from Payload to support declare module
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword'
 import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword'
 import type { Options as LoginOptions } from './auth/operations/local/login'
@@ -35,7 +35,6 @@ import type {
   Options as UpdateOptions,
 } from './collections/operations/local/update'
 import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types'
-import type { DatabaseAdapter } from './database/types'
 import type { PaginatedDocs } from './database/types'
 import type { BuildEmailResult } from './email/types'
 import type { PayloadAuthenticate } from './express/middleware/authenticate'
@@ -63,9 +62,9 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
  * @description Payload
  */
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
-  Mutation: { fields: { [key: string]: any }; name: string } = { fields: {}, name: 'Mutation' }
+  Mutation: { fields: { [key: string]: any }; name: string } = { name: 'Mutation', fields: {} }
 
-  Query: { fields: { [key: string]: any }; name: string } = { fields: {}, name: 'Query' }
+  Query: { fields: { [key: string]: any }; name: string } = { name: 'Query', fields: {} }
 
   authenticate: PayloadAuthenticate
 
@@ -358,7 +357,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       await this.db.init(this)
     }
 
-    if (this.db.connect) {
+    if (!options.disableDBConnect && this.db.connect) {
       await this.db.connect(this)
     }
 
@@ -380,7 +379,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     serverInitTelemetry(this)
 
-    if (options.local !== false) {
+    if (!options.disableOnInit) {
       if (typeof options.onInit === 'function') await options.onInit(this)
       if (typeof this.config.onInit === 'function') await this.config.onInit(this)
     }

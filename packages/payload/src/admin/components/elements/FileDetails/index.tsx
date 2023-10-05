@@ -36,7 +36,7 @@ const FileDetails: React.FC<Props> = (props) => {
     upload: { imageSizes, staticURL },
   } = collection
 
-  const { filename, filesize, height, id, mimeType, sizes, url, width } = doc
+  const { id, filename, filesize, height, mimeType, sizes, url, width } = doc
 
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes))
 
@@ -74,13 +74,17 @@ const FileDetails: React.FC<Props> = (props) => {
               {!moreInfoOpen && (
                 <React.Fragment>
                   {t('moreInfo')}
-                  <Chevron />
+                  <div className={`${baseClass}__toggle-icon`}>
+                    <Chevron />
+                  </div>
                 </React.Fragment>
               )}
               {moreInfoOpen && (
                 <React.Fragment>
                   {t('lessInfo')}
-                  <Chevron />
+                  <div className={`${baseClass}__toggle-icon`}>
+                    <Chevron direction="up" />
+                  </div>
                 </React.Fragment>
               )}
             </Button>

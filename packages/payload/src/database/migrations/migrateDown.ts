@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { PayloadRequest } from '../../express/types'
-import type { DatabaseAdapter } from '../types'
+import type { BaseDatabaseAdapter } from '../types'
 
 import { getMigrations } from './getMigrations'
 import { readMigrationFiles } from './readMigrationFiles'
 
-export async function migrateDown(this: DatabaseAdapter): Promise<void> {
+export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -21,7 +21,7 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
     return
   }
   payload.logger.info({
-    msg: `Rolling back batch ${latestBatch} consisting of ${migrationsToRollback.length} migrations.`,
+    msg: `Rolling back batch ${latestBatch} consisting of ${migrationsToRollback.length} migration(s).`,
   })
 
   for (const migration of migrationsToRollback) {
@@ -34,14 +34,16 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
     let transactionID
 
     try {
-      payload.logger.info({ msg: `Migrating: ${migrationFile.name}` })
+      payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       transactionID = await this.beginTransaction()
       await migrationFile.down({ payload })
-      payload.logger.info({ msg: `Migrated:  ${migrationFile.name} (${Date.now() - start}ms)` })
+      payload.logger.info({
+        msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
+      })
       // Waiting for implementation here
       await payload.delete({
-        collection: 'payload-migrations',
         id: migration.id,
+        collection: 'payload-migrations',
         req: {
           transactionID,
         } as PayloadRequest,

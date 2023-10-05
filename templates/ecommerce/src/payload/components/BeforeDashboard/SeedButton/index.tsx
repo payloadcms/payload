@@ -6,7 +6,7 @@ export const SeedButton: React.FC = () => {
   const [error, setError] = useState(null)
 
   const handleClick = useCallback(
-    async e => {
+    async (e) => {
       e.preventDefault()
       if (loading || seeded) return
 

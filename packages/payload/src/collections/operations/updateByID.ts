@@ -1,10 +1,10 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
 import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../express/types'
+import type { GeneratedTypes } from '../../index'
 import type { Collection } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'
@@ -61,12 +61,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   }, Promise.resolve())
 
   const {
+    id,
     autosave = false,
     collection: { config: collectionConfig },
     collection,
     depth,
     draft: draftArg = false,
-    id,
     overrideAccess,
     overwriteExistingFiles = false,
     req: {
@@ -111,7 +111,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ data, id, req }, collectionConfig.access.update)
+      ? await executeAccess({ id, data, req }, collectionConfig.access.update)
       : true
     const hasWherePolicy = hasWhereAccessResult(accessResults)
 
@@ -122,12 +122,13 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       locale,
+      req,
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
     const docWithLocales = await getLatestCollectionVersion({
-      config: collectionConfig,
       id,
+      config: collectionConfig,
       payload,
       query: findOneArgs,
       req,
@@ -179,11 +180,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+      id,
       context: req.context,
       data,
       doc: originalDoc,
       entityConfig: collectionConfig,
-      id,
       operation: 'update',
       overrideAccess,
       req,
@@ -236,12 +237,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+      id,
       context: req.context,
       data,
       doc: originalDoc,
       docWithLocales,
       entityConfig: collectionConfig,
-      id,
       operation: 'update',
       req,
       skipValidation: shouldSaveDraft || data._status === 'draft',
@@ -267,9 +268,9 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (!shouldSaveDraft) {
       result = await req.payload.db.updateOne({
+        id,
         collection: collectionConfig.slug,
         data: dataToUpdate,
-        id,
         locale,
         req,
       })
@@ -281,6 +282,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (collectionConfig.versions) {
       result = await saveVersion({
+        id,
         autosave,
         collection: collectionConfig,
         docWithLocales: {
@@ -288,7 +290,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
           createdAt: docWithLocales.createdAt,
         },
         draft: shouldSaveDraft,
-        id,
         payload,
         req,
       })

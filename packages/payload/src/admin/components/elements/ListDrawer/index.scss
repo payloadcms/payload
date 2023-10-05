@@ -12,6 +12,7 @@
 
   &__header-wrap {
     display: flex;
+    gap: base(1);
   }
 
   &__header-content {
@@ -22,13 +23,18 @@
 
     button .pill {
       pointer-events: none;
-      margin-top: base(0.25);
-      margin-right: base(0.5);
+      margin: 0;
+      top: 4px;
+      margin-left: base(0.5);
     }
   }
 
   &__header-text {
     margin: 0;
+  }
+
+  &__header-close {
+    flex-shrink: 0;
   }
 
   &__toggler {
@@ -89,6 +95,16 @@
   @include mid-break {
     .collection-list__header {
       margin-bottom: base(0.5);
+    }
+
+    &__select-collection-wrap {
+      margin-top: calc(var(--base) / 2);
+    }
+
+    &__header-content {
+      button .pill {
+        top: 2px;
+      }
     }
   }
 }

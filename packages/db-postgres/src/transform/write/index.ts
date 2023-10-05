@@ -8,43 +8,41 @@ import { traverseFields } from './traverseFields'
 type Args = {
   data: Record<string, unknown>
   fields: Field[]
-  locale: string
   path?: string
   tableName: string
 }
 
-export const transformForWrite = ({
-  data,
-  fields,
-  locale,
-  path = '',
-  tableName,
-}: Args): RowToInsert => {
-  // Split out the incoming data into the corresponding:
-  // base row, locales, relationships, blocks, and arrays
+export const transformForWrite = ({ data, fields, path = '', tableName }: Args): RowToInsert => {
+  // Split out the incoming data into rows to insert / delete
   const rowToInsert: RowToInsert = {
     arrays: {},
     blocks: {},
-    locale: {},
+    locales: {},
+    numbers: [],
     relationships: [],
+    relationshipsToDelete: [],
     row: {},
+    selects: {},
   }
 
   // This function is responsible for building up the
   // above rowToInsert
   traverseFields({
     arrays: rowToInsert.arrays,
+    baseTableName: tableName,
     blocks: rowToInsert.blocks,
     columnPrefix: '',
     data,
+    fieldPrefix: '',
     fields,
-    locale,
-    localeRow: rowToInsert.locale,
-    newTableName: tableName,
+    locales: rowToInsert.locales,
+    numbers: rowToInsert.numbers,
     parentTableName: tableName,
     path,
     relationships: rowToInsert.relationships,
+    relationshipsToDelete: rowToInsert.relationshipsToDelete,
     row: rowToInsert.row,
+    selects: rowToInsert.selects,
   })
 
   return rowToInsert

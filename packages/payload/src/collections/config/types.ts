@@ -1,19 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Response } from 'express'
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { GeneratedTypes } from '../../'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
-import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types'
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
-import type { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types'
+import type {
+  Access,
+  EditView,
+  EditViewComponent,
+  Endpoint,
+  EntityDescription,
+  GeneratePreviewURL,
+  LivePreview,
+} from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
@@ -199,7 +206,34 @@ export type CollectionAdminOptions = {
       SaveDraftButton?: CustomSaveDraftButtonProps
     }
     views?: {
-      Edit?: React.ComponentType<EditProps>
+      /**
+       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to an object to replace or modify individual nested routes, or to add new ones.
+       */
+      Edit?:
+        | {
+            [key: string]: EditView
+            /**
+             * Replace or modify individual nested routes, or add new ones:
+             * + `Default` - `/admin/collections/:collection/:id`
+             * + `API` - `/admin/collections/:collection/:id/api`
+             * + `LivePreview` - `/admin/collections/:collection/:id/preview`
+             * + `References` - `/admin/collections/:collection/:id/references`
+             * + `Relationships` - `/admin/collections/:collection/:id/relationships`
+             * + `Versions` - `/admin/collections/:collection/:id/versions`
+             * + `Version` - `/admin/collections/:collection/:id/versions/:version`
+             * + `:path` - `/admin/collections/:collection/:id/:path`
+             */
+            Default?: EditView
+            Versions?: EditView
+            // TODO: uncomment these as they are built
+            // API?: EditView
+            // LivePreview?: EditView
+            // References?: EditView
+            // Relationships?: EditView
+            // Version: EditView
+          }
+        | EditViewComponent
       List?: React.ComponentType<ListProps>
     }
   }
@@ -236,6 +270,10 @@ export type CollectionAdminOptions = {
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[]
+  /**
+   * Live preview options
+   */
+  livePreview?: LivePreview
   pagination?: {
     defaultLimit?: number
     limits?: number[]

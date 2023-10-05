@@ -2,16 +2,12 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { OptionObject, SelectField } from '../../../../../../../../fields/config/types'
+import type { CellComponentProps } from '../../types'
 
 import { optionsAreObjects } from '../../../../../../../../fields/config/types'
 import { getTranslation } from '../../../../../../../../utilities/getTranslation'
 
-type Props = {
-  data: any
-  field: SelectField
-}
-
-const SelectCell: React.FC<Props> = ({ data, field }: Props) => {
+const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, field }) => {
   const { i18n } = useTranslation()
   const findLabel = (items: string[]) =>
     items

@@ -20,26 +20,20 @@ describe('field error states', () => {
     await page.goto(`${serverURL}/admin/collections/error-fields/create`)
 
     // add parent array
-    await page.locator('#field-parentArray > .array-field__add-button-wrap > button').click()
+    await page.locator('#field-parentArray > .array-field__add-row').click()
 
     // add first child array
-    await page
-      .locator('#parentArray-row-0 .collapsible__content .array-field__add-button-wrap > button')
-      .click()
+    await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
     await page.locator('#field-parentArray__0__childArray__0__childArrayText').focus()
     await page.keyboard.type('T1')
 
     // add second child array
-    await page
-      .locator('#parentArray-row-0 .collapsible__content .array-field__add-button-wrap > button')
-      .click()
+    await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
     await page.locator('#field-parentArray__0__childArray__1__childArrayText').focus()
     await page.keyboard.type('T2')
 
     // add third child array
-    await page
-      .locator('#parentArray-row-0 .collapsible__content .array-field__add-button-wrap > button')
-      .click()
+    await page.locator('#parentArray-row-0 .collapsible__content .array-field__add-row').click()
     await page.locator('#parentArray-0-childArray-row-2 .array-actions__button').click()
     await page
       .locator('#parentArray-0-childArray-row-2 .array-actions__action.array-actions__remove')

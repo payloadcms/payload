@@ -13,11 +13,11 @@
   --breakpoint-m-width: #{$breakpoint-m-width};
   --breakpoint-l-width: #{$breakpoint-l-width};
   --scrollbar-width: 17px;
-  --nav-width: #{base(9)};
 
   --theme-bg: var(--theme-elevation-0);
   --theme-input-bg: var(--theme-elevation-0);
   --theme-text: var(--theme-elevation-800);
+  --theme-overlay: rgba(5, 5, 5, 0.5);
   --theme-baseline: #{$baseline-px};
   --theme-baseline-body-size: #{$baseline-body-size};
   --font-body: 'Suisse Intl', system-ui;
@@ -36,20 +36,28 @@
   --accessibility-outline: 2px solid var(--theme-text);
   --accessibility-outline-offset: 2px;
 
-  --gutter-h: #{base(5)};
-
-  @include large-break {
-    --gutter-h: #{base(3)};
-    --nav-width: #{base(8)};
-  }
+  --gutter-h: #{base(3)};
+  --spacing-view-bottom: var(--gutter-h);
+  --app-header-height: calc(var(--base) * 3);
+  --doc-controls-height: calc(var(--base) * 3);
+  --nav-width: 300px;
+  --nav-trans-time: 150ms;
 
   @include mid-break {
     --gutter-h: #{base(2)};
-    --nav-width: 0px;
+    --app-header-height: calc(var(--base) * 2);
+    --doc-controls-height: calc(var(--base) * 1.5);
+    // set to xs-breakpoint to achieve a seamless transition to full screen
+    --nav-width: var(--breakpoint-xs-width);
   }
 
   @include small-break {
     --gutter-h: #{base(0.5)};
+    --spacing-view-bottom: calc(var(--base) * 2);
+  }
+
+  @include extra-small-break {
+    --nav-width: 100vw;
   }
 }
 
@@ -70,6 +78,7 @@ html {
     --theme-bg: var(--theme-elevation-0);
     --theme-text: var(--theme-elevation-1000);
     --theme-input-bg: var(--theme-elevation-50);
+    --theme-overlay: rgba(5, 5, 5, 0.75);
     color-scheme: dark;
 
     ::selection {
@@ -97,6 +106,8 @@ body {
   font-weight: 400;
   color: var(--theme-text);
   margin: 0;
+  // this is for the nav to be able to push the document over
+  overflow-x: hidden;
 }
 
 ::selection {

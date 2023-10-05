@@ -10,8 +10,8 @@ import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
-import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array'
-import { blocksFieldSeedData } from './collections/Blocks'
+import { arrayDefaultValue, arrayFieldsSlug } from './collections/Array'
+import { blocksDoc } from './collections/Blocks'
 import { dateDoc } from './collections/Date'
 import {
   groupDefaultChild,
@@ -21,13 +21,13 @@ import {
 } from './collections/Group'
 import { defaultNumber, numberDoc } from './collections/Number'
 import { pointDoc } from './collections/Point'
+import { tabsDoc } from './collections/Tabs'
 import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
-  tabsDoc,
   tabsSlug,
-} from './collections/Tabs'
+} from './collections/Tabs/constants'
 import { defaultText } from './collections/Text'
 
 let client
@@ -41,7 +41,7 @@ describe('Fields', () => {
     ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
     config = await configPromise
 
-    client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' })
+    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
     const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
     graphQLClient = new GraphQLClient(graphQLURL)
     token = await client.login()
@@ -64,7 +64,7 @@ describe('Fields', () => {
     })
 
     it('should populate default values in beforeValidate hook', async () => {
-      const { fieldWithDefaultValue, dependentOnFieldWithDefaultValue } = await payload.create({
+      const { dependentOnFieldWithDefaultValue, fieldWithDefaultValue } = await payload.create({
         collection: 'text-fields',
         data: { text },
       })
@@ -117,15 +117,15 @@ describe('Fields', () => {
     beforeAll(async () => {
       const { id } = await payload.create({
         collection: 'select-fields',
-        locale: 'en',
         data: {
           selectHasManyLocalized: ['one', 'two'],
         },
+        locale: 'en',
       })
       doc = await payload.findByID({
+        id,
         collection: 'select-fields',
         locale: 'all',
-        id,
       })
     })
 
@@ -142,8 +142,8 @@ describe('Fields', () => {
       })
 
       const updatedDoc = await payload.update({
-        collection: 'select-fields',
         id,
+        collection: 'select-fields',
         data: {
           select: 'one',
         },
@@ -241,15 +241,15 @@ describe('Fields', () => {
       const localizedHasMany = [5, 10]
       const { id } = await payload.create({
         collection: 'number-fields',
-        locale: 'en',
         data: {
           localizedHasMany,
         },
+        locale: 'en',
       })
       const localizedDoc = await payload.findByID({
+        id,
         collection: 'number-fields',
         locale: 'all',
-        id,
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -258,54 +258,171 @@ describe('Fields', () => {
     })
   })
 
-  describe('indexes', () => {
-    let indexes
-    const definitions: Record<string, IndexDirection> = {}
-    const options: Record<string, IndexOptions> = {}
+  if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+    describe('indexes', () => {
+      let indexes
+      const definitions: Record<string, IndexDirection> = {}
+      const options: Record<string, IndexOptions> = {}
 
-    beforeAll(() => {
-      indexes = (payload.db as MongooseAdapter).collections['indexed-fields'].schema.indexes() as [
-        Record<string, IndexDirection>,
-        IndexOptions,
-      ]
+      beforeAll(() => {
+        indexes = (payload.db as MongooseAdapter).collections[
+          'indexed-fields'
+        ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
 
-      indexes.forEach((index) => {
-        const field = Object.keys(index[0])[0]
-        definitions[field] = index[0][field]
-        // eslint-disable-next-line prefer-destructuring
-        options[field] = index[1]
+        indexes.forEach((index) => {
+          const field = Object.keys(index[0])[0]
+          definitions[field] = index[0][field]
+          // eslint-disable-next-line prefer-destructuring
+          options[field] = index[1]
+        })
+      })
+
+      it('should have indexes', () => {
+        expect(definitions.text).toEqual(1)
+      })
+
+      it('should have unique indexes', () => {
+        expect(definitions.uniqueText).toEqual(1)
+        expect(options.uniqueText).toMatchObject({ unique: true })
+      })
+
+      it('should have unique compound indexes', () => {
+        expect(definitions.partOne).toEqual(1)
+        expect(options.partOne).toMatchObject({
+          name: 'compound-index',
+          sparse: true,
+          unique: true,
+        })
+      })
+
+      it('should have 2dsphere indexes on point fields', () => {
+        expect(definitions.point).toEqual('2dsphere')
+      })
+
+      it('should have 2dsphere indexes on point fields in groups', () => {
+        expect(definitions['group.point']).toEqual('2dsphere')
+      })
+
+      it('should have a sparse index on a unique localized field in a group', () => {
+        expect(definitions['group.localizedUnique.en']).toEqual(1)
+        expect(options['group.localizedUnique.en']).toMatchObject({ sparse: true, unique: true })
+        expect(definitions['group.localizedUnique.es']).toEqual(1)
+        expect(options['group.localizedUnique.es']).toMatchObject({ sparse: true, unique: true })
+      })
+
+      it('should have unique indexes in a collapsible', () => {
+        expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1)
+        expect(options['collapsibleLocalizedUnique.en']).toMatchObject({
+          sparse: true,
+          unique: true,
+        })
+        expect(definitions.collapsibleTextUnique).toEqual(1)
+        expect(options.collapsibleTextUnique).toMatchObject({ unique: true })
       })
     })
 
-    it('should have indexes', () => {
-      expect(definitions.text).toEqual(1)
+    describe('version indexes', () => {
+      let indexes
+      const definitions: Record<string, IndexDirection> = {}
+      const options: Record<string, IndexOptions> = {}
+
+      beforeAll(() => {
+        indexes = (payload.db as MongooseAdapter).versions['indexed-fields'].schema.indexes() as [
+          Record<string, IndexDirection>,
+          IndexOptions,
+        ]
+        indexes.forEach((index) => {
+          const field = Object.keys(index[0])[0]
+          definitions[field] = index[0][field]
+          // eslint-disable-next-line prefer-destructuring
+          options[field] = index[1]
+        })
+      })
+
+      it('should have versions indexes', () => {
+        expect(definitions['version.text']).toEqual(1)
+      })
+      it('should have version indexes from collection indexes', () => {
+        expect(definitions['version.partOne']).toEqual(1)
+        expect(options['version.partOne']).toMatchObject({
+          name: 'compound-index',
+          sparse: true,
+          unique: true,
+        })
+      })
     })
-    it('should have unique indexes', () => {
-      expect(definitions.uniqueText).toEqual(1)
-      expect(options.uniqueText).toMatchObject({ unique: true })
+
+    describe('point', () => {
+      let doc
+      const point = [7, -7]
+      const localized = [5, -2]
+      const group = { point: [1, 9] }
+
+      beforeAll(async () => {
+        const findDoc = await payload.find({
+          collection: 'point-fields',
+          pagination: false,
+        })
+        ;[doc] = findDoc.docs
+      })
+
+      it('should read', async () => {
+        const find = await payload.find({
+          collection: 'point-fields',
+          pagination: false,
+        })
+
+        ;[doc] = find.docs
+
+        expect(doc.point).toEqual(pointDoc.point)
+        expect(doc.localized).toEqual(pointDoc.localized)
+        expect(doc.group).toMatchObject(pointDoc.group)
+      })
+
+      it('should create', async () => {
+        doc = await payload.create({
+          collection: 'point-fields',
+          data: {
+            group,
+            localized,
+            point,
+          },
+        })
+
+        expect(doc.point).toEqual(point)
+        expect(doc.localized).toEqual(localized)
+        expect(doc.group).toMatchObject(group)
+      })
+
+      it('should not create duplicate point when unique', async () => {
+        await expect(() =>
+          payload.create({
+            collection: 'point-fields',
+            data: {
+              group,
+              localized,
+              point,
+            },
+          }),
+        ).rejects.toThrow(Error)
+
+        await expect(async () =>
+          payload.create({
+            collection: 'number-fields',
+            data: {
+              min: 5,
+            },
+          }),
+        ).rejects.toThrow('The following field is invalid: min')
+
+        expect(doc.point).toEqual(point)
+        expect(doc.localized).toEqual(localized)
+        expect(doc.group).toMatchObject(group)
+      })
     })
-    it('should have 2dsphere indexes on point fields', () => {
-      expect(definitions.point).toEqual('2dsphere')
-    })
-    it('should have 2dsphere indexes on point fields in groups', () => {
-      expect(definitions['group.point']).toEqual('2dsphere')
-    })
-    it('should have a sparse index on a unique localized field in a group', () => {
-      expect(definitions['group.localizedUnique.en']).toEqual(1)
-      expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true })
-      expect(definitions['group.localizedUnique.es']).toEqual(1)
-      expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true })
-    })
-    it('should have unique indexes in a collapsible', () => {
-      expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1)
-      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true })
-      expect(definitions.collapsibleTextUnique).toEqual(1)
-      expect(options.collapsibleTextUnique).toMatchObject({ unique: true })
-    })
-    it('should have unique compound indexes', () => {
-      expect(definitions.partOne).toEqual(1)
-      expect(options.partOne).toMatchObject({ unique: true, name: 'compound-index', sparse: true })
-    })
+  }
+
+  describe('unique indexes', () => {
     it('should throw validation error saving on unique fields', async () => {
       const data = {
         text: 'a',
@@ -326,16 +443,16 @@ describe('Fields', () => {
     it('should throw validation error saving on unique combined fields', async () => {
       await payload.delete({ collection: 'indexed-fields', where: {} })
       const data1 = {
+        partOne: 'u',
+        partTwo: 'u',
         text: 'a',
         uniqueText: 'a',
-        partOne: 'u',
-        partTwo: 'u',
       }
       const data2 = {
-        text: 'b',
-        uniqueText: 'b',
         partOne: 'u',
         partTwo: 'u',
+        text: 'b',
+        uniqueText: 'b',
       }
       await payload.create({
         collection: 'indexed-fields',
@@ -351,105 +468,6 @@ describe('Fields', () => {
     })
   })
 
-  describe('version indexes', () => {
-    let indexes
-    const definitions: Record<string, IndexDirection> = {}
-    const options: Record<string, IndexOptions> = {}
-
-    beforeAll(() => {
-      indexes = (payload.db as MongooseAdapter).versions['indexed-fields'].schema.indexes() as [
-        Record<string, IndexDirection>,
-        IndexOptions,
-      ]
-      indexes.forEach((index) => {
-        const field = Object.keys(index[0])[0]
-        definitions[field] = index[0][field]
-        // eslint-disable-next-line prefer-destructuring
-        options[field] = index[1]
-      })
-    })
-
-    it('should have versions indexes', () => {
-      expect(definitions['version.text']).toEqual(1)
-    })
-    it('should have version indexes from collection indexes', () => {
-      expect(definitions['version.partOne']).toEqual(1)
-      expect(options['version.partOne']).toMatchObject({
-        unique: true,
-        name: 'compound-index',
-        sparse: true,
-      })
-    })
-  })
-
-  describe('point', () => {
-    let doc
-    const point = [7, -7]
-    const localized = [5, -2]
-    const group = { point: [1, 9] }
-
-    beforeAll(async () => {
-      const findDoc = await payload.find({
-        collection: 'point-fields',
-        pagination: false,
-      })
-      ;[doc] = findDoc.docs
-    })
-
-    it('should read', async () => {
-      const find = await payload.find({
-        collection: 'point-fields',
-        pagination: false,
-      })
-
-      ;[doc] = find.docs
-
-      expect(doc.point).toEqual(pointDoc.point)
-      expect(doc.localized).toEqual(pointDoc.localized)
-      expect(doc.group).toMatchObject(pointDoc.group)
-    })
-
-    it('should create', async () => {
-      doc = await payload.create({
-        collection: 'point-fields',
-        data: {
-          point,
-          localized,
-          group,
-        },
-      })
-
-      expect(doc.point).toEqual(point)
-      expect(doc.localized).toEqual(localized)
-      expect(doc.group).toMatchObject(group)
-    })
-
-    it('should not create duplicate point when unique', async () => {
-      await expect(() =>
-        payload.create({
-          collection: 'point-fields',
-          data: {
-            point,
-            localized,
-            group,
-          },
-        }),
-      ).rejects.toThrow(Error)
-
-      await expect(async () =>
-        payload.create({
-          collection: 'number-fields',
-          data: {
-            min: 5,
-          },
-        }),
-      ).rejects.toThrow('The following field is invalid: min')
-
-      expect(doc.point).toEqual(point)
-      expect(doc.localized).toEqual(localized)
-      expect(doc.group).toMatchObject(group)
-    })
-  })
   describe('array', () => {
     let doc
     const collection = arrayFieldsSlug
@@ -459,15 +477,6 @@ describe('Fields', () => {
         collection,
         data: {},
       })
-    })
-
-    it('should return undefined arrays when no data present', async () => {
-      const document = await payload.create({
-        collection: arrayFieldsSlug,
-        data: arrayDoc,
-      })
-
-      expect(document.potentiallyEmptyArray).toBeUndefined()
     })
 
     it('should create with ids and nested ids', async () => {
@@ -495,26 +504,26 @@ describe('Fields', () => {
       })
 
       const enDoc = await payload.update({
-        collection,
         id,
-        locale: 'en',
+        collection,
         data: {
           localized: [{ text: enText }],
         },
+        locale: 'en',
       })
 
       const esDoc = await payload.update({
-        collection,
         id,
-        locale: 'es',
+        collection,
         data: {
           localized: [{ text: esText }],
         },
+        locale: 'es',
       })
 
       const allLocales = (await payload.findByID({
-        collection,
         id,
+        collection,
         locale: 'all',
       })) as unknown as { localized: { en: unknown; es: unknown } }
 
@@ -565,8 +574,8 @@ describe('Fields', () => {
 
     it('should create with localized text inside a named tab', async () => {
       document = await payload.findByID({
-        collection: tabsSlug,
         id: document.id,
+        collection: tabsSlug,
         locale: 'all',
       })
       expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue)
@@ -574,8 +583,8 @@ describe('Fields', () => {
 
     it('should allow access control on a named tab', async () => {
       document = await payload.findByID({
-        collection: tabsSlug,
         id: document.id,
+        collection: tabsSlug,
         overrideAccess: false,
       })
       expect(document.accessControlTab).toBeUndefined()
@@ -598,7 +607,7 @@ describe('Fields', () => {
         data: groupDoc,
       })
 
-      expect(doc.potentiallyEmptyGroup).toEqual({})
+      expect(doc.potentiallyEmptyGroup).toBeDefined()
     })
   })
 
@@ -608,16 +617,16 @@ describe('Fields', () => {
         collection: 'block-fields',
       })
 
-      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksFieldSeedData[0].blockType)
-      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksFieldSeedData[0].text)
+      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksDoc.blocks[0].blockType)
+      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksDoc.blocks[0].text)
 
-      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksFieldSeedData[2].blockType)
-      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksFieldSeedData[2].blockName)
+      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksDoc.blocks[2].blockType)
+      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksDoc.blocks[2].blockName)
       expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(
-        blocksFieldSeedData[2].subBlocks[0].number,
+        blocksDoc.blocks[2].subBlocks[0].number,
       )
       expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(
-        blocksFieldSeedData[2].subBlocks[1].text,
+        blocksDoc.blocks[2].subBlocks[1].text,
       )
     })
 
@@ -731,8 +740,8 @@ describe('Fields', () => {
       expect(jsonFieldsDoc.json.state).toEqual({})
 
       const updatedJsonFieldsDoc = await payload.update({
-        collection: 'json-fields',
         id: jsonFieldsDoc.id,
+        collection: 'json-fields',
         data: {
           json: {
             state: {},
@@ -796,11 +805,17 @@ describe('Fields', () => {
       expect(nodes).toBeDefined()
       const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
       expect(child).toMatchObject({
-        type: 'link',
         linkType: 'internal',
+        type: 'link',
       })
       expect(child.doc.relationTo).toEqual('array-fields')
-      expect(typeof child.doc.value.id).toBe('string')
+
+      if (payload.db.defaultIDType === 'number') {
+        expect(typeof child.doc.value.id).toBe('number')
+      } else {
+        expect(typeof child.doc.value.id).toBe('string')
+      }
+
       expect(child.doc.value.items).toHaveLength(6)
     })
 

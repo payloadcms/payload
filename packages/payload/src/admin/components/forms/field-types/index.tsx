@@ -50,7 +50,7 @@ export type FieldTypes = {
   upload: React.ComponentType<any>
 }
 
-const fieldTypes: FieldTypes = {
+export const fieldTypes: FieldTypes = {
   array,
   blocks,
   checkbox,
@@ -76,5 +76,3 @@ const fieldTypes: FieldTypes = {
   ui,
   upload,
 }
-
-export default fieldTypes

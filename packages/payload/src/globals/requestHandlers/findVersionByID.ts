@@ -14,9 +14,9 @@ export default function findVersionByIDHandler(globalConfig: SanitizedGlobalConf
     next: NextFunction,
   ): Promise<Response<Document> | void> {
     const options = {
+      id: req.params.id,
       depth: isNumber(req.query?.depth) ? Number(req.query.depth) : undefined,
       globalConfig,
-      id: req.params.id,
       req,
     }
 

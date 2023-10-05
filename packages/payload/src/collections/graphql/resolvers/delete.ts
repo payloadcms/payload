@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Response } from 'express'
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
@@ -27,9 +27,9 @@ export default function getDeleteResolver<TSlug extends keyof GeneratedTypes['co
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
     const options = {
+      id: args.id,
       collection,
       depth: 0,
-      id: args.id,
       req: context.req,
     }
 

@@ -3,7 +3,7 @@ import equal from 'deep-equal'
 
 import type { FieldAction, Fields, FormField } from './types'
 
-import deepCopyObject from '../../../../utilities/deepCopyObject'
+import { deepCopyObject } from '../../../../utilities/deepCopyObject'
 import getSiblingData from './getSiblingData'
 import reduceFieldsToValues from './reduceFieldsToValues'
 import { flattenRows, separateRows } from './rows'
@@ -140,10 +140,10 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         0,
         // new row
         {
+          id: new ObjectID().toHexString(),
           blockType: blockType || undefined,
           childErrorPaths: new Set(),
           collapsed: false,
-          id: new ObjectID().toHexString(),
         },
       )
 
@@ -181,10 +181,10 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata[rowIndex] = {
+        id: new ObjectID().toHexString(),
         blockType: blockType || undefined,
         childErrorPaths: new Set(),
         collapsed: false,
-        id: new ObjectID().toHexString(),
       }
 
       if (blockType) {

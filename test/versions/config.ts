@@ -2,13 +2,14 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import AutosavePosts from './collections/Autosave'
 import DraftPosts from './collections/Drafts'
+import Posts from './collections/Posts'
 import VersionPosts from './collections/Versions'
 import AutosaveGlobal from './globals/Autosave'
 import DraftGlobal from './globals/Draft'
 import { draftSlug } from './shared'
 
 export default buildConfigWithDefaults({
-  collections: [AutosavePosts, DraftPosts, VersionPosts],
+  collections: [Posts, AutosavePosts, DraftPosts, VersionPosts],
   globals: [AutosaveGlobal, DraftGlobal],
   localization: {
     locales: ['en', 'es'],

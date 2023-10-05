@@ -1,5 +1,4 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 
 import type {
@@ -9,10 +8,19 @@ import type {
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
 import type { User } from '../../auth/types'
-import type { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types'
+import type {
+  Access,
+  EditView,
+  EditViewComponent,
+  Endpoint,
+  EntityDescription,
+  GeneratePreviewURL,
+  LivePreview,
+} from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { Where } from '../../types'
+
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
 
 export type TypeWithID = {
@@ -66,7 +74,34 @@ export type GlobalAdminOptions = {
       SaveDraftButton?: CustomSaveDraftButtonProps
     }
     views?: {
-      Edit?: React.ComponentType<any>
+      /**
+       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to an object to replace or modify individual nested routes, or to add new ones.
+       */
+      Edit?:
+        | {
+            /**
+             * Replace or modify individual nested routes, or add new ones:
+             * + `Default` - `/admin/globals/:slug`
+             * + `API` - `/admin/globals/:id/api`
+             * + `LivePreview` - `/admin/globals/:id/preview`
+             * + `References` - `/admin/globals/:id/references`
+             * + `Relationships` - `/admin/globals/:id/relationships`
+             * + `Versions` - `/admin/globals/:id/versions`
+             * + `Version` - `/admin/globals/:id/versions/:version`
+             * + `:path` - `/admin/globals/:id/:path`
+             */
+            Default?: EditView
+            Versions?: EditView
+            [name: string]: EditView
+            // TODO: uncomment these as they are built
+            // API?: EditView
+            // LivePreview?: EditView
+            // References?: EditView
+            // Relationships?: EditView
+            // Version?: EditView
+          }
+        | EditViewComponent
     }
   }
   /**
@@ -85,6 +120,10 @@ export type GlobalAdminOptions = {
    * Hide the API URL within the Edit view
    */
   hideAPIURL?: boolean
+  /**
+   * Live preview options
+   */
+  livePreview?: LivePreview
   /**
    * Function to generate custom preview URL
    */

@@ -27,10 +27,10 @@ export default function findVersionByIDResolver(globalConfig: SanitizedGlobalCon
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
     const options = {
+      id: args.id,
       depth: 0,
       draft: args.draft,
       globalConfig,
-      id: args.id,
       req: context.req,
     }
 

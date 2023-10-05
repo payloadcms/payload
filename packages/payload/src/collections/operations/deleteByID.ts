@@ -1,5 +1,4 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
+import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../express/types'
 import type { Document } from '../../types'
 import type { BeforeOperationHook, Collection } from '../config/types'
@@ -49,9 +48,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
   )
 
   const {
+    id,
     collection: { config: collectionConfig },
     depth,
-    id,
     overrideAccess,
     req: {
       payload: { config },
@@ -100,8 +99,8 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook
 
       return hook({
-        context: req.context,
         id,
+        context: req.context,
         req,
       })
     }, Promise.resolve())
@@ -142,7 +141,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete Preferences
     // /////////////////////////////////////
 
-    deleteUserPreferences({
+    await deleteUserPreferences({
       collectionConfig,
       ids: [id],
       payload,
@@ -154,7 +153,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
-      deleteCollectionVersions({
+      await deleteCollectionVersions({
         id,
         payload,
         req,
@@ -200,9 +199,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          id,
           context: req.context,
           doc: result,
-          id,
           req,
         })) || result
     }, Promise.resolve())

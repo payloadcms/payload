@@ -5,13 +5,22 @@ import type { GenericColumn } from '../types'
 
 type CreateIndexArgs = {
   columnName: string
-  name: string
+  name: string | string[]
   unique?: boolean
 }
 
-export const createIndex = ({ columnName, name, unique }: CreateIndexArgs) => {
+export const createIndex = ({ name, columnName, unique }: CreateIndexArgs) => {
   return (table: { [x: string]: GenericColumn }) => {
-    if (unique) return uniqueIndex(`${columnName}_idx`).on(table[name])
-    return index(`${columnName}_idx`).on(table[name])
+    let columns
+    if (Array.isArray(name)) {
+      columns = name
+        .map((columnName) => table[columnName])
+        // exclude fields were included in compound indexes but do not exist on the table
+        .filter((col) => typeof col !== 'undefined')
+    } else {
+      columns = [table[name]]
+    }
+    if (unique) return uniqueIndex(`${columnName}_idx`).on(columns[0], ...columns.slice(1))
+    return index(`${columnName}_idx`).on(columns[0], ...columns.slice(1))
   }
 }

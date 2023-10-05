@@ -9,5 +9,7 @@ export const destroy: Destroy = async function destroy(this: MongooseAdapter) {
     await mongoose.connection.dropDatabase()
     await mongoose.connection.close()
     await this.mongoMemoryServer.stop()
+  } else {
+    await mongoose.connection.close()
   }
 }

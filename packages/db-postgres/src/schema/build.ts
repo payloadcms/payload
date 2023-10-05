@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import type { AnyPgColumnBuilder, IndexBuilder } from 'drizzle-orm/pg-core'
-import type { Field } from 'payload/types'
+import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
+import type { Field, SanitizedCollectionConfig } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -24,39 +24,54 @@ import { traverseFields } from './traverseFields'
 
 type Args = {
   adapter: PostgresAdapter
-  baseColumns?: Record<string, AnyPgColumnBuilder>
+  baseColumns?: Record<string, PgColumnBuilder>
+  baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
+  collectionIndexes?: SanitizedCollectionConfig['indexes']
+  disableUnique: boolean
   fields: Field[]
+  rootRelationsToBuild?: Map<string, string>
+  rootTableIDColType?: string
+  rootTableName?: string
   tableName: string
   timestamps?: boolean
 }
 
 type Result = {
-  arrayBlockRelations: Map<string, string>
+  relationsToBuild: Map<string, string>
 }
 
 export const buildTable = ({
   adapter,
   baseColumns = {},
+  baseExtraConfig = {},
   buildRelationships,
+  collectionIndexes = [],
+  disableUnique = false,
   fields,
+  rootRelationsToBuild,
+  rootTableIDColType,
+  rootTableName,
   tableName,
   timestamps,
 }: Args): Result => {
-  const formattedTableName = toSnakeCase(tableName)
-  const columns: Record<string, AnyPgColumnBuilder> = baseColumns
+  const columns: Record<string, PgColumnBuilder> = baseColumns
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
 
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
-  const localesColumns: Record<string, AnyPgColumnBuilder> = {}
+  let hasManyNumberField: 'index' | boolean = false
+  let hasLocalizedManyNumberField = false
+
+  const localesColumns: Record<string, PgColumnBuilder> = {}
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
   let localesTable: GenericTable
+  let numbersTable: GenericTable
 
   const relationships: Set<string> = new Set()
   let relationshipsTable: GenericTable
 
-  const arrayBlockRelations: Map<string, string> = new Map()
+  const relationsToBuild: Map<string, string> = new Map()
 
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
   let idColType = 'integer'
@@ -75,40 +90,67 @@ export const buildTable = ({
     columns.id = serial('id').primaryKey()
   }
 
-  ;({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
+  ;({
+    hasLocalizedField,
+    hasLocalizedManyNumberField,
+    hasLocalizedRelationshipField,
+    hasManyNumberField,
+  } = traverseFields({
     adapter,
-    arrayBlockRelations,
     buildRelationships,
+    collectionIndexes,
     columns,
+    disableUnique,
     fields,
     indexes,
     localesColumns,
     localesIndexes,
     newTableName: tableName,
     parentTableName: tableName,
+    relationsToBuild,
     relationships,
+    rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
+    rootTableIDColType: rootTableIDColType || idColType,
+    rootTableName: rootTableName || tableName,
   }))
 
   if (timestamps) {
-    columns.createdAt = timestamp('created_at').defaultNow().notNull()
-    columns.updatedAt = timestamp('updated_at').defaultNow().notNull()
+    columns.createdAt = timestamp('created_at', {
+      mode: 'string',
+      precision: 3,
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull()
+    columns.updatedAt = timestamp('updated_at', {
+      mode: 'string',
+      precision: 3,
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull()
   }
 
-  const table = pgTable(formattedTableName, columns, (cols) => {
+  const table = pgTable(tableName, columns, (cols) => {
+    const extraConfig = Object.entries(baseExtraConfig).reduce((config, [key, func]) => {
+      config[key] = func(cols)
+      return config
+    }, {})
+
     return Object.entries(indexes).reduce((acc, [colName, func]) => {
       acc[colName] = func(cols)
       return acc
-    }, {})
+    }, extraConfig)
   })
 
-  adapter.tables[formattedTableName] = table
+  adapter.tables[tableName] = table
 
   if (hasLocalizedField) {
-    const localeTableName = `${formattedTableName}_locales`
+    const localeTableName = `${tableName}_locales`
     localesColumns.id = serial('id').primaryKey()
-    localesColumns._locale = adapter.enums._locales('_locale').notNull()
+    localesColumns._locale = adapter.enums.enum__locales('_locale').notNull()
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id')
-      .references(() => table.id)
+      .references(() => table.id, { onDelete: 'cascade' })
       .notNull()
 
     localesTable = pgTable(localeTableName, localesColumns, (cols) => {
@@ -118,7 +160,10 @@ export const buildTable = ({
           return acc
         },
         {
-          _localeParent: unique().on(cols._locale, cols._parentID),
+          _localeParent: unique(`${localeTableName}_locale_parent_id_unique`).on(
+            cols._locale,
+            cols._parentID,
+          ),
         },
       )
     })
@@ -135,19 +180,63 @@ export const buildTable = ({
     adapter.relations[`relations_${localeTableName}`] = localesTableRelations
   }
 
+  if (hasManyNumberField) {
+    const numbersTableName = `${tableName}_numbers`
+    const columns: Record<string, PgColumnBuilder> = {
+      id: serial('id').primaryKey(),
+      number: numeric('number'),
+      order: integer('order').notNull(),
+      parent: parentIDColumnMap[idColType]('parent_id')
+        .references(() => table.id, { onDelete: 'cascade' })
+        .notNull(),
+      path: varchar('path').notNull(),
+    }
+
+    if (hasLocalizedManyNumberField) {
+      columns.locale = adapter.enums.enum__locales('locale')
+    }
+
+    numbersTable = pgTable(numbersTableName, columns, (cols) => {
+      const indexes: Record<string, IndexBuilder> = {
+        orderParentIdx: index('order_parent_idx').on(cols.order, cols.parent),
+      }
+
+      if (hasManyNumberField === 'index') {
+        indexes.numberIdx = index('number_idx').on(cols.number)
+      }
+
+      if (hasLocalizedManyNumberField) {
+        indexes.localeParent = index('locale_parent').on(cols.locale, cols.parent)
+      }
+
+      return indexes
+    })
+
+    adapter.tables[numbersTableName] = numbersTable
+
+    const numbersTableRelations = relations(numbersTable, ({ one }) => ({
+      parent: one(table, {
+        fields: [numbersTable.parent],
+        references: [table.id],
+      }),
+    }))
+
+    adapter.relations[`relations_${numbersTableName}`] = numbersTableRelations
+  }
+
   if (buildRelationships) {
     if (relationships.size) {
-      const relationshipColumns: Record<string, AnyPgColumnBuilder> = {
+      const relationshipColumns: Record<string, PgColumnBuilder> = {
         id: serial('id').primaryKey(),
         order: integer('order'),
         parent: parentIDColumnMap[idColType]('parent_id')
-          .references(() => table.id)
+          .references(() => table.id, { onDelete: 'cascade' })
           .notNull(),
         path: varchar('path').notNull(),
       }
 
       if (hasLocalizedRelationshipField) {
-        relationshipColumns.locale = adapter.enums._locale('locale')
+        relationshipColumns.locale = adapter.enums.enum__locales('locale')
       }
 
       relationships.forEach((relationTo) => {
@@ -161,14 +250,25 @@ export const buildTable = ({
 
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
           `${formattedRelationTo}_id`,
-        ).references(() => adapter.tables[formattedRelationTo].id)
+        ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
       })
 
-      const relationshipsTableName = `${formattedTableName}_relationships`
+      const relationshipsTableName = `${tableName}_relationships`
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
-        const result: Record<string, IndexBuilder> = {}
-        if (hasLocalizedRelationshipField) result.localeIdx = index('locale_idx').on(cols.locale)
+        const result: Record<string, unknown> = {}
+
+        if (hasLocalizedRelationshipField) {
+          result.localeIdx = index('locale_idx').on(cols.locale)
+          result.parentPathOrderLocale = unique(
+            `${relationshipsTableName}_parent_id_path_order_locale_unique`,
+          ).on(cols.parent, cols.path, cols.order, cols.locale)
+        } else {
+          result.parentPathOrder = unique(
+            `${relationshipsTableName}_parent_id_path_order_unique`,
+          ).on(cols.parent, cols.path, cols.order)
+        }
+
         return result
       })
 
@@ -202,12 +302,16 @@ export const buildTable = ({
   const tableRelations = relations(table, ({ many }) => {
     const result: Record<string, Relation<string>> = {}
 
-    arrayBlockRelations.forEach((val, key) => {
+    relationsToBuild.forEach((val, key) => {
       result[key] = many(adapter.tables[val])
     })
 
     if (hasLocalizedField) {
       result._locales = many(localesTable)
+    }
+
+    if (hasManyNumberField) {
+      result._numbers = many(numbersTable)
     }
 
     if (relationships.size && relationshipsTable) {
@@ -219,7 +323,7 @@ export const buildTable = ({
     return result
   })
 
-  adapter.relations[`relations_${formattedTableName}`] = tableRelations
+  adapter.relations[`relations_${tableName}`] = tableRelations
 
-  return { arrayBlockRelations }
+  return { relationsToBuild }
 }

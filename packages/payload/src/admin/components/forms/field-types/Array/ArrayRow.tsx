@@ -102,8 +102,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         dragHandleProps={{
-          attributes,
           id: row.id,
+          attributes,
           listeners,
         }}
         header={
@@ -129,6 +129,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           indexPath={indexPath}
           permissions={permissions?.fields}
           readOnly={readOnly}
+          margins="small"
         />
       </Collapsible>
     </div>

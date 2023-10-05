@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { Tab } from '../../../../../fields/config/types'
 import type { DocumentPreferences } from '../../../../../preferences/types'
 import type { Props } from './types'
 
 import { tabHasName } from '../../../../../fields/config/types'
-import { Tab } from '../../../../../fields/config/types'
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import toKebabCase from '../../../../../utilities/toKebabCase'
 import { useCollapsible } from '../../../elements/Collapsible/provider'
@@ -20,6 +20,7 @@ import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
 import './index.scss'
 import { TabsProvider } from './provider'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'tabs-field'
 
@@ -29,7 +30,8 @@ type TabProps = {
   setIsActive: () => void
   tab: Tab
 }
-const Tab: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
+
+const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
   const hasName = tabHasName(tab)
@@ -131,7 +133,12 @@ const TabsField: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={[className, baseClass, isWithinCollapsible && `${baseClass}--within-collapsible`]
+      className={[
+        fieldBaseClass,
+        className,
+        baseClass,
+        isWithinCollapsible && `${baseClass}--within-collapsible`,
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -140,7 +147,7 @@ const TabsField: React.FC<Props> = (props) => {
           <div className={`${baseClass}__tabs`}>
             {tabs.map((tab, tabIndex) => {
               return (
-                <Tab
+                <TabComponent
                   isActive={activeTabIndex === tabIndex}
                   key={tabIndex}
                   parentPath={path}
@@ -166,6 +173,7 @@ const TabsField: React.FC<Props> = (props) => {
                 <FieldDescription
                   className={`${baseClass}__description`}
                   description={activeTabConfig.description}
+                  marginPlacement="bottom"
                 />
                 <RenderFields
                   fieldSchema={activeTabConfig.fields.map((field) => {
@@ -183,6 +191,7 @@ const TabsField: React.FC<Props> = (props) => {
                   forceRender
                   indexPath={indexPath}
                   key={String(activeTabConfig.label)}
+                  margins="small"
                   permissions={
                     tabHasName(activeTabConfig)
                       ? permissions[activeTabConfig.name].fields

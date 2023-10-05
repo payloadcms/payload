@@ -37,13 +37,14 @@ export default buildConfigWithDefaults({
           label: 'Role',
           type: 'select',
           options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
-          defaultValue: 'user',
+          defaultValue: ['user'],
           required: true,
           saveToJWT: true,
           hasMany: true,
         },
         {
           name: 'namedSaveToJWT',
+          label: 'Named Save To JWT',
           type: 'text',
           defaultValue: namedSaveToJWTValue,
           saveToJWT: saveToJWTKey,
@@ -54,6 +55,7 @@ export default buildConfigWithDefaults({
           fields: [
             {
               name: 'liftedSaveToJWT',
+              label: 'Lifted Save To JWT',
               type: 'text',
               saveToJWT: 'x-lifted-from-group',
               defaultValue: 'lifted from group',
@@ -62,17 +64,20 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'groupSaveToJWT',
+          label: 'Group Save To JWT',
           type: 'group',
           saveToJWT: 'x-group',
           fields: [
             {
               name: 'saveToJWTString',
+              label: 'Save To JWT String',
               type: 'text',
               saveToJWT: 'x-test',
               defaultValue: 'nested property',
             },
             {
               name: 'saveToJWTFalse',
+              label: 'Save To JWT False',
               type: 'text',
               saveToJWT: false,
               defaultValue: 'nested property',
@@ -84,6 +89,7 @@ export default buildConfigWithDefaults({
           tabs: [
             {
               name: 'saveToJWTTab',
+              label: 'Save To JWT Tab',
               saveToJWT: true,
               fields: [
                 {
@@ -96,6 +102,7 @@ export default buildConfigWithDefaults({
             },
             {
               name: 'tabSaveToJWTString',
+              label: 'Tab Save To JWT String',
               saveToJWT: 'tab-test',
               fields: [
                 {
@@ -110,18 +117,21 @@ export default buildConfigWithDefaults({
               fields: [
                 {
                   name: 'tabLiftedSaveToJWT',
+                  label: 'Tab Lifted Save To JWT',
                   type: 'text',
                   saveToJWT: true,
                   defaultValue: 'lifted from unnamed tab',
                 },
                 {
                   name: 'unnamedTabSaveToJWTString',
+                  label: 'Unnamed Tab Save To JWT String',
                   type: 'text',
                   saveToJWT: 'x-tab-field',
                   defaultValue: 'text',
                 },
                 {
                   name: 'unnamedTabSaveToJWTFalse',
+                  label: 'Unnamed Tab Save To JWT False',
                   type: 'text',
                   saveToJWT: false,
                   defaultValue: 'false',
@@ -149,6 +159,10 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'api-keys',
+      labels: {
+        singular: 'API Key',
+        plural: 'API Keys',
+      },
       access: {
         read: ({ req: { user } }) => {
           if (user.collection === 'api-keys') {

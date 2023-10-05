@@ -1,13 +1,11 @@
 import type { PayloadRequest } from '../../express/types'
 
 async function init(args: { collection: string; req: PayloadRequest }): Promise<boolean> {
-  const {
-    collection: slug,
-    req: { payload },
-  } = args
+  const { collection: slug, req } = args
 
-  const doc = await payload.db.findOne({
+  const doc = await req.payload.db.findOne({
     collection: slug,
+    req,
   })
 
   return !!doc

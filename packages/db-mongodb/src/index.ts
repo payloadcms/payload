@@ -1,21 +1,26 @@
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
-import type { DatabaseAdapter } from 'payload/database'
+import type { BaseDatabaseAdapter } from 'payload/database'
 
 import mongoose from 'mongoose'
 import { createDatabaseAdapter } from 'payload/database'
 import { createMigration } from 'payload/database'
+
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
 
 import type { CollectionModel, GlobalModel } from './types'
 
 import { connect } from './connect'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
+import { createGlobalVersion } from './createGlobalVersion'
 import { createVersion } from './createVersion'
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { destroy } from './destroy'
+import { extendViteConfig } from './extendViteConfig'
+import { extendWebpackConfig } from './extendWebpackConfig'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -27,9 +32,9 @@ import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
 import { rollbackTransaction } from './transactions/rollbackTransaction'
 import { updateGlobal } from './updateGlobal'
+import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateOne } from './updateOne'
 import { updateVersion } from './updateVersion'
-import { webpack } from './webpack'
 
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
@@ -44,7 +49,7 @@ export interface Args {
   url: false | string
 }
 
-export type MongooseAdapter = DatabaseAdapter &
+export type MongooseAdapter = BaseDatabaseAdapter &
   Args & {
     collections: {
       [slug: string]: CollectionModel
@@ -60,6 +65,21 @@ export type MongooseAdapter = DatabaseAdapter &
 
 type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
 
+declare module 'payload' {
+  export interface DatabaseAdapter extends Args {
+    collections: {
+      [slug: string]: CollectionModel
+    }
+    connection: Connection
+    globals: GlobalModel
+    mongoMemoryServer: any
+    sessions: Record<number | string, ClientSession>
+    versions: {
+      [slug: string]: CollectionModel
+    }
+  }
+}
+
 export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
@@ -68,6 +88,9 @@ export function mongooseAdapter({
 }: Args): MongooseAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     mongoose.set('strictQuery', false)
+
+    extendWebpackConfig(payload.config)
+    extendViteConfig(payload.config)
 
     return createDatabaseAdapter<MongooseAdapter>({
       autoPluralization,
@@ -79,8 +102,10 @@ export function mongooseAdapter({
       connection: undefined,
       create,
       createGlobal,
+      createGlobalVersion,
       createMigration,
       createVersion,
+      defaultIDType: 'text',
       deleteMany,
       deleteOne,
       deleteVersions,
@@ -92,18 +117,19 @@ export function mongooseAdapter({
       findVersions,
       globals: undefined,
       init,
-      migrationDir,
+      ...(migrationDir && { migrationDir }),
+      name: 'mongoose',
       mongoMemoryServer: undefined,
       payload,
       queryDrafts,
       rollbackTransaction,
       sessions: {},
       updateGlobal,
+      updateGlobalVersion,
       updateOne,
       updateVersion,
       url,
       versions: {},
-      webpack,
     })
   }
 

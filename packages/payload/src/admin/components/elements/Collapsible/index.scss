@@ -10,10 +10,6 @@
     position: relative;
   }
 
-  &--nested {
-    margin-bottom: $baseline !important;
-  }
-
   &__drag {
     opacity: 0.5;
     position: absolute;
@@ -85,10 +81,6 @@
       border-bottom-right-radius: $style-radius-s;
       border-bottom-left-radius: $style-radius-s;
     }
-
-    .collapsible__indicator {
-      transform: rotate(0turn);
-    }
   }
 
   &__actions-wrap {
@@ -104,14 +96,16 @@
   }
 
   &__indicator {
-    transform: rotate(0.5turn);
+    padding: calc(var(--base) / 4);
+    display: flex;
+    align-items: flex-start;
   }
 
   &__content {
     background-color: var(--theme-elevation-0);
     border-bottom-left-radius: $style-radius-s;
     border-bottom-right-radius: $style-radius-s;
-    padding: $baseline $baseline 0 $baseline;
+    padding: var(--base);
   }
 
   @include small-break {

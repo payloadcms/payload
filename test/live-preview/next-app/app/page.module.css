@@ -1,0 +1,12 @@
+.main {
+  padding: 6rem;
+  min-height: 100vh;
+}
+
+.main > *:first-child {
+  margin-top: 0;
+}
+
+.main > *:last-child {
+  margin-bottom: 0;
+}

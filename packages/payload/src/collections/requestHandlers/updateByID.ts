@@ -34,12 +34,12 @@ export default async function updateByIDHandler(
     const autosave = req.query.autosave === 'true'
 
     const doc = await updateByID({
+      id: req.params.id,
       autosave,
       collection: req.collection,
       data: req.body,
       depth: parseInt(String(req.query.depth), 10),
       draft,
-      id: req.params.id,
       req,
     })
 

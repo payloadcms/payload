@@ -1,3 +1,4 @@
+import type { Config } from '../../config/types'
 import type { Field } from './types'
 
 import withCondition from '../../admin/components/forms/withCondition'
@@ -8,7 +9,17 @@ import { baseIDField } from '../baseFields/baseIDField'
 import validations from '../validations'
 import { fieldAffectsData, tabHasName } from './types'
 
-const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
+type Args = {
+  config: Config
+  fields: Field[]
+  /**
+   * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
+   * This validation will be skipped if validRelationships is null.
+   */
+  validRelationships: null | string[]
+}
+
+export const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] => {
   if (!fields) return []
 
   return fields.map((unsanitizedField) => {
@@ -41,12 +52,16 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
-      const relationships = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]
-      relationships.forEach((relationship: string) => {
-        if (!validRelationships.includes(relationship)) {
-          throw new InvalidFieldRelationship(field, relationship)
-        }
-      })
+      if (validRelationships) {
+        const relationships = Array.isArray(field.relationTo)
+          ? field.relationTo
+          : [field.relationTo]
+        relationships.forEach((relationship: string) => {
+          if (!validRelationships.includes(relationship)) {
+            throw new InvalidFieldRelationship(field, relationship)
+          }
+        })
+      }
 
       if (field.type === 'relationship') {
         if (field.min && !field.minRows) {
@@ -80,6 +95,8 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     }
 
     if (fieldAffectsData(field)) {
+      if (field.localized && !config.localization) delete field.localized
+
       if (typeof field.validate === 'undefined') {
         const defaultValidate = validations[field.type]
         if (defaultValidate) {
@@ -101,8 +118,13 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       field.admin = {}
     }
 
-    if ('fields' in field && field.fields)
-      field.fields = sanitizeFields(field.fields, validRelationships)
+    if ('fields' in field && field.fields) {
+      field.fields = sanitizeFields({
+        config,
+        fields: field.fields,
+        validRelationships,
+      })
+    }
 
     if (field.type === 'tabs') {
       field.tabs = field.tabs.map((tab) => {
@@ -110,7 +132,13 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
         if (tabHasName(tab) && typeof tab.label === 'undefined') {
           unsanitizedTab.label = toWords(tab.name)
         }
-        unsanitizedTab.fields = sanitizeFields(tab.fields, validRelationships)
+
+        unsanitizedTab.fields = sanitizeFields({
+          config,
+          fields: tab.fields,
+          validRelationships,
+        })
+
         return unsanitizedTab
       })
     }
@@ -121,7 +149,13 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
         unsanitizedBlock.labels = !unsanitizedBlock.labels
           ? formatLabels(unsanitizedBlock.slug)
           : unsanitizedBlock.labels
-        unsanitizedBlock.fields = sanitizeFields(block.fields, validRelationships)
+
+        unsanitizedBlock.fields = sanitizeFields({
+          config,
+          fields: block.fields,
+          validRelationships,
+        })
+
         return unsanitizedBlock
       })
     }
@@ -129,5 +163,3 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     return field
   })
 }
-
-export default sanitizeFields

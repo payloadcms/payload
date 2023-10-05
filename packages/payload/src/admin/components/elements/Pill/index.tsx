@@ -11,7 +11,7 @@ import './index.scss'
 const baseClass = 'pill'
 
 const DraggablePill: React.FC<Props> = (props) => {
-  const { className, id } = props
+  const { id, className } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
     id,
@@ -82,9 +82,9 @@ const StaticPill: React.FC<Props> = (props) => {
       to={to || undefined}
       type={Element === 'button' ? 'button' : undefined}
     >
-      {icon && alignIcon === 'left' && <React.Fragment>{icon}</React.Fragment>}
-      {children}
-      {icon && alignIcon === 'right' && <React.Fragment>{icon}</React.Fragment>}
+      {icon && alignIcon === 'left' && <span className={`${baseClass}__icon`}>{icon}</span>}
+      <span className={`${baseClass}__label`}>{children}</span>
+      {icon && alignIcon === 'right' && <span className={`${baseClass}__icon`}>{icon}</span>}
     </Element>
   )
 }

@@ -2,7 +2,7 @@ import path from 'path'
 
 import type { Config } from './types'
 
-export const defaults: Omit<Config, 'db'> = {
+export const defaults: Omit<Config, 'db' | 'editor'> = {
   admin: {
     avatar: 'default',
     buildPath: path.resolve(process.cwd(), './build'),

@@ -1,5 +1,4 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
-
+import type { GeneratedTypes } from '../../../'
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { Payload } from '../../../payload'
@@ -45,7 +44,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     depth,
     disableErrors,
     draft = false,
-    fallbackLocale = null,
+    fallbackLocale,
     limit,
     locale = null,
     overrideAccess = true,
@@ -70,9 +69,19 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     )
   }
 
+  let fallbackLocaleToUse = defaultLocale
+
+  if (typeof req.fallbackLocale !== 'undefined') {
+    fallbackLocaleToUse = req.fallbackLocale
+  }
+
+  if (typeof fallbackLocale !== 'undefined') {
+    fallbackLocaleToUse = fallbackLocale
+  }
+
   req.payloadAPI = req.payloadAPI || 'local'
   req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale
+  req.fallbackLocale = fallbackLocaleToUse
   req.i18n = i18nInit(payload.config.i18n)
   req.payload = payload
 

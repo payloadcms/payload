@@ -1,8 +1,8 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepPartial } from 'ts-essentials'
 
 import httpStatus from 'http-status'
 
+import type { GeneratedTypes } from '../../'
 import type { AccessResult } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Where } from '../../types'
@@ -40,6 +40,7 @@ export type Arguments<T extends CreateUpdateType> = {
   showHiddenFields?: boolean
   where: Where
 }
+
 async function update<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<BulkOperationResult<TSlug>> {
@@ -206,11 +207,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+          id,
           context: req.context,
           data,
           doc: originalDoc,
           entityConfig: collectionConfig,
-          id,
           operation: 'update',
           overrideAccess,
           req,
@@ -263,12 +264,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+          id,
           context: req.context,
           data,
           doc: originalDoc,
           docWithLocales: doc,
           entityConfig: collectionConfig,
-          id,
           operation: 'update',
           req,
           skipValidation: shouldSaveDraft || data._status === 'draft',
@@ -280,9 +281,9 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         if (!shouldSaveDraft) {
           result = await req.payload.db.updateOne({
+            id,
             collection: collectionConfig.slug,
             data: result,
-            id,
             locale,
             req,
           })
@@ -294,13 +295,13 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         if (collectionConfig.versions) {
           result = await saveVersion({
+            id,
             collection: collectionConfig,
             docWithLocales: {
               ...result,
               createdAt: doc.createdAt,
             },
             draft: shouldSaveDraft,
-            id,
             payload,
             req,
           })

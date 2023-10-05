@@ -12,13 +12,13 @@ import TextInput from './Input'
 
 const Text: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, condition, description, placeholder, readOnly, rtl, style, width } = {},
     inputRef,
     label,
     localized,
     maxLength,
     minLength,
-    name,
     path: pathFromProps,
     required,
     validate = text,

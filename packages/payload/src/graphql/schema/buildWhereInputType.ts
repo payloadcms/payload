@@ -2,6 +2,7 @@
 /* eslint-disable no-use-before-define */
 import { GraphQLInputObjectType, GraphQLList } from 'graphql'
 
+import type { Payload } from '../..'
 import type { Field, FieldAffectingData } from '../../fields/config/types'
 
 import {
@@ -12,6 +13,13 @@ import {
 import formatName from '../utilities/formatName'
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap'
 import { withOperators } from './withOperators'
+
+type Args = {
+  fields: Field[]
+  name: string
+  parentName: string
+  payload: Payload
+}
 
 /** This does as the function name suggests. It builds a where GraphQL input type
  * for all the fields which are passed to the function.
@@ -27,11 +35,12 @@ import { withOperators } from './withOperators'
  *    directly searchable. Instead, we need to build a chained pathname
  *    using dot notation so MongoDB can properly search nested paths.
  */
-const buildWhereInputType = (
-  name: string,
-  fields: Field[],
-  parentName: string,
-): GraphQLInputObjectType => {
+const buildWhereInputType = ({
+  name,
+  fields,
+  parentName,
+  payload,
+}: Args): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
@@ -41,7 +50,10 @@ const buildWhereInputType = (
     if (fieldAffectsData(field) && field.name === 'id') idField = field
 
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
-      const getFieldSchema = fieldToSchemaMap(parentName)[field.type]
+      const getFieldSchema = fieldToSchemaMap({
+        parentName,
+        payload,
+      })[field.type]
 
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(field)
@@ -78,26 +90,26 @@ const buildWhereInputType = (
   const fieldName = formatName(name)
 
   return new GraphQLInputObjectType({
+    name: `${fieldName}_where`,
     fields: {
       ...fieldTypes,
       AND: {
         type: new GraphQLList(
           new GraphQLInputObjectType({
-            fields: fieldTypes,
             name: `${fieldName}_where_and`,
+            fields: fieldTypes,
           }),
         ),
       },
       OR: {
         type: new GraphQLList(
           new GraphQLInputObjectType({
-            fields: fieldTypes,
             name: `${fieldName}_where_or`,
+            fields: fieldTypes,
           }),
         ),
       },
     },
-    name: `${fieldName}_where`,
   })
 }
 

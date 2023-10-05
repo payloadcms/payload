@@ -24,8 +24,8 @@ const errorHandler = async (
 
   let response: GraphQLFormattedError = {
     extensions: {
-      data: (err && err.originalError && err.originalError.data) || undefined,
       name: err?.originalError?.name || undefined,
+      data: (err && err.originalError && err.originalError.data) || undefined,
       stack: debug ? err.stack : undefined,
       statusCode: status,
     },

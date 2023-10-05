@@ -26,6 +26,7 @@ export const createVersion: CreateVersion = async function createVersion(
       {
         autosave,
         createdAt,
+        latest: true,
         parent,
         updatedAt,
         version: versionData,
@@ -33,6 +34,29 @@ export const createVersion: CreateVersion = async function createVersion(
     ],
     options,
     req,
+  )
+
+  await VersionModel.updateMany(
+    {
+      $and: [
+        {
+          _id: {
+            $ne: doc._id,
+          },
+        },
+        {
+          parent: {
+            $eq: parent,
+          },
+        },
+        {
+          latest: {
+            $eq: true,
+          },
+        },
+      ],
+    },
+    { $unset: { latest: 1 } },
   )
 
   const result: Document = JSON.parse(JSON.stringify(doc))

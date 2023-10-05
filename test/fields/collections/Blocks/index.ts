@@ -1,10 +1,10 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
-import type { Field } from '../../../../packages/payload/src/fields/config/types'
+import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
-export const blocksFieldSeedData = [
+export const getBlocksFieldSeedData = (prefix?: string): any => [
   {
     blockName: 'First block',
-    blockType: 'text',
+    blockType: prefix ? `${prefix}Content` : 'content',
     text: 'first block',
     richText: [
       {
@@ -14,12 +14,12 @@ export const blocksFieldSeedData = [
   },
   {
     blockName: 'Second block',
-    blockType: 'number',
+    blockType: prefix ? `${prefix}Number` : 'number',
     number: 342,
   },
   {
     blockName: 'Sub-block demonstration',
-    blockType: 'subBlocks',
+    blockType: prefix ? `${prefix}SubBlocks` : 'subBlocks',
     subBlocks: [
       {
         blockName: 'First sub block',
@@ -38,15 +38,15 @@ export const blocksFieldSeedData = [
     blockType: 'i18n-text',
     text: 'first block',
   },
-] as const
+]
 
-export const blocksField: Field = {
+export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
   type: 'blocks',
   required: true,
   blocks: [
     {
-      slug: 'text',
+      slug: prefix ? `${prefix}Content` : 'content',
       fields: [
         {
           name: 'text',
@@ -60,7 +60,7 @@ export const blocksField: Field = {
       ],
     },
     {
-      slug: 'number',
+      slug: prefix ? `${prefix}Number` : 'number',
       fields: [
         {
           name: 'number',
@@ -70,7 +70,7 @@ export const blocksField: Field = {
       ],
     },
     {
-      slug: 'subBlocks',
+      slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
       fields: [
         {
           type: 'collapsible',
@@ -107,7 +107,7 @@ export const blocksField: Field = {
       ],
     },
     {
-      slug: 'tabs',
+      slug: prefix ? `${prefix}Tabs` : 'tabs',
       fields: [
         {
           type: 'tabs',
@@ -143,15 +143,15 @@ export const blocksField: Field = {
       ],
     },
   ],
-  defaultValue: blocksFieldSeedData,
-}
+  defaultValue: getBlocksFieldSeedData(prefix),
+})
 
 const BlockFields: CollectionConfig = {
   slug: 'block-fields',
   fields: [
-    blocksField,
+    getBlocksField(),
     {
-      ...blocksField,
+      ...getBlocksField('localized'),
       name: 'collapsedByDefaultBlocks',
       localized: true,
       admin: {
@@ -159,7 +159,7 @@ const BlockFields: CollectionConfig = {
       },
     },
     {
-      ...blocksField,
+      ...getBlocksField('localized'),
       name: 'localizedBlocks',
       localized: true,
     },
@@ -247,8 +247,8 @@ const BlockFields: CollectionConfig = {
 }
 
 export const blocksDoc = {
-  blocks: blocksFieldSeedData,
-  localizedBlocks: blocksFieldSeedData,
+  blocks: getBlocksFieldSeedData(),
+  localizedBlocks: getBlocksFieldSeedData('localized'),
 }
 
 export default BlockFields

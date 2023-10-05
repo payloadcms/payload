@@ -13,6 +13,7 @@ const decryptKey: FieldHook = ({ req, value }) =>
 
 export default [
   {
+    name: 'enableAPIKey',
     admin: {
       components: {
         Field: () => null,
@@ -20,10 +21,10 @@ export default [
     },
     defaultValue: false,
     label: labels['authentication:enableAPIKey'],
-    name: 'enableAPIKey',
     type: 'checkbox',
   },
   {
+    name: 'apiKey',
     admin: {
       components: {
         Field: () => null,
@@ -34,10 +35,10 @@ export default [
       beforeChange: [encryptKey],
     },
     label: labels['authentication:apiKey'],
-    name: 'apiKey',
     type: 'text',
   },
   {
+    name: 'apiKeyIndex',
     admin: {
       disabled: true,
     },
@@ -58,7 +59,6 @@ export default [
         },
       ],
     },
-    name: 'apiKeyIndex',
     type: 'text',
   },
 ] as Field[]

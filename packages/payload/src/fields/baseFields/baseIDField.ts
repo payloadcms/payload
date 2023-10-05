@@ -5,6 +5,7 @@ import type { Field, FieldHook } from '../config/types'
 const generateID: FieldHook = ({ value }) => value || new ObjectID().toHexString()
 
 export const baseIDField: Field = {
+  name: 'id',
   admin: {
     disabled: true,
   },
@@ -12,6 +13,5 @@ export const baseIDField: Field = {
     beforeChange: [generateID],
   },
   label: 'ID',
-  name: 'id',
   type: 'text',
 }

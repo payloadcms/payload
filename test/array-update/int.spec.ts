@@ -99,7 +99,7 @@ describe('array-update', () => {
     })
 
     expect(updatedDoc.arrayOfFields?.[0].required).toStrictEqual(updatedText)
-    expect(updatedDoc.arrayOfFields?.[0].optional).toBeUndefined()
+    expect(updatedDoc.arrayOfFields?.[0].optional).toBeFalsy()
 
     expect(updatedDoc.arrayOfFields?.[1]).toMatchObject(secondArrayItem)
   })

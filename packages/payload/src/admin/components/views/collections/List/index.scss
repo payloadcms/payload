@@ -2,15 +2,17 @@
 
 .collection-list {
   width: 100%;
-  margin-bottom: base(2);
+  margin-top: base(0.5);
 
   &__wrap {
-    padding-top: $baseline;
-    padding-bottom: $baseline;
+    padding-bottom: var(--spacing-view-bottom);
+
+    & > *:not(:last-child) {
+      margin-bottom: var(--base);
+    }
   }
 
   &__header {
-    margin-bottom: $baseline;
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
@@ -25,7 +27,9 @@
     }
 
     .pill {
-      margin: base(0.5) 0 base(0.25);
+      position: relative;
+      top: -14px;
+      margin: 0;
     }
   }
 
@@ -44,6 +48,17 @@
         min-width: unset;
         width: auto;
       }
+    }
+  }
+
+  &__no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--base);
+
+    & > * {
+      margin: 0;
     }
   }
 
@@ -106,19 +121,40 @@
   }
 
   @include mid-break {
+    margin-top: base(0.25);
+
     &__wrap {
       padding-top: 0;
       padding-bottom: 0;
     }
 
     &__header {
-      .pill {
-        margin-bottom: base(0.0625);
-      }
+      gap: base(0.5);
+    }
+
+    &__sub-header {
+      margin-top: 0;
     }
 
     &__search-input {
       margin: 0;
+    }
+
+    // on mobile, extend the table all the way to the viewport edges
+    // this is to visually indicate overflowing content
+    .table {
+      display: flex;
+      width: calc(100% + calc(var(--gutter-h) * 2));
+      max-width: unset;
+      left: calc(var(--gutter-h) * -1);
+      position: relative;
+      padding-left: var(--gutter-h);
+
+      &::after {
+        content: '';
+        height: 1px;
+        padding-right: var(--gutter-h);
+      }
     }
 
     &__page-controls {
@@ -136,6 +172,13 @@
   }
 
   @include small-break {
+    margin-top: 0;
     margin-bottom: base(3);
+
+    &__header {
+      .pill {
+        top: -6px;
+      }
+    }
   }
 }

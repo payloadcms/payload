@@ -1,41 +1,48 @@
 @import '../../../scss/styles.scss';
 
 .popup {
+  --popup-button-highlight: var(--theme-elevation-200);
+  --popup-bg: var(--theme-input-bg);
+  --popup-text: var(--theme-text);
+  --popup-caret-size: 10px;
+  --popup-x-padding: calc(var(--base) * 0.33);
+  --popup-padding: calc(var(--base) * 0.5);
   position: relative;
 
   &__content {
     position: absolute;
-    background: var(--theme-input-bg);
+    background: var(--popup-bg);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     z-index: var(--z-popup);
     max-width: calc(100vw - #{$baseline});
-
-    &:after {
-      content: ' ';
-      position: absolute;
-      top: calc(100% - 1px);
-      border: 12px solid transparent;
-      border-top-color: var(--theme-input-bg);
-    }
+    color: var(--popup-text);
+    border-radius: 4px;
+    padding-left: var(--popup-padding);
+    padding-right: var(--popup-padding);
+    min-width: var(--popup-width, auto);
   }
 
-  &__wrap {
+  &__hide-scrollbar {
     overflow: hidden;
   }
 
-  .popup__scroll {
-    padding: $baseline;
+  &__scroll-container {
     overflow-y: auto;
     white-space: nowrap;
-    padding-right: calc(var(--scrollbar-width) + #{$baseline});
     width: calc(100% + var(--scrollbar-width));
+    padding-top: var(--popup-padding);
+    padding-bottom: var(--popup-padding);
+  }
+
+  &__scroll-content {
+    width: calc(100% - var(--scrollbar-width));
   }
 
   &--show-scrollbar {
-    .popup__scroll {
-      padding-right: 0;
+    .popup__scroll-container,
+    .popup__scroll-content {
       width: 100%;
     }
   }
@@ -50,62 +57,23 @@
   ////////////////////////////////
 
   &--size-small {
-    .popup__scroll {
-      [dir='ltr'] & {
-        padding: base(0.75) calc(var(--scrollbar-width) + #{base(0.75)}) base(0.75) base(0.75);
-      }
-      [dir='rtl'] & {
-        padding: base(0.75) base(0.75) base(0.75) calc(var(--scrollbar-width) + #{base(0.75)});
-      }
-    }
-
+    --popup-width: 100px;
     .popup__content {
       @include shadow-m;
     }
+  }
 
-    &.popup--h-align-left {
-      .popup__content {
-        left: - base(0.5);
-
-        &:after {
-          left: base(0.425);
-        }
-      }
+  &--size-medium {
+    --popup-width: 150px;
+    .popup__content {
+      @include shadow-lg;
     }
   }
 
   &--size-large {
+    --popup-width: 200px;
     .popup__content {
       @include shadow-lg;
-    }
-
-    .popup__scroll {
-      padding: base(1.5) calc(var(--scrollbar-width) + #{base(1.5)}) base(1) base(1.5);
-    }
-  }
-
-  &--size-wide {
-    .popup__content {
-      @include shadow-m;
-
-      &:after {
-        border: 12px solid transparent;
-        border-top-color: var(--theme-input-bg);
-      }
-    }
-
-    .popup__scroll {
-      padding: base(0.25) base(0.5);
-    }
-
-    &.popup--align-left {
-      .popup__content {
-        left: - base(0.5);
-
-        &:after {
-          left: base(0.425);
-        }
-      }
     }
   }
 
@@ -114,12 +82,8 @@
   ////////////////////////////////
 
   &--h-align-left {
-    .popup__content {
-      left: - base(1.75);
-
-      &:after {
-        left: base(1.75);
-      }
+    .popup__caret {
+      left: var(--popup-padding);
     }
   }
 
@@ -127,26 +91,21 @@
     .popup__content {
       left: 50%;
       transform: translateX(-50%);
+    }
 
-      &:after {
-        left: 50%;
-        transform: translateX(-50%);
-      }
+    .popup__caret {
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 
   &--h-align-right {
     .popup__content {
-      right: - base(1.75);
-      [dir='rtl'] & {
-        right: - base(0.75);
-      }
-      &:after {
-        right: base(1.75);
-        [dir='rtl'] & {
-          right: base(0.75);
-        }
-      }
+      right: 0;
+    }
+
+    .popup__caret {
+      right: var(--popup-padding);
     }
   }
 
@@ -154,46 +113,32 @@
   // VERTICAL ALIGNMENT
   ////////////////////////////////
 
+  &__caret {
+    position: absolute;
+    border: var(--popup-caret-size) solid transparent;
+  }
+
   &--v-align-top {
     .popup__content {
-      bottom: calc(100% + #{$baseline});
+      @include shadow-lg;
+      bottom: calc(100% + var(--popup-caret-size));
+    }
+
+    .popup__caret {
+      top: calc(100% - 1px);
+      border-top-color: var(--popup-bg);
     }
   }
 
   &--v-align-bottom {
     .popup__content {
       @include shadow-lg-top;
-      top: calc(100% + #{base(0.5)});
-
-      &:after {
-        top: unset;
-        bottom: calc(100% - 1px);
-        border-top-color: transparent !important;
-        border-bottom-color: var(--theme-input-bg);
-      }
+      top: calc(100% + var(--popup-caret-size));
     }
 
-    &.popup--color-dark {
-      .popup__content {
-        &:after {
-          border-bottom-color: var(--theme-elevation-800);
-        }
-      }
-    }
-  }
-
-  ////////////////////////////////
-  // COLOR
-  ////////////////////////////////
-
-  &--color-dark {
-    .popup__content {
-      background: var(--theme-elevation-800);
-      color: var(--theme-input-bg);
-
-      &:after {
-        border-top-color: var(--theme-elevation-800);
-      }
+    .popup__caret {
+      bottom: calc(100% - 1px);
+      border-bottom-color: var(--popup-bg);
     }
   }
 
@@ -210,69 +155,55 @@
   }
 
   @include mid-break {
-    &__scroll,
-    &--size-large .popup__scroll {
-      padding: base(0.75);
-      padding-right: calc(var(--scrollbar-width) + #{base(0.75)});
-    }
-
-    &--h-align-left {
-      .popup__content {
-        left: - base(0.5);
-
-        &:after {
-          left: base(0.5);
-        }
-      }
-    }
+    --popup-padding: calc(var(--base) * 0.25);
 
     &--h-align-center {
       .popup__content {
         left: 50%;
         transform: translateX(-0%);
+      }
 
-        &:after {
-          left: 50%;
-          transform: translateX(-0%);
-        }
+      .popup__caret {
+        left: 50%;
+        transform: translateX(-0%);
       }
     }
 
     &--h-align-right {
       .popup__content {
-        right: - base(0.5);
+        right: 0;
+      }
 
-        &:after {
-          right: base(0.5);
-        }
+      .popup__caret {
+        right: var(--popup-padding);
       }
     }
 
     &--force-h-align-left {
       .popup__content {
-        left: - base(0.5);
+        left: 0;
         right: unset;
         transform: unset;
+      }
 
-        &:after {
-          left: base(0.5);
-          right: unset;
-          transform: unset;
-        }
+      .popup__caret {
+        left: var(--popup-padding);
+        right: unset;
+        transform: unset;
       }
     }
 
     &--force-h-align-right {
       .popup__content {
-        right: - base(0.5);
+        right: 0;
         left: unset;
         transform: unset;
+      }
 
-        &:after {
-          right: base(0.5);
-          left: unset;
-          transform: unset;
-        }
+      .popup__caret {
+        right: var(--popup-padding);
+        left: unset;
+        transform: unset;
       }
     }
   }

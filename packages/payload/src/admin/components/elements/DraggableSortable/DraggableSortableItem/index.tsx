@@ -11,11 +11,11 @@ export const DraggableSortableItem: React.FC<
     children: ChildFunction
   }
 > = (props) => {
-  const { children, disabled, id } = props
+  const { id, children, disabled } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
-    disabled,
     id,
+    disabled,
   })
 
   return (

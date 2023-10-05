@@ -17,11 +17,11 @@ type Args<T> = {
 }
 
 export const traverseFields = async <T>({
+  id,
   context,
   data,
   doc,
   fields,
-  id,
   operation,
   overrideAccess,
   req,
@@ -32,11 +32,11 @@ export const traverseFields = async <T>({
   fields.forEach((field) => {
     promises.push(
       promise({
+        id,
         context,
         data,
         doc,
         field,
-        id,
         operation,
         overrideAccess,
         req,

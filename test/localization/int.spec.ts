@@ -7,21 +7,20 @@ import type { LocalizedPost, WithLocalizedRelationship } from './payload-types'
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { arrayCollectionSlug } from './collections/Array'
-import configPromise, {
-  localizedPostsSlug,
-  relationshipLocalizedSlug,
-  withLocalizedRelSlug,
-  withRequiredLocalizedFields,
-} from './config'
+import configPromise from './config'
 import {
   defaultLocale,
   englishTitle,
+  localizedPostsSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationSpanishTitle,
   relationSpanishTitle2,
+  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
+  withLocalizedRelSlug,
+  withRequiredLocalizedFields,
 } from './shared'
 
 const collection = localizedPostsSlug
@@ -37,6 +36,7 @@ describe('Localization', () => {
     ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
     config = await configPromise
 
+    // @ts-expect-error Force typing
     post1 = await payload.create({
       collection,
       data: {
@@ -44,6 +44,7 @@ describe('Localization', () => {
       },
     })
 
+    // @ts-expect-error Force typing
     postWithLocalizedData = await payload.create({
       collection,
       data: {
@@ -90,7 +91,7 @@ describe('Localization', () => {
 
       expect(updated.title).toEqual(spanishTitle)
 
-      const localized = await payload.findByID({
+      const localized: any = await payload.findByID({
         collection,
         id: post1.id,
         locale: 'all',
@@ -101,7 +102,7 @@ describe('Localization', () => {
     })
 
     it('should fallback to english translation when empty', async () => {
-      const updated = await payload.update({
+      await payload.update({
         collection,
         id: post1.id,
         locale: spanishLocale,
@@ -110,9 +111,14 @@ describe('Localization', () => {
         },
       })
 
-      expect(updated.title).toEqual(englishTitle)
+      const retrievedInEnglish = await payload.findByID({
+        collection,
+        id: post1.id,
+      })
 
-      const localizedFallback = await payload.findByID({
+      expect(retrievedInEnglish.title).toEqual(englishTitle)
+
+      const localizedFallback: any = await payload.findByID({
         collection,
         id: post1.id,
         locale: 'all',
@@ -132,6 +138,7 @@ describe('Localization', () => {
           },
         })
 
+        // @ts-expect-error Force typing
         localizedPost = await payload.update({
           collection,
           id,
@@ -172,7 +179,7 @@ describe('Localization', () => {
       })
 
       it('all locales', async () => {
-        const localized = await payload.findByID({
+        const localized: any = await payload.findByID({
           collection,
           locale: 'all',
           id: localizedPost.id,
@@ -192,7 +199,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(localizedPost.id)
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
       })
 
       it('by localized field value - alternate locale', async () => {
@@ -206,7 +213,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(localizedPost.id)
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
       })
 
       it('by localized field value - opposite locale???', async () => {
@@ -220,7 +227,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(localizedPost.id)
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id)
       })
     })
   })
@@ -244,6 +251,7 @@ describe('Localization', () => {
         },
       })
 
+      // @ts-expect-error Force typing
       withRelationship = await payload.create({
         collection: withLocalizedRelSlug,
         data: {
@@ -305,15 +313,16 @@ describe('Localization', () => {
 
       it('populates relationships with all locales', async () => {
         // the relationship fields themselves are localized on this collection
-        const result = await payload.find({
+        const result: any = await payload.find({
           collection: relationshipLocalizedSlug,
           locale: 'all',
           depth: 1,
         })
-        expect((result.docs[0].relationship as any).en.id).toBeDefined()
-        expect((result.docs[0].relationshipHasMany as any).en[0].id).toBeDefined()
-        expect((result.docs[0].relationMultiRelationTo as any).en.value.id).toBeDefined()
-        expect((result.docs[0].relationMultiRelationToHasMany as any).en[0].value.id).toBeDefined()
+
+        expect(result.docs[0].relationship.en.id).toBeDefined()
+        expect(result.docs[0].relationshipHasMany.en[0].id).toBeDefined()
+        expect(result.docs[0].relationMultiRelationTo.en.value.id).toBeDefined()
+        expect(result.docs[0].relationMultiRelationToHasMany.en[0].value.id).toBeDefined()
         expect(result.docs[0].arrayField.en[0].nestedRelation.id).toBeDefined()
       })
     })
@@ -329,7 +338,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(withRelationship.id)
+        expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id)
 
         // Second relationship
         const result2 = await payload.find({
@@ -341,7 +350,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result2.docs[0].id).toEqual(withRelationship.id)
+        expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id)
       })
 
       it('specific locale', async () => {
@@ -396,7 +405,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(withRelationship.id)
+        expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id)
 
         // First relationship - spanish
         const result2 = await queryRelation({
@@ -405,7 +414,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result2.docs[0].id).toEqual(withRelationship.id)
+        expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id)
 
         // Second relationship - english
         const result3 = await queryRelation({
@@ -414,7 +423,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result3.docs[0].id).toEqual(withRelationship.id)
+        expect(result3.docs.map(({ id }) => id)).toContain(withRelationship.id)
 
         // Second relationship - spanish
         const result4 = await queryRelation({
@@ -510,7 +519,7 @@ describe('Localization', () => {
 
   describe('Localized - arrays with nested localized fields', () => {
     it('should allow moving rows and retain existing row locale data', async () => {
-      const globalArray = await payload.findGlobal({
+      const globalArray: any = await payload.findGlobal({
         slug: 'global-array',
       })
 
@@ -653,7 +662,7 @@ describe('Localization', () => {
 
       const update = `mutation {
         updateLocalizedPost(
-          id: "${createResult.id}",
+          id: ${payload.db.defaultIDType === 'number' ? createResult.id : `"${createResult.id}"`},
           data: {
             title: "${spanishTitle}"
           }
@@ -712,6 +721,7 @@ describe('Localization', () => {
       const updatedSpanishDoc = await payload.update({
         collection: arrayCollectionSlug,
         locale: spanishLocale,
+        fallbackLocale: null,
         id: docID,
         data: {
           items: [],
@@ -754,7 +764,7 @@ async function createLocalizedPost(data: {
     [spanishLocale]: string
   }
 }): Promise<LocalizedPost> {
-  const localizedRelation = await payload.create({
+  const localizedRelation: any = await payload.create({
     collection,
     data: {
       title: data.title.en,

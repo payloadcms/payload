@@ -1,14 +1,13 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field } from 'payload/types'
 
-import type { GenericColumn, PostgresAdapter } from '../types'
+import type { DrizzleDB, GenericColumn, PostgresAdapter } from '../types'
 
 type BaseArgs = {
   adapter: PostgresAdapter
   data: Record<string, unknown>
-  fallbackLocale?: false | string
+  db: DrizzleDB
   fields: Field[]
-  locale: string
   path?: string
   tableName: string
 }

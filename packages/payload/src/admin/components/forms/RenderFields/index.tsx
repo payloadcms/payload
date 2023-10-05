@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types'
+import { fieldAffectsData } from '../../../../fields/config/types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import useIntersect from '../../../hooks/useIntersect'
 import { useOperation } from '../../utilities/OperationProvider'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import { filterFields } from './filterFields'
+import './index.scss'
 
 const baseClass = 'render-fields'
 
@@ -15,26 +17,21 @@ const intersectionObserverOptions = {
   rootMargin: '1000px',
 }
 
+// If you send `fields` through, it will render those fields explicitly
+// Otherwise, it will reduce your fields using the other provided props
+// This is so that we can conditionally render fields before reducing them, if desired
+// See the sidebar in '../collections/Edit/Default/index.tsx' for an example
 const RenderFields: React.FC<Props> = (props) => {
-  const {
-    className,
-    fieldSchema,
-    fieldTypes,
-    filter,
-    forceRender,
-    indexPath: incomingIndexPath,
-    permissions,
-    readOnly: readOnlyOverride,
-  } = props
+  const { className, fieldTypes, forceRender, margins } = props
 
   const { i18n, t } = useTranslation('general')
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions)
-  const operation = useOperation()
 
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0
   const shouldRender = forceRender || isIntersecting || isAboveViewport
+  const operation = useOperation()
 
   useEffect(() => {
     if (shouldRender && !hasRendered) {
@@ -42,87 +39,80 @@ const RenderFields: React.FC<Props> = (props) => {
     }
   }, [shouldRender, hasRendered])
 
-  const classes = [baseClass, className].filter(Boolean).join(' ')
+  let fieldsToRender = 'fields' in props ? props?.fields : null
 
-  if (fieldSchema) {
+  if (!fieldsToRender && 'fieldSchema' in props) {
+    const { fieldSchema, fieldTypes, filter, permissions, readOnly: readOnlyOverride } = props
+
+    fieldsToRender = filterFields({
+      fieldSchema,
+      fieldTypes,
+      filter,
+      operation,
+      permissions,
+      readOnly: readOnlyOverride,
+    })
+  }
+
+  if (fieldsToRender) {
     return (
-      <div className={classes} ref={intersectionRef}>
+      <div
+        className={[
+          baseClass,
+          className,
+          margins && `${baseClass}--margins-${margins}`,
+          margins === false && `${baseClass}--margins-none`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        ref={intersectionRef}
+      >
         {hasRendered &&
-          fieldSchema.map((field, fieldIndex) => {
-            const fieldIsPresentational = fieldIsPresentationalOnly(field)
-            let FieldComponent = fieldTypes[field.type]
+          fieldsToRender.map((reducedField, fieldIndex) => {
+            const {
+              FieldComponent,
+              field,
+              fieldIsPresentational,
+              fieldPermissions,
+              isFieldAffectingData,
+              readOnly,
+            } = reducedField
 
-            if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
-              if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
-                if (fieldIsPresentational) {
-                  return <FieldComponent {...field} key={fieldIndex} />
-                }
-
-                if (field?.admin?.hidden) {
-                  FieldComponent = fieldTypes.hidden
-                }
-
-                const isFieldAffectingData = fieldAffectsData(field)
-
-                const fieldPermissions = isFieldAffectingData
-                  ? permissions?.[field.name]
-                  : permissions
-
-                let { admin: { readOnly } = {} } = field
-
-                if (readOnlyOverride && readOnly !== false) readOnly = true
-
-                if (
-                  (isFieldAffectingData &&
-                    permissions?.[field?.name]?.read?.permission !== false) ||
-                  !isFieldAffectingData
-                ) {
-                  if (
-                    isFieldAffectingData &&
-                    permissions?.[field?.name]?.[operation]?.permission === false
-                  ) {
-                    readOnly = true
-                  }
-
-                  if (FieldComponent) {
-                    return (
-                      <RenderCustomComponent
-                        CustomComponent={field?.admin?.components?.Field}
-                        DefaultComponent={FieldComponent}
-                        componentProps={{
-                          ...field,
-                          admin: {
-                            ...(field.admin || {}),
-                            readOnly,
-                          },
-                          fieldTypes,
-                          indexPath: incomingIndexPath
-                            ? `${incomingIndexPath}.${fieldIndex}`
-                            : `${fieldIndex}`,
-                          path: field.path || (isFieldAffectingData ? field.name : ''),
-                          permissions: fieldPermissions,
-                        }}
-                        key={fieldIndex}
-                      />
-                    )
-                  }
-
-                  return (
-                    <div className="missing-field" key={fieldIndex}>
-                      {t('error:noMatchedField', {
-                        label: fieldAffectsData(field)
-                          ? getTranslation(field.label || field.name, i18n)
-                          : field.path,
-                      })}
-                    </div>
-                  )
-                }
-              }
-
-              return null
+            if (fieldIsPresentational) {
+              return <FieldComponent key={fieldIndex} {...field} />
             }
 
-            return null
+            if (field) {
+              return (
+                <RenderCustomComponent
+                  CustomComponent={field?.admin?.components?.Field}
+                  DefaultComponent={FieldComponent}
+                  componentProps={{
+                    ...field,
+                    admin: {
+                      ...(field.admin || {}),
+                      readOnly,
+                    },
+                    fieldTypes,
+                    indexPath:
+                      'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
+                    path: field.path || (isFieldAffectingData && 'name' in field ? field.name : ''),
+                    permissions: fieldPermissions,
+                  }}
+                  key={fieldIndex}
+                />
+              )
+            }
+
+            return (
+              <div className="missing-field" key={fieldIndex}>
+                {t('error:noMatchedField', {
+                  label: fieldAffectsData(field)
+                    ? getTranslation(field.label || field.name, i18n)
+                    : field.path,
+                })}
+              </div>
+            )
           })}
       </div>
     )

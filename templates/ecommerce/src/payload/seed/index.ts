@@ -24,13 +24,13 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // clear the database
   await Promise.all([
-    ...collections.map(async collection =>
+    ...collections.map(async (collection) =>
       payload.delete({
         collection,
         where: {},
       }),
     ), // eslint-disable-line function-paren-newline
-    ...globals.map(async global =>
+    ...globals.map(async (global) =>
       payload.updateGlobal({
         slug: global,
         data: {},

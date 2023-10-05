@@ -8,14 +8,16 @@ import { v4 as uuid } from 'uuid'
 import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
-import payload from '../../packages/payload/src'
+import payload, { Payload } from '../../packages/payload/src'
 
 type Options = {
   __dirname: string
   init?: Partial<InitOptions>
 }
 
-export async function initPayloadE2E(__dirname: string): Promise<{ serverURL: string }> {
+type InitializedPayload = { serverURL: string; payload: Payload }
+
+export async function initPayloadE2E(__dirname: string): Promise<InitializedPayload> {
   const webpackCachePath = path.resolve(__dirname, '../../node_modules/.cache/webpack')
   shelljs.rm('-rf', webpackCachePath)
   return initPayloadTest({
@@ -26,7 +28,7 @@ export async function initPayloadE2E(__dirname: string): Promise<{ serverURL: st
   })
 }
 
-export async function initPayloadTest(options: Options): Promise<{ serverURL: string }> {
+export async function initPayloadTest(options: Options): Promise<InitializedPayload> {
   const initOptions = {
     local: true,
     secret: uuid(),
@@ -34,6 +36,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     ...(options.init || {}),
   }
 
+  process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
 
@@ -64,7 +67,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     initOptions.express.listen(port)
   }
 
-  return { serverURL: `http://localhost:${port}` }
+  return { serverURL: `http://localhost:${port}`, payload }
 }
 
 export const openAccess: CollectionConfig['access'] = {

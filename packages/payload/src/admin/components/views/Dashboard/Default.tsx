@@ -9,7 +9,6 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { EntityType, groupNavItems } from '../../../utilities/groupNavItems'
 import Button from '../../elements/Button'
 import Card from '../../elements/Card'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
 import { useConfig } from '../../utilities/Config'
 import './index.scss'
@@ -70,13 +69,12 @@ const Dashboard: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) &&
           beforeDashboard.map((Component, i) => <Component key={i} />)}
         {groups.map(({ entities, label }, groupIndex) => {
           return (
-            <React.Fragment key={groupIndex}>
+            <div className={`${baseClass}__group`} key={groupIndex}>
               <h2 className={`${baseClass}__label`}>{label}</h2>
               <ul className={`${baseClass}__card-list`}>
                 {entities.map(({ entity, type }, entityIndex) => {
@@ -129,7 +127,7 @@ const Dashboard: React.FC<Props> = (props) => {
                   )
                 })}
               </ul>
-            </React.Fragment>
+            </div>
           )
         })}
         {Array.isArray(afterDashboard) &&

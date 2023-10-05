@@ -1,0 +1,192 @@
+@import '../../../scss/styles.scss';
+
+.doc-controls {
+  @include blur-bg;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    height: 1px;
+    background: var(--theme-elevation-100);
+    width: 100%;
+    left: 0;
+    top: 100%;
+  }
+
+  &__wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--base);
+    padding-bottom: 1px;
+    z-index: 1;
+  }
+
+  &__content {
+    height: var(--doc-controls-height);
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  &__meta {
+    flex-grow: 1;
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: var(--base);
+    margin: 0;
+    width: 100%;
+  }
+
+  &__list-item {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  &__value-wrap {
+    overflow: hidden;
+  }
+
+  &__value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__label {
+    color: var(--theme-elevation-500);
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  &__controls-wrapper {
+    --controls-gap: calc(var(--base) / 2);
+    --dot-button-width: calc(var(--base) * 2);
+    display: flex;
+    align-items: center;
+    margin: 0;
+    gap: var(--controls-gap);
+    position: relative;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    gap: calc(var(--base) / 2);
+
+    button {
+      margin: 0;
+      white-space: nowrap;
+    }
+  }
+
+  &__dots {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    border: 1px solid var(--theme-elevation-100);
+    border-radius: $style-radius-m;
+    height: calc(var(--base) * 1.5);
+    width: calc(var(--base) * 1.5);
+
+    &:hover {
+      border: 1px solid var(--theme-elevation-500);
+      background-color: var(--theme-elevation-100);
+    }
+
+    > div {
+      width: 3px;
+      height: 3px;
+      border-radius: 100%;
+      background-color: currentColor;
+    }
+  }
+
+  &__popup {
+    position: relative;
+  }
+
+  .popup--active {
+    .doc-controls {
+      &__dots {
+        border: 1px solid var(--theme-elevation-500);
+        background-color: var(--theme-elevation-100);
+      }
+    }
+  }
+
+  .popup__trigger-wrap {
+    display: flex;
+  }
+
+  @include mid-break {
+    // On mobile, only stick the controls to the top
+    // The timestamps and meta can scroll past
+    // The same container needs to the sticky, though
+    // So we use a static height with a negative top
+    top: calc(var(--doc-controls-height) * -1);
+    padding-right: 0;
+    padding-left: 0;
+
+    &__wrapper {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    &__content {
+      width: 100%;
+      align-items: flex-start;
+      padding-top: calc(var(--base) / 2);
+      overflow: auto;
+
+      // this container has a fixed height
+      // this means the scrollbar (when present) overlaps the content
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &__meta {
+      width: auto;
+      gap: calc(var(--base) / 2);
+      margin-left: var(--gutter-h);
+      margin-right: var(--gutter-h);
+    }
+
+    &__controls-wrapper {
+      width: 100%;
+      transform: translate3d(0, 0, 0);
+      padding: calc(var(--base) / 2) 0;
+      overflow: auto;
+    }
+
+    &__controls {
+      margin-left: var(--gutter-h);
+      margin-right: var(--gutter-h);
+    }
+
+    &__popup {
+      // TODO: the container needs to overflow on mobile
+      // But the popup interferes with this because it requires overflow in order to be visible
+      // So we likely need to outright show the controls nested within the popup on mobile
+      display: none;
+    }
+  }
+}

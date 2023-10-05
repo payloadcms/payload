@@ -30,7 +30,7 @@ export default async function Order({ params: { id } }) {
         'Content-Type': 'application/json',
         Authorization: `JWT ${token}`,
       },
-    })?.then(async res => {
+    })?.then(async (res) => {
       if (!res.ok) notFound()
       const json = await res.json()
       if ('error' in json && json.error) notFound()

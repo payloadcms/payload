@@ -1,5 +1,7 @@
 import { GraphQLEnumType, GraphQLInputObjectType, GraphQLString } from 'graphql'
+import GraphQLJSON from 'graphql-type-json'
 
+import type { Payload } from '../..'
 import type {
   ArrayField,
   CheckboxField,
@@ -22,14 +24,25 @@ import type {
   UploadField,
 } from '../../fields/config/types'
 
-import { fieldAffectsData, fieldHasSubFields } from '../../fields/config/types'
 import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths'
 import { withOperators } from './withOperators'
 
-const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => ({
-  array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+type Args = {
+  nestedFieldName?: string
+  parentName: string
+  payload: Payload
+}
+
+const fieldToSchemaMap = ({ nestedFieldName, parentName, payload }: Args): any => ({
+  array: (field: ArrayField) =>
+    recursivelyBuildNestedPaths({
+      field,
+      nestedFieldName2: nestedFieldName,
+      parentName,
+      payload,
+    }),
   checkbox: (field: CheckboxField) => ({
     type: withOperators(field, parentName),
   }),
@@ -37,14 +50,25 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
     type: withOperators(field, parentName),
   }),
   collapsible: (field: CollapsibleField) =>
-    recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+    recursivelyBuildNestedPaths({
+      field,
+      nestedFieldName2: nestedFieldName,
+      parentName,
+      payload,
+    }),
   date: (field: DateField) => ({
     type: withOperators(field, parentName),
   }),
   email: (field: EmailField) => ({
     type: withOperators(field, parentName),
   }),
-  group: (field: GroupField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  group: (field: GroupField) =>
+    recursivelyBuildNestedPaths({
+      field,
+      nestedFieldName2: nestedFieldName,
+      parentName,
+      payload,
+    }),
   json: (field: JSONField) => ({
     type: withOperators(field, parentName),
   }),
@@ -61,6 +85,7 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
     if (Array.isArray(field.relationTo)) {
       return {
         type: new GraphQLInputObjectType({
+          name: `${combineParentName(parentName, field.name)}_Relation`,
           fields: {
             relationTo: {
               type: new GraphQLEnumType({
@@ -76,9 +101,8 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
                 ),
               }),
             },
-            value: { type: GraphQLString },
+            value: { type: GraphQLJSON },
           },
-          name: `${combineParentName(parentName, field.name)}_Relation`,
         }),
       }
     }
@@ -90,11 +114,23 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
   richText: (field: RichTextField) => ({
     type: withOperators(field, parentName),
   }),
-  row: (field: RowField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  row: (field: RowField) =>
+    recursivelyBuildNestedPaths({
+      field,
+      nestedFieldName2: nestedFieldName,
+      parentName,
+      payload,
+    }),
   select: (field: SelectField) => ({
     type: withOperators(field, parentName),
   }),
-  tabs: (field: TabsField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  tabs: (field: TabsField) =>
+    recursivelyBuildNestedPaths({
+      field,
+      nestedFieldName2: nestedFieldName,
+      parentName,
+      payload,
+    }),
   text: (field: TextField) => ({
     type: withOperators(field, parentName),
   }),
