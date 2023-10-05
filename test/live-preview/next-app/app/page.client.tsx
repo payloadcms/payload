@@ -19,7 +19,7 @@ export const Page: React.FC<Props> = (props) => {
   const { initialPage } = props
 
   const { data, isLoading } = useLivePreview<PageType>({
-    initialPage,
+    initialData: initialPage,
     serverURL: PAYLOAD_SERVER_URL,
   })
 

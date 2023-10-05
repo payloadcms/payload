@@ -16,6 +16,11 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
+  if (!migrationFiles.length) {
+    payload.logger.info({ msg: 'No migrations to run.' })
+    return
+  }
+
   let latestBatch = 0
   let migrationsInDB = []
 

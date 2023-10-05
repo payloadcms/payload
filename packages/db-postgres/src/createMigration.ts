@@ -4,10 +4,9 @@ import type { CreateMigration } from 'payload/database'
 
 import { generateDrizzleJson, generateMigration } from 'drizzle-kit/utils'
 import fs from 'fs'
+import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
-
-import { migrationTableExists } from './utilities/migrationTableExists'
 
 const migrationTemplate = (
   upSQL?: string,
@@ -96,6 +95,26 @@ export const createMigration: CreateMigration = async function createMigration(
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
   const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
   const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+
+  if (!sqlStatementsUp.length && !sqlStatementsDown.length) {
+    const { confirm: shouldCreateBlankMigration } = await prompts(
+      {
+        name: 'confirm',
+        initial: false,
+        message: 'No schema changes detected. Would you like to create a blank migration file?',
+        type: 'confirm',
+      },
+      {
+        onCancel: () => {
+          process.exit(0)
+        },
+      },
+    )
+
+    if (!shouldCreateBlankMigration) {
+      process.exit(0)
+    }
+  }
 
   // write schema
   fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
