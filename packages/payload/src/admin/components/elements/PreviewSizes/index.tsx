@@ -57,18 +57,24 @@ const PreviewSizes: React.FC<{
         />
       </div>
       <div className={`${baseClass}__listWrap`}>
-        <ul className={`${baseClass}__list`}>
+        <div className={`${baseClass}__list`}>
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
             if (val?.filename) {
               return (
-                <li
+                <div
                   className={[`${baseClass}__sizeOption`, selected && `${baseClass}--selected`]
                     .filter(Boolean)
                     .join(' ')}
                   key={key}
                   onClick={() => setSelectedSize(key)}
-                  role="presentation"
+                  onKeyDown={(e) => {
+                    if (e.keyCode === 13) {
+                      setSelectedSize(key)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className={`${baseClass}__image`}>
                     <img alt={val.filename} src={`${staticURL}/${val.filename}`} />
@@ -77,13 +83,13 @@ const PreviewSizes: React.FC<{
                     <div className={`${baseClass}__sizeName`}>{key}</div>
                     <Meta {...val} staticURL={staticURL} />
                   </div>
-                </li>
+                </div>
               )
             }
 
             return null
           })}
-        </ul>
+        </div>
       </div>
     </div>
   )

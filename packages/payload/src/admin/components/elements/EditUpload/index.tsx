@@ -199,11 +199,10 @@ const EditUpload: React.FC<{
                       Reset
                     </Button>
                   </div>
-                  <span className={`${baseClass}__description`}>
-                    Draw an area to crop, adjust by dragging the corners or updating the values
-                    below.
-                  </span>
                 </div>
+                <span className={`${baseClass}__description`}>
+                  Draw an area to crop, adjust by dragging the corners or updating the values below.
+                </span>
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="Width (px)"
@@ -232,11 +231,11 @@ const EditUpload: React.FC<{
                       Reset
                     </Button>
                   </div>
-                  <span className={`${baseClass}__description`}>
-                    Click within the cropped area to position the focal point or adjust the values
-                    below.
-                  </span>
                 </div>
+                <span className={`${baseClass}__description`}>
+                  Click within the cropped area to position the focal point or adjust the values
+                  below.
+                </span>
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="X %"

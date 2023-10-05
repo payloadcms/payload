@@ -141,7 +141,7 @@ $header-height: base(5);
   &__groupWrap {
     display: flex;
     flex-direction: column;
-    gap: base(1);
+    gap: base(0.5);
     padding-right: var(--gutter-h);
     padding-left: var(--edit-upload-cell-spacing);
     width: 100%;
