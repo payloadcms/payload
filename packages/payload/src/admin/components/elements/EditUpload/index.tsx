@@ -21,7 +21,13 @@ const Input: React.FC<{ name: string; onChange: (value: string) => void; value: 
 }) => (
   <div className={`${baseClass}__input`}>
     {name}
-    <input name={name} onChange={(e) => onChange(e.target.value)} type="number" value={value} />
+    <input
+      name={name}
+      defaultValue={value}
+      onChange={(e) => onChange(e.target.value)}
+      type="number"
+      value={value}
+    />
   </div>
 )
 
@@ -54,40 +60,28 @@ const EditUpload: React.FC<{
   const imageRef = useRef<HTMLImageElement | undefined>()
   const cropRef = useRef<HTMLDivElement | undefined>()
 
-  const originalHeight = imageRef.current ? imageRef.current.naturalHeight / 100 : 0
-  const originalWidth = imageRef.current ? imageRef.current.naturalWidth / 100 : 0
+  const originalHeight = imageRef.current ? imageRef.current.naturalHeight : 0
+  const originalWidth = imageRef.current ? imageRef.current.naturalWidth : 0
 
-  const handleInputChange = (name: string, value: string) => {
-    if (name === 'width' || name === 'height') {
-      const dimension = name === 'width' ? 'width' : 'height'
-      const val = parseFloat(value) / (dimension === 'width' ? originalWidth : originalHeight)
+  const fineTuneCrop = ({ dimension, value }: { dimension: 'width' | 'height'; value: string }) => {
+    const intValue = parseInt(value)
+    if (dimension === 'width' && intValue >= originalWidth) return null
+    if (dimension === 'height' && intValue >= originalHeight) return null
 
-      const maxCrop = {
-        height: (crop.y + val).toFixed(0) >= 100,
-        width: (crop.x + val).toFixed(0) >= 100,
-      }
+    const percentage = 100 * (intValue / (dimension === 'width' ? originalWidth : originalHeight))
 
-      const maxReached =
-        dimension === 'height'
-          ? crop.y === 0 && crop.height >= 100
-          : crop.x === 0 && crop.width >= 100
+    if (percentage === 100 || percentage === 0) return null
 
-      if (maxReached) return null
+    setCrop({
+      ...crop,
+      [dimension]: dimension === 'height' ? 100 - percentage : percentage,
+    })
+  }
 
-      const updatedCrop = {
-        ...crop,
-        [dimension]: val,
-        ...(maxCrop.width && name === 'width' ? { x: 100 - val } : {}),
-        ...(maxCrop.height && name === 'height' ? { y: 100 - val } : {}),
-      }
-
-      setCrop(updatedCrop)
-    } else if (name === 'x' || name === 'y') {
-      const coordinate = name === 'x' ? 'x' : 'y'
-      const newValue = parseInt(value)
-      if (newValue >= 0 && newValue <= 100) {
-        setPointPosition((prevPosition) => ({ ...prevPosition, [coordinate]: newValue }))
-      }
+  const fineTuneFocalPoint = ({ coordinate, value }: { coordinate: 'x' | 'y'; value: string }) => {
+    const intValue = parseInt(value)
+    if (intValue >= 0 && intValue <= 100) {
+      setPointPosition((prevPosition) => ({ ...prevPosition, [coordinate]: intValue }))
     }
   }
 
@@ -206,13 +200,13 @@ const EditUpload: React.FC<{
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="Width (px)"
-                    onChange={(value) => handleInputChange('width', value)}
-                    value={(originalWidth * crop.width).toFixed(0)}
+                    onChange={(value) => fineTuneCrop({ dimension: 'width', value })}
+                    value={((crop.width / 100) * originalWidth).toFixed(0)}
                   />
                   <Input
                     name="Height (px)"
-                    onChange={(value) => handleInputChange('height', value)}
-                    value={(originalHeight * crop.height).toFixed(0)}
+                    onChange={(value) => fineTuneCrop({ dimension: 'height', value })}
+                    value={((crop.height / 100) * originalHeight).toFixed(0)}
                   />
                 </div>
               </div>
@@ -239,12 +233,12 @@ const EditUpload: React.FC<{
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="X %"
-                    onChange={(value) => handleInputChange('x', value)}
+                    onChange={(value) => fineTuneFocalPoint({ coordinate: 'x', value })}
                     value={pointPosition.x.toFixed(0)}
                   />
                   <Input
                     name="Y %"
-                    onChange={(value) => handleInputChange('y', value)}
+                    onChange={(value) => fineTuneFocalPoint({ coordinate: 'y', value })}
                     value={pointPosition.y.toFixed(0)}
                   />
                 </div>
