@@ -16,15 +16,13 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
 
   if (transactionsNotAvailable) return id
 
-  if (!this.connection.get('replicaSet')) {
+  const client = this.connection.getClient()
+  if (!client.options.replicaSet) {
     transactionsNotAvailable = true
-    this.payload.logger.warn(
-      'Database transactions for MongoDB are only available when connecting to a replica set. Operations will continue without using transactions.',
-    )
   } else {
     id = uuid()
     if (!this.sessions[id]) {
-      this.sessions[id] = await this.connection.getClient().startSession()
+      this.sessions[id] = await client.startSession()
     }
     if (this.sessions[id].inTransaction()) {
       this.payload.logger.warn('beginTransaction called while transaction already exists')

@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field } from 'payload/types'
+import type { Field, SanitizedCollectionConfig } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -27,6 +27,7 @@ type Args = {
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
+  collectionIndexes?: SanitizedCollectionConfig['indexes']
   disableUnique: boolean
   fields: Field[]
   rootRelationsToBuild?: Map<string, string>
@@ -45,6 +46,7 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   buildRelationships,
+  collectionIndexes = [],
   disableUnique = false,
   fields,
   rootRelationsToBuild,
@@ -96,6 +98,7 @@ export const buildTable = ({
   } = traverseFields({
     adapter,
     buildRelationships,
+    collectionIndexes,
     columns,
     disableUnique,
     fields,
@@ -157,7 +160,10 @@ export const buildTable = ({
           return acc
         },
         {
-          _localeParent: unique().on(cols._locale, cols._parentID),
+          _localeParent: unique(`${localeTableName}_locale_parent_id_unique`).on(
+            cols._locale,
+            cols._parentID,
+          ),
         },
       )
     })
@@ -254,14 +260,13 @@ export const buildTable = ({
 
         if (hasLocalizedRelationshipField) {
           result.localeIdx = index('locale_idx').on(cols.locale)
-          result.parentPathOrderLocale = unique().on(
-            cols.parent,
-            cols.path,
-            cols.order,
-            cols.locale,
-          )
+          result.parentPathOrderLocale = unique(
+            `${relationshipsTableName}_parent_id_path_order_locale_unique`,
+          ).on(cols.parent, cols.path, cols.order, cols.locale)
         } else {
-          result.parentPathOrder = unique().on(cols.parent, cols.path, cols.order)
+          result.parentPathOrder = unique(
+            `${relationshipsTableName}_parent_id_path_order_unique`,
+          ).on(cols.parent, cols.path, cols.order)
         }
 
         return result

@@ -314,7 +314,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 
-    // this.logger.info('Starting Payload...')
+    this.logger.info('Starting Payload...')
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')
     }
@@ -357,7 +357,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       await this.db.init(this)
     }
 
-    if (this.db.connect) {
+    if (!options.disableDBConnect && this.db.connect) {
       await this.db.connect(this)
     }
 

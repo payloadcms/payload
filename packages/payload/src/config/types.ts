@@ -8,10 +8,12 @@ import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 import type { Configuration } from 'webpack'
+// @ts-expect-error
+import type { InlineConfig } from 'vite'
 
 import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
-import type { EditViewProps } from '../admin/components/views/types'
+import type { CollectionEditViewProps, GlobalEditViewProps } from '../admin/components/views/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -116,6 +118,11 @@ export type InitOptions = {
    * Disable running of the `onInit` function
    */
   disableOnInit?: boolean
+
+  /**
+   * Disable connect to the database on init
+   */
+  disableDBConnect?: boolean
 
   /**
    * Configuration for Payload's email functionality
@@ -239,7 +246,7 @@ export type EditViewConfig = {
   path: string
 }
 
-export type EditViewComponent = React.ComponentType<EditViewProps>
+export type EditViewComponent = React.ComponentType<CollectionEditViewProps | GlobalEditViewProps>
 
 export type EditView = EditViewComponent | EditViewConfig
 
@@ -455,6 +462,8 @@ export type Config = {
     user?: string
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration
+    /** Customize the Vite config that's used to generate the Admin panel. */
+    vite?: (config: InlineConfig) => InlineConfig
   }
   /**
    * Manage the datamodel of your application

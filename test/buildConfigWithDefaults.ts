@@ -7,7 +7,7 @@ import { webpackBundler } from '../packages/bundler-webpack/src'
 import { mongooseAdapter } from '../packages/db-mongodb/src'
 import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
-import { createSlate } from '../packages/richtext-slate/src'
+import { slateEditor } from '../packages/richtext-slate/src'
 
 // process.env.PAYLOAD_DATABASE = 'postgres'
 
@@ -32,7 +32,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const [name] = process.argv.slice(2)
 
   const config: Config = {
-    editor: createSlate({}),
+    editor: slateEditor({}),
     telemetry: false,
     rateLimit: {
       window: 15 * 60 * 100, // 15min default,
@@ -76,11 +76,11 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ...existingConfig.resolve?.alias,
             [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-postgres/src/mock.js',
+              '../packages/db-postgres/mock.js',
             ),
             [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-mongodb/src/mock.js',
+              '../packages/db-mongodb/mock.js',
             ),
             [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
               __dirname,
@@ -88,7 +88,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ),
             [path.resolve(__dirname, '../packages/bundler-vite/src/index')]: path.resolve(
               __dirname,
-              '../packages/bundler-vite/src/mock.js',
+              '../packages/bundler-vite/mock.js',
             ),
             react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },

@@ -239,9 +239,9 @@ function useAddBlockHandle(
       if (!emptyBlockElem) {
         return
       }
-
+      let node: ParagraphNode
       editor.update(() => {
-        const node: ParagraphNode = $getNearestNodeFromDOMNode(emptyBlockElem) as ParagraphNode
+        node = $getNearestNodeFromDOMNode(emptyBlockElem) as ParagraphNode
         if (!node || node.getType() !== 'paragraph') {
           return
         }
@@ -257,7 +257,7 @@ function useAddBlockHandle(
       // Otherwise, this won't work
       setTimeout(() => {
         editor.dispatchCommand(ENABLE_SLASH_MENU_COMMAND, {
-          rect: emptyBlockElem.getBoundingClientRect(),
+          node: node,
         })
       }, 0)
 
