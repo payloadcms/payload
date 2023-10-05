@@ -83,7 +83,7 @@ export const createMigration: CreateMigration = async function createMigration(
     .readdirSync(dir)
     .filter((file) => file.endsWith('.json'))
     .sort()
-    .reverse()[0]
+    .reverse()?.[0]
 
   if (latestSnapshot) {
     const latestSnapshotJSON = JSON.parse(
