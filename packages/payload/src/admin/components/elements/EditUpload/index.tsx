@@ -143,10 +143,10 @@ const EditUpload: React.FC<{
         <div className={`${baseClass}__crop`}>
           <div
             className={`${baseClass}__focal-wrapper`}
+            ref={focalWrapRef}
             style={{
               aspectRatio: `${originalWidth / originalHeight}`,
             }}
-            ref={focalWrapRef}
           >
             {showCrop ? (
               <ReactCrop
@@ -164,13 +164,13 @@ const EditUpload: React.FC<{
               <img alt="Upload Preview" ref={imageRef} src={fileSrc} />
             )}
             <DraggableElement
-              className={`${baseClass}__focalPoint`}
-              onDragEnd={onDragEnd}
-              containerRef={focalWrapRef}
               boundsRef={cropRef}
               checkBounds={checkBounds}
-              setCheckBounds={setCheckBounds}
+              className={`${baseClass}__focalPoint`}
+              containerRef={focalWrapRef}
               initialPosition={pointPosition}
+              onDragEnd={onDragEnd}
+              setCheckBounds={setCheckBounds}
             >
               <Plus />
             </DraggableElement>
@@ -261,14 +261,14 @@ const EditUpload: React.FC<{
 export default EditUpload
 
 const DraggableElement = ({
-  onDragEnd,
-  className,
-  children,
-  initialPosition = { x: 50, y: 50 },
-  checkBounds,
-  setCheckBounds,
-  containerRef,
   boundsRef,
+  checkBounds,
+  children,
+  className,
+  containerRef,
+  initialPosition = { x: 50, y: 50 },
+  onDragEnd,
+  setCheckBounds,
 }) => {
   const [position, setPosition] = useState({ x: initialPosition.x, y: initialPosition.y })
   const [isDragging, setIsDragging] = useState(false)
@@ -341,7 +341,7 @@ const DraggableElement = ({
   React.useEffect(() => {
     if (isDragging || !dragRef.current) return
     if (checkBounds) {
-      const { left, top, height, width } = dragRef.current.getBoundingClientRect()
+      const { height, left, top, width } = dragRef.current.getBoundingClientRect()
       const { x, y } = getCoordinates(left + width / 2, top + height / 2, true)
       onDragEnd({ x, y })
       setPosition({ x, y })
@@ -356,20 +356,20 @@ const DraggableElement = ({
 
   return (
     <div
-      onMouseMove={handleMouseMove}
       className={[
         `${baseClass}__draggable-container`,
         isDragging && `${baseClass}__draggable-container--dragging`,
       ]
         .filter(Boolean)
         .join(' ')}
+      onMouseMove={handleMouseMove}
     >
       <div
         className={[`${baseClass}__draggable`, className].filter(Boolean).join(' ')}
         onMouseDown={handleMouseDown}
         onMouseUp={onDrop}
-        style={{ position: 'absolute', left: `${position.x}%`, top: `${position.y}%` }}
         ref={dragRef}
+        style={{ left: `${position.x}%`, position: 'absolute', top: `${position.y}%` }}
       >
         {children}
       </div>

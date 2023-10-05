@@ -10,11 +10,11 @@ import { Dropzone } from '../../../../elements/Dropzone'
 import EditUpload from '../../../../elements/EditUpload'
 import FileDetails from '../../../../elements/FileDetails'
 import PreviewSizes from '../../../../elements/PreviewSizes'
+import Thumbnail from '../../../../elements/Thumbnail'
 import Error from '../../../../forms/Error'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
-import FileGraphic from '../../../../graphics/File'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
 import './index.scss'
 
@@ -144,41 +144,30 @@ export const Upload: React.FC<Props> = (props) => {
 
           {value && (
             <React.Fragment>
-              <div
-                className={[
-                  `${baseClass}__file-preview`,
-                  value && isImage(value?.type) && `${baseClass}__image-preview`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                {fileSrc && isImage(value.type) ? (
-                  <img alt={value.name} src={fileSrc} />
-                ) : (
-                  <FileGraphic />
-                )}
+              <div className={`${baseClass}__thumbnail-wrap`}>
+                <Thumbnail fileSrc={isImage(value.type) ? fileSrc : null} />
               </div>
-
               <div className={`${baseClass}__file-adjustments`}>
                 <div className={`${baseClass}__filename`}>
                   <input onChange={handleFileNameChange} type="text" value={value.name} />
-                  <Button
-                    buttonStyle="icon-label"
-                    icon="x"
-                    iconStyle="with-border"
-                    onClick={handleFileRemoval}
-                    round
-                    tooltip={t('general:cancel')}
-                  />
                 </div>
 
                 {isImage(value.type) && (
                   <UploadActions
                     canEdit={showCrop || showFocalPoint}
-                    showSizePreviews={hasImageSizes && doc.filename}
+                    showSizePreviews={hasImageSizes && doc.filename && !replacingFile}
                   />
                 )}
               </div>
+              <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__remove`}
+                icon="x"
+                iconStyle="with-border"
+                onClick={handleFileRemoval}
+                round
+                tooltip={t('general:cancel')}
+              />
             </React.Fragment>
           )}
         </div>
