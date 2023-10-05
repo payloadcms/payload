@@ -28,7 +28,6 @@ export const Hamburger: React.FC<{
       )}
       {closeIcon === 'collapse' && (
         <div aria-label={t('collapse')} className={`${baseClass}__collapse`} title={t('collapse')}>
-          <div className={`${baseClass}__line ${baseClass}__collapse-left`} />
           <Chevron className={`${baseClass}__collapse-chevron`} direction="left" />
           <div className={`${baseClass}__collapse-label`}>{t('collapse')}</div>
         </div>

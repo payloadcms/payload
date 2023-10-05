@@ -79,19 +79,16 @@
     top: 50%;
     transform: translate3d(0, -50%, 0);
     font-weight: bold;
-  }
-
-  &__collapse-left {
-    height: 90%;
-    width: 2px;
-    left: 0;
-    top: 50%;
-    transform: translate3d(0, -50%, 0);
+    color: var(--theme-elevation-400);
   }
 
   &__collapse-chevron {
     position: relative;
     top: -1px;
+
+    .stroke {
+      stroke: var(--theme-elevation-400);
+    }
   }
 
   &--active {
