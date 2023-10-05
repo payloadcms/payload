@@ -16,8 +16,12 @@
   }
 
   @include mid-break {
-    --gutter-h: 24px;
+    --gutter-h: 75px;
     --block-padding: 60px;
+  }
+
+  @include small-break {
+    --gutter-h: 24px;
   }
 }
 

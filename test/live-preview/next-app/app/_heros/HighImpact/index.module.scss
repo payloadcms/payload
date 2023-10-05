@@ -5,8 +5,8 @@
   position: relative;
   overflow: hidden;
 
-  @include mid-break {
-    padding-top: var(--gutter-h);
+  @include large-break {
+    padding-top: var(--base);
   }
 }
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { fetchFooter } from '../../_api/fetchGlobals'
+import { fetchFooter } from '../../_api/fetchFooter'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
 
