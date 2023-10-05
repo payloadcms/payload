@@ -497,6 +497,7 @@ describe('Auth', () => {
         data: {
           email: 'insecure@me.com',
           password: 'test',
+          roles: ['admin'],
           adminOnlyField: 'admin secret',
         },
       })
