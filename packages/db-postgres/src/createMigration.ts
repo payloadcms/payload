@@ -71,8 +71,8 @@ export const createMigration: CreateMigration = async function createMigration(
   const timestamp = `${formattedDate}_${formattedTime}`
 
   const fileName = migrationName
-    ? `${timestamp}_${migrationName.replace(/\W/g, '_')}.ts`
-    : `${timestamp}.ts`
+    ? `${timestamp}_${migrationName.replace(/\W/g, '_')}`
+    : `${timestamp}`
 
   const filePath = `${dir}/${fileName}`
 
@@ -96,12 +96,16 @@ export const createMigration: CreateMigration = async function createMigration(
   const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
   const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
 
+  // write schema
+  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter))
+
+  // write migration
   fs.writeFileSync(
-    filePath,
+    `${filePath}.ts`,
     migrationTemplate(
       sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
       sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
     ),
   )
-  payload.logger.info({ msg: `Migration created at ${filePath}` })
+  payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
 }
