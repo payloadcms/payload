@@ -12,17 +12,17 @@ export default buildConfig({
     // for development of this plugin.
     // No need to use these aliases within your own projects.
     webpack: config => {
-      const newConfig = {
+      return {
         ...config,
         resolve: {
           ...(config.resolve || {}),
           alias: {
             ...(config.resolve.alias || {}),
+            [path.resolve(__dirname, '../../src')]: path.resolve(__dirname, '../../src/admin.js'),
             react: path.resolve(__dirname, '../node_modules/react'),
           },
         },
       }
-      return newConfig
     },
   },
   typescript: {
