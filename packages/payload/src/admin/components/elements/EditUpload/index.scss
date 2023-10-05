@@ -1,20 +1,16 @@
 @import '../../../scss/styles.scss';
 
 $header-height: base(5);
-$sidebar-width: 350px;
 
 .edit-upload {
+  --edit-upload-cell-spacing: calc(var(--base) * 1.5);
+  --edit-upload-sidebar-width: calc(350px + var(--gutter-h));
   height: 100%;
-
-  // cropped area from react-image-crop
-  & .ReactCrop__selection-addon {
-    height: 100%;
-    padding: base(0.25);
-  }
+  margin-right: calc(var(--gutter-h) * -1);
+  margin-left: calc(var(--gutter-h) * -1);
 
   &__header {
     height: $header-height;
-    margin: 0 calc(var(--gutter-h) * -1);
     border-bottom: 1px solid var(--theme-elevation-150);
     padding: 0 var(--gutter-h);
     display: flex;
@@ -27,8 +23,7 @@ $sidebar-width: 350px;
   }
 
   &__actions {
-    border-left: 1px solid var(--theme-elevation-150);
-    min-width: $sidebar-width;
+    min-width: 350px;
     margin-left: auto;
     padding: base(0.5) 0 base(0.5) base(1.5);
     justify-content: flex-end;
@@ -43,18 +38,78 @@ $sidebar-width: 350px;
 
   &__toolWrap {
     display: flex;
+    justify-content: flex-end;
     height: (calc(100% - #{$header-height}));
   }
 
-  &__focalPoint {
-    position: relative;
-    width: 100%;
+  .ReactCrop__selection-addon,
+  &__crop-window {
     height: 100%;
+    width: 100%;
+  }
+
+  &__focal-wrapper {
+    position: relative;
+    display: inline-flex;
+    max-height: 100%;
+  }
+
+  &__draggable-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    pointer-events: none;
+
+    &--dragging {
+      pointer-events: all;
+
+      .edit-upload__focalPoint {
+        cursor: grabbing;
+      }
+    }
+  }
+
+  &__focalPoint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    width: 50px;
+    height: 50px;
+    transform: translate3d(-50%, -50%, 0);
+    pointer-events: all;
+
+    svg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 100%;
+      width: base(2);
+      height: base(2);
+      color: white;
+    }
   }
 
   &__crop,
   &__focalOnly {
     padding: base(1.5) base(1.5) base(1.5) 0;
+  }
+
+  &__crop {
+    padding: var(--edit-upload-cell-spacing);
+    padding-left: var(--gutter-h);
+    display: flex;
+    align-items: flex-start;
+    height: 100%;
   }
 
   &__imageWrap {
@@ -64,7 +119,6 @@ $sidebar-width: 350px;
   &__point {
     cursor: move;
     position: absolute;
-    transform: translate3d(-50%, -50%, 0);
     background: rgba(0, 0, 0, 0.5);
     border-radius: 100%;
 
@@ -76,9 +130,8 @@ $sidebar-width: 350px;
 
   &__sidebar {
     border-left: 1px solid var(--theme-elevation-150);
-    padding: base(2) 0 0 base(1.5);
-    width: $sidebar-width;
-    min-width: $sidebar-width;
+    padding-top: var(--edit-upload-cell-spacing);
+    min-width: var(--edit-upload-sidebar-width);
 
     & > div:first-child {
       margin-bottom: base(1);
@@ -89,6 +142,15 @@ $sidebar-width: 350px;
     display: flex;
     flex-direction: column;
     gap: base(1);
+    padding-right: var(--gutter-h);
+    padding-left: var(--edit-upload-cell-spacing);
+    width: 100%;
+
+    + .edit-upload__groupWrap {
+      padding-top: var(--edit-upload-cell-spacing);
+      margin-top: var(--edit-upload-cell-spacing);
+      border-top: 1px solid var(--theme-elevation-150);
+    }
   }
 
   &__inputsWrap,
@@ -114,8 +176,21 @@ $sidebar-width: 350px;
   }
 
   &__input {
+    flex: 1;
     & input {
       @include formInput;
+    }
+  }
+
+  @include mid-break {
+    --edit-upload-cell-spacing: var(--gutter-h);
+    &__sidebar {
+      padding-left: 0;
+      border-left: 0;
+      width: 100%;
+    }
+    &__toolWrap {
+      flex-direction: column-reverse;
     }
   }
 
@@ -127,8 +202,12 @@ $sidebar-width: 350px;
       padding: base(1) 0;
     }
 
+    &__inputsWrap {
+      flex-direction: column;
+      gap: base(1);
+    }
+
     &__sidebar {
-      padding: 0;
       min-width: 0;
     }
   }
