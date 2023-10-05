@@ -12,23 +12,39 @@ interface Args {
   collection: CollectionConfig
 }
 
-const multipartThreshold = 1024 * 1024 * 50 // 50MB
+const MB = 1024 * 1024
 
 export const getBeforeChangeHook =
   ({ collection }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
   async ({ req, data }) => {
     try {
       const files = getIncomingFiles({ req, data })
+
+      req.payload.logger.debug({
+        msg: `Preparing to upload ${files.length} files`,
+      })
+
       const { storageClient, identityID } = await getStorageClient()
 
       const promises = files.map(async file => {
         const fileKey = file.filename
 
+        req.payload.logger.debug({
+          msg: `File buffer length: ${file.buffer.length / MB}MB`,
+          fileKey,
+          tempFilePath: file.tempFilePath ?? 'undefined',
+        })
+
         const fileBufferOrStream: Buffer | stream.Readable = file.tempFilePath
           ? fs.createReadStream(file.tempFilePath)
           : file.buffer
 
-        if (file.buffer.length > 0 && file.buffer.length < multipartThreshold) {
+        if (file.buffer.length > 0) {
+          req.payload.logger.debug({
+            msg: `Uploading ${fileKey} from buffer. Size: ${file.buffer.length / MB}MB`,
+            fileKey,
+          })
+
           await storageClient.putObject({
             Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
             Key: createKey({ collection: collection.slug, filename: fileKey, identityID }),
@@ -37,6 +53,7 @@ export const getBeforeChangeHook =
           })
         }
 
+        // This will buffer at max 4 * 5MB = 20MB. Default queueSize is 4 and default partSize is 5MB.
         const parallelUploadS3 = new Upload({
           client: storageClient,
           params: {
@@ -45,8 +62,17 @@ export const getBeforeChangeHook =
             Body: fileBufferOrStream,
             ContentType: file.mimeType,
           },
-          queueSize: 4,
-          partSize: multipartThreshold,
+        })
+
+        parallelUploadS3.on('httpUploadProgress', progress => {
+          if (progress.total) {
+            req.payload.logger.debug({
+              fileKey,
+              msg: `Uploaded part ${progress.part} - ${(progress.loaded || 0) / MB}MB out of ${
+                (progress.total || 0) / MB
+              }MB`,
+            })
+          }
         })
 
         await parallelUploadS3.done()

@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev:s3": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "yarn build:payload && yarn build:server",
@@ -16,7 +16,7 @@
     "@aws-sdk/client-s3": "^3.142.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^1.6.19"
+    "payload": "^1.8.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",

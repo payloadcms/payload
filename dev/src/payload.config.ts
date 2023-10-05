@@ -28,6 +28,7 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
+  // @ts-expect-error local reference
   plugins: [payloadCloud()],
   onInit: async payload => {
     const users = await payload.find({

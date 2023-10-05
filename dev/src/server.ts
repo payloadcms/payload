@@ -1,8 +1,8 @@
+import dotenv from 'dotenv'
 import express from 'express'
 import payload from 'payload'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-require('dotenv').config()
+dotenv.config()
 
 const app = express()
 
