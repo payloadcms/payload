@@ -1,13 +1,14 @@
 'use client'
 
-import React, { Fragment } from 'react'
-import styles from './page.module.css'
+import React from 'react'
 import { PAYLOAD_SERVER_URL } from './api'
 // The `useLivePreview` hook is imported from the monorepo for development purposes only
 // in your own app you would import this hook directly from the payload package itself
 // i.e. `import { useLivePreview } from 'payload'`
 import { useLivePreview } from '../../../../packages/payload/src/admin/components/views/LivePreview/useLivePreview'
 import { Page as PageType } from '@/payload-types'
+import { Hero } from './_components/Hero'
+import { Blocks } from './_components/Blocks'
 
 export type Props = {
   initialPage: PageType
@@ -22,40 +23,14 @@ export const Page: React.FC<Props> = (props) => {
   })
 
   return (
-    <main className={styles.main}>
-      {isLoading && <Fragment>Loading...</Fragment>}
-      {!isLoading && (
-        <Fragment>
-          {data.layout && (
-            <div>
-              <div className={styles.blocks}>
-                {data.layout.map((block, index) => {
-                  const { title, description } = block
-                  return (
-                    <div key={index}>
-                      <h2>{title}</h2>
-                      <p>{description}</p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-          <br />
-          <hr />
-          <br />
-          {data.featuredPosts && (
-            <div>
-              <p>Featured Posts</p>
-              <ul className={styles['featured-posts']}>
-                {data.featuredPosts.map((post, index) => (
-                  <li key={index}>{typeof post === 'string' ? post : post.id}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </Fragment>
-      )}
+    <main>
+      <Hero {...data?.hero} />
+      <Blocks
+        blocks={data?.layout}
+        disableTopPadding={
+          !data?.hero || data?.hero?.type === 'none' || data?.hero?.type === 'lowImpact'
+        }
+      />
     </main>
   )
 }

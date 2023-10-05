@@ -1,10 +1,5 @@
 import type { Field } from '../../../packages/payload/src/fields/config/types'
 
-// import linkGroup from './linkGroup'
-// import richText from './richText'
-// import label from './richText/label'
-// import largeBody from './richText/largeBody'
-
 export const hero: Field = {
   name: 'hero',
   label: false,
@@ -26,10 +21,6 @@ export const hero: Field = {
           value: 'highImpact',
         },
         {
-          label: 'Medium Impact',
-          value: 'mediumImpact',
-        },
-        {
           label: 'Low Impact',
           value: 'lowImpact',
         },
@@ -37,22 +28,17 @@ export const hero: Field = {
     },
     {
       name: 'richText',
+      label: 'Rich Text',
       type: 'richText',
-      required: true,
     },
-    // linkGroup({
-    //   overrides: {
-    //     maxRows: 2,
-    //   },
-    // }),
-    // {
-    //   name: 'media',
-    //   type: 'upload',
-    //   relationTo: 'media',
-    //   required: true,
-    //   admin: {
-    //     condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
-    //   },
-    // },
+    {
+      name: 'media',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      admin: {
+        condition: (_, { type } = {}) => ['highImpact'].includes(type),
+      },
+    },
   ],
 }

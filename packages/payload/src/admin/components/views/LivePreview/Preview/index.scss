@@ -2,6 +2,7 @@
 
 .live-preview-window {
   width: 60%;
+  flex-shrink: 0;
   position: sticky;
   top: var(--doc-controls-height);
   height: calc(100vh - var(--doc-controls-height));

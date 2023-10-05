@@ -1,5 +1,9 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
+import { Archive } from '../blocks/ArchiveBlock'
+import { CallToAction } from '../blocks/CallToAction'
+import { Content } from '../blocks/Content'
+import { MediaBlock } from '../blocks/MediaBlock'
 import { hero } from '../fields/hero'
 
 export const postsSlug = 'posts'
@@ -60,43 +64,29 @@ export const Posts: CollectionConfig = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [
-                {
-                  slug: 'hero',
-                  labels: {
-                    singular: 'Hero',
-                    plural: 'Hero',
-                  },
-                  fields: [
-                    {
-                      name: 'title',
-                      type: 'text',
-                      required: true,
-                    },
-                    {
-                      name: 'description',
-                      type: 'textarea',
-                      required: true,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              name: 'meta',
-              type: 'group',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                },
-              ],
+              required: true,
+              blocks: [CallToAction, Content, MediaBlock, Archive],
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'meta',
+      type: 'group',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
         },
       ],
     },

@@ -11,10 +11,15 @@ export interface Config {
     users: User
     pages: Page
     posts: Post
+    categories: Category
+    media: Media
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
-  globals: {}
+  globals: {
+    header: Header
+    footer: Footer
+  }
 }
 export interface User {
   id: string
@@ -31,9 +36,146 @@ export interface User {
 }
 export interface Page {
   id: string
-  title: string
-  description: string
   slug: string
+  title: string
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact'
+    richText?: {
+      [k: string]: unknown
+    }[]
+    media: string | Media
+  }
+  layout: (
+    | {
+        invertBackground?: boolean
+        richText?: {
+          [k: string]: unknown
+        }[]
+        links?: {
+          link: {
+            type?: 'reference' | 'custom'
+            newTab?: boolean
+            reference: {
+              relationTo: 'pages'
+              value: string | Page
+            }
+            url: string
+            label: string
+            appearance?: 'primary' | 'secondary'
+          }
+          id?: string
+        }[]
+        id?: string
+        blockName?: string
+        blockType: 'cta'
+      }
+    | {
+        invertBackground?: boolean
+        columns?: {
+          size?: 'oneThird' | 'half' | 'twoThirds' | 'full'
+          richText?: {
+            [k: string]: unknown
+          }[]
+          enableLink?: boolean
+          link?: {
+            type?: 'reference' | 'custom'
+            newTab?: boolean
+            reference: {
+              relationTo: 'pages'
+              value: string | Page
+            }
+            url: string
+            label: string
+            appearance?: 'default' | 'primary' | 'secondary'
+          }
+          id?: string
+        }[]
+        id?: string
+        blockName?: string
+        blockType: 'content'
+      }
+    | {
+        invertBackground?: boolean
+        position?: 'default' | 'fullscreen'
+        media: string | Media
+        id?: string
+        blockName?: string
+        blockType: 'mediaBlock'
+      }
+    | {
+        introContent?: {
+          [k: string]: unknown
+        }[]
+        populateBy?: 'collection' | 'selection'
+        relationTo?: 'posts'
+        categories?: string[] | Category[]
+        limit?: number
+        selectedDocs?:
+          | {
+              relationTo: 'posts'
+              value: string
+            }[]
+          | {
+              relationTo: 'posts'
+              value: Post
+            }[]
+        populatedDocs?:
+          | {
+              relationTo: 'posts'
+              value: string
+            }[]
+          | {
+              relationTo: 'posts'
+              value: Post
+            }[]
+        populatedDocsTotal?: number
+        id?: string
+        blockName?: string
+        blockType: 'archive'
+      }
+  )[]
+  featuredPosts?: string[] | Post[]
+  meta?: {
+    title?: string
+    description?: string
+    image?: string | Media
+  }
+  updatedAt: string
+  createdAt: string
+}
+export interface Media {
+  id: string
+  alt: string
+  caption?: {
+    [k: string]: unknown
+  }[]
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+}
+export interface Category {
+  id: string
+  title?: string
+  updatedAt: string
+  createdAt: string
+}
+export interface Post {
+  id: string
+  slug: string
+  title: string
+  categories?: string[] | Category[]
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact'
+    richText?: {
+      [k: string]: unknown
+    }[]
+    media: string | Media
+  }
   layout?: {
     title: string
     description: string
@@ -41,13 +183,12 @@ export interface Page {
     blockName?: string
     blockType: 'hero'
   }[]
-  featuredPosts?: string[] | Post[]
-  updatedAt: string
-  createdAt: string
-}
-export interface Post {
-  id: string
-  title: string
+  relatedPosts?: string[] | Post[]
+  meta?: {
+    title?: string
+    description?: string
+    image?: string | Media
+  }
   updatedAt: string
   createdAt: string
 }
@@ -86,6 +227,44 @@ export interface PayloadMigration {
   updatedAt: string
   createdAt: string
 }
+export interface Header {
+  id: string
+  navItems?: {
+    link: {
+      type?: 'reference' | 'custom'
+      newTab?: boolean
+      reference: {
+        relationTo: 'pages'
+        value: string | Page
+      }
+      url: string
+      label: string
+      appearance?: 'default' | 'primary' | 'secondary'
+    }
+    id?: string
+  }[]
+  updatedAt?: string
+  createdAt?: string
+}
+export interface Footer {
+  id: string
+  navItems?: {
+    link: {
+      type?: 'reference' | 'custom'
+      newTab?: boolean
+      reference: {
+        relationTo: 'pages'
+        value: string | Page
+      }
+      url: string
+      label: string
+      appearance?: 'default' | 'primary' | 'secondary'
+    }
+    id?: string
+  }[]
+  updatedAt?: string
+  createdAt?: string
+}
 
 declare module 'payload' {
   export interface GeneratedTypes {
@@ -93,8 +272,14 @@ declare module 'payload' {
       users: User
       pages: Page
       posts: Post
+      categories: Category
+      media: Media
       'payload-preferences': PayloadPreference
       'payload-migrations': PayloadMigration
+    }
+    globals: {
+      header: Header
+      footer: Footer
     }
   }
 }
