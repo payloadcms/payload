@@ -18,7 +18,7 @@ const tsConfig = getTSconfig()
 
 const swcOptions = {
   ignore: [
-    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
+    /.*[\\/]node_modules[\\/].*/, // parse everything besides files within node_modules
   ],
   jsc: {
     baseUrl: path.resolve(),

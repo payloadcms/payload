@@ -17,7 +17,7 @@ import CustomDefaultView from './components/views/CustomDefault'
 import CustomEditView from './components/views/CustomEdit'
 import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
-import { globalSlug, slug, slugPluralLabel, slugSingularLabel } from './shared'
+import { globalSlug, postsSlug, slugPluralLabel, slugSingularLabel } from './shared'
 
 export interface Post {
   createdAt: Date
@@ -89,7 +89,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug,
+      slug: postsSlug,
       labels: {
         singular: slugSingularLabel,
         plural: slugPluralLabel,
@@ -107,36 +107,46 @@ export default buildConfigWithDefaults({
       },
       fields: [
         {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'text',
-        },
-        {
-          name: 'number',
-          type: 'number',
-        },
-        {
-          name: 'richText',
-          type: 'richText',
-          editor: slateEditor({
-            admin: {
-              elements: ['relationship'],
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab 1',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                },
+                {
+                  name: 'description',
+                  type: 'text',
+                },
+                {
+                  name: 'number',
+                  type: 'number',
+                },
+                {
+                  name: 'richText',
+                  type: 'richText',
+                  editor: slateEditor({
+                    admin: {
+                      elements: ['relationship'],
+                    },
+                  }),
+                },
+                {
+                  type: 'ui',
+                  name: 'demoUIField',
+                  label: 'Demo UI Field',
+                  admin: {
+                    components: {
+                      Field: DemoUIFieldField,
+                      Cell: DemoUIFieldCell,
+                    },
+                  },
+                },
+              ],
             },
-          }),
-        },
-        {
-          type: 'ui',
-          name: 'demoUIField',
-          label: 'Demo UI Field',
-          admin: {
-            components: {
-              Field: DemoUIFieldField,
-              Cell: DemoUIFieldCell,
-            },
-          },
+          ],
         },
         {
           name: 'sidebarField',
@@ -380,7 +390,7 @@ export default buildConfigWithDefaults({
 
     await mapAsync([...Array(11)], async () => {
       await payload.create({
-        collection: slug,
+        collection: postsSlug,
         data: {
           title: 'title',
           description: 'description',

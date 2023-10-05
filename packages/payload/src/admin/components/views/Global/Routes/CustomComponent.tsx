@@ -2,6 +2,7 @@ import React from 'react'
 
 import type { GlobalEditViewProps } from '../../types'
 
+import { API } from '../../API'
 import VersionView from '../../Version/Version'
 import VersionsView from '../../Versions'
 import { DefaultGlobalEdit } from '../Default/index'
@@ -18,7 +19,7 @@ export type globalViewType =
 export const defaultGlobalViews: {
   [key in globalViewType]: React.ComponentType<any>
 } = {
-  API: null,
+  API,
   Default: DefaultGlobalEdit,
   LivePreview: null,
   References: null,

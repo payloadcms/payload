@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import url from 'url'
 
 import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
@@ -25,9 +26,19 @@ async function me({ collection, req }: Arguments): Promise<Result> {
   }
 
   if (req.user) {
-    const user = { ...req.user }
+    const parsedURL = url.parse(req.originalUrl)
+    const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`
 
-    if (user.collection !== collection.config.slug) {
+    const user = (await req.payload.findByID({
+      id: req.user.id,
+      collection: collection.config.slug,
+      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      overrideAccess: false,
+      req,
+      showHiddenFields: false,
+    })) as User
+
+    if (req.user.collection !== collection.config.slug) {
       return {
         user: null,
       }

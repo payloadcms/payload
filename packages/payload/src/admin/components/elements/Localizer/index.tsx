@@ -1,6 +1,5 @@
 import qs from 'qs'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
 import { useConfig } from '../../utilities/Config'
 import { useLocale } from '../../utilities/Locale'
@@ -8,7 +7,6 @@ import { useSearchParams } from '../../utilities/SearchParams'
 import Popup from '../Popup'
 import * as PopupList from '../Popup/PopupButtonList'
 import { LocalizerLabel } from './LocalizerLabel'
-
 import './index.scss'
 
 const baseClass = 'localizer'
@@ -22,7 +20,6 @@ const Localizer: React.FC<{
 
   const locale = useLocale()
   const searchParams = useSearchParams()
-  const { t } = useTranslation('general')
 
   if (localization) {
     const { locales } = localization

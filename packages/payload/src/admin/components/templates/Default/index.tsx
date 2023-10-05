@@ -3,16 +3,15 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
+import { Hamburger } from '../../elements/Hamburger'
 import { AppHeader } from '../../elements/Header'
+import { Nav as DefaultNav } from '../../elements/Nav'
+import { NavToggler } from '../../elements/Nav/NavToggler'
+import { useNav } from '../../elements/Nav/context'
 import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import { Nav as DefaultNav } from '../../elements/Nav'
-import { useNav } from '../../elements/Nav/context'
-import { NavToggler } from '../../elements/Nav/NavToggler'
-
 import './index.scss'
-import { Hamburger } from '../../elements/Hamburger'
 
 const baseClass = 'template-default'
 
@@ -46,15 +45,15 @@ const Default: React.FC<Props> = ({ children, className }) => {
           <AppHeader />
           {children}
           <button
-            type="button"
+            aria-label={t('close')}
             className={`${baseClass}__nav-overlay`}
-            aria-label={t('menu')}
             onClick={() => setNavOpen(!navOpen)}
+            type="button"
           />
         </div>
       </div>
       <NavToggler className={`${baseClass}__nav-toggler`} id="nav-toggler">
-        <Hamburger isActive={navOpen} closeIcon="collapse" />
+        <Hamburger closeIcon="collapse" isActive={navOpen} />
       </NavToggler>
     </Fragment>
   )

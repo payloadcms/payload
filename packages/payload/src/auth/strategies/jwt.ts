@@ -25,8 +25,8 @@ export default ({ collections, config, secret }: Payload): PassportStrategy => {
     try {
       const collection = collections[token.collection]
 
-      const parsedURL = url.parse(req.url)
-      const isGraphQL = parsedURL.pathname === config.routes.graphQL
+      const parsedURL = url.parse(req.originalUrl)
+      const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`
 
       const user = await req.payload.findByID({
         id: token.id,
