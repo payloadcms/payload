@@ -4,13 +4,12 @@ import { Link } from 'react-router-dom'
 
 import Account from '../../graphics/Account'
 import { useConfig } from '../../utilities/Config'
-import Localizer from '../Localizer'
-import StepNav from '../StepNav'
-import { NavToggler } from '../Nav/NavToggler'
 import { Hamburger } from '../Hamburger'
-
-import './index.scss'
+import Localizer from '../Localizer'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel'
+import { NavToggler } from '../Nav/NavToggler'
+import StepNav from '../StepNav'
+import './index.scss'
 
 const baseClass = 'app-header'
 
@@ -18,6 +17,7 @@ export const AppHeader: React.FC = (props) => {
   const { t } = useTranslation()
 
   const {
+    localization,
     routes: { admin: adminRoute },
   } = useConfig()
 
@@ -34,7 +34,12 @@ export const AppHeader: React.FC = (props) => {
               <StepNav className={`${baseClass}__step-nav`} />
             </div>
             <div className={`${baseClass}__controls`}>
-              <LocalizerLabel ariaLabel="invisible" className={`${baseClass}__localizer-spacing`} />
+              {localization && (
+                <LocalizerLabel
+                  ariaLabel="invisible"
+                  className={`${baseClass}__localizer-spacing`}
+                />
+              )}
               <Link
                 aria-label={t('authentication:account')}
                 className={`${baseClass}__account`}

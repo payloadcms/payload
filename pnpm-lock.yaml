@@ -392,6 +392,47 @@ importers:
         specifier: 1.15.0
         version: 1.15.0(eslint@8.48.0)
 
+  packages/live-preview:
+    dependencies:
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      '@types/node':
+        specifier: 20.5.7
+        version: 20.5.7
+      '@types/react':
+        specifier: 18.2.15
+        version: 18.2.15
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
+  packages/live-preview-react:
+    dependencies:
+      '@payloadcms/live-preview':
+        specifier: workspace:*
+        version: link:../live-preview
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      '@types/node':
+        specifier: 20.5.7
+        version: 20.5.7
+      '@types/react':
+        specifier: 18.2.15
+        version: 18.2.15
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/payload:
     dependencies:
       '@date-io/date-fns':
@@ -4176,7 +4217,7 @@ packages:
     resolution: {integrity: sha512-ALYone6pm6QmwZoAgeyNksccT9Q4AWZQ6PvfwR37GT6r6FWUPguq6sUmNGSMV2Wr761oQoBxwGGa6DR5o1DC9g==}
     dependencies:
       '@types/connect': 3.4.36
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/body-scroll-lock@3.1.0:
@@ -4248,7 +4289,7 @@ packages:
   /@types/express-serve-static-core@4.17.35:
     resolution: {integrity: sha512-wALWQwrgiB2AWTT91CB62b6Yt0sNHpznUXeZEcnPU3DRdlDIz74x8Qg1UUYKSVFi+va5vKOLYRBI1bRKiLLKIg==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
       '@types/qs': 6.9.7
       '@types/range-parser': 1.2.4
       '@types/send': 0.17.1
@@ -4319,7 +4360,7 @@ packages:
   /@types/ignore-styles@5.0.0:
     resolution: {integrity: sha512-NHDTLx8xF/T/jIxvH+0wFHHDsPtz6ulSMdUQ8p66qk9vJZ25S4cUUSQcal3+JxcQikCEdpaG5gUW2bVQvmh7KA==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/is-hotkey@0.1.7:
@@ -4371,7 +4412,7 @@ packages:
   /@types/jsonwebtoken@8.5.9:
     resolution: {integrity: sha512-272FMnFGzAVMGtu9tkr29hRL6bZj4Zs1KZNeHLnKqAvp06tAIcarTMwOh8/8bz4FmKRcMxZhZNeUAQsNLoiPhg==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/keyv@3.1.4:
@@ -4401,7 +4442,7 @@ packages:
   /@types/mini-css-extract-plugin@1.4.3(@swc/core@1.3.76)(webpack-cli@4.10.0):
     resolution: {integrity: sha512-jyOSVaF4ie2jUGr1uohqeyDrp7ktRthdFxDKzTgbPZtl0QI5geEopW7UKD/DEfn0XgV1KEq/RnZlUmnrEAWbmg==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
       tapable: 2.2.1
       webpack: 5.88.2(@swc/core@1.3.76)(webpack-cli@4.10.0)
     transitivePeerDependencies:
@@ -4421,7 +4462,7 @@ packages:
   /@types/mkdirp@1.0.2:
     resolution: {integrity: sha512-o0K1tSO0Dx5X6xlU5F1D6625FawhC3dU3iqr25lluNv/+/QIVH8RLNEiVokgIZo+mz+87w/3Mkg/VvQS+J51fQ==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/mongoose-aggregate-paginate-v2@1.0.9:
@@ -4442,7 +4483,7 @@ packages:
   /@types/node-fetch@2.6.4:
     resolution: {integrity: sha512-1ZX9fcN4Rvkvgv4E6PAY5WXUFWFcRWxZa3EW83UjycOB9ljJCedb2CupIP4RZMEwF/M3eTcCihbBRgwtGbg5Rg==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
       form-data: 3.0.1
 
   /@types/node@18.17.17:
@@ -4458,7 +4499,7 @@ packages:
   /@types/nodemailer@6.4.8:
     resolution: {integrity: sha512-oVsJSCkqViCn8/pEu2hfjwVO+Gb3e+eTWjg3PcjeFKRItfKpKwHphQqbYmPQrlMk+op7pNNWPbsJIEthpFN/OQ==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/normalize-package-data@2.4.1:
@@ -4532,7 +4573,7 @@ packages:
     resolution: {integrity: sha512-R5H3vw62gHNHrn+JGZbKejb+Z2D/6E5UNVlhCzIaBBLroMQMOFqy5Pap2gM+ZZHdqBtVU0/cx/M6to+mOJcoew==}
     dependencies:
       '@types/needle': 3.2.0
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/prop-types@15.7.5:
@@ -4640,14 +4681,14 @@ packages:
   /@types/sharp@0.31.1:
     resolution: {integrity: sha512-5nWwamN9ZFHXaYEincMSuza8nNfOof8nmO+mcI+Agx1uMUk4/pQnNIcix+9rLPXzKrm1pS34+6WRDbDV0Jn7ag==}
     dependencies:
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/shelljs@0.8.12:
     resolution: {integrity: sha512-ZA8U81/gldY+rR5zl/7HSHrG2KDfEb3lzG6uCUDhW1DTQE9yC/VBQ45fXnXq8f3CgInfhZmjtdu/WOUlrXRQUg==}
     dependencies:
       '@types/glob': 7.2.0
-      '@types/node': 20.5.7
+      '@types/node': 20.6.2
     dev: true
 
   /@types/source-list-map@0.1.2:

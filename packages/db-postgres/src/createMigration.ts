@@ -71,37 +71,42 @@ export const createMigration: CreateMigration = async function createMigration(
   const timestamp = `${formattedDate}_${formattedTime}`
 
   const fileName = migrationName
-    ? `${timestamp}_${migrationName.replace(/\W/g, '_')}.ts`
-    : `${timestamp}.ts`
+    ? `${timestamp}_${migrationName.replace(/\W/g, '_')}`
+    : `${timestamp}`
 
   const filePath = `${dir}/${fileName}`
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
 
-  const hasMigrationTable = await migrationTableExists(this.drizzle)
+  // Get latest migration snapshot
+  const latestSnapshot = fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith('.json'))
+    .sort()
+    .reverse()?.[0]
 
-  if (hasMigrationTable) {
-    const migrationQuery = await payload.find({
-      collection: 'payload-migrations',
-      limit: 1,
-      sort: '-name',
-    })
+  if (latestSnapshot) {
+    const latestSnapshotJSON = JSON.parse(
+      fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
+    ) as DrizzleSnapshotJSON
 
-    if (migrationQuery.docs?.[0]?.schema) {
-      drizzleJsonBefore = migrationQuery.docs[0]?.schema as DrizzleSnapshotJSON
-    }
+    drizzleJsonBefore = latestSnapshotJSON
   }
 
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
   const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
   const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
 
+  // write schema
+  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+
+  // write migration
   fs.writeFileSync(
-    filePath,
+    `${filePath}.ts`,
     migrationTemplate(
       sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
       sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
     ),
   )
-  payload.logger.info({ msg: `Migration created at ${filePath}` })
+  payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
 }

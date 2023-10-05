@@ -17,6 +17,8 @@ import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { destroy } from './destroy'
+import { extendViteConfig } from './extendViteConfig'
+import { extendWebpackConfig } from './extendWebpackConfig'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -33,11 +35,14 @@ import { updateOne } from './update'
 import { updateGlobal } from './updateGlobal'
 import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
-import { webpack } from './webpack'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = args.migrationDir || path.resolve(process.cwd(), 'src/migrations')
+
+    extendWebpackConfig(payload.config)
+    extendViteConfig(payload.config)
+
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       name: 'postgres',
@@ -81,7 +86,6 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       updateGlobalVersion,
       updateOne,
       updateVersion,
-      webpack,
     })
   }
 

@@ -1,0 +1,19 @@
+---
+title: MongoDB
+label: MongoDB
+order: 20
+desc: Payload has supported MongoDB natively since alpha. The flexible nature of MongoDB lends itself well to Payload's powerful fields.
+keywords: MongoDB, documentation, typescript, Content Management System, cms, headless, javascript, node, react, express
+---
+
+##### `mongoURL`
+
+**Required**. This is a fully qualified MongoDB connection string that points to your MongoDB database. If you don't have MongoDB installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
+
+`mongodb://127.0.0.1/payload`
+
+In contrast to running MongoDB locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of MongoDB that you don't need to ever worry about.
+
+##### `mongoOptions`
+
+Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.

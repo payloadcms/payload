@@ -9,12 +9,11 @@ import getPort from 'get-port'
 import path from 'path'
 import virtual from 'vite-plugin-virtual'
 
-const bundlerPath = path.resolve(__dirname, './')
 const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js')
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
-  const { createLogger } = await import('vite')
+  const { createLogger, searchForWorkspaceRoot } = await import('vite')
 
   const logger = createLogger('warn', { allowClearScreen: false, prefix: '[VITE-WARNING]' })
   const originalWarning = logger.warn
@@ -26,11 +25,10 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
 
   const hmrPort = await getPort()
 
-  const absoluteAliases = {
-    [`${bundlerPath}`]: path.resolve(__dirname, './mock.js'),
-  }
+  const absoluteAliases = {}
 
   const alias = [
+    { find: '@payloadcms/bundler-vite', replacement: path.resolve(__dirname, '../mock.js') },
     { find: 'path', replacement: require.resolve('path-browserify') },
     { find: 'payload-config', replacement: payloadConfig.paths.rawConfig },
     { find: /payload$/, replacement: mockModulePath },
@@ -64,7 +62,9 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     __dirname: '"/"',
     'module.hot': 'undefined',
     'process.argv': '[]',
-    'process.cwd': '() => ""',
+    'process.cwd': 'function () { return "/" }',
+    'process.env': '{}',
+    'process?.cwd': 'function () { return "/" }',
   }
 
   Object.entries(process.env).forEach(([key, val]) => {
@@ -77,6 +77,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     base: payloadConfig.routes.admin,
     build: {
       chunkSizeWarningLimit: 4000,
+      emptyOutDir: true,
       outDir: payloadConfig.admin.buildPath,
       rollupOptions: {
         plugins: [image()],
@@ -89,7 +90,9 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       exclude: [
         // Dependencies that need aliases should be excluded
         // from pre-bundling
+        '@payloadcms/bundler-vite',
       ],
+      include: ['payload/components/root', 'react-dom/client'],
     },
     plugins: [
       {
@@ -130,6 +133,9 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     },
     root: path.resolve(__dirname, './'),
     server: {
+      fs: {
+        allow: [searchForWorkspaceRoot(process.cwd()), path.resolve(__dirname, '../../../payload')],
+      },
       hmr: {
         port: hmrPort,
       },

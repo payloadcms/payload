@@ -129,31 +129,18 @@ export default buildConfigWithDefaults({
       payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
 
     const richTextDocWithRelId = JSON.parse(
-      JSON.stringify(richTextDoc).replace(/"\{\{ARRAY_DOC_ID\}\}"/g, formattedID),
+      JSON.stringify(richTextDoc)
+        .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, formattedID)
+        .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `"${createdJPGDoc.id}"`)
+        .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `"${createdTextDoc.id}"`),
     )
     const richTextDocWithRelationship = { ...richTextDocWithRelId }
-
-    const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(
-      ({ type }) => type === 'relationship',
-    )
-    richTextDocWithRelationship.richText[richTextRelationshipIndex].value = {
-      id: createdTextDoc.id,
-    }
-    richTextDocWithRelationship.richTextReadOnly[richTextRelationshipIndex].value = {
-      id: createdTextDoc.id,
-    }
-
-    const richTextUploadIndex = richTextDocWithRelationship.richText.findIndex(
-      ({ type }) => type === 'upload',
-    )
-    richTextDocWithRelationship.richText[richTextUploadIndex].value = { id: createdJPGDoc.id }
-    richTextDocWithRelationship.richTextReadOnly[richTextUploadIndex].value = {
-      id: createdJPGDoc.id,
-    }
 
     await payload.create({ collection: 'rich-text-fields', data: richTextBulletsDoc })
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship })
 
+    await payload.create({ collection: 'number-fields', data: { number: 2 } });
+    await payload.create({ collection: 'number-fields', data: { number: 3 } });
     await payload.create({ collection: 'number-fields', data: numberDoc })
 
     const blocksDocWithRichText = { ...blocksDoc }

@@ -1,4 +1,10 @@
-import type { LexicalCommand, LexicalEditor, RangeSelection, TextNode } from 'lexical'
+import type {
+  LexicalCommand,
+  LexicalEditor,
+  ParagraphNode,
+  RangeSelection,
+  TextNode,
+} from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { mergeRegister } from '@lexical/utils'
@@ -53,7 +59,8 @@ function tryToPositionRange(leadOffset: number, range: Range, editorWindow: Wind
 
   try {
     range.setStart(anchorNode, startOffset)
-    range.setEnd(anchorNode, endOffset)
+    // if endOffset is 0, positioning the range for when you click the plus button to open the slash menu will fial
+    range.setEnd(anchorNode, endOffset > 1 ? endOffset : 1)
   } catch (error) {
     return false
   }
@@ -176,7 +183,7 @@ export type TypeaheadMenuPluginProps = {
 }
 
 export const ENABLE_SLASH_MENU_COMMAND: LexicalCommand<{
-  rect: DOMRect
+  node: ParagraphNode
 }> = createCommand('ENABLE_SLASH_MENU_COMMAND')
 
 export function LexicalTypeaheadMenuPlugin({
@@ -215,7 +222,7 @@ export function LexicalTypeaheadMenuPlugin({
     return mergeRegister(
       editor.registerCommand(
         ENABLE_SLASH_MENU_COMMAND,
-        ({ rect }) => {
+        ({ node }) => {
           editor.getEditorState().read(() => {
             const match: MenuTextMatch = {
               leadOffset: 0,
@@ -223,15 +230,22 @@ export function LexicalTypeaheadMenuPlugin({
               replaceableString: '',
             }
             if (match !== null && !isSelectionOnEntityBoundary(editor, match.leadOffset)) {
-              if (rect !== null) {
-                startTransition(() =>
-                  openTypeahead({
-                    getRect: () => {
-                      return rect
-                    },
-                    match,
-                  }),
-                )
+              if (node !== null) {
+                const editorWindow = editor._window ?? window
+                const range = editorWindow.document.createRange()
+
+                const isRangePositioned = tryToPositionRange(match.leadOffset, range, editorWindow)
+                if (isRangePositioned !== null) {
+                  startTransition(() =>
+                    openTypeahead({
+                      getRect: () => {
+                        return range.getBoundingClientRect()
+                      },
+                      match,
+                    }),
+                  )
+                }
+
                 return
               }
             }
@@ -270,7 +284,9 @@ export function LexicalTypeaheadMenuPlugin({
           if (isRangePositioned !== null) {
             startTransition(() =>
               openTypeahead({
-                getRect: () => range.getBoundingClientRect(),
+                getRect: () => {
+                  return range.getBoundingClientRect()
+                },
                 match,
               }),
             )
