@@ -1,19 +1,20 @@
 import { useWindowInfo } from '@faceless-ui/window-info'
+import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import React, { useEffect, useRef } from 'react'
 import { useHistory } from 'react-router-dom'
+
 import { usePreferences } from '../../utilities/Preferences'
-import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
 
 type NavContextType = {
   navOpen: boolean
-  setNavOpen: (value: boolean) => void
   navRef: React.RefObject<HTMLDivElement>
+  setNavOpen: (value: boolean) => void
 }
 
 export const NavContext = React.createContext<NavContextType>({
-  navOpen: false,
-  setNavOpen: () => {},
+  navOpen: true,
   navRef: null,
+  setNavOpen: () => {},
 })
 
 export const useNav = () => React.useContext(NavContext)
@@ -42,7 +43,10 @@ export const NavProvider: React.FC<{
         const navPrefs = await getPreference('nav')
         const preferredState = navPrefs?.open
         if (typeof preferredState === 'boolean') {
+          console.log({ navPrefs })
           setNavOpen(preferredState)
+        } else {
+          setNavOpen(true)
         }
       }
 
@@ -94,6 +98,6 @@ export const NavProvider: React.FC<{
   }, [])
 
   return (
-    <NavContext.Provider value={{ navOpen, setNavOpen, navRef }}>{children}</NavContext.Provider>
+    <NavContext.Provider value={{ navOpen, navRef, setNavOpen }}>{children}</NavContext.Provider>
   )
 }

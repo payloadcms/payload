@@ -1,34 +1,36 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useConfig } from '../../utilities/Config'
-import { useAuth } from '../../utilities/Auth'
-import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import Chevron from '../../icons/Chevron'
-import Logout from '../Logout'
-import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems'
+import { NavLink } from 'react-router-dom'
+
+import type { EntityToGroup, Group } from '../../../utilities/groupNavItems'
+
 import { getTranslation } from '../../../../utilities/getTranslation'
+import { EntityType, groupNavItems } from '../../../utilities/groupNavItems'
+import Chevron from '../../icons/Chevron'
+import { useAuth } from '../../utilities/Auth'
+import { useConfig } from '../../utilities/Config'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import { Hamburger } from '../Hamburger'
+import Logout from '../Logout'
 import NavGroup from '../NavGroup'
 import { useNav } from './context'
-
 import './index.scss'
-import { Hamburger } from '../Hamburger'
 
 const baseClass = 'nav'
 
 const DefaultNav: React.FC = () => {
-  const { navOpen, setNavOpen, navRef } = useNav()
+  const { navOpen, navRef, setNavOpen } = useNav()
   const { permissions, user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
-  const { t, i18n } = useTranslation('general')
+  const { i18n } = useTranslation('general')
 
   const {
+    admin: {
+      components: { afterNavLinks, beforeNavLinks },
+    },
     collections,
     globals,
     routes: { admin },
-    admin: {
-      components: { beforeNavLinks, afterNavLinks },
-    },
   } = useConfig()
 
   useEffect(() => {
@@ -42,8 +44,8 @@ const DefaultNav: React.FC = () => {
             )
             .map((collection) => {
               const entityToGroup: EntityToGroup = {
-                type: EntityType.collection,
                 entity: collection,
+                type: EntityType.collection,
               }
 
               return entityToGroup
@@ -55,8 +57,8 @@ const DefaultNav: React.FC = () => {
             )
             .map((global) => {
               const entityToGroup: EntityToGroup = {
-                type: EntityType.global,
                 entity: global,
+                type: EntityType.global,
               }
 
               return entityToGroup
@@ -74,7 +76,7 @@ const DefaultNav: React.FC = () => {
         <nav className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) &&
             beforeNavLinks.map((Component, i) => <Component key={i} />)}
-          {groups.map(({ label, entities }, key) => {
+          {groups.map(({ entities, label }, key) => {
             return (
               <NavGroup {...{ key, label }}>
                 {entities.map(({ entity, type }, i) => {
@@ -96,9 +98,9 @@ const DefaultNav: React.FC = () => {
 
                   return (
                     <NavLink
-                      id={id}
-                      className={`${baseClass}__link`}
                       activeClassName="active"
+                      className={`${baseClass}__link`}
+                      id={id}
                       key={i}
                       to={href}
                     >
@@ -126,6 +128,7 @@ const DefaultNav: React.FC = () => {
             onClick={() => {
               setNavOpen(false)
             }}
+            type="button"
           >
             <Hamburger isActive />
           </button>
