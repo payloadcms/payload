@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-vite",
-  "version": "0.1.0-beta.4",
+  "version": "0.1.0-beta.7",
   "description": "The officially supported Vite bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -44,6 +44,7 @@
     "types": "./dist/index.d.ts"
   },
   "files": [
-    "dist"
+    "dist",
+    "mock.js"
   ]
 }

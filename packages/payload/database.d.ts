@@ -46,7 +46,6 @@ export {
   UpdateOneArgs,
   UpdateVersion,
   UpdateVersionArgs,
-  Webpack,
 } from './dist/database/types'
 export * from './dist/database/queryValidation/types'
 export { combineQueries } from './dist/database/combineQueries'

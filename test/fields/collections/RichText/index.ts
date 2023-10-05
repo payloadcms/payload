@@ -5,11 +5,12 @@ import {
   LinkFeature,
   TreeviewFeature,
   UploadFeature,
-  createLexical,
+  lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
-import { createSlate } from '../../../../packages/richtext-slate/src'
+import { slateEditor } from '../../../../packages/richtext-slate/src'
 import { TextBlock, UploadAndRichTextBlock } from './blocks'
-import { loremIpsum } from './loremIpsum'
+import { generateLexicalRichText } from './generateLexicalRichText'
+import { generateSlateRichText } from './generateSlateRichText'
 
 const RichTextFields: CollectionConfig = {
   slug: 'rich-text-fields',
@@ -28,7 +29,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextLexicalCustomFields',
       type: 'richText',
-      editor: createLexical({
+      editor: lexicalEditor({
         userConfig(defaultEditorConfig) {
           defaultEditorConfig.features.push(TreeviewFeature())
           defaultEditorConfig.features.push(
@@ -57,7 +58,7 @@ const RichTextFields: CollectionConfig = {
                     {
                       name: 'caption',
                       type: 'richText',
-                      editor: createLexical({}),
+                      editor: lexicalEditor({}),
                     },
                   ],
                 },
@@ -77,7 +78,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextLexical',
       type: 'richText',
-      editor: createLexical({
+      editor: lexicalEditor({
         userConfig(defaultEditorConfig) {
           defaultEditorConfig.features.push(TreeviewFeature())
           return defaultEditorConfig
@@ -122,7 +123,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
-      editor: createSlate({
+      editor: slateEditor({
         admin: {
           elements: [
             'h1',
@@ -173,7 +174,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextCustomFields',
       type: 'richText',
-      editor: createSlate({
+      editor: slateEditor({
         admin: {
           elements: [
             'h1',
@@ -222,7 +223,7 @@ const RichTextFields: CollectionConfig = {
       admin: {
         readOnly: true,
       },
-      editor: createSlate({
+      editor: slateEditor({
         admin: {
           elements: [
             'h1',
@@ -293,153 +294,6 @@ const RichTextFields: CollectionConfig = {
       ],
     },
   ],
-}
-
-function generateRichText() {
-  return [
-    {
-      children: [
-        {
-          text: "Hello, I'm a rich text field.",
-        },
-      ],
-      type: 'h1',
-      textAlign: 'center',
-    },
-    {
-      children: [
-        {
-          text: 'I can do all kinds of fun stuff like ',
-        },
-        {
-          type: 'link',
-          url: 'https://payloadcms.com',
-          newTab: true,
-          children: [
-            {
-              text: 'render links',
-            },
-          ],
-        },
-        {
-          text: ', ',
-        },
-        {
-          type: 'link',
-          linkType: 'internal',
-          doc: {
-            value: '{{ARRAY_DOC_ID}}',
-            relationTo: 'array-fields',
-          },
-          fields: {},
-          children: [
-            {
-              text: 'link to relationships',
-            },
-          ],
-        },
-        {
-          text: ', and store nested relationship fields:',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-      type: 'relationship',
-      value: {
-        id: '',
-      },
-      relationTo: 'text-fields',
-    },
-    {
-      children: [
-        {
-          text: 'You can build your own elements, too.',
-        },
-      ],
-    },
-    {
-      type: 'ul',
-      children: [
-        {
-          children: [
-            {
-              text: "It's built with SlateJS",
-            },
-          ],
-          type: 'li',
-        },
-        {
-          type: 'li',
-          children: [
-            {
-              text: 'It stores content as JSON so you can use it wherever you need',
-            },
-          ],
-        },
-        {
-          type: 'li',
-          children: [
-            {
-              text: "It's got a great editing experience for non-technical users",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: 'And a whole lot more.',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-      type: 'upload',
-      value: {
-        id: '',
-      },
-      relationTo: 'uploads',
-      fields: {
-        caption: [
-          ...[...Array(4)].map(() => {
-            return {
-              children: [
-                {
-                  text: loremIpsum,
-                },
-              ],
-            }
-          }),
-        ],
-      },
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-    },
-    ...[...Array(2)].map(() => {
-      return {
-        children: [
-          {
-            text: loremIpsum,
-          },
-        ],
-      }
-    }),
-  ]
 }
 
 export const richTextBulletsDoc = {
@@ -567,9 +421,10 @@ export const richTextBlocks = [
 export const richTextDoc = {
   title: 'Rich Text',
   selectHasMany: ['one', 'five'],
-  richText: generateRichText(),
-  richTextReadOnly: generateRichText(),
-  richTextCustomFields: generateRichText(),
+  richText: generateSlateRichText(),
+  richTextReadOnly: generateSlateRichText(),
+  richTextCustomFields: generateSlateRichText(),
+  richTextLexicalCustomFields: generateLexicalRichText(),
   blocks: richTextBlocks,
 }
 
