@@ -31,16 +31,17 @@ const validate = (value) => {
 }
 
 export const UploadActions = ({ canEdit, showSizePreviews }) => {
+  const { t } = useTranslation('upload')
   return (
     <div className={`${baseClass}__file-mutation`}>
       {showSizePreviews && (
         <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
-          Preview Sizes
+          {t('previewSizes')}
         </DrawerToggler>
       )}
       {canEdit && (
         <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
-          Edit Image
+          {t('editImage')}
         </DrawerToggler>
       )}
     </div>
@@ -185,7 +186,7 @@ export const Upload: React.FC<Props> = (props) => {
         </Drawer>
       )}
       {doc && hasImageSizes && (
-        <Drawer slug={sizePreviewSlug} title={`Sizes for ${doc.filename}`}>
+        <Drawer slug={sizePreviewSlug} title={t('sizesFor', { label: doc?.filename })}>
           <PreviewSizes collection={collection} doc={doc} updatedAt={updatedAt} />
         </Drawer>
       )}

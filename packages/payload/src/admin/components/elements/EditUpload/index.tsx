@@ -1,6 +1,6 @@
 import { useModal } from '@faceless-ui/modal'
-import { t } from 'i18next'
 import React, { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ReactCrop, { type Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
@@ -22,8 +22,8 @@ const Input: React.FC<{ name: string; onChange: (value: string) => void; value: 
   <div className={`${baseClass}__input`}>
     {name}
     <input
-      name={name}
       defaultValue={value}
+      name={name}
       onChange={(e) => onChange(e.target.value)}
       type="number"
       value={value}
@@ -39,7 +39,7 @@ const EditUpload: React.FC<{
   showFocalPoint?: boolean
 }> = ({ fileName, fileSrc, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
-
+  const { t } = useTranslation(['general', 'upload'])
   const { formQueryParams, setFormQueryParams } = useFormQueryParams()
   const { uploadEdits } = formQueryParams || {}
   const [crop, setCrop] = useState<CropType>({
@@ -63,7 +63,7 @@ const EditUpload: React.FC<{
   const originalHeight = imageRef.current ? imageRef.current.naturalHeight : 0
   const originalWidth = imageRef.current ? imageRef.current.naturalWidth : 0
 
-  const fineTuneCrop = ({ dimension, value }: { dimension: 'width' | 'height'; value: string }) => {
+  const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
     if (dimension === 'width' && intValue >= originalWidth) return null
     if (dimension === 'height' && intValue >= originalHeight) return null
@@ -114,22 +114,25 @@ const EditUpload: React.FC<{
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
-        <h2>Editing {fileName}</h2>
+        <h2>
+          {t('editing')} {fileName}
+        </h2>
         <div className={`${baseClass}__actions`}>
           <Button
-            aria-label={t('close')}
+            aria-label={t('cancel')}
             buttonStyle="secondary"
             className={`${baseClass}__cancel`}
             onClick={() => closeModal(editDrawerSlug)}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
+            aria-label={t('applyChanges')}
             buttonStyle="primary"
             className={`${baseClass}__save`}
             onClick={() => saveEdits()}
           >
-            Apply Changes
+            {t('applyChanges')}
           </Button>
         </div>
       </div>
@@ -152,10 +155,10 @@ const EditUpload: React.FC<{
                   return <div className={`${baseClass}__crop-window`} ref={cropRef} />
                 }}
               >
-                <img alt="Upload Preview" ref={imageRef} src={fileSrc} />
+                <img alt={t('setCropArea')} ref={imageRef} src={fileSrc} />
               </ReactCrop>
             ) : (
-              <img alt="Upload Preview" ref={imageRef} src={fileSrc} />
+              <img alt={t('setFocalPoint')} ref={imageRef} src={fileSrc} />
             )}
             <DraggableElement
               boundsRef={cropRef}
@@ -176,7 +179,7 @@ const EditUpload: React.FC<{
               <div className={`${baseClass}__groupWrap`}>
                 <div>
                   <div className={`${baseClass}__titleWrap`}>
-                    <h3>Crop</h3>
+                    <h3>{t('Crop')}</h3>
                     <Button
                       buttonStyle="none"
                       className={`${baseClass}__reset`}
@@ -190,21 +193,19 @@ const EditUpload: React.FC<{
                         })
                       }
                     >
-                      Reset
+                      {t('reset')}
                     </Button>
                   </div>
                 </div>
-                <span className={`${baseClass}__description`}>
-                  Draw an area to crop, adjust by dragging the corners or updating the values below.
-                </span>
+                <span className={`${baseClass}__description`}>{t('cropToolDescription')}</span>
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
-                    name="Width (px)"
+                    name={`${t('width')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'width', value })}
                     value={((crop.width / 100) * originalWidth).toFixed(0)}
                   />
                   <Input
-                    name="Height (px)"
+                    name={`${t('height')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'height', value })}
                     value={((crop.height / 100) * originalHeight).toFixed(0)}
                   />
@@ -216,20 +217,17 @@ const EditUpload: React.FC<{
               <div className={`${baseClass}__groupWrap`}>
                 <div>
                   <div className={`${baseClass}__titleWrap`}>
-                    <h3>Focal Point</h3>
+                    <h3>{t('focalPoint')}</h3>
                     <Button
                       buttonStyle="none"
                       className={`${baseClass}__reset`}
                       onClick={centerFocalPoint}
                     >
-                      Reset
+                      {t('reset')}
                     </Button>
                   </div>
                 </div>
-                <span className={`${baseClass}__description`}>
-                  Click within the cropped area to position the focal point or adjust the values
-                  below.
-                </span>
+                <span className={`${baseClass}__description`}>{t('focalPointDescription')}</span>
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="X %"
