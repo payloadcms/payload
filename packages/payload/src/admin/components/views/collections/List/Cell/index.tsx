@@ -53,7 +53,7 @@ const DefaultCell: React.FC<Props> = (props) => {
     }
   }
 
-  if (field.name === 'id' && cellData.toString().length < 5) {
+  if (field.name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
         <CodeCell
@@ -61,6 +61,7 @@ const DefaultCell: React.FC<Props> = (props) => {
           data={`ID: ${cellData}`}
           field={field as CodeField}
           rowData={rowData}
+          nowrap
         />
       </WrapElement>
     )
