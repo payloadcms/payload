@@ -1,8 +1,9 @@
 import type { Connect } from 'payload/database'
 
 import { pushSchema } from 'drizzle-kit/utils'
-import { sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core'
 import { Pool } from 'pg'
 import prompts from 'prompts'
 
@@ -82,4 +83,22 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   }
 
   await apply()
+
+  // Migration table def in order to use query using drizzle
+  const migrationsSchema = pgTable('payload_migrations', {
+    name: varchar('name'),
+    batch: numeric('batch'),
+  })
+
+  const devPush = await this.drizzle
+    .select()
+    .from(migrationsSchema)
+    .where(eq(migrationsSchema.batch, '-1'))
+
+  if (!devPush.length) {
+    await this.drizzle.insert(migrationsSchema).values({
+      name: 'dev',
+      batch: '-1',
+    })
+  }
 }
