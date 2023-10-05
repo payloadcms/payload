@@ -9,8 +9,6 @@ import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUp
 import { subscriptionDeleted } from './webhooks/subscriptionDeleted'
 import { syncPriceJSON } from './webhooks/syncPriceJSON'
 
-const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js')
-
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
@@ -25,10 +23,7 @@ export default buildConfig({
             payload: path.join(__dirname, '../node_modules/payload'),
             react: path.join(__dirname, '../node_modules/react'),
             'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-            stripe: mockModulePath,
-            express: mockModulePath,
-            [path.resolve(__dirname, './webhooks/subscriptionCreatedOrUpdated')]: mockModulePath,
-            [path.resolve(__dirname, './webhooks/subscriptionDeleted')]: mockModulePath,
+            [path.resolve(__dirname, '../../src')]: path.resolve(__dirname, '../../src/admin.ts'),
           },
         },
       }
