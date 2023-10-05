@@ -1,3 +1,4 @@
+import type { i18n } from 'i18next'
 import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
 import type { MutableRefObject, ReactPortal } from 'react'
 
@@ -37,6 +38,7 @@ export class SlashMenuGroup {
 export class SlashMenuOption {
   Icon: React.FC
 
+  displayName?: ({ i18n }: { i18n: i18n }) => string
   // Icon for display
   key: string
   // TBD
@@ -45,6 +47,7 @@ export class SlashMenuOption {
   keywords: Array<string>
   // What happens when you select this option?
   onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
+
   ref?: MutableRefObject<HTMLElement | null>
 
   // What shows up in the editor
@@ -54,6 +57,7 @@ export class SlashMenuOption {
     title: string,
     options: {
       Icon: React.FC
+      displayName?: ({ i18n }: { i18n: i18n }) => string
       keyboardShortcut?: string
       keywords?: Array<string>
       onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
@@ -64,6 +68,7 @@ export class SlashMenuOption {
     this.setRefElement = this.setRefElement.bind(this)
 
     this.title = title
+    this.displayName = options.displayName
     this.keywords = options.keywords || []
     this.Icon = options.Icon
     this.keyboardShortcut = options.keyboardShortcut
