@@ -78,18 +78,19 @@ export const createMigration: CreateMigration = async function createMigration(
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
 
-  const hasMigrationTable = await migrationTableExists(this.drizzle)
+  // Get latest migration snapshot
+  const latestSnapshot = fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith('.json'))
+    .sort()
+    .reverse()[0]
 
-  if (hasMigrationTable) {
-    const migrationQuery = await payload.find({
-      collection: 'payload-migrations',
-      limit: 1,
-      sort: '-name',
-    })
+  if (latestSnapshot) {
+    const latestSnapshotJSON = JSON.parse(
+      fs.readFileSync(`${dir}/${latestSnapshot}`, 'utf8'),
+    ) as DrizzleSnapshotJSON
 
-    if (migrationQuery.docs?.[0]?.schema) {
-      drizzleJsonBefore = migrationQuery.docs[0]?.schema as DrizzleSnapshotJSON
-    }
+    drizzleJsonBefore = latestSnapshotJSON
   }
 
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
@@ -97,7 +98,7 @@ export const createMigration: CreateMigration = async function createMigration(
   const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
 
   // write schema
-  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter))
+  fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
 
   // write migration
   fs.writeFileSync(

@@ -23,7 +23,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
       limit: 0,
       sort: '-name',
     }))
-    if (typeof existingMigrations[0]?.batch !== 'undefined') {
+    if (Number(existingMigrations[0]?.batch) > 0) {
       latestBatch = Number(existingMigrations[0]?.batch)
     }
   } else {
