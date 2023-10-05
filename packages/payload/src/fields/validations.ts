@@ -389,15 +389,17 @@ export const array: Validate<unknown, unknown, ArrayField> = (
   value,
   { maxRows, minRows, required, t },
 ) => {
-  if (minRows && value < minRows) {
+  const arrayLength = Array.isArray(value) ? value.length : 0
+
+  if (minRows && arrayLength < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
   }
 
-  if (maxRows && value > maxRows) {
+  if (maxRows && arrayLength > maxRows) {
     return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
   }
 
-  if (!value && required) {
+  if (!arrayLength && required) {
     return t('validation:requiresAtLeast', { count: 1, label: t('row') })
   }
 
@@ -456,15 +458,17 @@ export const blocks: Validate<unknown, unknown, BlockField> = (
   value,
   { maxRows, minRows, required, t },
 ) => {
-  if (minRows && value < minRows) {
+  const arrayLength = Array.isArray(value) ? value.length : 0
+
+  if (minRows && arrayLength < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
   }
 
-  if (maxRows && value > maxRows) {
+  if (maxRows && arrayLength > maxRows) {
     return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
   }
 
-  if (!value && required) {
+  if (!arrayLength && required) {
     return t('validation:requiresAtLeast', { count: 1, label: t('row') })
   }
 
