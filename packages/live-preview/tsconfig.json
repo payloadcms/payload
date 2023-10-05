@@ -5,8 +5,7 @@
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "jsx": "react"
+    "rootDir": "./src" /* Specify the root folder within your source files. */
   },
   "exclude": [
     "dist",
@@ -21,5 +20,5 @@
     "src/**/*.spec.tsx"
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [{ "path": "../payload" }] // db-mongodb depends on payload
+  "references": [{ "path": "../payload" }] // db-postgres depends on payload
 }

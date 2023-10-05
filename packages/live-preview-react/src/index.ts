@@ -1,6 +1,5 @@
+import { subscribe, unsubscribe } from '@payloadcms/live-preview'
 import { useCallback, useEffect, useState } from 'react'
-
-import { subscribe, unsubscribe } from '../../live-preview/src'
 
 // To prevent the flicker of missing data on initial load,
 // you can pass in the initial page data from the server
