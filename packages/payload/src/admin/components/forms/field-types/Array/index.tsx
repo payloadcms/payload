@@ -20,9 +20,9 @@ import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { ArrayRow } from './ArrayRow'
 import './index.scss'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'array-field'
 
@@ -91,7 +91,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     valid,
     value,
-  } = useField<number>({
+  } = useField<[]>({
     condition,
     hasRows: true,
     path,
@@ -116,7 +116,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       setModified(true)
 
       setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex + 1}`)
+        scrollToID(`${path}-row-${rowIndex}`)
       }, 0)
     },
     [dispatchFields, path, setModified],
@@ -274,11 +274,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       {!readOnly && !hasMaxRows && (
         <Button
           buttonStyle="icon-label"
+          className={`${baseClass}__add-row`}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
-          onClick={() => addRow(value)}
-          className={`${baseClass}__add-row`}
+          onClick={() => addRow(value?.length || 0)}
         >
           {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>

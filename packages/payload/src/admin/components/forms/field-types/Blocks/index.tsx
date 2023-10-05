@@ -90,7 +90,7 @@ const BlocksField: React.FC<Props> = (props) => {
     showError,
     valid,
     value,
-  } = useField<number>({
+  } = useField<[]>({
     condition,
     hasRows: true,
     path,
@@ -297,7 +297,7 @@ const BlocksField: React.FC<Props> = (props) => {
           </DrawerToggler>
           <BlocksDrawer
             addRow={addRow}
-            addRowIndex={value}
+            addRowIndex={value?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
             labels={labels}
