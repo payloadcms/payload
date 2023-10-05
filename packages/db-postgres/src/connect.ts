@@ -3,7 +3,7 @@ import type { Connect } from 'payload/database'
 import { pushSchema } from 'drizzle-kit/utils'
 import { eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core'
+import { numeric, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
 import { Pool } from 'pg'
 import prompts from 'prompts'
 
@@ -88,6 +88,8 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   const migrationsSchema = pgTable('payload_migrations', {
     name: varchar('name'),
     batch: numeric('batch'),
+    created_at: timestamp('created_at'),
+    updated_at: timestamp('updated_at'),
   })
 
   const devPush = await this.drizzle
@@ -100,5 +102,12 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
       name: 'dev',
       batch: '-1',
     })
+  } else {
+    await this.drizzle
+      .update(migrationsSchema)
+      .set({
+        updated_at: new Date(),
+      })
+      .where(eq(migrationsSchema.batch, '-1'))
   }
 }
