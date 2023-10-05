@@ -23,4 +23,6 @@ export const handleMessage = async <T>(args: {
       return mergedData
     }
   }
+
+  return initialData
 }
