@@ -2,7 +2,7 @@
 
 html[data-theme='light'] {
   .link-editor {
-    box-shadow: 0px 6px 20px 0px rgba(0, 0, 0, 0.2);
+    @include shadow-m;
   }
 }
 
@@ -35,7 +35,7 @@ html[data-theme='light'] {
     border: 0;
     outline: 0;
     position: relative;
-    font-family: inherit;
+    font-family: var(--font-body);
 
     a {
       text-decoration: none;

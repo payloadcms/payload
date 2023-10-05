@@ -8,6 +8,8 @@
     --font-body
   ); // Reset font to non-serif, body font, as the lexical editor parent uses a serif font.
 
+  margin: 0 0 1.5em;
+
   &__header {
     h3 {
       margin: 0;
@@ -61,11 +63,32 @@
     }
   }
 
+  .collapsible {
+    &__header-wrap {
+      //  Make more space for the block header (default right: is base(3)) so that the remove button aligns nicely to the right
+      right: base(1.5);
+    }
+  }
+
+  &__removeButton {
+    margin: 0;
+  }
+
   &__block-header {
-    display: inline-flex;
+    pointer-events: none;
+  }
+
+  &__block-header * {
+    pointer-events: all;
+  }
+
+  &__block-header,
+  &__block-header div {
+    display: flex;
     max-width: 100%;
     overflow: hidden;
     gap: base(0.375);
+    justify-content: space-between;
   }
 
   &__block-number {

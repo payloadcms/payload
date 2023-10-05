@@ -69,7 +69,7 @@ export type MigrateDownArgs = { payload: Payload }
 
 declare module 'payload' {
   export interface DatabaseAdapter extends Args {
-    db: DrizzleDB
+    drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
     pool: Pool
     relations: Record<string, GenericRelation>

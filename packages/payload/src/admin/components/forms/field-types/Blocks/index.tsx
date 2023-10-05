@@ -90,7 +90,7 @@ const BlocksField: React.FC<Props> = (props) => {
     showError,
     valid,
     value,
-  } = useField<number>({
+  } = useField<[]>({
     condition,
     hasRows: true,
     path,
@@ -99,7 +99,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string) => {
-      addFieldRow({
+      await addFieldRow({
         data: {
           blockType,
         },
@@ -116,7 +116,7 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 
   const duplicateRow = useCallback(
-    async (rowIndex: number) => {
+    (rowIndex: number) => {
       dispatchFields({ path, rowIndex, type: 'DUPLICATE_ROW' })
       setModified(true)
 
@@ -128,8 +128,8 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 
   const removeRow = useCallback(
-    (rowIndex: number) => {
-      removeFieldRow({ path, rowIndex })
+    async (rowIndex: number) => {
+      await removeFieldRow({ path, rowIndex })
       setModified(true)
     },
     [path, removeFieldRow, setModified],
@@ -144,14 +144,14 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 
   const toggleCollapseAll = useCallback(
-    async (collapsed: boolean) => {
+    (collapsed: boolean) => {
       dispatchFields({ collapsed, path, setDocFieldPreferences, type: 'SET_ALL_ROWS_COLLAPSED' })
     },
     [dispatchFields, path, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
-    async (rowID: string, collapsed: boolean) => {
+    (rowID: string, collapsed: boolean) => {
       dispatchFields({ collapsed, path, rowID, setDocFieldPreferences, type: 'SET_ROW_COLLAPSED' })
     },
     [dispatchFields, path, setDocFieldPreferences],
@@ -297,7 +297,7 @@ const BlocksField: React.FC<Props> = (props) => {
           </DrawerToggler>
           <BlocksDrawer
             addRow={addRow}
-            addRowIndex={value}
+            addRowIndex={value?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
             labels={labels}

@@ -17,7 +17,7 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { globalSlug, slug, slugPluralLabel } from './shared'
+import { globalSlug, postsSlug, slugPluralLabel } from './shared'
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
@@ -33,7 +33,7 @@ describe('admin', () => {
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
     await clearDocs() // Clear any seeded data from onInit
-    url = new AdminUrlUtil(serverURL, slug)
+    url = new AdminUrlUtil(serverURL, postsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -52,7 +52,7 @@ describe('admin', () => {
     test('should nav to collection - nav', async () => {
       await page.goto(url.admin)
       await openNav(page)
-      await page.locator(`#nav-${slug}`).click()
+      await page.locator(`#nav-${postsSlug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
@@ -66,7 +66,7 @@ describe('admin', () => {
     test('should navigate to collection - card', async () => {
       await page.goto(url.admin)
       await wait(200)
-      await page.locator(`#card-${slug}`).click()
+      await page.locator(`#card-${postsSlug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
@@ -122,7 +122,9 @@ describe('admin', () => {
     test('breadcrumbs - from document to collection', async () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
-      const collectionBreadcrumb = page.locator(`.step-nav a[href="/admin/collections/${slug}"]`)
+      const collectionBreadcrumb = page.locator(
+        `.step-nav a[href="/admin/collections/${postsSlug}"]`,
+      )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
       expect(page.url()).toContain(url.list)
@@ -866,7 +868,7 @@ describe('admin', () => {
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
-    collection: slug,
+    collection: postsSlug,
     data: {
       title,
       description,
@@ -876,9 +878,9 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find({ collection: slug, limit: 100 })
+  const allDocs = await payload.find({ collection: postsSlug, limit: 100 })
   const ids = allDocs.docs.map((doc) => doc.id)
   await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: slug, id })
+    await payload.delete({ collection: postsSlug, id })
   })
 }

@@ -16,12 +16,13 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
 
   if (transactionsNotAvailable) return id
 
-  if (!this.connection.get('replicaSet')) {
+  const client = this.connection.getClient()
+  if (!client.options.replicaSet) {
     transactionsNotAvailable = true
   } else {
     id = uuid()
     if (!this.sessions[id]) {
-      this.sessions[id] = await this.connection.getClient().startSession()
+      this.sessions[id] = await client.startSession()
     }
     if (this.sessions[id].inTransaction()) {
       this.payload.logger.warn('beginTransaction called while transaction already exists')

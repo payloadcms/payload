@@ -36,6 +36,8 @@
     { "path": "./packages/db-postgres" },
     { "path": "./packages/richtext-slate" },
     { "path": "./packages/richtext-lexical" },
-    { "path": "./packages/payload" }
+    { "path": "./packages/payload" },
+    { "path": "./packages/live-preview" },
+    { "path": "./packages/live-preview-react" }
   ]
 }
