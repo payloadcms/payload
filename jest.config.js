@@ -6,7 +6,7 @@ module.exports = {
       '<rootDir>/packages/payload/src/bundlers/mocks/fileMock.js',
   },
   testEnvironment: 'node',
-  testMatch: ['**/packages/payload/src/**/*.spec.ts', '**/test/**/*int.spec.ts'],
+  testMatch: ['<rootDir>/packages/payload/src/**/*.spec.ts', '<rootDir>/test/**/*int.spec.ts'],
   testTimeout: 90000,
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
