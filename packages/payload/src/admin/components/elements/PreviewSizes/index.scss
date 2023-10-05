@@ -14,7 +14,7 @@
   }
 
   &__preview {
-    max-height: calc(100% - base(3.5));
+    max-height: calc(100% - base(4));
     padding: base(1.5) base(1.5) base(1.5) var(--gutter-h);
     object-fit: contain;
   }
@@ -28,7 +28,8 @@
 
     .file-meta {
       display: flex;
-      gap: base(1);
+      flex-wrap: wrap;
+      column-gap: base(1);
     }
   }
 

@@ -256,7 +256,11 @@ export default async function resizeAndTransformImageSizes({
       const imagePath = `${staticPath}/${imageNameWithDimensions}`
 
       if (await fileExists(imagePath)) {
-        fs.unlinkSync(imagePath)
+        try {
+          fs.unlinkSync(imagePath)
+        } catch {
+          // Ignore unlink errors
+        }
       }
 
       const { height, size, width } = bufferInfo
