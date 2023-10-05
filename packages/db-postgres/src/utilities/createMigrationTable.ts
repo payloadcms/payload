@@ -7,7 +7,6 @@ export const createMigrationTable = async (db: DrizzleDB): Promise<void> => {
   "id" serial PRIMARY KEY NOT NULL,
   "name" varchar,
   "batch" numeric,
-  "schema" jsonb,
   "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
 );`)

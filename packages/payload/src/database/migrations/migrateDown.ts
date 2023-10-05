@@ -14,12 +14,14 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
   })
 
   const migrationsToRollback = existingMigrations.filter(
-    (migration) => migration.batch === latestBatch,
+    (migration) => migration.batch === latestBatch && migration.batch !== -1,
   )
+
   if (!migrationsToRollback?.length) {
     payload.logger.info({ msg: 'No migrations to rollback.' })
     return
   }
+
   payload.logger.info({
     msg: `Rolling back batch ${latestBatch} consisting of ${migrationsToRollback.length} migration(s).`,
   })

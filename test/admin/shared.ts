@@ -1,4 +1,4 @@
-export const slug = 'posts'
+export const postsSlug = 'posts'
 
 export const slugSingularLabel = 'Post'
 
