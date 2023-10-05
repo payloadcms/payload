@@ -12,8 +12,6 @@ import {
 } from 'lexical'
 import * as React from 'react'
 
-import { UploadFeatureProps } from '..'
-
 // @ts-expect-error TypeScript being dumb
 const RawUploadComponent = React.lazy(async () => await import('../component'))
 
