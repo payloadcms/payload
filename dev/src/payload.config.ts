@@ -69,10 +69,22 @@ export default buildConfig({
           alias: {
             ...(config.resolve.alias || {}),
             react: path.resolve(__dirname, '../node_modules/react'),
-            '@azure/storage-blob': path.resolve(__dirname, '../../src/adapters/azure/mock.js'),
-            '@aws-sdk/client-s3': path.resolve(__dirname, '../../src/adapters/s3/mock.js'),
-            '@google-cloud/storage': path.resolve(__dirname, '../../src/adapters/gcs/mock.js'),
-            fs: path.resolve(__dirname, '../../src/adapters/s3/fsMock.js'),
+            [path.resolve(__dirname, '../../src/index')]: path.resolve(
+              __dirname,
+              '../../src/admin/index.ts',
+            ),
+            [path.resolve(__dirname, '../../src/adapters/s3/index')]: path.resolve(
+              __dirname,
+              '../../src/adapters/s3/mock.js',
+            ),
+            [path.resolve(__dirname, '../../src/adapters/gcs/index')]: path.resolve(
+              __dirname,
+              '../../src/adapters/gcs/mock.js',
+            ),
+            [path.resolve(__dirname, '../../src/adapters/azure/index')]: path.resolve(
+              __dirname,
+              '../../src/adapters/azure/mock.js',
+            ),
           },
         },
       }
