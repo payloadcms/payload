@@ -23,6 +23,7 @@ import {
   useEditDepth,
   useLocale,
 } from 'payload/components/utilities'
+import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -117,10 +118,14 @@ export function LinkEditor({
           `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${linkParent.getFields()
             ?.doc?.value}`,
         )
-        setLinkLabel(
-          `relation to ${linkParent.getFields()?.doc?.relationTo}: ${linkParent.getFields()?.doc
-            ?.value}`,
+
+        const relatedField = config.collections.find(
+          (coll) => coll.slug === linkParent.getFields()?.doc?.relationTo,
         )
+        const label = t('fields:linkedTo', {
+          label: getTranslation(relatedField.labels.singular, i18n),
+        }).replace(/<[^>]*>?/g, '')
+        setLinkLabel(label)
       }
 
       // Set initial state of the drawer. This will basically pre-fill the drawer fields with the
