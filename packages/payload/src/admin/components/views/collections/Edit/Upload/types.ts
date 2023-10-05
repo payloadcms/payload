@@ -5,4 +5,5 @@ export type Props = {
   collection: SanitizedCollectionConfig
   internalState?: Fields
   onChange?: (file?: File) => void
+  updatedAt?: string
 }

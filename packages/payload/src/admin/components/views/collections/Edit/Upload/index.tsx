@@ -48,7 +48,7 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const { collection, internalState, onChange } = props
+  const { collection, internalState, onChange, updatedAt } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation(['upload', 'general'])
@@ -104,7 +104,7 @@ export const Upload: React.FC<Props> = (props) => {
     if (typeof onChange === 'function') {
       onChange(value)
     }
-  }, [value, onChange])
+  }, [value, onChange, updatedAt])
 
   const canRemoveUpload =
     docPermissions?.update?.permission &&
@@ -186,7 +186,7 @@ export const Upload: React.FC<Props> = (props) => {
       )}
       {doc && hasImageSizes && (
         <Drawer slug={sizePreviewSlug} title={`Sizes for ${doc.filename}`}>
-          <PreviewSizes collection={collection} doc={doc} />
+          <PreviewSizes collection={collection} doc={doc} updatedAt={updatedAt} />
         </Drawer>
       )}
     </div>

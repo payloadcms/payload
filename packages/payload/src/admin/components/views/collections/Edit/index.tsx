@@ -50,6 +50,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>()
   const history = useHistory()
   const [internalState, setInternalState] = useState<Fields>()
+  const [lastEdited, setLastEdited] = useState<string>()
   const [updatedAt, setUpdatedAt] = useState<string>()
   const { permissions, user } = useAuth()
   const userRef = useRef(user)
@@ -86,6 +87,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     async (json: { doc }) => {
       getVersions()
       getDocPermissions()
+      setLastEdited(new Date().toISOString())
       setUpdatedAt(json?.doc?.updatedAt)
       if (!isEditing) {
         setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`)
@@ -158,6 +160,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     internalState,
     isEditing,
     isLoading,
+    lastEdited,
     onSave,
     permissions: docPermissions as CollectionPermission,
     updatedAt: updatedAt || data?.updatedAt,

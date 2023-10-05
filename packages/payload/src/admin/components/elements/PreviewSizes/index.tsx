@@ -28,7 +28,8 @@ const PreviewSizes: React.FC<{
   doc?: Data & {
     sizes?: FileSizes
   }
-}> = ({ collection, doc }) => {
+  updatedAt?: string
+}> = ({ collection, doc, updatedAt }) => {
   const {
     upload: { imageSizes, staticURL },
   } = collection
@@ -38,10 +39,20 @@ const PreviewSizes: React.FC<{
   const [selectedSize, setSelectedSize] = useState<null | string>(
     orderedSizes?.[imageSizes[0]?.name]?.filename ? imageSizes[0]?.name : null,
   )
+  const [appendUrl, setAppendUrl] = useState<boolean>(false)
+
+  const generateImageUrl = (filename) => {
+    const query = appendUrl ? `?${Date.now()}` : ''
+    return `${staticURL}/${filename}${query}`
+  }
 
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
-  }, [sizes, imageSizes])
+  }, [sizes, imageSizes, updatedAt])
+
+  useEffect(() => {
+    setAppendUrl(true)
+  }, [updatedAt])
 
   return (
     <div className={baseClass}>
@@ -53,7 +64,7 @@ const PreviewSizes: React.FC<{
         <img
           alt={doc.filename}
           className={`${baseClass}__preview`}
-          src={`${staticURL}/${orderedSizes[selectedSize]?.filename}`}
+          src={generateImageUrl(`${orderedSizes[selectedSize]?.filename}`)}
         />
       </div>
       <div className={`${baseClass}__listWrap`}>
@@ -77,7 +88,7 @@ const PreviewSizes: React.FC<{
                   tabIndex={0}
                 >
                   <div className={`${baseClass}__image`}>
-                    <img alt={val.filename} src={`${staticURL}/${val.filename}`} />
+                    <img alt={val.filename} src={generateImageUrl(val.filename)} />
                   </div>
                   <div className={`${baseClass}__sizeMeta`}>
                     <div className={`${baseClass}__sizeName`}>{key}</div>
