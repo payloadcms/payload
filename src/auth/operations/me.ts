@@ -1,3 +1,4 @@
+import url from 'url';
 import jwt from 'jsonwebtoken';
 import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
@@ -26,15 +27,23 @@ async function me({
   };
 
   if (req.user) {
-    const user = { ...req.user };
+    const parsedURL = url.parse(req.originalUrl);
+    const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`;
 
-    if (user.collection !== collection.config.slug) {
+    const user = await req.payload.findByID({
+      id: req.user.id,
+      collection: collection.config.slug,
+      req,
+      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      overrideAccess: false,
+      showHiddenFields: false,
+    }) as User;
+
+    if (req.user.collection !== collection.config.slug) {
       return {
         user: null,
       };
     }
-
-    delete user.collection;
 
     response = {
       user,

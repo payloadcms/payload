@@ -52,12 +52,21 @@ npx create-payload-app
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ## 🖱️ One-click templates
-### 🛒 [E-Commerce](https://github.com/payloadcms/payload/tree/master/templates/ecommerce)
-Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need.
 
-[All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)&nbsp;·&nbsp;[Community Templates](https://github.com/topics/payload-template)
+Jumpstart your next project by starting with a pre-made template. These are production-ready, end-to-end solutions designed to get you to market as fast as possible.
 
-**If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.**
+### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/master/templates/ecommerce)
+
+  Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Comes with a beautiful, fully functional front-end complete with shopping cart, checkout, orders, and much more.
+
+### [🌐 Website](https://github.com/payloadcms/payload/tree/master/templates/website)
+
+  Build any kind of website, blog, or portfolio from small to enterprise. Comes with a beautiful, fully functional front-end complete with posts, projects, comments, and much more.
+
+We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/master/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
+
+- [Official Templates](https://github.com/payloadcms/payload/tree/master/templates)
+- [Community Templates](https://github.com/topics/payload-template)
 
 ## ✨ Features
 
@@ -87,13 +96,15 @@ Check out the [Payload website](https://payloadcms.com/docs/getting-started/what
 
 ## 🙋 Contributing
 
-If you want to add contributions to this repository, please follow the instructions in [contributing.md](./contributing.md).
+If you want to add contributions to this repository, please follow the instructions in [contributing.md](./CONTRIBUTING.md).
 
 ## 📚 Examples
 
-The examples directory is a great resource for learning how to setup Payload in a variety of different ways.
+The [Examples Directory](./examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
 
-[Examples Directory](./examples)
+- [Examples Directory](./examples)
+- [Payload Blog](https://payloadcms.com/blog)
+- [Payload YouTube](https://www.youtube.com/@payloadcms)
 
 ## 🔌 Plugins
 
