@@ -29,9 +29,6 @@ export const SetStepNav: React.FC<
   let isEditing = false
   let id: string | undefined
 
-  // This only applies to collections
-  const title = useTitle(collection)
-
   if ('collection' in props) {
     const {
       id: idFromProps,
@@ -51,6 +48,9 @@ export const SetStepNav: React.FC<
     global = globalFromProps
     slug = globalFromProps?.slug
   }
+
+  // This only applies to collections
+  const title = useTitle(collection)
 
   const { setStepNav } = useStepNav()
 
