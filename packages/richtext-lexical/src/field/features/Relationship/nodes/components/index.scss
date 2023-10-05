@@ -10,6 +10,7 @@
   border: 1px solid var(--theme-elevation-100);
   max-width: base(15);
   font-family: var(--font-body);
+  margin: 0 0 1.5em;
 
   &:hover {
     border: 1px solid var(--theme-elevation-150);
@@ -56,7 +57,14 @@
     & > * {
       margin: 0;
     }
+  }
 
+  &__swapButton {
+    margin: 0;
+  }
+
+  &__doc-drawer-toggler,
+  &__swapButton {
     &:disabled {
       color: var(--theme-elevation-300);
       pointer-events: none;

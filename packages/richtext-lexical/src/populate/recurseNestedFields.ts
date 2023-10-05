@@ -196,6 +196,8 @@ export const recurseNestedFields = ({
     if (field.type === 'richText' && Array.isArray(data[field.name])) {
       ;(data[field.name] as SerializedEditorState).root.children.forEach((node) => {
         if ('children' in node && Array.isArray(node.children)) {
+          // This assumes that the richText editor is using lexical and not slate.
+          // TODO: Throw an error if Slate is used. That would be cursed, who'd do that?
           recurseRichText({
             afterReadPromises,
             children: node.children,
