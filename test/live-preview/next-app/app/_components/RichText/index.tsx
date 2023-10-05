@@ -2,7 +2,7 @@ import React from 'react'
 
 import serialize from './serialize'
 
-import styles from './index.module.scss'
+import classes from './index.module.scss'
 
 const RichText: React.FC<{ className?: string; content: any }> = ({ className, content }) => {
   if (!content) {
@@ -10,7 +10,7 @@ const RichText: React.FC<{ className?: string; content: any }> = ({ className, c
   }
 
   return (
-    <div className={[styles.richText, className].filter(Boolean).join(' ')}>
+    <div className={[classes.richText, className].filter(Boolean).join(' ')}>
       {serialize(content)}
     </div>
   )

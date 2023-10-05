@@ -1,7 +1,9 @@
-.richText:first-child {
-  margin-top: 0;
-}
+.richText {
+  > *:first-child {
+    margin-top: 0;
+  }
 
-.richText:last-child {
-  margin-bottom: 0;
+  > *:last-child {
+    margin-bottom: 0;
+  }
 }

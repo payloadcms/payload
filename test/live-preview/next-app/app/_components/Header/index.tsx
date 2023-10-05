@@ -9,8 +9,6 @@ import { Gutter } from '../Gutter'
 import { HeaderNav } from './Nav'
 
 import classes from './index.module.scss'
-import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
-import { Header } from '@/payload-types'
 import { fetchHeader } from '@/app/_api/fetchHeader'
 
 export async function Header() {

@@ -6,26 +6,26 @@ $spacer-h: calc(var(--block-padding) / 2);
   padding-left: $spacer-h;
   padding-right: $spacer-h;
   position: relative;
-  background-color: var(--theme-elevation-100);
-  color: var(--theme-elevation-1000);
+  background-color: var(--color-base-100);
+  color: var(--color-base-1000);
 }
 
 :global([data-theme='dark']) {
   .callToAction {
-    background-color: var(--theme-elevation-0);
-    color: var(--theme-elevation-1000);
+    background-color: var(--color-base-0);
+    color: var(--color-base-1000);
   }
 }
 
 .invert {
-  background-color: var(--theme-elevation-1000);
-  color: var(--theme-elevation-0);
+  background-color: var(--color-base-1000);
+  color: var(--color-base-0);
 }
 
 :global([data-theme='dark']) {
   .invert {
-    background-color: var(--theme-elevation-900);
-    color: var(--theme-elevation-0);
+    background-color: var(--color-base-900);
+    color: var(--color-base-0);
   }
 }
 

@@ -55,10 +55,15 @@ export interface Page {
           link: {
             type?: 'reference' | 'custom'
             newTab?: boolean
-            reference: {
-              relationTo: 'pages'
-              value: string | Page
-            }
+            reference:
+              | {
+                  relationTo: 'pages'
+                  value: string | Page
+                }
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }
             url: string
             label: string
             appearance?: 'primary' | 'secondary'
@@ -80,10 +85,15 @@ export interface Page {
           link?: {
             type?: 'reference' | 'custom'
             newTab?: boolean
-            reference: {
-              relationTo: 'pages'
-              value: string | Page
-            }
+            reference:
+              | {
+                  relationTo: 'pages'
+                  value: string | Page
+                }
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }
             url: string
             label: string
             appearance?: 'default' | 'primary' | 'secondary'
@@ -134,7 +144,6 @@ export interface Page {
         blockType: 'archive'
       }
   )[]
-  featuredPosts?: string[] | Post[]
   meta?: {
     title?: string
     description?: string
@@ -158,17 +167,10 @@ export interface Media {
   width?: number
   height?: number
 }
-export interface Category {
-  id: string
-  title?: string
-  updatedAt: string
-  createdAt: string
-}
 export interface Post {
   id: string
   slug: string
   title: string
-  categories?: string[] | Category[]
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
     richText?: {
@@ -176,19 +178,117 @@ export interface Post {
     }[]
     media: string | Media
   }
-  layout?: {
-    title: string
-    description: string
-    id?: string
-    blockName?: string
-    blockType: 'hero'
-  }[]
+  layout: (
+    | {
+        invertBackground?: boolean
+        richText?: {
+          [k: string]: unknown
+        }[]
+        links?: {
+          link: {
+            type?: 'reference' | 'custom'
+            newTab?: boolean
+            reference:
+              | {
+                  relationTo: 'pages'
+                  value: string | Page
+                }
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }
+            url: string
+            label: string
+            appearance?: 'primary' | 'secondary'
+          }
+          id?: string
+        }[]
+        id?: string
+        blockName?: string
+        blockType: 'cta'
+      }
+    | {
+        invertBackground?: boolean
+        columns?: {
+          size?: 'oneThird' | 'half' | 'twoThirds' | 'full'
+          richText?: {
+            [k: string]: unknown
+          }[]
+          enableLink?: boolean
+          link?: {
+            type?: 'reference' | 'custom'
+            newTab?: boolean
+            reference:
+              | {
+                  relationTo: 'pages'
+                  value: string | Page
+                }
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }
+            url: string
+            label: string
+            appearance?: 'default' | 'primary' | 'secondary'
+          }
+          id?: string
+        }[]
+        id?: string
+        blockName?: string
+        blockType: 'content'
+      }
+    | {
+        invertBackground?: boolean
+        position?: 'default' | 'fullscreen'
+        media: string | Media
+        id?: string
+        blockName?: string
+        blockType: 'mediaBlock'
+      }
+    | {
+        introContent?: {
+          [k: string]: unknown
+        }[]
+        populateBy?: 'collection' | 'selection'
+        relationTo?: 'posts'
+        categories?: string[] | Category[]
+        limit?: number
+        selectedDocs?:
+          | {
+              relationTo: 'posts'
+              value: string
+            }[]
+          | {
+              relationTo: 'posts'
+              value: Post
+            }[]
+        populatedDocs?:
+          | {
+              relationTo: 'posts'
+              value: string
+            }[]
+          | {
+              relationTo: 'posts'
+              value: Post
+            }[]
+        populatedDocsTotal?: number
+        id?: string
+        blockName?: string
+        blockType: 'archive'
+      }
+  )[]
   relatedPosts?: string[] | Post[]
   meta?: {
     title?: string
     description?: string
     image?: string | Media
   }
+  updatedAt: string
+  createdAt: string
+}
+export interface Category {
+  id: string
+  title?: string
   updatedAt: string
   createdAt: string
 }
@@ -215,15 +315,6 @@ export interface PayloadMigration {
   id: string
   name?: string
   batch?: number
-  schema?:
-    | {
-        [k: string]: unknown
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null
   updatedAt: string
   createdAt: string
 }
@@ -233,10 +324,15 @@ export interface Header {
     link: {
       type?: 'reference' | 'custom'
       newTab?: boolean
-      reference: {
-        relationTo: 'pages'
-        value: string | Page
-      }
+      reference:
+        | {
+            relationTo: 'pages'
+            value: string | Page
+          }
+        | {
+            relationTo: 'posts'
+            value: string | Post
+          }
       url: string
       label: string
       appearance?: 'default' | 'primary' | 'secondary'
@@ -252,10 +348,15 @@ export interface Footer {
     link: {
       type?: 'reference' | 'custom'
       newTab?: boolean
-      reference: {
-        relationTo: 'pages'
-        value: string | Page
-      }
+      reference:
+        | {
+            relationTo: 'pages'
+            value: string | Page
+          }
+        | {
+            relationTo: 'posts'
+            value: string | Post
+          }
       url: string
       label: string
       appearance?: 'default' | 'primary' | 'secondary'

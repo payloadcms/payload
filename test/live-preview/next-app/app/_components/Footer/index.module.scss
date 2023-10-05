@@ -2,8 +2,8 @@
 
 .footer {
   padding: calc(var(--base) * 4) 0;
-  background-color: var(--theme-elevation-1000);
-  color: var(--theme-elevation-0);
+  background-color: var(--color-base-1000);
+  color: var(--color-base-0);
 
   @include small-break {
     padding: calc(var(--base) * 2) 0;
@@ -12,8 +12,8 @@
 
 :global([data-theme='dark']) {
   .footer {
-    background-color: var(--theme-elevation-50);
-    color: var(--theme-elevation-1000);
+    background-color: var(--color-base-50);
+    color: var(--color-base-1000);
   }
 }
 

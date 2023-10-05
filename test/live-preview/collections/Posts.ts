@@ -67,6 +67,19 @@ export const Posts: CollectionConfig = {
               required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
             },
+            {
+              name: 'relatedPosts',
+              type: 'relationship',
+              relationTo: 'posts',
+              hasMany: true,
+              filterOptions: ({ id }) => {
+                return {
+                  id: {
+                    not_in: [id],
+                  },
+                }
+              },
+            },
           ],
         },
       ],

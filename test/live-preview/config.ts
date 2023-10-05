@@ -8,6 +8,13 @@ import { Pages } from './collections/Pages'
 import { Posts, postsSlug } from './collections/Posts'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
+import { footer } from './seed/footer'
+import { header } from './seed/header'
+import { home } from './seed/home'
+import { post1 } from './seed/post-1'
+import { post2 } from './seed/post-2'
+import { post3 } from './seed/post-3'
+import { postsPage } from './seed/posts-page'
 
 export const pagesSlug = 'pages'
 
@@ -47,117 +54,43 @@ export default buildConfigWithDefaults({
       },
     })
 
-    const post1 = await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'Post 1',
-        meta: {
-          description: 'This is an example of live preview on a post.',
-        },
-        slug: 'post-1',
-        hero: {
-          type: 'highImpact',
-          richText: [
-            {
-              type: 'h1',
-              children: [{ text: 'Hello, world!' }],
-            },
-            {
-              type: 'p',
-              children: [
-                {
-                  text: 'This is an example of live preview on a post. You can edit this post in the admin panel and see the changes reflected here.',
-                },
-              ],
-            },
-          ],
-          media: media.id,
-        },
-        layout: [
-          {
-            blockType: 'block-1',
-            title: 'Post 1',
-            description: 'This is an example of live preview on a post.',
-          },
-        ],
-      },
+    const [post1Doc] = await Promise.all([
+      await payload.create({
+        collection: postsSlug,
+        data: JSON.parse(JSON.stringify(post1).replace(/\{\{IMAGE\}\}/g, media.id)),
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: JSON.parse(JSON.stringify(post2).replace(/\{\{IMAGE\}\}/g, media.id)),
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: JSON.parse(JSON.stringify(post3).replace(/\{\{IMAGE\}\}/g, media.id)),
+      }),
+    ])
+
+    await payload.create({
+      collection: pagesSlug,
+      data: JSON.parse(
+        JSON.stringify(home)
+          .replace(/\{\{MEDIA_ID\}\}/g, media.id)
+          .replace(/\{\{POST_1_ID\}\}/g, post1Doc.id),
+      ),
     })
 
-    const homePage = await payload.create({
+    const postsPageDoc = await payload.create({
       collection: pagesSlug,
-      data: {
-        slug: 'home',
-        title: 'Hello, world!',
-        meta: {
-          description: 'This is an example of live preview on a page.',
-        },
-        hero: {
-          type: 'highImpact',
-          richText: [
-            {
-              type: 'h1',
-              children: [{ text: 'Hello, world!' }],
-            },
-            {
-              type: 'p',
-              children: [
-                {
-                  text: 'This is an example of live preview on a page. You can edit this page in the admin panel and see the changes reflected here.',
-                },
-              ],
-            },
-          ],
-          media: media.id,
-        },
-        layout: [
-          {
-            blockType: 'archive',
-            populateBy: 'selection',
-            selectedDocs: [
-              {
-                relationTo: 'posts',
-                value: post1.id,
-              },
-            ],
-          },
-        ],
-      },
+      data: JSON.parse(JSON.stringify(postsPage).replace(/\{\{IMAGE\}\}/g, media.id)),
     })
 
     await payload.updateGlobal({
       slug: 'header',
-      data: {
-        navItems: [
-          {
-            link: {
-              label: 'Home',
-              type: 'reference',
-              reference: {
-                relationTo: 'pages',
-                value: homePage.id,
-              },
-            },
-          },
-        ],
-      },
+      data: JSON.parse(JSON.stringify(header).replace(/\{\{POSTS_PAGE_ID\}\}/g, postsPageDoc.id)),
     })
 
     await payload.updateGlobal({
       slug: 'footer',
-      data: {
-        navItems: [
-          {
-            link: {
-              label: 'Home',
-              type: 'reference',
-              reference: {
-                relationTo: 'pages',
-                value: homePage.id,
-              },
-            },
-          },
-        ],
-      },
+      data: JSON.parse(JSON.stringify(footer)),
     })
   },
 })
