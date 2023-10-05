@@ -4,6 +4,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { useTranslation } from 'react-i18next'
 
 import type { SlashMenuGroup } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
 import type { SlashMenuOption } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
@@ -28,10 +29,18 @@ function SlashMenuItem({
   onMouseEnter: () => void
   option: SlashMenuOption
 }) {
+  const { i18n } = useTranslation('fields')
+
   let className = 'item'
   if (isSelected) {
     className += ' selected'
   }
+
+  let title = option.title
+  if (option.displayName && typeof option.displayName === 'function') {
+    title = option.displayName({ i18n })
+  }
+
   return (
     <button
       aria-selected={isSelected}
@@ -46,7 +55,7 @@ function SlashMenuItem({
       type="button"
     >
       <option.Icon />
-      <span className="text">{option.title}</span>
+      <span className="text">{title}</span>
     </button>
   )
 }

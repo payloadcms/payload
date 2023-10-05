@@ -1,7 +1,7 @@
 import type { Block } from 'payload/types'
 
 import { baseBlockFields } from 'payload/config'
-import { formatLabels } from 'payload/utilities'
+import { formatLabels, getTranslation } from 'payload/utilities'
 
 import type { FeatureProvider } from '../types'
 
@@ -11,7 +11,7 @@ import { blockAfterReadPromiseHOC } from './afterReadPromise'
 import { INSERT_BLOCK_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'
 import { BlockNode } from './nodes/BlocksNode'
-import { BlocksPlugin } from './plugin'
+import { BlocksPlugin, INSERT_BLOCK_COMMAND } from './plugin'
 
 export type BlocksFeatureProps = {
   blocks: Block[]
@@ -65,8 +65,26 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
                     editor.dispatchCommand(INSERT_BLOCK_WITH_DRAWER_COMMAND, null)
                   },
                 }),
+                ...props?.blocks?.map((block) => {
+                  return new SlashMenuOption(block.slug + ' Block', {
+                    Icon: BlockIcon,
+                    displayName: ({ i18n }) => {
+                      return getTranslation(block.labels.singular, i18n) + ' Block'
+                    },
+                    keywords: ['block', 'blocks', block.slug],
+                    onSelect: ({ editor }) => {
+                      editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
+                        collapsed: false,
+                        data: {
+                          blockName: '',
+                          blockType: block.slug,
+                        },
+                      })
+                    },
+                  })
+                }),
               ],
-              title: 'Basic',
+              title: 'Blocks',
             },
           ],
         },
