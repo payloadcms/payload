@@ -23,7 +23,6 @@ import { Gutter } from '../../elements/Gutter';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { FormLoadingOverlayToggle } from '../../elements/Loading';
 import { formatDate } from '../../../utilities/formatDate';
-import { EditDepthContext } from '../../utilities/EditDepth';
 
 import './index.scss';
 
@@ -54,151 +53,149 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <OperationContext.Provider value="update">
-        <EditDepthContext.Provider value={1}>
-          <Form
-            className={`${baseClass}__form`}
-            method="post"
-            action={action}
-            onSuccess={onSave}
-            disabled={!hasSavePermission}
-            initialState={initialState}
-            configFieldsSchema={fields}
-          >
-            <FormLoadingOverlayToggle
-              action="update"
-              name={`global-edit--${label}`}
-              loadingSuffix={getTranslation(label, i18n)}
-            />
+        <Form
+          className={`${baseClass}__form`}
+          method="post"
+          action={action}
+          onSuccess={onSave}
+          disabled={!hasSavePermission}
+          initialState={initialState}
+          configFieldsSchema={fields}
+        >
+          <FormLoadingOverlayToggle
+            action="update"
+            name={`global-edit--${label}`}
+            loadingSuffix={getTranslation(label, i18n)}
+          />
 
-            {!isLoading && (
-              <React.Fragment>
-                <div className={`${baseClass}__main`}>
-                  <Meta
-                    title={getTranslation(label, i18n)}
-                    description={getTranslation(label, i18n)}
-                    keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
+          {!isLoading && (
+            <React.Fragment>
+              <div className={`${baseClass}__main`}>
+                <Meta
+                  title={getTranslation(label, i18n)}
+                  description={getTranslation(label, i18n)}
+                  keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
+                />
+                <Eyebrow />
+                {!(global.versions?.drafts && global.versions?.drafts?.autosave) && (
+                  <LeaveWithoutSaving />
+                )}
+                <Gutter className={`${baseClass}__edit`}>
+                  <header className={`${baseClass}__header`}>
+                    <h1>
+                      {t('editLabel', { label: getTranslation(label, i18n) })}
+                    </h1>
+                    {description && (
+                      <div className={`${baseClass}__sub-header`}>
+                        <ViewDescription description={description} />
+                      </div>
+                    )}
+                  </header>
+                  <RenderFields
+                    readOnly={!hasSavePermission}
+                    permissions={permissions.fields}
+                    filter={(field) => (!field.admin.position || (field.admin.position && field.admin.position !== 'sidebar'))}
+                    fieldTypes={fieldTypes}
+                    fieldSchema={fields}
                   />
-                  <Eyebrow />
-                  {!(global.versions?.drafts && global.versions?.drafts?.autosave) && (
-                    <LeaveWithoutSaving />
-                  )}
-                  <Gutter className={`${baseClass}__edit`}>
-                    <header className={`${baseClass}__header`}>
-                      <h1>
-                        {t('editLabel', { label: getTranslation(label, i18n) })}
-                      </h1>
-                      {description && (
-                        <div className={`${baseClass}__sub-header`}>
-                          <ViewDescription description={description} />
-                        </div>
-                      )}
-                    </header>
-                    <RenderFields
-                      readOnly={!hasSavePermission}
-                      permissions={permissions.fields}
-                      filter={(field) => (!field.admin.position || (field.admin.position && field.admin.position !== 'sidebar'))}
-                      fieldTypes={fieldTypes}
-                      fieldSchema={fields}
-                    />
-                  </Gutter>
-                </div>
-                <div className={`${baseClass}__sidebar-wrap`}>
-                  <div className={`${baseClass}__sidebar`}>
-                    <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                      <div className={`${baseClass}__document-actions${((global.versions?.drafts && !global.versions?.drafts?.autosave) || preview) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
-                        {(preview && (!global.versions?.drafts || global.versions?.drafts?.autosave)) && (
-                          <PreviewButton
-                            generatePreviewURL={preview}
-                            CustomComponent={global?.admin?.components?.elements?.PreviewButton}
-                          />
-                        )}
-
-                        {hasSavePermission && (
-                          <React.Fragment>
-                            {global.versions?.drafts && (
-                              <React.Fragment>
-                                {!global.versions.drafts.autosave && (
-                                  <SaveDraft
-                                    CustomComponent={global?.admin?.components?.elements?.SaveDraftButton}
-                                  />
-                                )}
-
-                                <Publish
-                                  CustomComponent={global?.admin?.components?.elements?.PublishButton}
-                                />
-                              </React.Fragment>
-                            )}
-                            {!global.versions?.drafts && (
-                              <Save
-                                CustomComponent={global?.admin?.components?.elements?.SaveButton}
-                              />
-                            )}
-                          </React.Fragment>
-                        )}
-                      </div>
-                      <div className={`${baseClass}__sidebar-fields`}>
-                        {(preview && (global.versions?.drafts && !global.versions?.drafts?.autosave)) && (
-                          <PreviewButton
-                            generatePreviewURL={preview}
-                            CustomComponent={global?.admin?.components?.elements?.PreviewButton}
-                          />
-                        )}
-                        {global.versions?.drafts && (
-                          <React.Fragment>
-                            <Status />
-                            {(global.versions.drafts.autosave && hasSavePermission) && (
-                              <Autosave
-                                publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-                                global={global}
-                              />
-                            )}
-                          </React.Fragment>
-                        )}
-                        <RenderFields
-                          readOnly={!hasSavePermission}
-                          permissions={permissions.fields}
-                          filter={(field) => field.admin.position === 'sidebar'}
-                          fieldTypes={fieldTypes}
-                          fieldSchema={fields}
+                </Gutter>
+              </div>
+              <div className={`${baseClass}__sidebar-wrap`}>
+                <div className={`${baseClass}__sidebar`}>
+                  <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                    <div className={`${baseClass}__document-actions${((global.versions?.drafts && !global.versions?.drafts?.autosave) || preview) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
+                      {(preview && (!global.versions?.drafts || global.versions?.drafts?.autosave)) && (
+                        <PreviewButton
+                          generatePreviewURL={preview}
+                          CustomComponent={global?.admin?.components?.elements?.PreviewButton}
                         />
-                      </div>
-                      <ul className={`${baseClass}__meta`}>
-                        {versions && (
-                          <li>
-                            <div className={`${baseClass}__label`}>{t('version:versions')}</div>
-                            <VersionsCount global={global} />
-                          </li>
-                        )}
-                        {(data && !hideAPIURL) && (
-                          <li className={`${baseClass}__api-url`}>
-                            <span className={`${baseClass}__label`}>
-                              API URL
-                              {' '}
-                              <CopyToClipboard value={apiURL} />
-                            </span>
-                            <a
-                              href={apiURL}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {apiURL}
-                            </a>
-                          </li>
-                        )}
-                        {updatedAt && (
-                          <li>
-                            <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                            <div>{formatDate((updatedAt as string), dateFormat, i18n?.language)}</div>
-                          </li>
-                        )}
-                      </ul>
+                      )}
+
+                      {hasSavePermission && (
+                        <React.Fragment>
+                          {global.versions?.drafts && (
+                            <React.Fragment>
+                              {!global.versions.drafts.autosave && (
+                                <SaveDraft
+                                  CustomComponent={global?.admin?.components?.elements?.SaveDraftButton}
+                                />
+                              )}
+
+                              <Publish
+                                CustomComponent={global?.admin?.components?.elements?.PublishButton}
+                              />
+                            </React.Fragment>
+                          )}
+                          {!global.versions?.drafts && (
+                            <Save
+                              CustomComponent={global?.admin?.components?.elements?.SaveButton}
+                            />
+                          )}
+                        </React.Fragment>
+                      )}
                     </div>
+                    <div className={`${baseClass}__sidebar-fields`}>
+                      {(preview && (global.versions?.drafts && !global.versions?.drafts?.autosave)) && (
+                        <PreviewButton
+                          generatePreviewURL={preview}
+                          CustomComponent={global?.admin?.components?.elements?.PreviewButton}
+                        />
+                      )}
+                      {global.versions?.drafts && (
+                        <React.Fragment>
+                          <Status />
+                          {(global.versions.drafts.autosave && hasSavePermission) && (
+                            <Autosave
+                              publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
+                              global={global}
+                            />
+                          )}
+                        </React.Fragment>
+                      )}
+                      <RenderFields
+                        readOnly={!hasSavePermission}
+                        permissions={permissions.fields}
+                        filter={(field) => field.admin.position === 'sidebar'}
+                        fieldTypes={fieldTypes}
+                        fieldSchema={fields}
+                      />
+                    </div>
+                    <ul className={`${baseClass}__meta`}>
+                      {versions && (
+                        <li>
+                          <div className={`${baseClass}__label`}>{t('version:versions')}</div>
+                          <VersionsCount global={global} />
+                        </li>
+                      )}
+                      {(data && !hideAPIURL) && (
+                        <li className={`${baseClass}__api-url`}>
+                          <span className={`${baseClass}__label`}>
+                            API URL
+                            {' '}
+                            <CopyToClipboard value={apiURL} />
+                          </span>
+                          <a
+                            href={apiURL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {apiURL}
+                          </a>
+                        </li>
+                      )}
+                      {updatedAt && (
+                        <li>
+                          <div className={`${baseClass}__label`}>{t('lastModified')}</div>
+                          <div>{formatDate((updatedAt as string), dateFormat, i18n?.language)}</div>
+                        </li>
+                      )}
+                    </ul>
                   </div>
                 </div>
-              </React.Fragment>
-            )}
-          </Form>
-        </EditDepthContext.Provider>
+              </div>
+            </React.Fragment>
+          )}
+        </Form>
       </OperationContext.Provider>
     </div>
   );

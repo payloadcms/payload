@@ -13,6 +13,7 @@ import { IndexProps } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { Fields } from '../../forms/Form/types';
 import { usePreferences } from '../../utilities/Preferences';
+import { EditDepthContext } from '../../utilities/EditDepth';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>();
@@ -85,21 +86,23 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const isLoading = !initialState || !docPermissions || isLoadingData;
 
   return (
-    <RenderCustomComponent
-      DefaultComponent={DefaultGlobal}
-      CustomComponent={CustomEdit}
-      componentProps={{
-        isLoading,
-        data: dataToRender,
-        permissions: docPermissions,
-        initialState,
-        global,
-        onSave,
-        apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${global.versions?.drafts ? '&draft=true' : ''}`,
-        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
-        updatedAt: updatedAt || dataToRender?.updatedAt,
-      }}
-    />
+    <EditDepthContext.Provider value={1}>
+      <RenderCustomComponent
+        DefaultComponent={DefaultGlobal}
+        CustomComponent={CustomEdit}
+        componentProps={{
+          isLoading,
+          data: dataToRender,
+          permissions: docPermissions,
+          initialState,
+          global,
+          onSave,
+          apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${global.versions?.drafts ? '&draft=true' : ''}`,
+          action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
+          updatedAt: updatedAt || dataToRender?.updatedAt,
+        }}
+      />
+    </EditDepthContext.Provider>
   );
 };
 export default GlobalView;
