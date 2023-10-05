@@ -1,3 +1,4 @@
+import path from 'path'
 import type { Config } from 'payload/config'
 import type { Configuration as WebpackConfig } from 'webpack'
 import type { GeneratedAdapter, PluginOptions } from './types'
@@ -21,6 +22,7 @@ export const extendWebpackConfig =
         ...(existingWebpackConfig.resolve || {}),
         alias: {
           ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
+          '@payloadcms/plugin-cloud-storage': path.resolve(__dirname, './admin/index.js'),
         },
       },
     }

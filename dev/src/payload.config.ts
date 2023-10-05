@@ -72,7 +72,7 @@ export default buildConfig({
             '@azure/storage-blob': path.resolve(__dirname, '../../src/adapters/azure/mock.js'),
             '@aws-sdk/client-s3': path.resolve(__dirname, '../../src/adapters/s3/mock.js'),
             '@google-cloud/storage': path.resolve(__dirname, '../../src/adapters/gcs/mock.js'),
-            fs: path.resolve(__dirname, './mocks/fsMock.js'),
+            fs: path.resolve(__dirname, '../../src/adapters/s3/fsMock.js'),
           },
         },
       }
@@ -83,7 +83,7 @@ export default buildConfig({
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
   plugins: [
-    // @ts-expect-error
+    // @ts-expect-error Conflicting types for relative package
     cloudStorage({
       collections: {
         media: {

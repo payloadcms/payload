@@ -1,3 +1,1 @@
-exports.Storage = function () {
-  return null
-}
+export const gcsAdapter = () => ({})

@@ -1,24 +1,13 @@
 import path from 'path'
 import type { GroupField, TextField } from 'payload/dist/fields/config/types'
 import type { CollectionConfig, Field } from 'payload/types'
-import { getAfterReadHook } from '../hooks/afterRead'
-import type { GeneratedAdapter, GenerateFileURL } from '../types'
 
 interface Args {
   collection: CollectionConfig
-  disablePayloadAccessControl?: true
-  generateFileURL?: GenerateFileURL
   prefix?: string
-  adapter: GeneratedAdapter
 }
 
-export const getFields = ({
-  adapter,
-  collection,
-  disablePayloadAccessControl,
-  generateFileURL,
-  prefix,
-}: Args): Field[] => {
+export const getFields = ({ collection, prefix }: Args): Field[] => {
   const baseURLField: Field = {
     name: 'url',
     label: 'URL',
@@ -59,12 +48,6 @@ export const getFields = ({
   fields.push({
     ...baseURLField,
     ...(existingURLField || {}),
-    hooks: {
-      afterRead: [
-        getAfterReadHook({ adapter, collection, disablePayloadAccessControl, generateFileURL }),
-        ...(existingURLField?.hooks?.afterRead || []),
-      ],
-    },
   })
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
@@ -107,18 +90,6 @@ export const getFields = ({
             {
               ...(existingSizeURLField || {}),
               ...baseURLField,
-              hooks: {
-                afterRead: [
-                  getAfterReadHook({
-                    adapter,
-                    collection,
-                    size,
-                    disablePayloadAccessControl,
-                    generateFileURL,
-                  }),
-                  ...(existingSizeURLField?.hooks?.afterRead || []),
-                ],
-              },
             },
           ],
         }

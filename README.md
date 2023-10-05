@@ -37,6 +37,23 @@ export default buildConfig({
 });
 ```
 
+### Conditionally Enabling/Disabling
+
+The proper way to conditionally enable/disable this plugin is to use the `enabled` property.
+
+```ts
+cloudStorage({
+  enabled: process.env.MY_CONDITION === 'true',
+  collections: {
+    'my-collection-slug': {
+      adapter: theAdapterToUse, // see docs for the adapter you want to use
+    },
+  },
+}),
+```
+
+If the code is included *in any way in your config* but conditionally disabled in another fashion, you may run into issues such as `Webpack Build Error: Can't Resolve 'fs' and 'stream'` or similar because the plugin must be run at all times in order to properly extend the webpack config.
+
 ## Features
 
 **Adapter-based Implementation**
@@ -58,6 +75,7 @@ This plugin is configurable to work across many different Payload collections. A
 | Option                  | Type                                    | Description |
 |-------------------------|-----------------------------------------| ----------- |
 | `collections` *         | Record<string, [CollectionOptions](https://github.com/payloadcms/plugin-cloud-storage/blob/c4a492a62abc2f21b4cd6a7c97778acd8e831212/src/types.ts#L48)> | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
+| `enabled`               |                                         | `boolean` to conditionally enable/disable plugin. Default: true. |
 
 **Collection-specific options:**
 
@@ -104,7 +122,8 @@ const adapter = s3Adapter({
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY_ID,
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    }
+    },
+    region: process.env.S3_REGION,
     // ... Other S3 configuration
   },
   bucket: process.env.S3_BUCKET,
@@ -112,6 +131,7 @@ const adapter = s3Adapter({
 
 // Now you can pass this adapter to the plugin
 ```
+Note that the credentials option does not have to be used when you are using PayloadCMS on an EC2 instance that has been configured with an IAM Role with necessary permissions.
 
 Other S3 Client configuration is documented [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html).
 
@@ -147,7 +167,7 @@ const adapter = gcsAdapter({
     // you can choose any method for authentication, and authorization which is being provided by `@google-cloud/storage`
     keyFilename: './gcs-credentials.json',
     //OR
-    credentials: JSON.parse(process.env.GCS_CREDENTIALS) // this env variable will have stringify version of your credentials.json file
+    credentials: JSON.parse(process.env.GCS_CREDENTIALS || "{}") // this env variable will have stringify version of your credentials.json file
   },
   bucket: process.env.GCS_BUCKET,
 })
@@ -157,9 +177,9 @@ const adapter = gcsAdapter({
 
 ### Payload Access Control
 
-Payload ships with access control that runs _even on statically served files_. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
+Payload ships with access control that runs *even on statically served files*. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
 
-To preserve this feature, by default, this plugin _keeps all file URLs exactly the same_. Your file URLs won't be updated to point directly to your cloud storage source, as in that case, Payload's access control will be completely bypassed and you would need public readability on your cloud-hosted files.
+To preserve this feature, by default, this plugin *keeps all file URLs exactly the same*. Your file URLs won't be updated to point directly to your cloud storage source, as in that case, Payload's access control will be completely bypassed and you would need public readability on your cloud-hosted files.
 
 Instead, all uploads will still be reached from the default `/collectionSlug/staticURL/filename` path. This plugin will "pass through" all files that are hosted on your third-party cloud service—with the added benefit of keeping your existing access control in place.
 
@@ -171,7 +191,7 @@ For instructions regarding how to develop with this plugin locally, [click here]
 
 ## Questions
 
-Please contact [Payload](dev@payloadcms.com) with any questions about using this plugin.
+Please contact [Payload](mailto:dev@payloadcms.com) with any questions about using this plugin.
 
 ## Credit
 

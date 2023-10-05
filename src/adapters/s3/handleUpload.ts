@@ -24,7 +24,7 @@ export const getHandleUpload = ({
   prefix = '',
 }: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const fileKey = path.posix.join(prefix, file.filename)
+    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
 
     const fileBufferOrStream: Buffer | stream.Readable = file.tempFilePath
       ? fs.createReadStream(file.tempFilePath)

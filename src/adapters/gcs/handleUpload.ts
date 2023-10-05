@@ -18,7 +18,9 @@ export const getHandleUpload = ({
   prefix = '',
 }: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const gcsFile = getStorageClient().bucket(bucket).file(path.posix.join(prefix, file.filename))
+    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
+
+    const gcsFile = getStorageClient().bucket(bucket).file(fileKey)
     await gcsFile.save(file.buffer, {
       metadata: {
         contentType: file.mimeType,

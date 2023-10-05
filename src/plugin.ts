@@ -16,19 +16,26 @@ import { getFields } from './fields/getFields'
 
 export const cloudStorage =
   (pluginOptions: PluginOptions) =>
-  (config: Config): Config => {
-    const { collections: allCollectionOptions } = pluginOptions
+  (incomingConfig: Config): Config => {
+    const { collections: allCollectionOptions, enabled } = pluginOptions
+    const config = { ...incomingConfig }
 
-    const webpack = extendWebpackConfig({ options: pluginOptions, config })
+    const webpack = extendWebpackConfig({ options: pluginOptions, config: incomingConfig })
+
+    config.admin = {
+      ...(config.admin || {}),
+      webpack,
+    }
+
+    // Return early if disabled. Only webpack config mods are applied.
+    if (enabled === false) {
+      return config
+    }
 
     const initFunctions: Array<() => void> = []
 
     return {
       ...config,
-      admin: {
-        ...(config.admin || {}),
-        webpack,
-      },
       collections: (config.collections || []).map(existingCollection => {
         const options = allCollectionOptions[existingCollection.slug]
 

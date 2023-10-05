@@ -1,4 +1,5 @@
-import { Storage, StorageOptions } from '@google-cloud/storage'
+import type { StorageOptions } from '@google-cloud/storage'
+import { Storage } from '@google-cloud/storage'
 import type { Adapter, GeneratedAdapter } from '../../types'
 import { getGenerateURL } from './generateURL'
 import { getHandler } from './staticHandler'
@@ -16,9 +17,11 @@ export const gcsAdapter =
   ({ options, bucket, acl }: Args): Adapter =>
   ({ collection, prefix }): GeneratedAdapter => {
     let storageClient: Storage | null = null
-    const getStorageClient = () => {
+
+    const getStorageClient = (): Storage => {
       if (storageClient) return storageClient
-      return (storageClient = new Storage(options))
+      storageClient = new Storage(options)
+      return storageClient
     }
 
     return {

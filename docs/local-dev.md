@@ -8,7 +8,7 @@ This repository includes a local development environment for local testing and d
 1. `cd` into `./dev` and run `cp .env.example .env` to create an `.env` file
 1. Open your newly created `./dev/.env` file and _completely_ fill out each property
 
-### Azure Adapter Development
+## Azure Adapter Development
 
 This repository comes with a Docker emulator for Azure Blob Storage.
 
@@ -20,7 +20,7 @@ Otherwise, if you are not using the emulator, make sure your environment variabl
 
 Finally, to start the Payload dev server with the Azure adapter, run `yarn dev:azure` and then open `http://localhost:3000/admin` in your browser.
 
-### S3 Adapter Development
+## S3 Adapter Development
 
 This repository also includes a Docker LocalStack emulator for S3. It requires a few more steps to get up and running.
 
@@ -34,7 +34,7 @@ To use the S3 emulator, use the following steps:
 
 Finally, you can run `yarn dev:s3` and then open `http://localhost:3000/admin` in your browser.
 
-### Google Cloud Storage(GCS) Adapter Development
+## Google Cloud Storage (GCS) Adapter Development
 
 This repository comes with a Docker emulator for Google Cloud Storage.
 
