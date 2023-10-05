@@ -40,6 +40,10 @@ function SlashMenuItem({
   if (option.displayName && typeof option.displayName === 'function') {
     title = option.displayName({ i18n })
   }
+  // Crop title to max. 50 characters
+  if (title.length > 25) {
+    title = title.substring(0, 25) + '...'
+  }
 
   return (
     <button

@@ -58,18 +58,18 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
           options: [
             {
               options: [
-                new SlashMenuOption('Block', {
+                /*new SlashMenuOption('Block', {
                   Icon: BlockIcon,
                   keywords: ['block', 'blocks'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_BLOCK_WITH_DRAWER_COMMAND, null)
                   },
-                }),
+                }),*/
                 ...props?.blocks?.map((block) => {
-                  return new SlashMenuOption(block.slug + ' Block', {
+                  return new SlashMenuOption(block.slug, {
                     Icon: BlockIcon,
                     displayName: ({ i18n }) => {
-                      return getTranslation(block.labels.singular, i18n) + ' Block'
+                      return getTranslation(block.labels.singular, i18n)
                     },
                     keywords: ['block', 'blocks', block.slug],
                     onSelect: ({ editor }) => {
