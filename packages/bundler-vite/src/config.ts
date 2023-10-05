@@ -76,6 +76,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     base: payloadConfig.routes.admin,
     build: {
       chunkSizeWarningLimit: 4000,
+      emptyOutDir: true,
       outDir: payloadConfig.admin.buildPath,
       rollupOptions: {
         plugins: [image()],
