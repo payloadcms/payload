@@ -7,7 +7,7 @@ import cssVariables from '../../../cssVariables'
 import { Props as MediaProps } from '../types'
 
 import classes from './index.module.scss'
-import { PAYLOAD_SERVER_URL } from '@/app/api'
+import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 
 const { breakpoints } = cssVariables
 

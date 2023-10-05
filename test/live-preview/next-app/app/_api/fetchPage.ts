@@ -1,7 +1,8 @@
 import { Page } from '@/payload-types'
+import { PAYLOAD_SERVER_URL } from './serverURL'
 
 export const fetchPage = async (slug: string): Promise<Page> => {
-  return await fetch(`http://localhost:3000/api/pages?where[slug][equals]=${slug}`, {
+  return await fetch(`${PAYLOAD_SERVER_URL}/api/pages?where[slug][equals]=${slug}`, {
     method: 'GET',
     cache: 'no-store',
   })

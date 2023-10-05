@@ -1,5 +1,5 @@
 import type { Header } from '../../payload-types'
-import { PAYLOAD_SERVER_URL } from '../api'
+import { PAYLOAD_SERVER_URL } from './serverURL'
 
 export async function fetchHeader(): Promise<Header> {
   if (!PAYLOAD_SERVER_URL) throw new Error('PAYLOAD_SERVER_URL not found')

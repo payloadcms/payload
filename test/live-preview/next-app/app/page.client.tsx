@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { PAYLOAD_SERVER_URL } from './api'
+import { PAYLOAD_SERVER_URL } from './_api/serverURL'
 // The `useLivePreview` hook is imported from the monorepo for development purposes only
 // in your own app you would import this hook directly from the package itself
 // i.e. `import { useLivePreview } from '@payloadcms/live-preview-react'`
