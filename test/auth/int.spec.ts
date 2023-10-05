@@ -490,6 +490,50 @@ describe('Auth', () => {
 
       expect(result).toBeTruthy()
     })
+
+    it('should enforce access control on the me route', async () => {
+      const user = await payload.create({
+        collection: slug,
+        data: {
+          email: 'insecure@me.com',
+          password: 'test',
+          roles: ['admin'],
+          adminOnlyField: 'admin secret',
+        },
+      })
+
+      const response = await fetch(`${apiUrl}/${slug}/login`, {
+        body: JSON.stringify({
+          email: 'insecure@me.com',
+          password: 'test',
+        }),
+        headers,
+        method: 'post',
+      })
+
+      const data = await response.json()
+      const adminMe = await fetch(`${apiUrl}/${slug}/me`, {
+        headers: {
+          Authorization: `JWT ${data.token}`,
+        },
+      }).then((res) => res.json())
+      expect(adminMe.user.adminOnlyField).toEqual('admin secret')
+
+      await payload.update({
+        collection: slug,
+        id: user?.id || '',
+        data: {
+          roles: ['editor'],
+        },
+      })
+
+      const editorMe = await fetch(`${apiUrl}/${slug}/me`, {
+        headers: {
+          Authorization: `JWT ${adminMe?.token}`,
+        },
+      }).then((res) => res.json())
+      expect(editorMe.user.adminOnlyField).toBeUndefined()
+    })
   })
 
   describe('API Key', () => {
