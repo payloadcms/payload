@@ -1,24 +1,27 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
+import isImage from '../../../../../../uploads/isImage'
 import Button from '../../../../elements/Button'
+import { Drawer, DrawerToggler } from '../../../../elements/Drawer'
+import { Dropzone } from '../../../../elements/Dropzone'
+import { EditUpload } from '../../../../elements/EditUpload'
 import FileDetails from '../../../../elements/FileDetails'
+import PreviewSizes from '../../../../elements/PreviewSizes'
+import Thumbnail from '../../../../elements/Thumbnail'
 import Error from '../../../../forms/Error'
+import { useFormSubmitted } from '../../../../forms/Form/context'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
-import Label from '../../../../forms/Label'
+import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
 import './index.scss'
-import { fieldBaseClass } from '../../../../forms/field-types/shared'
 
 const baseClass = 'file-field'
-
-const handleDrag = (e) => {
-  e.preventDefault()
-  e.stopPropagation()
-}
+export const editDrawerSlug = 'edit-upload'
+export const sizePreviewSlug = 'preview-sizes'
 
 const validate = (value) => {
   if (!value && value !== undefined) {
@@ -28,87 +31,60 @@ const validate = (value) => {
   return true
 }
 
-const Upload: React.FC<Props> = (props) => {
-  const { collection, internalState } = props
+export const UploadActions = ({ canEdit, showSizePreviews }) => {
+  const { t } = useTranslation('upload')
+  return (
+    <div className={`${baseClass}__file-mutation`}>
+      {showSizePreviews && (
+        <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
+          {t('upload:previewSizes')}
+        </DrawerToggler>
+      )}
+      {canEdit && (
+        <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+          {t('upload:editImage')}
+        </DrawerToggler>
+      )}
+    </div>
+  )
+}
 
-  const inputRef = useRef(null)
-  const dropRef = useRef(null)
-  const [selectingFile, setSelectingFile] = useState(false)
-  const [dragging, setDragging] = useState(false)
-  const [dragCounter, setDragCounter] = useState(0)
+export const Upload: React.FC<Props> = (props) => {
+  const submitted = useFormSubmitted()
+  const { collection, internalState, onChange, updatedAt } = props
   const [replacingFile, setReplacingFile] = useState(false)
+  const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation(['upload', 'general'])
   const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true))
   const { docPermissions } = useDocumentInfo()
-
-  const { errorMessage, setValue, showError, value } = useField<{ name: string }>({
+  const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
     validate,
   })
 
-  const handleDragIn = useCallback((e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragCounter((count) => count + 1)
-    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-      setDragging(true)
-    }
-  }, [])
-
-  const handleDragOut = useCallback(
-    (e) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setDragCounter((count) => count - 1)
-      if (dragCounter > 1) return
-      setDragging(false)
-    },
-    [dragCounter],
-  )
-
-  const handleDrop = useCallback(
-    (e) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setDragging(false)
-
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        setValue(e.dataTransfer.files[0])
-        setDragging(false)
-
-        e.dataTransfer.clearData()
-        setDragCounter(0)
-      } else {
-        setDragging(false)
-      }
-    },
-    [setValue],
-  )
-
   const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedFileName = e.target.value
     if (value) {
-      const fileValue = value as File
+      const fileValue = value
       // Creating a new File object with updated properties
       const newFile = new File([fileValue], updatedFileName, { type: fileValue.type })
       setValue(newFile) // Updating the state with the new File object
     }
   }
 
-  // Only called when input is interacted with directly
-  // Not called when drag + drop is used
-  // Or when input is cleared
-  const handleInputChange = useCallback(() => {
-    setSelectingFile(false)
-    setValue(inputRef?.current?.files?.[0] || null)
-  }, [inputRef, setValue])
+  const handleFileSelection = React.useCallback(
+    (files: FileList) => {
+      const fileToUpload = files?.[0]
+      setValue(fileToUpload)
+    },
+    [setValue],
+  )
 
-  useEffect(() => {
-    if (selectingFile) {
-      inputRef.current.click()
-      setSelectingFile(false)
-    }
-  }, [selectingFile, inputRef, setSelectingFile])
+  const handleFileRemoval = useCallback(() => {
+    setReplacingFile(true)
+    setValue(null)
+    setFileSrc('')
+  }, [setValue])
 
   useEffect(() => {
     setDoc(reduceFieldsToValues(internalState || {}, true))
@@ -116,110 +92,118 @@ const Upload: React.FC<Props> = (props) => {
   }, [internalState])
 
   useEffect(() => {
-    const div = dropRef.current
-    if (div) {
-      div.addEventListener('dragenter', handleDragIn)
-      div.addEventListener('dragleave', handleDragOut)
-      div.addEventListener('dragover', handleDrag)
-      div.addEventListener('drop', handleDrop)
+    if (value instanceof File) {
+      const fileReader = new FileReader()
+      fileReader.onload = (e) => {
+        const imgSrc = e.target?.result
 
-      return () => {
-        div.removeEventListener('dragenter', handleDragIn)
-        div.removeEventListener('dragleave', handleDragOut)
-        div.removeEventListener('dragover', handleDrag)
-        div.removeEventListener('drop', handleDrop)
+        if (typeof imgSrc === 'string') {
+          setFileSrc(imgSrc)
+        }
       }
+      fileReader.readAsDataURL(value)
     }
 
-    return () => null
-  }, [handleDragIn, handleDragOut, handleDrop, value])
+    if (typeof onChange === 'function') {
+      onChange(value)
+    }
+  }, [value, onChange, updatedAt])
 
   const canRemoveUpload =
     docPermissions?.update?.permission &&
     'delete' in docPermissions &&
     docPermissions?.delete?.permission
 
+  const hasImageSizes = collection?.upload?.imageSizes?.length > 0
+  const hasResizeOptions = Boolean(collection?.upload?.resizeOptions)
+
+  const { collection: { upload: { crop: showCrop = true, focalPoint = true } } = {} } = props
+
+  const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions)
+
+  const lastSubmittedTime = submitted ? new Date().toISOString() : null
+
   return (
-    <div
-      className={[fieldBaseClass, baseClass, dragging && `${baseClass}--dragging`]
-        .filter(Boolean)
-        .join(' ')}
-    >
+    <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <Error message={errorMessage} showError={showError} />
+
       {doc.filename && !replacingFile && (
         <FileDetails
+          canEdit={showCrop || showFocalPoint}
           collection={collection}
           doc={doc}
-          handleRemove={
-            canRemoveUpload
-              ? () => {
-                  setReplacingFile(true)
-                  setValue(null)
-                }
-              : undefined
-          }
+          handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
+          hasImageSizes={hasImageSizes}
+          imageCacheTag={lastSubmittedTime}
         />
       )}
+
       {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
+          {!value && (
+            <Dropzone
+              className={`${baseClass}__dropzone`}
+              mimeTypes={collection?.upload?.mimeTypes}
+              onChange={handleFileSelection}
+            />
+          )}
+
           {value && (
-            <div className={`${baseClass}__file-selected`}>
-              <Label label={t('fileName')} required />
-              <div className={`${baseClass}__file-upload`}>
+            <React.Fragment>
+              <div className={`${baseClass}__thumbnail-wrap`}>
+                <Thumbnail fileSrc={isImage(value.type) ? fileSrc : null} />
+              </div>
+              <div className={`${baseClass}__file-adjustments`}>
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
                   type="text"
                   value={value.name}
                 />
-                <Button
-                  buttonStyle="none"
-                  icon="x"
-                  onClick={() => {
-                    setValue(null)
-                    inputRef.current.value = null
-                  }}
-                  tooltip={t('general:cancel')}
-                />
+
+                {isImage(value.type) && (
+                  <UploadActions
+                    canEdit={showCrop || showFocalPoint}
+                    showSizePreviews={hasImageSizes && doc.filename && !replacingFile}
+                  />
+                )}
               </div>
-            </div>
-          )}
-          {!value && (
-            <React.Fragment>
-              <div
-                className={`${baseClass}__drop-zone`}
-                onPaste={(e) => {
-                  if (e?.clipboardData?.files.length) {
-                    const fileObject = e.clipboardData.files[0]
-                    if (fileObject) setValue(fileObject)
-                  }
-                }}
-                ref={dropRef}
-              >
-                <Button
-                  buttonStyle="secondary"
-                  className={`${baseClass}__file-button`}
-                  onClick={() => setSelectingFile(true)}
-                  size="small"
-                >
-                  {t('selectFile')}
-                </Button>
-                <p className={`${baseClass}__drag-label`}>
-                  {t('general:or')} {t('dragAndDrop')}
-                </p>
-              </div>
+              <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__remove`}
+                icon="x"
+                iconStyle="with-border"
+                onClick={handleFileRemoval}
+                round
+                tooltip={t('general:cancel')}
+              />
             </React.Fragment>
           )}
-          <input
-            accept={collection?.upload?.mimeTypes?.join(',')}
-            onChange={handleInputChange}
-            ref={inputRef}
-            type="file"
-          />
         </div>
+      )}
+
+      {(value || doc.filename) && (
+        <Drawer header={null} slug={editDrawerSlug}>
+          <EditUpload
+            doc={doc || undefined}
+            fileName={value?.name || doc?.filename}
+            fileSrc={fileSrc || doc?.url}
+            imageCacheTag={lastSubmittedTime}
+            showCrop={showCrop}
+            showFocalPoint={showFocalPoint}
+          />
+        </Drawer>
+      )}
+      {doc && hasImageSizes && (
+        <Drawer
+          className={`${baseClass}__previewDrawer`}
+          hoverTitle
+          slug={sizePreviewSlug}
+          title={t('upload:sizesFor', { label: doc?.filename })}
+        >
+          <PreviewSizes collection={collection} doc={doc} updatedAt={updatedAt} />
+        </Drawer>
       )}
     </div>
   )
 }
-
-export default Upload

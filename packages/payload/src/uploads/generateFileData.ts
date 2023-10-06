@@ -1,3 +1,4 @@
+import type { UploadedFile } from 'express-fileupload'
 import type { Sharp } from 'sharp'
 
 import { fromBuffer } from 'file-type'
@@ -13,6 +14,8 @@ import type { FileData, FileToSave, ProbedImageSize } from './types'
 
 import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
+import cropImage from './cropImage'
+import getFileByPath from './getFileByPath'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -47,15 +50,8 @@ export const generateFileData = async <T>({
     }
   }
 
-  const { file } = req.files || {}
-  if (!file) {
-    if (throwOnMissingFile) throw new MissingFile(req.t)
-
-    return {
-      data,
-      files: [],
-    }
-  }
+  let file = req.files?.file || undefined
+  const { uploadEdits } = req.query || {}
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload
@@ -63,6 +59,24 @@ export const generateFileData = async <T>({
   let staticPath = staticDir
   if (staticDir.indexOf('/') !== 0) {
     staticPath = path.resolve(config.paths.configDir, staticDir)
+  }
+
+  if (!file && uploadEdits && data) {
+    const { filename } = data as FileData
+    const filePath = `${staticPath}/${filename}`
+    const response = await getFileByPath(filePath)
+
+    overwriteExistingFiles = true
+    file = response as UploadedFile
+  }
+
+  if (!file) {
+    if (throwOnMissingFile) throw new MissingFile(req.t)
+
+    return {
+      data,
+      files: [],
+    }
   }
 
   if (!disableLocalStorage) {
@@ -73,6 +87,8 @@ export const generateFileData = async <T>({
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
   const fileIsAnimated = file.mimetype === 'image/gif' || file.mimetype === 'image/webp'
+  const cropData =
+    typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
   try {
     const fileSupportsResize = canResizeImage(file.mimetype)
@@ -152,20 +168,43 @@ export const generateFileData = async <T>({
     }
 
     fileData.filename = fsSafeName
+    let fileForResize = file
 
-    // Original file
-    filesToSave.push({
-      buffer: fileBuffer?.data || file.data,
-      path: `${staticPath}/${fsSafeName}`,
-    })
+    if (cropData) {
+      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
+
+      filesToSave.push({
+        buffer: croppedImage,
+        path: `${staticPath}/${fsSafeName}`,
+      })
+
+      fileForResize = {
+        ...file,
+        data: croppedImage,
+        size: info.size,
+      }
+      fileData.width = info.width
+      fileData.height = info.height
+      fileData.filesize = info.size
+    } else {
+      filesToSave.push({
+        buffer: fileBuffer?.data || file.data,
+        path: `${staticPath}/${fsSafeName}`,
+      })
+    }
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {
       req.payloadUploadSizes = {}
-
       const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
-        dimensions,
-        file,
+        dimensions: !cropData
+          ? dimensions
+          : {
+              ...dimensions,
+              height: fileData.height,
+              width: fileData.width,
+            },
+        file: fileForResize,
         mimeType: fileData.mimeType,
         req,
         savedFilename: fsSafeName || file.name,

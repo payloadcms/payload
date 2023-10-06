@@ -13,7 +13,7 @@ import { LeaveWithoutSaving } from '../../../../modals/LeaveWithoutSaving'
 import Meta from '../../../../utilities/Meta'
 import Auth from '../Auth'
 import { SetStepNav } from '../SetStepNav'
-import Upload from '../Upload'
+import { Upload } from '../Upload'
 import './index.scss'
 
 const baseClass = 'collection-default-edit'
@@ -32,6 +32,7 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
     internalState,
     isEditing,
     permissions,
+    updatedAt,
   } = props
 
   const { auth, fields, upload } = collection
@@ -96,7 +97,9 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
                 verify={auth.verify}
               />
             )}
-            {upload && <Upload collection={collection} data={data} internalState={internalState} />}
+            {upload && (
+              <Upload collection={collection} internalState={internalState} updatedAt={updatedAt} />
+            )}
             <RenderFields
               className={`${baseClass}__fields`}
               fieldSchema={fields}

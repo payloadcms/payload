@@ -5,10 +5,12 @@ import fs from 'fs'
 import sanitize from 'sanitize-filename'
 import sharp from 'sharp'
 
+import type { UploadEdits } from '../admin/components/views/collections/Edit/types'
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { PayloadRequest } from '../express/types'
 import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types'
 
+import { isNumber } from '../utilities/isNumber'
 import fileExists from './fileExists'
 
 type ResizeArgs = {
@@ -16,7 +18,11 @@ type ResizeArgs = {
   dimensions: ProbedImageSize
   file: UploadedFile
   mimeType: string
-  req: PayloadRequest
+  req: PayloadRequest & {
+    query?: {
+      uploadEdits?: UploadEdits
+    }
+  }
   savedFilename: string
   staticPath: string
 }
@@ -162,7 +168,6 @@ export default async function resizeAndTransformImageSizes({
   staticPath,
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { imageSizes } = config.upload
-
   // Noting to resize here so return as early as possible
   if (!imageSizes) return { sizeData: {}, sizesToSave: [] }
 
@@ -177,7 +182,57 @@ export default async function resizeAndTransformImageSizes({
         return createResult(imageResizeConfig.name)
       }
 
-      let resized = sharpBase.clone().resize(imageResizeConfig)
+      let resized = sharpBase.clone()
+
+      if (req.query && imageResizeConfig.width && imageResizeConfig.height) {
+        const { height, width } = imageResizeConfig
+
+        const focalPoint = {
+          x: 0.5,
+          y: 0.5,
+        }
+
+        if (req.query?.uploadEdits?.focalPoint) {
+          if (isNumber(req.query.uploadEdits.focalPoint?.x)) {
+            focalPoint.x = req.query.uploadEdits.focalPoint.x
+          }
+          if (isNumber(req.query.uploadEdits.focalPoint?.y)) {
+            focalPoint.y = req.query.uploadEdits.focalPoint.y
+          }
+        }
+
+        const originalAspectRatio = dimensions.width / dimensions.height
+        const targetAspectRatio = imageResizeConfig.width / imageResizeConfig.height
+
+        if (originalAspectRatio !== targetAspectRatio) {
+          const prioritizeHeight = originalAspectRatio > targetAspectRatio
+
+          const { info } = await resized
+            .resize({
+              height: prioritizeHeight ? height : null,
+              width: prioritizeHeight ? null : width,
+            })
+            .toBuffer({ resolveWithObject: true })
+
+          const maxOffsetX = Math.max(info.width - width, 0)
+          const maxOffsetY = Math.max(info.height - height, 0)
+
+          const focalPointX = Math.floor(info.width * focalPoint.x - width / 2)
+          const focalPointY = Math.floor(info.height * focalPoint.y - height / 2)
+
+          const offsetX = Math.min(Math.max(focalPointX, 0), maxOffsetX)
+          const offsetY = Math.min(Math.max(focalPointY, 0), maxOffsetY)
+
+          resized = resized.extract({
+            height,
+            left: offsetX,
+            top: offsetY,
+            width,
+          })
+        }
+      } else {
+        resized = resized.resize(imageResizeConfig)
+      }
 
       if (imageResizeConfig.formatOptions) {
         resized = resized.toFormat(
@@ -211,7 +266,11 @@ export default async function resizeAndTransformImageSizes({
       const imagePath = `${staticPath}/${imageNameWithDimensions}`
 
       if (await fileExists(imagePath)) {
-        fs.unlinkSync(imagePath)
+        try {
+          fs.unlinkSync(imagePath)
+        } catch {
+          // Ignore unlink errors
+        }
       }
 
       const { height, size, width } = bufferInfo

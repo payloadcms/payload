@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
@@ -12,19 +12,31 @@ const Thumbnail: React.FC<Props> = (props) => {
   const {
     className = '',
     collection,
-    doc: { filename },
+    doc: { filename } = {},
     doc,
+    fileSrc,
+    imageCacheTag,
     size,
   } = props
 
-  const thumbnailSRC = useThumbnail(collection, doc)
+  const thumbnailSRC = collection && doc ? useThumbnail(collection, doc) : fileSrc
+  const [src, setSrc] = useState(thumbnailSRC)
 
   const classes = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
+  useEffect(() => {
+    if (doc && collection && thumbnailSRC) {
+      setSrc(`${thumbnailSRC}${imageCacheTag ? `?${imageCacheTag}` : ''}`)
+    }
+    if (fileSrc) {
+      setSrc(fileSrc)
+    }
+  }, [doc, collection, thumbnailSRC, fileSrc, imageCacheTag])
+
   return (
     <div className={classes}>
-      {thumbnailSRC && <img alt={filename as string} src={thumbnailSRC} />}
-      {!thumbnailSRC && <FileGraphic />}
+      {src && <img alt={filename as string} src={src} />}
+      {!src && <FileGraphic />}
     </div>
   )
 }

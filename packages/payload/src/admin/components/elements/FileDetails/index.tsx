@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react'
-import AnimateHeight from 'react-animate-height'
-import { useTranslation } from 'react-i18next'
+import React from 'react'
 
-import type { FileSizes, Upload } from '../../../../uploads/types'
 import type { Props } from './types'
 
-import Chevron from '../../icons/Chevron'
+import isImage from '../../../../uploads/isImage'
+import { UploadActions } from '../../views/collections/Edit/Upload'
 import Button from '../Button'
 import Thumbnail from '../Thumbnail'
 import Meta from './Meta'
@@ -13,46 +11,20 @@ import './index.scss'
 
 const baseClass = 'file-details'
 
-// sort to the same as imageSizes
-const sortSizes = (sizes: FileSizes, imageSizes: Upload['imageSizes']) => {
-  if (!imageSizes || imageSizes.length === 0) return sizes
-
-  const orderedSizes: FileSizes = {}
-
-  imageSizes.forEach(({ name }) => {
-    if (sizes[name]) {
-      orderedSizes[name] = sizes[name]
-    }
-  })
-
-  return orderedSizes
-}
-
 const FileDetails: React.FC<Props> = (props) => {
-  const { collection, doc, handleRemove } = props
+  const { canEdit, collection, doc, handleRemove, hasImageSizes, imageCacheTag } = props
 
   const {
     slug: collectionSlug,
-    upload: { imageSizes, staticURL },
+    upload: { staticURL },
   } = collection
 
-  const { id, filename, filesize, height, mimeType, sizes, url, width } = doc
-
-  const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes))
-
-  useEffect(() => {
-    setOrderedSizes(sortSizes(sizes, imageSizes))
-  }, [sizes, imageSizes])
-
-  const [moreInfoOpen, setMoreInfoOpen] = useState(false)
-  const { t } = useTranslation('upload')
-
-  const hasSizes = sizes && Object.keys(sizes)?.length > 0
+  const { id, filename, filesize, height, mimeType, url, width } = doc
 
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail collection={collection} doc={doc} />
+        <Thumbnail collection={collection} doc={doc} imageCacheTag={imageCacheTag} />
         <div className={`${baseClass}__main-detail`}>
           <Meta
             collection={collectionSlug}
@@ -65,29 +37,9 @@ const FileDetails: React.FC<Props> = (props) => {
             url={url as string}
             width={width as number}
           />
-          {hasSizes && (
-            <Button
-              buttonStyle="none"
-              className={`${baseClass}__toggle-more-info${moreInfoOpen ? ' open' : ''}`}
-              onClick={() => setMoreInfoOpen(!moreInfoOpen)}
-            >
-              {!moreInfoOpen && (
-                <React.Fragment>
-                  {t('moreInfo')}
-                  <div className={`${baseClass}__toggle-icon`}>
-                    <Chevron />
-                  </div>
-                </React.Fragment>
-              )}
-              {moreInfoOpen && (
-                <React.Fragment>
-                  {t('lessInfo')}
-                  <div className={`${baseClass}__toggle-icon`}>
-                    <Chevron direction="up" />
-                  </div>
-                </React.Fragment>
-              )}
-            </Button>
+
+          {isImage(mimeType as string) && (
+            <UploadActions canEdit={canEdit} showSizePreviews={hasImageSizes && doc.filename} />
           )}
         </div>
         {handleRemove && (
@@ -101,24 +53,6 @@ const FileDetails: React.FC<Props> = (props) => {
           />
         )}
       </header>
-      {hasSizes && (
-        <AnimateHeight className={`${baseClass}__more-info`} height={moreInfoOpen ? 'auto' : 0}>
-          <ul className={`${baseClass}__sizes`}>
-            {Object.entries(orderedSizes).map(([key, val]) => {
-              if (val?.filename) {
-                return (
-                  <li key={key}>
-                    <div className={`${baseClass}__size-label`}>{key}</div>
-                    <Meta {...val} mimeType={val.mimeType} staticURL={staticURL} />
-                  </li>
-                )
-              }
-
-              return null
-            })}
-          </ul>
-        </AnimateHeight>
-      )}
     </div>
   )
 }

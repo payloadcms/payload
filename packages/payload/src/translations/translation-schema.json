@@ -580,6 +580,9 @@
         "and": {
           "type": "string"
         },
+        "applyChanges": {
+          "type": "string"
+        },
         "ascending": {
           "type": "string"
         },
@@ -809,6 +812,9 @@
           "type": "string"
         },
         "remove": {
+          "type": "string"
+        },
+        "reset": {
           "type": "string"
         },
         "row": {
@@ -1079,10 +1085,25 @@
     "upload": {
       "additionalProperties": false,
       "properties": {
+        "crop": {
+          "type": "string"
+        },
+        "cropToolDescription": {
+          "type": "string"
+        },
         "dragAndDrop": {
           "type": "string"
         },
         "dragAndDropHere": {
+          "type": "string"
+        },
+        "editImage": {
+          "type": "string"
+        },
+        "focalPoint": {
+          "type": "string"
+        },
+        "focalPointDescription": {
           "type": "string"
         },
         "fileName": {
@@ -1100,13 +1121,25 @@
         "moreInfo": {
           "type": "string"
         },
+        "previewSizes": {
+          "type": "string"
+        },
         "selectCollectionToBrowse": {
           "type": "string"
         },
         "selectFile": {
           "type": "string"
         },
+        "setCropArea": {
+          "type": "string"
+        },
+        "setFocalPoint": {
+          "type": "string"
+        },
         "sizes": {
+          "type": "string"
+        },
+        "sizesFor": {
           "type": "string"
         },
         "width": {

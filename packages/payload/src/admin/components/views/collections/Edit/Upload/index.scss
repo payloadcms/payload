@@ -5,109 +5,109 @@
   margin-bottom: var(--base);
   background: var(--theme-elevation-50);
 
+  &__upload {
+    display: flex;
+  }
+
   .tooltip.error-message {
     z-index: 3;
     bottom: calc(100% - #{base(0.5)});
   }
 
-  &__drag-label {
-    margin: 0;
-    text-transform: lowercase;
-  }
-
-  &__upload {
-    position: relative;
-
-    input[type='file'] {
-      position: absolute;
-      top: 0;
-      z-index: -1;
-    }
-  }
-
-  &__file-selected,
-  &__drop-zone {
-    background: var(--theme-elevation-100);
-    position: relative;
-    z-index: 2;
-    padding: base(2);
-    display: flex;
-  }
-
-  &__drop-zone {
-    align-items: center;
-    border: 1px dotted var(--theme-elevation-400);
-    gap: $baseline;
-
-    .btn {
-      margin: 0;
-    }
-  }
-
   &__file-selected {
-    gap: $baseline;
-    flex-direction: column;
-    .btn {
-      @include formInput;
-      position: relative;
-      margin: 0;
-      margin-left: -1px;
-      display: flex;
-      padding: 0 base(0.5);
-      align-items: center;
-      display: flex;
-      cursor: pointer;
-      width: fit-content;
+    display: flex;
+  }
 
-      &:hover {
-        .btn__icon {
-          background: none;
+  &__thumbnail-wrap {
+    position: relative;
+    width: 150px;
 
-          .stroke {
-            stroke: currentColor;
-          }
-        }
-      }
+    .thumbnail {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
   }
 
-  &__file-upload {
-    display: flex;
+  &__remove {
+    margin: calc($baseline * 1.5) $baseline $baseline 0;
+    place-self: flex-start;
+  }
+
+  &__file-adjustments {
+    padding: $baseline;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
   }
 
   &__filename {
     @include formInput;
-    padding-top: base(0.25);
-    padding-bottom: base(0.25);
-    flex-wrap: nowrap;
+    background-color: var(--theme-bg);
   }
 
-  &--dragging {
-    .file-field__drop-zone {
-      border-color: var(--theme-success-500);
-      background: var(--theme-success-150);
+  &__file-mutation {
+    display: flex;
+    gap: calc(var(--base) / 2);
+    flex-wrap: wrap;
 
-      * {
-        pointer-events: none;
+    & button {
+      cursor: pointer;
+      background-color: var(--theme-elevation-150);
+      border: none;
+      border-radius: $style-radius-s;
+      padding: base(0.25) base(0.5);
+      text-wrap: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &:hover {
+        background-color: var(--theme-elevation-100);
       }
     }
   }
 
-  @include mid-break {
-    &__drop-zone {
-      display: block;
-      text-align: center;
+  &__previewDrawer {
+    & h2 {
+      margin: 0 base(1) 0 0;
+      text-wrap: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: calc(100% - base(2));
+    }
+  }
 
-      .btn {
-        margin: 0 auto;
+  @include small-break {
+    &__upload {
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    &__remove {
+      margin: $baseline;
+      order: 2;
+    }
+
+    &__file-adjustments {
+      order: 3;
+      border-top: 2px solid var(--theme-elevation-0);
+      padding: calc($baseline * 0.5);
+      gap: 0;
+    }
+
+    &__thumbnail-wrap {
+      order: 1;
+      width: 50%;
+
+      .thumbnail {
         width: 100%;
-        max-width: 200px;
       }
+    }
 
-      .file-field__drag-label {
-        display: none;
-      }
+    &__edit {
+      display: none;
     }
   }
 }

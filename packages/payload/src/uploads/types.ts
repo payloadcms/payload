@@ -61,7 +61,9 @@ export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => fals
 
 export type IncomingUploadType = {
   adminThumbnail?: GetAdminThumbnail | string
+  crop?: boolean
   disableLocalStorage?: boolean
+  focalPoint?: boolean
   /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
   handlers?: any[]
@@ -76,7 +78,9 @@ export type IncomingUploadType = {
 
 export type Upload = {
   adminThumbnail?: GetAdminThumbnail | string
-  disableLocalStorage: boolean
+  crop?: boolean
+  disableLocalStorage?: boolean
+  focalPoint?: boolean
   formatOptions?: ImageUploadFormatOptions
   handlers?: any[]
   imageSizes?: ImageSize[]

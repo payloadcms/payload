@@ -82,10 +82,80 @@ export default buildConfigWithDefaults({
       fields: [],
     },
     {
+      slug: 'no-image-sizes',
+      upload: {
+        staticURL: '/no-image-sizes',
+        staticDir: './no-image-sizes',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        resizeOptions: {
+          position: 'center',
+          width: 200,
+          height: 200,
+        },
+      },
+      fields: [],
+    },
+    {
+      slug: 'crop-only',
+      upload: {
+        focalPoint: false,
+        staticURL: '/crop-only',
+        staticDir: './crop-only',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        imageSizes: [
+          {
+            name: 'focalTest',
+            width: 400,
+            height: 300,
+          },
+          {
+            name: 'focalTest2',
+            width: 600,
+            height: 300,
+          },
+          {
+            name: 'focalTest3',
+            width: 900,
+            height: 300,
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
+      slug: 'focal-only',
+      upload: {
+        crop: false,
+        staticURL: '/focal-only',
+        staticDir: './focal-only',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        imageSizes: [
+          {
+            name: 'focalTest',
+            width: 400,
+            height: 300,
+          },
+          {
+            name: 'focalTest2',
+            width: 600,
+            height: 300,
+          },
+          {
+            name: 'focalTest3',
+            width: 900,
+            height: 300,
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
       slug: mediaSlug,
       upload: {
         staticURL: '/media',
         staticDir: './media',
+        // crop: false,
+        // focalPoint: false,
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -94,11 +164,6 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
-        resizeOptions: {
-          width: 1280,
-          height: 720,
-          position: 'center',
-        },
         formatOptions: {
           format: 'png',
           options: { quality: 90 },
@@ -133,12 +198,12 @@ export default buildConfigWithDefaults({
             name: 'accidentalSameSize',
             width: 320,
             height: 80,
+            position: 'top',
           },
           {
             name: 'tablet',
             width: 640,
             height: 480,
-            crop: 'left top',
           },
           {
             name: 'mobile',
@@ -150,6 +215,41 @@ export default buildConfigWithDefaults({
             name: 'icon',
             width: 16,
             height: 16,
+          },
+          {
+            name: 'focalTest',
+            width: 400,
+            height: 300,
+          },
+          {
+            name: 'focalTest2',
+            width: 600,
+            height: 300,
+          },
+          {
+            name: 'focalTest3',
+            width: 900,
+            height: 300,
+          },
+          {
+            name: 'focalTest4',
+            width: 300,
+            height: 400,
+          },
+          {
+            name: 'focalTest5',
+            width: 300,
+            height: 600,
+          },
+          {
+            name: 'focalTest6',
+            width: 300,
+            height: 800,
+          },
+          {
+            name: 'focalTest7',
+            width: 300,
+            height: 300,
           },
         ],
       },
