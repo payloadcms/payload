@@ -51,6 +51,9 @@ importers:
       '@types/react':
         specifier: 18.2.15
         version: 18.2.15
+      '@types/shelljs':
+        specifier: 0.8.12
+        version: 0.8.12
       '@types/testing-library__jest-dom':
         specifier: 5.14.8
         version: 5.14.8
@@ -72,6 +75,9 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
+      glob:
+        specifier: 8.1.0
+        version: 8.1.0
       graphql-request:
         specifier: 6.1.0
         version: 6.1.0(graphql@16.7.1)
@@ -117,6 +123,9 @@ importers:
       shelljs:
         specifier: 0.8.5
         version: 0.8.5
+      slash:
+        specifier: 3.0.0
+        version: 3.0.0
       slate:
         specifier: 0.91.4
         version: 0.91.4
@@ -826,9 +835,6 @@ importers:
       '@types/sharp':
         specifier: 0.31.1
         version: 0.31.1
-      '@types/shelljs':
-        specifier: 0.8.12
-        version: 0.8.12
       '@types/uuid':
         specifier: 8.3.4
         version: 8.3.4
@@ -856,9 +862,6 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
-      glob:
-        specifier: 8.1.0
-        version: 8.1.0
       graphql-request:
         specifier: 3.7.0
         version: 3.7.0(graphql@16.7.1)
@@ -898,12 +901,6 @@ importers:
       serve-static:
         specifier: 1.15.0
         version: 1.15.0
-      shelljs:
-        specifier: 0.8.5
-        version: 0.8.5
-      slash:
-        specifier: 3.0.0
-        version: 3.0.0
       terser:
         specifier: 5.19.2
         version: 5.19.2
