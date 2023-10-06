@@ -25,12 +25,12 @@ export const Hamburger: React.FC<{
         )}
 
         {isActive && (
-          <div className={`${baseClass}__close-icon`}>
+          <div aria-label={t('collapse')} className={`${baseClass}__close-icon`}>
             {closeIcon === 'x' && (
-              <div>
+              <React.Fragment>
                 <div className={`${baseClass}__line ${baseClass}__x-left`} />
                 <div className={`${baseClass}__line ${baseClass}__x-right`} />
-              </div>
+              </React.Fragment>
             )}
 
             {closeIcon === 'collapse' && (

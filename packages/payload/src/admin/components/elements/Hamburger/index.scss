@@ -55,19 +55,15 @@
     height: 1px;
   }
 
-  &__x,
-  &__collapse {
-    display: none;
-    opacity: 0;
-  }
-
   &__x-left {
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate3d(-50%, -50%, 0) rotate(45deg);
   }
 
   &__x-right {
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate3d(-50%, -50%, 0) rotate(-45deg);
