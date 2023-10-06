@@ -14,9 +14,8 @@ import type { Pool, PoolConfig } from 'pg'
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
-  client: PoolConfig
   migrationDir?: string
-  migrationName?: string
+  pool: PoolConfig
 }
 
 export type GenericColumn = PgColumn<
@@ -45,22 +44,22 @@ export type DrizzleTransaction = PgTransaction<
   ExtractTablesWithRelations<Record<string, unknown>>
 >
 
-export type PostgresAdapter = BaseDatabaseAdapter &
-  Args & {
-    drizzle: DrizzleDB
-    enums: Record<string, GenericEnum>
-    pool: Pool
-    relations: Record<string, GenericRelation>
-    schema: Record<string, GenericEnum | GenericRelation | GenericTable>
-    sessions: {
-      [id: string]: {
-        db: DrizzleTransaction
-        reject: () => void
-        resolve: () => void
-      }
+export type PostgresAdapter = BaseDatabaseAdapter & {
+  drizzle: DrizzleDB
+  enums: Record<string, GenericEnum>
+  pool: Pool
+  poolOptions: Args['pool']
+  relations: Record<string, GenericRelation>
+  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  sessions: {
+    [id: string]: {
+      db: DrizzleTransaction
+      reject: () => void
+      resolve: () => void
     }
-    tables: Record<string, GenericTable>
   }
+  tables: Record<string, GenericTable>
+}
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
@@ -68,7 +67,7 @@ export type MigrateUpArgs = { payload: Payload }
 export type MigrateDownArgs = { payload: Payload }
 
 declare module 'payload' {
-  export interface DatabaseAdapter extends Args {
+  export interface DatabaseAdapter extends Omit<Args, 'pool'> {
     drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
     pool: Pool

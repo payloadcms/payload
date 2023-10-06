@@ -6,10 +6,11 @@ import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
 import {
   buildStateFromSchema,
   useAuth,
+  useConfig,
   useDocumentInfo,
   useLocale,
 } from 'payload/components/utilities'
-import { fieldTypes } from 'payload/config'
+import { fieldTypes, sanitizeFields } from 'payload/config'
 import { deepCopyObject, getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -34,7 +35,17 @@ export const UploadDrawer: React.FC<
   const { closeModal } = useModal()
   const { getDocPreferences } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
-  const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
+  const fieldSchemaUnsanitized =
+    fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
+  const config = useConfig()
+
+  // Sanitize custom fields here
+  const validRelationships = config.collections.map((c) => c.slug) || []
+  const fieldSchema = sanitizeFields({
+    config: config,
+    fields: fieldSchemaUnsanitized,
+    validRelationships,
+  })
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -51,9 +62,18 @@ export const UploadDrawer: React.FC<
   )
 
   useEffect(() => {
+    // Sanitize custom fields here
+    const validRelationships = config.collections.map((c) => c.slug) || []
+    const fieldSchema = sanitizeFields({
+      config: config,
+      fields: fieldSchemaUnsanitized,
+      validRelationships,
+    })
+
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data: deepCopyObject(element?.fields || {}),
         fieldSchema,
         locale,
@@ -66,7 +86,7 @@ export const UploadDrawer: React.FC<
     }
 
     awaitInitialState()
-  }, [fieldSchema, element.fields, user, locale, t, getDocPreferences])
+  }, [fieldSchemaUnsanitized, config, element.fields, user, locale, t, getDocPreferences])
 
   return (
     <Drawer

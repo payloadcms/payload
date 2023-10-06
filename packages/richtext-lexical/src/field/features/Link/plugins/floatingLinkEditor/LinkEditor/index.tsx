@@ -23,6 +23,7 @@ import {
   useEditDepth,
   useLocale,
 } from 'payload/components/utilities'
+import { sanitizeFields } from 'payload/config'
 import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -65,7 +66,14 @@ export function LinkEditor({
   const [initialState, setInitialState] = useState<Fields>({})
 
   const [fieldSchema] = useState(() => {
-    const fields = transformExtraFields(customFieldSchema, config, i18n)
+    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
+    // Sanitize custom fields here
+    const validRelationships = config.collections.map((c) => c.slug) || []
+    const fields = sanitizeFields({
+      config: config,
+      fields: fieldsUnsanitized,
+      validRelationships,
+    })
 
     return fields
   })
@@ -132,6 +140,7 @@ export function LinkEditor({
       // values saved in the link node you clicked on.
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data,
         fieldSchema,
         locale,

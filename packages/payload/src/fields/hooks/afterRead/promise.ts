@@ -128,7 +128,7 @@ export const promise = async ({
     }
 
     case 'richText': {
-      const editor: RichTextAdapter = field?.editor || req?.payload?.config?.editor
+      const editor: RichTextAdapter = field?.editor
       if (editor?.afterReadPromise) {
         const afterReadPromise = editor.afterReadPromise({
           currentDepth,

@@ -4,6 +4,7 @@ import type { TFunction } from 'i18next'
 import ObjectID from 'bson-objectid'
 
 import type { User } from '../../../../../auth'
+import type { SanitizedConfig } from '../../../../../config/types'
 import type { NonPresentationalField } from '../../../../../fields/config/types'
 import type { Data, Fields, FormField } from '../types'
 
@@ -12,6 +13,7 @@ import getValueWithDefault from '../../../../../fields/getDefaultValue'
 import { iterateFields } from './iterateFields'
 
 type Args = {
+  config: SanitizedConfig
   data: Data
   field: NonPresentationalField
   fullData: Data
@@ -30,6 +32,7 @@ type Args = {
 
 export const addFieldStatePromise = async ({
   id,
+  config,
   data,
   field,
   fullData,
@@ -68,6 +71,7 @@ export const addFieldStatePromise = async ({
       validationResult = await fieldState.validate(data?.[field.name], {
         ...field,
         id,
+        config,
         data: fullData,
         operation,
         siblingData: data,
@@ -100,6 +104,7 @@ export const addFieldStatePromise = async ({
             acc.promises.push(
               iterateFields({
                 id,
+                config,
                 data: row,
                 fields: field.fields,
                 fullData,
@@ -188,6 +193,7 @@ export const addFieldStatePromise = async ({
               acc.promises.push(
                 iterateFields({
                   id,
+                  config,
                   data: row,
                   fields: block.fields,
                   fullData,
@@ -249,6 +255,7 @@ export const addFieldStatePromise = async ({
       case 'group': {
         await iterateFields({
           id,
+          config,
           data: data?.[field.name] || {},
           fields: field.fields,
           fullData,
@@ -348,6 +355,7 @@ export const addFieldStatePromise = async ({
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
+      config,
       data,
       fields: field.fields,
       fullData,
@@ -364,6 +372,7 @@ export const addFieldStatePromise = async ({
     const promises = field.tabs.map((tab) =>
       iterateFields({
         id,
+        config,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         fields: tab.fields,
         fullData,

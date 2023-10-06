@@ -12,6 +12,7 @@ import {
   useDocumentInfo,
   useLocale,
 } from 'payload/components/utilities'
+import { sanitizeFields } from 'payload/config'
 import { deepCopyObject, getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -77,7 +78,14 @@ export const LinkElement: React.FC<{
   const [initialState, setInitialState] = useState<Fields>({})
   const { getDocPreferences } = useDocumentInfo()
   const [fieldSchema] = useState(() => {
-    const fields = transformExtraFields(customFieldSchema, config, i18n)
+    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
+    // Sanitize custom fields here
+    const validRelationships = config.collections.map((c) => c.slug) || []
+    const fields = sanitizeFields({
+      config: config,
+      fields: fieldsUnsanitized,
+      validRelationships,
+    })
 
     return fields
   })
@@ -103,6 +111,7 @@ export const LinkElement: React.FC<{
 
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data,
         fieldSchema,
         locale,

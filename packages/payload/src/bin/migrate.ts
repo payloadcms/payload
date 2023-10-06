@@ -27,9 +27,10 @@ const availableCommands = [
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
 export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
-  const { args, help } = parsedArgs
+  const { _: args, help } = parsedArgs
   if (help) {
-    console.log(`\n\n${availableCommandsMsg}\n`)
+    // eslint-disable-next-line no-console
+    console.log(`\n\n${availableCommandsMsg}\n`) // Avoid having to init payload to get the logger
     process.exit(0)
   }
 

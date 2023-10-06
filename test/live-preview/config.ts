@@ -1,15 +1,23 @@
+import path from 'path'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
+import Categories from './collections/Categories'
+import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
+import { Posts, postsSlug } from './collections/Posts'
+import { Footer } from './globals/Footer'
+import { Header } from './globals/Header'
+import { footer } from './seed/footer'
+import { header } from './seed/header'
+import { home } from './seed/home'
+import { post1 } from './seed/post-1'
+import { post2 } from './seed/post-2'
+import { post3 } from './seed/post-3'
+import { postsPage } from './seed/posts-page'
 
-export interface Post {
-  createdAt: Date
-  description: string
-  id: string
-  title: string
-  updatedAt: Date
-}
+export const pagesSlug = 'pages'
 
-export const slug = 'pages'
 export default buildConfigWithDefaults({
   admin: {},
   cors: ['http://localhost:3001'],
@@ -23,105 +31,12 @@ export default buildConfigWithDefaults({
       },
       fields: [],
     },
-    {
-      slug,
-      access: {
-        read: () => true,
-        create: () => true,
-        update: () => true,
-        delete: () => true,
-      },
-      admin: {
-        livePreview: {
-          url: 'http://localhost:3001',
-          breakpoints: [
-            {
-              label: 'Mobile',
-              name: 'mobile',
-              width: 375,
-              height: 667,
-            },
-            // {
-            //   label: 'Desktop',
-            //   name: 'desktop',
-            //   width: 1440,
-            //   height: 900,
-            // },
-          ],
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-          required: true,
-        },
-        {
-          name: 'slug',
-          type: 'text',
-          required: true,
-          admin: {
-            position: 'sidebar',
-          },
-        },
-        {
-          name: 'layout',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'hero',
-              labels: {
-                singular: 'Hero',
-                plural: 'Hero',
-              },
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  required: true,
-                },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  required: true,
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'featuredPosts',
-          type: 'relationship',
-          relationTo: 'posts',
-          hasMany: true,
-        },
-      ],
-    },
-    {
-      slug: 'posts',
-      access: {
-        read: () => true,
-        create: () => true,
-        update: () => true,
-        delete: () => true,
-      },
-      admin: {
-        useAsTitle: 'title',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
+    Pages,
+    Posts,
+    Categories,
+    Media,
   ],
+  globals: [Header, Footer],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -131,28 +46,54 @@ export default buildConfigWithDefaults({
       },
     })
 
-    const post1 = await payload.create({
-      collection: 'posts',
+    const media = await payload.create({
+      collection: 'media',
+      filePath: path.resolve(__dirname, 'image-1.jpg'),
       data: {
-        title: 'Post 1',
+        alt: 'Image 1',
       },
     })
 
+    const [post1Doc, post2Doc, post3Doc] = await Promise.all([
+      await payload.create({
+        collection: postsSlug,
+        data: JSON.parse(JSON.stringify(post1).replace(/\{\{IMAGE\}\}/g, media.id)),
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: JSON.parse(JSON.stringify(post2).replace(/\{\{IMAGE\}\}/g, media.id)),
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: JSON.parse(JSON.stringify(post3).replace(/\{\{IMAGE\}\}/g, media.id)),
+      }),
+    ])
+
+    const postsPageDoc = await payload.create({
+      collection: pagesSlug,
+      data: JSON.parse(JSON.stringify(postsPage).replace(/\{\{IMAGE\}\}/g, media.id)),
+    })
+
     await payload.create({
-      collection: slug,
-      data: {
-        title: 'Hello, world!',
-        description: 'This is an example of live preview.',
-        slug: 'home',
-        layout: [
-          {
-            blockType: 'hero',
-            title: 'Hello, world!',
-            description: 'This is an example of live preview.',
-          },
-        ],
-        featuredPosts: [post1.id],
-      },
+      collection: pagesSlug,
+      data: JSON.parse(
+        JSON.stringify(home)
+          .replace(/\{\{MEDIA_ID\}\}/g, media.id)
+          .replace(/\{\{POSTS_PAGE_ID\}\}/g, postsPageDoc.id)
+          .replace(/\{\{POST_1_ID\}\}/g, post1Doc.id)
+          .replace(/\{\{POST_2_ID\}\}/g, post2Doc.id)
+          .replace(/\{\{POST_3_ID\}\}/g, post3Doc.id),
+      ),
+    })
+
+    await payload.updateGlobal({
+      slug: 'header',
+      data: JSON.parse(JSON.stringify(header).replace(/\{\{POSTS_PAGE_ID\}\}/g, postsPageDoc.id)),
+    })
+
+    await payload.updateGlobal({
+      slug: 'footer',
+      data: JSON.parse(JSON.stringify(footer)),
     })
   },
 })
