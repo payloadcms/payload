@@ -93,7 +93,12 @@
     }
 
     &__mobile-nav-toggler {
-      display: block;
+      display: flex;
+      align-items: center;
+
+      &.nav-toggler--is-open {
+        opacity: 0.5;
+      }
     }
 
     &__step-header {

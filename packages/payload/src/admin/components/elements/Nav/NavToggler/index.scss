@@ -9,4 +9,8 @@
   height: var(--app-header-height);
   width: var(--gutter-h);
   cursor: pointer;
+
+  @include small-break {
+    width: calc(var(--gutter-h) * 2);
+  }
 }
