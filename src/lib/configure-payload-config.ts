@@ -19,13 +19,16 @@ export async function configurePayloadConfig(args: {
   try {
     const packageObj = await fse.readJson(packageJsonPath)
 
+    // TODO: Likely revert this once we go to latest
+    packageObj.dependencies['payload'] = 'beta'
+
     const dbPackage = dbPackages[args.dbDetails.type]
     const bundlerPackage = bundlerPackages['webpack']
     const editorPackage = editorPackages['lexical']
 
-    packageObj.dependencies[dbPackage.packageName] = 'latest'
-    packageObj.dependencies[bundlerPackage.packageName] = 'latest'
-    packageObj.dependencies[editorPackage.packageName] = 'latest'
+    packageObj.dependencies[dbPackage.packageName] = 'beta'
+    packageObj.dependencies[bundlerPackage.packageName] = 'beta'
+    packageObj.dependencies[editorPackage.packageName] = 'beta'
 
     await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
   } catch (err: unknown) {
