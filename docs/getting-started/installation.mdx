@@ -100,34 +100,41 @@ PAYLOAD_SECRET=your-payload-secret
 
 Here is a list of all properties available to pass through `payload.init`:
 
-##### `express`
-
-**Required**. This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
-
 ##### `secret`
 **Required**. This is a secure string that will be used to authenticate with Payload. It can be random but should be at least 14 characters and be very difficult to guess.
 
 Payload uses this secret key to generate secure user tokens (JWT). Behind the scenes, we do not use your secret key to encrypt directly - instead, we first take the secret key and create an encrypted string using the SHA-256 hash function. Then, we reduce the encrypted string to its first 32 characters. This final value is what Payload uses for encryption.
 
+##### `config`
+
+Allows you to pass your config directly to the onInit function. The config passed here should match the payload.config file.
+
 ##### `disableOnInit`
 
 A boolean that disables running your `onInit` function when Payload starts up.
+
+##### `disableDBConnect`
+
+A boolean that disables the database connection when Payload starts up.
 
 ##### `email`
 
 An object used to configure SMTP. [Read more](/docs/email/overview).
 
+##### `express`
+This is your Express app as shown above. Payload will tie into your existing `app` and scope all of its functionalities to sub-routers. By default, Payload will add an `/admin` router and an `/api` router, but you can customize these paths.
+
 ##### `local`
 
 A boolean that when set to `true` tells Payload to start in local-only mode which will bypass setting up API routes. When set to `true`, `express` is not required. This is useful when running scripts that need to use Payload's [local-api](/docs/local-api/overview).
 
-##### `loggerOptions`
-
-Specify options for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=options) for more info on what is available.
-
 ##### `loggerDestination`
 
 Specify destination stream for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=pino-destination) for more info on what is available.
+
+##### `loggerOptions`
+
+Specify options for the built-in Pino logger that Payload uses for internal logging. See [Pino Docs](https://getpino.io/#/docs/api?id=options) for more info on what is available.
 
 ##### `onInit`
 
