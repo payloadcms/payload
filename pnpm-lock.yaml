@@ -45,6 +45,9 @@ importers:
       '@types/node':
         specifier: 20.5.7
         version: 20.5.7
+      '@types/qs':
+        specifier: 6.9.7
+        version: 6.9.7
       '@types/react':
         specifier: 18.2.15
         version: 18.2.15
@@ -111,6 +114,9 @@ importers:
       shelljs:
         specifier: 0.8.5
         version: 0.8.5
+      slate:
+        specifier: 0.91.4
+        version: 0.91.4
       ts-node:
         specifier: 10.9.1
         version: 10.9.1(@swc/core@1.3.76)(@types/node@20.5.7)(typescript@5.2.2)
@@ -9233,7 +9239,6 @@ packages:
 
   /immer@9.0.21:
     resolution: {integrity: sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==}
-    dev: false
 
   /immutable@4.3.4:
     resolution: {integrity: sha512-fsXeu4J4i6WNWSikpI88v/PcVflZz+6kMhUfIwc5SY+poQRPnaf5V7qds6SUyUN3cVxEzuCab7QIoLOQ+DQ1wA==}
@@ -13979,7 +13984,6 @@ packages:
       immer: 9.0.21
       is-plain-object: 5.0.0
       tiny-warning: 1.0.3
-    dev: false
 
   /slice-ansi@5.0.0:
     resolution: {integrity: sha512-FC+lgizVPfie0kkhqUScwRu1O/lF6NOgJmlCgK+/LYxDCTk8sGelYaHDhFcDN+Sn3Cv+3VSa4Byeo+IMCzpMgQ==}
@@ -14517,7 +14521,6 @@ packages:
 
   /tiny-warning@1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
-    dev: false
 
   /titleize@3.0.0:
     resolution: {integrity: sha512-KxVu8EYHDPBdUYdKZdKtU2aj2XfEx9AfjXxE/Aj0vT06w2icA09Vus1rh6eSu1y01akYg6BjIK/hxyLJINoMLQ==}
