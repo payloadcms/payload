@@ -216,10 +216,16 @@ export const API = ({ apiURL }) => {
         <div className={`${baseClass}__form-fields`}>
           <div className={`${baseClass}__filter-query-checkboxes`}>
             {draftsEnabled && (
-              <CheckboxInput checked={draft} label="Draft" onToggle={() => setDraft(!draft)} />
+              <CheckboxInput
+                checked={draft}
+                id="draft-checkbox"
+                label="Draft"
+                onToggle={() => setDraft(!draft)}
+              />
             )}
             <CheckboxInput
               checked={authenticated}
+              id="auth-checkbox"
               label="Authenticated"
               onToggle={() => setAuthenticated(!authenticated)}
             />
