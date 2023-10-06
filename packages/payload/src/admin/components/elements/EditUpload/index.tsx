@@ -29,10 +29,10 @@ export const EditUpload: React.FC<{
   doc?: Data
   fileName: string
   fileSrc: string
+  imageCacheTag?: string
   showCrop?: boolean
   showFocalPoint?: boolean
-  imageCacheTag?: string
-}> = ({ fileName, fileSrc, showCrop, showFocalPoint, imageCacheTag }) => {
+}> = ({ fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation(['general', 'upload'])
   const { formQueryParams, setFormQueryParams } = useFormQueryParams()
@@ -112,7 +112,7 @@ export const EditUpload: React.FC<{
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
         <h2>
-          {t('editing')} {fileName}
+          {t('general:editing')} {fileName}
         </h2>
         <div className={`${baseClass}__actions`}>
           <Button
@@ -121,15 +121,15 @@ export const EditUpload: React.FC<{
             className={`${baseClass}__cancel`}
             onClick={() => closeModal(editDrawerSlug)}
           >
-            {t('cancel')}
+            {t('general:cancel')}
           </Button>
           <Button
-            aria-label={t('applyChanges')}
+            aria-label={t('general:applyChanges')}
             buttonStyle="primary"
             className={`${baseClass}__save`}
             onClick={() => saveEdits()}
           >
-            {t('applyChanges')}
+            {t('general:applyChanges')}
           </Button>
         </div>
       </div>
@@ -152,10 +152,10 @@ export const EditUpload: React.FC<{
                   return <div className={`${baseClass}__crop-window`} ref={cropRef} />
                 }}
               >
-                <img alt={t('setCropArea')} ref={imageRef} src={fileSrcToUse} />
+                <img alt={t('upload:setCropArea')} ref={imageRef} src={fileSrcToUse} />
               </ReactCrop>
             ) : (
-              <img alt={t('setFocalPoint')} ref={imageRef} src={fileSrcToUse} />
+              <img alt={t('upload:setFocalPoint')} ref={imageRef} src={fileSrcToUse} />
             )}
             <DraggableElement
               boundsRef={cropRef}
@@ -176,7 +176,7 @@ export const EditUpload: React.FC<{
               <div className={`${baseClass}__groupWrap`}>
                 <div>
                   <div className={`${baseClass}__titleWrap`}>
-                    <h3>{t('Crop')}</h3>
+                    <h3>{t('upload:crop')}</h3>
                     <Button
                       buttonStyle="none"
                       className={`${baseClass}__reset`}
@@ -190,19 +190,21 @@ export const EditUpload: React.FC<{
                         })
                       }
                     >
-                      {t('reset')}
+                      {t('general:reset')}
                     </Button>
                   </div>
                 </div>
-                <span className={`${baseClass}__description`}>{t('cropToolDescription')}</span>
+                <span className={`${baseClass}__description`}>
+                  {t('upload:cropToolDescription')}
+                </span>
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
-                    name={`${t('width')} (px)`}
+                    name={`${t('upload:width')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'width', value })}
                     value={((crop.width / 100) * originalWidth).toFixed(0)}
                   />
                   <Input
-                    name={`${t('height')} (px)`}
+                    name={`${t('upload:height')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'height', value })}
                     value={((crop.height / 100) * originalHeight).toFixed(0)}
                   />
@@ -214,17 +216,19 @@ export const EditUpload: React.FC<{
               <div className={`${baseClass}__groupWrap`}>
                 <div>
                   <div className={`${baseClass}__titleWrap`}>
-                    <h3>{t('focalPoint')}</h3>
+                    <h3>{t('upload:focalPoint')}</h3>
                     <Button
                       buttonStyle="none"
                       className={`${baseClass}__reset`}
                       onClick={centerFocalPoint}
                     >
-                      {t('reset')}
+                      {t('general:reset')}
                     </Button>
                   </div>
                 </div>
-                <span className={`${baseClass}__description`}>{t('focalPointDescription')}</span>
+                <span className={`${baseClass}__description`}>
+                  {t('upload:focalPointDescription')}
+                </span>
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
                     name="X %"

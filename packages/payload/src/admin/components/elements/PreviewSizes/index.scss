@@ -30,6 +30,12 @@
       display: flex;
       flex-wrap: wrap;
       column-gap: base(1);
+      text-wrap: wrap;
+      width: 100%;
+    }
+
+    .file-meta__url {
+      width: 100%;
     }
   }
 

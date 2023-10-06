@@ -37,12 +37,12 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
     <div className={`${baseClass}__file-mutation`}>
       {showSizePreviews && (
         <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
-          {t('previewSizes')}
+          {t('upload:previewSizes')}
         </DrawerToggler>
       )}
       {canEdit && (
         <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
-          {t('editImage')}
+          {t('upload:editImage')}
         </DrawerToggler>
       )}
     </div>
@@ -192,7 +192,11 @@ export const Upload: React.FC<Props> = (props) => {
         </Drawer>
       )}
       {doc && hasImageSizes && (
-        <Drawer slug={sizePreviewSlug} title={t('sizesFor', { label: doc?.filename })}>
+        <Drawer
+          className={`${baseClass}__previewDrawer`}
+          slug={sizePreviewSlug}
+          title={t('upload:sizesFor', { label: doc?.filename })}
+        >
           <PreviewSizes collection={collection} doc={doc} updatedAt={updatedAt} />
         </Drawer>
       )}

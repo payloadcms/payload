@@ -19,6 +19,9 @@ $header-height: base(5);
 
     & h2 {
       margin: 0;
+      text-wrap: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -29,6 +32,7 @@ $header-height: base(5);
     justify-content: flex-end;
     display: flex;
     gap: base(1);
+    text-wrap: nowrap;
   }
 
   &__cancel,

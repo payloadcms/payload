@@ -78,6 +78,16 @@
     }
   }
 
+  &__previewDrawer {
+    & h2 {
+      margin: 0 base(1) 0 0;
+      text-wrap: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: calc(100% - base(2));
+    }
+  }
+
   @include small-break {
     &__upload {
       flex-wrap: wrap;
