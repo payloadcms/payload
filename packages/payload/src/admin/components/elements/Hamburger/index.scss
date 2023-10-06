@@ -10,6 +10,7 @@
 
   --hamburger-padding: 5px;
   --hamburger-size: 13px;
+  --hamburger-line-gap: 4px;
   padding: var(--hamburger-padding);
   border: 1px solid var(--theme-elevation-350);
   color: var(--theme-elevation-350);
@@ -43,7 +44,7 @@
   &__lines {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--hamburger-line-gap);
     width: 100%;
     margin: auto;
   }
@@ -90,7 +91,8 @@
 
   @include mid-break {
     --hamburger-padding: 4px;
-    --hamburger-size: 9px;
+    --hamburger-size: 11px;
+    --hamburger-line-gap: 3px;
     &__collapse-chevron {
       top: -2px;
     }
