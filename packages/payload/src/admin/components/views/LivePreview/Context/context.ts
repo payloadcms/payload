@@ -2,12 +2,12 @@ import type { Dispatch } from 'react'
 
 import { createContext, useContext } from 'react'
 
-import type { LivePreview } from '../../../../../exports/config'
+import type { LivePreviewConfig } from '../../../../../exports/config'
 import type { SizeReducerAction } from './sizeReducer'
 
 export interface LivePreviewContextType {
-  breakpoint: LivePreview['breakpoints'][number]['name']
-  breakpoints: LivePreview['breakpoints']
+  breakpoint: LivePreviewConfig['breakpoints'][number]['name']
+  breakpoints: LivePreviewConfig['breakpoints']
   deviceFrameRef: React.RefObject<HTMLDivElement>
   iframeHasLoaded: boolean
   iframeRef: React.RefObject<HTMLIFrameElement>
@@ -15,7 +15,7 @@ export interface LivePreviewContextType {
     height: number
     width: number
   }
-  setBreakpoint: (breakpoint: LivePreview['breakpoints'][number]['name']) => void
+  setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
   setIframeHasLoaded: (loaded: boolean) => void
   setSize: Dispatch<SizeReducerAction>

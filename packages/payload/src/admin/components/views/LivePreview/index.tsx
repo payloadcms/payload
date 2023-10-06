@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { LivePreviewConfig } from '../../../../exports/config'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
 import type { EditViewProps } from '../types'
 
@@ -11,6 +12,8 @@ import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../forms/field-types'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
+import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useLocale } from '../../utilities/Locale'
 import Meta from '../../utilities/Meta'
 import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { LivePreview } from './Preview'
@@ -21,16 +24,27 @@ const baseClass = 'live-preview'
 
 export const LivePreviewView: React.FC<EditViewProps> = (props) => {
   const { i18n, t } = useTranslation('general')
+  const documentInfo = useDocumentInfo()
+  const locale = useLocale()
 
-  let url
+  let urlFromConfig: LivePreviewConfig['url']
 
   if ('collection' in props) {
-    url = props?.collection.admin.livePreview.url
+    urlFromConfig = props?.collection.admin.livePreview.url
   }
 
   if ('global' in props) {
-    url = props?.global.admin.livePreview.url
+    urlFromConfig = props?.global.admin.livePreview.url
   }
+
+  const url =
+    typeof urlFromConfig === 'function'
+      ? urlFromConfig({
+          data: props?.data,
+          documentInfo,
+          locale,
+        })
+      : urlFromConfig
 
   const popupState = usePopupWindow({
     eventType: 'livePreview',

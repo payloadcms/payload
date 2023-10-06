@@ -19,7 +19,7 @@ import type {
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
-  LivePreview,
+  LivePreviewConfig,
 } from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
@@ -273,7 +273,7 @@ export type CollectionAdminOptions = {
   /**
    * Live preview options
    */
-  livePreview?: LivePreview
+  livePreview?: LivePreviewConfig
   pagination?: {
     defaultLimit?: number
     limits?: number[]

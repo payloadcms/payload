@@ -1,7 +1,7 @@
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect } from 'react'
 
-import type { LivePreview } from '../../../../../exports/config'
+import type { LivePreviewConfig } from '../../../../../exports/config'
 import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
 
@@ -11,7 +11,7 @@ import { LivePreviewContext } from './context'
 import { sizeReducer } from './sizeReducer'
 
 export type ToolbarProviderProps = EditViewProps & {
-  breakpoints?: LivePreview['breakpoints']
+  breakpoints?: LivePreviewConfig['breakpoints']
   children: React.ReactNode
   deviceSize?: {
     height: number
@@ -37,7 +37,7 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
   const [size, setSize] = React.useReducer(sizeReducer, { height: 0, width: 0 })
 
   const [breakpoint, setBreakpoint] =
-    React.useState<LivePreview['breakpoints'][0]['name']>('responsive')
+    React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {

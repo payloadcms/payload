@@ -13,6 +13,7 @@ import type { Configuration } from 'webpack'
 
 import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
+import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
 import type { CollectionEditViewProps, GlobalEditViewProps } from '../admin/components/views/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
@@ -40,7 +41,7 @@ type Email = {
 // eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Config | Promise<Config>
 
-export type LivePreview = {
+export type LivePreviewConfig = {
   /**
     Device breakpoints to use for the `iframe` of the Live Preview window.
     Options are displayed in the Live Preview toolbar.
@@ -58,7 +59,9 @@ export type LivePreview = {
     The frontend application is responsible for receiving the message and updating the UI accordingly.
     Use the `useLivePreview` hook to get started in React applications.
   */
-  url?: string
+  url?:
+    | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
+    | string
 }
 
 type GeneratePreviewURLOptions = {

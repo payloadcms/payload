@@ -15,12 +15,11 @@ import type {
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
-  LivePreview,
+  LivePreviewConfig,
 } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { Where } from '../../types'
-
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
 
 export type TypeWithID = {
@@ -80,6 +79,7 @@ export type GlobalAdminOptions = {
        */
       Edit?:
         | {
+            [name: string]: EditView
             /**
              * Replace or modify individual nested routes, or add new ones:
              * + `Default` - `/admin/globals/:slug`
@@ -93,7 +93,6 @@ export type GlobalAdminOptions = {
              */
             Default?: EditView
             Versions?: EditView
-            [name: string]: EditView
             // TODO: uncomment these as they are built
             // API?: EditView
             // LivePreview?: EditView
@@ -123,7 +122,7 @@ export type GlobalAdminOptions = {
   /**
    * Live preview options
    */
-  livePreview?: LivePreview
+  livePreview?: LivePreviewConfig
   /**
    * Function to generate custom preview URL
    */
