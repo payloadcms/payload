@@ -12,7 +12,7 @@ import {
   useDocumentInfo,
   useLocale,
 } from 'payload/components/utilities'
-import { fieldTypes } from 'payload/config'
+import { fieldTypes, sanitizeFields } from 'payload/config'
 import { deepCopyObject, getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -50,9 +50,18 @@ export const ExtraFieldsUploadDrawer: React.FC<
   const { closeModal } = useModal()
   const { getDocPreferences } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
-  const fieldSchema = (editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps)
-    ?.collections?.[relatedCollection.slug]?.fields
+  const fieldSchemaUnsanitized = (
+    editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps
+  )?.collections?.[relatedCollection.slug]?.fields
   const config = useConfig()
+
+  // Sanitize custom fields here
+  const validRelationships = config.collections.map((c) => c.slug) || []
+  const fieldSchema = sanitizeFields({
+    config: config,
+    fields: fieldSchemaUnsanitized,
+    validRelationships,
+  })
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -74,6 +83,14 @@ export const ExtraFieldsUploadDrawer: React.FC<
   )
 
   useEffect(() => {
+    // Sanitize custom fields here
+    const validRelationships = config.collections.map((c) => c.slug) || []
+    const fieldSchema = sanitizeFields({
+      config: config,
+      fields: fieldSchemaUnsanitized,
+      validRelationships,
+    })
+
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
@@ -90,7 +107,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
     }
 
     void awaitInitialState()
-  }, [user, locale, t, getDocPreferences, fields, fieldSchema])
+  }, [user, locale, t, getDocPreferences, fields, fieldSchemaUnsanitized, config])
 
   return (
     <Drawer

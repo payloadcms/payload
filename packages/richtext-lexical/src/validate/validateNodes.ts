@@ -19,7 +19,11 @@ export async function validateNodes({
 }): Promise<string | true> {
   for (const node of nodes) {
     // Validate node
-    if (nodeValidations?.has(node.type)) {
+    if (
+      nodeValidations &&
+      typeof nodeValidations?.has === 'function' &&
+      nodeValidations?.has(node.type)
+    ) {
       const validations = nodeValidations.get(node.type)
       for (const validation of validations) {
         const validationResult = await validation({

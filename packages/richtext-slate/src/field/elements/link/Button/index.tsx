@@ -10,6 +10,7 @@ import {
   useDocumentInfo,
   useLocale,
 } from 'payload/components/utilities'
+import { sanitizeFields } from 'payload/config'
 import React, { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Editor, Range, Transforms } from 'slate'
@@ -75,7 +76,14 @@ export const LinkButton: React.FC<{
   const config = useConfig()
 
   const [fieldSchema] = useState(() => {
-    const fields = transformExtraFields(customFieldSchema, config, i18n)
+    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
+    // Sanitize custom fields here
+    const validRelationships = config.collections.map((c) => c.slug) || []
+    const fields = sanitizeFields({
+      config: config,
+      fields: fieldsUnsanitized,
+      validRelationships,
+    })
 
     return fields
   })
