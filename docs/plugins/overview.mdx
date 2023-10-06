@@ -33,12 +33,18 @@ The base Payload config allows for a `plugins` property which takes an `array` o
 
 ```js
 import { buildConfig } from 'payload/config'
-
 // note: these plugins are not real (yet?)
 import addLastModified from 'payload-add-last-modified'
 import passwordProtect from 'payload-password-protect'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+import { viteBundler } from '@payloadcms/bundler-vite'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
 
 const config = buildConfig({
+  bundler: webpackBundler() // or viteBundler(),
   collections: [
     {
       slug: 'pages',
@@ -56,6 +62,7 @@ const config = buildConfig({
       ],
     },
   ],
+  db: mongooseAdapter({}) // or postgresAdapter({})
   plugins: [
     // Many plugins require options to be passed.
     // In the following example, we call the function

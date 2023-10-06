@@ -28,7 +28,7 @@ The data structure in the database matches the GeoJSON structure to represent po
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                            |
 | **`label`**        | Used as a field label in the Admin panel and to name the generated GraphQL type.                                                                                                                                  |
 | **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                      |
-| **`index`**        | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. To support location queries, point index defaults to `2dsphere`, to disable the index set to `false`. |
+| **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. To support location queries, point index defaults to `2dsphere`, to disable the index set to `false`. |
 | **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                                      |
 | **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                                     |
 | **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                                        |
@@ -41,6 +41,10 @@ The data structure in the database matches the GeoJSON structure to represent po
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                         |
 
 _\* An asterisk denotes that a property is required._
+
+<Banner type="warning">
+  <strong>Note:</strong> The Point field type is currently only supported in MongoDB.
+</Banner>
 
 ### Example
 
