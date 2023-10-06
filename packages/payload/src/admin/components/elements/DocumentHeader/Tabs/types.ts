@@ -1,8 +1,10 @@
 import type { useLocation, useRouteMatch } from 'react-router-dom'
 
+import type { Config } from '../../../../../exports/config'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 import type { useConfig } from '../../../utilities/Config'
 import type { useDocumentInfo } from '../../../utilities/DocumentInfo'
+import type { ContextType } from '../../../utilities/DocumentInfo/types'
 
 export type DocumentTabProps = {
   apiURL?: string
@@ -14,6 +16,8 @@ export type DocumentTabProps = {
 
 export type DocumentTabCondition = (args: {
   collection: SanitizedCollectionConfig
+  config: Config
+  documentInfo: ContextType
   global: SanitizedGlobalConfig
 }) => boolean
 

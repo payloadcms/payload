@@ -12,6 +12,7 @@ import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../forms/field-types'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
+import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import Meta from '../../utilities/Meta'
@@ -24,27 +25,34 @@ const baseClass = 'live-preview'
 
 export const LivePreviewView: React.FC<EditViewProps> = (props) => {
   const { i18n, t } = useTranslation('general')
+  const config = useConfig()
   const documentInfo = useDocumentInfo()
   const locale = useLocale()
 
-  let urlFromConfig: LivePreviewConfig['url']
+  let livePreviewConfig: LivePreviewConfig = config?.admin?.livePreview
 
   if ('collection' in props) {
-    urlFromConfig = props?.collection.admin.livePreview.url
+    livePreviewConfig = {
+      ...(livePreviewConfig || {}),
+      ...(props?.collection.admin.livePreview || {}),
+    }
   }
 
   if ('global' in props) {
-    urlFromConfig = props?.global.admin.livePreview.url
+    livePreviewConfig = {
+      ...(livePreviewConfig || {}),
+      ...(props?.global.admin.livePreview || {}),
+    }
   }
 
   const url =
-    typeof urlFromConfig === 'function'
-      ? urlFromConfig({
+    typeof livePreviewConfig?.url === 'function'
+      ? livePreviewConfig?.url({
           data: props?.data,
           documentInfo,
           locale,
         })
-      : urlFromConfig
+      : livePreviewConfig?.url
 
   const popupState = usePopupWindow({
     eventType: 'livePreview',
@@ -134,7 +142,12 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
             )}
           </Gutter>
         </div>
-        <LivePreview {...props} popupState={popupState} url={url} />
+        <LivePreview
+          {...props}
+          livePreviewConfig={livePreviewConfig}
+          popupState={popupState}
+          url={url}
+        />
       </div>
     </Fragment>
   )

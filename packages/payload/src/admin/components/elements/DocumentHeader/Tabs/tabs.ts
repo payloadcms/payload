@@ -10,8 +10,22 @@ export const tabs: DocumentTabConfig[] = [
   },
   // Live Preview
   {
-    condition: ({ collection, global }) =>
-      Boolean(collection?.admin?.livePreview || global?.admin?.livePreview),
+    condition: ({ collection, config, global }) => {
+      if (collection) {
+        return Boolean(
+          config?.admin?.livePreview?.collections?.includes(collection.slug) ||
+            collection?.admin?.livePreview,
+        )
+      }
+
+      if (global) {
+        return Boolean(
+          config?.admin?.livePreview?.globals?.includes(global.slug) || global?.admin?.livePreview,
+        )
+      }
+
+      return false
+    },
     href: ({ match }) => `${match.url}/preview`,
     isActive: ({ href, location }) => location.pathname === href,
     label: ({ t }) => t('livePreview'),

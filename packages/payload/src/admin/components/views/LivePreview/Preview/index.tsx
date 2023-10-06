@@ -115,13 +115,15 @@ const Preview: React.FC<
 
 export const LivePreview: React.FC<
   EditViewProps & {
+    livePreviewConfig?: LivePreviewConfig
     popupState: ReturnType<typeof usePopupWindow>
     url?: string
   }
 > = (props) => {
-  let url
+  const { livePreviewConfig, url } = props
 
-  let breakpoints: LivePreviewConfig['breakpoints'] = [
+  const breakpoints: LivePreviewConfig['breakpoints'] = [
+    ...(livePreviewConfig?.breakpoints || []),
     {
       name: 'responsive',
       height: '100%',
@@ -129,16 +131,6 @@ export const LivePreview: React.FC<
       width: '100%',
     },
   ]
-
-  if ('collection' in props) {
-    url = props?.collection.admin.livePreview.url
-    breakpoints = breakpoints.concat(props?.collection.admin.livePreview.breakpoints)
-  }
-
-  if ('global' in props) {
-    url = props?.global.admin.livePreview.url
-    breakpoints = breakpoints.concat(props?.global.admin.livePreview.breakpoints)
-  }
 
   return (
     <LivePreviewProvider {...props} breakpoints={breakpoints} url={url}>

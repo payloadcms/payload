@@ -17,23 +17,6 @@ export const Pages: CollectionConfig = {
     delete: () => true,
   },
   admin: {
-    livePreview: {
-      url: ({ data }) => `http://localhost:3001/${data?.slug}`,
-      breakpoints: [
-        {
-          label: 'Mobile',
-          name: 'mobile',
-          width: 375,
-          height: 667,
-        },
-        // {
-        //   label: 'Desktop',
-        //   name: 'desktop',
-        //   width: 1440,
-        //   height: 900,
-        // },
-      ],
-    },
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
   },
