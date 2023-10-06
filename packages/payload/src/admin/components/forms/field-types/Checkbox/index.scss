@@ -22,6 +22,10 @@
   label {
     padding-bottom: 0;
     padding-left: base(0.5);
+
+    &[for] {
+      cursor: pointer;
+    }
   }
 
   [dir='rtl'] &__input {
