@@ -1,3 +1,7 @@
+import type { ParsedArgs } from 'minimist'
+
+import minimist from 'minimist'
+
 import payload from '..'
 import { prettySyncLoggerDestination } from '../utilities/logger'
 
@@ -22,7 +26,13 @@ const availableCommands = [
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
-export const migrate = async (args: string[]): Promise<void> => {
+export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
+  const { args, help } = parsedArgs
+  if (help) {
+    console.log(`\n\n${availableCommandsMsg}\n`)
+    process.exit(0)
+  }
+
   process.env.PAYLOAD_MIGRATING = 'true'
 
   // Barebones instance to access database adapter
@@ -85,7 +95,7 @@ export const migrate = async (args: string[]): Promise<void> => {
 
 // When launched directly call migrate
 if (module.id === require.main.id) {
-  const args = process.argv.slice(2)
+  const args = minimist(process.argv.slice(2))
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   migrate(args).then(() => {
     process.exit(0)

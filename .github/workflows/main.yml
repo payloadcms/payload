@@ -320,3 +320,31 @@ jobs:
 
       - name: Build richtext-lexical
         run: pnpm turbo run build --filter=richtext-lexical
+
+  build-plugin-live-preview:
+    runs-on: ubuntu-latest
+    needs: core-build
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Build live-preview
+        run: pnpm turbo run build --filter=live-preview
+
+      - name: Build live-preview-react
+        run: pnpm turbo run build --filter=live-preview-react

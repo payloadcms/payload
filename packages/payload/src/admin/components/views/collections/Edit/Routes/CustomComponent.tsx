@@ -2,8 +2,8 @@ import React from 'react'
 
 import type { CollectionEditViewProps } from '../../../types'
 
+import { API } from '../../../API'
 import { LivePreviewView } from '../../../LivePreview'
-import { QueryInspector } from '../../../RestAPI'
 import VersionView from '../../../Version/Version'
 import VersionsView from '../../../Versions'
 import { DefaultCollectionEdit } from '../Default/index'
@@ -20,7 +20,7 @@ export type collectionViewType =
 export const defaultCollectionViews: {
   [key in collectionViewType]: React.ComponentType<any>
 } = {
-  API: QueryInspector,
+  API,
   Default: DefaultCollectionEdit,
   LivePreview: LivePreviewView,
   References: null,

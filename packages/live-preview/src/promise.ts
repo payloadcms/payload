@@ -17,7 +17,6 @@ export const promise = async ({
   ref,
   serverURL,
 }: Args): Promise<void> => {
-  // TODO: get dynamic `api` route from config
   const res: any = await fetch(
     `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`,
   ).then((res) => res.json())

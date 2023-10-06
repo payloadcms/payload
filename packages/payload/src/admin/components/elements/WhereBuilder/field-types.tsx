@@ -41,7 +41,7 @@ const numeric = [
   },
   {
     label: 'isGreaterThanOrEqualTo',
-    value: 'greater_than_equals',
+    value: 'greater_than_equal',
   },
 ]
 

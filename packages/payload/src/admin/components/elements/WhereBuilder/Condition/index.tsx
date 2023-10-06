@@ -60,11 +60,11 @@ const Condition: React.FC<Props> = (props) => {
     ? Select
     : valueFields[activeField?.component] || valueFields.Text
 
-  let selectOptions
+  let valueOptions
   if (booleanSelect) {
-    selectOptions = ['true', 'false']
-  } else if ('options' in activeField?.props) {
-    selectOptions = activeField.props.options
+    valueOptions = ['true', 'false']
+  } else if (activeField?.props && 'options' in activeField.props) {
+    valueOptions = activeField.props.options
   }
 
   return (
@@ -108,7 +108,7 @@ const Condition: React.FC<Props> = (props) => {
                 ...activeField?.props,
                 onChange: setInternalValue,
                 operator: operatorValue,
-                options: selectOptions,
+                options: valueOptions,
                 value: internalValue,
               }}
             />

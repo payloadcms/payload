@@ -139,6 +139,8 @@ export default buildConfigWithDefaults({
     await payload.create({ collection: 'rich-text-fields', data: richTextBulletsDoc })
     await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship })
 
+    await payload.create({ collection: 'number-fields', data: { number: 2 } });
+    await payload.create({ collection: 'number-fields', data: { number: 3 } });
     await payload.create({ collection: 'number-fields', data: numberDoc })
 
     const blocksDocWithRichText = { ...blocksDoc }

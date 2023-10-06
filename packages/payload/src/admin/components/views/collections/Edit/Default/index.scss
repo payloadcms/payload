@@ -25,6 +25,12 @@
           padding-left: calc(var(--base) * 2);
         }
       }
+
+      &__fields {
+        & > .tabs-field {
+          margin-right: calc(var(--base) * -2);
+        }
+      }
     }
   }
 
@@ -95,6 +101,12 @@
           [dir='rtl'] & {
             border-left: 0;
             padding-left: var(--gutter-h);
+          }
+        }
+
+        &__fields {
+          & > .tabs-field {
+            margin-right: calc(var(--gutter-h) * -1);
           }
         }
       }

@@ -48,4 +48,18 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       }
     }
   }
+
+  // Delete dev migration
+  try {
+    await payload.delete({
+      collection: 'payload-migrations',
+      where: {
+        batch: {
+          equals: -1,
+        },
+      },
+    })
+  } catch (err: unknown) {
+    payload.logger.error({ error: err, msg: 'Error deleting dev migration' })
+  }
 }
