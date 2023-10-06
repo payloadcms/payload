@@ -11,6 +11,7 @@ import Users from './collections/Users'
 export default buildConfig({
   admin: {
     user: Users.slug,
+    bundler: webpackBundler(), // bundler-config
   },
   editor: lexicalEditor({}), // editor-config
   collections: [Users],
@@ -26,5 +27,4 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
-  bundler: webpackBundler(), // bundler-config
 })

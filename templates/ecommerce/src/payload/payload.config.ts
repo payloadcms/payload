@@ -34,6 +34,7 @@ const mockModulePath = path.resolve(__dirname, './emptyModuleMock.js')
 export default buildConfig({
   admin: {
     user: Users.slug,
+    bundler: webpackBundler(), // bundler-config
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
@@ -74,7 +75,6 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
-  bundler: webpackBundler(), // bundler-config
   cors: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
     Boolean,
   ),

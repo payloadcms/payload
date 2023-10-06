@@ -28,6 +28,7 @@ const mockModulePath = path.resolve(__dirname, './emptyModuleMock.js')
 export default buildConfig({
   admin: {
     user: Users.slug,
+    bundler: webpackBundler(), // bundler-config
     components: {
       // The BeforeDashboard component renders the 'welcome' block that you see after logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import BeforeDashboard statement on line 15.
@@ -59,7 +60,6 @@ export default buildConfig({
     url: process.env.DATABASE_URI,
   }),
   // database-adapter-config-end
-  bundler: webpackBundler(), // bundler-config
   ...(process.env.PAYLOAD_PUBLIC_SITE_URL
     ? {
         cors: [process.env.PAYLOAD_PUBLIC_SITE_URL].filter(Boolean),
