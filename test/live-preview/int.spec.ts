@@ -32,6 +32,12 @@ describe('Collections - Live Preview', () => {
       data: {
         slug: 'home',
         title: 'Test Page',
+        layout: [
+          {
+            blockType: 'content',
+            richText: [],
+          },
+        ],
       },
     })
 
@@ -43,7 +49,7 @@ describe('Collections - Live Preview', () => {
 
     const mergedData = await mergeData<Page>({
       depth: 1,
-      existingData: testPage,
+      initialData: testPage,
       fieldSchema: fieldSchemaToJSON(Pages.fields),
       incomingData: pageEdits,
       serverURL,

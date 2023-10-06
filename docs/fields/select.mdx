@@ -98,3 +98,85 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+### Customization
+
+The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config.
+
+```ts
+export const CustomSelectField: Field = {
+  name: 'customSelectField',
+  type: 'select', // or 'text' if you have dynamic options
+  admin: {
+    components: {
+      Field: CustomSelectComponent({
+        options: [
+          {
+            label: 'Option 1',
+            value: '1',
+          },
+          {
+            label: 'Option 2',
+            value: '2',
+          },
+        ],
+      }),
+    },
+  }
+}
+```
+
+You can import the existing Select component directly from Payload, then extend and customize it as needed.
+
+```ts
+import * as React from 'react';
+import { SelectInput, useField } from 'payload/components/forms';
+import { useAuth } from 'payload/components/utilities';
+
+type customSelectProps = {
+  path: string;
+  options: {
+    label: string;
+    value: string;
+  }[];
+}
+
+export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, options }) => {
+  const { value, setValue } = useField<string>({ path })
+  const { user } = useAuth()
+
+  const adjustedOptions = options.filter((option) => {
+    /*
+      A common use case for a custom select
+      is to show different options based on
+      the current user's role.
+    */
+    return option;
+  });
+
+  return (
+    <div>
+      <label className="field-label">
+        Custom Select
+      </label>
+      <SelectInput
+        path={path}
+        name={path}
+        options={adjustedOptions}
+        value={value}
+        onChange={() => setValue(e.value)}
+      />
+    </div>
+  )
+}
+```
+
+If you are looking to create a dynamic select field, the following tutorial will walk you through the process of creating a custom select field that fetches its options from an external API.
+
+<VideoDrawer
+ id='Efn9OxSjA6Y'
+ label='How to Create a Custom Select Field'
+ drawerTitle='How to Create a Custom Select Field: A Step-by-Step Guide'
+/>
+
+If you want to learn more about custom components check out the [Admin > Custom Component](/docs/admin/components#field-component) docs.
