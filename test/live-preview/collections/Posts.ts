@@ -18,7 +18,7 @@ export const Posts: CollectionConfig = {
   },
   admin: {
     livePreview: {
-      url: 'http://localhost:3001',
+      url: ({ data, documentInfo }) => `http://localhost:3001/${documentInfo.slug}/${data?.slug}`,
       breakpoints: [
         {
           label: 'Mobile',
@@ -26,12 +26,6 @@ export const Posts: CollectionConfig = {
           width: 375,
           height: 667,
         },
-        // {
-        //   label: 'Desktop',
-        //   name: 'desktop',
-        //   width: 1440,
-        //   height: 900,
-        // },
       ],
     },
     useAsTitle: 'title',

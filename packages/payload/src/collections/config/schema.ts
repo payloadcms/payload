@@ -68,7 +68,7 @@ const collectionSchema = joi.object().keys({
           width: joi.alternatives().try(joi.number(), joi.string()),
         }),
       ),
-      url: joi.string(),
+      url: joi.alternatives().try(joi.string(), joi.func()),
     }),
     pagination: joi.object({
       defaultLimit: joi.number(),

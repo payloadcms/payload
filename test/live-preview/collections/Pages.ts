@@ -18,7 +18,7 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     livePreview: {
-      url: 'http://localhost:3001',
+      url: ({ data }) => `http://localhost:3001/${data?.slug}`,
       breakpoints: [
         {
           label: 'Mobile',

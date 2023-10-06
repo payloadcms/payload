@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import type { LivePreview as LivePreviewType } from '../../../../../exports/config'
+import type { LivePreviewConfig } from '../../../../../exports/config'
 import type { Field } from '../../../../../fields/config/types'
 import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
@@ -121,7 +121,7 @@ export const LivePreview: React.FC<
 > = (props) => {
   let url
 
-  let breakpoints: LivePreviewType['breakpoints'] = [
+  let breakpoints: LivePreviewConfig['breakpoints'] = [
     {
       name: 'responsive',
       height: '100%',
