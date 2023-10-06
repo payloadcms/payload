@@ -417,7 +417,7 @@ describe('admin', () => {
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
         const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText()
-        expect(firstId).toEqual(id)
+        expect(firstId).toEqual(`ID: ${id}`)
 
         // Remove filter
         await page.locator('.condition__actions-remove').click()

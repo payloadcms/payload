@@ -10,13 +10,18 @@
   color: var(--theme-elevation-800);
   border-radius: $style-radius-s;
   padding: 0 base(0.25);
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-800);
+
   [dir='ltr'] & {
     padding-left: base(0.0875 + 0.25);
   }
+
   [dir='rtl'] & {
     padding-right: base(0.0875 + 0.25);
   }
 
-  background: var(--theme-elevation-100);
-  color: var(--theme-elevation-800);
+  &:hover {
+    text-decoration: inherit;
+  }
 }
