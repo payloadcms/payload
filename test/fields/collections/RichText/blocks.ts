@@ -24,7 +24,7 @@ export const UploadAndRichTextBlock: Block = {
     {
       name: 'richText',
       type: 'richText',
-      editor: lexicalEditor({}),
+      editor: lexicalEditor(),
     },
   ],
   slug: 'uploadAndRichText',

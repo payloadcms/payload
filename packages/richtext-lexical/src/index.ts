@@ -1,27 +1,51 @@
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
 import { withMergedProps } from 'payload/components/utilities'
 
+import type { FeatureProvider } from './field/features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
 import type { AdapterProps } from './types'
 
 import { RichTextCell } from './cell'
 import { RichTextField } from './field'
-import { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexical/config/default'
+import {
+  defaultEditorFeatures,
+  defaultEditorLexicalConfig,
+  defaultSanitizedEditorConfig,
+} from './field/lexical/config/default'
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
 import { richTextValidateHOC } from './validate'
 
-export function lexicalEditor({
-  userConfig,
-}: {
-  userConfig?: (defaultEditorConfig: EditorConfig) => EditorConfig
-}): RichTextAdapter<AdapterProps> {
-  const finalSanitizedEditorConfig: SanitizedEditorConfig =
-    userConfig == null || typeof userConfig != 'function'
-      ? cloneDeep(defaultSanitizedEditorConfig)
-      : sanitizeEditorConfig(userConfig(cloneDeep(defaultEditorConfig)))
+export type LexicalEditorProps = {
+  features?:
+    | (({ defaultFeatures }: { defaultFeatures: FeatureProvider[] }) => FeatureProvider[])
+    | FeatureProvider[]
+  lexical?: LexicalEditorConfig
+}
+
+export function lexicalEditor(props?: LexicalEditorProps): RichTextAdapter<AdapterProps> {
+  let finalSanitizedEditorConfig: SanitizedEditorConfig = null
+  if (!props || (!props.features && !props.lexical)) {
+    finalSanitizedEditorConfig = cloneDeep(defaultSanitizedEditorConfig)
+  } else {
+    let features: FeatureProvider[] =
+      props.features && typeof props.features === 'function'
+        ? props.features({ defaultFeatures: cloneDeep(defaultEditorFeatures) })
+        : (props.features as FeatureProvider[])
+    if (!features) {
+      features = cloneDeep(defaultEditorFeatures)
+    }
+
+    const lexical: LexicalEditorConfig = props.lexical || cloneDeep(defaultEditorLexicalConfig)
+
+    finalSanitizedEditorConfig = sanitizeEditorConfig({
+      features,
+      lexical,
+    })
+  }
 
   return {
     CellComponent: withMergedProps({
@@ -88,9 +112,11 @@ export { CheckListFeature } from './field/features/lists/CheckList'
 export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnoderedListFeature } from './field/features/lists/UnorderedList'
 export type {
+  AfterReadPromise,
   Feature,
   FeatureProvider,
   FeatureProviderMap,
+  NodeValidation,
   ResolvedFeature,
   ResolvedFeatureMap,
   SanitizedFeatures,
@@ -100,7 +126,12 @@ export {
   EditorConfigProvider,
   useEditorConfigContext,
 } from './field/lexical/config/EditorConfigProvider'
-export { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexical/config/default'
+export {
+  defaultEditorConfig,
+  defaultEditorFeatures,
+  defaultEditorLexicalConfig,
+  defaultSanitizedEditorConfig,
+} from './field/lexical/config/default'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
 // export SanitizedEditorConfig
