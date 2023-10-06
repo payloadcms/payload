@@ -86,13 +86,38 @@
         }
       }
     }
+
+    &__nav-toggler {
+      .hamburger {
+        left: calc(var(--base) * 1.25);
+      }
+    }
+  }
+
+  @include mid-break {
+    &__nav-toggler {
+      .hamburger {
+        left: calc(var(--base) * 0.75);
+      }
+    }
+  }
+
+  @include small-break {
+    &__nav-toggler {
+      .hamburger {
+        left: calc(var(--base) * 0.5);
+      }
+      &.nav-toggler--is-open .hamburger {
+        display: flex;
+        display: inline;
+      }
+    }
   }
 
   @include small-break {
     &__nav-toggler {
       width: unset;
       justify-content: unset;
-      padding-left: var(--gutter-h);
 
       .hamburger {
         opacity: none;
