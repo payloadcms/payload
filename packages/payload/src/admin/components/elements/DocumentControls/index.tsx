@@ -73,7 +73,7 @@ export const DocumentControls: React.FC<{
       !global?.versions?.drafts?.autosave
   }
 
-  const showDotMenu = Boolean(collection && !disableActions)
+  const showDotMenu = Boolean(collection && id && !disableActions)
 
   return (
     <Gutter className={baseClass}>
