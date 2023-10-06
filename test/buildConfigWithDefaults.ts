@@ -18,6 +18,7 @@ const bundlerAdapters = {
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
+    migrationDir: path.resolve(__dirname, '../packages/db-mongodb/migrations'),
     url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({

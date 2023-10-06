@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
 
 import mongoose from 'mongoose'
+import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 import { createMigration } from 'payload/database'
 
@@ -27,6 +28,7 @@ import { findGlobalVersions } from './findGlobalVersions'
 import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
+import { migrateFresh } from './migrateFresh'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
@@ -83,23 +85,34 @@ declare module 'payload' {
 export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
-  migrationDir,
+  migrationDir: migrationDirArg,
   url,
 }: Args): MongooseAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
+    const migrationDir = migrationDirArg || path.resolve(process.cwd(), 'src/migrations')
     mongoose.set('strictQuery', false)
 
     extendWebpackConfig(payload.config)
     extendViteConfig(payload.config)
 
     return createDatabaseAdapter<MongooseAdapter>({
+      name: 'mongoose',
+
+      // Mongoose-specific
       autoPluralization,
-      beginTransaction,
       collections: {},
-      commitTransaction,
-      connect,
       connectOptions: connectOptions || {},
       connection: undefined,
+      globals: undefined,
+      mongoMemoryServer: undefined,
+      sessions: {},
+      url,
+      versions: {},
+
+      // DatabaseAdapter
+      beginTransaction,
+      commitTransaction,
+      connect,
       create,
       createGlobal,
       createGlobalVersion,
@@ -115,21 +128,16 @@ export function mongooseAdapter({
       findGlobalVersions,
       findOne,
       findVersions,
-      globals: undefined,
       init,
-      ...(migrationDir && { migrationDir }),
-      name: 'mongoose',
-      mongoMemoryServer: undefined,
+      migrateFresh,
+      migrationDir,
       payload,
       queryDrafts,
       rollbackTransaction,
-      sessions: {},
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
-      url,
-      versions: {},
     })
   }
 

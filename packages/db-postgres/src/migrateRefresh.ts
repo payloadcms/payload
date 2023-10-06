@@ -1,14 +1,16 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../express/types'
-import type { BaseDatabaseAdapter } from '../types'
+import type { PayloadRequest } from 'payload/types'
 
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { getMigrations, readMigrationFiles } from 'payload/database'
+
+import type { PostgresAdapter } from './types'
+
+import { migrationTableExists } from './utilities/migrationTableExists'
 
 /**
  * Run all migration down functions before running up
  */
-export async function migrateRefresh(this: BaseDatabaseAdapter) {
+export async function migrateRefresh(this: PostgresAdapter) {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -48,17 +50,21 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
       payload.logger.info({
         msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
       })
-      await payload.delete({
-        collection: 'payload-migrations',
-        req: {
-          transactionID,
-        } as PayloadRequest,
-        where: {
-          name: {
-            equals: migration.name,
+
+      const tableExists = await migrationTableExists(this.drizzle)
+      if (tableExists) {
+        await payload.delete({
+          collection: 'payload-migrations',
+          req: {
+            transactionID,
+          } as PayloadRequest,
+          where: {
+            name: {
+              equals: migration.name,
+            },
           },
-        },
-      })
+        })
+      }
     } catch (err: unknown) {
       await this.rollbackTransaction(transactionID)
       let msg = `Error running migration ${migration.name}. Rolling back.`

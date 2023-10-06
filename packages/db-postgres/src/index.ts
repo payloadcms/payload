@@ -24,6 +24,10 @@ import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
 import { migrate } from './migrate'
+import { migrateDown } from './migrateDown'
+import { migrateFresh } from './migrateFresh'
+import { migrateRefresh } from './migrateRefresh'
+import { migrateReset } from './migrateReset'
 import { migrateStatus } from './migrateStatus'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
@@ -77,6 +81,10 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       findVersions,
       init,
       migrate,
+      migrateDown,
+      migrateFresh,
+      migrateRefresh,
+      migrateReset,
       migrateStatus,
       migrationDir,
       payload,

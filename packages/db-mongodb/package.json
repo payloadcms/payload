@@ -26,6 +26,7 @@
     "mongoose": "6.11.4",
     "mongoose-aggregate-paginate-v2": "1.0.6",
     "mongoose-paginate-v2": "1.7.22",
+    "prompts": "2.4.2",
     "uuid": "9.0.0"
   },
   "devDependencies": {

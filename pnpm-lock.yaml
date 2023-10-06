@@ -293,6 +293,9 @@ importers:
       mongoose-paginate-v2:
         specifier: 1.7.22
         version: 1.7.22
+      prompts:
+        specifier: 2.4.2
+        version: 2.4.2
       uuid:
         specifier: 9.0.0
         version: 9.0.0
