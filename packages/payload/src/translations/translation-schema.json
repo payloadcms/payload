@@ -790,6 +790,9 @@
         "or": {
           "type": "string"
         },
+        "open": {
+          "type": "string"
+        },
         "order": {
           "type": "string"
         },

@@ -17,22 +17,24 @@ export const Hamburger: React.FC<{
     <div className={[baseClass].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__icon`}>
         {!isActive && (
-          <div className={`${baseClass}__lines`}>
+          <div className={`${baseClass}__lines`} title={t('open')}>
             <div className={`${baseClass}__line ${baseClass}__top`} />
             <div className={`${baseClass}__line ${baseClass}__middle`} />
             <div className={`${baseClass}__line ${baseClass}__bottom`} />
           </div>
         )}
-
         {isActive && (
-          <div aria-label={t('collapse')} className={`${baseClass}__close-icon`}>
+          <div
+            aria-label={closeIcon === 'collapse' ? t('collapse') : t('close')}
+            className={`${baseClass}__close-icon`}
+            title={closeIcon === 'collapse' ? t('collapse') : t('close')}
+          >
             {closeIcon === 'x' && (
               <React.Fragment>
                 <div className={`${baseClass}__line ${baseClass}__x-left`} />
                 <div className={`${baseClass}__line ${baseClass}__x-right`} />
               </React.Fragment>
             )}
-
             {closeIcon === 'collapse' && (
               <Chevron className={`${baseClass}__collapse-chevron`} direction="left" />
             )}
