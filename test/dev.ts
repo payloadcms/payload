@@ -10,7 +10,7 @@ import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
 
 dotenv.config()
 
-const [testSuiteDir] = process.argv.slice(2)
+const [testSuiteDir] = process.argv.slice(4)
 
 /**
  * The default logger's options did not allow for forcing sync logging
@@ -50,13 +50,13 @@ const expressApp = express()
 
 const startDev = async () => {
   await payload.init({
-    secret: uuid(),
-    express: expressApp,
     email: {
-      logMockCredentials: false,
-      fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
+      fromName: 'Payload',
+      logMockCredentials: false,
     },
+    express: expressApp,
+    secret: uuid(),
     ...prettySyncLogger,
     onInit: async (payload) => {
       payload.logger.info('Payload Dev Server Initialized')
