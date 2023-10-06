@@ -26,6 +26,7 @@ module.exports = {
         '@typescript-eslint/no-use-before-define': 'off',
         // turn the @typescript-eslint/unbound-method rule off *only* for test files. See https://typescript-eslint.io/rules/unbound-method/#when-not-to-use-it
         '@typescript-eslint/unbound-method': 'off',
+        'no-console': 'off',
         'perfectionist/sort-objects': 'off',
       },
     },

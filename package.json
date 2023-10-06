@@ -20,7 +20,7 @@
     "lint-staged": "lint-staged",
     "pretest": "pnpm build",
     "reinstall": "./scripts/reinstall.sh",
-    "release:list:beta": "./scripts/list_published_packages.sh beta",
+    "list:packages": "./scripts/list_published_packages.sh beta",
     "script:release:beta": "./scripts/release_beta.sh",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
