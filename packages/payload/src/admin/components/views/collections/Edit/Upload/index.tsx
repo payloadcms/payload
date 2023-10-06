@@ -154,9 +154,12 @@ export const Upload: React.FC<Props> = (props) => {
                 <Thumbnail fileSrc={isImage(value.type) ? fileSrc : null} />
               </div>
               <div className={`${baseClass}__file-adjustments`}>
-                <div className={`${baseClass}__filename`}>
-                  <input onChange={handleFileNameChange} type="text" value={value.name} />
-                </div>
+                <input
+                  className={`${baseClass}__filename`}
+                  onChange={handleFileNameChange}
+                  type="text"
+                  value={value.name}
+                />
 
                 {isImage(value.type) && (
                   <UploadActions

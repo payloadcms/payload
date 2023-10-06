@@ -44,17 +44,8 @@
   }
 
   &__filename {
-    display: flex;
-    gap: calc(var(--base) / 2);
-
-    input {
-      @include formInput;
-      background-color: var(--theme-bg);
-    }
-
-    button {
-      margin: 0;
-    }
+    @include formInput;
+    background-color: var(--theme-bg);
   }
 
   &__file-mutation {
