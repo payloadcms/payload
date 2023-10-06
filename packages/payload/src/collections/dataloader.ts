@@ -77,7 +77,7 @@ const batchAndLoadDocs =
 
       if (idField?.type === 'number') sanitizedID = parseFloat(id)
 
-      if (isValidID(sanitizedID, getIDType(idField))) {
+      if (isValidID(sanitizedID, getIDType(idField, payload?.db?.defaultIDType))) {
         return {
           ...batches,
           [batchKey]: [...(batches[batchKey] || []), sanitizedID],
