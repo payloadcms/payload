@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next'
 
 import type { User } from '../../../../../auth'
+import type { SanitizedConfig } from '../../../../../config/types'
 import type { Field as FieldSchema } from '../../../../../fields/config/types'
 import type { Data, Fields } from '../types'
 
@@ -8,6 +9,7 @@ import { fieldIsPresentationalOnly } from '../../../../../fields/config/types'
 import { addFieldStatePromise } from './addFieldStatePromise'
 
 type Args = {
+  config: SanitizedConfig
   data: Data
   fields: FieldSchema[]
   fullData: Data
@@ -26,6 +28,7 @@ type Args = {
 
 export const iterateFields = async ({
   id,
+  config,
   data,
   fields,
   fullData,
@@ -51,6 +54,7 @@ export const iterateFields = async ({
       promises.push(
         addFieldStatePromise({
           id,
+          config,
           data,
           field,
           fullData,

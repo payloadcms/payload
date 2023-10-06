@@ -15,7 +15,7 @@ import { Editable, Slate, withReact } from 'slate-react'
 import type { ElementNode, FieldProps, RichTextElement, RichTextLeaf, TextNode } from '../types'
 
 import { defaultRichTextValue } from '../data/defaultValue'
-import { richText } from '../data/validation'
+import { richTextValidate } from '../data/validation'
 import elementTypes from './elements'
 import listTypes from './elements/listTypes'
 import enablePlugins from './enablePlugins'
@@ -80,7 +80,7 @@ const RichText: React.FC<FieldProps> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = richText,
+    validate = richTextValidate,
   } = props
 
   const elements: RichTextElement[] = admin?.elements || defaultElements

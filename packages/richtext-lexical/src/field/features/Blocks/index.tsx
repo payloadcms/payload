@@ -8,10 +8,10 @@ import type { FeatureProvider } from '../types'
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { BlockIcon } from '../../lexical/ui/icons/Block'
 import { blockAfterReadPromiseHOC } from './afterReadPromise'
-import { INSERT_BLOCK_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'
 import { BlockNode } from './nodes/BlocksNode'
 import { BlocksPlugin, INSERT_BLOCK_COMMAND } from './plugin'
+import { blockValidationHOC } from './validate'
 
 export type BlocksFeatureProps = {
   blocks: Block[]
@@ -45,6 +45,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
             afterReadPromises: [blockAfterReadPromiseHOC(props)],
             node: BlockNode,
             type: BlockNode.getType(),
+            validations: [blockValidationHOC(props)],
           },
         ],
         plugins: [

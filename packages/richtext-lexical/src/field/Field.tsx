@@ -6,7 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { FieldProps } from '../types'
 
-import { richTextValidate } from '../populate/validation'
+import { richTextValidate } from '../validate'
 import './index.scss'
 import { LexicalProvider } from './lexical/LexicalProvider'
 
@@ -36,9 +36,9 @@ const RichText: React.FC<FieldProps> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      return validate(value, { ...validationOptions, required })
+      return validate(value, { ...validationOptions, props, required })
     },
-    [validate, required],
+    [validate, required, props],
   )
 
   const fieldType = useField<SerializedEditorState>({

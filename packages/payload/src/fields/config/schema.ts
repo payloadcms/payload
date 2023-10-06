@@ -358,6 +358,7 @@ export const richText = baseField.keys({
     CellComponent: componentSchema.required(),
     FieldComponent: componentSchema.required(),
     afterReadPromise: joi.func().required(),
+    validate: joi.func().required(),
   }),
   type: joi.string().valid('richText').required(),
 })

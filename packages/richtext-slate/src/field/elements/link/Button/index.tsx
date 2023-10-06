@@ -104,6 +104,7 @@ export const LinkButton: React.FC<{
 
               const preferences = await getDocPreferences()
               const state = await buildStateFromSchema({
+                config,
                 data,
                 fieldSchema,
                 locale,

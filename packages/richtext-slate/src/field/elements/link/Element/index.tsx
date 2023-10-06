@@ -103,6 +103,7 @@ export const LinkElement: React.FC<{
 
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data,
         fieldSchema,
         locale,

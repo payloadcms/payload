@@ -41,6 +41,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const hasInitializedState = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
+  const config = useConfig()
 
   const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
 
@@ -82,6 +83,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         id,
+        config,
         data,
         fieldSchema: fields,
         locale,

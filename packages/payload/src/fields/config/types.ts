@@ -10,6 +10,7 @@ import type { RowLabel } from '../../admin/components/forms/RowLabel/types'
 import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
 import type { User } from '../../auth'
 import type { TypeWithID } from '../../collections/config/types'
+import type { SanitizedConfig } from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Payload } from '../../payload'
 import type { Operation, Where } from '../../types'
@@ -91,6 +92,7 @@ export type Labels = {
 }
 
 export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
+  config: SanitizedConfig
   data: Partial<TData>
   id?: number | string
   operation?: Operation
@@ -100,6 +102,7 @@ export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
   user?: Partial<User>
 } & TFieldConfig
 
+// TODO: Having TFieldConfig as any breaks all type checking / auto-completions for the base ValidateOptions properties.
 export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (
   value: TValue,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig>,

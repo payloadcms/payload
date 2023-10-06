@@ -132,6 +132,7 @@ export function LinkEditor({
       // values saved in the link node you clicked on.
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data,
         fieldSchema,
         locale,

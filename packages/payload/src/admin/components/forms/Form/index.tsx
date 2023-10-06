@@ -24,6 +24,7 @@ import wait from '../../../../utilities/wait'
 import { requests } from '../../../api'
 import useThrottledEffect from '../../../hooks/useThrottledEffect'
 import { useAuth } from '../../utilities/Auth'
+import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import { useOperation } from '../../utilities/OperationProvider'
@@ -62,6 +63,7 @@ const Form: React.FC<Props> = (props) => {
     onSubmit,
     onSuccess,
     redirect,
+    submitted: submittedFromProps,
     waitForAutocomplete,
   } = props
 
@@ -71,6 +73,8 @@ const Form: React.FC<Props> = (props) => {
   const { refreshCookie, user } = useAuth()
   const { id, collection, getDocPreferences, global } = useDocumentInfo()
   const operation = useOperation()
+
+  const config = useConfig()
 
   const [modified, setModified] = useState(false)
   const [processing, setProcessing] = useState(false)
@@ -165,6 +169,7 @@ const Form: React.FC<Props> = (props) => {
           if (typeof field.validate === 'function') {
             validationResult = await field.validate(field.value, {
               id,
+              config,
               data,
               operation,
               siblingData: contextRef.current.getSiblingData(path),
@@ -452,6 +457,7 @@ const Form: React.FC<Props> = (props) => {
       if (fieldConfig) {
         const subFieldState = await buildStateFromSchema({
           id,
+          config,
           data,
           fieldSchema: fieldConfig,
           locale,
@@ -490,6 +496,7 @@ const Form: React.FC<Props> = (props) => {
       if (fieldConfig) {
         const subFieldState = await buildStateFromSchema({
           id,
+          config,
           data,
           fieldSchema: fieldConfig,
           locale,
@@ -557,6 +564,7 @@ const Form: React.FC<Props> = (props) => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         id,
+        config,
         data,
         fieldSchema,
         locale,
@@ -600,6 +608,10 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.addFieldRow = addFieldRow
   contextRef.current.removeFieldRow = removeFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
+
+  useEffect(() => {
+    if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
+  }, [submittedFromProps])
 
   useEffect(() => {
     if (initialState) {

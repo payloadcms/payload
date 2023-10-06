@@ -6,6 +6,7 @@ import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
 import {
   buildStateFromSchema,
   useAuth,
+  useConfig,
   useDocumentInfo,
   useLocale,
 } from 'payload/components/utilities'
@@ -35,6 +36,7 @@ export const UploadDrawer: React.FC<
   const { getDocPreferences } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
   const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
+  const config = useConfig()
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -54,6 +56,7 @@ export const UploadDrawer: React.FC<
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data: deepCopyObject(element?.fields || {}),
         fieldSchema,
         locale,

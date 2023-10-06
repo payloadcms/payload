@@ -8,6 +8,7 @@ import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
 import {
   buildStateFromSchema,
   useAuth,
+  useConfig,
   useDocumentInfo,
   useLocale,
 } from 'payload/components/utilities'
@@ -51,6 +52,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
   const [initialState, setInitialState] = useState({})
   const fieldSchema = (editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps)
     ?.collections?.[relatedCollection.slug]?.fields
+  const config = useConfig()
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -75,6 +77,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data: deepCopyObject(fields || {}),
         fieldSchema,
         locale,
