@@ -6,7 +6,8 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { FieldProps } from '../types'
 
-import { richTextValidate } from '../populate/validation'
+import { defaultRichTextValueV2 } from '../populate/defaultValue'
+import { richTextValidateHOC } from '../validate'
 import './index.scss'
 import { LexicalProvider } from './lexical/LexicalProvider'
 
@@ -23,22 +24,21 @@ const RichText: React.FC<FieldProps> = (props) => {
       style,
       width,
     },
-    admin,
     defaultValue: defaultValueFromProps,
     editorConfig,
     label,
     path: pathFromProps,
     required,
-    validate = richTextValidate,
+    validate = richTextValidateHOC({ editorConfig }),
   } = props
 
   const path = pathFromProps || name
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      return validate(value, { ...validationOptions, required })
+      return validate(value, { ...validationOptions, props, required })
     },
-    [validate, required],
+    [validate, required, props],
   )
 
   const fieldType = useField<SerializedEditorState>({
@@ -48,6 +48,19 @@ const RichText: React.FC<FieldProps> = (props) => {
   })
 
   const { errorMessage, initialValue, setValue, showError, value } = fieldType
+
+  let valueToUse = value
+
+  if (typeof valueToUse === 'string') {
+    try {
+      const parsedJSON = JSON.parse(valueToUse)
+      valueToUse = parsedJSON
+    } catch (err) {
+      valueToUse = null
+    }
+  }
+
+  if (!valueToUse) valueToUse = defaultValueFromProps || defaultRichTextValueV2
 
   const classes = [
     baseClass,

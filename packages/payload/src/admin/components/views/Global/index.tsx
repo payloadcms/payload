@@ -29,6 +29,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     useDocumentInfo()
   const { getPreference } = usePreferences()
   const { t } = useTranslation()
+  const config = useConfig()
 
   const {
     routes: { api },
@@ -44,6 +45,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       setUpdatedAt(json?.result?.updatedAt)
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data: json.result,
         fieldSchema: fields,
         locale,
@@ -68,6 +70,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        config,
         data: dataToRender,
         fieldSchema: fields,
         locale,

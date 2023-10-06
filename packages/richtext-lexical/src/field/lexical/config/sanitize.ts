@@ -17,6 +17,7 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
       dynamicOptions: [],
       groupsWithOptions: [],
     },
+    validations: new Map(),
   }
 
   features.forEach((feature) => {
@@ -25,6 +26,9 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
       feature.nodes.forEach((node) => {
         if (node?.afterReadPromises?.length) {
           sanitized.afterReadPromises.set(node.type, node.afterReadPromises)
+        }
+        if (node?.validations?.length) {
+          sanitized.validations.set(node.type, node.validations)
         }
       })
     }

@@ -6,6 +6,7 @@ import type { FieldType, Options } from './types'
 
 import useThrottledEffect from '../../../hooks/useThrottledEffect'
 import { useAuth } from '../../utilities/Auth'
+import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useOperation } from '../../utilities/OperationProvider'
 import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
@@ -26,6 +27,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const field = useFormFields(([fields]) => fields[path])
   const { t } = useTranslation()
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
+  const config = useConfig()
 
   const { getData, getSiblingData, setModified } = useForm()
 
@@ -106,6 +108,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
         const validateOptions = {
           id,
+          config,
           data: getData(),
           operation,
           siblingData: getSiblingData(path),

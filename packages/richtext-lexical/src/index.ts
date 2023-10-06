@@ -11,6 +11,7 @@ import { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexic
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
+import { richTextValidateHOC } from './validate'
 
 export function lexicalEditor({
   userConfig,
@@ -56,6 +57,9 @@ export function lexicalEditor({
 
       return null
     },
+    validate: richTextValidateHOC({
+      editorConfig: finalSanitizedEditorConfig,
+    }),
   }
 }
 

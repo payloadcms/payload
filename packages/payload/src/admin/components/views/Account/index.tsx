@@ -25,6 +25,7 @@ const AccountView: React.FC = () => {
   const { id, docPermissions, getDocPermissions, getDocPreferences, preferencesKey, slug } =
     useDocumentInfo()
   const { getPreference } = usePreferences()
+  const config = useConfig()
 
   const {
     admin: {
@@ -65,6 +66,7 @@ const AccountView: React.FC = () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         id,
+        config,
         data: json.doc,
         fieldSchema: collection.fields,
         locale,
@@ -94,6 +96,7 @@ const AccountView: React.FC = () => {
 
       const state = await buildStateFromSchema({
         id,
+        config,
         data: dataToRender,
         fieldSchema: fields,
         locale,

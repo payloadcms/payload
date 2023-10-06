@@ -1,5 +1,5 @@
 import type { PayloadRequest } from '../../../../../express/types'
-import type { RichTextField } from '../../../../../fields/config/types'
+import type { RichTextField, Validate } from '../../../../../fields/config/types'
 import type { CellComponentProps } from '../../../views/collections/List/Cell/types'
 
 export type RichTextFieldProps<AdapterProps = unknown> = Omit<
@@ -21,4 +21,5 @@ export type RichTextAdapter<AdapterProps = unknown> = {
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
+  validate: Validate<unknown, unknown, RichTextField<AdapterProps>>
 }
