@@ -345,3 +345,6 @@ jobs:
 
       - name: Build live-preview
         run: pnpm turbo run build --filter=live-preview
+
+      - name: Build live-preview-react
+        run: pnpm turbo run build --filter=live-preview-react

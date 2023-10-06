@@ -50,13 +50,13 @@ const expressApp = express()
 
 const startDev = async () => {
   await payload.init({
-    secret: uuid(),
-    express: expressApp,
     email: {
-      logMockCredentials: false,
-      fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
+      fromName: 'Payload',
+      logMockCredentials: false,
     },
+    express: expressApp,
+    secret: uuid(),
     ...prettySyncLogger,
     onInit: async (payload) => {
       payload.logger.info('Payload Dev Server Initialized')

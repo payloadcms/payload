@@ -1,5 +1,7 @@
 import type { ParsedArgs } from 'minimist'
 
+import minimist from 'minimist'
+
 import payload from '..'
 import { prettySyncLoggerDestination } from '../utilities/logger'
 
@@ -93,7 +95,7 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
 
 // When launched directly call migrate
 if (module.id === require.main.id) {
-  const args = process.argv.slice(2)
+  const args = minimist(process.argv.slice(2))
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   migrate(args).then(() => {
     process.exit(0)
