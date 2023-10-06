@@ -10,23 +10,9 @@ $spacer-h: calc(var(--block-padding) / 2);
   color: var(--color-base-1000);
 }
 
-:global([data-theme='dark']) {
-  .callToAction {
-    background-color: var(--color-base-0);
-    color: var(--color-base-1000);
-  }
-}
-
 .invert {
   background-color: var(--color-base-1000);
   color: var(--color-base-0);
-}
-
-:global([data-theme='dark']) {
-  .invert {
-    background-color: var(--color-base-900);
-    color: var(--color-base-0);
-  }
 }
 
 .wrap {

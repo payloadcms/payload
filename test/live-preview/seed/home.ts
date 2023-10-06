@@ -36,17 +36,25 @@ export const home: Page = {
           relationTo: 'posts',
           value: '{{POST_1_ID}}',
         },
+        {
+          relationTo: 'posts',
+          value: '{{POST_2_ID}}',
+        },
+        {
+          relationTo: 'posts',
+          value: '{{POST_3_ID}}',
+        },
       ],
       introContent: [
         {
-          type: 'h1',
+          type: 'h2',
           children: [{ text: 'Recent Posts' }],
         },
         {
           type: 'p',
           children: [
             {
-              text: 'The posts below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or posts can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
+              text: 'This is a custom layout building block. You can edit this block in the admin panel and see the changes reflected here.',
             },
           ],
         },
@@ -67,7 +75,7 @@ export const home: Page = {
         {
           children: [
             {
-              text: 'This is a custom layout building block. This text can be anything you want.',
+              text: 'This is a custom layout building block. You can edit this block in the admin panel and see the changes reflected here.',
             },
           ],
         },
@@ -80,8 +88,8 @@ export const home: Page = {
             label: 'All posts',
             appearance: 'primary',
             reference: {
-              value: '{{POST_1_ID}}',
-              relationTo: 'posts',
+              value: '{{POSTS_PAGE_ID}}',
+              relationTo: 'pages',
             },
           },
         },

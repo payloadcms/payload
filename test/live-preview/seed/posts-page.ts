@@ -23,7 +23,7 @@ export const postsPage: Partial<Page> = {
         type: 'p',
         children: [
           {
-            text: 'This page displays all or some of the posts of your blog. Each post is complete with a dynamic page layout builder for a completely custom user experience that is under your full control.',
+            text: 'This is an example of live preview on a page. You can edit this page in the admin panel and see the changes reflected here.',
           },
         ],
       },
@@ -47,7 +47,7 @@ export const postsPage: Partial<Page> = {
           type: 'p',
           children: [
             {
-              text: 'The posts below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or posts can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
+              text: 'This is a custom layout building block. You can edit this block in the admin panel and see the changes reflected here.',
             },
           ],
         },

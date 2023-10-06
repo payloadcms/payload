@@ -10,13 +10,6 @@
   }
 }
 
-:global([data-theme='dark']) {
-  .footer {
-    background-color: var(--color-base-50);
-    color: var(--color-base-1000);
-  }
-}
-
 .wrap {
   display: flex;
   justify-content: space-between;

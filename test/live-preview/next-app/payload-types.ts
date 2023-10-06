@@ -55,15 +55,10 @@ export interface Page {
           link: {
             type?: 'reference' | 'custom'
             newTab?: boolean
-            reference:
-              | {
-                  relationTo: 'pages'
-                  value: string | Page
-                }
-              | {
-                  relationTo: 'posts'
-                  value: string | Post
-                }
+            reference: {
+              relationTo: 'pages'
+              value: string | Page
+            }
             url: string
             label: string
             appearance?: 'primary' | 'secondary'
@@ -85,15 +80,10 @@ export interface Page {
           link?: {
             type?: 'reference' | 'custom'
             newTab?: boolean
-            reference:
-              | {
-                  relationTo: 'pages'
-                  value: string | Page
-                }
-              | {
-                  relationTo: 'posts'
-                  value: string | Post
-                }
+            reference: {
+              relationTo: 'pages'
+              value: string | Page
+            }
             url: string
             label: string
             appearance?: 'default' | 'primary' | 'secondary'
@@ -167,6 +157,12 @@ export interface Media {
   width?: number
   height?: number
 }
+export interface Category {
+  id: string
+  title?: string
+  updatedAt: string
+  createdAt: string
+}
 export interface Post {
   id: string
   slug: string
@@ -188,15 +184,10 @@ export interface Post {
           link: {
             type?: 'reference' | 'custom'
             newTab?: boolean
-            reference:
-              | {
-                  relationTo: 'pages'
-                  value: string | Page
-                }
-              | {
-                  relationTo: 'posts'
-                  value: string | Post
-                }
+            reference: {
+              relationTo: 'pages'
+              value: string | Page
+            }
             url: string
             label: string
             appearance?: 'primary' | 'secondary'
@@ -218,15 +209,10 @@ export interface Post {
           link?: {
             type?: 'reference' | 'custom'
             newTab?: boolean
-            reference:
-              | {
-                  relationTo: 'pages'
-                  value: string | Page
-                }
-              | {
-                  relationTo: 'posts'
-                  value: string | Post
-                }
+            reference: {
+              relationTo: 'pages'
+              value: string | Page
+            }
             url: string
             label: string
             appearance?: 'default' | 'primary' | 'secondary'
@@ -277,17 +263,12 @@ export interface Post {
         blockType: 'archive'
       }
   )[]
+  relatedPosts?: string[] | Post[]
   meta?: {
     title?: string
     description?: string
     image?: string | Media
   }
-  updatedAt: string
-  createdAt: string
-}
-export interface Category {
-  id: string
-  title?: string
   updatedAt: string
   createdAt: string
 }
@@ -323,15 +304,10 @@ export interface Header {
     link: {
       type?: 'reference' | 'custom'
       newTab?: boolean
-      reference:
-        | {
-            relationTo: 'pages'
-            value: string | Page
-          }
-        | {
-            relationTo: 'posts'
-            value: string | Post
-          }
+      reference: {
+        relationTo: 'pages'
+        value: string | Page
+      }
       url: string
       label: string
       appearance?: 'default' | 'primary' | 'secondary'
@@ -347,15 +323,10 @@ export interface Footer {
     link: {
       type?: 'reference' | 'custom'
       newTab?: boolean
-      reference:
-        | {
-            relationTo: 'pages'
-            value: string | Page
-          }
-        | {
-            relationTo: 'posts'
-            value: string | Post
-          }
+      reference: {
+        relationTo: 'pages'
+        value: string | Page
+      }
       url: string
       label: string
       appearance?: 'default' | 'primary' | 'secondary'

@@ -1,5 +1,4 @@
-import type { Field } from '../../../packages/payload/src/fields/config/types'
-import type { ArrayField } from '../../../packages/payload/src/fields/config/types'
+import type { ArrayField, Field } from '../../../packages/payload/src/fields/config/types'
 import type { LinkAppearances } from './link'
 
 import deepMerge from '../utilities/deepMerge'

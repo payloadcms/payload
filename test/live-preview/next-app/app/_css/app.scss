@@ -10,6 +10,8 @@
   --gutter-h: 180px;
   --block-padding: 120px;
 
+  --theme-text: var(--color-base-750);
+
   @include large-break {
     --gutter-h: 144px;
     --block-padding: 96px;
@@ -39,16 +41,16 @@ body,
 body {
   font-family: var(--font-body);
   margin: 0;
-  color: var(--color-base-750);
+  color: var(--theme-text);
 }
 
 ::selection {
-  background: var(--theme-success-500);
+  background: var(--color-success-500);
   color: var(--color-base-800);
 }
 
 ::-moz-selection {
-  background: var(--theme-success-500);
+  background: var(--color-success-500);
   color: var(--color-base-800);
 }
 

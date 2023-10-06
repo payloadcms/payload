@@ -13,7 +13,7 @@
   position: relative;
   display: flex;
   padding: calc(var(--base) / 2);
-  color: var(--color-elevation-500);
+  color: var(--color-base-500);
   border: 1px solid var(--color-base-200);
 
   &:disabled {

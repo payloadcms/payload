@@ -54,7 +54,7 @@ export default buildConfigWithDefaults({
       },
     })
 
-    const [post1Doc] = await Promise.all([
+    const [post1Doc, post2Doc, post3Doc] = await Promise.all([
       await payload.create({
         collection: postsSlug,
         data: JSON.parse(JSON.stringify(post1).replace(/\{\{IMAGE\}\}/g, media.id)),
@@ -69,18 +69,21 @@ export default buildConfigWithDefaults({
       }),
     ])
 
+    const postsPageDoc = await payload.create({
+      collection: pagesSlug,
+      data: JSON.parse(JSON.stringify(postsPage).replace(/\{\{IMAGE\}\}/g, media.id)),
+    })
+
     await payload.create({
       collection: pagesSlug,
       data: JSON.parse(
         JSON.stringify(home)
           .replace(/\{\{MEDIA_ID\}\}/g, media.id)
-          .replace(/\{\{POST_1_ID\}\}/g, post1Doc.id),
+          .replace(/\{\{POSTS_PAGE_ID\}\}/g, postsPageDoc.id)
+          .replace(/\{\{POST_1_ID\}\}/g, post1Doc.id)
+          .replace(/\{\{POST_2_ID\}\}/g, post2Doc.id)
+          .replace(/\{\{POST_3_ID\}\}/g, post3Doc.id),
       ),
-    })
-
-    const postsPageDoc = await payload.create({
-      collection: pagesSlug,
-      data: JSON.parse(JSON.stringify(postsPage).replace(/\{\{IMAGE\}\}/g, media.id)),
     })
 
     await payload.updateGlobal({

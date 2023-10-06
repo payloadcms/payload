@@ -6,6 +6,7 @@ export async function fetchFooter(): Promise<Footer> {
 
   const footer = await fetch(`${PAYLOAD_SERVER_URL}/api/globals/footer`, {
     method: 'GET',
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
     },

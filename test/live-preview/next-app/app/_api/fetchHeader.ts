@@ -6,6 +6,7 @@ export async function fetchHeader(): Promise<Header> {
 
   const header = await fetch(`${PAYLOAD_SERVER_URL}/api/globals/header`, {
     method: 'GET',
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
     },

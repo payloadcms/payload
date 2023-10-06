@@ -21,6 +21,7 @@ export const ArchiveBlock: React.FC<
     populatedDocs,
     populatedDocsTotal,
     categories,
+    selectedDocs,
   } = props
 
   return (
@@ -38,6 +39,7 @@ export const ArchiveBlock: React.FC<
         categories={categories}
         limit={limit}
         sort="-publishedDate"
+        selectedDocs={selectedDocs}
       />
     </div>
   )
