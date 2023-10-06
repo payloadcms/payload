@@ -35,6 +35,7 @@
     "@lexical/selection": "0.12.2",
     "@lexical/table": "0.12.2",
     "@lexical/utils": "0.12.2",
+    "bson-objectid": "2.0.4",
     "classnames": "^2.3.2",
     "i18next": "22.5.1",
     "katex": "0.16.8",

@@ -75,7 +75,6 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
                     keywords: ['block', 'blocks', block.slug],
                     onSelect: ({ editor }) => {
                       editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-                        collapsed: false,
                         data: {
                           blockName: '',
                           blockType: block.slug,
