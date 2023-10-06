@@ -8,7 +8,7 @@ import { useConfig } from '../Config'
 import { usePreferences } from '../Preferences'
 import { useSearchParams } from '../SearchParams'
 
-const LocaleContext = createContext(null)
+const LocaleContext = createContext({} as Locale)
 
 export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { localization } = useConfig()
@@ -65,5 +65,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 /**
  * A hook that returns the current locale object.
  */
-export const useLocale = (): Locale | null => useContext(LocaleContext)
+export const useLocale = (): Locale => useContext(LocaleContext)
+
 export default LocaleContext

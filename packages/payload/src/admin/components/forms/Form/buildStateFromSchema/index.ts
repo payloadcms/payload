@@ -10,7 +10,7 @@ import { iterateFields } from './iterateFields'
 type Args = {
   config: SanitizedConfig
   data?: Data
-  fieldSchema: FieldSchema[]
+  fieldSchema: FieldSchema[] | undefined
   id?: number | string
   locale: string
   operation?: 'create' | 'update'
@@ -19,7 +19,7 @@ type Args = {
   }
   siblingData?: Data
   t: TFunction
-  user?: User
+  user?: User | null
 }
 
 const buildStateFromSchema = async (args: Args): Promise<Fields> => {

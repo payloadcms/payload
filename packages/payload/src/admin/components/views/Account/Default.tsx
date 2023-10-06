@@ -41,10 +41,12 @@ const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
   const { refreshCookieAsync } = useAuth()
   const { i18n, t } = useTranslation('authentication')
 
-  const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => ({
-    label: (resource as Translation).general.thisLanguage,
-    value: language,
-  }))
+  const languageOptions = Object.entries(i18n.options.resources || {}).map(
+    ([language, resource]) => ({
+      label: (resource as Translation).general.thisLanguage,
+      value: language,
+    }),
+  )
 
   const onSave = useCallback(async () => {
     await refreshCookieAsync()
@@ -101,7 +103,7 @@ const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
                       fieldSchema={fields}
                       fieldTypes={fieldTypes}
                       filter={(field) => field?.admin?.position !== 'sidebar'}
-                      permissions={permissions.fields}
+                      permissions={permissions?.fields}
                       readOnly={!hasSavePermission}
                     />
                   </Gutter>
@@ -128,7 +130,7 @@ const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
                         fieldSchema={fields}
                         fieldTypes={fieldTypes}
                         filter={(field) => field?.admin?.position === 'sidebar'}
-                        permissions={permissions.fields}
+                        permissions={permissions?.fields}
                         readOnly={!hasSavePermission}
                       />
                     </div>

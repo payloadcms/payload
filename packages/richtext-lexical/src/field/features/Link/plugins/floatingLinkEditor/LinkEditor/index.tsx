@@ -189,7 +189,7 @@ export function LinkEditor({
     }
 
     return true
-  }, [anchorElem, editor, fieldSchema])
+  }, [anchorElem, editor, fieldSchema, config, getDocPreferences, locale, t, user, i18n])
 
   useEffect(() => {
     return mergeRegister(

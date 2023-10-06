@@ -43,7 +43,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       getVersions()
       getDocPermissions()
       setUpdatedAt(json?.result?.updatedAt)
+
       const preferences = await getDocPreferences()
+
       const state = await buildStateFromSchema({
         config,
         data: json.result,
@@ -56,7 +58,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       })
       setInitialState(state)
     },
-    [getVersions, fields, user, locale, t, getDocPermissions, getDocPreferences],
+    [getVersions, fields, user, locale, t, getDocPermissions, getDocPreferences, config],
   )
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(`${serverURL}${api}/globals/${slug}`, {
@@ -79,12 +81,26 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         t,
         user,
       })
-      await getPreference(preferencesKey)
+
+      if (preferencesKey) {
+        await getPreference(preferencesKey)
+      }
+
       setInitialState(state)
     }
 
     if (dataToRender) awaitInitialState()
-  }, [dataToRender, fields, user, locale, getPreference, preferencesKey, t, getDocPreferences])
+  }, [
+    dataToRender,
+    fields,
+    user,
+    locale,
+    getPreference,
+    preferencesKey,
+    t,
+    getDocPreferences,
+    config,
+  ])
 
   const isLoading = !initialState || !docPermissions || isLoadingData
 

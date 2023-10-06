@@ -7,9 +7,9 @@ import type SMTPConnection from 'nodemailer/lib/smtp-connection'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
-import type { Configuration } from 'webpack'
 // @ts-expect-error
 import type { InlineConfig } from 'vite'
+import type { Configuration } from 'webpack'
 
 import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
@@ -115,14 +115,14 @@ export type InitOptions = {
   config?: Promise<SanitizedConfig>
 
   /**
-   * Disable running of the `onInit` function
-   */
-  disableOnInit?: boolean
-
-  /**
    * Disable connect to the database on init
    */
   disableDBConnect?: boolean
+
+  /**
+   * Disable running of the `onInit` function
+   */
+  disableOnInit?: boolean
 
   /**
    * Configuration for Payload's email functionality
@@ -230,10 +230,10 @@ export type Endpoint = {
 }
 
 export type CustomAdminView = React.ComponentType<{
-  canAccessAdmin: boolean
+  canAccessAdmin?: boolean
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
-  user: User
+  user: User | null | undefined
 }>
 
 export type EditViewConfig = {
@@ -460,10 +460,10 @@ export type Config = {
     }
     /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
     user?: string
-    /** Customize the Webpack config that's used to generate the Admin panel. */
-    webpack?: (config: Configuration) => Configuration
     /** Customize the Vite config that's used to generate the Admin panel. */
     vite?: (config: InlineConfig) => InlineConfig
+    /** Customize the Webpack config that's used to generate the Admin panel. */
+    webpack?: (config: Configuration) => Configuration
   }
   /**
    * Manage the datamodel of your application
