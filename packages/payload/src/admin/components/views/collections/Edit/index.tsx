@@ -47,7 +47,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { t } = useTranslation('general')
 
   const [{ data, isError, isLoading: isLoadingData }] = usePayloadAPI(
-    isEditing ? `${serverURL}${api}/${collectionSlug}/${id}` : null,
+    isEditing ? `${serverURL}${api}/${collectionSlug}/${id}` : '',
     { initialData: null, initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
 
@@ -59,7 +59,7 @@ const EditView: React.FC<IndexProps> = (props) => {
         id,
         config,
         data: doc || {},
-        fieldSchema: overrides.fieldSchema,
+        fieldSchema: overrides?.fieldSchema,
         locale,
         operation: 'update',
         preferences,
@@ -70,7 +70,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
       setInternalState(state)
     },
-    [getDocPreferences, id, locale, t],
+    [getDocPreferences, id, locale, t, config],
   )
 
   const onSave = useCallback(

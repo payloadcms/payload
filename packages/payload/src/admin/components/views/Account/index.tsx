@@ -25,6 +25,7 @@ const AccountView: React.FC = () => {
   const { id, docPermissions, getDocPermissions, getDocPreferences, preferencesKey, slug } =
     useDocumentInfo()
   const { getPreference } = usePreferences()
+
   const config = useConfig()
 
   const {
@@ -44,7 +45,7 @@ const AccountView: React.FC = () => {
 
   const collection = collections.find((coll) => coll.slug === slug)
 
-  const { fields } = collection
+  const { fields } = collection || {}
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(`${serverURL}${api}/${slug}/${id}`, {
     initialData: null,
@@ -63,12 +64,14 @@ const AccountView: React.FC = () => {
   const onSave = React.useCallback(
     async (json: any) => {
       getDocPermissions()
+
       const preferences = await getDocPreferences()
+
       const state = await buildStateFromSchema({
         id,
         config,
         data: json.doc,
-        fieldSchema: collection.fields,
+        fieldSchema: collection?.fields,
         locale,
         operation: 'update',
         preferences,
@@ -77,7 +80,7 @@ const AccountView: React.FC = () => {
       })
       setInternalState(state)
     },
-    [collection, user, id, t, locale, getDocPermissions, getDocPreferences],
+    [collection, user, id, t, locale, getDocPermissions, getDocPreferences, config],
   )
 
   useEffect(() => {
@@ -106,12 +109,25 @@ const AccountView: React.FC = () => {
         user: userRef.current,
       })
 
-      await getPreference(preferencesKey)
+      if (preferencesKey) {
+        await getPreference(preferencesKey)
+      }
+
       setInternalState(state)
     }
 
     if (dataToRender) awaitInternalState()
-  }, [dataToRender, fields, id, locale, preferencesKey, getPreference, t, getDocPreferences])
+  }, [
+    dataToRender,
+    fields,
+    id,
+    locale,
+    preferencesKey,
+    getPreference,
+    t,
+    getDocPreferences,
+    config,
+  ])
 
   const isLoading = !internalState || !docPermissions || isLoadingData
 

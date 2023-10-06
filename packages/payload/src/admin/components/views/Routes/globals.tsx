@@ -11,7 +11,6 @@ import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const EditGlobal = lazy(() => import('../Global'))
-
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Unauthorized = lazy(() => import('../Unauthorized'))
 

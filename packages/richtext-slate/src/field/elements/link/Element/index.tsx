@@ -124,7 +124,7 @@ export const LinkElement: React.FC<{
     }
 
     awaitInitialState()
-  }, [renderModal, element, fieldSchema, user, locale, t, getDocPreferences])
+  }, [renderModal, element, fieldSchema, user, locale, t, getDocPreferences, config])
 
   return (
     <span className={baseClass} {...attributes}>

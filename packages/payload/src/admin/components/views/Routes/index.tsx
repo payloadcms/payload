@@ -34,7 +34,7 @@ const ResetPassword = lazy(() => import('../ResetPassword'))
 const Account = lazy(() => import('../Account'))
 
 export const Routes: React.FC = () => {
-  const [initialized, setInitialized] = useState(null)
+  const [initialized, setInitialized] = useState<boolean | null>(null)
   const { permissions, refreshCookie, user } = useAuth()
   const { i18n } = useTranslation()
   const { code: locale } = useLocale()
@@ -62,9 +62,9 @@ export const Routes: React.FC = () => {
   const userCollection = collections.find(({ slug }) => slug === userSlug)
 
   useEffect(() => {
-    const { slug } = userCollection
+    if (userCollection && !userCollection?.auth?.disableLocalStrategy) {
+      const { slug } = userCollection
 
-    if (!userCollection.auth.disableLocalStrategy) {
       requests
         .get(`${routes.api}/${slug}/init`, {
           headers: {
@@ -123,12 +123,12 @@ export const Routes: React.FC = () => {
                 <Route path={`${match.url}${logoutInactivityRoute}`}>
                   <Logout inactivity />
                 </Route>
-                {!userCollection.auth.disableLocalStrategy && (
+                {!userCollection?.auth?.disableLocalStrategy && (
                   <Route path={`${match.url}/forgot`}>
                     <ForgotPassword />
                   </Route>
                 )}
-                {!userCollection.auth.disableLocalStrategy && (
+                {!userCollection?.auth?.disableLocalStrategy && (
                   <Route path={`${match.url}/reset/:token`}>
                     <ResetPassword />
                   </Route>

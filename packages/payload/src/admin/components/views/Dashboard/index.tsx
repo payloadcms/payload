@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
+import type { SanitizedGlobalConfig } from '../../../../exports/types'
+
 import { useStepNav } from '../../elements/StepNav'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
@@ -9,7 +11,7 @@ import DefaultDashboard from './Default'
 const Dashboard: React.FC = () => {
   const { permissions, user } = useAuth()
   const { setStepNav } = useStepNav()
-  const [filteredGlobals, setFilteredGlobals] = useState([])
+  const [filteredGlobals, setFilteredGlobals] = useState<SanitizedGlobalConfig[]>([])
 
   const {
     admin: {

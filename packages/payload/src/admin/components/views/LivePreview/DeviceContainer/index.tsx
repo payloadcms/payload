@@ -9,7 +9,7 @@ export const DeviceContainer: React.FC<{
 
   const { breakpoint, breakpoints, deviceFrameRef, size, zoom } = useLivePreviewContext()
 
-  const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
+  const foundBreakpoint = breakpoint && breakpoints?.find((bp) => bp.name === breakpoint)
 
   let x = '0'
   let margin = '0'

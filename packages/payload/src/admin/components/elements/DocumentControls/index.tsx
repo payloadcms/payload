@@ -32,7 +32,7 @@ export const DocumentControls: React.FC<{
   id?: string
   isAccountView?: boolean
   isEditing?: boolean
-  permissions?: CollectionPermission | GlobalPermission
+  permissions?: CollectionPermission | GlobalPermission | null
 }> = (props) => {
   const {
     id,
