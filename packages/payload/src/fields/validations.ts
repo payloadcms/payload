@@ -317,7 +317,7 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
     const idField = options.payload.collections[options.relationTo].config.fields.find(
       (field) => fieldAffectsData(field) && field.name === 'id',
     )
-    const type = getIDType(idField, options.payload.db.defaultIDType)
+    const type = getIDType(idField, options?.payload?.db?.defaultIDType)
 
     if (!isValidID(value, type)) {
       return options.t('validation:validUploadID')
@@ -374,7 +374,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         (field) => fieldAffectsData(field) && field.name === 'id',
       )
 
-      const type = getIDType(idField, options.payload.db.defaultIDType)
+      const type = getIDType(idField, options?.payload?.db?.defaultIDType)
 
       return !isValidID(requestedID, type)
     })

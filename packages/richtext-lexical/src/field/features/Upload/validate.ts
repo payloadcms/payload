@@ -17,7 +17,7 @@ export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
         .find(({ slug }) => slug === node.fields.relationTo)
         .fields.find((field) => fieldAffectsData(field) && field.name === 'id')
 
-      const type = getIDType(idField, validation.options.payload.db.defaultIDType)
+      const type = getIDType(idField, validation?.options?.payload?.db?.defaultIDType)
 
       if (!isValidID(node.fields.value.id, type)) {
         return validation.options.t('validation:validUploadID')
