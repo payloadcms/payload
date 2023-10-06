@@ -13,6 +13,7 @@ export const PageClient: React.FC<{
   const { data } = useLivePreview<PageType>({
     initialData: initialPage,
     serverURL: PAYLOAD_SERVER_URL,
+    depth: 2,
   })
 
   return (
