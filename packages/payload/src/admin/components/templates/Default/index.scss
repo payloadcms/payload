@@ -90,20 +90,28 @@
 
   @include small-break {
     &__nav-toggler {
-      width: auto;
+      width: unset;
+      justify-content: unset;
       padding-left: var(--gutter-h);
+
+      .hamburger {
+        opacity: none;
+      }
+    }
+
+    &__nav-toggler.nav-toggler--is-open .hamburger {
+      display: flex;
+      display: inline;
     }
   }
 
   @include extra-small-break {
-    &__nav-toggler {
-      width: calc(var(--base) * 2);
-      height: calc(var(--base) * 2);
-      display: none;
-    }
-
     &--nav-open {
       transition: none;
+    }
+
+    &__nav-toggler.nav-toggler--is-open .hamburger {
+      display: none;
     }
 
     .template-default {

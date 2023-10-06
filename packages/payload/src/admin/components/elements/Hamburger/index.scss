@@ -1,14 +1,19 @@
 @import '../../../scss/styles';
 
 .hamburger {
-  position: relative;
   padding: 0;
   border: 0;
   cursor: pointer;
   background-color: transparent;
   outline: none;
-  width: 14px;
-  height: 14px;
+  position: absolute;
+
+  --hamburger-padding: 5px;
+  --hamburger-size: 13px;
+  padding: var(--hamburger-padding);
+  border: 1px solid var(--theme-elevation-350);
+  color: var(--theme-elevation-350);
+  border-radius: 3px;
 
   &:focus {
     outline: none;
@@ -16,38 +21,37 @@
 
   &__icon {
     position: relative;
+    height: var(--hamburger-size);
+    width: var(--hamburger-size);
+    display: flex;
+    .stroke {
+      stroke: currentColor;
+      stroke-width: 1px;
+    }
+
+    svg {
+      height: 100%;
+    }
   }
 
-  &__icon,
-  &__x,
-  &__collapse {
-    position: absolute;
-    left: 0;
-    top: 0;
+  &__close-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     width: 100%;
-    height: 100%;
+    margin: auto;
   }
 
   &__line {
-    background-color: var(--theme-text);
+    background-color: currentColor;
     width: 100%;
-    height: 2px;
-    position: absolute;
-  }
-
-  &__top {
-    top: 1px;
-    transform: translate3d(0, 0, 0) rotate(0);
-  }
-
-  &__middle {
-    top: 50%;
-    transform: translate3d(0, -50%, 0) rotate(0);
-  }
-
-  &__bottom {
-    bottom: 1px;
-    transform: translate3d(0, 0, 0) rotate(0);
+    height: 1px;
   }
 
   &__x,
@@ -68,32 +72,6 @@
     transform: translate3d(-50%, -50%, 0) rotate(-45deg);
   }
 
-  &__collapse {
-    position: relative;
-  }
-
-  &__collapse-label {
-    opacity: 0;
-    position: absolute;
-    left: calc(100% + 4px);
-    top: 50%;
-    transform: translate3d(0, -50%, 0);
-    font-weight: bold;
-  }
-
-  &__collapse-left {
-    height: 90%;
-    width: 2px;
-    left: 0;
-    top: 50%;
-    transform: translate3d(0, -50%, 0);
-  }
-
-  &__collapse-chevron {
-    position: relative;
-    top: -1px;
-  }
-
   &--active {
     .hamburger {
       &__x,
@@ -111,6 +89,8 @@
   }
 
   @include mid-break {
+    --hamburger-padding: 4px;
+    --hamburger-size: 9px;
     &__collapse-chevron {
       top: -2px;
     }
