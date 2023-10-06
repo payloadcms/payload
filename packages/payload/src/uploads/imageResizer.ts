@@ -10,6 +10,7 @@ import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { PayloadRequest } from '../express/types'
 import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types'
 
+import { isNumber } from '../utilities/isNumber'
 import fileExists from './fileExists'
 
 type ResizeArgs = {
@@ -187,8 +188,17 @@ export default async function resizeAndTransformImageSizes({
         const { height, width } = imageResizeConfig
 
         const focalPoint = {
-          x: Math.floor(Number(req?.query?.uploadEdits?.focalPoint?.x)) / 100 || 0.5,
-          y: Math.floor(Number(req?.query?.uploadEdits?.focalPoint?.y)) / 100 || 0.5,
+          x: 0.5,
+          y: 0.5,
+        }
+
+        if (req.query?.uploadEdits?.focalPoint) {
+          if (isNumber(req.query.uploadEdits.focalPoint?.x)) {
+            focalPoint.x = req.query.uploadEdits.focalPoint.x
+          }
+          if (isNumber(req.query.uploadEdits.focalPoint?.y)) {
+            focalPoint.y = req.query.uploadEdits.focalPoint.y
+          }
         }
 
         const originalAspectRatio = dimensions.width / dimensions.height

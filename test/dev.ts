@@ -27,7 +27,7 @@ if (!testSuiteDir) {
 }
 
 const configPath = path.resolve(__dirname, testSuiteDir, 'config.ts')
-console.log({ testSuiteDir })
+
 if (!fs.existsSync(configPath)) {
   console.error('ERROR: You must pass a valid directory under test/ that contains a config.ts')
   process.exit(1)
