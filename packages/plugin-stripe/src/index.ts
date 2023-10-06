@@ -12,7 +12,7 @@ import { stripeREST } from './routes/rest'
 import { stripeWebhooks } from './routes/webhooks'
 import type { SanitizedStripeConfig, StripeConfig } from './types'
 
-const stripePlugin =
+export const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -122,5 +122,3 @@ const stripePlugin =
       }),
     }
   }
-
-export default stripePlugin

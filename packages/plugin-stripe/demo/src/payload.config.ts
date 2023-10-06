@@ -1,7 +1,7 @@
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
-import stripePlugin from '../../src'
+import { stripePlugin } from '../../src'
 import Customers from './collections/Customers'
 import Products from './collections/Products'
 import Users from './collections/Users'
@@ -23,7 +23,10 @@ export default buildConfig({
             payload: path.join(__dirname, '../node_modules/payload'),
             react: path.join(__dirname, '../node_modules/react'),
             'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-            [path.resolve(__dirname, '../../src')]: path.resolve(__dirname, '../../src/admin.ts'),
+            [path.resolve(__dirname, '../../src/index')]: path.resolve(
+              __dirname,
+              '../../src/admin.ts',
+            ),
           },
         },
       }
