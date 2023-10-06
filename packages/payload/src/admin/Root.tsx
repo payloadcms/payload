@@ -10,6 +10,8 @@ import React from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { Slide, ToastContainer } from 'react-toastify'
 
+import type { SanitizedConfig } from '../config/types'
+
 import { NavProvider } from './components/elements/Nav/context'
 import { StepNavProvider } from './components/elements/StepNav'
 import { AuthProvider } from './components/utilities/Auth'
@@ -24,10 +26,10 @@ import { ThemeProvider } from './components/utilities/Theme'
 import { Routes } from './components/views/Routes'
 import './scss/app.scss'
 
-const Root = () => {
+const Root = ({ config: incomingConfig }: { config?: SanitizedConfig }) => {
   return (
     <React.Fragment>
-      <ConfigProvider config={config}>
+      <ConfigProvider config={incomingConfig || config}>
         <I18n />
         <WindowInfoProvider
           breakpoints={{
