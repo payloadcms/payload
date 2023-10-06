@@ -370,17 +370,11 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
 
       if (requestedID === null) return false
 
-      // TODO: make consistent with upload idType validation
       const idField = payload.collections[collection]?.config?.fields?.find(
         (field) => fieldAffectsData(field) && field.name === 'id',
       )
-      let type
 
-      if (idField) {
-        type = idField.type === 'number' ? 'number' : 'text'
-      } else {
-        type = 'ObjectID'
-      }
+      const type = getIDType(idField, options.payload.db.defaultIDType)
 
       return !isValidID(requestedID, type)
     })
