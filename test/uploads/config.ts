@@ -170,41 +170,6 @@ export default buildConfigWithDefaults({
         },
         imageSizes: [
           {
-            name: 'focalTest',
-            width: 400,
-            height: 300,
-          },
-          {
-            name: 'focalTest2',
-            width: 600,
-            height: 300,
-          },
-          {
-            name: 'focalTest3',
-            width: 900,
-            height: 300,
-          },
-          {
-            name: 'focalTest4',
-            width: 300,
-            height: 400,
-          },
-          {
-            name: 'focalTest5',
-            width: 300,
-            height: 600,
-          },
-          {
-            name: 'focalTest6',
-            width: 300,
-            height: 800,
-          },
-          {
-            name: 'focalTest7',
-            width: 300,
-            height: 300,
-          },
-          {
             name: 'maintainedAspectRatio',
             width: 1024,
             height: undefined,
@@ -238,7 +203,7 @@ export default buildConfigWithDefaults({
           {
             name: 'tablet',
             width: 640,
-            height: 80,
+            height: 480,
           },
           {
             name: 'mobile',
@@ -250,6 +215,41 @@ export default buildConfigWithDefaults({
             name: 'icon',
             width: 16,
             height: 16,
+          },
+          {
+            name: 'focalTest',
+            width: 400,
+            height: 300,
+          },
+          {
+            name: 'focalTest2',
+            width: 600,
+            height: 300,
+          },
+          {
+            name: 'focalTest3',
+            width: 900,
+            height: 300,
+          },
+          {
+            name: 'focalTest4',
+            width: 300,
+            height: 400,
+          },
+          {
+            name: 'focalTest5',
+            width: 300,
+            height: 600,
+          },
+          {
+            name: 'focalTest6',
+            width: 300,
+            height: 800,
+          },
+          {
+            name: 'focalTest7',
+            width: 300,
+            height: 300,
           },
         ],
       },
