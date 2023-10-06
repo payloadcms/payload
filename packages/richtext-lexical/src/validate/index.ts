@@ -3,7 +3,7 @@ import type { RichTextField, Validate } from 'payload/types'
 
 import type { SanitizedEditorConfig } from '../field/lexical/config/types'
 
-import { defaultRichTextValue } from '../populate/defaultValue'
+import { defaultRichTextValue, defaultRichTextValueV2 } from '../populate/defaultValue'
 import { validateNodes } from './validateNodes'
 
 export const richTextValidateHOC = ({ editorConfig }: { editorConfig: SanitizedEditorConfig }) => {
@@ -16,9 +16,15 @@ export const richTextValidateHOC = ({ editorConfig }: { editorConfig: SanitizedE
     const { required, t } = options
 
     if (required) {
-      const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue)
-      if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true
-      return t('validation:required')
+      if (
+        !value ||
+        !value?.root?.children ||
+        !value?.root?.children?.length ||
+        JSON.stringify(value) === JSON.stringify(defaultRichTextValue) ||
+        JSON.stringify(value) === JSON.stringify(defaultRichTextValueV2)
+      ) {
+        return t('validation:required')
+      }
     }
 
     // Traverse through nodes and validate them. Just like a node can hook into the population process (e.g. link or relationship nodes),
