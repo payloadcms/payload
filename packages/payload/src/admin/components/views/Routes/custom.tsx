@@ -5,10 +5,10 @@ import type { User } from '../../../../auth'
 import type { SanitizedConfig } from '../../../../exports/config'
 
 export const customRoutes = (props: {
-  canAccessAdmin: boolean
-  customRoutes: SanitizedConfig['admin']['components']['routes']
+  canAccessAdmin?: boolean
+  customRoutes?: SanitizedConfig['admin']['components']['routes']
   match: { url: string }
-  user: User
+  user: User | null | undefined
 }) => {
   const { canAccessAdmin, customRoutes, match, user } = props
 

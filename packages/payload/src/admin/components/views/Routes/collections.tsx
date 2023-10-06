@@ -12,7 +12,6 @@ import List from '../collections/List'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Edit = lazy(() => import('../collections/Edit'))
-
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Unauthorized = lazy(() => import('../Unauthorized'))
 

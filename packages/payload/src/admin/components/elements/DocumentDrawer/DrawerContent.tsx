@@ -97,7 +97,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
     awaitInitialState()
     hasInitializedState.current = true
-  }, [data, fields, id, user, locale, isLoadingDocument, t, getDocPreferences])
+  }, [data, fields, id, user, locale, isLoadingDocument, t, getDocPreferences, config])
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))

@@ -28,7 +28,7 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
   const { i18n, t } = useTranslation('authentication')
 
   const isAdminUser = collectionSlug === adminUser
-  const [verifyResult, setVerifyResult] = useState(null)
+  const [verifyResult, setVerifyResult] = useState<Response | null>(null)
 
   useEffect(() => {
     async function verifyToken() {

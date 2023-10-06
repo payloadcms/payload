@@ -70,7 +70,7 @@ const Login: React.FC = () => {
             <Logo />
           </div>
           {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-          {!collection.auth.disableLocalStrategy && (
+          {!collection?.auth?.disableLocalStrategy && (
             <Form
               action={`${serverURL}${api}/${userSlug}/login`}
               className={`${baseClass}__form`}
