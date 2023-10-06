@@ -5,6 +5,7 @@ export type Props = {
   className?: string
   gutter?: boolean
   header?: React.ReactNode
+  hoverTitle?: boolean
   slug: string
   title?: string
 }

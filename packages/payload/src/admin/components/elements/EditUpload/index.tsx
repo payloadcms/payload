@@ -111,7 +111,7 @@ export const EditUpload: React.FC<{
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
-        <h2>
+        <h2 title={`${t('general:editing')} ${fileName}`}>
           {t('general:editing')} {fileName}
         </h2>
         <div className={`${baseClass}__actions`}>

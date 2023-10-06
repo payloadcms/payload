@@ -46,6 +46,7 @@ export const Drawer: React.FC<Props> = ({
   className,
   gutter = true,
   header,
+  hoverTitle,
   slug,
   title,
 }) => {
@@ -94,7 +95,9 @@ export const Drawer: React.FC<Props> = ({
               {header && header}
               {header === undefined && (
                 <div className={`${baseClass}__header`}>
-                  <h2 className={`${baseClass}__header__title`}>{title}</h2>
+                  <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
+                    {title}
+                  </h2>
                   <button
                     aria-label={t('close')}
                     className={`${baseClass}__header__close`}

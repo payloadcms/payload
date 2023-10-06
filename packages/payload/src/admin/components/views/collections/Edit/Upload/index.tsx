@@ -197,6 +197,7 @@ export const Upload: React.FC<Props> = (props) => {
       {doc && hasImageSizes && (
         <Drawer
           className={`${baseClass}__previewDrawer`}
+          hoverTitle
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: doc?.filename })}
         >
