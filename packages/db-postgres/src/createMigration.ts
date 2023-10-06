@@ -57,7 +57,6 @@ export const createMigration: CreateMigration = async function createMigration(
   payload,
   migrationName,
 ) {
-  payload.logger.info({ msg: 'Creating new migration...' })
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)

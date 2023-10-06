@@ -32,8 +32,6 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     process.exit(1)
   }
 
-  this.payload.logger.info('Connected to Postgres successfully')
-
   // Only push schema if not in production
   if (process.env.NODE_ENV === 'production' || process.env.PAYLOAD_MIGRATING === 'true') return
 
@@ -43,30 +41,20 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     this.drizzle,
   )
 
-  // this.payload.logger.debug({
-  //   hasDataLoss,
-  //   msg: 'Schema push results',
-  //   statementsToExecute,
-  //   warnings,
-  // })
-
   if (warnings.length) {
-    this.payload.logger.info({
-      msg: `Warnings detected during schema push: ${warnings.join('\n')}`,
-      warnings,
-    })
+    let message = `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\n`
 
     if (hasDataLoss) {
-      this.payload.logger.info({
-        msg: 'DATA LOSS WARNING: Possible data loss detected if schema is pushed.',
-      })
+      message += `DATA LOSS WARNING: Possible data loss detected if schema is pushed.\n\n`
     }
+
+    message += `Accept warnings and push schema to database?`
 
     const { confirm: acceptWarnings } = await prompts(
       {
         name: 'confirm',
         initial: false,
-        message: 'Accept warnings and push schema to database?',
+        message,
         type: 'confirm',
       },
       {
