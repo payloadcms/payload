@@ -1,4 +1,4 @@
-import type { Block, Data } from 'payload/types'
+import type { Block, Data, Fields } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getNodeByKey } from 'lexical'
@@ -29,8 +29,10 @@ export const BlockContent: React.FC<Props> = (props) => {
   const [editor] = useLexicalComposerContext()
   const [collapsed, setCollapsed] = React.useState<boolean>(fields.collapsed)
   const hasSubmitted = useFormSubmitted()
-  const childErrorPathsCount = 0 // TODO row.childErrorPaths?.size
-  const fieldHasErrors = hasSubmitted && childErrorPathsCount > 0
+
+  const [errorCount, setErrorCount] = React.useState(0)
+
+  const fieldHasErrors = hasSubmitted && errorCount > 0
 
   const classNames = [
     `${baseClass}__row`,
@@ -42,7 +44,7 @@ export const BlockContent: React.FC<Props> = (props) => {
   const path = '' as const
 
   const onFormChange = useCallback(
-    ({ formData }: { formData: Data }) => {
+    ({ fields: formFields, formData }: { fields: Fields; formData: Data }) => {
       editor.update(() => {
         const node: BlockNode = $getNodeByKey(nodeKey)
         if (node) {
@@ -52,8 +54,19 @@ export const BlockContent: React.FC<Props> = (props) => {
           })
         }
       })
+
+      // update error count
+      if (hasSubmitted) {
+        let rowErrorCount = 0
+        for (const formField of Object.values(formFields)) {
+          if (formField?.valid === false) {
+            rowErrorCount++
+          }
+        }
+        setErrorCount(rowErrorCount)
+      }
     },
-    [editor, nodeKey, collapsed],
+    [editor, nodeKey, collapsed, hasSubmitted],
   )
 
   const onCollapsedChange = useCallback(() => {
@@ -79,7 +92,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       <Collapsible
         className={classNames}
         collapsed={collapsed}
-        collapsibleStyle={false ? 'error' : 'default'}
+        collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
           <div className={`${baseClass}__block-header`}>
             <div>
@@ -90,7 +103,7 @@ export const BlockContent: React.FC<Props> = (props) => {
                 {getTranslation(block.labels.singular, i18n)}
               </Pill>
               <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
-              {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
+              {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}
             </div>
             <Button
               buttonStyle="icon-label"

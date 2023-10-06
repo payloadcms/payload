@@ -196,7 +196,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid
-  }, [contextRef, id, user, operation, t, dispatchFields])
+  }, [contextRef, id, user, operation, t, dispatchFields, config])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -475,7 +475,7 @@ const Form: React.FC<Props> = (props) => {
         })
       }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath],
+    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath, config],
   )
 
   const removeFieldRow: Context['removeFieldRow'] = useCallback(
@@ -514,7 +514,7 @@ const Form: React.FC<Props> = (props) => {
         })
       }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath],
+    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath, config],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef])
@@ -577,7 +577,7 @@ const Form: React.FC<Props> = (props) => {
       setModified(false)
       dispatchFields({ state, type: 'REPLACE_STATE' })
     },
-    [id, user, operation, locale, t, dispatchFields, getDocPreferences],
+    [id, user, operation, locale, t, dispatchFields, getDocPreferences, config],
   )
 
   const replaceState = useCallback(

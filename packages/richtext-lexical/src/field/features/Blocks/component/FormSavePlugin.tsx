@@ -1,4 +1,4 @@
-import type { Data, FieldWithPath } from 'payload/types'
+import type { Data, FieldWithPath, Fields } from 'payload/types'
 import type React from 'react'
 
 import { reduceFieldsToValues, useAllFormFields } from 'payload/components/forms'
@@ -8,7 +8,7 @@ import './index.scss'
 
 type Props = {
   fieldSchema: FieldWithPath[]
-  onChange?: ({ formData }: { formData: Data }) => void
+  onChange?: ({ fields, formData }: { fields: Fields; formData: Data }) => void
 }
 
 export const FormSavePlugin: React.FC<Props> = (props) => {
@@ -22,9 +22,9 @@ export const FormSavePlugin: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (onChange) {
-      onChange({ formData })
+      onChange({ fields, formData })
     }
-  }, [formData, onChange])
+  }, [formData, onChange, fields])
 
   return null
 }
