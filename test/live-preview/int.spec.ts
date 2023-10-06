@@ -1,7 +1,7 @@
 import type { Page } from './payload-types'
 
+import { mergeData } from '../../packages/live-preview/src/mergeData'
 import payload from '../../packages/payload/src'
-import { mergeLivePreviewData } from '../../packages/payload/src/admin/components/views/LivePreview/useLivePreview/mergeData'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -41,7 +41,7 @@ describe('Collections - Live Preview', () => {
       title: 'Test Page (Changed)',
     } as Page
 
-    const mergedData = await mergeLivePreviewData<Page>({
+    const mergedData = await mergeData<Page>({
       depth: 1,
       existingData: testPage,
       fieldSchema: fieldSchemaToJSON(Pages.fields),
