@@ -89,7 +89,14 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
           .filter(Boolean)
           .join(' ')}
       >
-        <div className={`${baseClass}__main`}>
+        <div
+          className={[
+            `${baseClass}__main`,
+            popupState?.isPopupOpen && `${baseClass}__main--popup-open`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           <Meta
             description={t('editing')}
             keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}

@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^13.5.3"
+    "@types/escape-html": "^1.0.2",
+    "next": "^13.5.3",
+    "sass": "^1.68.0",
+    "slate": "^0.94.1"
   },
   "devDependencies": {
     "@types/node": "20.6.2",

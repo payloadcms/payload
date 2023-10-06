@@ -17,21 +17,20 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   }
 
   try {
-    this.pool = new Pool(this.client)
+    this.pool = new Pool(this.poolOptions)
     await this.pool.connect()
 
     this.drizzle = drizzle(this.pool, { schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING TABLES ----')
-      await this.drizzle.execute(sql`drop schema public cascade;\ncreate schema public;`)
+      await this.drizzle.execute(sql`drop schema public cascade;
+      create schema public;`)
       this.payload.logger.info('---- DROPPED TABLES ----')
     }
   } catch (err) {
     payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
     process.exit(1)
   }
-
-  this.payload.logger.info('Connected to Postgres successfully')
 
   // Only push schema if not in production
   if (process.env.NODE_ENV === 'production' || process.env.PAYLOAD_MIGRATING === 'true') return
@@ -42,30 +41,20 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     this.drizzle,
   )
 
-  // this.payload.logger.debug({
-  //   hasDataLoss,
-  //   msg: 'Schema push results',
-  //   statementsToExecute,
-  //   warnings,
-  // })
-
   if (warnings.length) {
-    this.payload.logger.info({
-      msg: `Warnings detected during schema push: ${warnings.join('\n')}`,
-      warnings,
-    })
+    let message = `Warnings detected during schema push: \n\n${warnings.join('\n')}\n\n`
 
     if (hasDataLoss) {
-      this.payload.logger.info({
-        msg: 'DATA LOSS WARNING: Possible data loss detected if schema is pushed.',
-      })
+      message += `DATA LOSS WARNING: Possible data loss detected if schema is pushed.\n\n`
     }
+
+    message += `Accept warnings and push schema to database?`
 
     const { confirm: acceptWarnings } = await prompts(
       {
         name: 'confirm',
         initial: false,
-        message: 'Accept warnings and push schema to database?',
+        message,
         type: 'confirm',
       },
       {

@@ -1,7 +1,8 @@
 import type { Transformer } from '@lexical/markdown'
-import type { Klass, LexicalEditor, LexicalNode } from 'lexical'
+import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
-import type { PayloadRequest, RichTextField } from 'payload/types'
+import type { SanitizedConfig } from 'payload/config'
+import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
 
 import type { AdapterProps } from '../../types'
@@ -28,6 +29,22 @@ export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexical
   req: PayloadRequest
   showHiddenFields: boolean
 }) => Promise<void>[]
+
+export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
+  node,
+  nodeValidations,
+  payloadConfig,
+  validation,
+}: {
+  node: T
+  nodeValidations: Map<string, Array<NodeValidation>>
+  payloadConfig: SanitizedConfig
+  validation: {
+    options: ValidateOptions<SerializedEditorState, unknown, RichTextField>
+    value: SerializedEditorState
+  }
+}) => Promise<string | true> | string | true
+
 export type Feature = {
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
@@ -37,6 +54,7 @@ export type Feature = {
     afterReadPromises?: Array<AfterReadPromise>
     node: Klass<LexicalNode>
     type: string
+    validations?: Array<NodeValidation>
   }>
   plugins?: Array<
     | {
@@ -124,4 +142,6 @@ export type SanitizedFeatures = Required<
     >
     groupsWithOptions: SlashMenuGroup[]
   }
+  /**  The node types mapped to their validations */
+  validations: Map<string, Array<NodeValidation>>
 }

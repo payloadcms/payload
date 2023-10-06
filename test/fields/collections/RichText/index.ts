@@ -29,6 +29,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextLexicalCustomFields',
       type: 'richText',
+      required: true,
       editor: lexicalEditor({
         userConfig(defaultEditorConfig) {
           defaultEditorConfig.features.push(TreeviewFeature())
@@ -298,6 +299,7 @@ const RichTextFields: CollectionConfig = {
 
 export const richTextBulletsDoc = {
   title: 'Bullets and Indentation',
+  richTextLexicalCustomFields: generateLexicalRichText(),
   richText: [
     {
       type: 'ul',

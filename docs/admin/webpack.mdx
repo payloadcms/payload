@@ -7,10 +7,12 @@ keywords: admin, webpack, documentation, Content Management System, cms, headles
 ---
 
 TODO: rewrite this
-- Talk about how Webpack is stable, and should be used unless you are adventurous. 
+- Talk about how Webpack is stable, and should be used unless you are adventurous.
 - Show a code example about how to install and pass the Webpack bundler to the Payload config
 
-Payload uses Webpack 5 to build the Admin panel. It comes with support for many common functionalities such as SCSS and Typescript out of the box, but there are many cases where you may need to add support for additional functionalities.
+Payload allows usage of Webpack 5 to build the Admin panel. It comes with support for many common functionalities such as SCSS and Typescript out of the box, but there are many cases where you may need to add support for additional functionalities.
+
+To use webpack as your bundler, you must import the `@payloadcms/bundler-webpack` package and define it as the bundler in your Payload config.
 
 To extend the Webpack config, add the `webpack` key to your base Payload config, and provide a function that accepts the default Webpack config as its only argument:
 
@@ -18,6 +20,7 @@ To extend the Webpack config, add the `webpack` key to your base Payload config,
 
 ```ts
 import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
 
 export default buildConfig({
   admin: {
@@ -29,11 +32,11 @@ export default buildConfig({
     },
     // highlight-end
   },
-})
+  bunder: webpackBundler(),
 ```
 
 TODO: move the aliasing section to its own page
-- Talk about how Webpack is stable, and should be used unless you are adventurous. 
+- Talk about how Webpack is stable, and should be used unless you are adventurous.
 - Show a code example about how to install and pass the Webpack bundler to the Payload config
 
 ### Aliasing server-only modules
@@ -142,6 +145,7 @@ Example in `payload.config.js`:
 import { buildConfig } from 'payload/config'
 import path from 'path'
 import Subscription from './collections/Subscription'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
 
 const createStripeSubscriptionPath = path.resolve(
   __dirname,
@@ -163,6 +167,7 @@ export default buildConfig({
       },
     }),
   },
+  bundler: webpackBundler(),
 })
 ```
 

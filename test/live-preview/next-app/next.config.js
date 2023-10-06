@@ -5,6 +5,9 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
+  images: {
+    domains: ['localhost'],
+  },
 }
 
 module.exports = nextConfig

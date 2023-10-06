@@ -1,5 +1,5 @@
 import { type ElementFormatType } from 'lexical'
-import { Form, buildInitialState } from 'payload/components/forms'
+import { Form, buildInitialState, useFormSubmitted } from 'payload/components/forms'
 import React, { useMemo } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode'
@@ -27,6 +27,7 @@ type Props = {
 export const BlockComponent: React.FC<Props> = (props) => {
   const { children, className, fields, format, nodeKey } = props
   const payloadConfig = useConfig()
+  const submitted = useFormSubmitted()
 
   const { editorConfig, field } = useEditorConfigContext()
 
@@ -48,7 +49,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const formContent = useMemo(() => {
     return (
       block && (
-        <Form initialState={initialDataRef?.current}>
+        <Form initialState={initialDataRef?.current} submitted={submitted}>
           <BlockContent
             baseClass={baseClass}
             block={block}
@@ -59,7 +60,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         </Form>
       )
     )
-  }, [block, field, nodeKey])
+  }, [block, field, nodeKey, submitted])
 
   return <div className={baseClass}>{formContent}</div>
 }
