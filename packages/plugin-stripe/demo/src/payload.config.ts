@@ -1,15 +1,13 @@
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
-import stripePlugin from '../../src'
+import { stripePlugin } from '../../src'
 import Customers from './collections/Customers'
 import Products from './collections/Products'
 import Users from './collections/Users'
 import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated'
 import { subscriptionDeleted } from './webhooks/subscriptionDeleted'
 import { syncPriceJSON } from './webhooks/syncPriceJSON'
-
-const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js')
 
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
@@ -25,10 +23,10 @@ export default buildConfig({
             payload: path.join(__dirname, '../node_modules/payload'),
             react: path.join(__dirname, '../node_modules/react'),
             'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-            stripe: mockModulePath,
-            express: mockModulePath,
-            [path.resolve(__dirname, './webhooks/subscriptionCreatedOrUpdated')]: mockModulePath,
-            [path.resolve(__dirname, './webhooks/subscriptionDeleted')]: mockModulePath,
+            [path.resolve(__dirname, '../../src/index')]: path.resolve(
+              __dirname,
+              '../../src/admin.ts',
+            ),
           },
         },
       }

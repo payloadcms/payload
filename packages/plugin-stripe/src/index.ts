@@ -4,15 +4,15 @@ import type { Config } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
 
 import { extendWebpackConfig } from './extendWebpackConfig'
+import { getFields } from './fields/getFields'
 import { createNewInStripe } from './hooks/createNewInStripe'
 import { deleteFromStripe } from './hooks/deleteFromStripe'
 import { syncExistingWithStripe } from './hooks/syncExistingWithStripe'
 import { stripeREST } from './routes/rest'
 import { stripeWebhooks } from './routes/webhooks'
 import type { SanitizedStripeConfig, StripeConfig } from './types'
-import { LinkToDoc } from './ui/LinkToDoc'
 
-const stripePlugin =
+export const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -77,6 +77,11 @@ const stripePlugin =
         const syncConfig = stripeConfig.sync?.find(sync => sync.collection === collection.slug)
 
         if (syncConfig) {
+          const fields = getFields({
+            collection,
+            stripeConfig,
+            syncConfig,
+          })
           return {
             ...collection,
             hooks: {
@@ -109,44 +114,7 @@ const stripePlugin =
                   }),
               ],
             },
-            fields: [
-              ...collection.fields,
-              {
-                name: 'stripeID',
-                label: 'Stripe ID',
-                type: 'text',
-                saveToJWT: true,
-                admin: {
-                  position: 'sidebar',
-                  readOnly: true,
-                },
-              },
-              {
-                name: 'skipSync',
-                label: 'Skip Sync',
-                type: 'checkbox',
-                admin: {
-                  position: 'sidebar',
-                  readOnly: true,
-                },
-              },
-              {
-                name: 'docUrl',
-                type: 'ui',
-                admin: {
-                  position: 'sidebar',
-                  components: {
-                    Field: args =>
-                      LinkToDoc({
-                        ...args,
-                        isTestKey: stripeConfig.isTestKey,
-                        stripeResourceType: syncConfig.stripeResourceType,
-                        nameOfIDField: 'stripeID',
-                      }),
-                  },
-                },
-              },
-            ],
+            fields,
           }
         }
 
@@ -154,5 +122,3 @@ const stripePlugin =
       }),
     }
   }
-
-export default stripePlugin
