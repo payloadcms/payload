@@ -1,4 +1,4 @@
-import type { Block, Data } from 'payload/types'
+import type { Block, Data, Fields } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getNodeByKey } from 'lexical'
@@ -6,8 +6,9 @@ import { Button, ErrorPill, Pill } from 'payload/components'
 import { Collapsible } from 'payload/components/elements'
 import { SectionTitle } from 'payload/components/fields/Blocks'
 import { RenderFields, createNestedFieldPath, useFormSubmitted } from 'payload/components/forms'
+import { useDocumentInfo } from 'payload/components/utilities'
 import { getTranslation } from 'payload/utilities'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { FieldProps } from '../../../../types'
@@ -27,10 +28,31 @@ export const BlockContent: React.FC<Props> = (props) => {
   const { baseClass, block, field, fields, nodeKey } = props
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
-  const [collapsed, setCollapsed] = React.useState<boolean>(fields.collapsed)
+  // Used for saving collapsed to preferences (and gettin' it from there again)
+  // Remember, these preferences are scoped to the whole document, not just this form. This
+  // is important to consider for the data path used in setDocFieldPreferences
+  const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
+
+  const [collapsed, setCollapsed] = React.useState<boolean>(() => {
+    let initialState = false
+
+    getDocPreferences().then((currentDocPreferences) => {
+      const currentFieldPreferences = currentDocPreferences?.fields[field.name]
+
+      const collapsedMap: { [key: string]: boolean } = currentFieldPreferences?.collapsed
+
+      if (collapsedMap && collapsedMap[fields.data.id] !== undefined) {
+        setCollapsed(collapsedMap[fields.data.id])
+        initialState = collapsedMap[fields.data.id]
+      }
+    })
+    return initialState
+  })
   const hasSubmitted = useFormSubmitted()
-  const childErrorPathsCount = 0 // TODO row.childErrorPaths?.size
-  const fieldHasErrors = hasSubmitted && childErrorPathsCount > 0
+
+  const [errorCount, setErrorCount] = React.useState(0)
+
+  const fieldHasErrors = hasSubmitted && errorCount > 0
 
   const classNames = [
     `${baseClass}__row`,
@@ -42,31 +64,46 @@ export const BlockContent: React.FC<Props> = (props) => {
   const path = '' as const
 
   const onFormChange = useCallback(
-    ({ formData }: { formData: Data }) => {
+    ({ fields: formFields, formData }: { fields: Fields; formData: Data }) => {
       editor.update(() => {
         const node: BlockNode = $getNodeByKey(nodeKey)
         if (node) {
           node.setFields({
-            collapsed: collapsed,
             data: formData as any,
           })
         }
       })
+
+      // update error count
+      if (hasSubmitted) {
+        let rowErrorCount = 0
+        for (const formField of Object.values(formFields)) {
+          if (formField?.valid === false) {
+            rowErrorCount++
+          }
+        }
+        setErrorCount(rowErrorCount)
+      }
     },
-    [editor, nodeKey, collapsed],
+    [editor, nodeKey, hasSubmitted],
   )
 
   const onCollapsedChange = useCallback(() => {
-    editor.update(() => {
-      const node: BlockNode = $getNodeByKey(nodeKey)
-      if (node) {
-        node.setFields({
-          ...node.getFields(),
-          collapsed: collapsed,
-        })
-      }
+    getDocPreferences().then((currentDocPreferences) => {
+      const currentFieldPreferences = currentDocPreferences?.fields[field.name]
+
+      const collapsedMap: { [key: string]: boolean } = currentFieldPreferences?.collapsed
+
+      const newCollapsed: { [key: string]: boolean } =
+        collapsedMap && collapsedMap?.size ? collapsedMap : {}
+
+      newCollapsed[fields.data.id] = !collapsed
+
+      setDocFieldPreferences(field.name, {
+        collapsed: newCollapsed,
+      })
     })
-  }, [editor, nodeKey, collapsed])
+  }, [collapsed, getDocPreferences, field.name, setDocFieldPreferences, fields.data.id])
 
   const removeBlock = useCallback(() => {
     editor.update(() => {
@@ -79,7 +116,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       <Collapsible
         className={classNames}
         collapsed={collapsed}
-        collapsibleStyle={false ? 'error' : 'default'}
+        collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         header={
           <div className={`${baseClass}__block-header`}>
             <div>
@@ -90,7 +127,7 @@ export const BlockContent: React.FC<Props> = (props) => {
                 {getTranslation(block.labels.singular, i18n)}
               </Pill>
               <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
-              {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
+              {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}
             </div>
             <Button
               buttonStyle="icon-label"

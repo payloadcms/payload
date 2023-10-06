@@ -5,8 +5,6 @@ import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types'
-
 import { connect } from './connect'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
@@ -36,6 +34,8 @@ import { updateGlobal } from './updateGlobal'
 import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
 
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
+
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = args.migrationDir || path.resolve(process.cwd(), 'src/migrations')
@@ -44,13 +44,13 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     extendViteConfig(payload.config)
 
     return createDatabaseAdapter<PostgresAdapter>({
-      ...args,
       name: 'postgres',
 
       // Postgres-specific
       drizzle: undefined,
       enums: {},
       pool: undefined,
+      poolOptions: args.pool,
       relations: {},
       schema: {},
       sessions: {},

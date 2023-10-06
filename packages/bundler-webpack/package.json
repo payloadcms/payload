@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-webpack",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "The officially supported Webpack bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",

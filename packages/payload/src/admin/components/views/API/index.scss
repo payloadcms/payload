@@ -4,7 +4,7 @@
   --string-color: #11b102;
   --number-color: #62c3f3;
   display: flex;
-  gap: var(--base);
+  gap: calc(var(--base) * 2);
   align-items: flex-start;
 
   &--fullscreen {
@@ -96,6 +96,7 @@
     padding-bottom: calc(var(--base) * 0.5);
     background-color: var(--theme-elevation-50);
     overflow: auto;
+    min-height: 100vh;
   }
 
   &__json-children {

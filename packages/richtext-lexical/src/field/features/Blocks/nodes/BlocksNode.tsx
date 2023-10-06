@@ -11,17 +11,18 @@ import type {
 } from 'lexical'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import ObjectID from 'bson-objectid'
 import React from 'react'
 
 import { BlockComponent } from '../component'
 
 export type BlockFields = {
-  collapsed: boolean
   /** Block data */
   data: {
     [key: string]: any
     blockName: string
     blockType: string
+    id?: string
   }
 }
 
@@ -118,9 +119,15 @@ export class BlockNode extends DecoratorBlockNode {
   }
 }
 
-export function $createBlockNode(fields: BlockFields): BlockNode {
+export function $createBlockNode(fields: Exclude<BlockFields, 'id'>): BlockNode {
   return new BlockNode({
-    fields,
+    fields: {
+      ...fields,
+      data: {
+        ...fields.data,
+        id: fields?.data?.id || new ObjectID().toHexString(),
+      },
+    },
   })
 }
 

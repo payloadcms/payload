@@ -50,8 +50,19 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 
 ```ts
 import { buildConfig } from 'payload/config'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+import { viteBundler } from '@payloadcms/bundler-vite'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 export default buildConfig({
+  bundler: webpackBundler() // or viteBundler(),
+  db: mongooseAdapter({}) // or postgresAdapter({}),
+  editor: lexicalEditor({}) // or slateEditor({})
   collections: [
     {
       slug: 'pages',

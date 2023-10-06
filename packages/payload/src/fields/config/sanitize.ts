@@ -32,6 +32,11 @@ export const sanitizeFields = ({ config, fields, validRelationships }: Args): Fi
       throw new InvalidFieldName(field, field.name)
     }
 
+    // Make sure that the richText field has an editor
+    if (field.type === 'richText' && !field.editor && config.editor) {
+      field.editor = config.editor
+    }
+
     // Auto-label
     if (
       'name' in field &&

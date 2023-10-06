@@ -86,6 +86,7 @@ export default joi.object({
     CellComponent: component.required(),
     FieldComponent: component.required(),
     afterReadPromise: joi.func().required(),
+    validate: joi.func().required(),
   }),
   email: joi.object(),
   endpoints: endpointsSchema,

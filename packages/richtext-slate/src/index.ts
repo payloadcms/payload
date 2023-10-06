@@ -6,6 +6,7 @@ import type { AdapterArguments } from './types'
 
 import RichTextCell from './cell'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
+import { richTextValidate } from './data/validation'
 import RichTextField from './field'
 
 export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArguments> {
@@ -45,5 +46,6 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArgu
       }
       return null
     },
+    validate: richTextValidate,
   }
 }

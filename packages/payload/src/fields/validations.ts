@@ -1,3 +1,4 @@
+import type { RichTextAdapter } from '../exports/types'
 import type {
   ArrayField,
   BlockField,
@@ -11,6 +12,7 @@ import type {
   RadioField,
   RelationshipField,
   RelationshipValue,
+  RichTextField,
   SelectField,
   TextField,
   TextareaField,
@@ -210,6 +212,15 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required, t
   }
 
   return true
+}
+
+export const richText: Validate<unknown, unknown, RichTextField, RichTextField> = async (
+  value,
+  options,
+) => {
+  const editor: RichTextAdapter = options?.editor
+
+  return await editor.validate(value, options)
 }
 
 const validateFilterOptions: Validate = async (
@@ -511,6 +522,7 @@ export default {
   point,
   radio,
   relationship,
+  richText,
   select,
   text,
   textarea,

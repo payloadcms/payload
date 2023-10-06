@@ -38,7 +38,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`label`**         | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`unique`**        | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
 | **`validate`**      | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
-| **`index`**         | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`index`**         | Build a an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`saveToJWT`**     | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
 | **`hooks`**         | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
 | **`access`**        | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
@@ -152,7 +152,7 @@ The shape of the data to save for a document with the field configured this way 
 
 ```json
 {
-  // MongoDB ObjectID of the related user
+  // ObjectID of the related user
   "owner": "6031ac9e1289176380734024"
 }
 ```

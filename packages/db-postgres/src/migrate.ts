@@ -45,7 +45,7 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
         name: 'confirm',
         initial: false,
         message:
-          "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database. " +
+          "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
           "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
         type: 'confirm',
       },

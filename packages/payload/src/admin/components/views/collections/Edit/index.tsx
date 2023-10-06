@@ -42,10 +42,11 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const { code: locale } = useLocale()
 
+  const config = useConfig()
   const {
     routes: { admin, api },
     serverURL,
-  } = useConfig()
+  } = config
 
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>()
   const history = useHistory()
@@ -67,6 +68,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
       const state = await buildStateFromSchema({
         id,
+        config,
         data: doc || {},
         fieldSchema: overrides.fieldSchema,
         locale,

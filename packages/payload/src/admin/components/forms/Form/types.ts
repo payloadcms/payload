@@ -49,6 +49,7 @@ export type Props = {
   onSubmit?: (fields: Fields, data: Data) => void
   onSuccess?: (json: unknown) => void
   redirect?: string
+  submitted?: boolean
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
 }

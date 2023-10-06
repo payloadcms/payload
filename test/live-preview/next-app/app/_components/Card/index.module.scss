@@ -1,0 +1,106 @@
+@import '../../_css/common';
+
+.card {
+  border: 1px var(--color-base-200) solid;
+  border-radius: 4px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+.horizontal {
+  flex-direction: row;
+
+  &:local() {
+    .mediaWrapper {
+      width: 150px;
+
+      @include mid-break {
+        width: 100%;
+      }
+    }
+  }
+
+  @include mid-break {
+    flex-direction: column;
+  }
+}
+
+.content {
+  padding: var(--base);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 2);
+
+  @include small-break {
+    padding: calc(var(--base) / 2);
+    gap: calc(var(--base) / 4);
+  }
+}
+
+.title {
+  margin: 0;
+}
+
+.titleLink {
+  text-decoration: none;
+}
+
+.centerAlign {
+  align-items: center;
+}
+
+.body {
+  flex-grow: 1;
+}
+
+.leader {
+  @extend %label;
+  display: flex;
+  gap: var(--base);
+}
+
+.description {
+  margin: 0;
+}
+
+.hideImageOnMobile {
+  @include mid-break {
+    display: none;
+  }
+}
+
+.mediaWrapper {
+  text-decoration: none;
+  display: block;
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.placeholder {
+  background-color: var(--color-base-50);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+
+  @include mid-break {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,12 +1,18 @@
 ---
 title: Webpack
 label: Webpack
-order: 60
+order: 80
 desc: The Payload admin panel uses Webpack 5 and supports many common functionalities such as SCSS and Typescript out of the box to give you more freedom.
 keywords: admin, webpack, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload uses Webpack 5 to build the Admin panel. It comes with support for many common functionalities such as SCSS and Typescript out of the box, but there are many cases where you may need to add support for additional functionalities.
+TODO: rewrite this
+- Talk about how Webpack is stable, and should be used unless you are adventurous.
+- Show a code example about how to install and pass the Webpack bundler to the Payload config
+
+Payload allows usage of Webpack 5 to build the Admin panel. It comes with support for many common functionalities such as SCSS and Typescript out of the box, but there are many cases where you may need to add support for additional functionalities.
+
+To use webpack as your bundler, you must import the `@payloadcms/bundler-webpack` package and define it as the bundler in your Payload config.
 
 To extend the Webpack config, add the `webpack` key to your base Payload config, and provide a function that accepts the default Webpack config as its only argument:
 
@@ -14,6 +20,7 @@ To extend the Webpack config, add the `webpack` key to your base Payload config,
 
 ```ts
 import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
 
 export default buildConfig({
   admin: {
@@ -25,8 +32,12 @@ export default buildConfig({
     },
     // highlight-end
   },
-})
+  bunder: webpackBundler(),
 ```
+
+TODO: move the aliasing section to its own page
+- Talk about how Webpack is stable, and should be used unless you are adventurous.
+- Show a code example about how to install and pass the Webpack bundler to the Payload config
 
 ### Aliasing server-only modules
 
@@ -134,6 +145,7 @@ Example in `payload.config.js`:
 import { buildConfig } from 'payload/config'
 import path from 'path'
 import Subscription from './collections/Subscription'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
 
 const createStripeSubscriptionPath = path.resolve(
   __dirname,
@@ -155,6 +167,7 @@ export default buildConfig({
       },
     }),
   },
+  bundler: webpackBundler(),
 })
 ```
 
@@ -175,23 +188,3 @@ Now, when Webpack sees that you're attempting to import your `createStripeSubscr
   [cached](https://webpack.js.org/configuration/cache/) in `node_modules/.cache/webpack`. Try
   deleting that folder and restarting your server.
 </Banner>
-
-## Admin environment vars
-
-<Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  Be careful about what variables you provide to your client-side code. Analyze every single one to
-  make sure that you're not accidentally leaking anything that an attacker could exploit. Only keys
-  that are safe to be available to everyone in plain text should be provided to your Admin panel.
-</Banner>
-
-By default, `env` variables are **not** provided to the Admin panel for security and safety reasons. But, Payload provides you with a way to still provide `env` vars to your frontend code.
-
-**Payload will automatically supply any present `env` variables that are prefixed with `PAYLOAD_PUBLIC_` directly to the Admin panel.**
-
-For example, if you've got the following environment variable:
-
-`PAYLOAD_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXX`
-
-This key will automatically be made available to the Payload bundle and can be referenced in your Admin component code as `process.env.PAYLOAD_PUBLIC_STRIPE_PUBLISHABLE_KEY`.

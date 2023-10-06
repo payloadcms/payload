@@ -106,6 +106,7 @@ export const promise = async ({
       const validationResult = await field.validate(valueToValidate, {
         ...field,
         id,
+        config: req.payload.config,
         data: merge(doc, data, { arrayMerge: (_, source) => source }),
         jsonError,
         operation,
