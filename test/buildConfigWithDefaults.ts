@@ -21,10 +21,10 @@ const databaseAdapters = {
     url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
-    client: {
+    migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
+    pool: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
-    migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
   }),
 }
 
@@ -33,11 +33,11 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
 
   const config: Config = {
     editor: slateEditor({}),
-    telemetry: false,
     rateLimit: {
-      window: 15 * 60 * 100, // 15min default,
       max: 9999999999,
+      window: 15 * 60 * 100, // 15min default,
     },
+    telemetry: false,
     ...testConfig,
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
   }
@@ -60,6 +60,8 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           : webpackConfig
       return {
         ...existingConfig,
+        name,
+        cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
         entry: {
           main: [
             `webpack-hot-middleware/client?path=${
@@ -68,27 +70,25 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             path.resolve(__dirname, '../packages/payload/src/admin'),
           ],
         },
-        name,
-        cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
         resolve: {
           ...existingConfig.resolve,
           alias: {
             ...existingConfig.resolve?.alias,
-            [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
+            [path.resolve(__dirname, '../packages/bundler-vite/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-postgres/mock.js',
-            ),
-            [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
-              __dirname,
-              '../packages/db-mongodb/mock.js',
+              '../packages/bundler-vite/mock.js',
             ),
             [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
               __dirname,
               '../packages/bundler-webpack/src/mocks/emptyModule.js',
             ),
-            [path.resolve(__dirname, '../packages/bundler-vite/src/index')]: path.resolve(
+            [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
-              '../packages/bundler-vite/mock.js',
+              '../packages/db-mongodb/mock.js',
+            ),
+            [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
+              __dirname,
+              '../packages/db-postgres/mock.js',
             ),
             react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },
