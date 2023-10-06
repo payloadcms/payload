@@ -13,7 +13,7 @@ export const fetchDocs = async <T>(collection: keyof Config['collections']): Pro
     ?.then((res) => {
       if (res.errors) throw new Error(res?.errors?.[0]?.message ?? 'Error fetching docs')
 
-      return res?.data
+      return res?.docs
     })
 
   return docs
