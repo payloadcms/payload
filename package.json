@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-cloud-storage",
   "description": "The official cloud storage plugin for Payload CMS",
-  "version": "1.0.19",
+  "version": "1.1.0-beta.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
