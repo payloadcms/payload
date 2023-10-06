@@ -179,7 +179,8 @@ export const Media: CollectionConfig = {
       // ... image sizes here
     ],
     // highlight-start
-    adminThumbnail: ({ doc }) => `https://google.com/custom-path-to-file/${doc.filename}`,
+    adminThumbnail: ({ doc }) =>
+      `https://google.com/custom-path-to-file/${doc.filename}`,
     // highlight-end
   },
 }

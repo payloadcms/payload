@@ -95,6 +95,19 @@ const Header: GlobalConfig = {
 
 User [preferences](/docs/admin/overview#preferences) for the admin panel are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
 
+**Payload will open the following query:**
+
+| Query Name       | Operation |
+| ---------------- | --------- |
+| **`Preference`** | `findOne` |
+
+**And the following mutations:**
+
+| Query Name             | Operation |
+| ---------------------- | --------- |
+| **`updatePreference`** | `update`  |
+| **`deletePreference`** | `delete`  |
+
 ## GraphQL Playground
 
 GraphQL Playground is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload config.
