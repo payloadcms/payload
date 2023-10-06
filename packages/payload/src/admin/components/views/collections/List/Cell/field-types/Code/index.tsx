@@ -5,7 +5,7 @@ import type { CellComponentProps } from '../../types'
 
 import './index.scss'
 
-interface CodeCellProps extends CellComponentProps<CodeField, string> {
+export interface CodeCellProps extends CellComponentProps<CodeField, string> {
   nowrap?: boolean
 }
 
