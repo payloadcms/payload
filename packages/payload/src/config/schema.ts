@@ -1,5 +1,6 @@
 import joi from 'joi'
 
+import { livePreviewSchema } from './shared/componentSchema'
 import { routeSchema } from './shared/routeSchema'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
@@ -63,6 +64,11 @@ export default joi.object({
     disable: joi.bool(),
     inactivityRoute: joi.string(),
     indexHTML: joi.string(),
+    livePreview: joi.object({
+      ...livePreviewSchema,
+      collections: joi.array().items(joi.string()),
+      globals: joi.array().items(joi.string()),
+    }),
     logoutRoute: joi.string(),
     meta: joi.object().keys({
       favicon: joi.string(),

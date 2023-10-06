@@ -439,6 +439,10 @@ export type Config = {
     inactivityRoute?: string
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
     indexHTML?: string
+    livePreview?: LivePreviewConfig & {
+      collections?: string[]
+      globals?: string[]
+    }
     /** The route for the logout page. */
     logoutRoute?: string
     /** Base meta data to use for the Admin panel. Included properties are titleSuffix, ogImage, and favicon. */

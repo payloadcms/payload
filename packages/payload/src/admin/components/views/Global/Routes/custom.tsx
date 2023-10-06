@@ -14,8 +14,8 @@ export const globalCustomRoutes = (props: {
   match: match<{
     [key: string]: string | undefined
   }>
-  permissions: GlobalPermission
-  user: User
+  permissions: GlobalPermission | null
+  user: User | null | undefined
 }): React.ReactElement[] => {
   const { global, match, permissions, user } = props
 

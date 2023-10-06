@@ -19,7 +19,25 @@ import { postsPage } from './seed/posts-page'
 export const pagesSlug = 'pages'
 
 export default buildConfigWithDefaults({
-  admin: {},
+  admin: {
+    livePreview: {
+      // You can also define this per collection or per global
+      // The Live Preview config is inherited from the top down
+      url: ({ data, documentInfo }) =>
+        `http://localhost:3001${
+          documentInfo.slug !== 'pages' ? `/${documentInfo.slug}` : ''
+        }/${data?.slug}`,
+      breakpoints: [
+        {
+          label: 'Mobile',
+          name: 'mobile',
+          width: 375,
+          height: 667,
+        },
+      ],
+      collections: ['pages', 'posts'],
+    },
+  },
   cors: ['http://localhost:3001'],
   csrf: ['http://localhost:3001'],
   collections: [

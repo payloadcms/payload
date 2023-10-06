@@ -19,10 +19,14 @@ export const GlobalRoutes: React.FC<GlobalEditViewProps> = (props) => {
   const match = useRouteMatch()
 
   const {
+    admin: { livePreview },
     routes: { admin: adminRoute },
   } = useConfig()
 
   const { user } = useAuth()
+
+  const livePreviewEnabled =
+    livePreview?.globals?.some((c) => c === global.slug) || global?.admin?.livePreview
 
   return (
     <Switch>
@@ -51,13 +55,15 @@ export const GlobalRoutes: React.FC<GlobalEditViewProps> = (props) => {
           <Unauthorized />
         )}
       </Route>
-      <Route
-        exact
-        key={`${global.slug}-live-preview`}
-        path={`${adminRoute}/globals/${global.slug}/preview`}
-      >
-        <CustomGlobalComponent view="LivePreview" {...props} />
-      </Route>
+      {livePreviewEnabled && (
+        <Route
+          exact
+          key={`${global.slug}-live-preview`}
+          path={`${adminRoute}/globals/${global.slug}/preview`}
+        >
+          <CustomGlobalComponent view="LivePreview" {...props} />
+        </Route>
+      )}
       {globalCustomRoutes({
         global,
         match,
