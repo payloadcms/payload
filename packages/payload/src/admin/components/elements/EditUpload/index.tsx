@@ -21,23 +21,18 @@ const Input: React.FC<{ name: string; onChange: (value: string) => void; value: 
 }) => (
   <div className={`${baseClass}__input`}>
     {name}
-    <input
-      defaultValue={value}
-      name={name}
-      onChange={(e) => onChange(e.target.value)}
-      type="number"
-      value={value}
-    />
+    <input name={name} onChange={(e) => onChange(e.target.value)} type="number" value={value} />
   </div>
 )
 
-const EditUpload: React.FC<{
+export const EditUpload: React.FC<{
   doc?: Data
   fileName: string
   fileSrc: string
   showCrop?: boolean
   showFocalPoint?: boolean
-}> = ({ fileName, fileSrc, showCrop, showFocalPoint }) => {
+  imageCacheTag?: string
+}> = ({ fileName, fileSrc, showCrop, showFocalPoint, imageCacheTag }) => {
   const { closeModal } = useModal()
   const { t } = useTranslation(['general', 'upload'])
   const { formQueryParams, setFormQueryParams } = useFormQueryParams()
@@ -74,7 +69,7 @@ const EditUpload: React.FC<{
 
     setCrop({
       ...crop,
-      [dimension]: dimension === 'height' ? 100 - percentage : percentage,
+      [dimension]: percentage,
     })
   }
 
@@ -110,6 +105,8 @@ const EditUpload: React.FC<{
       ((boundsRect.top - containerRect.top + boundsRect.height / 2) / containerRect.height) * 100
     setPointPosition({ x: xCenter, y: yCenter })
   }
+
+  const fileSrcToUse = imageCacheTag ? `${fileSrc}?${imageCacheTag}` : fileSrc
 
   return (
     <div className={baseClass}>
@@ -155,10 +152,10 @@ const EditUpload: React.FC<{
                   return <div className={`${baseClass}__crop-window`} ref={cropRef} />
                 }}
               >
-                <img alt={t('setCropArea')} ref={imageRef} src={fileSrc} />
+                <img alt={t('setCropArea')} ref={imageRef} src={fileSrcToUse} />
               </ReactCrop>
             ) : (
-              <img alt={t('setFocalPoint')} ref={imageRef} src={fileSrc} />
+              <img alt={t('setFocalPoint')} ref={imageRef} src={fileSrcToUse} />
             )}
             <DraggableElement
               boundsRef={cropRef}
@@ -248,8 +245,6 @@ const EditUpload: React.FC<{
     </div>
   )
 }
-
-export default EditUpload
 
 const DraggableElement = ({
   boundsRef,

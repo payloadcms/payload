@@ -9,7 +9,15 @@ import './index.scss'
 const baseClass = 'thumbnail'
 
 const Thumbnail: React.FC<Props> = (props) => {
-  const { className = '', collection, doc: { filename } = {}, doc, fileSrc, size } = props
+  const {
+    className = '',
+    collection,
+    doc: { filename } = {},
+    doc,
+    fileSrc,
+    imageCacheTag,
+    size,
+  } = props
 
   const thumbnailSRC = collection && doc ? useThumbnail(collection, doc) : fileSrc
   const [src, setSrc] = useState(thumbnailSRC)
@@ -18,12 +26,12 @@ const Thumbnail: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (doc && collection && thumbnailSRC) {
-      setSrc(`${thumbnailSRC}?${Date.now()}`)
+      setSrc(`${thumbnailSRC}${imageCacheTag ? `?${imageCacheTag}` : ''}`)
     }
     if (fileSrc) {
       setSrc(fileSrc)
     }
-  }, [doc, collection, thumbnailSRC, fileSrc])
+  }, [doc, collection, thumbnailSRC, fileSrc, imageCacheTag])
 
   return (
     <div className={classes}>

@@ -12,7 +12,7 @@ import './index.scss'
 const baseClass = 'file-details'
 
 const FileDetails: React.FC<Props> = (props) => {
-  const { canEdit, collection, doc, handleRemove, hasImageSizes } = props
+  const { canEdit, collection, doc, handleRemove, hasImageSizes, imageCacheTag } = props
 
   const {
     slug: collectionSlug,
@@ -24,7 +24,7 @@ const FileDetails: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail collection={collection} doc={doc} />
+        <Thumbnail collection={collection} doc={doc} imageCacheTag={imageCacheTag} />
         <div className={`${baseClass}__main-detail`}>
           <Meta
             collection={collectionSlug}

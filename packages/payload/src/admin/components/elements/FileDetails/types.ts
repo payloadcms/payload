@@ -10,4 +10,5 @@ export type Props = {
   }
   handleRemove?: () => void
   hasImageSizes?: boolean
+  imageCacheTag?: string
 }

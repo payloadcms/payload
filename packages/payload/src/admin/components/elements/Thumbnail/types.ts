@@ -5,5 +5,6 @@ export type Props = {
   collection?: SanitizedCollectionConfig
   doc?: Record<string, unknown>
   fileSrc?: string
+  imageCacheTag?: string
   size?: 'expand' | 'large' | 'medium' | 'small'
 }

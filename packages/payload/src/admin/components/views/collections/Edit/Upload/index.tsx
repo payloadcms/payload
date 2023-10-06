@@ -7,11 +7,12 @@ import isImage from '../../../../../../uploads/isImage'
 import Button from '../../../../elements/Button'
 import { Drawer, DrawerToggler } from '../../../../elements/Drawer'
 import { Dropzone } from '../../../../elements/Dropzone'
-import EditUpload from '../../../../elements/EditUpload'
+import { EditUpload } from '../../../../elements/EditUpload'
 import FileDetails from '../../../../elements/FileDetails'
 import PreviewSizes from '../../../../elements/PreviewSizes'
 import Thumbnail from '../../../../elements/Thumbnail'
 import Error from '../../../../forms/Error'
+import { useFormSubmitted } from '../../../../forms/Form/context'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
@@ -49,6 +50,7 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
+  const submitted = useFormSubmitted()
   const { collection, internalState, onChange, updatedAt } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
@@ -119,6 +121,8 @@ export const Upload: React.FC<Props> = (props) => {
 
   const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions)
 
+  const lastSubmittedTime = submitted ? new Date().toISOString() : null
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <Error message={errorMessage} showError={showError} />
@@ -130,6 +134,7 @@ export const Upload: React.FC<Props> = (props) => {
           doc={doc}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
+          imageCacheTag={lastSubmittedTime}
         />
       )}
 
@@ -180,6 +185,7 @@ export const Upload: React.FC<Props> = (props) => {
             doc={doc || undefined}
             fileName={value?.name || doc?.filename}
             fileSrc={fileSrc || doc?.url}
+            imageCacheTag={lastSubmittedTime}
             showCrop={showCrop}
             showFocalPoint={showFocalPoint}
           />

@@ -10,7 +10,7 @@ import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
 
 dotenv.config()
 
-const [testSuiteDir] = process.argv.slice(2)
+const [testSuiteDir] = process.argv.slice(4)
 
 /**
  * The default logger's options did not allow for forcing sync logging
@@ -27,7 +27,7 @@ if (!testSuiteDir) {
 }
 
 const configPath = path.resolve(__dirname, testSuiteDir, 'config.ts')
-
+console.log({ testSuiteDir })
 if (!fs.existsSync(configPath)) {
   console.error('ERROR: You must pass a valid directory under test/ that contains a config.ts')
   process.exit(1)
