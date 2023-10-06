@@ -9,6 +9,7 @@ import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'
 import { UploadNode } from './nodes/UploadNode'
 import { UploadPlugin } from './plugin'
+import { uploadValidation } from './validate'
 
 export type UploadFeatureProps = {
   collections: {
@@ -27,6 +28,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             afterReadPromises: [uploadAfterReadPromiseHOC(props)],
             node: UploadNode,
             type: UploadNode.getType(),
+            validations: [uploadValidation()],
           },
         ],
         plugins: [

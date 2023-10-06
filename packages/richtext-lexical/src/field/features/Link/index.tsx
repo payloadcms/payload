@@ -77,6 +77,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             afterReadPromises: [linkAfterReadPromiseHOC(props)],
             node: LinkNode,
             type: LinkNode.getType(),
+            // TODO: Add validation similar to upload for internal links and fields
           },
           {
             node: AutoLinkNode,

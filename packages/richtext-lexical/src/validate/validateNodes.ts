@@ -3,6 +3,7 @@ import type { SanitizedConfig } from 'payload/config'
 import type { RichTextField, ValidateOptions } from 'payload/types'
 
 import type { NodeValidation } from '../field/features/types'
+
 export async function validateNodes({
   nodeValidations,
   nodes,
@@ -37,6 +38,7 @@ export async function validateNodes({
         }
       }
     }
+
     // Validate node's children
     if ('children' in node && node?.children) {
       const childrenValidationResult = await validateNodes({

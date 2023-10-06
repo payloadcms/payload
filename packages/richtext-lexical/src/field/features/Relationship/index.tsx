@@ -17,6 +17,7 @@ export const RelationshipFeature = (): FeatureProvider => {
             afterReadPromises: [relationshipAfterReadPromise],
             node: RelationshipNode,
             type: RelationshipNode.getType(),
+            // TODO: Add validation similar to upload
           },
         ],
         plugins: [
