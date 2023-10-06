@@ -58,7 +58,7 @@ const scriptIndex = args._.findIndex((x) => x === 'build')
 const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
 
 if (script.startsWith('migrate')) {
-  migrate(args._).then(() => process.exit(0))
+  migrate(args).then(() => process.exit(0))
 } else {
   switch (script.toLowerCase()) {
     case 'build': {
