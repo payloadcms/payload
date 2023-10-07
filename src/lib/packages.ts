@@ -34,7 +34,7 @@ const postgresReplacement: DbAdapterReplacement = {
   importReplacement: "import { postgresAdapter } from '@payloadcms/db-postgres'",
   configReplacement: [
     '  db: postgresAdapter({',
-    '    client: {',
+    '    pool: {',
     '      connectionString: process.env.DATABASE_URI,',
     '    },',
     '  }),',
