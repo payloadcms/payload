@@ -80,6 +80,7 @@ export type GlobalAdminOptions = {
       Edit?:
         | {
             [name: string]: EditView
+            API?: EditView
             /**
              * Replace or modify individual nested routes, or add new ones:
              * + `Default` - `/admin/globals/:slug`
@@ -92,13 +93,12 @@ export type GlobalAdminOptions = {
              * + `:path` - `/admin/globals/:id/:path`
              */
             Default?: EditView
+            LivePreview?: EditView
+            Version?: EditView
             Versions?: EditView
             // TODO: uncomment these as they are built
-            // API?: EditView
-            // LivePreview?: EditView
             // References?: EditView
             // Relationships?: EditView
-            // Version?: EditView
           }
         | EditViewComponent
     }

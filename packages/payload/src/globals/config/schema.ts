@@ -27,14 +27,13 @@ const globalSchema = joi
           Edit: joi.alternatives().try(
             componentSchema,
             joi.object({
+              API: joi.alternatives().try(componentSchema, customViewSchema),
               Default: joi.alternatives().try(componentSchema, customViewSchema),
+              Preview: joi.alternatives().try(componentSchema, customViewSchema),
+              Version: joi.alternatives().try(componentSchema, customViewSchema),
               Versions: joi.alternatives().try(componentSchema, customViewSchema),
-              // Version
-              // Preview
               // Relationships
               // References
-              // API
-              // :path
             }),
           ),
         }),

@@ -213,6 +213,7 @@ export type CollectionAdminOptions = {
       Edit?:
         | {
             [key: string]: EditView
+            API?: EditView
             /**
              * Replace or modify individual nested routes, or add new ones:
              * + `Default` - `/admin/collections/:collection/:id`
@@ -225,13 +226,12 @@ export type CollectionAdminOptions = {
              * + `:path` - `/admin/collections/:collection/:id/:path`
              */
             Default?: EditView
+            LivePreview?: EditView
+            Version?: EditView
             Versions?: EditView
             // TODO: uncomment these as they are built
-            // API?: EditView
-            // LivePreview?: EditView
             // References?: EditView
             // Relationships?: EditView
-            // Version: EditView
           }
         | EditViewComponent
       List?: React.ComponentType<ListProps>
