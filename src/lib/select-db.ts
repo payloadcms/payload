@@ -16,7 +16,7 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
   },
   postgres: {
     value: 'postgres',
-    title: 'PostgreSQL',
+    title: 'PostgreSQL (beta)',
     dbConnectionPrefix: 'postgres://127.0.0.1:5432/',
   },
 }
