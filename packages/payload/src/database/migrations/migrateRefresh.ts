@@ -16,25 +16,21 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
     payload,
   })
 
-  const migrationsToRollback = existingMigrations.filter(
-    (migration) => migration.batch === latestBatch && migration.batch !== -1,
-  )
-
-  if (!migrationsToRollback?.length) {
+  if (!existingMigrations?.length) {
     payload.logger.info({ msg: 'No migrations to rollback.' })
     return
   }
 
   payload.logger.info({
-    msg: `Rolling back batch ${latestBatch} consisting of ${migrationsToRollback.length} migration(s).`,
+    msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
   let transactionID
 
   // Reverse order of migrations to rollback
-  migrationsToRollback.reverse()
+  existingMigrations.reverse()
 
-  for (const migration of migrationsToRollback) {
+  for (const migration of existingMigrations) {
     try {
       const migrationFile = migrationFiles.find((m) => m.name === migration.name)
       if (!migrationFile) {
@@ -69,7 +65,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         err,
         msg,
       })
-      throw err
+      process.exit(1)
     }
   }
 
@@ -95,11 +91,15 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
       await this.rollbackTransaction(transactionID)
+      let msg = `Error running migration ${migration.name}. Rolling back.`
+      if (err instanceof Error) {
+        msg += ` ${err.message}`
+      }
       payload.logger.error({
         err,
-        msg: `Error running migration ${migration.name}. Rolling back.`,
+        msg,
       })
-      throw err
+      process.exit(1)
     }
   }
 }
