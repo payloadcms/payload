@@ -114,9 +114,6 @@ importers:
       qs:
         specifier: 6.11.2
         version: 6.11.2
-      react-image-crop:
-        specifier: 10.1.8
-        version: 10.1.8(react@18.2.0)
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
@@ -675,6 +672,9 @@ importers:
       react-i18next:
         specifier: 11.18.6
         version: 11.18.6(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0)
+      react-image-crop:
+        specifier: 10.1.8
+        version: 10.1.8(react@18.2.0)
       react-router-dom:
         specifier: 5.3.4
         version: 5.3.4(react@18.2.0)
@@ -13105,7 +13105,7 @@ packages:
       react: '>=16.13.1'
     dependencies:
       react: 18.2.0
-    dev: true
+    dev: false
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}

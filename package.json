@@ -65,7 +65,6 @@
     "nodemon": "3.0.1",
     "prettier": "^3.0.3",
     "qs": "6.11.2",
-    "react-image-crop": "10.1.8",
     "rimraf": "3.0.2",
     "shelljs": "0.8.5",
     "slash": "3.0.0",
