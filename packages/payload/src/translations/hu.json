@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Jelenlegi {{docStatus}} dokumentum",
     "draft": "Piszkozat",
     "draftSavedSuccessfully": "A piszkozat sikeresen mentve.",
-    "lastSavedAgo": "Utoljára mentve {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Utoljára mentve {{distance}} órája",
     "noFurtherVersionsFound": "További verziók nem találhatók",
     "noRowsFound": "Nem található {{label}}",
     "preview": "Előnézet",

@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Сегашен статус на документа: {{docStatus}}",
     "draft": "Чернова",
     "draftSavedSuccessfully": "Чернова запазена успешно.",
-    "lastSavedAgo": "Последно запазен {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "последно запазено преди {{distance}}",
     "noFurtherVersionsFound": "Не са открити повече версии",
     "noRowsFound": "Не е открит {{label}}",
     "preview": "Предварителен преглед",

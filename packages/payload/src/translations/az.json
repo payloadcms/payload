@@ -334,7 +334,7 @@
     "currentDocumentStatus": "Cari {{docStatus}} sənədi",
     "draft": "Qaralama",
     "draftSavedSuccessfully": "Qaralama uğurla yadda saxlandı.",
-    "lastSavedAgo": "Son yadda saxlama: {{distance, relativetime(minutes)}} əvvəl",
+    "lastSavedAgo": "{{distance}} əvvəl son yadda saxlanıldı",
     "noFurtherVersionsFound": "Başqa versiyalar tapılmadı",
     "noRowsFound": "Heç bir {{label}} tapılmadı",
     "preview": "Öncədən baxış",

@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Şu an {{docStatus}} döküman",
     "draft": "Taslak",
     "draftSavedSuccessfully": "Taslak başarıyla kaydedildi.",
-    "lastSavedAgo": "Son kaydedilme: {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Son kaydedildi {{distance}} önce",
     "noFurtherVersionsFound": "Başka sürüm bulunamadı.",
     "noRowsFound": "{{label}} bulunamadı",
     "preview": "Önizleme",

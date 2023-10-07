@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Trenutni {{docStatus}} dokumenta",
     "draft": "Nacrt",
     "draftSavedSuccessfully": "Nacrt uspješno spremljen.",
-    "lastSavedAgo": "Zadnje spremljeno prije {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Zadnji put spremljeno prije {{distance}",
     "noFurtherVersionsFound": "Nisu pronađene daljnje verzije",
     "noRowsFound": "{{label}} nije pronađeno",
     "preview": "Pregled",

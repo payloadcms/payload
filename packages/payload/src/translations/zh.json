@@ -333,7 +333,7 @@
     "currentDocumentStatus": "当前{{docStatus}}文件",
     "draft": "草稿",
     "draftSavedSuccessfully": "草稿成功保存。",
-    "lastSavedAgo": "最后一次保存{{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "上次保存{{distance}}之前",
     "noFurtherVersionsFound": "没有发现其他版本",
     "noRowsFound": "没有发现{{label}}",
     "preview": "预览",

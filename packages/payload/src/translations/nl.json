@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Huidig {{docStatus}} document",
     "draft": "Concept",
     "draftSavedSuccessfully": "Concept succesvol bewaard.",
-    "lastSavedAgo": "Laatst bewaard {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Laatst opgeslagen {{distance}} geleden",
     "noFurtherVersionsFound": "Geen verdere versies gevonden",
     "noRowsFound": "Geen {{label}} gevonden",
     "preview": "Voorbeeld",
