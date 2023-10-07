@@ -253,20 +253,25 @@ export const buildTable = ({
         ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
       })
 
-      const relationshipsTableName = `${tableName}_relationships`
+      const relationshipsTableName = `${tableName}_rels`
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
         const result: Record<string, unknown> = {}
 
         if (hasLocalizedRelationshipField) {
           result.localeIdx = index('locale_idx').on(cols.locale)
-          result.parentPathOrderLocale = unique(
-            `${relationshipsTableName}_parent_id_path_order_locale_unique`,
-          ).on(cols.parent, cols.path, cols.order, cols.locale)
+          result.parentPathOrderLocale = unique(`${relationshipsTableName}_unique`).on(
+            cols.parent,
+            cols.path,
+            cols.order,
+            cols.locale,
+          )
         } else {
-          result.parentPathOrder = unique(
-            `${relationshipsTableName}_parent_id_path_order_unique`,
-          ).on(cols.parent, cols.path, cols.order)
+          result.parentPathOrder = unique(`${relationshipsTableName}_unique`).on(
+            cols.parent,
+            cols.path,
+            cols.order,
+          )
         }
 
         return result
@@ -279,7 +284,7 @@ export const buildTable = ({
           parent: one(table, {
             fields: [relationshipsTable.parent],
             references: [table.id],
-            relationName: '_relationships',
+            relationName: '_rels',
           }),
         }
 
@@ -315,8 +320,8 @@ export const buildTable = ({
     }
 
     if (relationships.size && relationshipsTable) {
-      result._relationships = many(relationshipsTable, {
-        relationName: '_relationships',
+      result._rels = many(relationshipsTable, {
+        relationName: '_rels',
       })
     }
 

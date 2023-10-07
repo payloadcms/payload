@@ -43,8 +43,8 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_relationships`]) {
-    result.with._relationships = {
+  if (adapter.tables[`${tableName}_rels`]) {
+    result.with._rels = {
       columns: {
         id: false,
         parent: false,

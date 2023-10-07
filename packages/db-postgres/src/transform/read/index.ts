@@ -20,9 +20,9 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
   let relationships: Record<string, Record<string, unknown>[]> = {}
   let numbers: Record<string, Record<string, unknown>[]> = {}
 
-  if ('_relationships' in data) {
-    relationships = createPathMap(data._relationships)
-    delete data._relationships
+  if ('_rels' in data) {
+    relationships = createPathMap(data._rels)
+    delete data._rels
   }
 
   if ('_numbers' in data) {

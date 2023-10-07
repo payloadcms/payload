@@ -129,7 +129,7 @@ export const upsertRow = async <T extends TypeWithID>({
   // INSERT RELATIONSHIPS
   // //////////////////////////////////
 
-  const relationshipsTableName = `${tableName}_relationships`
+  const relationshipsTableName = `${tableName}_rels`
 
   if (operation === 'update') {
     await deleteExistingRowsByPath({

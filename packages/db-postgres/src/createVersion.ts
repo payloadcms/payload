@@ -39,7 +39,7 @@ export async function createVersion<T extends TypeWithID>(
   })
 
   const table = this.tables[tableName]
-  const relationshipsTable = this.tables[`${tableName}_relationships`]
+  const relationshipsTable = this.tables[`${tableName}_rels`]
 
   if (collection.versions.drafts) {
     await db.execute(sql`
