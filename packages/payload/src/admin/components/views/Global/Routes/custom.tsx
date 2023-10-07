@@ -4,10 +4,21 @@ import React from 'react'
 import { Route } from 'react-router-dom'
 
 import type { GlobalPermission, User } from '../../../../../auth'
+import type { EditView } from '../../../../../config/types'
 import type { SanitizedGlobalConfig } from '../../../../../exports/types'
 import type { globalViewType } from './CustomComponent'
 
 import Unauthorized from '../../Unauthorized'
+
+const internalViews: globalViewType[] = [
+  'Default',
+  'LivePreview',
+  'Version',
+  'Versions',
+  'Relationships',
+  'References',
+  'API',
+]
 
 export const globalCustomRoutes = (props: {
   global?: SanitizedGlobalConfig
@@ -19,17 +30,7 @@ export const globalCustomRoutes = (props: {
 }): React.ReactElement[] => {
   const { global, match, permissions, user } = props
 
-  let customViews = []
-
-  const internalViews: globalViewType[] = [
-    'Default',
-    'LivePreview',
-    'Version',
-    'Versions',
-    'Relationships',
-    'References',
-    'API',
-  ]
+  let customViews: EditView[] = []
 
   const BaseEdit = global?.admin?.components?.views?.Edit
 
@@ -47,19 +48,25 @@ export const globalCustomRoutes = (props: {
       ?.map(([, view]) => view)
   }
 
-  return customViews?.reduce((acc, { Component, path }) => {
+  return customViews?.reduce((acc, ViewComponent) => {
     const routesToReturn = [...acc]
 
-    if (global) {
-      routesToReturn.push(
-        <Route exact key={`${global.slug}-${path}`} path={`${match.url}${path}`}>
-          {permissions?.read?.permission ? (
-            <Component global={global} user={user} />
-          ) : (
-            <Unauthorized />
-          )}
-        </Route>,
-      )
+    if (typeof ViewComponent === 'function') {
+      routesToReturn.push(<ViewComponent global={global} key={ViewComponent.name} user={user} />)
+    } else {
+      const { Component, path } = ViewComponent
+
+      if (global) {
+        routesToReturn.push(
+          <Route exact key={`${global.slug}-${path}`} path={`${match.url}${path}`}>
+            {permissions?.read?.permission ? (
+              <Component global={global} user={user} />
+            ) : (
+              <Unauthorized />
+            )}
+          </Route>,
+        )
+      }
     }
 
     return routesToReturn

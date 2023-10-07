@@ -4,10 +4,21 @@ import React from 'react'
 import { Route } from 'react-router-dom'
 
 import type { CollectionPermission, User } from '../../../../../../auth'
+import type { EditView } from '../../../../../../config/types'
 import type { SanitizedCollectionConfig } from '../../../../../../exports/types'
 import type { collectionViewType } from './CustomComponent'
 
 import Unauthorized from '../../../Unauthorized'
+
+const internalViews: collectionViewType[] = [
+  'Default',
+  'LivePreview',
+  'Version',
+  'Versions',
+  'Relationships',
+  'References',
+  'API',
+]
 
 export const collectionCustomRoutes = (props: {
   collection?: SanitizedCollectionConfig
@@ -19,17 +30,7 @@ export const collectionCustomRoutes = (props: {
 }): React.ReactElement[] => {
   const { collection, match, permissions, user } = props
 
-  let customViews = []
-
-  const internalViews: collectionViewType[] = [
-    'Default',
-    'LivePreview',
-    'Version',
-    'Versions',
-    'Relationships',
-    'References',
-    'API',
-  ]
+  let customViews: EditView[] = []
 
   const BaseEdit = collection?.admin?.components?.views?.Edit
 
@@ -47,19 +48,27 @@ export const collectionCustomRoutes = (props: {
       ?.map(([, view]) => view)
   }
 
-  return customViews?.reduce((acc, { Component, path }) => {
+  return customViews?.reduce((acc, ViewComponent) => {
     const routesToReturn = [...acc]
 
-    if (collection) {
+    if (typeof ViewComponent === 'function') {
       routesToReturn.push(
-        <Route exact key={`${collection.slug}-${path}`} path={`${match.url}${path}`}>
-          {permissions?.read?.permission ? (
-            <Component collection={collection} user={user} />
-          ) : (
-            <Unauthorized />
-          )}
-        </Route>,
+        <ViewComponent collection={collection} key={ViewComponent.name} user={user} />,
       )
+    } else {
+      const { Component, path } = ViewComponent
+
+      if (collection) {
+        routesToReturn.push(
+          <Route exact key={`${collection.slug}-${path}`} path={`${match.url}${path}`}>
+            {permissions?.read?.permission ? (
+              <Component collection={collection} user={user} />
+            ) : (
+              <Unauthorized />
+            )}
+          </Route>,
+        )
+      }
     }
 
     return routesToReturn

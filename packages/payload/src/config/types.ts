@@ -249,7 +249,11 @@ export type EditViewConfig = {
   path: string
 }
 
-export type EditViewComponent = React.ComponentType<CollectionEditViewProps | GlobalEditViewProps>
+export type EditViewComponent = React.ComponentType<{
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
+  user: User | null | undefined
+}>
 
 export type EditView = EditViewComponent | EditViewConfig
 
