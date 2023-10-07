@@ -16,6 +16,7 @@ export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 export type Args = {
   migrationDir?: string
   pool: PoolConfig
+  push?: boolean
 }
 
 export type GenericColumn = PgColumn<
@@ -49,6 +50,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   enums: Record<string, GenericEnum>
   pool: Pool
   poolOptions: Args['pool']
+  push: boolean
   relations: Record<string, GenericRelation>
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   sessions: {
@@ -71,6 +73,7 @@ declare module 'payload' {
     drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
     pool: Pool
+    push: boolean
     relations: Record<string, GenericRelation>
     schema: Record<string, GenericEnum | GenericRelation | GenericTable>
     sessions: {

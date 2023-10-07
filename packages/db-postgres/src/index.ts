@@ -55,6 +55,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       enums: {},
       pool: undefined,
       poolOptions: args.pool,
+      push: args.push,
       relations: {},
       schema: {},
       sessions: {},
