@@ -70,7 +70,7 @@ export async function selectDb(
     {
       type: 'text',
       name: 'value',
-      message: `Enter ${dbChoice.title} connection string`,
+      message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
       initial: `${dbChoice.dbConnectionPrefix}${
         projectName === '.'
           ? `payload-${getRandomDigitSuffix()}`
