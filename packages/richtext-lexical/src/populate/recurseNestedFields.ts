@@ -1,13 +1,10 @@
-import type { SerializedEditorState } from 'lexical'
-import type { Field, PayloadRequest, RichTextField } from 'payload/types'
+import type { Field, PayloadRequest, RichTextAdapter } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
 
 import type { AfterReadPromise } from '../field/features/types'
-import type { AdapterProps } from '../types'
 
 import { populate } from './populate'
-import { recurseRichText } from './richTextRelationshipPromise'
 
 type NestedRichTextFieldsArgs = {
   afterReadPromises: Map<string, Array<AfterReadPromise>>
@@ -19,6 +16,7 @@ type NestedRichTextFieldsArgs = {
   promises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
+  siblingDoc: Record<string, unknown>
 }
 
 export const recurseNestedFields = ({
@@ -31,6 +29,7 @@ export const recurseNestedFields = ({
   promises,
   req,
   showHiddenFields,
+  siblingDoc,
 }: NestedRichTextFieldsArgs): void => {
   fields.forEach((field) => {
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -128,6 +127,7 @@ export const recurseNestedFields = ({
           promises,
           req,
           showHiddenFields,
+          siblingDoc,
         })
       } else {
         recurseNestedFields({
@@ -140,6 +140,7 @@ export const recurseNestedFields = ({
           promises,
           req,
           showHiddenFields,
+          siblingDoc,
         })
       }
     } else if (field.type === 'tabs') {
@@ -154,6 +155,7 @@ export const recurseNestedFields = ({
           promises,
           req,
           showHiddenFields,
+          siblingDoc,
         })
       })
     } else if (Array.isArray(data[field.name])) {
@@ -171,6 +173,7 @@ export const recurseNestedFields = ({
               promises,
               req,
               showHiddenFields,
+              siblingDoc,
             })
           }
         })
@@ -188,29 +191,31 @@ export const recurseNestedFields = ({
             promises,
             req,
             showHiddenFields,
+            siblingDoc,
           })
         })
       }
     }
 
-    if (field.type === 'richText' && Array.isArray(data[field.name])) {
-      ;(data[field.name] as SerializedEditorState).root.children.forEach((node) => {
-        if ('children' in node && Array.isArray(node.children)) {
-          // This assumes that the richText editor is using lexical and not slate.
-          // TODO: Throw an error if Slate is used. That would be cursed, who'd do that?
-          recurseRichText({
-            afterReadPromises,
-            children: node.children,
-            currentDepth,
-            depth,
-            field: field as RichTextField<AdapterProps>,
-            overrideAccess,
-            promises,
-            req,
-            showHiddenFields,
-          })
+    if (field.type === 'richText') {
+      // TODO: This does not properly work yet. E.g. it does not handle a relationship inside of lexical inside of block inside of lexical
+      const editor: RichTextAdapter = field?.editor
+
+      if (editor?.afterReadPromise) {
+        const afterReadPromise = editor.afterReadPromise({
+          currentDepth,
+          depth,
+          field,
+          overrideAccess,
+          req,
+          showHiddenFields,
+          siblingDoc,
+        })
+
+        if (afterReadPromise) {
+          promises.push(afterReadPromise)
         }
-      })
+      }
     }
   })
 }

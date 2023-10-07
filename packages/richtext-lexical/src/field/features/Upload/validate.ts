@@ -14,12 +14,12 @@ export const uploadValidation = (): NodeValidation<SerializedUploadNode> => {
   }) => {
     if (!CAN_USE_DOM) {
       const idField = payloadConfig.collections
-        .find(({ slug }) => slug === node.fields.relationTo)
+        .find(({ slug }) => slug === node.relationTo)
         .fields.find((field) => fieldAffectsData(field) && field.name === 'id')
 
       const type = getIDType(idField, validation?.options?.payload?.db?.defaultIDType)
 
-      if (!isValidID(node.fields.value.id, type)) {
+      if (!isValidID(node.value?.id, type)) {
         return validation.options.t('validation:validUploadID')
       }
     }

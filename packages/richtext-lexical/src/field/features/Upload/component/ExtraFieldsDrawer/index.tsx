@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { ElementProps } from '..'
 import type { UploadFeatureProps } from '../..'
-import type { UploadNode } from '../../nodes/UploadNode'
+import type { UploadData, UploadNode } from '../../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
 
@@ -34,9 +34,8 @@ export const ExtraFieldsUploadDrawer: React.FC<
   }
 > = (props) => {
   const {
+    data: { fields, relationTo, value },
     drawerSlug,
-    fields: { relationTo, value },
-    fields,
     nodeKey,
     relatedCollection,
   } = props
@@ -69,11 +68,11 @@ export const ExtraFieldsUploadDrawer: React.FC<
       editor.update(() => {
         const uploadNode: UploadNode | null = $getNodeByKey(nodeKey)
         if (uploadNode) {
-          const newFields = {
-            ...uploadNode.getFields(),
-            ...data,
+          const newData: UploadData = {
+            ...uploadNode.getData(),
+            fields: data,
           }
-          uploadNode.setFields(newFields)
+          uploadNode.setData(newData)
         }
       })
 

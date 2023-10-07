@@ -109,8 +109,6 @@ export function LinkEditor({
           doc: undefined,
           linkType: undefined,
           newTab: undefined,
-          nofollow: undefined,
-          sponsored: undefined,
           url: '',
           ...linkParent.getFields(),
         },
@@ -124,7 +122,7 @@ export function LinkEditor({
         // internal link
         setLinkUrl(
           `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${linkParent.getFields()
-            ?.doc?.value}`,
+            ?.doc?.value?.id}`,
         )
 
         const relatedField = config.collections.find(
@@ -320,6 +318,12 @@ export function LinkEditor({
           closeModal(drawerSlug)
 
           const data = reduceFieldsToValues(fields, true)
+
+          if (data?.fields?.doc?.value) {
+            data.fields.doc.value = {
+              id: data.fields.doc.value,
+            }
+          }
 
           const newLinkPayload: LinkPayload = data as LinkPayload
 

@@ -17,16 +17,17 @@ export const linkAfterReadPromiseHOC = (
     overrideAccess,
     req,
     showHiddenFields,
+    siblingDoc,
   }) => {
     const promises: Promise<void>[] = []
 
-    if (node?.fields?.doc?.value && node?.fields?.doc?.relationTo) {
+    if (node?.fields?.doc?.value?.id && node?.fields?.doc?.relationTo) {
       const collection = req.payload.collections[node?.fields?.doc?.relationTo]
 
       if (collection) {
         promises.push(
           populate({
-            id: node?.fields?.doc.value,
+            id: node?.fields?.doc?.value?.id,
             collection,
             currentDepth,
             data: node?.fields?.doc,
@@ -51,6 +52,7 @@ export const linkAfterReadPromiseHOC = (
         promises,
         req,
         showHiddenFields,
+        siblingDoc,
       })
     }
     return promises

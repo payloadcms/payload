@@ -34,6 +34,7 @@ const insertUpload = ({
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_UPLOAD_COMMAND, {
       id,
+      fields: null,
       relationTo,
     })
   } else {
@@ -42,7 +43,8 @@ const insertUpload = ({
       if (node) {
         node.replace(
           $createUploadNode({
-            fields: {
+            data: {
+              fields: null,
               relationTo,
               value: {
                 id,

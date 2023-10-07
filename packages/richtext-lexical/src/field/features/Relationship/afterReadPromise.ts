@@ -14,19 +14,19 @@ export const relationshipAfterReadPromise: AfterReadPromise<SerializedRelationsh
 }) => {
   const promises: Promise<void>[] = []
 
-  if (node?.fields?.id) {
-    const collection = req.payload.collections[node?.fields?.relationTo]
+  if (node?.value?.id) {
+    const collection = req.payload.collections[node?.relationTo]
 
     if (collection) {
       promises.push(
         populate({
-          id: node?.fields?.id,
+          id: node.value.id,
           collection,
           currentDepth,
-          data: node.fields,
+          data: node,
           depth,
           field,
-          key: 'data',
+          key: 'value',
           overrideAccess,
           req,
           showHiddenFields,

@@ -18,6 +18,7 @@ type RecurseRichTextArgs = {
   promises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
+  siblingDoc?: Record<string, unknown>
 }
 
 export const recurseRichText = ({
@@ -30,6 +31,7 @@ export const recurseRichText = ({
   promises,
   req,
   showHiddenFields,
+  siblingDoc,
 }: RecurseRichTextArgs): void => {
   if (depth <= 0 || currentDepth > depth) {
     return
@@ -49,6 +51,7 @@ export const recurseRichText = ({
               overrideAccess,
               req,
               showHiddenFields,
+              siblingDoc,
             }),
           )
         }
@@ -65,6 +68,7 @@ export const recurseRichText = ({
           promises,
           req,
           showHiddenFields,
+          siblingDoc,
         })
       }
     })
@@ -93,6 +97,7 @@ export const richTextRelationshipPromise = async ({
     promises,
     req,
     showHiddenFields,
+    siblingDoc,
   })
 
   await Promise.all(promises)

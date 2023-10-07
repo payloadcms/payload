@@ -16,13 +16,19 @@ import * as React from 'react'
 const RawUploadComponent = React.lazy(async () => await import('../component'))
 
 export interface RawUploadPayload {
+  fields: {
+    // unknown, custom fields:
+    [key: string]: unknown
+  }
   id: string
   relationTo: string
 }
 
-export type UploadFields = {
-  // unknown, custom fields:
-  [key: string]: unknown
+export type UploadData = {
+  fields: {
+    // unknown, custom fields:
+    [key: string]: unknown
+  }
   relationTo: string
   value: {
     // Actual upload data, populated in afterRead hook
@@ -41,32 +47,27 @@ function convertUploadElement(domNode: Node): DOMConversionOutput | null {
   return null
 }
 
-export type SerializedUploadNode = Spread<
-  {
-    fields: UploadFields
-  },
-  SerializedDecoratorBlockNode
->
+export type SerializedUploadNode = Spread<UploadData, SerializedDecoratorBlockNode>
 
 export class UploadNode extends DecoratorBlockNode {
-  __fields: UploadFields
+  __data: UploadData
 
   constructor({
-    fields,
+    data,
     format,
     key,
   }: {
-    fields: UploadFields
+    data: UploadData
     format?: ElementFormatType
     key?: NodeKey
   }) {
     super(format, key)
-    this.__fields = fields
+    this.__data = data
   }
 
   static clone(node: UploadNode): UploadNode {
     return new UploadNode({
-      fields: node.__fields,
+      data: node.__data,
       format: node.__format,
       key: node.__key,
     })
@@ -86,9 +87,13 @@ export class UploadNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedUploadNode): UploadNode {
-    const node = $createUploadNode({
+    const importedData: UploadData = {
       fields: serializedNode.fields,
-    })
+      relationTo: serializedNode.relationTo,
+      value: serializedNode.value,
+    }
+
+    const node = $createUploadNode({ data: importedData })
     node.setFormat(serializedNode.format)
 
     return node
@@ -99,9 +104,7 @@ export class UploadNode extends DecoratorBlockNode {
   }
 
   decorate(): JSX.Element {
-    return (
-      <RawUploadComponent fields={this.__fields} format={this.__format} nodeKey={this.getKey()} />
-    )
+    return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
   }
 
   exportDOM(): DOMExportOutput {
@@ -114,19 +117,19 @@ export class UploadNode extends DecoratorBlockNode {
   exportJSON(): SerializedUploadNode {
     return {
       ...super.exportJSON(),
-      fields: this.getFields(),
+      ...this.getData(),
       type: this.getType(),
       version: 1,
     }
   }
 
-  getFields(): UploadFields {
-    return this.getLatest().__fields
+  getData(): UploadData {
+    return this.getLatest().__data
   }
 
-  setFields(fields: UploadFields): void {
+  setData(data: UploadData): void {
     const writable = this.getWritable()
-    writable.__fields = fields
+    writable.__data = data
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -135,8 +138,8 @@ export class UploadNode extends DecoratorBlockNode {
   }
 }
 
-export function $createUploadNode({ fields }: { fields: UploadFields }): UploadNode {
-  return $applyNodeReplacement(new UploadNode({ fields }))
+export function $createUploadNode({ data }: { data: UploadData }): UploadNode {
+  return $applyNodeReplacement(new UploadNode({ data }))
 }
 
 export function $isUploadNode(node: LexicalNode | null | undefined): node is UploadNode {

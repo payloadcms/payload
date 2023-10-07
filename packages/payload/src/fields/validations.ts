@@ -314,7 +314,7 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
   }
 
   if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
-    const idField = options.payload.collections[options.relationTo].config.fields.find(
+    const idField = options?.payload?.collections[options.relationTo]?.config?.fields?.find(
       (field) => fieldAffectsData(field) && field.name === 'id',
     )
     const type = getIDType(idField, options?.payload?.db?.defaultIDType)

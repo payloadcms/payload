@@ -35,9 +35,12 @@ export type LinkFields = {
   // unknown, custom fields:
   [key: string]: unknown
   doc: {
-    data?: any // Will be populated in afterRead hook
     relationTo: string
-    value: string
+    value: {
+      // Actual doc data, populated in afterRead hook
+      [key: string]: unknown
+      id: string
+    }
   } | null
   linkType: 'custom' | 'internal'
   newTab: boolean
@@ -124,23 +127,10 @@ export class LinkNode extends ElementNode {
       element.target = '_blank'
     }
 
-    element.rel = ''
-
     if (this.__fields?.newTab === true && this.__fields?.linkType === 'custom') {
       element.rel = manageRel(element.rel, 'add', 'noopener')
     }
 
-    if (this.__fields?.sponsored ?? false) {
-      element.rel = manageRel(element.rel, 'add', 'sponsored')
-    }
-
-    if (this.__fields?.nofollow ?? false) {
-      element.rel = manageRel(element.rel, 'add', 'nofollow')
-    }
-
-    if (this.__fields?.rel !== null) {
-      element.rel += ` ${this.__rel}`
-    }
     addClassNamesToElement(element, config.theme.link)
     return element
   }
@@ -212,9 +202,6 @@ export class LinkNode extends ElementNode {
   updateDOM(prevNode: LinkNode, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
     const url = this.__fields?.url
     const newTab = this.__fields?.newTab
-    const sponsored = this.__fields?.sponsored
-    const nofollow = this.__fields?.nofollow
-    const rel = this.__fields?.rel
     if (url != null && url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {
       anchor.href = url
     }
@@ -240,33 +227,6 @@ export class LinkNode extends ElementNode {
       }
     }
 
-    if (nofollow !== prevNode.__fields.nofollow) {
-      if (nofollow ?? false) {
-        anchor.rel = manageRel(anchor.rel, 'add', 'nofollow')
-      } else {
-        anchor.rel = manageRel(anchor.rel, 'remove', 'nofollow')
-      }
-    }
-
-    if (sponsored !== prevNode.__fields.sponsored) {
-      if (sponsored ?? false) {
-        anchor.rel = manageRel(anchor.rel, 'add', 'sponsored')
-      } else {
-        anchor.rel = manageRel(anchor.rel, 'remove', 'sponsored')
-      }
-    }
-
-    // TODO - revisit - I don't think there can be any other rel
-    // values other than nofollow and noopener - so not
-    // sure why anchor.rel += rel below
-    if (rel !== prevNode.__fields.rel) {
-      if (rel != null) {
-        anchor.rel += rel
-      } else {
-        anchor.removeAttribute('rel')
-      }
-    }
-
     return false
   }
 }
@@ -281,9 +241,6 @@ function convertAnchorElement(domNode: Node): DOMConversionOutput {
           doc: null,
           linkType: 'custom',
           newTab: domNode.getAttribute('target') === '_blank',
-          nofollow: domNode.getAttribute('rel')?.includes('nofollow') ?? false,
-          rel: domNode.getAttribute('rel'),
-          sponsored: domNode.getAttribute('rel')?.includes('sponsored') ?? false,
           url: domNode.getAttribute('href') ?? '',
         },
       })
