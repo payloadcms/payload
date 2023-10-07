@@ -2,12 +2,127 @@
 title: Implementing Live Preview in your app
 label: Frontend Implementation
 order: 20
-desc: NEED TO WRITE 
+desc: NEED TO WRITE
 keywords: NEED TO WRITE
 ---
 
 - Talk about in detail how it works on the frontend
 - How you should write your frontend to be "safe" and not break if there is no data filled in a required field, etc.
-- Your UI should be reactive to new props 
+- Your UI should be reactive to new props
 - Loading states
 - Etc.
+
+While using Live Preview, the Payload Admin Panel emits `window.postMessage` events as changes are made to the document. Your front-end application can listen for these events from within its iframe and re-render accordingly.
+
+Wiring your front-end into Live Preview is very easy. Payload provides all the underlying tooling needed to make it work with any front-end framework. By default, all hooks require the following args:
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`depth`**           | The depth of the relationships to fetch. Defaults to `0`.                                                                                                                                   |
+| **`initialData`**     | The initial data of the document. The live data will be merged in as changes are made.                                                                                                      |
+| **`serverURL`**       | The URL of your Payload server. This is used to make fetch requests for relationships and uploads as needed.                                                                                |
+
+### React
+
+If your front-end application is built with React or Next.js, you can use the `useLivePreview` hook that Payload provides.
+
+First, install the `@payloadcms/live-preview-react` package:
+
+```bash
+npm install @payloadcms/live-preview-react
+```
+
+Then, use the `useLivePreview` hook in your React component:
+
+```tsx
+'use client';
+import { useLivePreview } from '@payloadcms/live-preview-react';
+import { Page as PageType } from '@/payload-types'
+
+// Fetch the page in a server component, then pass it to the client component and thread it through the hook
+// The hook will take over from there and keep the preview in sync with the changes you make
+// The `data` property will contain the live data of the document
+export const PageClient: React.FC<{
+  page: {
+    title: string
+  }
+}> = ({ page: initialPage }) => {
+  const { data } = useLivePreview<PageType>({
+    initialData: initialPage,
+    serverURL: PAYLOAD_SERVER_URL,
+    depth: 2,
+  })
+
+  return (
+    <h1>{data.title}</h1>
+  )
+}
+```
+
+### Building your own hook
+
+If you are using another framework, you can build your own hook using the underlying tooling that Payload provides.
+
+First, install the `@payloadcms/live-preview` package:
+
+```bash
+npm install @payloadcms/live-preview
+```
+
+This package provides the following functions:
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`subscribe`**       | Subscribes to the Payload Admin Panel's `window.postMessage` events and calls the provided callback function with the data from the event.                                                  |
+| **`unsubscribe`**     | Unsubscribes from the Payload Admin Panel's `window.postMessage` events.                                                                                                                    |
+| **`handleMessage`**   | Handles the `window.postMessage` events emitted emitted by the parent window.                                                                                                               |
+| **`mergeData`**       | Merges the initial page data with the incoming live data using `traverseFields` and `promises`                                                                                              |
+| **`traverseFields`**  | Recursively traverses the field schema and rebuilds each field into the correct format.                                                                                                     |
+] **`promises`**        | Fetches relationships and uploads from the Payload API and populates the data.                                                                                                              |
+
+With these functions, you can build your own hook to use in your front-end application. The `useLivePreview` React hook from above looks something like this:
+
+```tsx
+import { subscribe, unsubscribe } from '@payloadcms/live-preview'
+import { useCallback, useEffect, useState } from 'react'
+
+export const useLivePreview = <T extends any>(props: {
+  depth?: number
+  initialData: T
+  serverURL: string
+}): {
+  data: T
+  isLoading: boolean
+} => {
+  const { depth = 0, initialData, serverURL } = props
+  const [data, setData] = useState<T>(initialData)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  const onChange = useCallback((mergedData) => {
+    setData(mergedData)
+    setIsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    const subscription = subscribe({
+      callback: onChange,
+      depth,
+      initialData,
+      serverURL,
+    })
+
+    return () => {
+      unsubscribe(subscription)
+    }
+  }, [serverURL, onChange, depth, initialData])
+
+  return {
+    data,
+    isLoading,
+  }
+}
+```
+
+<Banner type="info">
+  When building your own hook, ensure that the args are consistent with the ones above. This will ensure that all hooks follow a similar API and can be used interchangeably.
+</Banner>

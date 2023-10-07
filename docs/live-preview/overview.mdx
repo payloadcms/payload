@@ -2,19 +2,17 @@
 title: Live Preview
 label: Overview
 order: 10
-desc: NEED TO WRITE
-keywords: NEED TO WRITE
+desc: Live Preview allows you to render your front-end application directly within the Payload Admin Panel and see your changes in real-time as you type.
+keywords: 'live preview', 'preview', 'live', 'iframe', 'iframe preview', 'visual editing', 'design'
 ---
 
-TODO: write docs here
-- Show screenshot of the usage
-- Talk about how it works at a high level
-- Talk about the property on `collectionConfig.admin`
-- Talk about the React hook, and the subsequent package that it relies on which can be used for other frameworks
+**With Live Preview you can render your front-end application directly within the Payload Admin Panel and see your changes take effect in real-time as you type, without having to save a draft or publish your changes.**
 
-**With Live Preview you can render your front-end application directly within the Payload Admin Panel, then see your changes take effect in real-time on your actual app, with zero-latency, all without pressing save.**
+Live Preview works by rendering an iframe on the page that loads your front-end application. The Payload Admin Panel and the iframe communicate with each other through `window.postMessage` to keep the preview in sync with the changes you make. Payload emits events when changes are made to the document, and your front-end application listens for these events and updates the preview accordingly.
 
 {/* IMAGE OF LIVE PREVIEW HERE */}
+
+## Setup
 
 Setting up Live Preview is easy. You first need to enable it through the `admin.components.livePreview` property of your Payload config:
 
@@ -46,6 +44,8 @@ It might look something like as simple as this:
 <Banner type="info">
   You can also define the <code>admin.components.livePreview</code> property on individual collection and global configs. These settings will override the top-level options.
 </Banner>
+
+Once configured, a new "Live Preview" tab will appear at the top of all enabled collections and globals. Clicking this tab will open the preview window and load your front-end application.
 
 ### URL
 
@@ -99,5 +99,3 @@ The breakpoints property is an array of breakpoint objects to be used as “devi
 </Banner>
 
 The device frame may also be resized directly by using the number inputs in the toolbar and specifying an exact width or height. This will temporarily override the breakpoint selection as "Custom" until a predefined breakpoint is selected again.
-
-### Data
