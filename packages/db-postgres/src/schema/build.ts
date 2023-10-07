@@ -256,22 +256,14 @@ export const buildTable = ({
       const relationshipsTableName = `${tableName}_rels`
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
-        const result: Record<string, unknown> = {}
+        const result: Record<string, unknown> = {
+          order: index('order_idx').on(cols.order),
+          parentIdx: index('parent_idx').on(cols.parent),
+          pathIdx: index('path_idx').on(cols.path),
+        }
 
         if (hasLocalizedRelationshipField) {
           result.localeIdx = index('locale_idx').on(cols.locale)
-          result.parentPathOrderLocale = unique(`${relationshipsTableName}_unique`).on(
-            cols.parent,
-            cols.path,
-            cols.order,
-            cols.locale,
-          )
-        } else {
-          result.parentPathOrder = unique(`${relationshipsTableName}_unique`).on(
-            cols.parent,
-            cols.path,
-            cols.order,
-          )
         }
 
         return result

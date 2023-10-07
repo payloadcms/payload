@@ -221,15 +221,14 @@ export const traverseFields = ({
           const baseExtraConfig: Record<
             string,
             (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-          > = {}
+          > = {
+            orderIdx: (cols) => index('order_idx').on(cols.order),
+            parentIdx: (cols) => index('parent_idx').on(cols.parent),
+          }
 
           if (field.localized) {
             baseColumns.locale = adapter.enums.enum__locales('locale').notNull()
-            baseExtraConfig.parentOrderLocale = (cols) =>
-              unique(`${selectTableName}_unique`).on(cols.parent, cols.order, cols.locale)
-          } else {
-            baseExtraConfig.parent = (cols) => index('parent_idx').on(cols.parent)
-            baseExtraConfig.order = (cols) => index('order_idx').on(cols.order)
+            baseExtraConfig.localeIdx = (cols) => index('locale_idx').on(cols.locale)
           }
 
           if (field.index) {
@@ -282,15 +281,14 @@ export const traverseFields = ({
         const baseExtraConfig: Record<
           string,
           (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-        > = {}
+        > = {
+          _orderIdx: (cols) => index('_order_idx').on(cols._order),
+          _parentIDIdx: (cols) => index('_parent_id_idx').on(cols._parentID),
+        }
 
         if (field.localized && adapter.payload.config.localization) {
           baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
-          baseExtraConfig._parentOrderLocale = (cols) =>
-            unique(`${arrayTableName}_unique`).on(cols._parentID, cols._order, cols._locale)
-        } else {
-          baseExtraConfig._parentOrder = (cols) =>
-            unique(`${arrayTableName}_unique`).on(cols._parentID, cols._order)
+          baseExtraConfig._localeIdx = (cols) => index('_locale_idx').on(cols._locale)
         }
 
         const { relationsToBuild: subRelationsToBuild } = buildTable({
@@ -346,20 +344,15 @@ export const traverseFields = ({
             const baseExtraConfig: Record<
               string,
               (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
-            > = {}
+            > = {
+              _orderIdx: (cols) => index('order_idx').on(cols._order),
+              _parentIDIdx: (cols) => index('parent_id_idx').on(cols._parentID),
+              _pathIdx: (cols) => index('path_idx').on(cols._path),
+            }
 
             if (field.localized && adapter.payload.config.localization) {
               baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
-              baseExtraConfig._parentPathOrderLocale = (cols) =>
-                unique(`${blockTableName}_unique`).on(
-                  cols._parentID,
-                  cols._path,
-                  cols._order,
-                  cols._locale,
-                )
-            } else {
-              baseExtraConfig._parentPathOrder = (cols) =>
-                unique(`${blockTableName}_unique`).on(cols._parentID, cols._path, cols._order)
+              baseExtraConfig._localeIdx = (cols) => index('locale_idx').on(cols._locale)
             }
 
             const { relationsToBuild: subRelationsToBuild } = buildTable({
