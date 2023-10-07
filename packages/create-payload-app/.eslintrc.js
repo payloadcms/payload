@@ -1,30 +1,28 @@
+/** @type {import('prettier').Config} */
 module.exports = {
-  plugins: ['@typescript-eslint', 'prettier'],
-  parser: '@typescript-eslint/parser', // Specifies the ESLint parser
-  parserOptions: {
-    ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module', // Allows for the use of imports
-    ecmaFeatures: {
-      jsx: true, // Allows for the parsing of JSX
-    },
-  },
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended',
-    'prettier',
-  ],
-  settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+  extends: ['@payloadcms'],
+  overrides: [
+    {
+      files: ['package.json', 'tsconfig.json'],
+      rules: {
+        'perfectionist/sort-array-includes': 'off',
+        'perfectionist/sort-astro-attributes': 'off',
+        'perfectionist/sort-classes': 'off',
+        'perfectionist/sort-enums': 'off',
+        'perfectionist/sort-exports': 'off',
+        'perfectionist/sort-imports': 'off',
+        'perfectionist/sort-interfaces': 'off',
+        'perfectionist/sort-jsx-props': 'off',
+        'perfectionist/sort-keys': 'off',
+        'perfectionist/sort-maps': 'off',
+        'perfectionist/sort-named-exports': 'off',
+        'perfectionist/sort-named-imports': 'off',
+        'perfectionist/sort-object-types': 'off',
+        'perfectionist/sort-objects': 'off',
+        'perfectionist/sort-svelte-attributes': 'off',
+        'perfectionist/sort-union-types': 'off',
+        'perfectionist/sort-vue-attributes': 'off',
       },
     },
-  },
-  ignorePatterns: ['node_modules', 'src/templates', 'dist'],
-  rules: {
-    'prettier/prettier': 'error',
-    'import/prefer-default-export': 'off',
-    'no-underscore-dangle': 'off',
-    '@typescript-eslint/consistent-type-imports': 'warn',
-  },
-};
+  ],
+}
