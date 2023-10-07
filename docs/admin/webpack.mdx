@@ -6,180 +6,81 @@ desc: The Payload admin panel uses Webpack 5 and supports many common functional
 keywords: admin, webpack, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-TODO: rewrite this
-- Talk about how Webpack is stable, and should be used unless you are adventurous.
-- Show a code example about how to install and pass the Webpack bundler to the Payload config
+Payload has a Webpack (v5) bundler that you can build the Admin panel with. We recommended using it because it is stable. If you are feeling a bit more adventurous you can give the Vite bundler shot.
 
-Payload allows usage of Webpack 5 to build the Admin panel. It comes with support for many common functionalities such as SCSS and Typescript out of the box, but there are many cases where you may need to add support for additional functionalities.
+Out of the box the Webpack bundler supports common functionalities such as SCSS and Typescript, but there are many cases where you may need to add support for additional functionalities.
 
-To use webpack as your bundler, you must import the `@payloadcms/bundler-webpack` package and define it as the bundler in your Payload config.
+To use webpack as your bundler, you must install it:
 
-To extend the Webpack config, add the `webpack` key to your base Payload config, and provide a function that accepts the default Webpack config as its only argument:
+```bash
+yarn add @payloadcms/bundler-webpack
+```
 
-`payload.config.ts`
+After installing, set the `bundler: webpackBundler()` on your Payload config. If you would like to extend the Webpack config, you can do so by passing a function to the webpack property.
 
 ```ts
+// payload.config.ts
+
 import { buildConfig } from 'payload/config'
 import { webpackBundler } from '@payloadcms/bundler-webpack'
 
 export default buildConfig({
   admin: {
     // highlight-start
+    bundler: webpackBundler()
     webpack: (config) => {
-      // Do something with the config here
+      // full control of the Webpack config
 
       return config
     },
     // highlight-end
   },
-  bunder: webpackBundler(),
-```
-
-TODO: move the aliasing section to its own page
-- Talk about how Webpack is stable, and should be used unless you are adventurous.
-- Show a code example about how to install and pass the Webpack bundler to the Payload config
-
-### Aliasing server-only modules
-
-A common use case for extending the Payload config is to alias server-only modules, thus preventing them from inclusion into the browser JavaScript bundle.
-
-As the Payload config is used in both server **and** client contexts, you may find yourself writing code in your Payload config that may be incompatible with browser environments.
-
-Examples of **non** browser-friendly packages:
-
-- `fs`
-- `stripe`
-- `authorizenet`
-- `nodemailer`
-
-You may rely on server-only packages such as the above to perform logic in access control functions, hooks, and other contexts (which is great!) but when you boot up your Payload app and try to view it in the browser, you'll likely run into missing dependency issues or other general incompatibilities.
-
-<Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  To avoid problems with server code making it to your Webpack bundle, you can use the{' '}
-  <strong>alias</strong> Webpack feature to tell Webpack to avoid importing the modules you want to
-  restrict to server-only.
-</Banner>
-
-<strong>
-  For example, let's say that you have a Collection called `Subscriptions` which relies on Stripe:
-</strong>
-
-<br />
-<br />
-
-`collections/Subscriptions/index.js`
-
-```ts
-import { CollectionConfig } from 'payload/types'
-import createStripeSubscription from './hooks/createStripeSubscription'
-
-export const Subscription: CollectionConfig = {
-  slug: 'subscriptions',
-  hooks: {
-    beforeChange: [createStripeSubscription],
-  },
-  fields: [
-    {
-      name: 'stripeSubscriptionID',
-      type: 'text',
-      required: true,
-    },
-  ],
-}
-```
-
-The collection above features a `beforeChange` hook that creates a Stripe subscription whenever a Subscription document is created in Payload.
-
-<strong>That hook might look something like this:</strong>
-
-<br />
-<br />
-
-`collections/Subscriptions/hooks/createStripeSubscription.js`
-
-```js
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
-const createStripeSubscription = async ({ data, operation }) => {
-  if (operation === 'create') {
-    const dataWithStripeID = { ...data }
-
-    // use Stripe to create a Stripe subscription
-    const subscription = await stripe.subscriptions.create({
-      // Configure the subscription accordingly
-    })
-
-    // Automatically add the Stripe subscription ID
-    // to the data that will be saved to this Subscription doc
-    dataWithStripeID.stripeSubscriptionID = subscription.id
-
-    return dataWithStripeID
-  }
-
-  return data
-}
-
-export default createStripeSubscription
-```
-
-<Banner type="error">
-  <strong>Warning:</strong>
-  <br />
-  The above code is NOT production-ready and should not be referenced to create Stripe
-  subscriptions. Although creating a beforeChange hook is a completely valid spot to do things like
-  create subscriptions, the code above is incomplete and insecure, meant for explanation purposes
-  only.
-</Banner>
-
-**As-is, this collection will prevent your Admin panel from bundling or loading correctly, because Stripe relies on some Node-only packages.**
-
-To remedy this issue you can extend the Payload Webpack config to alias your entire `createStripeSubscription` hook to a separate, empty mock file.
-
-Example in `payload.config.js`:
-
-```js
-import { buildConfig } from 'payload/config'
-import path from 'path'
-import Subscription from './collections/Subscription'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
-
-const createStripeSubscriptionPath = path.resolve(
-  __dirname,
-  'collections/Subscription/hooks/createStripeSubscription.js',
-)
-const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
-
-export default buildConfig({
-  collections: [Subscription],
-  admin: {
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve.alias,
-          [createStripeSubscriptionPath]: mockModulePath,
-        },
-      },
-    }),
-  },
-  bundler: webpackBundler(),
+  // rest of your payload config
 })
 ```
 
-The above code will alias the file at path `createStripeSubscriptionPath` to a mocked module, which might look like this:
+### Aliasing server-only modules
 
-`mocks/emptyObject.js`
+To remove files that contain server-only modules from your bundle, you can use the `alias` Webpack feature.
 
+First create a mock module that exports an empty object:
 ```js
+// mocks/emptyObject.js
+
 export default {}
 ```
 
-Now, when Webpack sees that you're attempting to import your `createStripeSubscriptionPath` file, it'll disregard that actual file and load your mock file instead. Not only will your Admin panel now bundle successfully, you will have optimized its filesize by removing unnecessary code! And you might have learned something about Webpack, too.
+Then, in your Payload config, you can alias the file containing the server-only module to the mock module:
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
+const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
+const pathToFileWithServerOnlyModule = path.resolve(__dirname, 'hooks/syncStripeCustomer.ts')
+
+export default buildConfig({
+  admin: {
+    bundler: webpackBundler(),
+    webpack: (config) => {
+      return {
+        ...config,
+        resolve: {
+          ...config.resolve,
+          // highlight-start
+          alias: {
+            ...config.resolve.alias,
+            [pathToFileWithServerOnlyModule]: mockModulePath,
+          },
+          // highlight-end
+        },
+      }
+    },
+  },
+  // rest of your payload config
+})
+```
 
 <Banner type="success">
   <strong>Tip:</strong>

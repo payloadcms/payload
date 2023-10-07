@@ -8,8 +8,8 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 Payload dynamically generates a beautiful, fully functional React admin panel to manage your data. It's extremely powerful and can be customized / extended upon easily by swapping in your own React components. You can add additional views, modify how built-in views look / work, swap out Payload branding for your client's, build your own field types and much more.
 
-TODO: change the sentence below to reference our adapter pattern, and officially supported bundlers, linking to Vite and Webpack docs pages specifically
-The Payload Admin panel is built with Webpack, code-split, highly performant (even with 100+ fields), and written fully in TypeScript.
+The Payload Admin panel can be bundled with our officially supported [Vite](/docs/admin/vite) and [webpack](/docs/admin/webpack) bundlers or you can integrate another bundler following our adapter pattern approach.
+When bundled, it is code-split, highly performant (even with 100+ fields), and written fully in TypeScript.
 
 <Banner type="success">
   The Admin panel is meant to be simple enough to give you a starting point but not bring too much
@@ -25,8 +25,6 @@ _Screenshot of the Admin panel while editing a document from an example `AllFiel
 
 All options for the Admin panel are defined in your base Payload config file.
 
-TODO: add `vite` and `bundler` properties to the table below
-
 | Option                | Description                                                                                                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `user`                | The `slug` of a Collection that you want be used to log in to the Admin dashboard. [More](/docs/admin/overview#the-admin-user-collection)                                                                                                                    |
@@ -41,6 +39,8 @@ TODO: add `vite` and `bundler` properties to the table below
 | `autoLogin`           | Used to automate admin log-in for dev and demonstration convenience. [More](/docs/authentication/config).                                                                                                                                                    |
 | `components`          | Component overrides that affect the entirety of the Admin panel. [More](/docs/admin/components)                                                                                                                                                              |
 | `webpack`             | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack)                                                                                                                                                            |
+| `vite`                | Customize the Vite config that's used to generate the Admin panel. [More](/docs/admin/vite)                                                                                                                                                                  |
+| **`bundler`**         | The bundler that you would like to use to bundle the admin panel. Officially supported bundlers: [Webpack](/docs/admin/webpack) and [Vite](/docs/admin/vite).                                                                                                |
 | **`logoutRoute`**     | The route for the `logout` page.                                                                                                                                                                                                                             |
 | **`inactivityRoute`** | The route for the `logout` inactivity page.                                                                                                                                                                                                                  |
 

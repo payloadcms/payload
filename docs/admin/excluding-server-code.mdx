@@ -2,8 +2,138 @@
 title: Excluding server-only code from admin UI
 label: Excluding server code
 order: 70
-desc: NEEDS TO BE WRITTEN
+desc: Learn how to exclude server-only code from the Payload Admin UI bundle
 ---
 
-- Talk about the theory behind using aliases to exclude files
+### Aliasing server-only modules
+
 - Talk about environment variables maybe?
+
+Because the Admin Panel browser bundle includes your Payload Config file,
+files using server-only modules need to be excluded from the bundle.
+It's common for your config to rely on server only modules to perform logic in access control functions, hooks, and other contexts.
+
+Any file that imports a server-only module such as `fs`, `stripe`, `authorizenet`, `nodemailer`, etc. **cannot** be included in the browser bundle.
+
+To exclude these files from the browser bundle, currently we recommend aliasing filepaths.
+The concept is, when your bundler goes to import a file that contains server-only modules you provide it an alternative filepath to import from.
+That alternate file contains code that **can** run in the browser, but does not need to actually do anything.
+
+<br />
+<strong>
+  For example, let's say you have a Collection called `Subscriptions`
+</strong>
+
+```ts
+// collections/Subscriptions/index.ts
+
+import { CollectionConfig } from 'payload/types'
+import createStripeSubscription from './hooks/createStripeSubscription'
+
+export const Subscription: CollectionConfig = {
+  slug: 'subscriptions',
+  hooks: {
+    beforeChange: [createStripeSubscription],
+  },
+  fields: [
+    {
+      name: 'stripeSubscriptionID',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
+```
+
+The collection above features a `beforeChange` hook that creates a Stripe subscription whenever a Subscription document is created in Payload. <strong>That hook might look something like this:</strong>
+
+
+```ts
+// collections/Subscriptions/hooks/createStripeSubscription.ts
+
+// highlight-start
+import Stripe from 'stripe' // <-- server-only module
+// highlight-end
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+
+export const createStripeSubscription = async ({ data, operation }) => {
+  if (operation === 'create') {
+    const dataWithStripeID = { ...data }
+
+    // use Stripe to create a Stripe subscription
+    const subscription = await stripe.subscriptions.create({
+      // Configure the subscription accordingly
+    })
+
+    // Automatically add the Stripe subscription ID
+    // to the data that will be saved to this Subscription doc
+    dataWithStripeID.stripeSubscriptionID = subscription.id
+
+    return dataWithStripeID
+  }
+
+  return data
+}
+```
+
+<Banner type="error">
+  <strong>Warning:</strong>
+  <br />
+  The above code is NOT production-ready and should not be referenced to create Stripe
+  subscriptions. Although creating a beforeChange hook is a completely valid spot to do things like
+  create subscriptions, the code above is incomplete and insecure, meant for explanation purposes
+  only.
+</Banner>
+
+**As-is, this collection will prevent your Admin panel from bundling or loading correctly, because Stripe relies on some Node-only packages.**
+
+To remedy this issue you can create a path alias so an alternate file is included in the browser bundle.
+
+First create a mock file that exports an empty object:
+
+```js
+// mocks/emptyObject.js
+
+export default {}
+```
+
+In your Payload config, under the `admin.webpack` property, add an alias for your `createStripeSubscription` import path to be replaced with your mock module filepath.
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import path from 'path'
+import { Subscription } from './collections/Subscriptions'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
+const createStripeSubscriptionPath = path.resolve(
+  __dirname,
+  'collections/Subscriptions/hooks/createStripeSubscription.ts'
+)
+const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
+
+export default buildConfig({
+  collections: [Subscription],
+  admin: {
+    bundler: webpackBundler(),
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config.resolve.alias,
+          [createStripeSubscriptionPath]: mockModulePath,
+        },
+      },
+    }),
+  },
+})
+```
+
+Now, your bundler will instead load the mock file whenever it sees the import path for the `createStripeSubscription` file. Not only will your Admin panel now bundle successfully, you will have optimized its filesize by removing unnecessary code! And you might have learned something about bundling, too.
+
+### Using environment variables
+
+If you need to access an env variable in your admin panel, you need to prefix your variable with `PAYLOAD_PUBLIC`. Payload looks for this prefix and will replace it with the actual value of the variable when bundling the admin panel code.
