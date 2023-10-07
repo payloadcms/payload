@@ -31,6 +31,7 @@ export class Main {
         '--dry-run': Boolean,
         '--beta': Boolean,
 
+        '-d': '--db',
         '-h': '--help',
         '-n': '--name',
         '-t': '--template',
