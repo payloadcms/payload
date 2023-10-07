@@ -11,6 +11,7 @@ import type { PostgresAdapter } from './types'
 
 import { createMigrationTable } from './utilities/createMigrationTable'
 import { migrationTableExists } from './utilities/migrationTableExists'
+import { parseError } from './utilities/parseError'
 
 export async function migrate(this: PostgresAdapter): Promise<void> {
   const { payload } = this
@@ -96,14 +97,9 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
       },
     })
   } catch (err: unknown) {
-    let msg = `Error running migration ${migration.name}`
-
-    if (err instanceof DatabaseError) {
-      msg += `: ${err.message}`
-      if (err.hint) msg += `. ${err.hint}`
-    }
-
-    payload.logger.error({ err, msg })
-    throw err
+    payload.logger.error({
+      err,
+      msg: parseError(err, `Error running migration ${migration.name}`),
+    })
   }
 }

@@ -23,15 +23,15 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
 
   // Rollback all migrations in order
   for (const migration of existingMigrations) {
-    const migrationFile = migrationFiles.find((m) => m.name === migration.name)
-    if (!migrationFile) {
-      throw new Error(`Migration ${migration.name} not found locally.`)
-    }
-
-    const start = Date.now()
     let transactionID
 
+    const migrationFile = migrationFiles.find((m) => m.name === migration.name)
     try {
+      if (!migrationFile) {
+        throw new Error(`Migration ${migration.name} not found locally.`)
+      }
+
+      const start = Date.now()
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       transactionID = await this.beginTransaction()
       await migrationFile.down({ payload })
@@ -52,12 +52,16 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
 
       await this.commitTransaction(transactionID)
     } catch (err: unknown) {
+      let msg = `Error running migration ${migrationFile.name}.`
+
+      if (err instanceof Error) msg += ` ${err.message}`
+
       await this.rollbackTransaction(transactionID)
       payload.logger.error({
         err,
-        msg: `Error running migration ${migrationFile.name}`,
+        msg,
       })
-      throw err
+      process.exit(1)
     }
   }
 

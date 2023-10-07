@@ -6,6 +6,8 @@ import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
 
+import { parseError } from './utilities/parseError'
+
 /**
  * Drop the current database and run all migrate up functions
  */
@@ -66,9 +68,8 @@ export async function migrateFresh(this: PostgresAdapter): Promise<void> {
       await this.rollbackTransaction(transactionID)
       payload.logger.error({
         err,
-        msg: `Error running migration ${migration.name}. Rolling back.`,
+        msg: parseError(err, `Error running migration ${migration.name}. Rolling back`),
       })
-      throw err
     }
   }
 }
