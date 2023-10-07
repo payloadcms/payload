@@ -2,7 +2,7 @@
 title: Live Preview
 label: Overview
 order: 10
-desc: NEED TO WRITE 
+desc: NEED TO WRITE
 keywords: NEED TO WRITE
 ---
 
@@ -11,3 +11,93 @@ TODO: write docs here
 - Talk about how it works at a high level
 - Talk about the property on `collectionConfig.admin`
 - Talk about the React hook, and the subsequent package that it relies on which can be used for other frameworks
+
+**With Live Preview you can render your front-end application directly within the Payload Admin Panel, then see your changes take effect in real-time on your actual app, with zero-latency, all without pressing save.**
+
+{/* IMAGE OF LIVE PREVIEW HERE */}
+
+Setting up Live Preview is easy. You first need to enable it through the `admin.components.livePreview` property of your Payload config:
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`url`** \*          | URL string pointing to your front-end. This value is used as the iframe src. [More details](#url).
+| **`breakpoints`**     | Array of breakpoint objects to be used as “device sizes” in the preview window. Each item will render as an option to select from the drop-down in the toolbar. [More details](#breakpoints).
+| **`collections`**  \* | Array of collection slugs to enable Live Preview on.
+| **`globals`** \*      | Array of global slugs to enable Live Preview on.
+
+_\* An asterisk denotes that a property is required._
+
+It might look something like as simple as this:
+
+```ts
+// payload.config.js
+{
+  admin: {
+    components: {
+      livePreview: {
+        url: 'http://localhost:3000', // The URL to your front-end
+        collections: ['pages'], // The collections to enable Live Preview on
+      },
+    },
+  }
+}
+```
+
+<Banner type="info">
+  You can also define the <code>admin.components.livePreview</code> property on individual collection and global configs. These settings will override the top-level options.
+</Banner>
+
+### URL
+
+The URL property is a string that points to your front-end application. This value is used as the `src` attribute of the iframe that renders your front-end.
+
+If your application requires dynamic URLs, you can pass a function instead of a string.By using a function as the `url`, you will be able to support everything from multi-tenant applications to localized URLs. This function will be called with the following arguments:
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`data`**            | The data of the document being edited, these are changes that have not yet been saved. [More details](#data).
+| **`documentInfo`**    | Information about the document being edited. This will contain useful properties like collection and global slugs, etc.
+| **`locale`**          | The locale of the document being edited. [More details](#locale).
+
+A more complex URL example might look like this:
+
+```ts
+// payload.config.js
+{
+  admin: {
+    components: {
+      livePreview: {
+        url: ({
+          data,
+          documentInfo,
+          locale
+        }) => `${data.tenant.url}${
+          documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `/${data.slug}
+        `}?locale=${locale}`,
+        collections: ['pages'],
+      },
+    },
+  }
+}
+```
+
+### Breakpoints
+
+The breakpoints property is an array of breakpoint objects to be used as “device sizes” in the preview window. Each item will render as an option to select from the drop-down in the toolbar.
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`label`** \*        | The label to display in the drop-down. This is what the user will see.
+| **`name`** \*         | The name of the breakpoint.
+| **`width`** \*        | The width of the breakpoint. This is used to set the width of the iframe.
+| **`height`** \*       | The height of the breakpoint. This is used to set the height of the iframe.
+
+{/* IMAGE OF TOOLBAR HERE */}
+
+<Banner type="info">
+  The "Responsive" option will always be available in the drop-down and requires no configuration. This is the initial breakpoint that will be used when the page loads, and it styles the iframe with a width and height of `100%`.
+</Banner>
+
+The device frame may also be resized directly by using the number inputs in the toolbar and specifying an exact width or height. This will temporarily override the breakpoint selection as "Custom" until a predefined breakpoint is selected again.
+
+### Data
