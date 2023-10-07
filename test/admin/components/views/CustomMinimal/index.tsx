@@ -12,17 +12,17 @@ import { useConfig } from '../../../../../packages/payload/src/admin/components/
 
 import './index.scss'
 
-const baseClass = 'custom-minimal-route'
+const baseClass = 'custom-minimal-view'
 
-const CustomMinimalRoute: React.FC = () => {
+const CustomMinimalView: React.FC = () => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
 
   return (
     <MinimalTemplate className={baseClass}>
-      <h1>Custom Route</h1>
-      <p>Here is a custom route that was added in the Payload config.</p>
+      <h1>Custom Admin View</h1>
+      <p>Here is a custom admin view that was added in the Payload config.</p>
       <Button className={`${baseClass}__login-btn`} el="link" to={`${adminRoute}/login`}>
         Go to Login
       </Button>
@@ -33,4 +33,4 @@ const CustomMinimalRoute: React.FC = () => {
   )
 }
 
-export default CustomMinimalRoute
+export default CustomMinimalView
