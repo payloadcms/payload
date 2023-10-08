@@ -120,10 +120,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) {
-      await payload.db.commitTransaction(req.transactionID)
-      delete req.transactionID
-    }
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
     // /////////////////////////////////////
     // Return results

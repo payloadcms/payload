@@ -260,10 +260,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) {
-      await payload.db.commitTransaction(req.transactionID)
-      delete req.transactionID
-    }
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
     return result
   } catch (error: unknown) {

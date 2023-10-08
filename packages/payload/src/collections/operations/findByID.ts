@@ -205,10 +205,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) {
-      await payload.db.commitTransaction(req.transactionID)
-      delete req.transactionID
-    }
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
     return result
   } catch (error: unknown) {
