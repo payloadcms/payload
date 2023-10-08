@@ -122,7 +122,10 @@ async function resetPassword(args: Arguments): Promise<Result> {
       overrideAccess,
       req,
     })
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) {
+      await payload.db.commitTransaction(req.transactionID)
+      delete req.transactionID
+    }
 
     return {
       token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,

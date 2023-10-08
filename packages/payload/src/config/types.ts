@@ -232,12 +232,25 @@ export type Endpoint = {
   root?: boolean
 }
 
-export type CustomAdminView = React.ComponentType<{
+export type AdminViewConfig = {
+  Component: AdminViewComponent
+  /** Whether the path should be matched exactly or as a prefix */
+  exact?: boolean
+  path: string
+  sensitive?: boolean
+  strict?: boolean
+}
+
+export type AdminViewProps = {
   canAccessAdmin?: boolean
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   user: User | null | undefined
-}>
+}
+
+export type AdminViewComponent = React.ComponentType<AdminViewProps>
+
+export type AdminView = AdminViewComponent | AdminViewConfig
 
 export type EditViewConfig = {
   /**
@@ -256,15 +269,6 @@ export type EditViewComponent = React.ComponentType<{
 }>
 
 export type EditView = EditViewComponent | EditViewConfig
-
-export type AdminRoute = {
-  Component: CustomAdminView
-  /** Whether the path should be matched exactly or as a prefix */
-  exact?: boolean
-  path: string
-  sensitive?: boolean
-  strict?: boolean
-}
 
 export type Locale = {
   /**
@@ -422,15 +426,18 @@ export type Config = {
        */
       providers?: React.ComponentType<{ children: React.ReactNode }>[]
       /**
-       * Add custom routes in the admin dashboard
+       * Replace or modify top-level admin routes, or add new ones:
+       * + `Account` - `/admin/account`
+       * + `Dashboard` - `/admin`
+       * + `:path` - `/admin/:path`
        */
-      routes?: AdminRoute[]
-      /* Replace complete pages */
       views?: {
+        /** Add custom admin views */
+        [key: string]: AdminView
         /** Replace the account screen */
-        Account?: React.ComponentType<any>
+        Account?: AdminView
         /** Replace the admin homepage */
-        Dashboard?: React.ComponentType<any>
+        Dashboard?: AdminView
       }
     }
     /** Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. */

@@ -29,13 +29,7 @@ const AccountView: React.FC = () => {
   const config = useConfig()
 
   const {
-    admin: {
-      components: {
-        views: { Account: CustomAccount } = {
-          Account: undefined,
-        },
-      } = {},
-    },
+    admin: { components: { views: { Account: CustomAccountComponent } = {} } = {} },
     collections,
     routes: { api },
     serverURL,
@@ -133,7 +127,9 @@ const AccountView: React.FC = () => {
 
   return (
     <RenderCustomComponent
-      CustomComponent={CustomAccount}
+      CustomComponent={
+        typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
+      }
       DefaultComponent={DefaultAccount}
       componentProps={{
         action,

@@ -152,7 +152,10 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
       result: token,
     })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) {
+      await payload.db.commitTransaction(req.transactionID)
+      delete req.transactionID
+    }
 
     return token
   } catch (error: unknown) {

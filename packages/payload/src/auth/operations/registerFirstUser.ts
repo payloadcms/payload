@@ -86,7 +86,10 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
       token,
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) {
+      await payload.db.commitTransaction(req.transactionID)
+      delete req.transactionID
+    }
 
     return {
       message: 'Registered and logged in successfully. Welcome!',

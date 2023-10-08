@@ -11,10 +11,10 @@ import CustomTabComponent from './components/CustomTabComponent'
 import DemoUIFieldCell from './components/DemoUIField/Cell'
 import DemoUIFieldField from './components/DemoUIField/Field'
 import Logout from './components/Logout'
-import CustomDefaultRoute from './components/routes/CustomDefault'
-import CustomMinimalRoute from './components/routes/CustomMinimal'
 import CustomDefaultView from './components/views/CustomDefault'
+import CustomDefaultEditView from './components/views/CustomDefaultEdit'
 import CustomEditView from './components/views/CustomEdit'
+import CustomMinimalRoute from './components/views/CustomMinimal'
 import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
 import { globalSlug, postsSlug, slugPluralLabel, slugSingularLabel } from './shared'
@@ -32,16 +32,6 @@ export default buildConfigWithDefaults({
     css: path.resolve(__dirname, 'styles.scss'),
     components: {
       // providers: [CustomProvider, CustomProvider],
-      routes: [
-        {
-          path: '/custom-minimal-route',
-          Component: CustomMinimalRoute,
-        },
-        {
-          path: '/custom-default-route',
-          Component: CustomDefaultRoute,
-        },
-      ],
       afterDashboard: [AfterDashboard],
       beforeLogin: [BeforeLogin],
       logout: {
@@ -51,6 +41,14 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+        CustomMinimalRoute: {
+          path: '/custom-minimal-view',
+          Component: CustomMinimalRoute,
+        },
+        CustomDefaultRoute: {
+          path: '/custom-default-view',
+          Component: CustomDefaultView,
+        },
       },
     },
   },
@@ -184,7 +182,7 @@ export default buildConfigWithDefaults({
           views: {
             Edit: {
               // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
-              Default: CustomDefaultView,
+              Default: CustomDefaultEditView,
               Versions: CustomVersionsView,
               MyCustomView: {
                 path: '/custom-tab-view',
@@ -328,7 +326,7 @@ export default buildConfigWithDefaults({
         components: {
           views: {
             Edit: {
-              Default: CustomDefaultView,
+              Default: CustomDefaultEditView,
               Versions: CustomVersionsView,
               MyCustomView: {
                 path: '/custom-tab-view',

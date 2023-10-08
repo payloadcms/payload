@@ -220,7 +220,10 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // 8. Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) {
+      await payload.db.commitTransaction(req.transactionID)
+      delete req.transactionID
+    }
 
     return result
   } catch (error: unknown) {
