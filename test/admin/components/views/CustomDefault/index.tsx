@@ -1,21 +1,30 @@
-import React, { Fragment, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 
-import type { EditViewComponent } from '../../../../../packages/payload/src/config/types'
+import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
 
+import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
+// As this is the demo project, we import our dependencies from the `src` directory.
+import DefaultTemplate from '../../../../../packages/payload/src/admin/components/templates/Default'
 import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
+import Meta from '../../../../../packages/payload/src/admin/components/utilities/Meta'
 
-const CustomDefaultView: EditViewComponent = ({
-  canAccessAdmin,
-  // collection,
-  //  global,
-  user,
-}) => {
+// In your projects, you can import as follows:
+// import { DefaultTemplate } from 'payload/components/templates';
+// import { Button, Eyebrow } from 'payload/components/elements';
+// import { AdminView } from 'payload/config';
+// import { useStepNav } from 'payload/components/hooks';
+// import { useConfig, Meta } from 'payload/components/utilities';
+
+import './index.scss'
+
+const baseClass = 'custom-default-view'
+
+const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
-
   const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us
@@ -24,7 +33,7 @@ const CustomDefaultView: EditViewComponent = ({
   useEffect(() => {
     setStepNav([
       {
-        label: 'Custom Default View',
+        label: 'Custom Admin View with Default Template',
       },
     ])
   }, [setStepNav])
@@ -36,39 +45,31 @@ const CustomDefaultView: EditViewComponent = ({
   }
 
   return (
-    <Fragment>
+    <DefaultTemplate>
+      <Meta
+        description="Building custom views into Payload is easy."
+        keywords="Custom React Components, Payload, CMS"
+        title="Custom Admin View with Default Template"
+      />
       <div
+        className={`${baseClass}__content`}
         style={{
-          marginTop: 'calc(var(--base) * 2)',
           paddingLeft: 'var(--gutter-h)',
           paddingRight: 'var(--gutter-h)',
         }}
       >
-        <h1>Custom Default View</h1>
-        <p>This custom Default view was added through one of the following Payload configs:</p>
-        <ul>
-          <li>
-            <code>components.views.Edit.Default</code>
-            <p>
-              {'This allows you to override only the default edit view specifically, but '}
-              <b>
-                <em>not</em>
-              </b>
-              {
-                ' any nested views like versions, etc. The document header will render above this component.'
-              }
-            </p>
-          </li>
-          <li>
-            <code>components.views.Edit.Default.Component</code>
-            <p>
-              This is the most granular override, allowing you to override only the Default
-              component, or any of its other properties like path and label.
-            </p>
-          </li>
-        </ul>
+        <h1>Custom Admin View</h1>
+        <p>
+          Here is a custom admin view that was added in the Payload config. It uses the Default
+          Template, so the sidebar is rendered.
+        </p>
+        <div className={`${baseClass}__controls`}>
+          <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
+            Go to Dashboard
+          </Button>
+        </div>
       </div>
-    </Fragment>
+    </DefaultTemplate>
   )
 }
 

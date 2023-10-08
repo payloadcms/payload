@@ -44,12 +44,7 @@ export const Routes: React.FC = () => {
   const config = useConfig()
 
   const {
-    admin: {
-      components: { routes: customRoutesConfig } = {},
-      inactivityRoute: logoutInactivityRoute,
-      logoutRoute,
-      user: userSlug,
-    },
+    admin: { inactivityRoute: logoutInactivityRoute, logoutRoute, user: userSlug },
     collections,
     globals,
     routes,
@@ -110,7 +105,7 @@ export const Routes: React.FC = () => {
                 </Route>
                 {customRoutes({
                   canAccessAdmin,
-                  customRoutes: customRoutesConfig,
+                  config,
                   match,
                   user,
                 })}
