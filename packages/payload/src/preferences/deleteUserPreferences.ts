@@ -17,10 +17,14 @@ export const deleteUserPreferences = async ({ collectionConfig, ids, payload, re
       collection: 'payload-preferences',
       req,
       where: {
-        user: { in: ids },
-        userCollection: {
-          equals: collectionConfig.slug,
-        },
+        and: [
+          {
+            'user.value': { in: ids },
+          },
+          {
+            'user.relationTo': { equals: collectionConfig.slug },
+          },
+        ],
       },
     })
   }
