@@ -86,7 +86,7 @@ If you are using the Webpack bundler, you can use the [Webpack path aliasing app
 
 TODO: ADD LINK TO VITE DOCS BELOW
 
-If you are using the Vite bundler you can use [Vite's `optimizeDeps` config](/docs/admin/vite#optimizing-dependencies).
+If you are using the Vite bundler you can use [Vite's approach](/docs/admin/vite).
 
 The basic idea is to create a file that exports an empty object, and then alias import paths of any files that import server-only modules to that empty object file.
 This way when your bundler goes to import a file that contains server-only modules, it will instead import the empty object file, which will not break the browser bundle.
