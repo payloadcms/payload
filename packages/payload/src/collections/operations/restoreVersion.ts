@@ -190,10 +190,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) {
-      await payload.db.commitTransaction(req.transactionID)
-      delete req.transactionID
-    }
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
     return result
   } catch (error: unknown) {

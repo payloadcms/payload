@@ -126,10 +126,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) {
-      await payload.db.commitTransaction(req.transactionID)
-      delete req.transactionID
-    }
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
     return result
   } catch (error: unknown) {
