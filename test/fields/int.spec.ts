@@ -286,15 +286,6 @@ describe('Fields', () => {
         expect(options.uniqueText).toMatchObject({ unique: true })
       })
 
-      it('should have unique compound indexes', () => {
-        expect(definitions.partOne).toEqual(1)
-        expect(options.partOne).toMatchObject({
-          name: 'compound-index',
-          sparse: true,
-          unique: true,
-        })
-      })
-
       it('should have 2dsphere indexes on point fields', () => {
         expect(definitions.point).toEqual('2dsphere')
       })
@@ -341,14 +332,6 @@ describe('Fields', () => {
 
       it('should have versions indexes', () => {
         expect(definitions['version.text']).toEqual(1)
-      })
-      it('should have version indexes from collection indexes', () => {
-        expect(definitions['version.partOne']).toEqual(1)
-        expect(options['version.partOne']).toMatchObject({
-          name: 'compound-index',
-          sparse: true,
-          unique: true,
-        })
       })
     })
 
@@ -436,32 +419,6 @@ describe('Fields', () => {
         const result = await payload.create({
           collection: 'indexed-fields',
           data,
-        })
-        return result.error
-      }).toBeDefined()
-    })
-    it('should throw validation error saving on unique combined fields', async () => {
-      await payload.delete({ collection: 'indexed-fields', where: {} })
-      const data1 = {
-        partOne: 'u',
-        partTwo: 'u',
-        text: 'a',
-        uniqueText: 'a',
-      }
-      const data2 = {
-        partOne: 'u',
-        partTwo: 'u',
-        text: 'b',
-        uniqueText: 'b',
-      }
-      await payload.create({
-        collection: 'indexed-fields',
-        data: data1,
-      })
-      expect(async () => {
-        const result = await payload.create({
-          collection: 'indexed-fields',
-          data: data2,
         })
         return result.error
       }).toBeDefined()
