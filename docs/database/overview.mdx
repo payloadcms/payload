@@ -2,166 +2,72 @@
 title: Database
 label: Overview
 order: 10
-desc: Manage your data and customize the Admin Panel by swapping in your own React components. Create, modify or remove views, fields, styles and much more.
-keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, express
+keywords: database, mongodb, postgres, documentation, Content Management System, cms, headless, typescript, node, react, express
+desc: With Payload, you bring your own database and own your data. You have full control.
 ---
 
-Payload is compatible with a wide range of database systems. You may choose to configure your project with any of the supported databases by adding the necessary dependencies and following the setup instructions for the database adapter of choice.
+Payload interacts with your database via the database adapter that you choose. Right now, Payload officially supports two database adapters:
+
+1. [MongoDB](/docs/database/mongodb) w/ [Mongoose](https://mongoosejs.com/)
+1. [Postgres](/docs/database/postgres) w/ [Drizzle](https://drizzle.team/)
+
+We will be adding support for SQLite and MySQL in the near future using Drizzle ORM.
+
+To use a specific database adapter, you need to install it and configure it according to its own specifications. Visit the documentation for your applicable database adapter to learn more.
 
 ## Selecting a database
 
-There are several factors to consider when choosing which database technology and hosting option is right for your project and workload.
+There are several factors to consider when choosing which database technology and hosting option is right for your project and workload. Payload can theoretically support any database, but it's up to you to decide which database to use.
+
+#### When to use MongoDB
+
+If your project has a lot of dynamic fields, and you are comfortable with allowing Payload to enforce data integrity across your documents, MongoDB is a great choice. With it, your Payload documents are stored as _one_ document in your database—no matter if you have localization enabled, how many block or array fields you have, etc. This means that the shape of your data in your database will very closely reflect your field schema, and there is minimal complexity involved in storing or retrieving your data.
+
+You should prefer MongoDB if:
+
+- You prefer simplicity within your database
+- You don't want to deal with keeping production / staging databases in sync via [DDL changes](https://en.wikipedia.org/wiki/Data_definition_language)
+- Most (or everything) in your project is localized
+- You leverage a lot of array fields, block fields, or `hasMany` select fields and similar
+
+#### When to use a relational DB
+
+Many projects might call for more rigid database architecture where the shape of your data is strongly enforced at the database level. For example, if you know the shape of your data and it's relatively "flat", and you don't anticipate it to change often, your workload might suit relational databases like Postgres very well.
+
+You should prefer a relational DB like Postgres if:
+
+- You are comfortable with migration workflows
+- You require enforced data consistency at the database level
+- You have a lot of relationships between collections and require relationships to be enforced
+
+#### Differences in Payload features
+
+It's important to note that almost everything Payload does is available in all of our officially supported database adapters, including localization, arrays, blocks, etc. 
+
+The only thing that is not supported in Postgres yet is the [Point field](/docs/fields/point), but that should be added soon. 
+
+It's up to you to choose which database you would like to use.
 
 ## Configuration
 
-To configure the database for your Payload an adapter can be assigned to `config.db`.
+To configure the database for your Payload application, an adapter can be assigned to `config.db`. This property is required within your Payload config. 
 
-## Transactions
-
-Database transactions allow your application to make a series of database changes in an all-or-nothing commit. Consider an HTTP request that creates a new **Order** and has an `afterChange` hook to update the stock count of related **Items**. If an error occurs when updating an **Item** and an HTTP error is returned to the user, you would not want the new **Order** to be persisted or any other items to be changed either. This kind of interaction with the database is handled seamlessly with transactions.
-
-By default, Payload will use transactions for all operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
-
-<Banner type="info">
-  <strong>Note:</strong>
-  <br />
-  MongoDB requires a connection to a replicaset in order to make use of transactions.
-</Banner>
-
-The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt-in to using the same transaction by passing the `req` in the arguments. For example:
+Here's an example:
 
 ```ts
-const afterChange: CollectionAfterChangeHook = async ({ req }) => {
-  // because req.transactionID is assigned from Payload and passed through, my-slug will only persist if the entire request is successful
-  await req.payload.create({
-    req,
-    collection: 'my-slug',
-    data: {
-      some: 'data',
-    },
-  })
-}
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Here is where you pass your database adapter
+  // and the adapter will require options specific to itself
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URI,
+    }
+  }),
+})
 ```
-
-### Async Hooks with Transactions
-
-Since Payload hooks can be async and be written to not await the result, it is possible to have an incorrect success response returned on a request that is rolled back. If you have a hook where you do not `await` the result, then you should **not** pass the `req.transactionID`.
-
-```ts
-const afterChange: CollectionAfterChangeHook = async ({ req }) => {
-  // WARNING: an async call made with the same req may fail resulting in an OK response being returned with response data that is not committed
-  const dangerouslyIgnoreAsync = req.payload.create({
-    req,
-    collection: 'my-slug',
-    data: {
-      some: 'other data',
-    },
-  })
-
-  // Should this call fail, it will not rollback other changes
-  const safelyIgnoredAsync = req.payload.create({
-    req: {
-      ...req,
-      transactionID: undefined,
-    },
-    collection: 'my-slug',
-    data: {
-      some: 'other data',
-    },
-  })
-}
-```
-
-### Direct Transaction Access
-
-When writing your own scripts or custom endpoints, you may wish to have direct control over the database. This is useful for interacting with your database, outside of Payload's local API.
-
-The following functions can be used for managing transactions:
-
-`payload.db.transaction` - Helper function that takes a callback and wraps begin, commit, and rollback in try, catch, and error respectively.
-`payload.db.beginTransaction` - Starts a new session and returns an identifier for later reference.
-`payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.
-`payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
-
-## Migrations
-
-Payload's migrations are accessible via the `payload` command in your project directory.
-
-Available commands:
-
-- [`migrate`](#migrate) - Performs any migrations that have not yet been run.
-- [`migrate:status`](#migrate:status) - Checks the status of migrations.
-- [`migrate:down`](#migrate:down) - Reverts the last batch of migrations.
-- [`migrate:refresh`](#migrate:refresh) - Rolls back all migrations and runs them again.
-- [`migrate:reset`](#migrate:reset) - Rolls back all migrations.
-- [`migrate:create`](#migrate:create) - Creates new migration file in migrations directory.
-
-### Migrate
-
-The `migrate` command will run any migrations that have not yet been run. This command is run automatically when you start your Payload server.
-
-`payload migrate`
-
-Example output:
-
-```text
-TODO: add example output
-```
-
-### Migrate:status
-
-The `migrate:status` command will check the status of migrations.
-
-`payload migrate:status`
-
-Example output:
-
-```text
-```
-
-### Migrate:down
-
-Revert the last batch of migrations.
-
-`payload migrate:down`
-
-Example output:
-
-```text
-```
-
-### Migrate:refresh
-
-Roll back all migrations and run them again.
-
-`payload migrate:refresh`
-
-Example output:
-
-```text
-```
-
-### Migrate:reset
-
-Roll back all migrations.
-
-`payload migrate:reset`
-
-Example output:
-
-```text
-```
-
-### Migrate:create
-
-Create a new migration file in the migrations directory.
-
-`payload migrate:create`
-
-Example output:
-
-```text
-Migration created at .migrations/20230912_131129_first.ts
-```
-
-
