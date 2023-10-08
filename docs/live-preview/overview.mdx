@@ -14,7 +14,7 @@ Live Preview works by rendering an iframe on the page that loads your front-end 
 
 ## Setup
 
-Setting up Live Preview is easy. You first need to enable it through the `admin.components.livePreview` property of your Payload config. It takes the following options:
+Setting up Live Preview is easy. You first need to enable it through the `admin.livePreview` property of your Payload config. It takes the following options:
 
 | Path                  | Description                                                                                                                                                                                   |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -31,11 +31,9 @@ Here is a basic example of enabling Live Preview on a `pages` collection:
 // payload.config.ts
 {
   admin: {
-    components: {
-      livePreview: {
-        url: 'http://localhost:3000', // The URL to your front-end, this can also be a function (see below)
-        collections: ['pages'], // The collections to enable Live Preview on (globals are also possible)
-      },
+    livePreview: {
+      url: 'http://localhost:3000', // The URL to your front-end, this can also be a function (see below)
+      collections: ['pages'], // The collections to enable Live Preview on (globals are also possible)
     },
   }
 }
@@ -44,7 +42,7 @@ Here is a basic example of enabling Live Preview on a `pages` collection:
 Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
 
 <Banner type="info">
-  You can also define the <code>admin.components.livePreview</code> property on individual collection and global configs. Settings defined here will be merged into the top-level (if defined) as overrides.
+  You can also define the <code>admin.livePreview</code> property on individual collection and global configs. Settings defined here will be merged into the top-level (if defined) as overrides.
 </Banner>
 
 ### URL
@@ -65,17 +63,15 @@ Here is an example of using a function that returns a dynamic URL:
 // payload.config.ts
 {
   admin: {
-    components: {
-      livePreview: {
-        url: ({
-          data,
-          documentInfo,
-          locale
-        }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-          documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `/${data.slug}
-        `}?locale=${locale}`, // Localization query param
-        collections: ['pages'],
-      },
+    livePreview: {
+      url: ({
+        data,
+        documentInfo,
+        locale
+      }) => `${data.tenant.url}${ // Multi-tenant top-level domain
+        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `/${data.slug}
+      `}?locale=${locale}`, // Localization query param
+      collections: ['pages'],
     },
   }
 }
