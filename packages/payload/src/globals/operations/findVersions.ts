@@ -133,7 +133,10 @@ async function findVersions<T extends TypeWithVersion<T>>(
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) {
+      await payload.db.commitTransaction(req.transactionID)
+      delete req.transactionID
+    }
 
     return result
   } catch (error: unknown) {

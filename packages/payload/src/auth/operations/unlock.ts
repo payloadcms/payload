@@ -72,7 +72,10 @@ async function unlock(args: Args): Promise<boolean> {
       result = null
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) {
+      await payload.db.commitTransaction(req.transactionID)
+      delete req.transactionID
+    }
 
     return result
   } catch (error: unknown) {

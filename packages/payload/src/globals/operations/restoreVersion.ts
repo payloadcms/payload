@@ -149,7 +149,10 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) {
+      await payload.db.commitTransaction(req.transactionID)
+      delete req.transactionID
+    }
 
     return result
   } catch (error: unknown) {
