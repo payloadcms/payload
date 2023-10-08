@@ -42,6 +42,7 @@
   },
   "files": [
     "dist",
-    "mock.js"
+    "mock.js",
+    "predefinedMigrations"
   ]
 }

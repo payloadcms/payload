@@ -54,8 +54,7 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
 
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
-  payload,
-  migrationName,
+  { migrationName, payload },
 ) {
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
