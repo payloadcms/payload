@@ -89,13 +89,51 @@ export function lexicalEditor(props?: LexicalEditorProps): RichTextAdapter<Adapt
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
 export { BlocksFeature } from './field/features/Blocks'
+export {
+  $createBlockNode,
+  $isBlockNode,
+  type BlockFields,
+  BlockNode,
+  type SerializedBlockNode,
+} from './field/features/Blocks/nodes/BlocksNode'
+
 export { HeadingFeature } from './field/features/Heading'
 export { LinkFeature } from './field/features/Link'
 export type { LinkFeatureProps } from './field/features/Link'
+export {
+  $createAutoLinkNode,
+  $isAutoLinkNode,
+  AutoLinkNode,
+  type SerializedAutoLinkNode,
+} from './field/features/Link/nodes/AutoLinkNode'
+
+export {
+  $createLinkNode,
+  $isLinkNode,
+  type LinkFields,
+  LinkNode,
+  type SerializedLinkNode,
+  TOGGLE_LINK_COMMAND,
+} from './field/features/Link/nodes/LinkNode'
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
+export {
+  $createRelationshipNode,
+  $isRelationshipNode,
+  type RelationshipData,
+  RelationshipNode,
+  type SerializedRelationshipNode,
+} from './field/features/Relationship/nodes/RelationshipNode'
 export { UploadFeature } from './field/features/Upload'
 export type { UploadFeatureProps } from './field/features/Upload'
+export {
+  $createUploadNode,
+  $isUploadNode,
+  RawUploadPayload,
+  type SerializedUploadNode,
+  type UploadData,
+  UploadNode,
+} from './field/features/Upload/nodes/UploadNode'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export { TreeviewFeature } from './field/features/debug/TreeView'
