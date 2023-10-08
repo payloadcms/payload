@@ -67,18 +67,6 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
       type: 'json',
     },
   ],
-  indexes: [
-    {
-      fields: {
-        key: 1,
-        'user.relationTo': 1,
-        'user.value': 1,
-      },
-      options: {
-        unique: true,
-      },
-    },
-  ],
   slug: 'payload-preferences',
 })
 

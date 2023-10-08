@@ -26,7 +26,6 @@ export interface BaseDatabaseAdapter {
 
   createGlobal: CreateGlobal
 
-  // migrations
   createGlobalVersion: CreateGlobalVersion
   /**
    * Output a migration file
@@ -51,17 +50,14 @@ export interface BaseDatabaseAdapter {
    */
   destroy?: Destroy
 
-  // operations
   find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
-  // operations - globals
   findGlobal: FindGlobal
 
-  // transactions
   findGlobalVersions: FindGlobalVersions
 
   findOne: FindOne
-  // versions
+
   findVersions: FindVersions
 
   /**
@@ -124,20 +120,14 @@ export interface BaseDatabaseAdapter {
       resolve: () => void
     }
   }
-  /**
-   * Perform many database interactions in a single, all-or-nothing operation.
-   */
-  transaction?: Transaction
 
   updateGlobal: UpdateGlobal
 
   updateGlobalVersion: UpdateGlobalVersion
+
   updateOne: UpdateOne
+
   updateVersion: UpdateVersion
-  /**
-   * assign the transaction to use when making queries, defaults to the last started transaction
-   */
-  useTransaction?: (id: number | string) => void
 }
 
 export type Init = (payload: Payload) => Promise<void>

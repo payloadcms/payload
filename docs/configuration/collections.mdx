@@ -6,17 +6,17 @@ desc: Structure your Collections for your needs by defining fields, adding slugs
 keywords: collections, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload Collections are defined through configs of their own, and you can define as many as your application needs. Each Collection will scaffold a new collection automatically in your database of choice, based on fields that you define.
+Payload Collections are defined through configs of their own, and you can define as many as your application needs. Each
+Collection will scaffold a new collection automatically in your database of choice, based on fields that you define.
 
 It's often best practice to write your Collections in separate files and then import them into the main Payload config.
 
 ## Options
 
 | Option            | Description                                                                                                                                                                                                              |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`slug`** \*     | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                          |
 | **`fields`** \*   | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
-| **`indexes`** \*  | Array of database indexes to create, including compound indexes that have multiple fields.                                                                                                                               |
 | **`labels`**      | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                           |
 | **`admin`**       | Admin-specific configuration. See below for [more detail](#admin-options).                                                                                                                                               |
 | **`hooks`**       | Entry points to "tie in" to Collection actions at specific points. [More](/docs/hooks/overview#collection-hooks)                                                                                                         |
@@ -59,14 +59,17 @@ export const Orders: CollectionConfig = {
 
 #### More collection config examples
 
-You can find an assortment of [example collection configs](https://github.com/payloadcms/public-demo/tree/master/src/collections) in the Public Demo source code on GitHub.
+You can find an assortment
+of [example collection configs](https://github.com/payloadcms/public-demo/tree/master/src/collections) in the Public
+Demo source code on GitHub.
 
 ### Admin options
 
-You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin` property on a collection's config.
+You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin`
+property on a collection's config.
 
 | Option                       | Description                                                                                                                                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `group`                      | Text used as a label for grouping collection and global links together in the navigation.                                                                                                             |
 | `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                 |
 | `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks)                                                                                                                                        |
@@ -84,9 +87,11 @@ You can customize the way that the Admin panel behaves on a collection-by-collec
 
 ### Preview
 
-Collection `admin` options can accept a `preview` function that will be used to generate a link pointing to the frontend of your app to preview data.
+Collection `admin` options can accept a `preview` function that will be used to generate a link pointing to the frontend
+of your app to preview data.
 
-If the function is specified, a Preview button will automatically appear in the corresponding collection's Edit view. Clicking the Preview button will link to the URL that is generated by the function.
+If the function is specified, a Preview button will automatically appear in the corresponding collection's Edit view.
+Clicking the Preview button will link to the URL that is generated by the function.
 
 **The preview function accepts two arguments:**
 
@@ -124,27 +129,36 @@ export const Posts: CollectionConfig = {
 Here are a few options that you can specify options for pagination on a collection-by-collection basis:
 
 | Option         | Description                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------------- |
+|----------------|-----------------------------------------------------------------------------------------------------|
 | `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
 | `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List view. |
 
 ### Access control
 
-You can specify extremely granular access control (what users can do with documents in a collection) on a collection by collection basis. To learn more, go to the [Access Control](/docs/access-control/overview) docs.
+You can specify extremely granular access control (what users can do with documents in a collection) on a collection by
+collection basis. To learn more, go to the [Access Control](/docs/access-control/overview) docs.
 
 ### Hooks
 
-Hooks are a powerful way to extend collection functionality and execute your own logic, and can be defined on a collection by collection basis. To learn more, go to the [Hooks](/docs/hooks/overview) documentation.
+Hooks are a powerful way to extend collection functionality and execute your own logic, and can be defined on a
+collection by collection basis. To learn more, go to the [Hooks](/docs/hooks/overview) documentation.
 
 ### Field types
 
-Collections support all field types that Payload has to offer—including simple fields like text and checkboxes all the way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more about field types.
+Collections support all field types that Payload has to offer—including simple fields like text and checkboxes all the
+way to more complicated layout-building field groups like Blocks. [Click here](/docs/fields/overview) to learn more
+about field types.
 
 ### List Searchable Fields
 
-In the List view, there is a "search" box that allows you to quickly find a document with a search. By default, it searches on the ID field. If you have `admin.useAsTitle` defined, the list search will use that field. However, you can define more than one field to search to make it easier on your admin editors to find the data they need.
+In the List view, there is a "search" box that allows you to quickly find a document with a search. By default, it
+searches on the ID field. If you have `admin.useAsTitle` defined, the list search will use that field. However, you can
+define more than one field to search to make it easier on your admin editors to find the data they need.
 
-For example, let's say you have a Posts collection with `title`, `metaDescription`, and `tags` fields - and you want all three of those fields to be searchable in the List view. You can simply add `admin.listSearchableFields: ['title', 'metaDescription', 'tags']` - and the admin UI will automatically search on those three fields plus the ID field.
+For example, let's say you have a Posts collection with `title`, `metaDescription`, and `tags` fields - and you want all
+three of those fields to be searchable in the List view. You can simply
+add `admin.listSearchableFields: ['title', 'metaDescription', 'tags']` - and the admin UI will automatically search on
+those three fields plus the ID field.
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -159,7 +173,10 @@ In addition to collection hooks themselves, Payload provides for admin UI-specif
 
 **`beforeDuplicate`**
 
-The `beforeDuplicate` hook is an async function that accepts an object containing the data to duplicate, as well as the locale of the doc to duplicate. Within this hook, you can modify the data to be duplicated, which is useful in cases where you have unique fields that need to be incremented or similar, as well as if you want to automatically modify a document's `title`.
+The `beforeDuplicate` hook is an async function that accepts an object containing the data to duplicate, as well as the
+locale of the doc to duplicate. Within this hook, you can modify the data to be duplicated, which is useful in cases
+where you have unique fields that need to be incremented or similar, as well as if you want to automatically modify a
+document's `title`.
 
 Example:
 

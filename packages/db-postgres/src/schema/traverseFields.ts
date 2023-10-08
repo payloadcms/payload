@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field, SanitizedCollectionConfig, TabAsField } from 'payload/types'
+import type { Field, TabAsField } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -15,7 +15,6 @@ import {
   pgEnum,
   text,
   timestamp,
-  unique,
   varchar,
 } from 'drizzle-orm/pg-core'
 import { InvalidConfiguration } from 'payload/errors'
@@ -33,7 +32,6 @@ import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdent
 type Args = {
   adapter: PostgresAdapter
   buildRelationships: boolean
-  collectionIndexes: SanitizedCollectionConfig['indexes']
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
   disableUnique?: boolean
@@ -62,7 +60,6 @@ type Result = {
 export const traverseFields = ({
   adapter,
   buildRelationships,
-  collectionIndexes,
   columnPrefix,
   columns,
   disableUnique = false,
@@ -109,24 +106,6 @@ export const traverseFields = ({
         hasLocalizedField = true
         targetTable = localesColumns
         targetIndexes = localesIndexes
-      }
-
-      const collectionIndex = collectionIndexes
-        ? collectionIndexes.findIndex((index) => {
-            return Object.keys(index.fields).some((indexField) => indexField === fieldName)
-          })
-        : -1
-
-      if (collectionIndex > -1) {
-        const name = toSnakeCase(
-          `${Object.keys(collectionIndexes[collectionIndex].fields).join('_')}`,
-        )
-        targetIndexes[`${name}Idx`] = createIndex({
-          name: Object.keys(collectionIndexes[collectionIndex].fields),
-          columnName: name,
-          unique: collectionIndexes[collectionIndex].options.unique,
-        })
-        collectionIndexes.splice(collectionIndex)
       }
 
       if (
@@ -416,7 +395,6 @@ export const traverseFields = ({
           } = traverseFields({
             adapter,
             buildRelationships,
-            collectionIndexes,
             columnPrefix,
             columns,
             disableUnique,
@@ -450,7 +428,6 @@ export const traverseFields = ({
         } = traverseFields({
           adapter,
           buildRelationships,
-          collectionIndexes,
           columnPrefix: `${columnName}_`,
           columns,
           disableUnique,
@@ -485,7 +462,6 @@ export const traverseFields = ({
         } = traverseFields({
           adapter,
           buildRelationships,
-          collectionIndexes,
           columnPrefix,
           columns,
           disableUnique,
@@ -522,7 +498,6 @@ export const traverseFields = ({
         } = traverseFields({
           adapter,
           buildRelationships,
-          collectionIndexes,
           columnPrefix,
           columns,
           disableUnique,

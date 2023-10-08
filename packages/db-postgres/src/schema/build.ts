@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field, SanitizedCollectionConfig } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -27,7 +27,6 @@ type Args = {
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
-  collectionIndexes?: SanitizedCollectionConfig['indexes']
   disableUnique: boolean
   fields: Field[]
   rootRelationsToBuild?: Map<string, string>
@@ -46,7 +45,6 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   buildRelationships,
-  collectionIndexes = [],
   disableUnique = false,
   fields,
   rootRelationsToBuild,
@@ -98,7 +96,6 @@ export const buildTable = ({
   } = traverseFields({
     adapter,
     buildRelationships,
-    collectionIndexes,
     columns,
     disableUnique,
     fields,

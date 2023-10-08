@@ -14,7 +14,6 @@ import { migrateDown } from './migrations/migrateDown'
 import { migrateRefresh } from './migrations/migrateRefresh'
 import { migrateReset } from './migrations/migrateReset'
 import { migrateStatus } from './migrations/migrateStatus'
-import { transaction } from './transaction'
 
 const beginTransaction: BeginTransaction = async () => null
 const rollbackTransaction: RollbackTransaction = async () => null
@@ -31,7 +30,6 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     | 'migrateReset'
     | 'migrateStatus'
     | 'migrationDir'
-    | 'transaction'
   >,
 ): T {
   return {
@@ -46,7 +44,6 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     migrateReset,
     migrateStatus,
     rollbackTransaction,
-    transaction,
 
     ...args,
 

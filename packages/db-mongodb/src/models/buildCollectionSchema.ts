@@ -26,11 +26,7 @@ const buildCollectionSchema = (
     schema.index({ updatedAt: 1 })
     schema.index({ createdAt: 1 })
   }
-  if (collection.indexes) {
-    collection.indexes.forEach((index) => {
-      schema.index(index.fields, index.options)
-    })
-  }
+
   schema
     .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }))
