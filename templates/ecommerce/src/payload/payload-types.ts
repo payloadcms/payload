@@ -20,6 +20,7 @@ export interface Config {
     media: Media
     categories: Category
     users: User
+    redirects: Redirect
   }
   globals: {
     settings: Settings
@@ -30,7 +31,7 @@ export interface Config {
 export interface Page {
   id: string
   title: string
-  publishedDate?: string
+  publishedOn?: string
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact'
     richText: {
@@ -182,7 +183,7 @@ export interface Category {
 export interface Product {
   id: string
   title: string
-  publishedDate?: string
+  publishedOn?: string
   layout: (
     | {
         invertBackground?: boolean
@@ -365,6 +366,7 @@ export interface Product {
       }
   )[]
   categories?: string[] | Category[]
+  relatedProducts?: string[] | Product[]
   slug?: string
   skipSync?: boolean
   meta?: {
@@ -410,6 +412,25 @@ export interface User {
   loginAttempts?: number
   lockUntil?: string
   password?: string
+}
+export interface Redirect {
+  id: string
+  from: string
+  to: {
+    type?: 'reference' | 'custom'
+    reference:
+      | {
+          value: string | Page
+          relationTo: 'pages'
+        }
+      | {
+          value: string | Product
+          relationTo: 'products'
+        }
+    url: string
+  }
+  updatedAt: string
+  createdAt: string
 }
 export interface Settings {
   id: string
