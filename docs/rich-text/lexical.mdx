@@ -2,10 +2,123 @@
 title: Lexical Rich Text
 label: Lexical
 order: 30
-desc: NEED TO WRITE 
-keywords: NEED TO WRITE
+desc: Lexical is a powerful, extensible rich text editor created by Meta.
+keywords: rich text, lexical, meta, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Talk about the reasons why we are using Lexical, what it does well, and where we plan to go in the future
-Show a code snippet for how to install it
-Show how to configure it, with options 
+The new Lexical Rich Text Editor an incredibly powerful, extensible rich text editor created by Meta. It is the recommended rich text editor for new projects as of Payload 2.0.0. It is also the default rich text editor for new projects created with the [Payload CLI](/docs/cli).
+
+Lexical is a great choice for projects that need a rich text editor that is easy to use, but also extensible and customizable.
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/richtext.png"
+  srcDark="https://payloadcms.com/images/docs/fields/richtext-dark.png"
+  alt="Shows a Rich Text field in the Payload admin panel"
+  caption="***NEED UPDATED IMAGE***"
+/>
+
+## Installation
+
+To define Lexical as your rich text editor, you can pass it into the `editor` property in your `payload.config.ts` file. This will install Lexical for all fields that use the `richText` type. You can also pass in any options that Lexical accepts, which will be used by default for all instances of the rich text editor.
+
+```ts
+import { buildConfig } from 'payload/config'
+import { LexicalEditor } from '@payloadcms/richtext-lexical'
+
+export default buildConfig({
+  editor: LexicalEditor({
+    // pass in your options here
+  }),
+
+  // the rest of your config
+})
+```
+
+### Override at the field level
+
+You can customize Lexical on a field-by-field basis by passing in an editor to the `editor` property on the field. This will override the rich text editor configuration that is installed at the top level.
+
+```ts
+import { CollectionConfig } from 'payload/types'
+import { LexicalEditor } from '@payloadcms/richtext-lexical'
+
+export Example: CollectionConfig = {
+  slug: 'example',
+  fields: [
+    {
+      name: 'body',
+      type: 'richText',
+      editor: LexicalEditor({
+        // pass in your field-specific options here
+      }),
+    },
+  ],
+}
+```
+
+## Configuration
+
+You can pass in the following options to configure Lexical:
+
+| Option | Description |
+| --- | --- |
+| `features` | Features are the entry point for adding functionality into the rich text editor. [More](#features) |
+| `blocks` | Pass in an array of [Blocks](/docs/fields/blocks) that can be added inline inside the editor. |
+| `lexical` | An object of Lexical-specific options for changing the editor settings like theming. |
+
+### Features
+
+Lexical is built on a "feature" system that allows you to add functionality to the editor. This is done by passing in a `features` array to the `LexicalEditor` function. Each feature is an object with a `name` and `options` property. The `name` property is the name of the feature, and the `options` property is an object of options that will be passed into the feature.
+
+```ts
+LexicalEditor({
+  features: [],
+})
+```
+### Blocks
+
+Talk about blocks
+
+### Example
+
+```ts
+import { buildConfig } from 'payload/config'
+import { LexicalEditor } from '@payloadcms/richtext-lexical'
+import { CtaBlock } from './blocks/CtaBlock'
+import { FormBlock } from './blocks/FormBlock'
+
+export default buildConfig({
+  editor: LexicalEditor({
+    features: [
+      'h1',
+      'h2',
+      'h3',
+      'paragraph',
+      'link',
+      'bold',
+      'italic',
+      'underline',
+      // ...
+    ],
+    blocks: [
+      CtaBlock,
+      FormBlock,
+    ],
+  }),
+
+  // the rest of your config
+
+})
+```
+
+### Lexical Options
+
+Talk about lexical specific options
+
+### Creating Custom Features
+
+Talk about creating custom features
+
+### Rendering on the frontend
+
+Link to frontend page lexical example
