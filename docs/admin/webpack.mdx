@@ -6,17 +6,37 @@ desc: The Payload admin panel uses Webpack 5 and supports many common functional
 keywords: admin, webpack, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload has a Webpack (v5) bundler that you can build the Admin panel with. We recommended using it because it is stable. If you are feeling a bit more adventurous you can give the Vite bundler shot.
+Payload has a Webpack (v5) bundler that you can build the Admin panel with. We recommended using it because it is stable. If you are feeling a bit more adventurous you can give the [Vite](/docs/admin/vite) bundler shot.
 
 Out of the box the Webpack bundler supports common functionalities such as SCSS and Typescript, but there are many cases where you may need to add support for additional functionalities.
 
-To use webpack as your bundler, you must install it:
+#### Install the bundler
 
 ```bash
 yarn add @payloadcms/bundler-webpack
 ```
 
-After installing, set the `bundler: webpackBundler()` on your Payload config. If you would like to extend the Webpack config, you can do so by passing a function to the webpack property.
+#### Import the bundler
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+
+export default buildConfig({
+  // highlight-start
+  admin: {
+    bundler: webpackBundler()
+  },
+  // highlight-end
+})
+```
+
+### Extending Webpack
+
+If you need to extend the Webpack config, you can do so by passing a function to the `admin.webpack` property on your Payload config.
+The function will receive the Webpack config as an argument and should return the modified config.
 
 ```ts
 // payload.config.ts
@@ -26,8 +46,8 @@ import { webpackBundler } from '@payloadcms/bundler-webpack'
 
 export default buildConfig({
   admin: {
-    // highlight-start
     bundler: webpackBundler()
+    // highlight-start
     webpack: (config) => {
       // full control of the Webpack config
 
@@ -35,15 +55,14 @@ export default buildConfig({
     },
     // highlight-end
   },
-  // rest of your payload config
 })
 ```
 
 ### Aliasing server-only modules
 
-To remove files that contain server-only modules from your bundle, you can use the `alias` Webpack feature.
+To remove files that contain server-only modules from your bundle, you can use Webpack's `alias` feature.
 
-First create a mock module that exports an empty object:
+First create new file that exports an empty object:
 ```js
 // mocks/emptyObject.js
 
@@ -78,7 +97,6 @@ export default buildConfig({
       }
     },
   },
-  // rest of your payload config
 })
 ```
 

@@ -7,23 +7,18 @@ desc: Learn how to exclude server-only code from the Payload Admin UI bundle
 
 ### Aliasing server-only modules
 
-- Talk about environment variables maybe?
-
 Because the Admin Panel browser bundle includes your Payload Config file,
-files using server-only modules need to be excluded from the bundle.
+files using server-only modules need to be excluded.
 It's common for your config to rely on server only modules to perform logic in access control functions, hooks, and other contexts.
 
 Any file that imports a server-only module such as `fs`, `stripe`, `authorizenet`, `nodemailer`, etc. **cannot** be included in the browser bundle.
 
-To exclude these files from the browser bundle, currently we recommend aliasing filepaths.
-The concept is, when your bundler goes to import a file that contains server-only modules you provide it an alternative filepath to import from.
-That alternate file contains code that **can** run in the browser, but does not need to actually do anything.
+#### Let's Look at an example
 
-<br />
-<strong>
-  For example, let's say you have a Collection called `Subscriptions`
-</strong>
+Say we have a collection called `Subscriptions` that has a `beforeChange` hook that
+creates a Stripe subscription whenever a Subscription document is created in Payload.
 
+##### Your collection config
 ```ts
 // collections/Subscriptions/index.ts
 
@@ -45,9 +40,7 @@ export const Subscription: CollectionConfig = {
 }
 ```
 
-The collection above features a `beforeChange` hook that creates a Stripe subscription whenever a Subscription document is created in Payload. <strong>That hook might look something like this:</strong>
-
-
+##### Your collection hook
 ```ts
 // collections/Subscriptions/hooks/createStripeSubscription.ts
 
@@ -88,52 +81,12 @@ export const createStripeSubscription = async ({ data, operation }) => {
 
 **As-is, this collection will prevent your Admin panel from bundling or loading correctly, because Stripe relies on some Node-only packages.**
 
-To remedy this issue you can create a path alias so an alternate file is included in the browser bundle.
+#### How to fix this
+If you are using the Webpack bundler, you can use the [Webpack path aliasing approach](/docs/admin/webpack#aliasing-server-only-modules).
 
-First create a mock file that exports an empty object:
+TODO: ADD LINK TO VITE DOCS BELOW
 
-```js
-// mocks/emptyObject.js
+If you are using the Vite bundler you can use [Vite's `optimizeDeps` config](/docs/admin/vite#optimizing-dependencies).
 
-export default {}
-```
-
-In your Payload config, under the `admin.webpack` property, add an alias for your `createStripeSubscription` import path to be replaced with your mock module filepath.
-
-```ts
-// payload.config.ts
-
-import { buildConfig } from 'payload/config'
-import path from 'path'
-import { Subscription } from './collections/Subscriptions'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
-
-const createStripeSubscriptionPath = path.resolve(
-  __dirname,
-  'collections/Subscriptions/hooks/createStripeSubscription.ts'
-)
-const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
-
-export default buildConfig({
-  collections: [Subscription],
-  admin: {
-    bundler: webpackBundler(),
-    webpack: (config) => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve.alias,
-          [createStripeSubscriptionPath]: mockModulePath,
-        },
-      },
-    }),
-  },
-})
-```
-
-Now, your bundler will instead load the mock file whenever it sees the import path for the `createStripeSubscription` file. Not only will your Admin panel now bundle successfully, you will have optimized its filesize by removing unnecessary code! And you might have learned something about bundling, too.
-
-### Using environment variables
-
-If you need to access an env variable in your admin panel, you need to prefix your variable with `PAYLOAD_PUBLIC`. Payload looks for this prefix and will replace it with the actual value of the variable when bundling the admin panel code.
+The basic idea is to create a file that exports an empty object, and then alias import paths of any files that import server-only modules to that empty object file.
+This way when your bundler goes to import a file that contains server-only modules, it will instead import the empty object file, which will not break the browser bundle.
