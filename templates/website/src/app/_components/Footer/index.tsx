@@ -31,7 +31,7 @@ export async function Footer() {
             <img
               className={classes.logo}
               alt="Payload Logo"
-              src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-light.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
             />
           </picture>
         </Link>
@@ -42,7 +42,7 @@ export async function Footer() {
           })}
           <Link href="/admin">Admin</Link>
           <Link
-            href="https://github.com/payloadcms/payload/tree/master/templates/website"
+            href="https://github.com/payloadcms/payload/tree/main/templates/website"
             target="_blank"
             rel="noopener noreferrer"
           >

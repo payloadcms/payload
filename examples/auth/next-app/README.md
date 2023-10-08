@@ -1,14 +1,14 @@
 # Payload Auth Example Front-End
 
-This is a [Payload](https://payloadcms.com) + [Next.js](https://nextjs.org) app using the [App Router](https://nextjs.org/docs/app) made explicitly for the [Payload Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth). It demonstrates how to authenticate your Next.js app using [Payload Authentication](https://payloadcms.com/docs/authentication/overview).
+This is a [Payload](https://payloadcms.com) + [Next.js](https://nextjs.org) app using the [App Router](https://nextjs.org/docs/app) made explicitly for the [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth). It demonstrates how to authenticate your Next.js app using [Payload Authentication](https://payloadcms.com/docs/authentication/overview).
 
-> This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/master/examples/auth/next-pages).
+> This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/main/examples/auth/next-pages).
 
 ## Getting Started
 
 ### Payload
 
-First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/master/examples/auth/payload). If you have not done so already, clone it down and follow the setup instructions there. This will provide all the necessary APIs that your Next.js app requires for authentication.
+First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/main/examples/auth/payload). If you have not done so already, clone it down and follow the setup instructions there. This will provide all the necessary APIs that your Next.js app requires for authentication.
 
 ### Next.js
 
@@ -18,7 +18,7 @@ First you'll need a running Payload app. There is one made explicitly for this e
 4. `yarn dev` or `npm run dev` to start the server
 5. `open http://localhost:3001` to see the result
 
-Once running, a user is automatically seeded in your local environment with some basic instructions. See the [Payload Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth) for full details.
+Once running, a user is automatically seeded in your local environment with some basic instructions. See the [Payload Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) for full details.
 
 ## Learn More
 
@@ -32,7 +32,7 @@ You can check out [the Payload GitHub repository](https://github.com/payloadcms/
 
 ## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new) from the creators of Next.js. You could also combine this app into a [single Express server](https://github.com/payloadcms/payload/tree/master/examples/custom-server) and deploy in to [Payload Cloud](https://payloadcms.com/new/import).
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new) from the creators of Next.js. You could also combine this app into a [single Express server](https://github.com/payloadcms/payload/tree/main/examples/custom-server) and deploy in to [Payload Cloud](https://payloadcms.com/new/import).
 
 Check out our [Payload deployment documentation](https://payloadcms.com/docs/production/deployment) or the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 

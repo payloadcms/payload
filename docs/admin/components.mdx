@@ -27,7 +27,7 @@ You can override a set of admin panel-wide components by providing a component t
 | **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                         |
 | **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                     |
 | **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                         |
-| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/master/test/admin/components/AfterDashboard/index.tsx) |
+| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx) |
 | **`BeforeLogin`**     | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                     |
 | **`AfterLogin`**      | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                      |
 | **`logout.Button`**   | A custom React component.                                                                                                                                                                                   |
@@ -423,6 +423,50 @@ const CustomTextField: React.FC<Props> = ({ path }) => {
   components, including the <strong>useField</strong> hook, [click here](/docs/admin/hooks).
 </Banner>
 
+<<<<<<< HEAD
+=======
+## Custom routes
+
+You can easily add your own custom routes to the Payload Admin panel using the `admin.components.routes` property. Payload currently uses the extremely powerful React Router v5.x and custom routes support all the properties of the React Router `<Route />` component.
+
+**Custom routes support the following properties:**
+
+| Property           | Description                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| **`Component`** \* | Pass in the component that should be rendered when a user navigates to this route.                                           |
+| **`path`** \*      | React Router `path`. [See the React Router docs](https://v5.reactrouter.com/web/api/Route/path-string-string) for more info. |
+| **`exact`**        | React Router `exact` property. [More](https://v5.reactrouter.com/web/api/Route/exact-bool)                                   |
+| **`strict`**       | React Router `strict` property. [More](https://v5.reactrouter.com/web/api/Route/strict-bool)                                 |
+| **`sensitive`**    | React Router `sensitive` property. [More](https://v5.reactrouter.com/web/api/Route/sensitive-bool)                           |
+
+_\* An asterisk denotes that a property is required._
+
+#### Custom route components
+
+Your custom route components will be given all the props that a React Router `<Route />` typically would receive, as well as two props from Payload:
+
+| Prop                    | Description                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| **`user`**              | The currently logged in user. Will be `null` if no user is logged in.        |
+| **`canAccessAdmin`** \* | If the currently logged in user is allowed to access the admin panel or not. |
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  It's up to you to secure your custom routes. If your route requires a user to be logged in or to
+  have certain access rights, you should handle that within your route component yourself.
+</Banner>
+
+#### Example
+
+You can find examples of custom route views in the [Payload source code `/test/admin/components/views` folder](https://github.com/payloadcms/payload/tree/main/test/admin/components/views). There, you'll find two custom routes:
+
+1. A custom view that uses the `DefaultTemplate`, which is the built-in Payload template that displays the sidebar and "eyebrow nav"
+1. A custom view that uses the `MinimalTemplate` - which is just a centered template used for things like logging in or out
+
+To see how to pass in your custom views to create custom routes of your own, take a look at the `admin.components.routes` property of the [Payload test admin config](https://github.com/payloadcms/payload/blob/main/test/admin/config.ts).
+
+>>>>>>> a14411776 (chore: update all references to main in docs, examples, and templates)
 ## Custom providers
 
 As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.

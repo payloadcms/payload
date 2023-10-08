@@ -22,6 +22,11 @@ async function main() {
     process.exit(1)
   }
 
+  if (packageNames.length > 1 && packageNames.find((p) => p === 'payload')) {
+    console.error(chalk.bold.red('Cannot publish payload with other packages'))
+    process.exit(1)
+  }
+
   console.log(`\n${chalk.bold.green('Publishing packages:')}\n`)
   console.log(`${packageNames.map((p) => `  ${p}`).join('\n')}`)
   console.log('\n')
@@ -59,7 +64,7 @@ async function main() {
       const newVersion = packageObj.version
 
       execSync(`git commit -m "chore(release): ${packageName}@${newVersion}"`, execOpts)
-      execSync(`pnpm publish -C ${packageDir} --tag beta --no-git-checks`, execOpts)
+      execSync(`pnpm publish -C ${packageDir} --tag latest --no-git-checks`, execOpts)
       results.push({ name: packageName, success: true })
     } catch (error) {
       console.error(`ERROR: ${error.message}`)

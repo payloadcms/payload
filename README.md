@@ -56,17 +56,17 @@ Alternatively, it only takes about five minutes to [create an app from scratch](
 
 Jumpstart your next project by starting with a pre-made template. These are production-ready, end-to-end solutions designed to get you to market as fast as possible.
 
-### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/master/templates/ecommerce)
+### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce)
 
 Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Comes with a beautiful, fully functional front-end complete with shopping cart, checkout, orders, and much more.
 
-### [🌐 Website](https://github.com/payloadcms/payload/tree/master/templates/website)
+### [🌐 Website](https://github.com/payloadcms/payload/tree/main/templates/website)
 
 Build any kind of website, blog, or portfolio from small to enterprise. Comes with a beautiful, fully functional front-end complete with posts, projects, comments, and much more.
 
-We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/master/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
+We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
 
-- [Official Templates](https://github.com/payloadcms/payload/tree/master/templates)
+- [Official Templates](https://github.com/payloadcms/payload/tree/main/templates)
 - [Community Templates](https://github.com/topics/payload-template)
 
 ## ✨ Features

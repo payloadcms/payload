@@ -25,7 +25,7 @@ export const home: Partial<Page> = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'https://github.com/payloadcms/payload/tree/master/examples/redirects/cms',
+          url: 'https://github.com/payloadcms/payload/tree/main/examples/redirects/cms',
           children: [
             {
               text: 'Redirects Example',

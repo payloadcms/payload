@@ -20,7 +20,7 @@ export default function Home() {
           Pages Router
         </Link>
         {' made explicitly for the '}
-        <Link href="https://github.com/payloadcms/payload/tree/master/examples/auth">
+        <Link href="https://github.com/payloadcms/payload/tree/main/examples/auth">
           Payload Auth Example
         </Link>
         {". This example demonstrates how to implement Payload's "}
