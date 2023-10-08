@@ -6,10 +6,10 @@ desc: Payload offers two rich text editors for writing dynamic content in your C
 keywords: rich text, adapter, slate, lexical, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload provides a rich text editor adapter pattern that allows you to use any rich text editor you want. Out of the box, Payload comes with two rich text editors, [Lexical](./lexical) and [Slate](./slate) but you can also install your own.
+Payload provides a rich text editor adapter pattern that allows you to use any rich text editor you want. Out of the box, Payload comes with two rich text editors, [Lexical](/docs/rich-text/lexical) and [Slate](/docs/rich-text/slate) but you can also install your own.
 
 <Banner>
-  **As of 2.0.0**, Lexical is now the recommended rich text editor for new projects. Slate is still supported for legacy projects, but we are moving to Lexical from here on out which offers more features. For new projects as of 2.0.0, we recommend using Lexical. For existing projects, use Slate.
+  **As of 2.0.0**, [Lexical](/docs/rich-text/lexical) is now the recommended rich text editor for new projects. Slate is still supported for legacy projects, but we are moving to Lexical from here on out which offers more features. For new projects as of 2.0.0, we recommend using Lexical. For existing projects, use Slate.
 </Banner>
 
 ## Installation
@@ -33,6 +33,8 @@ export default buildConfig({
 
 You can customize the rich text editor on a field-by-field basis by passing in an editor to the `editor` property on the field. This will override the rich text editor configuration that is installed at the top level.
 
+Note: It is **not recommended** to use more than one rich text editor in your project. This will result in multiple rich text editors being loaded on the page, which will slow down your CMS and increase the bundle size of your project.
+
 ```ts
 import { CollectionConfig } from 'payload/types'
 import { LexicalEditor } from '@payloadcms/richtext-lexical'
@@ -51,6 +53,3 @@ export Example: CollectionConfig = {
 }
 ```
 
-<Banner type="warning">
-  **Note:** It is **not recommended** to use more than one rich text editor in your project. This will result in multiple rich text editors being loaded on the page, which will slow down your CMS and increase the bundle size of your project.
-</Banner>
