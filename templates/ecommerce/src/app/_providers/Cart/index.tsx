@@ -32,7 +32,7 @@ const Context = createContext({} as CartContext)
 
 export const useCart = () => useContext(Context)
 
-const arrayHasItems = (array) => Array.isArray(array) && array.length > 0
+const arrayHasItems = array => Array.isArray(array) && array.length > 0
 
 // Step 1: Check local storage for a cart
 // Step 2: If there is a cart, fetch the products and hydrate the cart
@@ -41,7 +41,7 @@ const arrayHasItems = (array) => Array.isArray(array) && array.length > 0
 // Step 4B: Sync the cart to Payload and clear local storage
 // Step 5: If the user is logged out, sync the cart to local storage only
 
-export const CartProvider = (props) => {
+export const CartProvider = props => {
   // const { setTimedNotification } = useNotifications();
   const { children } = props
   const { user, status: authStatus } = useAuth()
@@ -138,7 +138,7 @@ export const CartProvider = (props) => {
     const flattenedCart = {
       ...cart,
       items: cart?.items
-        ?.map((item) => {
+        ?.map(item => {
           if (!item?.product || typeof item?.product !== 'object') {
             return null
           }
@@ -203,7 +203,7 @@ export const CartProvider = (props) => {
   )
 
   // this method can be used to add new items AND update existing ones
-  const addItemToCart = useCallback((incomingItem) => {
+  const addItemToCart = useCallback(incomingItem => {
     dispatchCart({
       type: 'ADD_ITEM',
       payload: incomingItem,

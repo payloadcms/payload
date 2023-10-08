@@ -16,6 +16,7 @@
   height: calc(var(--base) * 2);
   line-height: calc(var(--base) * 2);
   padding: 0 calc(var(--base) / 2);
+  font-size: inherit;
 
   &:focus {
     border: none;
@@ -31,7 +32,11 @@
   }
 }
 
-:global([data-theme='dark']) {
+.asterisk {
+  color: var(--color-error-500);
+}
+
+:global([data-theme="dark"]) {
   .input {
     background-color: var(--theme-elevation-150);
   }

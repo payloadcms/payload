@@ -14,13 +14,7 @@ const Dashboard: React.FC = () => {
   const [filteredGlobals, setFilteredGlobals] = useState<SanitizedGlobalConfig[]>([])
 
   const {
-    admin: {
-      components: {
-        views: { Dashboard: CustomDashboard } = {
-          Dashboard: undefined,
-        },
-      } = {},
-    } = {},
+    admin: { components: { views: { Dashboard: CustomDashboardComponent } = {} } = {} } = {},
     collections,
     globals,
   } = useConfig()
@@ -37,7 +31,9 @@ const Dashboard: React.FC = () => {
 
   return (
     <RenderCustomComponent
-      CustomComponent={CustomDashboard}
+      CustomComponent={
+        typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
+      }
       DefaultComponent={DefaultDashboard}
       componentProps={{
         collections: collections.filter(

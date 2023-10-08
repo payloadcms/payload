@@ -23,8 +23,9 @@
   "dependencies": {
     "@payloadcms/plugin-cloud": "^2.0.0",
     "@payloadcms/plugin-nested-docs": "^1.0.4",
+    "@payloadcms/plugin-redirects": "^1.0.0",
     "@payloadcms/plugin-seo": "^1.0.10",
-    "@payloadcms/plugin-stripe": "^0.0.13",
+    "@payloadcms/plugin-stripe": "^0.0.14",
     "@stripe/react-stripe-js": "^1.16.3",
     "@stripe/stripe-js": "^1.46.0",
     "cross-env": "^7.0.3",

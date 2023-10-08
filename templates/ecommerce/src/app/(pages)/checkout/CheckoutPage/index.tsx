@@ -25,7 +25,7 @@ const stripe = loadStripe(apiKey)
 
 export const CheckoutPage: React.FC<{
   settings: Settings
-}> = (props) => {
+}> = props => {
   const {
     settings: { productsPage },
   } = props

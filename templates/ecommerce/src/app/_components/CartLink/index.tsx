@@ -9,7 +9,7 @@ import classes from './index.module.scss'
 
 export const CartLink: React.FC<{
   className?: string
-}> = (props) => {
+}> = props => {
   const { className } = props
   const { cart } = useCart()
   const [length, setLength] = useState<number>()

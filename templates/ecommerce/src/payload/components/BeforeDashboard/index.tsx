@@ -45,7 +45,7 @@ const BeforeDashboard: React.FC = () => {
         </li>
         <li>
           <Link to="/admin/collections/products">Link each of your products</Link>
-          {' to Stripe by selecting the corresponding product using the using the dropdown under '}
+          {' to Stripe by selecting the corresponding product using the dropdown under '}
           <i>Product Details</i>.
         </li>
         <li>

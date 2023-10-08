@@ -11,7 +11,7 @@ export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
     id?: string
   }
-> = (props) => {
+> = props => {
   const {
     introContent,
     id,
@@ -37,7 +37,7 @@ export const ArchiveBlock: React.FC<
         populatedDocsTotal={populatedDocsTotal}
         categories={categories}
         limit={limit}
-        sort="-publishedDate"
+        sort="-publishedOn"
       />
     </div>
   )

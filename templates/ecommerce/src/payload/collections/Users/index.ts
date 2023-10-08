@@ -4,6 +4,7 @@ import { admins } from '../../access/admins'
 import { anyone } from '../../access/anyone'
 import adminsAndUser from './access/adminsAndUser'
 import { checkRole } from './checkRole'
+import { customerProxy } from './endpoints/customer'
 import { createStripeCustomer } from './hooks/createStripeCustomer'
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 import { loginAfterCreate } from './hooks/loginAfterCreate'
@@ -28,6 +29,18 @@ const Users: CollectionConfig = {
     afterChange: [loginAfterCreate],
   },
   auth: true,
+  endpoints: [
+    {
+      path: '/:teamID/customer',
+      method: 'get',
+      handler: customerProxy,
+    },
+    {
+      path: '/:teamID/customer',
+      method: 'patch',
+      handler: customerProxy,
+    },
+  ],
   fields: [
     {
       name: 'name',

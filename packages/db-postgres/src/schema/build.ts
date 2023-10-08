@@ -30,6 +30,7 @@ type Args = {
   disableUnique: boolean
   fields: Field[]
   rootRelationsToBuild?: Map<string, string>
+  rootRelationships?: Set<string>
   rootTableIDColType?: string
   rootTableName?: string
   tableName: string
@@ -48,6 +49,7 @@ export const buildTable = ({
   disableUnique = false,
   fields,
   rootRelationsToBuild,
+  rootRelationships,
   rootTableIDColType,
   rootTableName,
   tableName,
@@ -66,9 +68,12 @@ export const buildTable = ({
   let localesTable: GenericTable
   let numbersTable: GenericTable
 
-  const relationships: Set<string> = new Set()
+  // Relationships to the base collection
+  const relationships: Set<string> = rootRelationships || new Set()
+
   let relationshipsTable: GenericTable
 
+  // Drizzle relations
   const relationsToBuild: Map<string, string> = new Map()
 
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')

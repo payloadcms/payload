@@ -1,7 +1,7 @@
 import joi from 'joi'
 
+import { adminViewSchema } from './shared/adminViewSchema'
 import { livePreviewSchema } from './shared/componentSchema'
-import { routeSchema } from './shared/routeSchema'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
@@ -53,11 +53,13 @@ export default joi.object({
         Button: component,
       }),
       providers: joi.array().items(component),
-      routes: routeSchema,
-      views: joi.object({
-        Account: component,
-        Dashboard: component,
-      }),
+      views: joi.alternatives().try(
+        joi.object({
+          Account: joi.alternatives().try(component, adminViewSchema),
+          Dashboard: joi.alternatives().try(component, adminViewSchema),
+        }),
+        joi.object().pattern(joi.string(), component),
+      ),
     }),
     css: joi.string(),
     dateFormat: joi.string(),

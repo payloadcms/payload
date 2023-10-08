@@ -18,7 +18,7 @@ import classes from './index.module.scss'
 export const CartPage: React.FC<{
   settings: Settings
   page: Page
-}> = (props) => {
+}> = props => {
   const { settings } = props
   const { productsPage } = settings || {}
 
@@ -121,7 +121,7 @@ export const CartPage: React.FC<{
                                 // fallback to empty string to avoid uncontrolled input error
                                 // this allows the user to user their backspace key to clear the input
                                 value={typeof quantity === 'number' ? quantity : ''}
-                                onChange={(e) => {
+                                onChange={e => {
                                   addItemToCart({
                                     product,
                                     quantity: Number(e.target.value),
