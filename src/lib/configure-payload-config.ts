@@ -26,9 +26,9 @@ export async function configurePayloadConfig(args: {
     const bundlerPackage = bundlerPackages['webpack']
     const editorPackage = editorPackages['slate']
 
-    packageObj.dependencies[dbPackage.packageName] = 'beta'
-    packageObj.dependencies[bundlerPackage.packageName] = 'beta'
-    packageObj.dependencies[editorPackage.packageName] = 'beta'
+    packageObj.dependencies[dbPackage.packageName] = 'latest'
+    packageObj.dependencies[bundlerPackage.packageName] = 'latest'
+    packageObj.dependencies[editorPackage.packageName] = 'latest'
 
     await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
   } catch (err: unknown) {
