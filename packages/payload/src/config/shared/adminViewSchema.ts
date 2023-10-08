@@ -2,7 +2,7 @@ import joi from 'joi'
 
 import { componentSchema } from './componentSchema'
 
-export const routeSchema = joi.array().items(
+export const adminViewSchema = joi.array().items(
   joi.object().keys({
     Component: componentSchema,
     exact: joi.bool(),
