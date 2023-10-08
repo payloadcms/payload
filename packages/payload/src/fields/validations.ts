@@ -260,17 +260,21 @@ const validateFilterOptions: Validate = async (
           }
         })
 
-        const result = await payload.find({
-          collection,
-          depth: 0,
-          limit: 0,
-          pagination: false,
-          where: {
-            and: [{ id: { in: valueIDs } }, optionFilter],
-          },
-        })
+        if (valueIDs.length > 0) {
+          const result = await payload.find({
+            collection,
+            depth: 0,
+            limit: 0,
+            pagination: false,
+            where: {
+              and: [{ id: { in: valueIDs } }, optionFilter],
+            },
+          })
 
-        options[collection] = result.docs.map((doc) => doc.id)
+          options[collection] = result.docs.map((doc) => doc.id)
+        } else {
+          options[collection] = []
+        }
       }),
     )
 

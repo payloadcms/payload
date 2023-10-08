@@ -4,8 +4,6 @@ export const home: Page = {
   slug: 'home',
   title: 'Home',
   id: '',
-  updatedAt: '',
-  createdAt: '',
   meta: {
     description: 'This is an example of live preview on a page.',
   },

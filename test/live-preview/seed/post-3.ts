@@ -38,10 +38,7 @@ export const post3: Partial<Post> = {
             },
           ],
           link: {
-            reference: {
-              relationTo: 'pages',
-              value: '',
-            },
+            type: 'custom',
             url: '',
             label: '',
           },
