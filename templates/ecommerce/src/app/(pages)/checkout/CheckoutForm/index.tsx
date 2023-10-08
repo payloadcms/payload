@@ -21,7 +21,7 @@ export const CheckoutForm: React.FC<{}> = () => {
   const { cart, cartTotal } = useCart()
 
   const handleSubmit = useCallback(
-    async (e) => {
+    async e => {
       e.preventDefault()
       setIsLoading(true)
 

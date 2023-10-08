@@ -3,7 +3,7 @@ import { Select, useFormFields } from 'payload/components/forms'
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 import { TextField } from 'payload/dist/fields/config/types'
 
-export const CustomerSelect: React.FC<TextField> = (props) => {
+export const CustomerSelect: React.FC<TextField> = props => {
   const { name, label } = props
   const [options, setOptions] = React.useState<
     {
@@ -17,31 +17,20 @@ export const CustomerSelect: React.FC<TextField> = (props) => {
   React.useEffect(() => {
     const getStripeCustomers = async () => {
       try {
-        const customersFetch = await fetch('/api/stripe/rest', {
-          method: 'post',
+        const customersFetch = await fetch(`/api/stripe/customers`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            stripeMethod: 'customers.list',
-            stripeArgs: [
-              {
-                limit: 100,
-              },
-            ],
-          }),
         })
 
         const res = await customersFetch.json()
 
-        const { data } = res
-
-        if (data && 'data' in data) {
-          const fetchedCustomers = data.data.reduce(
+        if (res?.data) {
+          const fetchedCustomers = res.data.reduce(
             (acc, item) => {
               acc.push({
-                label: item.name || item.id,
+                label: item.name || item.email || item.id,
                 value: item.id,
               })
               return acc
@@ -100,7 +89,7 @@ export const CustomerSelect: React.FC<TextField> = (props) => {
               }}
             >
               {`Manage "${
-                options.find((option) => option.value === stripeCustomerID)?.label || 'Unknown'
+                options.find(option => option.value === stripeCustomerID)?.label || 'Unknown'
               }" in Stripe`}
             </span>
             <CopyToClipboard value={href} />

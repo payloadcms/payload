@@ -5,6 +5,7 @@ import { ArchiveBlock } from '../../_blocks/ArchiveBlock'
 import { CallToActionBlock } from '../../_blocks/CallToAction'
 import { ContentBlock } from '../../_blocks/Content'
 import { MediaBlock } from '../../_blocks/MediaBlock'
+import { RelatedProducts, type RelatedProductsProps } from '../../_blocks/RelatedProducts'
 import { toKebabCase } from '../../_utilities/toKebabCase'
 import { BackgroundColor } from '../BackgroundColor/index'
 import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding/index'
@@ -14,12 +15,13 @@ const blockComponents = {
   content: ContentBlock,
   mediaBlock: MediaBlock,
   archive: ArchiveBlock,
+  relatedProducts: RelatedProducts,
 }
 
 export const Blocks: React.FC<{
-  blocks: Page['layout']
+  blocks: (Page['layout'][0] | RelatedProductsProps)[]
   disableTopPadding?: boolean
-}> = (props) => {
+}> = props => {
   const { disableTopPadding, blocks } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0

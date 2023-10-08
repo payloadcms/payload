@@ -13,7 +13,7 @@ export const Orders: CollectionConfig = {
   admin: {
     useAsTitle: 'createdAt',
     defaultColumns: ['createdAt', 'orderedBy'],
-    preview: (doc) => `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/orders/${doc.id}`,
+    preview: doc => `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/orders/${doc.id}`,
   },
   hooks: {
     afterChange: [updateUserPurchases, clearUserCart],

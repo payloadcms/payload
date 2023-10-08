@@ -1,3 +1,5 @@
+'use client'
+
 import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
 
@@ -39,7 +41,7 @@ export const Card: React.FC<{
   title?: string
   relationTo?: 'products'
   doc?: Product
-}> = (props) => {
+}> = props => {
   const {
     showCategories,
     title: titleFromProps,

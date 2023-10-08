@@ -8,7 +8,7 @@ import classes from './index.module.scss'
 export const RemoveFromCartButton: React.FC<{
   className?: string
   product: Product
-}> = (props) => {
+}> = props => {
   const { className, product } = props
 
   const { deleteItemFromCart, isProductInCart } = useCart()

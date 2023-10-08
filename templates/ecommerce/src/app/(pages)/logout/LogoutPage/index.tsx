@@ -8,7 +8,7 @@ import { useAuth } from '../../../_providers/Auth'
 
 export const LogoutPage: React.FC<{
   settings: Settings
-}> = (props) => {
+}> = props => {
   const { settings } = props
   const { productsPage } = settings || {}
   const { logout } = useAuth()

@@ -24,7 +24,7 @@ export const PageRange: React.FC<{
     singular?: string
     plural?: string
   }
-}> = (props) => {
+}> = props => {
   const {
     className,
     totalDocs,
