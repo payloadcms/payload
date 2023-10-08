@@ -82,12 +82,17 @@ This package provides the following functions:
 
 | Path                  | Description                                                                                                                                                                                 |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`subscribe`**       | Subscribes to the Admin panel's `window.postMessage` events and calls the provided callback function.                                                                               |
-| **`unsubscribe`**     | Unsubscribes from the Admin panel's `window.postMessage` events.                                                                                                                    |
-| **`handleMessage`**   | Handles the `window.postMessage` events emitted by the parent window.                                                                                                               |
-| **`mergeData`**       | Merges the initial page data with the incoming live data using `traverseFields` and `promises`                                                                                              |
-| **`traverseFields`**  | Recursively traverses the field schema and rebuilds each field into the correct format.                                                                                                     |
-] **`promises`**        | Fetches relationships and uploads from the Payload API and populates the data.                                                                                                              |
+| **`subscribe`**       | Subscribes to the Admin panel's `window.postMessage` events and calls the provided callback function.                                                                                       |
+| **`unsubscribe`**     | Unsubscribes from the Admin panel's `window.postMessage` events.                                                                                                                            |
+
+The `subscribe` function takes the following args:
+
+| Path                  | Description                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`callback`** \*     | A callback function that is called with `data` every time a change is made to the document.                                                                                                 |
+| **`serverURL`** \*    | The URL of your Payload server.                                                                                                                                                        git s     |
+| **`initialData`**     | The initial data of the document. The live data will be merged in as changes are made.                                                                                                      |
+| **`depth`**           | The depth of the relationships to fetch. Defaults to `0`.                                                                                                                                   |
 
 With these functions, you can build your own hook to use in your front-end application.
 
@@ -135,5 +140,5 @@ export const useLivePreview = <T extends any>(props: {
 ```
 
 <Banner type="info">
-  When building your own hook, ensure that the args and return values are consistent with the ones listed above. This will ensure that all hooks follow the same API.
+  When building your own hook, ensure that the args and return values are consistent with the ones listed at the top of this document. This will ensure that all hooks follow the same API.
 </Banner>
