@@ -69,7 +69,7 @@ module.exports.up = `  async function migrateCollectionDocs(slug: string, docsAt
   // For each collection
   await Promise.all(
     payload.config.collections.map(async ({ slug, versions }) => {
-      if (versions) {
+      if (versions?.drafts) {
         return migrateCollectionDocs(slug)
       }
     }),
