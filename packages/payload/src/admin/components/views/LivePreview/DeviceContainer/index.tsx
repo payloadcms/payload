@@ -25,7 +25,7 @@ export const DeviceContainer: React.FC<{
       const scaledWidth = size.width / zoom
       const difference = scaledWidth - size.width
       x = `${difference / 2}px`
-      margin = 'auto'
+      margin = '0 auto'
     }
   }
 
