@@ -3,27 +3,19 @@ import React from 'react'
 
 import type { ToolbarProviderProps } from '../Context'
 
-import { X } from '../../..'
-import { ExternalLinkIcon } from '../../../graphics/ExternalLink'
 import DragHandle from '../../../icons/Drag'
 import { useLivePreviewContext } from '../Context/context'
-import { PreviewFrameSizeInput } from './SizeInput'
+import { ToolbarControls } from './Controls'
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar'
 
-export const LivePreviewToolbar: React.FC<
-  Omit<ToolbarProviderProps, 'children'> & {
-    iframeRef: React.RefObject<HTMLIFrameElement>
-  }
-> = (props) => {
-  const {
-    popupState: { openPopupWindow },
-    url,
-  } = props
+export type LivePreviewToolbarProps = Omit<ToolbarProviderProps, 'children'> & {
+  iframeRef: React.RefObject<HTMLIFrameElement>
+}
 
-  const { breakpoint, breakpoints, setBreakpoint, setZoom, toolbarPosition, zoom } =
-    useLivePreviewContext()
+const DraggableToolbar: React.FC<LivePreviewToolbarProps> = (props) => {
+  const { toolbarPosition } = useLivePreviewContext()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',
@@ -31,7 +23,7 @@ export const LivePreviewToolbar: React.FC<
 
   return (
     <div
-      className={baseClass}
+      className={[baseClass, `${baseClass}--draggable`].join(' ')}
       style={{
         left: `${toolbarPosition.x}px`,
         top: `${toolbarPosition.y}px`,
@@ -53,48 +45,29 @@ export const LivePreviewToolbar: React.FC<
       >
         <DragHandle />
       </button>
-      <div className={`${baseClass}__controls`}>
-        {breakpoints?.length > 0 && (
-          <select
-            className={`${baseClass}__breakpoint`}
-            onChange={(e) => setBreakpoint(e.target.value)}
-            value={breakpoint}
-          >
-            {breakpoints.map((bp) => (
-              <option key={bp.name} value={bp.name}>
-                {bp.label}
-              </option>
-            ))}
-            {breakpoint === 'custom' && (
-              // Dynamically add this option so that it only appears when the width and height inputs are explicitly changed
-              // TODO: Translate this string
-              <option value="custom">Custom</option>
-            )}
-          </select>
-        )}
-        <div className={`${baseClass}__device-size`}>
-          <PreviewFrameSizeInput axis="x" />
-          <span className={`${baseClass}__size-divider`}>
-            <X />
-          </span>
-          <PreviewFrameSizeInput axis="y" />
-        </div>
-        <select
-          className={`${baseClass}__zoom`}
-          onChange={(e) => setZoom(Number(e.target.value) / 100)}
-          value={zoom * 100}
-        >
-          <option value={50}>50%</option>
-          <option value={75}>75%</option>
-          <option value={100}>100%</option>
-          <option value={125}>125%</option>
-          <option value={150}>150%</option>
-          <option value={200}>200%</option>
-        </select>
-        <a className={`${baseClass}__external`} href={url} onClick={openPopupWindow} type="button">
-          <ExternalLinkIcon />
-        </a>
-      </div>
+      <ToolbarControls {...props} />
     </div>
   )
+}
+
+const StaticToolbar: React.FC<LivePreviewToolbarProps> = (props) => {
+  return (
+    <div className={[baseClass, `${baseClass}--static`].join(' ')}>
+      <ToolbarControls {...props} />
+    </div>
+  )
+}
+
+export const LivePreviewToolbar: React.FC<
+  LivePreviewToolbarProps & {
+    draggable?: boolean
+  }
+> = (props) => {
+  const { draggable } = props
+
+  if (draggable) {
+    return <DraggableToolbar {...props} />
+  }
+
+  return <StaticToolbar {...props} />
 }

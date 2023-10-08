@@ -13,7 +13,6 @@ import { useLivePreviewContext } from '../Context/context'
 import { DeviceContainer } from '../Device'
 import { IFrame } from '../IFrame'
 import { LivePreviewToolbar } from '../Toolbar'
-import { ToolbarArea } from '../ToolbarArea'
 import './index.scss'
 
 const baseClass = 'live-preview-window'
@@ -100,14 +99,14 @@ const Preview: React.FC<
           .filter(Boolean)
           .join(' ')}
       >
-        <ToolbarArea>
-          <div className={`${baseClass}__wrapper`}>
+        <div className={`${baseClass}__wrapper`}>
+          <LivePreviewToolbar {...props} iframeRef={iframeRef} url={url} />
+          <div className={`${baseClass}__main`}>
             <DeviceContainer>
               <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
             </DeviceContainer>
           </div>
-          <LivePreviewToolbar {...props} iframeRef={iframeRef} url={url} />
-        </ToolbarArea>
+        </div>
       </div>
     )
   }
