@@ -24,7 +24,7 @@ export async function configurePayloadConfig(args: {
 
     const dbPackage = dbPackages[args.dbDetails.type]
     const bundlerPackage = bundlerPackages['webpack']
-    const editorPackage = editorPackages['lexical']
+    const editorPackage = editorPackages['slate']
 
     packageObj.dependencies[dbPackage.packageName] = 'beta'
     packageObj.dependencies[bundlerPackage.packageName] = 'beta'
