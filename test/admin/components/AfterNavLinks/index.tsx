@@ -30,7 +30,7 @@ const AfterNavLinks: React.FC = () => {
         <NavLink
           activeClassName="active"
           style={{ textDecoration: 'none' }}
-          to={`${adminRoute}/custom-default-route`}
+          to={`${adminRoute}/custom-default-view`}
         >
           Default Template
         </NavLink>
@@ -39,7 +39,7 @@ const AfterNavLinks: React.FC = () => {
         <NavLink
           activeClassName="active"
           style={{ textDecoration: 'none' }}
-          to={`${adminRoute}/custom-minimal-route`}
+          to={`${adminRoute}/custom-minimal-view`}
         >
           Minimal Template
         </NavLink>

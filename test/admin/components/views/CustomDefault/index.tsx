@@ -17,6 +17,10 @@ import Meta from '../../../../../packages/payload/src/admin/components/utilities
 // import { useStepNav } from 'payload/components/hooks';
 // import { useConfig, Meta } from 'payload/components/utilities';
 
+import './index.scss'
+
+const baseClass = 'custom-default-view'
+
 const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
   const {
     routes: { admin: adminRoute },
@@ -48,6 +52,7 @@ const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
         title="Custom Admin View with Default Template"
       />
       <div
+        className={`${baseClass}__content`}
         style={{
           paddingLeft: 'var(--gutter-h)',
           paddingRight: 'var(--gutter-h)',
@@ -58,9 +63,11 @@ const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
           Here is a custom admin view that was added in the Payload config. It uses the Default
           Template, so the sidebar is rendered.
         </p>
-        <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
-          Go to Dashboard
-        </Button>
+        <div className={`${baseClass}__controls`}>
+          <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
+            Go to Dashboard
+          </Button>
+        </div>
       </div>
     </DefaultTemplate>
   )
