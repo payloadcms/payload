@@ -27,7 +27,7 @@ const availableCommands = [
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
 export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
-  const { _: args, help } = parsedArgs
+  const { _: args, file, help } = parsedArgs
   if (help) {
     // eslint-disable-next-line no-console
     console.log(`\n\n${availableCommandsMsg}\n`) // Avoid having to init payload to get the logger
@@ -78,7 +78,7 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
       break
     case 'migrate:create':
       try {
-        await adapter.createMigration(payload, args[1])
+        await adapter.createMigration({ file, migrationName: args[1], payload })
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }

@@ -5,10 +5,10 @@ import type { CreateMigration } from '../types'
 
 import { migrationTemplate } from './migrationTemplate'
 
-export const createMigration: CreateMigration = async function createMigration(
-  payload,
+export const createMigration: CreateMigration = async function createMigration({
   migrationName,
-) {
+  payload,
+}) {
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)

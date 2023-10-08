@@ -3,13 +3,26 @@
 .live-preview-toolbar {
   display: flex;
   background-color: var(--theme-bg);
-  border: 1px solid var(--theme-elevation-200);
-  border-radius: 1px;
   color: var(--theme-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
+  height: calc(var(--base) * 1.75);
+  align-items: center;
+  flex-shrink: 0;
+
+  &--static {
+    position: relative;
+    width: 100%;
+    justify-content: center;
+    border-bottom: 1px solid var(--theme-elevation-100);
+  }
+
+  &--draggable {
+    @include shadow-lg;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border-radius: 4px;
+  }
 
   &__drag-handle {
     background: transparent;
@@ -24,59 +37,5 @@
     &:active {
       cursor: grabbing;
     }
-  }
-
-  &__controls {
-    padding: 6px 6px 6px 0;
-    display: flex;
-    align-items: center;
-    gap: calc(var(--base) / 3);
-  }
-
-  &__breakpoint {
-    border: none;
-    background: transparent;
-    height: var(--base);
-
-    &:focus {
-      outline: none;
-    }
-  }
-
-  &__device-size {
-    display: flex;
-    align-items: center;
-  }
-
-  &__size {
-    width: 50px;
-    height: var(--base);
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--theme-elevation-200);
-    background: var(--theme-elevation-100);
-    border-radius: 2px;
-    font-size: small;
-  }
-
-  &__zoom {
-    width: 55px;
-    border: none;
-    background: transparent;
-    height: var(--base);
-
-    &:focus {
-      outline: none;
-    }
-  }
-
-  &__external {
-    flex-shrink: 0;
-    display: flex;
-    width: var(--base);
-    height: var(--base);
-    align-items: center;
-    justify-content: center;
-    padding: 6px 0;
   }
 }

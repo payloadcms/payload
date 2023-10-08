@@ -146,7 +146,11 @@ export type Connect = (payload: Payload) => Promise<void>
 
 export type Destroy = (payload: Payload) => Promise<void>
 
-export type CreateMigration = (payload: Payload, migrationName?: string) => Promise<void>
+export type CreateMigration = (args: {
+  file?: string
+  migrationName?: string
+  payload: Payload
+}) => Promise<void>
 
 export type Transaction = (
   callback: () => Promise<void>,
