@@ -8,6 +8,10 @@ keywords: Postgres, documentation, typescript, Content Management System, cms, h
 
 To use Payload with Postgres, install the package `@payloadcms/db-postgres`. It leverages Drizzle ORM and `node-postgres` to interact with a Postgres database that you provide.
 
+<Banner>
+  The Postgres database adapter is currently in beta. If you would like to help us test this package, we'd love to hear if you find any bugs or issues!
+</Banner>
+
 It automatically manages changes to your database for you in development mode, and exposes a full suite of migration controls for you to leverage in order to keep other database environments in sync with your schema. DDL transformations are automatically generated.
 
 To configure Payload to use Postgres, pass the `postgresAdapter` to your Payload config as follows:

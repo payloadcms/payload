@@ -6,11 +6,11 @@ desc: The Payload admin panel uses Webpack 5 and supports many common functional
 keywords: admin, webpack, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload has a Webpack (v5) bundler that you can build the Admin panel with. We recommended using it because it is stable. If you are feeling a bit more adventurous you can give the [Vite](/docs/admin/vite) bundler shot.
+Payload has a Webpack (v5) bundler that you can build the Admin panel with. For now, we recommended using it because it is stable. If you are feeling a bit more adventurous you can give the [Vite](/docs/admin/vite) bundler a shot.
 
-Out of the box the Webpack bundler supports common functionalities such as SCSS and Typescript, but there are many cases where you may need to add support for additional functionalities.
+Out of the box, the Webpack bundler supports common functionalities such as SCSS and Typescript, but there are many cases where you may need to add support for additional functionalities.
 
-#### Install the bundler
+#### Installation
 
 ```bash
 yarn add @payloadcms/bundler-webpack
@@ -54,48 +54,6 @@ export default buildConfig({
       return config
     },
     // highlight-end
-  },
-})
-```
-
-### Aliasing server-only modules
-
-To remove files that contain server-only modules from your bundle, you can use Webpack's `alias` feature.
-
-First create new file that exports an empty object:
-```js
-// mocks/emptyObject.js
-
-export default {}
-```
-
-Then, in your Payload config, you can alias the file containing the server-only module to the mock module:
-```ts
-// payload.config.ts
-
-import { buildConfig } from 'payload/config'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
-
-const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
-const pathToFileWithServerOnlyModule = path.resolve(__dirname, 'hooks/syncStripeCustomer.ts')
-
-export default buildConfig({
-  admin: {
-    bundler: webpackBundler(),
-    webpack: (config) => {
-      return {
-        ...config,
-        resolve: {
-          ...config.resolve,
-          // highlight-start
-          alias: {
-            ...config.resolve.alias,
-            [pathToFileWithServerOnlyModule]: mockModulePath,
-          },
-          // highlight-end
-        },
-      }
-    },
   },
 })
 ```
