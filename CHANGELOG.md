@@ -1,5 +1,12 @@
 
 
+## [1.15.8](https://github.com/payloadcms/payload/compare/v1.15.7...v1.15.8) (2023-10-08)
+
+
+### Bug Fixes
+
+* secures the user response from the me auth route ([#3409](https://github.com/payloadcms/payload/issues/3409)) ([26939a3](https://github.com/payloadcms/payload/commit/26939a333135810f2eebd3ebaf05885d152f6f13))
+
 ## [1.15.7](https://github.com/payloadcms/payload/compare/v1.15.6...v1.15.7) (2023-10-02)
 
 
