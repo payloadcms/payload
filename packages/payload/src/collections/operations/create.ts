@@ -91,23 +91,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
   try {
     const shouldCommit = await initTransaction(req)
-    // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
-        args =
-          (await hook({
-            args,
-            context: req.context,
-            operation: 'create',
-          })) || args
-      },
-      Promise.resolve(),
-    )
 
     let { data } = args
 

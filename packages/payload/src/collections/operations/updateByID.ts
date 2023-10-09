@@ -82,21 +82,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   try {
     const shouldCommit = await initTransaction(req)
 
-    // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          context: req.context,
-          operation: 'update',
-        })) || args
-    }, Promise.resolve())
-
     if (!id) {
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }

@@ -82,21 +82,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   try {
     const shouldCommit = await initTransaction(req)
 
-    // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          context: req.context,
-          operation: 'update',
-        })) || args
-    }, Promise.resolve())
-
     if (!where) {
       throw new APIError("Missing 'where' query of documents to update.", httpStatus.BAD_REQUEST)
     }

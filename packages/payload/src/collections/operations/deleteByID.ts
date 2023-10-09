@@ -65,24 +65,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
-        args =
-          (await hook({
-            args,
-            context: req.context,
-            operation: 'delete',
-          })) || args
-      },
-      Promise.resolve(),
-    )
-
-    // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
