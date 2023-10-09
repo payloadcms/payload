@@ -149,6 +149,27 @@ describe('admin', () => {
     })
   })
 
+  describe('doc titles', () => {
+    beforeAll(async () => {
+      await openNav(page)
+    })
+
+    test('global - should render custom, localized label', async () => {
+      const globalLabel = page.locator(`#nav-global-${globalSlug}`)
+      await expect(globalLabel).toContainText('My Global Label')
+    })
+
+    test('global - should render simple label strings', async () => {
+      const globalLabel = page.locator(`#nav-global-group-globals-one`)
+      await expect(globalLabel).toContainText('Group Globals 1')
+    })
+
+    test('global - should render slug in sentence case as fallback', async () => {
+      const globalLabel = page.locator(`#nav-global-group-globals-two`)
+      await expect(globalLabel).toContainText('Group Globals Two')
+    })
+  })
+
   describe('CRUD', () => {
     test('should create', async () => {
       await page.goto(url.create)
