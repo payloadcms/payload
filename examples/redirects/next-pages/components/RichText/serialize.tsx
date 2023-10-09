@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
-import Link from 'next/link'
 import { Text } from 'slate'
 
 // eslint-disable-next-line no-use-before-define
@@ -8,7 +7,10 @@ type Children = Leaf[]
 
 type Leaf = {
   type: string
-  doc?: any
+  value?: {
+    url: string
+    alt: string
+  }
   children?: Children
   url?: string
   [key: string]: unknown
@@ -76,15 +78,11 @@ const serialize = (children: Children): React.ReactElement[] =>
       case 'li':
         return <li key={i}>{serialize(node.children)}</li>
       case 'link':
-        if (node?.linkType === 'internal') {
-          return <Link href={`/${node?.doc?.value?.slug}`}>{serialize(node.children)}</Link>
-        } else {
-          return (
-            <a href={escapeHTML(node.url)} key={i}>
-              {serialize(node.children)}
-            </a>
-          )
-        }
+        return (
+          <a href={escapeHTML(node.url)} key={i}>
+            {serialize(node.children)}
+          </a>
+        )
 
       default:
         return <p key={i}>{serialize(node.children)}</p>

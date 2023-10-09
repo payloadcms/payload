@@ -1,4 +1,10 @@
+import path from 'path'
 import type { Page } from '../payload-types'
+
+// eslint-disable-next-line
+require('dotenv').config({
+  path: path.resolve(__dirname, '../../.env'),
+})
 
 export const home: Partial<Page> = {
   title: 'Home Page',
@@ -56,7 +62,7 @@ export const home: Partial<Page> = {
           text: 'Paste ',
         },
         {
-          text: 'http://localhost:3000/redirect-to-internal',
+          text: `${process.env.PAYLOAD_PUBLIC_SITE_URL}/redirect-to-internal`,
           bold: true,
         },
         {
@@ -79,7 +85,7 @@ export const home: Partial<Page> = {
           text: ', or paste ',
         },
         {
-          text: 'http://localhost:3000/redirect-to-external',
+          text: `${process.env.PAYLOAD_PUBLIC_SITE_URL}/redirect-to-external`,
           bold: true,
         },
         {

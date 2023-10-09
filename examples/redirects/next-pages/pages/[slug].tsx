@@ -42,7 +42,7 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
   let doc
 
   const pageReq = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[slug][equals]=${slug}&depth=2&draft=true`,
+    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?where[slug][equals]=${slug}&depth=2&draft=true`,
   )
 
   if (pageReq.ok) {
@@ -73,7 +73,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   let pagesData
 
   pagesReq = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[_status][equals]=published&depth=0&limit=300`,
+    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?where[_status][equals]=published&depth=0&limit=300`,
   )
   pagesData = await pagesReq.json()
 

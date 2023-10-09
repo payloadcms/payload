@@ -16,8 +16,9 @@ module.exports = async () => {
   }
 
   const redirectsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/redirects?limit=1000&depth=1`,
+    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/redirects?limit=1000&depth=1`,
   )
+
   const redirectsData = await redirectsRes.json()
 
   const { docs } = redirectsData

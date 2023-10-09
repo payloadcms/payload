@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Redirects Example CMS",
+      "name": "Payload Redirects Example",
       "program": "${workspaceFolder}/src/server.ts",
       "preLaunchTask": "npm: build:server",
       "env": {

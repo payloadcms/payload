@@ -1,4 +1,10 @@
+import path from 'path'
 import type { Page } from '../payload-types'
+
+// eslint-disable-next-line
+require('dotenv').config({
+  path: path.resolve(__dirname, '../../.env'),
+})
 
 export const redirectPage: Partial<Page> = {
   title: 'Redirect Page',
@@ -10,7 +16,7 @@ export const redirectPage: Partial<Page> = {
           text: 'You have been successfully redirected to this page if you navigated from ',
         },
         {
-          text: 'http://localhost:3000/redirect-to-internal',
+          text: `${process.env.PAYLOAD_PUBLIC_SITE_URL}/redirect-to-internal`,
           bold: true,
         },
         {

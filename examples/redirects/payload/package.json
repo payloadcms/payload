@@ -1,6 +1,6 @@
 {
-  "name": "payload-example-redirects-cms",
-  "description": "The CMS is used to demonstrate the redirects feature.",
+  "name": "payload-example-redirects-example",
+  "description": "Payload redirects example.",
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",
@@ -17,6 +17,9 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src"
   },
   "dependencies": {
+    "@payloadcms/bundler-webpack": "^1.0.0-beta.5",
+    "@payloadcms/db-mongodb": "^1.0.0-beta.8",
+    "@payloadcms/richtext-slate": "^1.0.0-beta.4",
     "@payloadcms/plugin-redirects": "^1.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",

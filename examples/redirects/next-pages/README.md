@@ -8,7 +8,7 @@ This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nex
 
 ### Payload
 
-First you'll need a running CMS. If you have not done so already, open up the `cms` folder alongside this example and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
+First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/master/examples/redirects/payload). If you have not done so already, clone it down and follow the setup instructions there.
 
 ### Next.js App
 
@@ -16,13 +16,13 @@ First you'll need a running CMS. If you have not done so already, open up the `c
 2. `cd` into this directory and run `yarn` or `npm install`
 3. `cp .env.example .env` to copy the example environment variables
 4. `yarn dev` or `npm run dev` to start the server
-5. `open http://localhost:3000` to see the result
+5. `open http://localhost:3001` to see the result
 
-Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within your CMS. See the [Redirects Example CMS](https://github.com/payloadcms/payload/tree/main/examples/redirects/cms) for full details.
+Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within Payload. See the [Redirects Example](https://github.com/payloadcms/payload/tree/main/examples/redirects/payload) for full details.
 
 ## Learn More
 
-To learn more about PayloadCMS and Next.js, take a look at the following resources:
+To learn more about Payload and Next.js, take a look at the following resources:
 
 - [Payload Documentation](https://payloadcms.com/docs) - learn about Payload features and API.
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
