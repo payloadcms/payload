@@ -29,7 +29,6 @@ It's often best practice to write your Collections in separate files and then im
 | **`graphQL`**     | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined. Set to `false` to disable GraphQL.                                                            |
 | **`typescript`**  | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                      |
 | **`defaultSort`** | Pass a top-level field to sort by default in the collection List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
-| **`pagination`**  | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                                                 |
 | **`custom`**      | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                |
 
 _\* An asterisk denotes that a property is required._
@@ -84,6 +83,7 @@ property on a collection's config.
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                              |
 | `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections)                                                                                       |
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                      |
+| **`pagination`**             | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                              |
 
 ### Preview
 
