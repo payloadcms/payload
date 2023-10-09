@@ -35,7 +35,7 @@ export default function Home() {
         {' to start the authentication flow. Once logged in, you will be redirected to the '}
         <Link href="/account">account page</Link>
         {` which is restricted to users only. To manage all users, `}
-        <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+        <Link href={`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/admin/collections/users`}>
           login to the admin dashboard
         </Link>
         {'.'}
