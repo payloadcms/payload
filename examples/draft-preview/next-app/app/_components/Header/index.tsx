@@ -10,7 +10,7 @@ import classes from './index.module.scss'
 
 export async function Header() {
   const mainMenu: MainMenu = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/globals/main-menu`,
+    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/globals/main-menu`,
   ).then(res => res.json())
 
   const { navItems } = mainMenu

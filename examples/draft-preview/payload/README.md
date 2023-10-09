@@ -42,7 +42,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
     const searchParams = `?where[slug][equals]=${pageSlug}&depth=1${preview ? `&draft=true` : ''}`
 
     // when previewing, send the payload token to bypass draft access control
-    const pageReq = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/pages${searchParams}`, {
+    const pageReq = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages${searchParams}`, {
       headers: {
         ...preview ? {
           Authorization: `JWT ${payloadToken}`,
