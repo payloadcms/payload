@@ -37,11 +37,12 @@ if (!suiteName || args[0].startsWith('-')) {
   }
 
   if (files.length !== totalFiles) {
-    console.log(`\n\nExecuting ${files.length} of ${totalFiles} E2E tests...`)
-    console.log({ files })
+    console.log(`\n\nExecuting part ${part}: ${files.length} of ${totalFiles} E2E tests...\n\n`)
+  } else {
+    console.log(`\n\nExecuting all ${files.length} E2E tests...\n\n`)
   }
+  console.log(`${files.join('\n')}\n`)
 
-  console.log(`\n\nExecuting all ${files.length} E2E tests...`)
   files.forEach((file) => {
     clearWebpackCache()
     executePlaywright(file, bail)

@@ -128,7 +128,7 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: E2E Tests
-        run: pnpm test:e2e --part 1/2 --bail
+        run: pnpm test:e2e --part 1/3 --bail
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -160,7 +160,39 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: E2E Tests
-        run: pnpm test:e2e --part 2/2 --bail
+        run: pnpm test:e2e --part 2/3 --bail
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30
+
+  tests-e2e-3:
+    runs-on: ubuntu-latest
+    needs: core-build
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: E2E Tests
+        run: pnpm test:e2e --part 3/3 --bail
 
       - uses: actions/upload-artifact@v3
         if: always()

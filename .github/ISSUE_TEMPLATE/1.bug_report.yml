@@ -31,6 +31,11 @@ body:
       description: What version of Payload are you running?
     validations:
       required: true
+  - type: input
+    id: adapters-plugins
+    attributes:
+      label: Adapters and Plugins
+      description: What adapters and plugins are you using? ie. db-mongodb, db-postgres, bundler-webpack, etc.
   - type: markdown
     attributes:
       value: Before submitting the issue, go through the steps you've written down to make sure the steps provided are detailed and clear.
