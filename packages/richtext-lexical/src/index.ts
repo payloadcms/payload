@@ -137,6 +137,7 @@ export {
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export { TreeviewFeature } from './field/features/debug/TreeView'
+
 export { BoldTextFeature } from './field/features/format/Bold'
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
 export { ItalicTextFeature } from './field/features/format/Italic'
@@ -159,7 +160,6 @@ export type {
   ResolvedFeatureMap,
   SanitizedFeatures,
 } from './field/features/types'
-
 export {
   EditorConfigProvider,
   useEditorConfigContext,
@@ -172,10 +172,22 @@ export {
 } from './field/lexical/config/default'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
+export { getEnabledNodes } from './field/lexical/nodes'
+
+export { ToolbarButton } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarButton'
+export { ToolbarDropdown } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarDropdown/index'
+export {
+  type FloatingToolbarSection,
+  type FloatingToolbarSectionEntry,
+} from './field/lexical/plugins/FloatingSelectToolbar/types'
+export {
+  SlashMenuGroup,
+  SlashMenuOption,
+} from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 // export SanitizedEditorConfig
 export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
 export { RichTextCell }
 export { RichTextField }
-export { getEnabledNodes } from './field/lexical/nodes'
+export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
 export { defaultRichTextValue } from './populate/defaultValue'
