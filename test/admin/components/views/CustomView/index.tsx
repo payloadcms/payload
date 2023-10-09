@@ -1,9 +1,9 @@
 import React, { Fragment, useEffect } from 'react'
 
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
-import { type EditViewComponent } from '../../../../../packages/payload/src/config/types'
+import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
 
-const CustomView: EditViewComponent = () => {
+const CustomView: AdminViewComponent = () => {
   const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us

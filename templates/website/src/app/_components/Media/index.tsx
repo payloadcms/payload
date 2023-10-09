@@ -20,8 +20,10 @@ export const Media: React.FC<Props> = props => {
         : {})}
     >
       {isVideo ? (
+        // @ts-expect-error
         <Video {...props} />
       ) : (
+        // @ts-expect-error
         <Image {...props} /> // eslint-disable-line
       )}
     </Tag>

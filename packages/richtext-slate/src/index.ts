@@ -50,6 +50,10 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArgu
   }
 }
 
+export { default as ElementButton } from './field/elements/Button'
+
+export { default as toggleElement } from './field/elements/toggle'
+export { default as LeafButton } from './field/leaves/Button'
 export type {
   AdapterArguments,
   ElementNode,

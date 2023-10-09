@@ -242,8 +242,6 @@ export type AdminViewConfig = {
 
 export type AdminViewProps = {
   canAccessAdmin?: boolean
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
   user: User | null | undefined
 }
 
@@ -256,18 +254,12 @@ export type EditViewConfig = {
    * The component to render for this view
    * + Replaces the default component
    */
-  Component: EditViewComponent
+  Component: AdminViewComponent
   Tab: DocumentTab
   path: string
 }
 
-export type EditViewComponent = React.ComponentType<{
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
-  user: User | null | undefined
-}>
-
-export type EditView = EditViewComponent | EditViewConfig
+export type EditView = AdminViewComponent | EditViewConfig
 
 export type Locale = {
   /**
