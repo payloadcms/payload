@@ -25,6 +25,7 @@ const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
+
   const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us

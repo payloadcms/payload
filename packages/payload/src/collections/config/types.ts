@@ -14,8 +14,8 @@ import type { Props as ListProps } from '../../admin/components/views/collection
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
+  AdminViewComponent,
   EditView,
-  EditViewComponent,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
@@ -233,7 +233,7 @@ export type CollectionAdminOptions = {
             // References?: EditView
             // Relationships?: EditView
           }
-        | EditViewComponent
+        | AdminViewComponent
       List?: React.ComponentType<ListProps>
     }
   }
