@@ -9,7 +9,7 @@ export type RichTextFieldProps<AdapterProps = unknown> = Omit<
   path?: string
 }
 
-export type RichTextAdapter<AdapterProps = unknown> = {
+export type RichTextAdapter<AdapterProps = object> = {
   CellComponent: React.FC<CellComponentProps<RichTextField<AdapterProps>>>
   FieldComponent: React.FC<RichTextFieldProps<AdapterProps>>
   afterReadPromise?: (data: {
