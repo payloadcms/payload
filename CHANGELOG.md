@@ -61,7 +61,19 @@ npm install --save @payloadcms/db-mongodb @payloadcms/richtext-slate @payloadcms
 
 We have a ready-to-go migration script for your versions from v1 to v2, and to use it, all you have to do is run the following commands:
 
-**1. Create a migration, using the new Payload migration API**
+**1. First, make sure you have a `payload` npm script in your `package.json`**
+
+```json
+{
+  "scripts": {
+    "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload"
+  }
+}
+```
+
+Adjust the `PAYLOAD_CONFIG_PATH` to point to your Payload config file if necessary.
+
+**2. Create a migration, using the new Payload migration API**
 
 ```bash
 npm run payload migrate:create --file @payloadcms/db-mongodb/versions-v1-v2
@@ -69,7 +81,7 @@ npm run payload migrate:create --file @payloadcms/db-mongodb/versions-v1-v2
 
 The above command will output a migration file into your `./src/migrations` folder (default migrations location). It contains a migration script to automatically add a `latest: true` flag to each of your newest drafts, for all draft-enabled collections. It works out of the box!
 
-**2. Run migrations**
+**3. Run migrations**
 
 From there, you need to run migrations. Run the following command to execute your new migration:
 
