@@ -95,6 +95,8 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
+Migrating from v1 to v2? Check out the [2.0 Release Notes](https://github.com/payloadcms/payload/releases/tag/v2.0.0) on how to do it.
+
 ## 🙋 Contributing
 
 If you want to add contributions to this repository, please follow the instructions in [contributing.md](./CONTRIBUTING.md).
