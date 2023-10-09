@@ -8,11 +8,15 @@ import { buildConfig } from 'payload/config'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { MainMenu } from './globals/MainMenu'
+import BeforeLogin from './BeforeLogin'
 
 export default buildConfig({
   collections: [Pages, Users],
   admin: {
     bundler: webpackBundler(),
+    components: {
+      beforeLogin: [BeforeLogin],
+    },
   },
   cors: ['http://localhost:3000', process.env.PAYLOAD_PUBLIC_SITE_URL],
   globals: [MainMenu],
