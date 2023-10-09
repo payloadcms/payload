@@ -190,4 +190,23 @@ export type { AdapterProps }
 export { RichTextCell }
 export { RichTextField }
 export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
+export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM'
+export { cloneDeep } from './field/lexical/utils/cloneDeep'
+export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect'
+export { getSelectedNode } from './field/lexical/utils/getSelectedNode'
+export { isHTMLElement } from './field/lexical/utils/guard'
+export { invariant } from './field/lexical/utils/invariant'
+export { joinClasses } from './field/lexical/utils/joinClasses'
+export { createBlockNode } from './field/lexical/utils/markdown/createBlockNode'
+export { Point, isPoint } from './field/lexical/utils/point'
+export { Rect } from './field/lexical/utils/rect'
+export { setFloatingElemPosition } from './field/lexical/utils/setFloatingElemPosition'
+export { setFloatingElemPositionForLinkEditor } from './field/lexical/utils/setFloatingElemPositionForLinkEditor'
+export {
+  addSwipeDownListener,
+  addSwipeLeftListener,
+  addSwipeRightListener,
+  addSwipeUpListener,
+} from './field/lexical/utils/swipe'
+export { sanitizeUrl, validateUrl } from './field/lexical/utils/url'
 export { defaultRichTextValue } from './populate/defaultValue'
