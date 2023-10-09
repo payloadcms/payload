@@ -434,6 +434,36 @@ describe('Relationships', () => {
 
         expect(director.docs[0].movies.length).toBeGreaterThan(10)
       })
+
+      it('should allow clearing hasMany relationships', async () => {
+        const fiveMovies = await payload.find({
+          collection: 'movies',
+          limit: 5,
+          depth: 0,
+        })
+
+        const movieIDs = fiveMovies.docs.map((doc) => doc.id)
+
+        const stanley = await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Stanley Kubrick',
+            movies: movieIDs,
+          },
+        })
+
+        expect(stanley.movies).toHaveLength(5)
+
+        const stanleyNeverMadeMovies = await payload.update({
+          collection: 'directors',
+          id: stanley.id,
+          data: {
+            movies: null,
+          },
+        })
+
+        expect(stanleyNeverMadeMovies.movies).toHaveLength(0)
+      })
     })
   })
 })
