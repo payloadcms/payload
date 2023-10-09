@@ -101,34 +101,37 @@ const Component: React.FC<Props> = (props) => {
           </p>
         </DocumentDrawerToggler>
       </div>
-      <div className={`${baseClass}__actions`}>
-        <Button
-          buttonStyle="icon-label"
-          className={`${baseClass}__swapButton`}
-          disabled={field?.admin?.readOnly}
-          el="div"
-          icon="swap"
-          onClick={() => {
-            editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
-              replace: { nodeKey },
-            })
-          }}
-          round
-          tooltip={t('swapRelationship')}
-        />
-        <Button
-          buttonStyle="icon-label"
-          className={`${baseClass}__removeButton`}
-          disabled={field?.admin?.readOnly}
-          icon="x"
-          onClick={(e) => {
-            e.preventDefault()
-            removeRelationship()
-          }}
-          round
-          tooltip={t('fields:removeRelationship')}
-        />
-      </div>
+      {editor.isEditable() && (
+        <div className={`${baseClass}__actions`}>
+          <Button
+            buttonStyle="icon-label"
+            className={`${baseClass}__swapButton`}
+            disabled={field?.admin?.readOnly}
+            el="div"
+            icon="swap"
+            onClick={() => {
+              editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
+                replace: { nodeKey },
+              })
+            }}
+            round
+            tooltip={t('swapRelationship')}
+          />
+          <Button
+            buttonStyle="icon-label"
+            className={`${baseClass}__removeButton`}
+            disabled={field?.admin?.readOnly}
+            icon="x"
+            onClick={(e) => {
+              e.preventDefault()
+              removeRelationship()
+            }}
+            round
+            tooltip={t('fields:removeRelationship')}
+          />
+        </div>
+      )}
+
       {id && <DocumentDrawer onSave={updateRelationship} />}
       {children}
     </div>

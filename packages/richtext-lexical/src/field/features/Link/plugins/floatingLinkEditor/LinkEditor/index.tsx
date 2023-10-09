@@ -165,8 +165,7 @@ export function LinkEditor({
       selection !== null &&
       nativeSelection !== null &&
       rootElement !== null &&
-      rootElement.contains(nativeSelection.anchorNode) &&
-      editor.isEditable()
+      rootElement.contains(nativeSelection.anchorNode)
     ) {
       if (!selectedNodeDomRect) {
         // Get the DOM rect of the selected node using the native selection. This sometimes produces the wrong
@@ -285,30 +284,34 @@ export function LinkEditor({
           <a href={linkUrl} rel="noopener noreferrer" target="_blank">
             {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
           </a>
-          <button
-            aria-label="Edit link"
-            className="link-edit"
-            onClick={() => {
-              toggleModal(drawerSlug)
-            }}
-            onMouseDown={(event) => {
-              event.preventDefault()
-            }}
-            tabIndex={0}
-            type="button"
-          />
-          <button
-            aria-label="Remove link"
-            className="link-trash"
-            onClick={() => {
-              editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
-            }}
-            onMouseDown={(event) => {
-              event.preventDefault()
-            }}
-            tabIndex={0}
-            type="button"
-          />
+          {editor.isEditable() && (
+            <React.Fragment>
+              <button
+                aria-label="Edit link"
+                className="link-edit"
+                onClick={() => {
+                  toggleModal(drawerSlug)
+                }}
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                }}
+                tabIndex={0}
+                type="button"
+              />
+              <button
+                aria-label="Remove link"
+                className="link-trash"
+                onClick={() => {
+                  editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
+                }}
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                }}
+                tabIndex={0}
+                type="button"
+              />
+            </React.Fragment>
+          )}
         </div>
       </div>
       <LinkDrawer

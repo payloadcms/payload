@@ -107,52 +107,54 @@ const Component: React.FC<ElementProps> = (props) => {
             <div className={`${baseClass}__collectionLabel`}>
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
-            <div className={`${baseClass}__actions`}>
-              {customFields?.length > 0 && (
-                <DrawerToggler
-                  className={`${baseClass}__upload-drawer-toggler`}
-                  disabled={field?.admin?.readOnly}
-                  slug={drawerSlug}
-                >
-                  <Button
-                    buttonStyle="icon-label"
-                    el="div"
-                    icon="edit"
-                    onClick={(e) => {
-                      e.preventDefault()
-                    }}
-                    round
-                    tooltip={t('fields:editRelationship')}
-                  />
-                </DrawerToggler>
-              )}
+            {editor.isEditable() && (
+              <div className={`${baseClass}__actions`}>
+                {customFields?.length > 0 && (
+                  <DrawerToggler
+                    className={`${baseClass}__upload-drawer-toggler`}
+                    disabled={field?.admin?.readOnly}
+                    slug={drawerSlug}
+                  >
+                    <Button
+                      buttonStyle="icon-label"
+                      el="div"
+                      icon="edit"
+                      onClick={(e) => {
+                        e.preventDefault()
+                      }}
+                      round
+                      tooltip={t('fields:editRelationship')}
+                    />
+                  </DrawerToggler>
+                )}
 
-              <Button
-                buttonStyle="icon-label"
-                disabled={field?.admin?.readOnly}
-                el="div"
-                icon="swap"
-                onClick={() => {
-                  editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
-                    replace: { nodeKey },
-                  })
-                }}
-                round
-                tooltip={t('swapUpload')}
-              />
-              <Button
-                buttonStyle="icon-label"
-                className={`${baseClass}__removeButton`}
-                disabled={field?.admin?.readOnly}
-                icon="x"
-                onClick={(e) => {
-                  e.preventDefault()
-                  removeUpload()
-                }}
-                round
-                tooltip={t('removeUpload')}
-              />
-            </div>
+                <Button
+                  buttonStyle="icon-label"
+                  disabled={field?.admin?.readOnly}
+                  el="div"
+                  icon="swap"
+                  onClick={() => {
+                    editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
+                      replace: { nodeKey },
+                    })
+                  }}
+                  round
+                  tooltip={t('swapUpload')}
+                />
+                <Button
+                  buttonStyle="icon-label"
+                  className={`${baseClass}__removeButton`}
+                  disabled={field?.admin?.readOnly}
+                  icon="x"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    removeUpload()
+                  }}
+                  round
+                  tooltip={t('removeUpload')}
+                />
+              </div>
+            )}
           </div>
         </div>
         <div className={`${baseClass}__bottomRow`}>
