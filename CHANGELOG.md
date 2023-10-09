@@ -25,7 +25,7 @@
 
 ### BREAKING CHANGES
 
-#### You now need to provide your Payload config with a database, a bundler, and a rich text adapter
+### ⚠️ You now need to provide your Payload config with a database, a bundler, and a rich text adapter
 
 Here's an example of a barebones Payload config, set up to work as 1.0 did:
 
@@ -51,7 +51,7 @@ export default buildConfig({
 
 These new properties are all now required for Payload to function, and you will have to install each separate adapter that you use. Feel free to swap out any of the adapters with your choice (Lexical, Postgres, Vite, etc.)
 
-#### Draft versions now require a `latest: true` property to be set on the most recent draft in your `_versions` collections(s)
+### ⚠️ Draft versions now require a `latest: true` property to be set on the most recent draft in your `_versions` collections(s)
 
 We have a ready-to-go migration script for your versions from v1 to v2, and to use it, all you have to do is run the following commands:
 
@@ -73,29 +73,29 @@ npm run payload migrate
 
 And you'll be all good!
 
-#### Array and block field validations now accept the full array of field data as their validation argument instead of the value.length
+### ⚠️ Array and block field validations now accept the full array of field data as their validation argument instead of the value.length
 
 This change should only affect you if you have a custom array / block validation defined.
 
-#### For MongoDB, all models have been moved from the Payload object to the database adapter
+### ⚠️ For MongoDB, all models have been moved from the Payload object to the database adapter
 
 For example, if you are leveraging Mongoose models directly, in 1.0, you would have accessed them via `payload.collections[myCollectionSlug].Model`. Now, you can access the Mongoose model from `payload.db.collections[myCollectionSlug]`.
 
 Version models can be accessed from `payload.db.versions[myEntitySlug]`, and the global model can be accessed via `payload.db.globals`.
 
-#### User preferences data shape has changed, and you will lose preferences unless you manually migrate them to the new shape
+### ⚠️ User preferences data shape has changed, and you will lose preferences unless you manually migrate them to the new shape
 
 We don't have a migration ready to go yet for user preferences, and this typically wouldn't be a big deal for most Payload projects. So don't let it stop you from updating unless you have a serious amount of user preferences that you'd like to keep. If so, we'll come up with a migration script for you and hook you up. Just reach out to us on Discord to ask for this.
 
-#### Node 16 is now the minimum required node version and Node 14 is no longer supported
+### ⚠️ Node 16 is now the minimum required node version and Node 14 is no longer supported
 
 Pretty self-explanatory on this one. Node 14 is old.
 
-#### The Pino logger has been updated, which may require you to make changes to your Pino config if you have a custom one
+### ⚠️ The Pino logger has been updated, which may require you to make changes to your Pino config if you have a custom one
 
 If you don't have anything custom with the Pino logger, this does not apply to you.
 
-#### Transactions are now enabled by default if your database supports them
+### ⚠️ Transactions are now enabled by default if your database supports them
 
 MongoDB requires a replica set for transactions to work, so they likely are not going to work for you unless you do indeed have a replica set configured. But if you do, transactions will now instantly work for all internal Payload operations.
 
@@ -103,13 +103,13 @@ This means that in some fringe cases, if you are creating a doc and then instant
 
 To avoid any issues, you can pass the `req.transactionID` through to your Local API calls, so that your Local API calls are included as part of the parent transaction.
 
-#### Admin panel CSS classes may have changed
+### ⚠️ Admin panel CSS classes may have changed
 
 The revisions we've made in 2.0 required changes to both HTML and CSS within the admin panel. For this reason, if you were loading custom CSS into the admin panel to customize the look and feel, your stylesheets may need to be updated. If your CSS is targeting elements on the page using HTML selectors or class names, you may need to update these selectors based on the current markup. It may also be necessary to update your style definitions if the core Payload component you are targeting has undergone significant change.
 
 In many cases, our classnames and structure have remained the same, but technically, this could be a breaking change.
 
-#### Custom admin views API has changed
+### ⚠️ Custom admin views API has changed
 
 These changes only affect apps that are using custom views via the `admin.components.routes` config.
 
@@ -147,7 +147,7 @@ admin: {
 }
 ```
 
-#### Rich text admin properties have moved
+### ⚠️ Rich text admin properties have moved
 
 If you have customized the Slate rich text editor via `admin.elements` or `admin.leaves` properties, you now need to add your customizations to a `slateEditor({ admin: {} })` property. The signatures are all the same, but you might have to move some properties around.
 
@@ -187,6 +187,14 @@ const myRichTextField: Field = {
   }),
 };
 ```
+
+### ⚠️ MongoDB connection options have been removed from `payload.init`
+
+To pass connection options for MongoDB, you now need to pass them to `db: mongooseAdapter({})` instead of passing them to `payload.init()`.
+
+### ⚠️ Some types have changed locations
+
+If you are importing types from Payload, some of their locations may have changed. An example would be Slate-specific types being no longer exported from Payload itself—they are now exported from the `@payloadcms/richtext-slate` package. 
 
 ### Recap
 
