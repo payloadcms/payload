@@ -43,7 +43,7 @@ export const defaults: Omit<Config, 'db' | 'editor'> = {
   maxDepth: 10,
   rateLimit: {
     max: 500,
-    window: 15 * 60 * 100, // 15min default,
+    window: 15 * 60 * 1000, // 15min default,
   },
   routes: {
     admin: '/admin',
