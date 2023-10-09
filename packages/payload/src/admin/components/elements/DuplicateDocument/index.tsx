@@ -12,6 +12,7 @@ import { useForm, useFormModified } from '../../forms/Form/context'
 import MinimalTemplate from '../../templates/Minimal'
 import { useConfig } from '../../utilities/Config'
 import Button from '../Button'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'duplicate'
@@ -179,14 +180,9 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
 
   return (
     <React.Fragment>
-      <Button
-        buttonStyle="none"
-        className={baseClass}
-        id="action-duplicate"
-        onClick={() => handleClick(false)}
-      >
+      <PopupList.Button id="action-duplicate" onClick={() => handleClick(false)}>
         {t('duplicate')}
-      </Button>
+      </PopupList.Button>
       {modified && hasClicked && (
         <Modal className={`${baseClass}__modal`} slug={modalSlug}>
           <MinimalTemplate className={`${baseClass}__modal-template`}>
