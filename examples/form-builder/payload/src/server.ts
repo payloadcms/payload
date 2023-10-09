@@ -17,7 +17,6 @@ app.get('/', (_, res) => {
 const start = async () => {
   await payload.init({
     secret: process.env.PAYLOAD_SECRET,
-    mongoURL: process.env.MONGODB_URI,
     express: app,
     email: {
       fromName: 'Admin',
@@ -34,7 +33,7 @@ const start = async () => {
     await seed(payload)
   }
 
-  app.listen(8000)
+  app.listen(3000)
 }
 
 start()

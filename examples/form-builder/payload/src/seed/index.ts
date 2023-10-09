@@ -45,18 +45,20 @@ export const seed = async (payload: Payload) => {
     data: signUpFormJSON,
   })
 
-  const homePageJSON = JSON.parse(JSON.stringify(home).replace(/{{BASIC_FORM_ID}}/g, basicFormID))
+  const homePageJSON = JSON.parse(
+    JSON.stringify(home).replace(/{{BASIC_FORM_ID}}/g, basicFormID.toString()),
+  )
 
   const contactPageJSON = JSON.parse(
-    JSON.stringify(contact).replace(/{{CONTACT_FORM_ID}}/g, contactFormID),
+    JSON.stringify(contact).replace(/{{CONTACT_FORM_ID}}/g, contactFormID.toString()),
   )
 
   const advancedPageJSON = JSON.parse(
-    JSON.stringify(advanced).replace(/{{ADVANCED_FORM_ID}}/g, advancedFormID),
+    JSON.stringify(advanced).replace(/{{ADVANCED_FORM_ID}}/g, advancedFormID.toString()),
   )
 
   const signupPageJSON = JSON.parse(
-    JSON.stringify(signUp).replace(/{{SIGNUP_FORM_ID}}/g, signUpFormID),
+    JSON.stringify(signUp).replace(/{{SIGNUP_FORM_ID}}/g, signUpFormID.toString()),
   )
 
   await payload.create({
