@@ -49,3 +49,16 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArgu
     validate: richTextValidate,
   }
 }
+
+export type {
+  AdapterArguments,
+  ElementNode,
+  FieldProps,
+  RichTextCustomElement,
+  RichTextCustomLeaf,
+  RichTextElement,
+  RichTextLeaf,
+  TextNode,
+} from './types'
+
+export { nodeIsTextNode } from './types'
