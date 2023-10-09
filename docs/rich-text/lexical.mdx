@@ -8,7 +8,7 @@ keywords: lexical, rich text, editor, headless cms
 
 One of Payload's goals is to build the best rich text editor experience that we possibly can. We want to combine the beauty and polish of the Medium editing experience with the strength and features of the Notion editor - all in one place.
 
-Classically, we've used SlateJS to work toward this goal, but building custom elements into Slate has proven to be more difficult than we'd like, and we've been keeping our options open. 
+Classically, we've used SlateJS to work toward this goal, but building custom elements into Slate has proven to be more difficult than we'd like, and we've been keeping our options open.
 
 <Banner type="warning">
   Payload's Lexical rich text editor is currently in beta. It's stable enough to use as you build on Payload, so if you're up for helping us fine-tune it, you should use it. But if you're looking for stability, use Slate instead.
@@ -27,7 +27,7 @@ To use the Lexical editor, first you need to install it:
 npm install --save @payloadcms/richtext-lexical
 ```
 
-Once you have it installed, you can pas it to your top-level Payload config as follows:
+Once you have it installed, you can pass it to your top-level Payload config as follows:
 
 ```ts
 import { buildConfig } from 'payload/config'
@@ -37,7 +37,7 @@ export default buildConfig({
   collections: [
     // your collections here
   ],
-  // Pass the Lexical editor to the root config 
+  // Pass the Lexical editor to the root config
   editor: lexicalEditor({})
 })
 ```

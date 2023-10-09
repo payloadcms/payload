@@ -13,6 +13,6 @@ Payload currently supports two official rich text editors and you can choose eit
 
 These editors are built on an "adapter pattern" which means that you will need to install the editor you'd like to use. Take a look at the docs for the editor you'd like to use for instructions on how to install it.
 
-The big TL;DR here is that Slate is what we have used in the past, and we still support it for existing projects, but if you're building something new and you're feeling adventurous, you should give Lexical a shot. Slate has a lot of good stuff, but Lexical has lots more.  
+The big TL;DR here is that Slate is what we have used in the past, and we still support it for existing projects, but if you're building something new and you're feeling adventurous, you should give Lexical a shot. Slate has a lot of good stuff, but Lexical has lots more.
 
-No matter which editor you use, you can install either at the top-level on the `config.editor` property, which will then cascade throughout all of your rich text fields and be used accordingly. But you can also override the editor on a field-by-field basis if you'd like.
+No matter which editor you use, you have to install it at the top-level on the `config.editor` property, which will then cascade throughout all of your rich text fields and be used accordingly. Additionally, you also have the option to override the editor on a field-by-field basis if you'd like.

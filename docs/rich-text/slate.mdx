@@ -27,7 +27,7 @@ export default buildConfig({
   collections: [
     // your collections here
   ],
-  // Pass the Slate editor to the root config 
+  // Pass the Slate editor to the root config
   editor: slateEditor({})
 })
 ```
@@ -48,7 +48,7 @@ export const Pages: CollectionConfig = {
       editor: slateEditor({
         admin: {
           elements: [
-            // customize elements allowed in Slate editor here 
+            // customize elements allowed in Slate editor here
           ],
           leaves: [
             // customize leaves allowed in Slate editor here
@@ -353,5 +353,5 @@ The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate funct
 If you are building your own custom Rich Text elements or leaves, you may benefit from importing the following types:
 
 ```ts
-import type { RichTextCustomElement, RichTextCustomLeaf } from 'payload/types'
+import type { RichTextCustomElement, RichTextCustomLeaf } from '@payloadcms/richtext-slate'
 ```
