@@ -1,6 +1,6 @@
 import type { AfterChangeHook } from 'payload/dist/collections/config/types'
 
-import type { Order, User } from '../../../payload-types'
+import type { Order } from '../../../payload-types'
 
 export const clearUserCart: AfterChangeHook<Order> = async ({ doc, req, operation }) => {
   const { payload } = req
@@ -18,7 +18,9 @@ export const clearUserCart: AfterChangeHook<Order> = async ({ doc, req, operatio
         collection: 'users',
         id: orderedBy,
         data: {
-          cart: [] as User['cart'],
+          cart: {
+            items: [],
+          },
         },
       })
     }
