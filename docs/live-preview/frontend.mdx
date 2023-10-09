@@ -8,7 +8,7 @@ keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, us
 
 While using Live Preview, the Admin panel emits a new `window.postMessage` event every time a change is made to the document. Your front-end application can listen for these events and re-render accordingly.
 
-Wiring your front-end into Live Preview is easy. If your front-end application is built with React or Next.js, use the [`useLivePreview`](#react) React hook that Payload provides. In the future, all other major frameworks like Vue and Svelte will be officially supported. If you are using any of these framework today, you can still easily integrate with Live Preview using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook).
+Wiring your front-end into Live Preview is easy. If your front-end application is built with React or Next.js, use the [`useLivePreview`](#react) React hook that Payload provides. In the future, all other major frameworks like Vue, Svelte, etc will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
 
 By default, all hooks require the following args:
 
@@ -74,7 +74,7 @@ export const PageClient: React.FC<{
 
 ## Building your own hook
 
-No matter what JS-based front-end framework you are using, you can build your own hook using the underlying tooling that Payload provides.
+No matter what front-end framework you are using, you can build your own hook using the same underlying tooling that Payload provides.
 
 First, install the base `@payloadcms/live-preview` package:
 
@@ -98,7 +98,17 @@ The `subscribe` function takes the following args:
 | **`initialData`**     | The initial data of the document. The live data will be merged in as changes are made.                                                                                                      |
 | **`depth`**           | The depth of the relationships to fetch. Defaults to `0`.                                                                                                                                   |
 
-With these functions, you can build your own hook using your front-end framework of choice.
+With these functions, you can build your own hook using your front-end framework of choice:
+
+```tsx
+import { subscribe, unsubscribe } from '@payloadcms/live-preview';
+
+// Build your own hook to subscribe to the live preview events
+// This function will handle everything for you like
+// 1. subscribing to `window.postMessage` events
+// 2. merging initial page data with incoming form state
+// 3. populating relationships and uploads
+```
 
 Here is an example of what the same `useLivePreview` React hook from above looks like under the hood:
 
@@ -146,3 +156,11 @@ export const useLivePreview = <T extends any>(props: {
 <Banner type="info">
   When building your own hook, ensure that the args and return values are consistent with the ones listed at the top of this document. This will ensure that all hooks follow the same API.
 </Banner>
+
+## Example
+
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload). There you will find examples of various front-end frameworks and how to integrate each one of them, including:
+
+- [Next.js App Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-app)
+- [Next.js Pages Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-pages)
+

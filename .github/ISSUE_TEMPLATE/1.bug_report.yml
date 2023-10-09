@@ -10,7 +10,7 @@ body:
     id: reproduction-link
     attributes:
       label: Link to reproduction
-      description: Please add a link to a reproduction. See the fork [reproduction-guide](https://github.com/payloadcms/payload/blob/master/.github/reproduction-guide.md) for more information.
+      description: Please add a link to a reproduction. See the fork [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
     validations:
       required: true
   - type: textarea

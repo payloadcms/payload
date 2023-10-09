@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
   push:
-    branches: ['master', '2.0']
+    branches: ['main']
 
 jobs:
   core-build:

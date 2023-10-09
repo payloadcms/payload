@@ -52,18 +52,14 @@ export const globalCustomRoutes = (props: {
     const routesToReturn = [...acc]
 
     if (typeof ViewComponent === 'function') {
-      routesToReturn.push(<ViewComponent global={global} key={ViewComponent.name} user={user} />)
+      routesToReturn.push(<ViewComponent key={ViewComponent.name} user={user} />)
     } else {
       const { Component, path } = ViewComponent
 
       if (global) {
         routesToReturn.push(
           <Route exact key={`${global.slug}-${path}`} path={`${match.url}${path}`}>
-            {permissions?.read?.permission ? (
-              <Component global={global} user={user} />
-            ) : (
-              <Unauthorized />
-            )}
+            {permissions?.read?.permission ? <Component user={user} /> : <Unauthorized />}
           </Route>,
         )
       }

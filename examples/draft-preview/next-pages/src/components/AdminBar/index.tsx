@@ -20,7 +20,7 @@ export const AdminBar: React.FC<{
         <PayloadAdminBar
           {...adminBarProps}
           logo={<Title />}
-          cmsURL={process.env.NEXT_PUBLIC_CMS_URL}
+          cmsURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
           onAuthChange={setUser}
           className={classes.payloadAdminBar}
           classNames={{

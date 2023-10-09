@@ -18,7 +18,11 @@ import { buildConfig } from 'payload/config'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
 export default buildConfig({
-  db: postgresAdapter({}),
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URI,
+    }
+  }),
   // ...rest of config
 })
 

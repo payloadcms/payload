@@ -10,8 +10,8 @@ import type {
 import type { User } from '../../auth/types'
 import type {
   Access,
+  AdminViewComponent,
   EditView,
-  EditViewComponent,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
@@ -100,7 +100,7 @@ export type GlobalAdminOptions = {
             // References?: EditView
             // Relationships?: EditView
           }
-        | EditViewComponent
+        | AdminViewComponent
     }
   }
   /**

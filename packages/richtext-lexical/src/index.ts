@@ -89,16 +89,55 @@ export function lexicalEditor(props?: LexicalEditorProps): RichTextAdapter<Adapt
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
 export { BlocksFeature } from './field/features/Blocks'
+export {
+  $createBlockNode,
+  $isBlockNode,
+  type BlockFields,
+  BlockNode,
+  type SerializedBlockNode,
+} from './field/features/Blocks/nodes/BlocksNode'
+
 export { HeadingFeature } from './field/features/Heading'
 export { LinkFeature } from './field/features/Link'
 export type { LinkFeatureProps } from './field/features/Link'
+export {
+  $createAutoLinkNode,
+  $isAutoLinkNode,
+  AutoLinkNode,
+  type SerializedAutoLinkNode,
+} from './field/features/Link/nodes/AutoLinkNode'
+
+export {
+  $createLinkNode,
+  $isLinkNode,
+  type LinkFields,
+  LinkNode,
+  type SerializedLinkNode,
+  TOGGLE_LINK_COMMAND,
+} from './field/features/Link/nodes/LinkNode'
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
+export {
+  $createRelationshipNode,
+  $isRelationshipNode,
+  type RelationshipData,
+  RelationshipNode,
+  type SerializedRelationshipNode,
+} from './field/features/Relationship/nodes/RelationshipNode'
 export { UploadFeature } from './field/features/Upload'
 export type { UploadFeatureProps } from './field/features/Upload'
+export {
+  $createUploadNode,
+  $isUploadNode,
+  RawUploadPayload,
+  type SerializedUploadNode,
+  type UploadData,
+  UploadNode,
+} from './field/features/Upload/nodes/UploadNode'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export { TreeviewFeature } from './field/features/debug/TreeView'
+
 export { BoldTextFeature } from './field/features/format/Bold'
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
 export { ItalicTextFeature } from './field/features/format/Italic'
@@ -121,7 +160,6 @@ export type {
   ResolvedFeatureMap,
   SanitizedFeatures,
 } from './field/features/types'
-
 export {
   EditorConfigProvider,
   useEditorConfigContext,
@@ -134,10 +172,41 @@ export {
 } from './field/lexical/config/default'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
+export { getEnabledNodes } from './field/lexical/nodes'
+
+export { ToolbarButton } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarButton'
+export { ToolbarDropdown } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarDropdown/index'
+export {
+  type FloatingToolbarSection,
+  type FloatingToolbarSectionEntry,
+} from './field/lexical/plugins/FloatingSelectToolbar/types'
+export {
+  SlashMenuGroup,
+  SlashMenuOption,
+} from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 // export SanitizedEditorConfig
 export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
 export { RichTextCell }
 export { RichTextField }
-export { getEnabledNodes } from './field/lexical/nodes'
+export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
+export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM'
+export { cloneDeep } from './field/lexical/utils/cloneDeep'
+export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect'
+export { getSelectedNode } from './field/lexical/utils/getSelectedNode'
+export { isHTMLElement } from './field/lexical/utils/guard'
+export { invariant } from './field/lexical/utils/invariant'
+export { joinClasses } from './field/lexical/utils/joinClasses'
+export { createBlockNode } from './field/lexical/utils/markdown/createBlockNode'
+export { Point, isPoint } from './field/lexical/utils/point'
+export { Rect } from './field/lexical/utils/rect'
+export { setFloatingElemPosition } from './field/lexical/utils/setFloatingElemPosition'
+export { setFloatingElemPositionForLinkEditor } from './field/lexical/utils/setFloatingElemPositionForLinkEditor'
+export {
+  addSwipeDownListener,
+  addSwipeLeftListener,
+  addSwipeRightListener,
+  addSwipeUpListener,
+} from './field/lexical/utils/swipe'
+export { sanitizeUrl, validateUrl } from './field/lexical/utils/url'
 export { defaultRichTextValue } from './populate/defaultValue'

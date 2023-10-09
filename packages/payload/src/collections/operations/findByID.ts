@@ -62,21 +62,6 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     const { transactionID } = req
 
     // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          context: req.context,
-          operation: 'read',
-        })) || args
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 

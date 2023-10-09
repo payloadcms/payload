@@ -83,5 +83,3 @@ export { EntityPolicies, PathToQuery } from '../database/queryValidation/types'
 export { validateQueryPaths } from '../database/queryValidation/validateQueryPaths'
 
 export { validateSearchParam } from '../database/queryValidation/validateSearchParams'
-
-export { transaction } from '../database/transaction'

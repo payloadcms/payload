@@ -14,7 +14,7 @@ export const getMeUser = async (args?: {
   const cookieStore = cookies()
   const token = cookieStore.get('payload-token')?.value
 
-  const meUserReq = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/me`, {
+  const meUserReq = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/me`, {
     headers: {
       Authorization: `JWT ${token}`,
     },

@@ -74,24 +74,6 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   try {
     const shouldCommit = await initTransaction(req)
 
-    // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
-        args =
-          (await hook({
-            args,
-            context: req.context,
-            operation: 'delete',
-          })) || args
-      },
-      Promise.resolve(),
-    )
-
     if (!where) {
       throw new APIError("Missing 'where' query of documents to delete.", httpStatus.BAD_REQUEST)
     }

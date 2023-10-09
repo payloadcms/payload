@@ -18,7 +18,7 @@ export const AdminBarClient: React.FC<PayloadAdminBarProps> = props => {
         <PayloadAdminBar
           {...props}
           logo={<Title />}
-          cmsURL={process.env.NEXT_PUBLIC_CMS_URL}
+          cmsURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
           onPreviewExit={async () => {
             await fetch(`/api/exit-preview`)
             window.location.reload()

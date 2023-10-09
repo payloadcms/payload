@@ -14,7 +14,6 @@ import type { Configuration } from 'webpack'
 import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
-import type { CollectionEditViewProps, GlobalEditViewProps } from '../admin/components/views/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -43,10 +42,10 @@ export type Plugin = (config: Config) => Config | Promise<Config>
 
 export type LivePreviewConfig = {
   /**
-    Device breakpoints to use for the `iframe` of the Live Preview window.
-    Options are displayed in the Live Preview toolbar.
-    The `responsive` breakpoint is included by default.
-  */
+   Device breakpoints to use for the `iframe` of the Live Preview window.
+   Options are displayed in the Live Preview toolbar.
+   The `responsive` breakpoint is included by default.
+   */
   breakpoints?: {
     height: number | string
     label: string
@@ -54,11 +53,11 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-    The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-    Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-    The frontend application is responsible for receiving the message and updating the UI accordingly.
-    Use the `useLivePreview` hook to get started in React applications.
-  */
+   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   The frontend application is responsible for receiving the message and updating the UI accordingly.
+   Use the `useLivePreview` hook to get started in React applications.
+   */
   url?:
     | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
     | string
@@ -243,8 +242,6 @@ export type AdminViewConfig = {
 
 export type AdminViewProps = {
   canAccessAdmin?: boolean
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
   user: User | null | undefined
 }
 
@@ -257,18 +254,12 @@ export type EditViewConfig = {
    * The component to render for this view
    * + Replaces the default component
    */
-  Component: EditViewComponent
+  Component: AdminViewComponent
   Tab: DocumentTab
   path: string
 }
 
-export type EditViewComponent = React.ComponentType<{
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
-  user: User | null | undefined
-}>
-
-export type EditView = EditViewComponent | EditViewConfig
+export type EditView = AdminViewComponent | EditViewConfig
 
 export type Locale = {
   /**
@@ -637,7 +628,7 @@ export type Config = {
    *
    * @default
    * {
-   *   window: 15 * 60 * 100, // 1.5 minutes,
+   *   window: 15 * 60 * 1000, // 15 minutes,
    *   max: 500,
    * }
    */

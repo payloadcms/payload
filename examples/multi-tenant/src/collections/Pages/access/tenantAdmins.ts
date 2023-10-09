@@ -1,6 +1,6 @@
 import type { Access } from 'payload/config'
 
-import { checkUserRoles } from '../../utilities/checkUserRoles'
+import { checkUserRoles } from '../../../utilities/checkUserRoles'
 
 // the user must be an admin of the document's tenant
 export const tenantAdmins: Access = ({ req: { user } }) => {

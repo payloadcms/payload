@@ -41,7 +41,7 @@ export const home: Partial<Page> = {
           {
             type: 'link',
             linkType: 'custom',
-            url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
             newTab: true,
             children: [
               {
@@ -75,7 +75,7 @@ export const home: Partial<Page> = {
           appearance: 'secondary',
           reference: null,
           label: 'View on GitHub',
-          url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
+          url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
           newTab: true,
         },
       },

@@ -76,21 +76,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
-    // beforeOperation - Collection
-    // /////////////////////////////////////
-
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          context: args.req.context,
-          operation: 'login',
-        })) || args
-    }, Promise.resolve())
-
-    // /////////////////////////////////////
     // Login
     // /////////////////////////////////////
 

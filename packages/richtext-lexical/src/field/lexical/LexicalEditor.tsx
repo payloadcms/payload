@@ -1,3 +1,4 @@
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
@@ -18,6 +19,7 @@ import { LexicalContentEditable } from './ui/ContentEditable'
 
 export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
   const { editorConfig, onChange } = props
+  const [editor] = useLexicalComposerContext()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -71,7 +73,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
       />
       {floatingAnchorElem && (
         <React.Fragment>
-          {!isSmallWidthViewport && (
+          {!isSmallWidthViewport && editor.isEditable() && (
             <React.Fragment>
               <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
               <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
@@ -87,16 +89,21 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
           })}
         </React.Fragment>
       )}
-      <HistoryPlugin />
-      <FloatingSelectToolbarPlugin />
-      <SlashMenuPlugin />
+      {editor.isEditable() && (
+        <React.Fragment>
+          <HistoryPlugin />
+          <FloatingSelectToolbarPlugin />
+          <SlashMenuPlugin />
+          <MarkdownShortcutPlugin />
+        </React.Fragment>
+      )}
+
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'normal') {
           return <plugin.Component key={plugin.key} />
         }
       })}
-      <MarkdownShortcutPlugin />
     </React.Fragment>
   )
 }

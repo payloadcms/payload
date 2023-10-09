@@ -214,20 +214,12 @@ export const DocumentControls: React.FC<{
                     </PopupList.Button>
 
                     {!collection?.admin?.disableDuplicate && isEditing && (
-                      <PopupList.Button>
-                        <DuplicateDocument
-                          collection={collection}
-                          id={id}
-                          slug={collection?.slug}
-                        />
-                      </PopupList.Button>
+                      <DuplicateDocument collection={collection} id={id} slug={collection?.slug} />
                     )}
                   </React.Fragment>
                 )}
                 {'delete' in permissions && permissions?.delete?.permission && id && (
-                  <PopupList.Button>
-                    <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
-                  </PopupList.Button>
+                  <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
                 )}
               </PopupList.ButtonGroup>
             </Popup>

@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
+import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { FormField } from '../components/forms/Form/types'
 
 import { getObjectDotNotation } from '../../utilities/getObjectDotNotation'
+import { getTranslation } from '../../utilities/getTranslation'
 import { useFormFields } from '../components/forms/Form/context'
 import { useConfig } from '../components/utilities/Config'
 import { formatDate } from '../utilities/formatDate'
@@ -54,19 +56,30 @@ export const formatUseAsTitle = (args: {
 
 // Keep `collection` optional so that component do need to worry about conditionally rendering hooks
 // This is so that components which take both `collection` and `global` props can use this hook
-const useTitle = (collection?: SanitizedCollectionConfig): string => {
+const useTitle = (args: {
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
+}): string => {
+  const { collection, global } = args
   const { i18n } = useTranslation()
+  const config = useConfig()
+
+  let title: string = ''
 
   const field = useFormFields(([formFields]) => {
     if (!collection) return
     return formFields[collection?.admin?.useAsTitle]
   })
 
-  const config = useConfig()
+  if (collection) {
+    title = formatUseAsTitle({ collection, config, field, i18n })
+  }
 
-  if (!collection) return ''
+  if (global) {
+    title = getTranslation(global.label, i18n) || global.slug
+  }
 
-  return formatUseAsTitle({ collection, config, field, i18n })
+  return title
 }
 
 export default useTitle

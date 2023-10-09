@@ -14,7 +14,7 @@ Live Preview works by rendering an iframe on the page that loads your front-end 
 
 ## Setup
 
-Setting up Live Preview is easy. You first need to enable it through the `admin.components.livePreview` property of your Payload config. It takes the following options:
+Setting up Live Preview is easy. You first need to enable it through the `admin.livePreview` property of your Payload config. It takes the following options:
 
 | Path                  | Description                                                                                                                                                                                   |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -30,22 +30,33 @@ Here is a basic example of enabling Live Preview on a `pages` collection:
 ```ts
 // payload.config.ts
 {
+  // ...
   admin: {
-    components: {
-      livePreview: {
-        url: 'http://localhost:3000', // The URL to your front-end, this can also be a function (see below)
-        collections: ['pages'], // The collections to enable Live Preview on (globals are also possible)
-      },
+    // ...
+    livePreview: {
+      url: 'http://localhost:3000', // The URL to your front-end, this can also be a function (see below)
+      collections: ['pages'], // The collections to enable Live Preview on (globals are also possible)
+    },
+  }
+}
+```
+
+Alternatively, you can define the <code>admin.livePreview</code> property on individual collection and global configs. Settings defined here will be merged into the top-level as overrides (if applicable).
+
+```ts
+// Collection.ts
+{
+  // ...
+  admin: {
+    // ...
+    livePreview: {
+      url: 'http://localhost:3000',
     },
   }
 }
 ```
 
 Once configured, a new "Live Preview" tab will appear at the top of enabled documents. Navigating to this tab opens the preview window and loads your front-end application.
-
-<Banner type="info">
-  You can also define the <code>admin.components.livePreview</code> property on individual collection and global configs. Settings defined here will be merged into the top-level (if defined) as overrides.
-</Banner>
 
 ### URL
 
@@ -64,18 +75,18 @@ Here is an example of using a function that returns a dynamic URL:
 ```ts
 // payload.config.ts
 {
+  // ...
   admin: {
-    components: {
-      livePreview: {
-        url: ({
-          data,
-          documentInfo,
-          locale
-        }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-          documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `/${data.slug}
-        `}?locale=${locale}`, // Localization query param
-        collections: ['pages'],
-      },
+    // ...
+    livePreview: {
+      url: ({
+        data,
+        documentInfo,
+        locale
+      }) => `${data.tenant.url}${ // Multi-tenant top-level domain
+        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `/${data.slug}
+      `}?locale=${locale}`, // Localization query param
+      collections: ['pages'],
     },
   }
 }
@@ -94,6 +105,41 @@ The breakpoints property is an array of objects which are used as “device size
 
 _\* An asterisk denotes that a property is required._
 
+Here is an example of defining breakpoints:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  admin: {
+    // ...
+    livePreview: {
+      url: 'http://localhost:3000',
+      breakpoints: [
+        {
+          label: 'Mobile',
+          name: 'mobile',
+          width: 375,
+          height: 667,
+        },
+        {
+          label: 'Tablet',
+          name: 'tablet',
+          width: 768,
+          height: 1024,
+        },
+        {
+          label: 'Desktop',
+          name: 'desktop',
+          width: 1440,
+          height: 900,
+        },
+      ],
+    },
+  }
+}
+```
+
 {/* IMAGE OF TOOLBAR HERE */}
 
 The "Responsive" option is always available in the drop-down and requires no additional configuration. This is the default breakpoint that will be used on initial load. This option styles the iframe with a width and height of `100%` so that it fills the screen at its maximum size and automatically resizes as the window changes size.
@@ -101,3 +147,7 @@ The "Responsive" option is always available in the drop-down and requires no add
 You may also explicitly resize the Live Preview by using the corresponding inputs in the toolbar. This will temporarily override the breakpoint selection to "Custom" until a predefined breakpoint is selected once again.
 
 If you prefer to freely resize the Live Preview without the use of breakpoints, you can open it in a new window by clicking the button in the toolbar. This will close the iframe and open a new window which can be resized as you wish. Closing it will automatically re-open the iframe.
+
+## Example
+
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload).

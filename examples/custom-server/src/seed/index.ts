@@ -61,7 +61,7 @@ export const seed = async (payload: Payload): Promise<void> => {
               {
                 type: 'link',
                 linkType: 'custom',
-                url: 'http://github.com/payloadcms/payload/tree/master/examples/custom-server',
+                url: 'http://github.com/payloadcms/payload/tree/main/examples/custom-server',
                 children: [
                   {
                     text: 'README.md',

@@ -3,7 +3,7 @@ import type { JSONSchema4 } from 'json-schema'
 import { singular } from 'pluralize'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SanitizedConfig } from '../config/types'
+import type { SanitizedConfig } from '../exports/config'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
 
@@ -436,13 +436,14 @@ export function entityToJSONSchema(
   config: SanitizedConfig,
   incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
+  defaultIDType: 'number' | 'text',
 ): JSONSchema4 {
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
-  const idField: FieldAffectingData = { name: 'id', required: true, type: 'text' }
+  const idField: FieldAffectingData = { name: 'id', required: true, type: defaultIDType as 'text' }
   const customIdField = entity.fields.find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   ) as FieldAffectingData
@@ -480,7 +481,11 @@ export function entityToJSONSchema(
         (field) => 'name' in field && field.name === 'id',
       )
 
-      acc[collection.slug] = customCollectionIdField?.type === 'number' ? 'number' : 'string'
+      acc[collection.slug] = defaultIDType === 'text' ? 'string' : 'number'
+
+      if (customCollectionIdField) {
+        acc[collection.slug] = customCollectionIdField.type === 'number' ? 'number' : 'string'
+      }
 
       return acc
     },
@@ -495,14 +500,17 @@ export function entityToJSONSchema(
   }
 }
 
-export function configToJSONSchema(config: SanitizedConfig): JSONSchema4 {
+export function configToJSONSchema(
+  config: SanitizedConfig,
+  defaultIDType?: 'number' | 'text',
+): JSONSchema4 {
   // a mutable Map to store custom top-level `interfaceName` types
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
   const entityDefinitions: { [k: string]: JSONSchema4 } = [
     ...config.globals,
     ...config.collections,
   ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions)
+    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions, defaultIDType)
     return acc
   }, {})
 
@@ -510,8 +518,8 @@ export function configToJSONSchema(config: SanitizedConfig): JSONSchema4 {
     additionalProperties: false,
     definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
     properties: {
-      collections: generateEntitySchemas(config.collections),
-      globals: generateEntitySchemas(config.globals),
+      collections: generateEntitySchemas(config.collections || []),
+      globals: generateEntitySchemas(config.globals || []),
     },
     required: ['collections', 'globals'],
     title: 'Config',

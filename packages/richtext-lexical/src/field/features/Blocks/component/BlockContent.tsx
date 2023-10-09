@@ -129,18 +129,20 @@ export const BlockContent: React.FC<Props> = (props) => {
               <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
               {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}
             </div>
-            <Button
-              buttonStyle="icon-label"
-              className={`${baseClass}__removeButton`}
-              disabled={field?.admin?.readOnly}
-              icon="x"
-              onClick={(e) => {
-                e.preventDefault()
-                removeBlock()
-              }}
-              round
-              tooltip="Remove Block"
-            />
+            {editor.isEditable() && (
+              <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__removeButton`}
+                disabled={field?.admin?.readOnly}
+                icon="x"
+                onClick={(e) => {
+                  e.preventDefault()
+                  removeBlock()
+                }}
+                round
+                tooltip="Remove Block"
+              />
+            )}
           </div>
         }
         key={0}

@@ -18,7 +18,9 @@ export const clearUserCart: AfterChangeHook<Order> = async ({ doc, req, operatio
         collection: 'users',
         id: orderedBy,
         data: {
-          cart: [],
+          cart: {
+            items: [],
+          },
         },
       })
     }
