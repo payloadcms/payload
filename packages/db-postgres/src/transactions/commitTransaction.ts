@@ -2,7 +2,6 @@ import type { CommitTransaction } from 'payload/database'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
   if (!this.sessions[id]) {
-    this.payload.logger.warn('commitTransaction called when no transaction exists')
     return
   }
 
