@@ -43,7 +43,6 @@ export const NavProvider: React.FC<{
         const navPrefs = await getPreference('nav')
         const preferredState = navPrefs?.open
         if (typeof preferredState === 'boolean') {
-          console.log({ navPrefs })
           setNavOpen(preferredState)
         } else {
           setNavOpen(true)
