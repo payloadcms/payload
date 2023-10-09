@@ -59,6 +59,7 @@ export default buildConfig({
           ...config.resolve,
           alias: {
             ...config.resolve?.alias,
+            dotenv: path.resolve(__dirname, './dotenv.js'),
             [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
             [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]:
               mockModulePath,

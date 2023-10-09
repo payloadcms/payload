@@ -44,6 +44,16 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: [BeforeDashboard],
     },
+    webpack: config => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config.resolve.alias,
+          dotenv: path.resolve(__dirname, './dotenv.js'),
+        },
+      },
+    }),
   },
   editor: slateEditor({}), // editor-config
   // database-adapter-config-start
