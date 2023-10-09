@@ -59,7 +59,7 @@ export async function configurePayloadConfig(args: {
 
     const dbReplacement = dbPackages[args.dbDetails.type]
     const bundlerReplacement = bundlerPackages['webpack']
-    const editorReplacement = editorPackages['lexical']
+    const editorReplacement = editorPackages['slate']
 
     let dbConfigStartLineIndex: number | undefined
     let dbConfigEndLineIndex: number | undefined
