@@ -154,6 +154,7 @@ describe('admin', () => {
       await page.goto(url.create)
       await expect(page.locator('.doc-header__title.render-title')).toContainText('[Untitled]')
       await expect(page.locator('.step-nav.app-header__step-nav')).toContainText('Create New')
+      await saveDocAndAssert(page)
     })
 
     test('collection - should render `useAsTitle` field', async () => {
@@ -174,17 +175,17 @@ describe('admin', () => {
       await page.locator('#field-title').fill('')
       await expect(page.locator('.doc-header__title.render-title')).toContainText('ID: ')
       await expect(page.locator('.step-nav.app-header__step-nav')).toContainText('[Untitled]')
+      await saveDocAndAssert(page)
     })
 
     test('global - should render custom, localized label', async () => {
       await openNav(page)
       const label = 'My Global Label'
-      const globalLabel = page.locator(`#nav-global-${globalSlug}`)
+      const globalLabel = page.locator(`#nav-global-global`)
       await expect(globalLabel).toContainText(label)
       await globalLabel.click()
       await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
-      const nav = page.locator('.step-nav.app-header__step-nav')
-      await expect(nav).toContainText(label)
+      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(label)
     })
 
     test('global - should render simple label strings', async () => {
@@ -196,6 +197,7 @@ describe('admin', () => {
       await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
       const nav = page.locator('.step-nav.app-header__step-nav')
       await expect(nav).toContainText(label)
+      await saveDocAndAssert(page)
     })
 
     test('global - should render slug in sentence case as fallback', async () => {
@@ -207,6 +209,7 @@ describe('admin', () => {
       await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
       const nav = page.locator('.step-nav.app-header__step-nav')
       await expect(nav).toContainText(label)
+      await saveDocAndAssert(page)
     })
   })
 
