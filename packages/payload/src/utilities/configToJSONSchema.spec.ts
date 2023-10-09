@@ -28,7 +28,7 @@ describe('configToJSONSchema', () => {
     }
 
     const sanitizedConfig = sanitizeConfig(config)
-    const schema = configToJSONSchema(sanitizedConfig)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
     expect(schema?.definitions?.test).toStrictEqual({
       additionalProperties: false,
       properties: {

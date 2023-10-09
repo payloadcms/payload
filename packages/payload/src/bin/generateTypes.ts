@@ -48,7 +48,7 @@ export async function generateTypes(): Promise<void> {
 
   logger.info('Compiling TS types for Collections and Globals...')
 
-  const jsonSchema = configToJSONSchema(payload)
+  const jsonSchema = configToJSONSchema(payload.config, payload.db.defaultIDType)
 
   const collectionDeclaration = generateEntityDeclarations(config.collections, 'collections')
   const globalDeclaration = generateEntityDeclarations(config.globals, 'globals')
