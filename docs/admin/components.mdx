@@ -351,7 +351,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-To add a _new_ tab to the `Edit` view, simply add another key to the `views.Edit` object with at least a `path` and `Component` property. For example:
+To add a _new_ tab to the `Edit` view, simply add another key to `components.views.Edit[key]` with at least a `path` and `Component` property. For example:
 
 ```ts
 // `Collection.ts` or `Global.ts`
