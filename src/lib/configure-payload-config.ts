@@ -19,8 +19,7 @@ export async function configurePayloadConfig(args: {
   try {
     const packageObj = await fse.readJson(packageJsonPath)
 
-    // TODO: Likely revert this once we go to latest
-    packageObj.dependencies['payload'] = 'beta'
+    packageObj.dependencies['payload'] = 'latest'
 
     const dbPackage = dbPackages[args.dbDetails.type]
     const bundlerPackage = bundlerPackages['webpack']
