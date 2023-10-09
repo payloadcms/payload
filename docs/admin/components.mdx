@@ -72,7 +72,7 @@ export default buildConfig({
 
 #### Views
 
-You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views that can be overridden:
+You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views dy default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -84,6 +84,7 @@ To swap out any of these views, simply pass in your custom component to the `adm
 ```ts
 // payload.config.ts
 {
+  // ...
   admin: {
     components: {
       views: {
@@ -114,6 +115,7 @@ To add a _new_ view to the Admin Panel, simply add another key to the `views` ob
 ```ts
 // payload.config.ts
 {
+  // ...
   admin: {
     components: {
       views: {
@@ -127,7 +129,9 @@ To add a _new_ view to the Admin Panel, simply add another key to the `views` ob
 }
 ```
 
-_For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/master/test/admin/components)._ For help on how to build your own custom view components, see the [Building a custom view component](#building-a-custom-view-component) section.
+_For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/master/test/admin/components)._
+
+For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component).
 
 ### Collections
 
@@ -207,19 +211,19 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 #### Collection views
 
-To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views by default that can be overridden:
+To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views dy default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **`Edit`**         | The Edit view is used to edit a single document for a given Collection.                                                      |
-| **`List`**         | The List view is used to show a list of documents for a given Collection.                                                    |
+| **`Edit`**         | The Edit view is used to edit a single document for a given collection.                                                      |
+| **`List`**         | The List view is used to show a list of documents for a given collection.                                                    |
 
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. For example:
+To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, tabs, etc, _as well as all nested routes_.
 
 ```ts
 // Collection.ts
-export const MyCollection: SanitizedCollectionConfig = {
-  slug: 'my-collection',
+{
+  // ...
   admin: {
     components: {
       views: {
@@ -231,7 +235,27 @@ export const MyCollection: SanitizedCollectionConfig = {
 }
 ```
 
-To swap or add new _tabs_ to the `Edit` view, you can use the `admin.components.views.Edit` property on the collection's config. See the [Custom Tabs](#custom-tabs) section for more information. For help on how to build your own custom view components, see the [Building a custom view component](#building-a-custom-view-component) section.
+_For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component)._
+
+To swap specific _nested_ views within the parent `Edit` view, you can use the `admin.components.views.Edit` property on the globals's config. This will only replace the nested view, leaving the page breadcrumbs, title, tabs, etc intact.
+
+```ts
+// Collection.ts
+{
+  // ...
+  admin: {
+    components: {
+      views: {
+        Edit: {
+          Default: MyCustomDefaultTab,
+        },
+      },
+    },
+  },
+}
+```
+
+You can also add _new_ tabs to the `Edit` view by simply adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
 
 ### Globals
 
@@ -247,17 +271,18 @@ As with Collections, you can override components on a global-by-global basis via
 
 #### Global views
 
-To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views by default that you can override:
+To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views dy default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`Edit`**         | The Edit view is used to edit a single document for a given Global.                                                          |
 
-To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. For example:
+To swap out any of these views, simply pass in your custom component to the `admin.components.views` property of your Payload config. This will replace the entire view, including the page breadcrumbs, title, and tabs, _as well as all nested views_.
 
 ```ts
-export const MyGlobal: SanitizedGlobalConfig = {
-  slug: 'my-global',
+// Global.ts
+{
+  // ...
   admin: {
     components: {
       views: {
@@ -268,17 +293,39 @@ export const MyGlobal: SanitizedGlobalConfig = {
 }
 ```
 
-To swap or add new _tabs_ to the `Edit` view, you can use the `admin.components.views.Edit` property on the collection's config. See the [Custom Tabs](#custom-tabs) section for more information. For help on how to build your own custom view components, see the [Building a custom view component](#building-a-custom-view-component) section.
+_For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component)._
+
+To swap specific _nested_ views within the parent `Edit` view, you can use the `admin.components.views.Edit` property on the globals's config. This will only replace the nested view, leaving the page breadcrumbs, title, and tabs intact.
+
+```ts
+// Global.ts
+{
+  // ...
+  admin: {
+    components: {
+      views: {
+        Edit: {
+          Default: MyCustomDefaultTab,
+        },
+      },
+    },
+  },
+}
+```
+
+You can also add _new_ tabs to the `Edit` view by simply adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
+
+See [Custom Tabs](#custom-tabs) for more information.
 
 ### Custom Tabs
 
-To can swap collection or global tabs, pass an _object_ to the `admin.components.views.Edit` property on any collection or global config. Payload renders the following views by default which can be overridden:
+You can easily swap individual collection or global edit views. To do this, pass an _object_ to the `admin.components.views.Edit` property of the config. Payload renders the following views dy default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`Default`**      | The Default view is the primary view in which your document is edited.                                                       |
 | **`Versions`**     | The Versions view is used to view the version history of a single document. [More details](../versions)                      |
-| **`Version`**      | The Version view is used to view a single version of a single document for a given Collection. [More details](../versions).  |
+| **`Version`**      | The Version view is used to view a single version of a single document for a given collection. [More details](../versions).  |
 | **`API`**          | The API view is used to display the REST API JSON response for a given document.                                             |
 | **`LivePreview`**  | The LivePreview view is used to display the Live Preview interface. [More details](../live-preview)                          |
 
@@ -291,7 +338,7 @@ export const MyCollection: SanitizedCollectionConfig = {
   admin: {
     components: {
       views: {
-        Edit: {
+        Edit: { // You can also define `components.views.Edit` as a component, this will override _all_ nested views
           Default: MyCustomDefaultTab,
           Versions: MyCustomVersionsTab,
           Version: MyCustomVersionTab,
@@ -317,6 +364,17 @@ export const MyCollection: SanitizedCollectionConfig = {
           MyCustomTab: {
             Component: MyCustomTab,
             path: '/my-custom-tab',
+            // You an swap the entire tab component out for your own
+            Tab: MyCustomTab
+          },
+          AnotherCustomView: {
+            Component: AnotherCustomView,
+            path: '/another-custom-view',
+            // Or you can use the default tab component and just pass in your own label and href
+            Tab: {
+              label: 'Another Custom View',
+              href: '/another-custom-view',
+            }
           },
         },
       },
