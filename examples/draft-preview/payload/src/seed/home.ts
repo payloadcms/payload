@@ -21,7 +21,7 @@ export const home: Partial<Page> = {
         {
           type: 'link',
           newTab: true,
-          url: 'https://github.com/payloadcms/payload/tree/master/examples/redirects',
+          url: 'https://github.com/payloadcms/payload/tree/main/examples/redirects',
           children: [{ text: '' }],
         },
         { text: '' },
@@ -29,7 +29,7 @@ export const home: Partial<Page> = {
           type: 'link',
           linkType: 'custom',
           newTab: true,
-          url: 'https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload',
+          url: 'https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload',
           children: [{ text: 'Draft Preview Example' }],
         },
         { text: '. This example demonstrates how to implement draft preview into Payload using ' },

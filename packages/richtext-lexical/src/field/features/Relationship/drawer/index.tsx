@@ -33,15 +33,16 @@ const insertRelationship = ({
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_RELATIONSHIP_COMMAND, {
-      id,
-      data: null,
       relationTo,
+      value: {
+        id,
+      },
     })
   } else {
     editor.update(() => {
       const node = $getNodeByKey(replaceNodeKey)
       if (node) {
-        node.replace($createRelationshipNode({ id, data: null, relationTo }))
+        node.replace($createRelationshipNode({ relationTo, value: { id } }))
       }
     })
   }

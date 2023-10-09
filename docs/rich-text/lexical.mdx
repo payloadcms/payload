@@ -2,10 +2,116 @@
 title: Lexical Rich Text
 label: Lexical
 order: 30
-desc: NEED TO WRITE 
-keywords: NEED TO WRITE
+desc: Built by Meta, Lexical is an incredibly powerful rich text editor and it works beautifully within Payload.
+keywords: lexical, rich text, editor, headless cms
 ---
 
-Talk about the reasons why we are using Lexical, what it does well, and where we plan to go in the future
-Show a code snippet for how to install it
-Show how to configure it, with options 
+One of Payload's goals is to build the best rich text editor experience that we possibly can. We want to combine the beauty and polish of the Medium editing experience with the strength and features of the Notion editor - all in one place.
+
+Classically, we've used SlateJS to work toward this goal, but building custom elements into Slate has proven to be more difficult than we'd like, and we've been keeping our options open.
+
+<Banner type="warning">
+  Payload's Lexical rich text editor is currently in beta. It's stable enough to use as you build on Payload, so if you're up for helping us fine-tune it, you should use it. But if you're looking for stability, use Slate instead.
+</Banner>
+
+Lexical is extremely impressive and trivializes a lot of the hard parts of building new elements into a rich text editor. It has a few distinct advantages over Slate, including the following:
+
+1. A "/" menu, which allows editors to easily add new elements while never leaving their keyboard
+1. A "hover" toolbar that pops up if you select text
+1. It supports Payload blocks natively, directly within your rich text editor
+1. Custom elements, called "features", are much easier to build in Lexical vs. Slate
+
+To use the Lexical editor, first you need to install it:
+
+```
+npm install --save @payloadcms/richtext-lexical
+```
+
+Once you have it installed, you can pass it to your top-level Payload config as follows:
+
+```ts
+import { buildConfig } from 'payload/config'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export default buildConfig({
+  collections: [
+    // your collections here
+  ],
+  // Pass the Lexical editor to the root config
+  editor: lexicalEditor({})
+})
+```
+
+You can also override Lexical settings on a field-by-field basis as follows:
+
+```ts
+import { CollectionConfig } from 'payload/types'
+import {
+  BlocksFeature,
+  LinkFeature,
+  UploadFeature,
+  lexicalEditor
+} from '@payloadcms/richtext-lexical'
+import { Banner } from '../blocks/Banner'
+import { CallToAction } from '../blocks/CallToAction'
+
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'content',
+      type: 'richText',
+      // Pass the Lexical editor here and override base settings as necessary
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          LinkFeature({
+            // Example showing how to customize the built-in fields
+            // of the Link feature
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+                admin: {
+                  description:
+                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+                },
+              },
+            ],
+          }),
+          UploadFeature({
+            collections: {
+              uploads: {
+                // Example showing how to customize the built-in fields
+                // of the Upload feature
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                    editor: lexicalEditor(),
+                  },
+                ],
+              },
+            },
+          }),
+          // This is incredibly powerful. You can re-use your Payload blocks
+          // directly in the Lexical editor as follows:
+          BlocksFeature({
+            blocks: [
+              Banner,
+              CallToAction,
+            ],
+          }),
+        ]
+      })
+    }
+  ]
+}
+```
+
+Lots more documentation will be coming soon, which will show in detail how to create your own custom features within Lexical.
+
+For now, take a look at the TypeScript interfaces and let us know if you need a hand. Much more will be coming from the Payload team on this topic soon.

@@ -31,7 +31,6 @@ const app = express()
 const start = async () => {
   await payload.init({
     secret: 'PAYLOAD_SECRET_KEY',
-    mongoURL: 'mongodb://localhost/payload',
     express: app,
   })
 

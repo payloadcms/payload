@@ -33,7 +33,12 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   }
 
   // Only push schema if not in production
-  if (process.env.NODE_ENV === 'production' || process.env.PAYLOAD_MIGRATING === 'true') return
+  if (
+    process.env.NODE_ENV === 'production' ||
+    process.env.PAYLOAD_MIGRATING === 'true' ||
+    this.push === false
+  )
+    return
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(

@@ -14,7 +14,6 @@ import type { Configuration } from 'webpack'
 import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
-import type { CollectionEditViewProps, GlobalEditViewProps } from '../admin/components/views/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -43,10 +42,10 @@ export type Plugin = (config: Config) => Config | Promise<Config>
 
 export type LivePreviewConfig = {
   /**
-    Device breakpoints to use for the `iframe` of the Live Preview window.
-    Options are displayed in the Live Preview toolbar.
-    The `responsive` breakpoint is included by default.
-  */
+   Device breakpoints to use for the `iframe` of the Live Preview window.
+   Options are displayed in the Live Preview toolbar.
+   The `responsive` breakpoint is included by default.
+   */
   breakpoints?: {
     height: number | string
     label: string
@@ -54,11 +53,11 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-    The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-    Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-    The frontend application is responsible for receiving the message and updating the UI accordingly.
-    Use the `useLivePreview` hook to get started in React applications.
-  */
+   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   The frontend application is responsible for receiving the message and updating the UI accordingly.
+   Use the `useLivePreview` hook to get started in React applications.
+   */
   url?:
     | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
     | string
@@ -232,12 +231,25 @@ export type Endpoint = {
   root?: boolean
 }
 
-export type CustomAdminView = React.ComponentType<{
+export type AdminViewConfig = {
+  Component: AdminViewComponent
+  /** Whether the path should be matched exactly or as a prefix */
+  exact?: boolean
+  path: string
+  sensitive?: boolean
+  strict?: boolean
+}
+
+export type AdminViewProps = {
   canAccessAdmin?: boolean
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   user: User | null | undefined
-}>
+}
+
+export type AdminViewComponent = React.ComponentType<AdminViewProps>
+
+export type AdminView = AdminViewComponent | AdminViewConfig
 
 export type EditViewConfig = {
   /**
@@ -249,18 +261,13 @@ export type EditViewConfig = {
   path: string
 }
 
-export type EditViewComponent = React.ComponentType<CollectionEditViewProps | GlobalEditViewProps>
+export type EditViewComponent = React.ComponentType<{
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
+  user: User | null | undefined
+}>
 
 export type EditView = EditViewComponent | EditViewConfig
-
-export type AdminRoute = {
-  Component: CustomAdminView
-  /** Whether the path should be matched exactly or as a prefix */
-  exact?: boolean
-  path: string
-  sensitive?: boolean
-  strict?: boolean
-}
 
 export type Locale = {
   /**
@@ -418,15 +425,18 @@ export type Config = {
        */
       providers?: React.ComponentType<{ children: React.ReactNode }>[]
       /**
-       * Add custom routes in the admin dashboard
+       * Replace or modify top-level admin routes, or add new ones:
+       * + `Account` - `/admin/account`
+       * + `Dashboard` - `/admin`
+       * + `:path` - `/admin/:path`
        */
-      routes?: AdminRoute[]
-      /* Replace complete pages */
       views?: {
+        /** Add custom admin views */
+        [key: string]: AdminView
         /** Replace the account screen */
-        Account?: React.ComponentType<any>
+        Account?: AdminView
         /** Replace the admin homepage */
-        Dashboard?: React.ComponentType<any>
+        Dashboard?: AdminView
       }
     }
     /** Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. */
@@ -439,6 +449,10 @@ export type Config = {
     inactivityRoute?: string
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
     indexHTML?: string
+    livePreview?: LivePreviewConfig & {
+      collections?: string[]
+      globals?: string[]
+    }
     /** The route for the logout page. */
     logoutRoute?: string
     /** Base meta data to use for the Admin panel. Included properties are titleSuffix, ogImage, and favicon. */
@@ -622,7 +636,7 @@ export type Config = {
    *
    * @default
    * {
-   *   window: 15 * 60 * 100, // 1.5 minutes,
+   *   window: 15 * 60 * 1000, // 15 minutes,
    *   max: 500,
    * }
    */

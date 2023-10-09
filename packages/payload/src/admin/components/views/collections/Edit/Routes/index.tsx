@@ -19,10 +19,14 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
   const match = useRouteMatch()
 
   const {
+    admin: { livePreview },
     routes: { admin: adminRoute },
   } = useConfig()
 
   const { user } = useAuth()
+
+  const livePreviewEnabled =
+    livePreview?.collections?.some((c) => c === collection.slug) || collection?.admin?.livePreview
 
   return (
     <Switch>
@@ -55,13 +59,15 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
           <Unauthorized />
         )}
       </Route>
-      <Route
-        exact
-        key={`${collection.slug}-live-preview`}
-        path={`${adminRoute}/collections/${collection.slug}/:id/preview`}
-      >
-        <CustomCollectionComponent view="LivePreview" {...props} />
-      </Route>
+      {livePreviewEnabled && (
+        <Route
+          exact
+          key={`${collection.slug}-live-preview`}
+          path={`${adminRoute}/collections/${collection.slug}/:id/preview`}
+        >
+          <CustomCollectionComponent view="LivePreview" {...props} />
+        </Route>
+      )}
       {collectionCustomRoutes({
         collection,
         match,

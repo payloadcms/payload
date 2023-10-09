@@ -18,18 +18,16 @@ import * as React from 'react'
 
 import { RelationshipComponent } from './components/RelationshipComponent'
 
-export type RelationshipFields = {
-  data: null | unknown
-  id: string
+export type RelationshipData = {
   relationTo: string
+  value: {
+    // Actual relationship, populated in afterRead hook
+    [key: string]: unknown
+    id: string
+  }
 }
 
-export type SerializedRelationshipNode = Spread<
-  {
-    fields: RelationshipFields
-  },
-  SerializedDecoratorBlockNode
->
+export type SerializedRelationshipNode = Spread<RelationshipData, SerializedDecoratorBlockNode>
 
 function relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')
@@ -37,9 +35,10 @@ function relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput
 
   if (id != null && relationTo != null) {
     const node = $createRelationshipNode({
-      id,
-      data: null,
       relationTo,
+      value: {
+        id,
+      },
     })
     return { node }
   }
@@ -47,24 +46,24 @@ function relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutput
 }
 
 export class RelationshipNode extends DecoratorBlockNode {
-  __fields: RelationshipFields
+  __data: RelationshipData
 
   constructor({
-    fields,
+    data,
     format,
     key,
   }: {
-    fields: RelationshipFields
+    data: RelationshipData
     format?: ElementFormatType
     key?: NodeKey
   }) {
     super(format, key)
-    this.__fields = fields
+    this.__data = data
   }
 
   static clone(node: RelationshipNode): RelationshipNode {
     return new RelationshipNode({
-      fields: node.__fields,
+      data: node.__data,
       format: node.__format,
       key: node.__key,
     })
@@ -92,7 +91,11 @@ export class RelationshipNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedRelationshipNode): RelationshipNode {
-    const node = $createRelationshipNode(serializedNode.fields)
+    const importedData: RelationshipData = {
+      relationTo: serializedNode.relationTo,
+      value: serializedNode.value,
+    }
+    const node = $createRelationshipNode(importedData)
     node.setFormat(serializedNode.format)
     return node
   }
@@ -104,7 +107,7 @@ export class RelationshipNode extends DecoratorBlockNode {
     return (
       <RelationshipComponent
         className={config.theme.relationship ?? 'LexicalEditorTheme__relationship'}
-        fields={this.__fields}
+        data={this.__data}
         format={this.__format}
         nodeKey={this.getKey()}
       />
@@ -113,8 +116,8 @@ export class RelationshipNode extends DecoratorBlockNode {
 
   exportDOM(): DOMExportOutput {
     const element = document.createElement('div')
-    element.setAttribute('data-lexical-relationship-id', this.__fields?.id)
-    element.setAttribute('data-lexical-relationship-relationTo', this.__fields?.relationTo)
+    element.setAttribute('data-lexical-relationship-id', this.__data?.value?.id)
+    element.setAttribute('data-lexical-relationship-relationTo', this.__data?.relationTo)
 
     const text = document.createTextNode(this.getTextContent())
     element.append(text)
@@ -124,14 +127,14 @@ export class RelationshipNode extends DecoratorBlockNode {
   exportJSON(): SerializedRelationshipNode {
     return {
       ...super.exportJSON(),
-      fields: this.getFields(),
+      ...this.getData(),
       type: this.getType(),
       version: 1,
     }
   }
 
-  getFields(): RelationshipFields {
-    return this.getLatest().__fields
+  getData(): RelationshipData {
+    return this.getLatest().__data
   }
 
   getId(): string {
@@ -139,18 +142,18 @@ export class RelationshipNode extends DecoratorBlockNode {
   }
 
   getTextContent(): string {
-    return `${this?.__fields?.relationTo} relation to ${this.__fields?.id}`
+    return `${this?.__data?.relationTo} relation to ${this.__data?.value?.id}`
   }
 
-  setFields(fields: RelationshipFields): void {
+  setData(data: RelationshipData): void {
     const writable = this.getWritable()
-    writable.__fields = fields
+    writable.__data = data
   }
 }
 
-export function $createRelationshipNode(fields: RelationshipFields): RelationshipNode {
+export function $createRelationshipNode(data: RelationshipData): RelationshipNode {
   return new RelationshipNode({
-    fields,
+    data,
   })
 }
 

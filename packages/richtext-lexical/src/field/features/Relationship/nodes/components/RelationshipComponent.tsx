@@ -9,7 +9,7 @@ import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { RelationshipFields } from '../RelationshipNode'
+import type { RelationshipData } from '../RelationshipNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer'
@@ -25,7 +25,7 @@ const initialParams = {
 type Props = {
   children?: React.ReactNode
   className?: string
-  fields: RelationshipFields
+  data: RelationshipData
   format?: ElementFormatType
   nodeKey?: string
 }
@@ -33,7 +33,10 @@ type Props = {
 const Component: React.FC<Props> = (props) => {
   const {
     children,
-    fields: { id, relationTo },
+    data: {
+      relationTo,
+      value: { id },
+    },
     nodeKey,
   } = props
 

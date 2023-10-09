@@ -8,7 +8,7 @@ import {
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
 import { slateEditor } from '../../../../packages/richtext-slate/src'
-import { TextBlock, UploadAndRichTextBlock } from './blocks'
+import { SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
 import { generateLexicalRichText } from './generateLexicalRichText'
 import { generateSlateRichText } from './generateSlateRichText'
 
@@ -31,59 +31,48 @@ const RichTextFields: CollectionConfig = {
       type: 'richText',
       required: true,
       editor: lexicalEditor({
-        userConfig(defaultEditorConfig) {
-          defaultEditorConfig.features.push(TreeviewFeature())
-          defaultEditorConfig.features.push(
-            LinkFeature({
-              fields: [
-                {
-                  name: 'rel',
-                  label: 'Rel Attribute',
-                  type: 'select',
-                  hasMany: true,
-                  options: ['noopener', 'noreferrer', 'nofollow'],
-                  admin: {
-                    description:
-                      'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-                  },
-                },
-              ],
-            }),
-          )
-
-          defaultEditorConfig.features.push(
-            UploadFeature({
-              collections: {
-                uploads: {
-                  fields: [
-                    {
-                      name: 'caption',
-                      type: 'richText',
-                      editor: lexicalEditor({}),
-                    },
-                  ],
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          TreeviewFeature(),
+          LinkFeature({
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+                admin: {
+                  description:
+                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
                 },
               },
-            }),
-          )
-
-          defaultEditorConfig.features.push(
-            BlocksFeature({
-              blocks: [TextBlock, UploadAndRichTextBlock],
-            }),
-          )
-          return defaultEditorConfig
-        },
+            ],
+          }),
+          UploadFeature({
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                    editor: lexicalEditor(),
+                  },
+                ],
+              },
+            },
+          }),
+          BlocksFeature({
+            blocks: [TextBlock, UploadAndRichTextBlock, SelectFieldBlock],
+          }),
+        ],
       }),
     },
     {
       name: 'richTextLexical',
       type: 'richText',
       editor: lexicalEditor({
-        userConfig(defaultEditorConfig) {
-          defaultEditorConfig.features.push(TreeviewFeature())
-          return defaultEditorConfig
-        },
+        features: ({ defaultFeatures }) => [...defaultFeatures, TreeviewFeature()],
       }),
     },
     {

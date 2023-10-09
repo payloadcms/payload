@@ -3,5 +3,8 @@
   "watch": ["server.ts"],
   "exec": "ts-node --project tsconfig.server.json src/server.ts -- -I",
   "ext": "js ts",
+    "ignore" : [
+    "src/app"
+  ],
   "stdin": false
 }

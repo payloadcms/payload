@@ -13,7 +13,7 @@ import React, { useCallback, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { UploadFeatureProps } from '..'
-import type { UploadFields } from '../nodes/UploadNode'
+import type { UploadData } from '../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
 import { EnabledRelationshipsCondition } from '../../Relationship/utils/EnabledRelationshipsCondition'
@@ -28,14 +28,14 @@ const initialParams = {
 }
 
 export type ElementProps = {
-  fields: UploadFields
+  data: UploadData
   nodeKey: string
   //uploadProps: UploadFeatureProps
 }
 
 const Component: React.FC<ElementProps> = (props) => {
   const {
-    fields: { relationTo, value },
+    data: { fields, relationTo, value },
     nodeKey,
   } = props
 

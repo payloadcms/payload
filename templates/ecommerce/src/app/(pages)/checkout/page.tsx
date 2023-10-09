@@ -46,7 +46,7 @@ export default async function Checkout() {
                 </a>
                 {' then set them as environment variables. See the '}
                 <a
-                  href="https://github.com/payloadcms/payload/blob/master/templates/ecommerce/README.md#stripe"
+                  href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -13,20 +13,16 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
     payload,
   })
 
-  const migrationsToRollback = existingMigrations.filter(
-    (migration) => migration.batch === latestBatch && migration.batch !== -1,
-  )
-
-  if (!migrationsToRollback?.length) {
+  if (!existingMigrations?.length) {
     payload.logger.info({ msg: 'No migrations to rollback.' })
     return
   }
 
   payload.logger.info({
-    msg: `Rolling back batch ${latestBatch} consisting of ${migrationsToRollback.length} migration(s).`,
+    msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  for (const migration of migrationsToRollback) {
+  for (const migration of existingMigrations) {
     const migrationFile = migrationFiles.find((m) => m.name === migration.name)
     if (!migrationFile) {
       throw new Error(`Migration ${migration.name} not found locally.`)
@@ -57,7 +53,7 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
         err,
         msg: `Error running migration ${migrationFile.name}`,
       })
-      throw err
+      process.exit(1)
     }
   }
 }

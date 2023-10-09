@@ -7,9 +7,14 @@
   outline: 0;
   padding-top: 8px;
 
+  &:focus-visible {
+    outline: none !important;
+  }
+
   & > * {
     transition: transform 0.2s ease-in-out;
     will-change: transform;
+    position: relative; // makes sure that z-index properties work - for example for the Blocks feature
   }
 }
 

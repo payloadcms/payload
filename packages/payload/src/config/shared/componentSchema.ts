@@ -16,3 +16,15 @@ export const customViewSchema = joi.object({
   Tab: joi.alternatives().try(documentTabSchema, componentSchema),
   path: joi.string().required(),
 })
+
+export const livePreviewSchema = {
+  breakpoints: joi.array().items(
+    joi.object({
+      name: joi.string(),
+      height: joi.alternatives().try(joi.number(), joi.string()),
+      label: joi.string(),
+      width: joi.alternatives().try(joi.number(), joi.string()),
+    }),
+  ),
+  url: joi.alternatives().try(joi.string(), joi.func()),
+}

@@ -260,17 +260,21 @@ const validateFilterOptions: Validate = async (
           }
         })
 
-        const result = await payload.find({
-          collection,
-          depth: 0,
-          limit: 0,
-          pagination: false,
-          where: {
-            and: [{ id: { in: valueIDs } }, optionFilter],
-          },
-        })
+        if (valueIDs.length > 0) {
+          const result = await payload.find({
+            collection,
+            depth: 0,
+            limit: 0,
+            pagination: false,
+            where: {
+              and: [{ id: { in: valueIDs } }, optionFilter],
+            },
+          })
 
-        options[collection] = result.docs.map((doc) => doc.id)
+          options[collection] = result.docs.map((doc) => doc.id)
+        } else {
+          options[collection] = []
+        }
       }),
     )
 
@@ -314,10 +318,10 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
   }
 
   if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
-    const idField = options.payload.collections[options.relationTo].config.fields.find(
+    const idField = options?.payload?.collections[options.relationTo]?.config?.fields?.find(
       (field) => fieldAffectsData(field) && field.name === 'id',
     )
-    const type = getIDType(idField)
+    const type = getIDType(idField, options?.payload?.db?.defaultIDType)
 
     if (!isValidID(value, type)) {
       return options.t('validation:validUploadID')
@@ -373,13 +377,8 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
       const idField = payload.collections[collection]?.config?.fields?.find(
         (field) => fieldAffectsData(field) && field.name === 'id',
       )
-      let type
 
-      if (idField) {
-        type = idField.type === 'number' ? 'number' : 'text'
-      } else {
-        type = 'ObjectID'
-      }
+      const type = getIDType(idField, options?.payload?.db?.defaultIDType)
 
       return !isValidID(requestedID, type)
     })

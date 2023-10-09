@@ -19,6 +19,7 @@ export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexical
   overrideAccess,
   req,
   showHiddenFields,
+  siblingDoc,
 }: {
   afterReadPromises: Map<string, Array<AfterReadPromise>>
   currentDepth: number
@@ -28,6 +29,7 @@ export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexical
   overrideAccess: boolean
   req: PayloadRequest
   showHiddenFields: boolean
+  siblingDoc: Record<string, unknown>
 }) => Promise<void>[]
 
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({

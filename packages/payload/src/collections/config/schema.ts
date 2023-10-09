@@ -1,7 +1,11 @@
 import joi from 'joi'
 
 import { endpointsSchema } from '../../config/schema'
-import { componentSchema, customViewSchema } from '../../config/shared/componentSchema'
+import {
+  componentSchema,
+  customViewSchema,
+  livePreviewSchema,
+} from '../../config/shared/componentSchema'
 
 const strategyBaseSchema = joi.object().keys({
   logout: joi.boolean(),
@@ -34,14 +38,13 @@ const collectionSchema = joi.object().keys({
         Edit: joi.alternatives().try(
           componentSchema,
           joi.object({
+            API: joi.alternatives().try(componentSchema, customViewSchema),
             Default: joi.alternatives().try(componentSchema, customViewSchema),
+            LivePreview: joi.alternatives().try(componentSchema, customViewSchema),
+            Version: joi.alternatives().try(componentSchema, customViewSchema),
             Versions: joi.alternatives().try(componentSchema, customViewSchema),
-            // Version
-            // Preview
             // Relationships
             // References
-            // API
-            // :path
           }),
         ),
         List: componentSchema,
@@ -59,17 +62,7 @@ const collectionSchema = joi.object().keys({
       beforeDuplicate: joi.func(),
     }),
     listSearchableFields: joi.array().items(joi.string()),
-    livePreview: joi.object({
-      breakpoints: joi.array().items(
-        joi.object({
-          name: joi.string(),
-          height: joi.alternatives().try(joi.number(), joi.string()),
-          label: joi.string(),
-          width: joi.alternatives().try(joi.number(), joi.string()),
-        }),
-      ),
-      url: joi.alternatives().try(joi.string(), joi.func()),
-    }),
+    livePreview: joi.object(livePreviewSchema),
     pagination: joi.object({
       defaultLimit: joi.number(),
       limits: joi.array().items(joi.number()),

@@ -1,16 +1,18 @@
 ---
 title: Overview
-label: Rich Text Field
+label: Overview
 order: 10
-desc: NEED TO WRITE 
-keywords: NEED TO WRITE
+desc: Rich Text within Payload is extremely powerful. We've combined the beauty of the Medium editor with the power of the Notion editor all in one place.
+keywords: slatejs, lexical, rich text, json, custom editor, javascript, typescript
 ---
 
-TODO:
+Payload currently supports two official rich text editors and you can choose either one depending on your needs.
 
-- Talk about how Payload supports two rich text editors, and they work on an "adapter" pattern, which means you need to install the one you want to use separately and pass it to config
-- Talk about how Slate is still supported for legacy projects, but we are moving to Lexical from here on out which offers more features
-- For new projects as of 2.0, use Lexical
-- For existing projects, use Slate
-- Probably move some of the more complex docs from Fields -> Rich Text over to this set of docs
-- Show how you can install an editor at the top level, or override on a field-by-field basis (not recommended, no reason to have 2 editors installed. Lots of JS loaded)
+1. [SlateJS](/docs/rich-text/slate) - stable, backwards-compatible with 1.0
+2. [Lexical](/docs/rich-text/lexical) - beta, where things will be moving in the future
+
+These editors are built on an "adapter pattern" which means that you will need to install the editor you'd like to use. Take a look at the docs for the editor you'd like to use for instructions on how to install it.
+
+The big TL;DR here is that Slate is what we have used in the past, and we still support it for existing projects, but if you're building something new and you're feeling adventurous, you should give Lexical a shot. Slate has a lot of good stuff, but Lexical has lots more.
+
+No matter which editor you use, you have to install it at the top-level on the `config.editor` property, which will then cascade throughout all of your rich text fields and be used accordingly. Additionally, you also have the option to override the editor on a field-by-field basis if you'd like.

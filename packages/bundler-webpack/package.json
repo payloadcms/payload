@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-webpack",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0",
   "description": "The officially supported Webpack bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -29,7 +29,7 @@
     "md5": "2.3.0",
     "mini-css-extract-plugin": "1.6.2",
     "path-browserify": "1.0.1",
-    "postcss": "8.4.27",
+    "postcss": "8.4.31",
     "postcss-loader": "6.2.1",
     "postcss-preset-env": "9.0.0",
     "process": "0.11.10",

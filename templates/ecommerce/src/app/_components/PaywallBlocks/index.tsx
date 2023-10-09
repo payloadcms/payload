@@ -15,17 +15,21 @@ import { VerticalPadding } from '../VerticalPadding'
 export const PaywallBlocks: React.FC<{
   productSlug: string
   disableTopPadding?: boolean
-}> = (props) => {
+}> = props => {
   const { productSlug, disableTopPadding } = props
   const { user } = useAuth()
 
   const [isLoading, setIsLoading] = React.useState(false)
   const [blocks, setBlocks] = React.useState<Page['layout']>()
   const hasInitialized = React.useRef(false)
+  const isRequesting = React.useRef(false)
 
   useEffect(() => {
-    if (!user || hasInitialized.current) return
+    if (!user || hasInitialized.current || isRequesting.current) return
     hasInitialized.current = true
+    isRequesting.current = true
+
+    const start = Date.now()
 
     const getPaywallContent = async () => {
       setIsLoading(true)
@@ -44,11 +48,18 @@ export const PaywallBlocks: React.FC<{
             },
           }),
         })
-          ?.then((res) => res.json())
-          ?.then((res) => res?.data?.Products.docs[0]?.paywall)
+          ?.then(res => res.json())
+          ?.then(res => res?.data?.Products.docs[0]?.paywall)
 
         if (paywall) {
           setBlocks(paywall)
+        }
+
+        // wait before setting `isLoading` to `false` to give the illusion of loading
+        // this is to prevent a flash of the loading shimmer on fast networks
+        const end = Date.now()
+        if (end - start < 1000) {
+          await new Promise(resolve => setTimeout(resolve, 500 - (end - start)))
         }
 
         setIsLoading(false)

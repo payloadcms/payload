@@ -1,7 +1,9 @@
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+
+import type { FeatureProvider } from '../../features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { BlockQuoteFeature } from '../../features/BlockQuote'
-import { BlocksFeature } from '../../features/Blocks'
 import { HeadingFeature } from '../../features/Heading'
 import { LinkFeature } from '../../features/Link'
 import { ParagraphFeature } from '../../features/Paragraph'
@@ -22,32 +24,36 @@ import { UnoderedListFeature } from '../../features/lists/UnorderedList'
 import { LexicalEditorTheme } from '../theme/EditorTheme'
 import { sanitizeEditorConfig } from './sanitize'
 
+export const defaultEditorFeatures: FeatureProvider[] = [
+  BoldTextFeature(),
+  ItalicTextFeature(),
+  UnderlineTextFeature(),
+  StrikethroughTextFeature(),
+  SubscriptTextFeature(),
+  SuperscriptTextFeature(),
+  InlineCodeTextFeature(),
+  ParagraphFeature(),
+  HeadingFeature({}),
+  AlignFeature(),
+  IndentFeature(),
+  UnoderedListFeature(),
+  OrderedListFeature(),
+  CheckListFeature(),
+  LinkFeature({}),
+  RelationshipFeature(),
+  BlockQuoteFeature(),
+  UploadFeature(),
+  //BlocksFeature(), // Adding this by default makes no sense if no blocks are defined
+]
+
+export const defaultEditorLexicalConfig: LexicalEditorConfig = {
+  namespace: 'lexical',
+  theme: LexicalEditorTheme,
+}
+
 export const defaultEditorConfig: EditorConfig = {
-  features: [
-    BoldTextFeature(),
-    ItalicTextFeature(),
-    UnderlineTextFeature(),
-    StrikethroughTextFeature(),
-    SubscriptTextFeature(),
-    SuperscriptTextFeature(),
-    InlineCodeTextFeature(),
-    ParagraphFeature(),
-    HeadingFeature({}),
-    AlignFeature(),
-    IndentFeature(),
-    UnoderedListFeature(),
-    OrderedListFeature(),
-    CheckListFeature(),
-    LinkFeature({}),
-    RelationshipFeature(),
-    BlockQuoteFeature(),
-    UploadFeature(),
-    //BlocksFeature(), // Adding this by default makes no sense if no blocks are defined
-  ],
-  lexical: {
-    namespace: 'lexical',
-    theme: LexicalEditorTheme,
-  },
+  features: defaultEditorFeatures,
+  lexical: defaultEditorLexicalConfig,
 }
 
 export const defaultSanitizedEditorConfig: SanitizedEditorConfig =

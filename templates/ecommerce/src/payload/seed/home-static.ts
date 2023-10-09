@@ -60,7 +60,7 @@ export const staticHome: Page = {
           {
             type: 'link',
             linkType: 'custom',
-            url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
             newTab: true,
             children: [
               {

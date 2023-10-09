@@ -17,17 +17,6 @@ export const Posts: CollectionConfig = {
     delete: () => true,
   },
   admin: {
-    livePreview: {
-      url: ({ data, documentInfo }) => `http://localhost:3001/${documentInfo.slug}/${data?.slug}`,
-      breakpoints: [
-        {
-          label: 'Mobile',
-          name: 'mobile',
-          width: 375,
-          height: 667,
-        },
-      ],
-    },
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
   },

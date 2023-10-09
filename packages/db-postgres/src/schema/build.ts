@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field, SanitizedCollectionConfig } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -27,10 +27,10 @@ type Args = {
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
-  collectionIndexes?: SanitizedCollectionConfig['indexes']
   disableUnique: boolean
   fields: Field[]
   rootRelationsToBuild?: Map<string, string>
+  rootRelationships?: Set<string>
   rootTableIDColType?: string
   rootTableName?: string
   tableName: string
@@ -46,10 +46,10 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   buildRelationships,
-  collectionIndexes = [],
   disableUnique = false,
   fields,
   rootRelationsToBuild,
+  rootRelationships,
   rootTableIDColType,
   rootTableName,
   tableName,
@@ -68,9 +68,12 @@ export const buildTable = ({
   let localesTable: GenericTable
   let numbersTable: GenericTable
 
-  const relationships: Set<string> = new Set()
+  // Relationships to the base collection
+  const relationships: Set<string> = rootRelationships || new Set()
+
   let relationshipsTable: GenericTable
 
+  // Drizzle relations
   const relationsToBuild: Map<string, string> = new Map()
 
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
@@ -98,7 +101,6 @@ export const buildTable = ({
   } = traverseFields({
     adapter,
     buildRelationships,
-    collectionIndexes,
     columns,
     disableUnique,
     fields,
@@ -253,20 +255,17 @@ export const buildTable = ({
         ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
       })
 
-      const relationshipsTableName = `${tableName}_relationships`
+      const relationshipsTableName = `${tableName}_rels`
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
-        const result: Record<string, unknown> = {}
+        const result: Record<string, unknown> = {
+          order: index('order_idx').on(cols.order),
+          parentIdx: index('parent_idx').on(cols.parent),
+          pathIdx: index('path_idx').on(cols.path),
+        }
 
         if (hasLocalizedRelationshipField) {
           result.localeIdx = index('locale_idx').on(cols.locale)
-          result.parentPathOrderLocale = unique(
-            `${relationshipsTableName}_parent_id_path_order_locale_unique`,
-          ).on(cols.parent, cols.path, cols.order, cols.locale)
-        } else {
-          result.parentPathOrder = unique(
-            `${relationshipsTableName}_parent_id_path_order_unique`,
-          ).on(cols.parent, cols.path, cols.order)
         }
 
         return result
@@ -279,7 +278,7 @@ export const buildTable = ({
           parent: one(table, {
             fields: [relationshipsTable.parent],
             references: [table.id],
-            relationName: '_relationships',
+            relationName: '_rels',
           }),
         }
 
@@ -315,8 +314,8 @@ export const buildTable = ({
     }
 
     if (relationships.size && relationshipsTable) {
-      result._relationships = many(relationshipsTable, {
-        relationName: '_relationships',
+      result._rels = many(relationshipsTable, {
+        relationName: '_rels',
       })
     }
 

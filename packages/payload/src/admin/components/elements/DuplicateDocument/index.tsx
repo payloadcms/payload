@@ -82,12 +82,16 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       }
 
       let duplicateID
+
       if (localization) {
         duplicateID = await create(localization.defaultLocale)
         let abort = false
-        localization.localeCodes
+
+        await localization.localeCodes
           .filter((locale) => locale !== localization.defaultLocale)
-          .forEach(async (locale) => {
+          .reduce(async (priorLocalePatch, locale) => {
+            await priorLocalePatch
+
             if (!abort) {
               const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
                 headers: {
@@ -123,7 +127,8 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
                 json.errors.forEach((error) => toast.error(error.message))
               }
             }
-          })
+          }, Promise.resolve())
+
         if (abort) {
           // delete the duplicate doc to prevent incomplete
           await requests.delete(`${serverURL}${api}/${slug}/${id}`, {

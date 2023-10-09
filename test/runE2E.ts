@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies, no-console */
 import glob from 'glob'
 import path from 'path'
 import shelljs from 'shelljs'

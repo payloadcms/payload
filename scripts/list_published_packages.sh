@@ -2,20 +2,6 @@
 
 # List all published packages
 
-# parse params: tag=beta or blank string ''
-tag=${1:-}
-
-echo
-
-if [ -n "$tag" ]; then
-  echo "Listing packages with tag: $tag"
-  tag="@$tag"
-else
-  echo "Listing latest packages"
-  tag=""
-fi
-echo
-
 packages=$(find packages -name package.json -type f -exec grep -L '"private": true' {} \; | xargs jq -r '.name')
 
 # sort alphabetically
@@ -23,7 +9,11 @@ packages=$(echo "$packages" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
 # Loop through each package and print the name and version. Print as table
 
+printf "%-30s %-20s %-20s\n" "package" "latest" "beta"
+
 for package in $packages; do
-  version=$(npm view "$package""$tag" version 2> /dev/null || echo "N/A")
-  printf "%-30s %s\n" "$package" "$version"
+  info=$(npm view "$package" dist-tags --json)
+  latest=$(echo "$info" | jq -r '.latest')
+  beta=$(echo "$info" | jq -r '.beta')
+  printf "%-30s %-20s %-20s\n" "$package" "$latest" "$beta"
 done

@@ -8,8 +8,8 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 Payload dynamically generates a beautiful, fully functional React admin panel to manage your data. It's extremely powerful and can be customized / extended upon easily by swapping in your own React components. You can add additional views, modify how built-in views look / work, swap out Payload branding for your client's, build your own field types and much more.
 
-TODO: change the sentence below to reference our adapter pattern, and officially supported bundlers, linking to Vite and Webpack docs pages specifically
-The Payload Admin panel is built with Webpack, code-split, highly performant (even with 100+ fields), and written fully in TypeScript.
+The Payload Admin panel can be bundled with our officially supported [Vite](/docs/admin/vite) and [webpack](/docs/admin/webpack) bundlers or you can integrate another bundler following our adapter pattern approach.
+When bundled, it is code-split, highly performant (even with 100+ fields), and written fully in TypeScript.
 
 <Banner type="success">
   The Admin panel is meant to be simple enough to give you a starting point but not bring too much
@@ -17,15 +17,16 @@ The Payload Admin panel is built with Webpack, code-split, highly performant (ev
   editors.
 </Banner>
 
-![Payload's Admin panel built in React](https://payloadcms.com/images/docs/admin.jpg)
-
-_Screenshot of the Admin panel while editing a document from an example `AllFields` collection_
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/admin.jpg"
+  srcDark="https://payloadcms.com/images/docs/admin-dark.jpg"
+  alt="Admin panel with collapsible sidebar"
+  caption="Redesigned admin panel with a collapsible sidebar that's open by default, providing greater extensibility and enhanced horizontal real estate."
+/>
 
 ## Admin Options
 
 All options for the Admin panel are defined in your base Payload config file.
-
-TODO: add `vite` and `bundler` properties to the table below
 
 | Option                | Description                                                                                                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -33,14 +34,17 @@ TODO: add `vite` and `bundler` properties to the table below
 | `buildPath`           | Specify an absolute path for where to store the built Admin panel bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                                                                                                             |
 | `meta`                | Base meta data to use for the Admin panel. Included properties are `titleSuffix`, `ogImage`, and `favicon`.                                                                                                                                                  |
 | `disable`             | If set to `true`, the entire Admin panel will be disabled.                                                                                                                                                                                                   |
-| `indexHTML`           | Optionally replace the entirety of the `index.html` file used by the Admin panel. Reference the [base index.html file](https://github.com/payloadcms/payload/blob/master/src/admin/index.html) to ensure your replacement has the appropriate HTML elements. |
+| `indexHTML`           | Optionally replace the entirety of the `index.html` file used by the Admin panel. Reference the [base index.html file](https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/index.html) to ensure your replacement has the appropriate HTML elements. |
 | `css`                 | Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. [More](/docs/admin/customizing-css).                                                                                                                         |
 | `scss`                | Absolute path to a Sass variables / mixins stylesheet meant to override Payload styles to make for an easy re-skinning of the Admin panel. [More](/docs/admin/customizing-css#overriding-scss-variables).                                                    |
 | `dateFormat`          | Global date format that will be used for all dates in the Admin panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                                                                                                               |
 | `avatar`              | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                                                                                                                     |
 | `autoLogin`           | Used to automate admin log-in for dev and demonstration convenience. [More](/docs/authentication/config).                                                                                                                                                    |
+| `livePreview`         | Enable real-time editing for instant visual feedback of your front-end application. [More](/docs/live-preview/overview).                                                                                                                                     |
 | `components`          | Component overrides that affect the entirety of the Admin panel. [More](/docs/admin/components)                                                                                                                                                              |
 | `webpack`             | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack)                                                                                                                                                            |
+| `vite`                | Customize the Vite config that's used to generate the Admin panel. [More](/docs/admin/vite)                                                                                                                                                                  |
+| **`bundler`**         | The bundler that you would like to use to bundle the admin panel. Officially supported bundlers: [Webpack](/docs/admin/webpack) and [Vite](/docs/admin/vite).                                                                                                |
 | **`logoutRoute`**     | The route for the `logout` page.                                                                                                                                                                                                                             |
 | **`inactivityRoute`** | The route for the `logout` inactivity page.                                                                                                                                                                                                                  |
 

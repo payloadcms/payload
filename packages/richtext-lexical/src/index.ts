@@ -1,27 +1,51 @@
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
 import { withMergedProps } from 'payload/components/utilities'
 
+import type { FeatureProvider } from './field/features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
 import type { AdapterProps } from './types'
 
 import { RichTextCell } from './cell'
 import { RichTextField } from './field'
-import { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexical/config/default'
+import {
+  defaultEditorFeatures,
+  defaultEditorLexicalConfig,
+  defaultSanitizedEditorConfig,
+} from './field/lexical/config/default'
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
 import { richTextValidateHOC } from './validate'
 
-export function lexicalEditor({
-  userConfig,
-}: {
-  userConfig?: (defaultEditorConfig: EditorConfig) => EditorConfig
-}): RichTextAdapter<AdapterProps> {
-  const finalSanitizedEditorConfig: SanitizedEditorConfig =
-    userConfig == null || typeof userConfig != 'function'
-      ? cloneDeep(defaultSanitizedEditorConfig)
-      : sanitizeEditorConfig(userConfig(cloneDeep(defaultEditorConfig)))
+export type LexicalEditorProps = {
+  features?:
+    | (({ defaultFeatures }: { defaultFeatures: FeatureProvider[] }) => FeatureProvider[])
+    | FeatureProvider[]
+  lexical?: LexicalEditorConfig
+}
+
+export function lexicalEditor(props?: LexicalEditorProps): RichTextAdapter<AdapterProps> {
+  let finalSanitizedEditorConfig: SanitizedEditorConfig = null
+  if (!props || (!props.features && !props.lexical)) {
+    finalSanitizedEditorConfig = cloneDeep(defaultSanitizedEditorConfig)
+  } else {
+    let features: FeatureProvider[] =
+      props.features && typeof props.features === 'function'
+        ? props.features({ defaultFeatures: cloneDeep(defaultEditorFeatures) })
+        : (props.features as FeatureProvider[])
+    if (!features) {
+      features = cloneDeep(defaultEditorFeatures)
+    }
+
+    const lexical: LexicalEditorConfig = props.lexical || cloneDeep(defaultEditorLexicalConfig)
+
+    finalSanitizedEditorConfig = sanitizeEditorConfig({
+      features,
+      lexical,
+    })
+  }
 
   return {
     CellComponent: withMergedProps({
@@ -65,16 +89,55 @@ export function lexicalEditor({
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
 export { BlocksFeature } from './field/features/Blocks'
+export {
+  $createBlockNode,
+  $isBlockNode,
+  type BlockFields,
+  BlockNode,
+  type SerializedBlockNode,
+} from './field/features/Blocks/nodes/BlocksNode'
+
 export { HeadingFeature } from './field/features/Heading'
 export { LinkFeature } from './field/features/Link'
 export type { LinkFeatureProps } from './field/features/Link'
+export {
+  $createAutoLinkNode,
+  $isAutoLinkNode,
+  AutoLinkNode,
+  type SerializedAutoLinkNode,
+} from './field/features/Link/nodes/AutoLinkNode'
+
+export {
+  $createLinkNode,
+  $isLinkNode,
+  type LinkFields,
+  LinkNode,
+  type SerializedLinkNode,
+  TOGGLE_LINK_COMMAND,
+} from './field/features/Link/nodes/LinkNode'
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
+export {
+  $createRelationshipNode,
+  $isRelationshipNode,
+  type RelationshipData,
+  RelationshipNode,
+  type SerializedRelationshipNode,
+} from './field/features/Relationship/nodes/RelationshipNode'
 export { UploadFeature } from './field/features/Upload'
 export type { UploadFeatureProps } from './field/features/Upload'
+export {
+  $createUploadNode,
+  $isUploadNode,
+  RawUploadPayload,
+  type SerializedUploadNode,
+  type UploadData,
+  UploadNode,
+} from './field/features/Upload/nodes/UploadNode'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export { TreeviewFeature } from './field/features/debug/TreeView'
+
 export { BoldTextFeature } from './field/features/format/Bold'
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
 export { ItalicTextFeature } from './field/features/format/Italic'
@@ -88,25 +151,43 @@ export { CheckListFeature } from './field/features/lists/CheckList'
 export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnoderedListFeature } from './field/features/lists/UnorderedList'
 export type {
+  AfterReadPromise,
   Feature,
   FeatureProvider,
   FeatureProviderMap,
+  NodeValidation,
   ResolvedFeature,
   ResolvedFeatureMap,
   SanitizedFeatures,
 } from './field/features/types'
-
 export {
   EditorConfigProvider,
   useEditorConfigContext,
 } from './field/lexical/config/EditorConfigProvider'
-export { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexical/config/default'
+export {
+  defaultEditorConfig,
+  defaultEditorFeatures,
+  defaultEditorLexicalConfig,
+  defaultSanitizedEditorConfig,
+} from './field/lexical/config/default'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
+export { getEnabledNodes } from './field/lexical/nodes'
+
+export { ToolbarButton } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarButton'
+export { ToolbarDropdown } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarDropdown/index'
+export {
+  type FloatingToolbarSection,
+  type FloatingToolbarSectionEntry,
+} from './field/lexical/plugins/FloatingSelectToolbar/types'
+export {
+  SlashMenuGroup,
+  SlashMenuOption,
+} from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 // export SanitizedEditorConfig
 export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
 export { RichTextCell }
 export { RichTextField }
-export { getEnabledNodes } from './field/lexical/nodes'
+export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
 export { defaultRichTextValue } from './populate/defaultValue'

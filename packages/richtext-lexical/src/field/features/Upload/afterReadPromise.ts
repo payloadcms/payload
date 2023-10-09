@@ -17,19 +17,20 @@ export const uploadAfterReadPromiseHOC = (
     overrideAccess,
     req,
     showHiddenFields,
+    siblingDoc,
   }) => {
     const promises: Promise<void>[] = []
 
-    if (node?.fields?.value?.id) {
-      const collection = req.payload.collections[node?.fields?.relationTo]
+    if (node?.value?.id) {
+      const collection = req.payload.collections[node?.relationTo]
 
       if (collection) {
         promises.push(
           populate({
-            id: node?.fields?.value?.id,
+            id: node?.value?.id,
             collection,
             currentDepth,
-            data: node.fields,
+            data: node,
             depth,
             field,
             key: 'value',
@@ -39,17 +40,18 @@ export const uploadAfterReadPromiseHOC = (
           }),
         )
       }
-      if (Array.isArray(props?.collections?.[node?.fields?.relationTo]?.fields)) {
+      if (Array.isArray(props?.collections?.[node?.relationTo]?.fields)) {
         recurseNestedFields({
           afterReadPromises,
           currentDepth,
           data: node.fields || {},
           depth,
-          fields: props?.collections?.[node?.fields?.relationTo]?.fields,
+          fields: props?.collections?.[node?.relationTo]?.fields,
           overrideAccess,
           promises,
           req,
           showHiddenFields,
+          siblingDoc,
         })
       }
     }

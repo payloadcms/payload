@@ -29,7 +29,8 @@ export function UploadPlugin(): JSX.Element | null {
         (payload: InsertUploadPayload) => {
           editor.update(() => {
             const uploadNode = $createUploadNode({
-              fields: {
+              data: {
+                fields: payload.fields,
                 relationTo: payload.relationTo,
                 value: {
                   id: payload.id,

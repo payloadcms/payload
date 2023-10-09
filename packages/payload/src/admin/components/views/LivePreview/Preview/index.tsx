@@ -13,7 +13,6 @@ import { useLivePreviewContext } from '../Context/context'
 import { DeviceContainer } from '../Device'
 import { IFrame } from '../IFrame'
 import { LivePreviewToolbar } from '../Toolbar'
-import { ToolbarArea } from '../ToolbarArea'
 import './index.scss'
 
 const baseClass = 'live-preview-window'
@@ -100,14 +99,14 @@ const Preview: React.FC<
           .filter(Boolean)
           .join(' ')}
       >
-        <ToolbarArea>
-          <div className={`${baseClass}__wrapper`}>
+        <div className={`${baseClass}__wrapper`}>
+          <LivePreviewToolbar {...props} iframeRef={iframeRef} url={url} />
+          <div className={`${baseClass}__main`}>
             <DeviceContainer>
               <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
             </DeviceContainer>
           </div>
-          <LivePreviewToolbar {...props} iframeRef={iframeRef} url={url} />
-        </ToolbarArea>
+        </div>
       </div>
     )
   }
@@ -115,13 +114,15 @@ const Preview: React.FC<
 
 export const LivePreview: React.FC<
   EditViewProps & {
+    livePreviewConfig?: LivePreviewConfig
     popupState: ReturnType<typeof usePopupWindow>
     url?: string
   }
 > = (props) => {
-  let url
+  const { livePreviewConfig, url } = props
 
-  let breakpoints: LivePreviewConfig['breakpoints'] = [
+  const breakpoints: LivePreviewConfig['breakpoints'] = [
+    ...(livePreviewConfig?.breakpoints || []),
     {
       name: 'responsive',
       height: '100%',
@@ -129,16 +130,6 @@ export const LivePreview: React.FC<
       width: '100%',
     },
   ]
-
-  if ('collection' in props) {
-    url = props?.collection.admin.livePreview.url
-    breakpoints = breakpoints.concat(props?.collection.admin.livePreview.breakpoints)
-  }
-
-  if ('global' in props) {
-    url = props?.global.admin.livePreview.url
-    breakpoints = breakpoints.concat(props?.global.admin.livePreview.breakpoints)
-  }
 
   return (
     <LivePreviewProvider {...props} breakpoints={breakpoints} url={url}>

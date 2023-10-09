@@ -6,9 +6,11 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 import mongoose from 'mongoose'
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
-import { buildVersionGlobalFields } from 'payload/versions'
-import { buildVersionCollectionFields } from 'payload/versions'
-import { getVersionsModelName } from 'payload/versions'
+import {
+  buildVersionCollectionFields,
+  buildVersionGlobalFields,
+  getVersionsModelName,
+} from 'payload/versions'
 
 import type { MongooseAdapter } from '.'
 import type { CollectionModel } from './types'
@@ -35,20 +37,6 @@ export const init: Init = async function init(this: MongooseAdapter) {
           timestamps: false,
         },
       })
-
-      if (collection.indexes) {
-        collection.indexes.forEach((index) => {
-          // prefix 'version.' to each field in the index
-          const versionIndex = {
-            fields: {},
-            options: index.options,
-          }
-          Object.entries(index.fields).forEach(([key, value]) => {
-            versionIndex.fields[`version.${key}`] = value
-          })
-          versionSchema.index(versionIndex.fields, versionIndex.options)
-        })
-      }
 
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
         getBuildQueryPlugin({

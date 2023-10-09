@@ -283,7 +283,7 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         let relationshipFields
-        const relationTableName = `${tableName}_relationships`
+        const relationTableName = `${tableName}_rels`
         const newCollectionPath = pathSegments.slice(1).join('.')
 
         const aliasRelationshipTableName = uuid()

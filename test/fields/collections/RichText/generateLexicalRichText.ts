@@ -90,7 +90,9 @@ export function generateLexicalRichText() {
               fields: {
                 url: 'https://',
                 doc: {
-                  value: '{{ARRAY_DOC_ID}}',
+                  value: {
+                    id: '{{ARRAY_DOC_ID}}',
+                  },
                   relationTo: 'array-fields',
                 },
                 newTab: false,
@@ -117,13 +119,10 @@ export function generateLexicalRichText() {
           format: '',
           type: 'relationship',
           version: 1,
-          fields: {
+          value: {
             id: '{{TEXT_DOC_ID}}',
-            data: {
-              id: '{{TEXT_DOC_ID}}',
-            },
-            relationTo: 'text-fields',
           },
+          relationTo: 'text-fields',
         },
         {
           children: [
@@ -234,11 +233,11 @@ export function generateLexicalRichText() {
           format: '',
           type: 'upload',
           version: 1,
+          relationTo: 'uploads',
+          value: {
+            id: '{{UPLOAD_DOC_ID}}',
+          },
           fields: {
-            relationTo: 'uploads',
-            value: {
-              id: '{{UPLOAD_DOC_ID}}',
-            },
             caption: {
               root: {
                 type: 'root',

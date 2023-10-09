@@ -14,6 +14,7 @@
     flex-wrap: wrap;
     display: flex;
     align-items: center;
+    gap: base(0.25);
 
     .btn {
       margin: 0;
@@ -21,17 +22,12 @@
   }
 
   &__toggler {
-    margin: base(0.25);
     min-width: base(7);
   }
 
   @include mid-break {
     &__wrap {
       padding: base(0.75);
-    }
-
-    &__buttons {
-      display: block;
     }
 
     &__toggler {

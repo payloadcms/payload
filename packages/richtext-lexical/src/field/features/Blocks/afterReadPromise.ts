@@ -18,6 +18,7 @@ export const blockAfterReadPromiseHOC = (
     overrideAccess,
     req,
     showHiddenFields,
+    siblingDoc,
   }) => {
     const promises: Promise<void>[] = []
 
@@ -47,6 +48,7 @@ export const blockAfterReadPromiseHOC = (
             promises,
             req,
             showHiddenFields,
+            siblingDoc,
           })
         }
       })

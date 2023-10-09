@@ -28,7 +28,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   The `users` collection is auth-enabled and encompass both app-wide and tenant-scoped users based on the value of their `roles` and `tenants` fields. Users with the role `super-admin` can manage your entire application, while users with the _tenant role_ of `admin` have limited access to the platform and can manage only the tenant(s) they are assigned to, see [Tenants](#tenants) for more details.
 
-  For additional help with authentication, see the official [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth/cms#readme) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+  For additional help with authentication, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/cms#readme) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
 
 - #### Tenants
 

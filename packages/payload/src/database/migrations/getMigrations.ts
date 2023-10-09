@@ -1,6 +1,9 @@
 import type { Payload } from '../..'
 import type { MigrationData } from '../types'
 
+/**
+ * Gets all existing migrations from the database, excluding the dev migration
+ */
 export async function getMigrations({
   payload,
 }: {
@@ -10,6 +13,11 @@ export async function getMigrations({
     collection: 'payload-migrations',
     limit: 0,
     sort: '-name',
+    where: {
+      batch: {
+        not_equals: -1,
+      },
+    },
   })
 
   const existingMigrations = migrationQuery.docs as unknown as MigrationData[]

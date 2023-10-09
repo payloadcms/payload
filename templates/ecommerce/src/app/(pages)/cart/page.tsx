@@ -15,6 +15,10 @@ import { CartPage } from './CartPage'
 
 import classes from './index.module.scss'
 
+// Force this page to be dynamic so that Next.js does not cache it
+// See the note in '../[slug]/page.tsx' about this
+export const dynamic = 'force-dynamic'
+
 export default async function Cart() {
   let page: Page | null = null
 
@@ -70,7 +74,7 @@ export default async function Cart() {
                 </a>
                 {' then set them as environment variables. See the '}
                 <a
-                  href="https://github.com/payloadcms/payload/blob/master/templates/ecommerce/README.md#stripe"
+                  href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

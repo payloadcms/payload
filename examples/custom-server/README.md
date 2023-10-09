@@ -10,7 +10,7 @@ To spin up this example locally, follow these steps:
 1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
 1. Next `yarn && yarn dev`
 1. Now `open http://localhost:3000/admin` to access the admin panel
-1. Login with email `dev@payloadcms.com` and password `test`
+1. Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
 
@@ -94,7 +94,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates an admin user with email `dev@payloadcms.com`, password `test`, and a `home` page.
+On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_PUBLIC_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates an admin user with email `demo@payloadcms.com`, password `demo`, and a `home` page.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 

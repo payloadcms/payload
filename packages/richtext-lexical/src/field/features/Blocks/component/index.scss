@@ -1,5 +1,10 @@
 @import 'payload/scss';
 
+.ContentEditable__root > div:has(.lexical-block) {
+  // Fixes a bug where, if the block field has a Select field, the Select field's dropdown menu would be hidden behind the lexical editor.
+  z-index: 1;
+}
+
 .lexical-block {
   display: flex;
   flex-direction: column;

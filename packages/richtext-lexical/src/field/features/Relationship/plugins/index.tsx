@@ -5,12 +5,12 @@ import { useConfig } from 'payload/components/utilities'
 import { useEffect } from 'react'
 import React from 'react'
 
-import type { RelationshipFields } from '../nodes/RelationshipNode'
+import type { RelationshipData } from '../nodes/RelationshipNode'
 
 import { RelationshipDrawer } from '../drawer'
 import { $createRelationshipNode, RelationshipNode } from '../nodes/RelationshipNode'
 
-export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipFields> = createCommand(
+export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = createCommand(
   'INSERT_RELATIONSHIP_COMMAND',
 )
 
@@ -23,7 +23,7 @@ export default function RelationshipPlugin(): JSX.Element | null {
       throw new Error('RelationshipPlugin: RelationshipNode not registered on editor')
     }
 
-    return editor.registerCommand<RelationshipFields>(
+    return editor.registerCommand<RelationshipData>(
       INSERT_RELATIONSHIP_COMMAND,
       (payload) => {
         const relationshipNode = $createRelationshipNode(payload)

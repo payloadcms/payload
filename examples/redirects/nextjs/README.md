@@ -1,6 +1,6 @@
 # Redirects Example Front-End
 
-This is a [Next.js](https://nextjs.org/) app made explicitly for Payload's [Redirects Example](https://github.com/payloadcms/payload/tree/master/examples/redirects/cms).
+This is a [Next.js](https://nextjs.org/) app made explicitly for Payload's [Redirects Example](https://github.com/payloadcms/payload/tree/main/examples/redirects/cms).
 
 ## Getting Started
 
@@ -16,7 +16,7 @@ First you'll need a running CMS. If you have not done so already, open up the `c
 4. `yarn dev` or `npm run dev` to start the server
 5. `open http://localhost:3000` to see the result
 
-Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within your CMS. See the [Redirects Example CMS](https://github.com/payloadcms/payload/tree/master/examples/redirects/cms) for full details.
+Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within your CMS. See the [Redirects Example CMS](https://github.com/payloadcms/payload/tree/main/examples/redirects/cms) for full details.
 
 ## Learn More
 

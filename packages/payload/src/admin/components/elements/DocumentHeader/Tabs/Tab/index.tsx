@@ -27,10 +27,12 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
 
   const { t } = useTranslation('general')
   const location = useLocation()
-  const { routes } = useConfig()
-
-  const { versions } = useDocumentInfo()
+  const config = useConfig()
+  const documentInfo = useDocumentInfo()
   const match = useRouteMatch()
+
+  const { routes } = config
+  const { versions } = documentInfo
 
   let href = `${match.url}${typeof tabHref === 'string' ? tabHref : ''}`
 
@@ -52,7 +54,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
       ? checkIsActive
       : location.pathname.startsWith(href)
 
-  if (!condition || (condition && condition({ collection, global }))) {
+  if (!condition || (condition && condition({ collection, config, documentInfo, global }))) {
     const labelToRender = typeof label === 'function' ? label({ t }) : label
     const pillToRender = typeof pillLabel === 'function' ? pillLabel({ versions }) : pillLabel
 

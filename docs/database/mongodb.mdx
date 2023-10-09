@@ -1,19 +1,46 @@
 ---
 title: MongoDB
 label: MongoDB
-order: 20
-desc: Payload has supported MongoDB natively since alpha. The flexible nature of MongoDB lends itself well to Payload's powerful fields.
+order: 40
+desc: Payload has supported MongoDB natively since we started. The flexible nature of MongoDB lends itself well to Payload's powerful fields.
 keywords: MongoDB, documentation, typescript, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-##### `mongoURL`
+To use Payload with MongoDB, install the package `@payloadcms/db-mongodb`. It will come with everything you need to store your Payload data in MongoDB.
 
-**Required**. This is a fully qualified MongoDB connection string that points to your MongoDB database. If you don't have MongoDB installed locally, you can [follow these steps for Mac OSX](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/) and [these steps](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/) for Windows 10. If you want to use a local database and you know you have MongoDB installed locally, a typical connection string will look like this:
+Then from there, pass it to your Payload config as follows:
 
-`mongodb://127.0.0.1/payload`
+```ts
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
-In contrast to running MongoDB locally, a popular option is to sign up for a free [MongoDB Atlas account](https://www.mongodb.com/cloud/atlas), which is a fully hosted and cloud-based installation of MongoDB that you don't need to ever worry about.
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the Mongoose adapter here
+  db: mongooseAdapter({
+    // Mongoose-specific arguments go here.
+    // URL is required.
+    url: process.env.DATABASE_URI,
+  }),
+})
+```
 
-##### `mongoOptions`
+### Options
 
-Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.
+| Option                | Description                                                                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `autoPluralization`   | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s.  |
+| `connectOptions`      | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose. |
+| `migrationDir`        | Customize the directory that migrations are stored. |
+
+### Access to Mongoose models
+
+After Payload is initialized, this adapter exposes all of your Mongoose models and they are available for you to work with directly.
+
+You can access Mongoose models as follows:
+
+- Collection models - `payload.db.collections[myCollectionSlug]`
+- Globals model - `payload.db.globals`
+- Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`

@@ -5,17 +5,18 @@ import path from 'path'
 import shelljs from 'shelljs'
 import { v4 as uuid } from 'uuid'
 
+import type { Payload } from '../../packages/payload/src'
 import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
-import payload, { Payload } from '../../packages/payload/src'
+import payload from '../../packages/payload/src'
 
 type Options = {
   __dirname: string
   init?: Partial<InitOptions>
 }
 
-type InitializedPayload = { serverURL: string; payload: Payload }
+type InitializedPayload = { payload: Payload; serverURL: string }
 
 export async function initPayloadE2E(__dirname: string): Promise<InitializedPayload> {
   const webpackCachePath = path.resolve(__dirname, '../../node_modules/.cache/webpack')
