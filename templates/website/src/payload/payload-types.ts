@@ -15,6 +15,9 @@ export interface Config {
     categories: Category
     users: User
     comments: Comment
+    redirects: Redirect
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
   }
   globals: {
     settings: Settings
@@ -36,8 +39,8 @@ export interface Page {
         type?: 'reference' | 'custom'
         newTab?: boolean
         reference: {
-          value: string | Page
           relationTo: 'pages'
+          value: string | Page
         }
         url: string
         label: string
@@ -58,8 +61,8 @@ export interface Page {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -83,8 +86,8 @@ export interface Page {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -115,43 +118,43 @@ export interface Page {
         selectedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocsTotal?: number
@@ -218,8 +221,8 @@ export interface Post {
         type?: 'reference' | 'custom'
         newTab?: boolean
         reference: {
-          value: string | Page
           relationTo: 'pages'
+          value: string | Page
         }
         url: string
         label: string
@@ -240,8 +243,8 @@ export interface Post {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -265,8 +268,8 @@ export interface Post {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -297,43 +300,43 @@ export interface Post {
         selectedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocsTotal?: number
@@ -354,8 +357,8 @@ export interface Post {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -379,8 +382,8 @@ export interface Post {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -411,43 +414,43 @@ export interface Post {
         selectedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocsTotal?: number
@@ -497,8 +500,8 @@ export interface Project {
         type?: 'reference' | 'custom'
         newTab?: boolean
         reference: {
-          value: string | Page
           relationTo: 'pages'
+          value: string | Page
         }
         url: string
         label: string
@@ -519,8 +522,8 @@ export interface Project {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -544,8 +547,8 @@ export interface Project {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -576,43 +579,43 @@ export interface Project {
         selectedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocs?:
           | (
               | {
-                  value: string
                   relationTo: 'posts'
+                  value: string
                 }
               | {
-                  value: string
                   relationTo: 'projects'
+                  value: string
                 }
             )[]
           | (
               | {
-                  value: Post
                   relationTo: 'posts'
+                  value: Post
                 }
               | {
-                  value: Project
                   relationTo: 'projects'
+                  value: Project
                 }
             )[]
         populatedDocsTotal?: number
@@ -645,6 +648,51 @@ export interface Comment {
   createdAt: string
   _status?: 'draft' | 'published'
 }
+export interface Redirect {
+  id: string
+  from: string
+  to: {
+    type?: 'reference' | 'custom'
+    reference:
+      | {
+          relationTo: 'pages'
+          value: string | Page
+        }
+      | {
+          relationTo: 'posts'
+          value: string | Post
+        }
+    url: string
+  }
+  updatedAt: string
+  createdAt: string
+}
+export interface PayloadPreference {
+  id: string
+  user: {
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string
+  value?:
+    | {
+        [k: string]: unknown
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null
+  updatedAt: string
+  createdAt: string
+}
+export interface PayloadMigration {
+  id: string
+  name?: string
+  batch?: number
+  updatedAt: string
+  createdAt: string
+}
 export interface Settings {
   id: string
   postsPage?: string | Page
@@ -659,8 +707,8 @@ export interface Header {
       type?: 'reference' | 'custom'
       newTab?: boolean
       reference: {
-        value: string | Page
         relationTo: 'pages'
+        value: string | Page
       }
       url: string
       label: string
@@ -677,8 +725,8 @@ export interface Footer {
       type?: 'reference' | 'custom'
       newTab?: boolean
       reference: {
-        value: string | Page
         relationTo: 'pages'
+        value: string | Page
       }
       url: string
       label: string
@@ -687,4 +735,26 @@ export interface Footer {
   }[]
   updatedAt?: string
   createdAt?: string
+}
+
+declare module 'payload' {
+  export interface GeneratedTypes {
+    collections: {
+      pages: Page
+      posts: Post
+      projects: Project
+      media: Media
+      categories: Category
+      users: User
+      comments: Comment
+      redirects: Redirect
+      'payload-preferences': PayloadPreference
+      'payload-migrations': PayloadMigration
+    }
+    globals: {
+      settings: Settings
+      header: Header
+      footer: Footer
+    }
+  }
 }

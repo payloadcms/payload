@@ -1,3 +1,5 @@
+import { webpackBundler } from '@payloadcms/bundler-webpack' // bundler-import
+import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 import { payloadCloud } from '@payloadcms/plugin-cloud'
 // import formBuilder from '@payloadcms/plugin-form-builder'
 import nestedDocs from '@payloadcms/plugin-nested-docs'
@@ -5,6 +7,7 @@ import redirects from '@payloadcms/plugin-redirects'
 import seo from '@payloadcms/plugin-seo'
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import stripePlugin from '@payloadcms/plugin-stripe'
+import { slateEditor } from '@payloadcms/richtext-slate' // editor-import
 import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
@@ -40,6 +43,7 @@ dotenv.config({
 export default buildConfig({
   admin: {
     user: Users.slug,
+    bundler: webpackBundler(), // bundler-config
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
@@ -48,24 +52,35 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: [BeforeDashboard],
     },
-    webpack: config => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve?.alias,
-          [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
-          [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]: mockModulePath,
-          [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
-          [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
-          [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
-          [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
-          stripe: mockModulePath,
-          express: mockModulePath,
+    webpack: config => {
+      return {
+        ...config,
+        resolve: {
+          ...config.resolve,
+          alias: {
+            ...config.resolve?.alias,
+            dotenv: path.resolve(__dirname, './dotenv.js'),
+            [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
+            [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]:
+              mockModulePath,
+            [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/seed')]: mockModulePath,
+            stripe: mockModulePath,
+            express: mockModulePath,
+          },
         },
-      },
-    }),
+      }
+    },
   },
+  editor: slateEditor({}), // editor-config
+  // database-adapter-config-start
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
+  // database-adapter-config-end
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   collections: [Pages, Products, Orders, Media, Categories, Users],
   globals: [Settings, Header, Footer],

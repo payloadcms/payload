@@ -40,13 +40,13 @@ export const seed = async (payload: Payload): Promise<void> => {
   await Promise.all([
     ...collections.map(async collection =>
       payload.delete({
-        collection,
+        collection: collection as 'media',
         where: {},
       }),
     ), // eslint-disable-line function-paren-newline
     ...globals.map(async global =>
       payload.updateGlobal({
-        slug: global,
+        slug: global as 'header',
         data: {},
       }),
     ), // eslint-disable-line function-paren-newline
