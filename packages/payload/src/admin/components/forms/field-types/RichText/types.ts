@@ -2,7 +2,7 @@ import type { PayloadRequest } from '../../../../../express/types'
 import type { RichTextField, Validate } from '../../../../../fields/config/types'
 import type { CellComponentProps } from '../../../views/collections/List/Cell/types'
 
-export type RichTextFieldProps<AdapterProps = unknown> = Omit<
+export type RichTextFieldProps<AdapterProps = object> = Omit<
   RichTextField<AdapterProps>,
   'type'
 > & {
