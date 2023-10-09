@@ -1,4 +1,6 @@
-export const productsPage = {
+import type { Page } from '../payload-types'
+
+export const productsPage: Omit<Page, 'updatedAt' | 'createdAt' | 'id'> = {
   title: 'Products',
   slug: 'products',
   _status: 'published',
@@ -8,6 +10,7 @@ export const productsPage = {
   },
   hero: {
     type: 'lowImpact',
+    media: null,
     richText: [
       {
         type: 'h1',
