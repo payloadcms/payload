@@ -50,7 +50,7 @@ const webpackReplacement: BundlerReplacement = {
   packageName: '@payloadcms/bundler-webpack',
   importReplacement: "import { webpackBundler } from '@payloadcms/bundler-webpack'",
   // Replacement of line containing `// bundler-config`
-  configReplacement: '  bundler: webpackBundler(),',
+  configReplacement: '    bundler: webpackBundler(),',
 }
 
 const viteReplacement: BundlerReplacement = {
