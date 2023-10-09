@@ -8,7 +8,7 @@ export const USER = `
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const gql = async (query: string): Promise<any> => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/graphql`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/graphql`, {
       method: 'POST',
       credentials: 'include',
       headers: {
