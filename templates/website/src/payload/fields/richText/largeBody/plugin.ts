@@ -1,4 +1,4 @@
-import type { RichTextCustomElement } from 'payload/types'
+import type { RichTextCustomElement } from '@payloadcms/richtext-slate/dist/types'
 import type { BaseEditor } from 'slate'
 
 type RichTextPlugin = Exclude<RichTextCustomElement['plugins'], undefined>[0]

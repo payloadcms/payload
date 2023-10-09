@@ -21,6 +21,8 @@ export interface Config {
     categories: Category
     users: User
     redirects: Redirect
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
   }
   globals: {
     settings: Settings
@@ -42,8 +44,8 @@ export interface Page {
         type?: 'reference' | 'custom'
         newTab?: boolean
         reference: {
-          value: string | Page
           relationTo: 'pages'
+          value: string | Page
         }
         url: string
         label: string
@@ -64,8 +66,8 @@ export interface Page {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -89,8 +91,8 @@ export interface Page {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -120,21 +122,21 @@ export interface Page {
         limit?: number
         selectedDocs?:
           | {
-              value: string
               relationTo: 'products'
+              value: string
             }[]
           | {
-              value: Product
               relationTo: 'products'
+              value: Product
             }[]
         populatedDocs?:
           | {
-              value: string
               relationTo: 'products'
+              value: string
             }[]
           | {
-              value: Product
               relationTo: 'products'
+              value: Product
             }[]
         populatedDocsTotal?: number
         id?: string
@@ -195,8 +197,8 @@ export interface Product {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -220,8 +222,8 @@ export interface Product {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -251,21 +253,21 @@ export interface Product {
         limit?: number
         selectedDocs?:
           | {
-              value: string
               relationTo: 'products'
+              value: string
             }[]
           | {
-              value: Product
               relationTo: 'products'
+              value: Product
             }[]
         populatedDocs?:
           | {
-              value: string
               relationTo: 'products'
+              value: string
             }[]
           | {
-              value: Product
               relationTo: 'products'
+              value: Product
             }[]
         populatedDocsTotal?: number
         id?: string
@@ -287,8 +289,8 @@ export interface Product {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -312,8 +314,8 @@ export interface Product {
             type?: 'reference' | 'custom'
             newTab?: boolean
             reference: {
-              value: string | Page
               relationTo: 'pages'
+              value: string | Page
             }
             url: string
             label: string
@@ -343,21 +345,21 @@ export interface Product {
         limit?: number
         selectedDocs?:
           | {
-              value: string
               relationTo: 'products'
+              value: string
             }[]
           | {
-              value: Product
               relationTo: 'products'
+              value: Product
             }[]
         populatedDocs?:
           | {
-              value: string
               relationTo: 'products'
+              value: string
             }[]
           | {
-              value: Product
               relationTo: 'products'
+              value: Product
             }[]
         populatedDocsTotal?: number
         id?: string
@@ -420,15 +422,41 @@ export interface Redirect {
     type?: 'reference' | 'custom'
     reference:
       | {
-          value: string | Page
           relationTo: 'pages'
+          value: string | Page
         }
       | {
-          value: string | Product
           relationTo: 'products'
+          value: string | Product
         }
     url: string
   }
+  updatedAt: string
+  createdAt: string
+}
+export interface PayloadPreference {
+  id: string
+  user: {
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string
+  value?:
+    | {
+        [k: string]: unknown
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null
+  updatedAt: string
+  createdAt: string
+}
+export interface PayloadMigration {
+  id: string
+  name?: string
+  batch?: number
   updatedAt: string
   createdAt: string
 }
@@ -445,8 +473,8 @@ export interface Header {
       type?: 'reference' | 'custom'
       newTab?: boolean
       reference: {
-        value: string | Page
         relationTo: 'pages'
+        value: string | Page
       }
       url: string
       label: string
@@ -463,8 +491,8 @@ export interface Footer {
       type?: 'reference' | 'custom'
       newTab?: boolean
       reference: {
-        value: string | Page
         relationTo: 'pages'
+        value: string | Page
       }
       url: string
       label: string
@@ -473,4 +501,25 @@ export interface Footer {
   }[]
   updatedAt?: string
   createdAt?: string
+}
+
+declare module 'payload' {
+  export interface GeneratedTypes {
+    collections: {
+      pages: Page
+      products: Product
+      orders: Order
+      media: Media
+      categories: Category
+      users: User
+      redirects: Redirect
+      'payload-preferences': PayloadPreference
+      'payload-migrations': PayloadMigration
+    }
+    globals: {
+      settings: Settings
+      header: Header
+      footer: Footer
+    }
+  }
 }
