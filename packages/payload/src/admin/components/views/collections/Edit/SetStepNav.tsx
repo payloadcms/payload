@@ -49,8 +49,7 @@ export const SetStepNav: React.FC<
     slug = globalFromProps?.slug
   }
 
-  // This only applies to collections
-  const title = useTitle(collection)
+  const title = useTitle({ collection, global })
 
   const { setStepNav } = useStepNav()
 
@@ -80,7 +79,7 @@ export const SetStepNav: React.FC<
       }
     } else if (global) {
       nav.push({
-        label: getTranslation(global.label, i18n),
+        label: title,
         url: `${admin}/globals/${slug}`,
       })
     }

@@ -281,6 +281,9 @@ export default buildConfigWithDefaults({
     },
     {
       slug: globalSlug,
+      label: {
+        en: 'My Global Label',
+      },
       admin: {
         group: 'Group',
       },
@@ -301,7 +304,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-
     {
       slug: 'custom-global-views-one',
       versions: true,
@@ -354,6 +356,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'group-globals-one',
+      label: 'Group Globals 1',
       admin: {
         group: 'Group',
       },
