@@ -51,6 +51,12 @@ export default buildConfig({
 
 These new properties are all now required for Payload to function, and you will have to install each separate adapter that you use. Feel free to swap out any of the adapters with your choice (Lexical, Postgres, Vite, etc.)
 
+Make sure to install the packages that you need. In the above example, you would need to install the following:
+
+```bash
+npm install --save @payloadcms/db-mongodb @payloadcms/richtext-slate @payloadcms/bundler-webpack
+```
+
 ### ⚠️ Draft versions now require a `latest: true` property to be set on the most recent draft in your `_versions` collections(s)
 
 We have a ready-to-go migration script for your versions from v1 to v2, and to use it, all you have to do is run the following commands:
