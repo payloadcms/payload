@@ -12,6 +12,7 @@
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm build"
