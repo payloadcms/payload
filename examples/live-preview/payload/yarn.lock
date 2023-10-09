@@ -1130,9 +1130,9 @@
     fastq "^1.6.0"
 
 "@payloadcms/bundler-webpack@^1.0.0-beta.5":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@payloadcms/bundler-webpack/-/bundler-webpack-1.0.0.tgz#1c642dfed274f2646d78a57167c074b997673c30"
-  integrity sha512-pzn5HmETAzXaIIEtMce9H2N69WcNP15pzHBonxy04LKwGNJxPBh5RZuZ62sE1Lt/z4kN+XfdJng1bAVZlpCM3Q==
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@payloadcms/bundler-webpack/-/bundler-webpack-1.0.1.tgz#430ecca183570f50f4c8dd6bfffb766c5af9d3e2"
+  integrity sha512-AnFv1vY3+LoltUIPaj2dI515eEjOaz3WnYLtnKYD8VgKkDLysRbpVKuLTGyrJsYpEaEm7zsYmPeTmt1Ne/BeBg==
   dependencies:
     compression "1.7.4"
     connect-history-api-fallback "1.6.0"
@@ -1160,9 +1160,9 @@
     webpack-hot-middleware "^2.25.3"
 
 "@payloadcms/db-mongodb@^1.0.0-beta.8":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/db-mongodb/-/db-mongodb-1.0.1.tgz#fb49bd217e8f622fef5f21d9e29dec8e8190e280"
-  integrity sha512-IcXC/s8qPvEUtqgli6aK1379Av1O3pMIwDyQhSVezhAVuqUO8juIUN/Y0Crbch/CDr5A3b80bZ+u4lk76zPqgw==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@payloadcms/db-mongodb/-/db-mongodb-1.0.2.tgz#2c801eee0974334677e0a4ebd16fc26b1aa9f839"
+  integrity sha512-SCJfhJg3BeMW36Y10qNdzU6awgOD75zFR9FEhGkmCknr/EO8C51qxURamMntbiEuqxIh/uCl5PS7j2jXkIFL/w==
   dependencies:
     bson-objectid "2.0.4"
     deepmerge "4.3.1"
@@ -1179,9 +1179,9 @@
   integrity sha512-EcS7qyX4++eBP/MS4QgrFOzzplsVMaPDfEcxWYoH9OLJCUTlGz8UmfMZPWU7DeAuyehJdij+BywSrcprqun9rA==
 
 "@payloadcms/richtext-slate@^1.0.0-beta.4":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@payloadcms/richtext-slate/-/richtext-slate-1.0.0.tgz#4215d8e355a7f8b7e1584e295b443c0624c161ff"
-  integrity sha512-6cGrdgrk1ZJ/ryiXA5MyMmBU2yHmayj/xZjHHL+G8g7DK3fgImUHCYR1Q5fvrCDaGAE/luxwS1Q9Vo0RSffRsA==
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@payloadcms/richtext-slate/-/richtext-slate-1.0.1.tgz#00dce12e93602c1847e5e9a2dd17f0eb59ebaa3b"
+  integrity sha512-g96/c7Upfzf56x04xw94wPKOqF/UpcEJxi9oWdA0yJHCFA3tSVi5Hkfas2t2h7/PN/NPgS91aiWry5jB+NA5rA==
   dependencies:
     "@faceless-ui/modal" "2.0.1"
     i18next "22.5.1"
@@ -1830,9 +1830,9 @@
     "@types/react" "*"
 
 "@types/react@*":
-  version "18.2.25"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.2.25.tgz#99fa44154132979e870ff409dc5b6e67f06f0199"
-  integrity sha512-24xqse6+VByVLIr+xWaQ9muX1B4bXJKXBbjszbld/UEDslGLY53+ZucF44HCmLbMPejTzGG9XgR+3m2/Wqu1kw==
+  version "18.2.26"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.2.26.tgz#3bc3f33b804cbfd7d0bda6e8a014cb6ee4be74b9"
+  integrity sha512-ZaMtQo/fasHwMSRTED+u4Cjnkl0uuqEFJ2rKF0DQXji1v24DaNdSe9am4ldiDKFD/MpzbyS8UEOceh1/Oiw89g==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -5761,10 +5761,10 @@ pause@0.0.1:
   resolved "https://registry.yarnpkg.com/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
   integrity sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==
 
-payload@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-2.0.0.tgz#27e085c61851f40635836769ca5df8c5c5a2020d"
-  integrity sha512-eFWCw3sY2xW61lzznNsTKvtEaeMc0j/gb3P3ln2sH9bE9JeAns5AILLNVa/nW3RWzG/KHXDmtX7Lx3c13M5Mjw==
+payload@latest:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/payload/-/payload-2.0.2.tgz#5068df9130bedd527447ac911fb1b2f09beb469a"
+  integrity sha512-EsbDQJtwVSrX7QTGqtsKhcbaBfIKDmlcHkXiUVVc9gkSEtSSw455FQ7oa4sPgDpgKgpkCVC0LVUGOPIkmDJu9g==
   dependencies:
     "@date-io/date-fns" "2.16.0"
     "@dnd-kit/core" "6.0.8"
@@ -7305,9 +7305,9 @@ socks@^2.7.1:
     smart-buffer "^4.2.0"
 
 sonic-boom@^3.0.0, sonic-boom@^3.1.0:
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/sonic-boom/-/sonic-boom-3.6.1.tgz#ce1bc5d58e83d53e42a4b3a036050e463d95c9bb"
-  integrity sha512-QV+p5nXPiUiSMxn/k5bOL+hzCpafdj1voL+hywPZhheRSYyYp7CF15rNdz1evOXCUn/tFb7R62PDX1yJmtoTgg==
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/sonic-boom/-/sonic-boom-3.7.0.tgz#b4b7b8049a912986f4a92c51d4660b721b11f2f2"
+  integrity sha512-IudtNvSqA/ObjN97tfgNmOKyDOs4dNcg4cUUsHDebqsgb8wGBBwb31LIgShNO8fye0dFI52X1+tFoKKI6Rq1Gg==
   dependencies:
     atomic-sleep "^1.0.0"
 
