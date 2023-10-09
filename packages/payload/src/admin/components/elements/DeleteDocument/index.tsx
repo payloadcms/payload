@@ -13,6 +13,7 @@ import { useForm } from '../../forms/Form/context'
 import MinimalTemplate from '../../templates/Minimal'
 import { useConfig } from '../../utilities/Config'
 import Button from '../Button'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'delete-document'
@@ -41,40 +42,46 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const modalSlug = `delete-${id}`
 
   const addDefaultError = useCallback(() => {
+    setDeleting(false)
     toast.error(t('error:deletingTitle', { title }))
   }, [t, title])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     setDeleting(true)
     setModified(false)
-    requests
-      .delete(`${serverURL}${api}/${slug}/${id}`, {
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(async (res) => {
-        try {
-          const json = await res.json()
-          if (res.status < 400) {
+    try {
+      await requests
+        .delete(`${serverURL}${api}/${slug}/${id}`, {
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(async (res) => {
+          try {
+            const json = await res.json()
+            if (res.status < 400) {
+              setDeleting(false)
+              toggleModal(modalSlug)
+              toast.success(t('titleDeleted', { label: getTranslation(singular, i18n), title }))
+              return history.push(`${admin}/collections/${slug}`)
+            }
+
             toggleModal(modalSlug)
-            toast.success(t('titleDeleted', { label: getTranslation(singular, i18n), title }))
-            return history.push(`${admin}/collections/${slug}`)
-          }
 
-          toggleModal(modalSlug)
-
-          if (json.errors) {
-            json.errors.forEach((error) => toast.error(error.message))
-          } else {
-            addDefaultError()
+            if (json.errors) {
+              json.errors.forEach((error) => toast.error(error.message))
+            } else {
+              addDefaultError()
+            }
+            return false
+          } catch (e) {
+            return addDefaultError()
           }
-          return false
-        } catch (e) {
-          return addDefaultError()
-        }
-      })
+        })
+    } catch (e) {
+      addDefaultError()
+    }
   }, [
     setModified,
     serverURL,
@@ -95,9 +102,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   if (id) {
     return (
       <React.Fragment>
-        <Button
-          buttonStyle="none"
-          className={`${baseClass}__toggle`}
+        <PopupList.Button
           id={buttonId}
           onClick={() => {
             setDeleting(false)
@@ -105,7 +110,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
           }}
         >
           {t('delete')}
-        </Button>
+        </PopupList.Button>
         <Modal className={baseClass} slug={modalSlug}>
           <MinimalTemplate className={`${baseClass}__template`}>
             <h1>{t('confirmDeletion')}</h1>
