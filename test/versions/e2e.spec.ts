@@ -145,5 +145,21 @@ describe('versions', () => {
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDescription)
     })
+
+    test('should delete', async () => {
+      await page.goto(url.list)
+
+      const firstRowTitle = await page.locator('.row-1 .cell-title').innerText()
+
+      await page.locator('.row-1 .cell-_select input').click()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+
+      await expect(page.locator('.Toastify__toast--success')).toContainText(
+        'Deleted 1 Draft Post successfully.',
+      )
+
+      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(firstRowTitle)
+    })
   })
 })
