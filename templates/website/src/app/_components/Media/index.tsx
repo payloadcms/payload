@@ -11,6 +11,7 @@ export const Media: React.FC<Props> = props => {
   const Tag = (htmlElement as ElementType) || Fragment
 
   return (
+    // ts-expect-error
     <Tag
       {...(htmlElement !== null
         ? {
