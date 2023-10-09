@@ -42,10 +42,13 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const modalSlug = `delete-${id}`
 
   const addDefaultError = useCallback(() => {
+    setDeleting(false)
     toast.error(t('error:deletingTitle', { title }))
   }, [t, title])
 
   const handleDelete = useCallback(async () => {
+    setDeleting(true)
+    setModified(false)
     try {
       await requests
         .delete(`${serverURL}${api}/${slug}/${id}`, {
@@ -58,8 +61,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
           try {
             const json = await res.json()
             if (res.status < 400) {
-              setDeleting(true)
-              setModified(false)
+              setDeleting(false)
               toggleModal(modalSlug)
               toast.success(t('titleDeleted', { label: getTranslation(singular, i18n), title }))
               return history.push(`${admin}/collections/${slug}`)
