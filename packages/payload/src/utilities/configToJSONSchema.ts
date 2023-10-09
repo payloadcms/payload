@@ -510,8 +510,8 @@ export function configToJSONSchema(config: SanitizedConfig): JSONSchema4 {
     additionalProperties: false,
     definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
     properties: {
-      collections: generateEntitySchemas(config.collections),
-      globals: generateEntitySchemas(config.globals),
+      collections: generateEntitySchemas(config.collections || []),
+      globals: generateEntitySchemas(config.globals || []),
     },
     required: ['collections', 'globals'],
     title: 'Config',
