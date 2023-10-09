@@ -21,7 +21,7 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src"
   },
   "dependencies": {
-    "@payloadcms/bundler-webpack": "^1.0.0-beta.5",
+    "@payloadcms/bundler-webpack": "^1.0.0-beta.6",
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/plugin-cloud": "^2.0.0",
     "@payloadcms/plugin-nested-docs": "^1.0.4",
