@@ -1380,10 +1380,10 @@
   resolved "https://registry.yarnpkg.com/@one-ini/wasm/-/wasm-0.1.1.tgz#6013659736c9dbfccc96e8a9c2b3de317df39323"
   integrity sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==
 
-"@payloadcms/bundler-webpack@latest":
-  version "1.0.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@payloadcms/bundler-webpack/-/bundler-webpack-1.0.0-beta.6.tgz#71a32de1b7569513cc29529eeedaec94643dfb96"
-  integrity sha512-wgCvr0iD2YU1GU5HgltFDDVzwEY9HCi+9rhEgVMHO9OFu/hBhfgG9eoMtgnzfoNs5FG9C2KIxJbTPlzwSqKfIA==
+"@payloadcms/bundler-webpack@^1.0.0-beta.5":
+  version "1.0.0-beta.5"
+  resolved "https://registry.npmjs.org/@payloadcms/bundler-webpack/-/bundler-webpack-1.0.0-beta.5.tgz#95f6a04fc68bce92efc8be2edca5622bd3bf40fe"
+  integrity sha512-YQ9tHBKeoK9CD5P6tR5XZUNZzr9uVceoAfcQABuLLeLhDxoqY1ANPGEDa44fT1XHwTHvdcGkFiLtsgrFJEseFA==
   dependencies:
     compression "1.7.4"
     connect-history-api-fallback "1.6.0"
@@ -1394,7 +1394,7 @@
     md5 "2.3.0"
     mini-css-extract-plugin "1.6.2"
     path-browserify "1.0.1"
-    postcss "8.4.31"
+    postcss "8.4.27"
     postcss-loader "6.2.1"
     postcss-preset-env "9.0.0"
     process "0.11.10"
@@ -7141,7 +7141,16 @@ postcss@8.4.14:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-postcss@8.4.31, postcss@^8.2.15, postcss@^8.4.24:
+postcss@8.4.27:
+  version "8.4.27"
+  resolved "https://registry.npmjs.org/postcss/-/postcss-8.4.27.tgz#234d7e4b72e34ba5a92c29636734349e0d9c3057"
+  integrity sha512-gY/ACJtJPSmUFPDCHtX78+01fHa64FaU4zaaWfuh1MhGJISufJAH4cun6k/8fwsHYeK4UQmENQK+tRLCFJE8JQ==
+  dependencies:
+    nanoid "^3.3.6"
+    picocolors "^1.0.0"
+    source-map-js "^1.0.2"
+
+postcss@^8.2.15, postcss@^8.4.24:
   version "8.4.31"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.31.tgz#92b451050a9f914da6755af352bdc0192508656d"
   integrity sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==

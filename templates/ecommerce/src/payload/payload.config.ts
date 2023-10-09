@@ -52,23 +52,26 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       beforeDashboard: [BeforeDashboard],
     },
-    webpack: config => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve?.alias,
-          [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
-          [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]: mockModulePath,
-          [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
-          [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
-          [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
-          [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
-          stripe: mockModulePath,
-          express: mockModulePath,
+    webpack: config => {
+      return {
+        ...config,
+        resolve: {
+          ...config.resolve,
+          alias: {
+            ...config.resolve?.alias,
+            [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
+            [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]:
+              mockModulePath,
+            [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
+            [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
+            stripe: mockModulePath,
+            express: mockModulePath,
+          },
         },
-      },
-    }),
+      }
+    },
   },
   editor: slateEditor({}), // editor-config
   // database-adapter-config-start
