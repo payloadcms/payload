@@ -150,23 +150,62 @@ describe('admin', () => {
   })
 
   describe('doc titles', () => {
-    beforeAll(async () => {
-      await openNav(page)
+    test('collection - should render fallback titles when creating new', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.doc-header__title.render-title')).toContainText('[Untitled]')
+      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText('Create New')
+    })
+
+    test('collection - should render `useAsTitle` field', async () => {
+      await page.goto(url.create)
+      const titleField = page.locator('#field-title')
+      await titleField.fill(title)
+      await expect(page.locator('.doc-header__title.render-title')).toContainText(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
+    })
+
+    test('collection - should render `id` as `useAsTitle` fallback', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill(title)
+      await expect(page.locator('.doc-header__title.render-title')).toContainText(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
+      await page.locator('#field-title').fill('')
+      await expect(page.locator('.doc-header__title.render-title')).toContainText('ID: ')
     })
 
     test('global - should render custom, localized label', async () => {
+      await openNav(page)
+      const label = 'My Global Label'
       const globalLabel = page.locator(`#nav-global-${globalSlug}`)
-      await expect(globalLabel).toContainText('My Global Label')
+      await expect(globalLabel).toContainText(label)
+      await globalLabel.click()
+      await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
+      const nav = page.locator('.step-nav.app-header__step-nav')
+      await expect(nav).toContainText(label)
     })
 
     test('global - should render simple label strings', async () => {
+      await openNav(page)
+      const label = 'Group Globals 1'
       const globalLabel = page.locator(`#nav-global-group-globals-one`)
-      await expect(globalLabel).toContainText('Group Globals 1')
+      await expect(globalLabel).toContainText(label)
+      await globalLabel.click()
+      await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
+      const nav = page.locator('.step-nav.app-header__step-nav')
+      await expect(nav).toContainText(label)
     })
 
     test('global - should render slug in sentence case as fallback', async () => {
+      await openNav(page)
+      const label = 'Group Globals Two'
       const globalLabel = page.locator(`#nav-global-group-globals-two`)
-      await expect(globalLabel).toContainText('Group Globals Two')
+      await expect(globalLabel).toContainText(label)
+      await globalLabel.click()
+      await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
+      const nav = page.locator('.step-nav.app-header__step-nav')
+      await expect(nav).toContainText(label)
     })
   })
 
