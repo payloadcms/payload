@@ -22,10 +22,6 @@ interface Args {
 }
 
 export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promise<Payload> => {
-  if (!process.env.MONGODB_URI) {
-    throw new Error('MONGODB_URI environment variable is missing')
-  }
-
   if (!process.env.PAYLOAD_SECRET) {
     throw new Error('PAYLOAD_SECRET environment variable is missing')
   }
@@ -36,7 +32,6 @@ export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promis
 
   if (!cached.promise) {
     cached.promise = payload.init({
-      mongoURL: process.env.MONGODB_URI,
       secret: process.env.PAYLOAD_SECRET,
       local: initOptions?.express ? false : true,
       ...(initOptions || {}),

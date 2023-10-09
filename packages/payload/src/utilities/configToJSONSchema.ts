@@ -2,8 +2,8 @@ import type { JSONSchema4 } from 'json-schema'
 
 import { singular } from 'pluralize'
 
+import type { Payload } from '..'
 import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { SanitizedConfig } from '../config/types'
 import type { Field, FieldAffectingData, Option } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
 
@@ -433,7 +433,7 @@ function fieldsToJSONSchema(
 
 // This function is part of the public API and is exported through payload/utilities
 export function entityToJSONSchema(
-  config: SanitizedConfig,
+  payload: Payload,
   incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
 ): JSONSchema4 {
@@ -442,7 +442,9 @@ export function entityToJSONSchema(
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
-  const idField: FieldAffectingData = { name: 'id', required: true, type: 'text' }
+  const defaultIDType = payload.db.defaultIDType
+
+  const idField: FieldAffectingData = { name: 'id', required: true, type: defaultIDType as 'text' }
   const customIdField = entity.fields.find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   ) as FieldAffectingData
@@ -474,18 +476,20 @@ export function entityToJSONSchema(
   }
 
   // used for relationship fields, to determine whether to use a string or number type for the ID
-  const collectionIDFieldTypes: { [key: string]: 'number' | 'string' } = config.collections.reduce(
-    (acc, collection) => {
+  const collectionIDFieldTypes: { [key: string]: 'number' | 'string' } =
+    payload.config.collections.reduce((acc, collection) => {
       const customCollectionIdField = collection.fields.find(
         (field) => 'name' in field && field.name === 'id',
       )
 
-      acc[collection.slug] = customCollectionIdField?.type === 'number' ? 'number' : 'string'
+      acc[collection.slug] = payload.db.defaultIDType === 'text' ? 'string' : 'number'
+
+      if (customCollectionIdField) {
+        acc[collection.slug] = customCollectionIdField.type === 'number' ? 'number' : 'string'
+      }
 
       return acc
-    },
-    {},
-  )
+    }, {})
 
   return {
     additionalProperties: false,
@@ -495,14 +499,14 @@ export function entityToJSONSchema(
   }
 }
 
-export function configToJSONSchema(config: SanitizedConfig): JSONSchema4 {
+export function configToJSONSchema(payload: Payload): JSONSchema4 {
   // a mutable Map to store custom top-level `interfaceName` types
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
   const entityDefinitions: { [k: string]: JSONSchema4 } = [
-    ...config.globals,
-    ...config.collections,
+    ...payload.config.globals,
+    ...payload.config.collections,
   ].reduce((acc, entity) => {
-    acc[entity.slug] = entityToJSONSchema(config, entity, interfaceNameDefinitions)
+    acc[entity.slug] = entityToJSONSchema(payload, entity, interfaceNameDefinitions)
     return acc
   }, {})
 
@@ -510,8 +514,8 @@ export function configToJSONSchema(config: SanitizedConfig): JSONSchema4 {
     additionalProperties: false,
     definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
     properties: {
-      collections: generateEntitySchemas(config.collections || []),
-      globals: generateEntitySchemas(config.globals || []),
+      collections: generateEntitySchemas(payload.config.collections || []),
+      globals: generateEntitySchemas(payload.config.globals || []),
     },
     required: ['collections', 'globals'],
     title: 'Config',

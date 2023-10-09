@@ -8,6 +8,16 @@ desc: Payload features first-party database migrations all done in TypeScript.
 
 Payload exposes a full suite of migration controls available for your use. Migration commands are accessible via the `npm run payload` command in your project directory.
 
+Ensure you have an npm script called "payload" in your `package.json` file.
+
+```json
+{
+  "scripts": {
+    "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload"
+  }
+}
+```
+
 <Banner>
   Note that you need to run Payload migrations through the package manager that you are using, because Payload should not be globally installed on your system.
 </Banner>
@@ -41,18 +51,6 @@ All database adapters should implement similar migration patterns, but there wil
 ### Migrate
 
 The `migrate` command will run any migrations that have not yet been run.
-
-First, add a `payload` npm script to your  `package.json`
-
-```json
-{
-  "scripts": {
-    "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload"
-  }
-}
-```
-
-This will allow you to access the migration commands via `npm run payload`. Adjust the `PAYLOAD_CONFIG_PATH` to point to your Payload config file if necessary.
 
 ```text
 npm run payload migrate

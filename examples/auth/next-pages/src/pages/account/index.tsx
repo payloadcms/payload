@@ -40,15 +40,18 @@ const Account: React.FC = () => {
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (user) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/${user.id}`, {
-          // Make sure to include cookies with fetch
-          credentials: 'include',
-          method: 'PATCH',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/${user.id}`,
+          {
+            // Make sure to include cookies with fetch
+            credentials: 'include',
+            method: 'PATCH',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        })
+        )
 
         if (response.ok) {
           const json = await response.json()
@@ -91,7 +94,7 @@ const Account: React.FC = () => {
       <h1>Account</h1>
       <p>
         {`This is your account dashboard. Here you can update your account information and more. To manage all users, `}
-        <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+        <Link href={`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/admin/collections/users`}>
           login to the admin dashboard
         </Link>
         {'.'}

@@ -17,9 +17,6 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "payload/generated-types": [
-        "./src/payload-types.ts"
-      ],
       "node_modules/*": [
         "./node_modules/*"
       ]

@@ -1,7 +1,7 @@
 import type { Page } from '../payload-types'
 
 export const examplePage: Partial<Page> = {
-  title: 'Example Page',
+  title: 'Example Page (Published)',
   slug: 'example-page',
   _status: 'published',
   richText: [

@@ -13,7 +13,7 @@ export interface IGlobals {
 }
 
 export const getAllGlobals = async (): Promise<IGlobals> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/globals/main-menu?depth=1`)
+  const res = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/globals/main-menu?depth=1`)
   const mainMenu = await res.json()
 
   return {

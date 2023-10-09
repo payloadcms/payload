@@ -335,7 +335,7 @@ export const traverseFields = ({
           })
         }
       } else {
-        if (fieldData === null) {
+        if (fieldData === null || (Array.isArray(fieldData) && fieldData.length === 0)) {
           relationshipsToDelete.push({ path: relationshipPath })
           return
         }
