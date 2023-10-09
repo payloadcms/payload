@@ -1,4 +1,4 @@
-import React, { ElementType, Fragment } from 'react'
+import React, { Fragment } from 'react'
 
 import { Image } from './Image'
 import { Props } from './types'
@@ -20,10 +20,8 @@ export const Media: React.FC<Props> = props => {
         : {})}
     >
       {isVideo ? (
-        // @ts-expect-error
         <Video {...props} />
       ) : (
-        // @ts-expect-error
         <Image {...props} /> // eslint-disable-line
       )}
     </Tag>
