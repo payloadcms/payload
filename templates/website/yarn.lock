@@ -6374,10 +6374,10 @@ payload-admin-bar@^1.0.6:
   resolved "https://registry.yarnpkg.com/payload-admin-bar/-/payload-admin-bar-1.0.6.tgz#ca25e369a4f319c3d61ff3db4021c1c2fd9d0148"
   integrity sha512-hpQdOiPq4LpWTkbuAnvxDf5wQ2ysMp9kQt+X2U+FfvBwD1U6qoxJfmUymG1OjLlaZzCZ93FlOdTl4u4Z0/m/SA==
 
-payload@beta:
-  version "2.0.0-beta.30"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-2.0.0-beta.30.tgz#56594994d70eef83ca95850a38dadad2c30e6494"
-  integrity sha512-haQ/LCJMNKWgimRlPs5HmNWbT2jP4SHYFxd2ht43hESZ4gE5uFvwsgpqeWwQiO+QCttmgNBkrfmJfNLLDm7hgw==
+payload@^2.0.0-beta.31:
+  version "2.0.0-beta.31"
+  resolved "https://registry.npmjs.org/payload/-/payload-2.0.0-beta.31.tgz#e67390378dacdcbd0fb47a23fe29b1d1110de37c"
+  integrity sha512-QJqEBSzmYW/ZxMRNWk+oHPMBPUuP0q8RBD/a+ufg1V0UGilkdce6F1Jfx5i0R7xSfUd2sGK3cU9KZ3L8/0WlCg==
   dependencies:
     "@date-io/date-fns" "2.16.0"
     "@dnd-kit/core" "6.0.8"
