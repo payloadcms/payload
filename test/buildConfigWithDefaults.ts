@@ -36,7 +36,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
     editor: slateEditor({}),
     rateLimit: {
       max: 9999999999,
-      window: 15 * 60 * 100, // 15min default,
+      window: 15 * 60 * 1000, // 15min default,
     },
     telemetry: false,
     ...testConfig,
