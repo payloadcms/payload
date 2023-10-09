@@ -22,7 +22,7 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "beta"
+    "payload": "latest"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",

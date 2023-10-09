@@ -39,9 +39,9 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 export const slug = 'posts'
 export const relationSlug = 'relation'
 export const defaultAccessRelSlug = 'strict-access'
-export const chainedRelSlug = 'chained-relation'
-export const customIdSlug = 'custom-id-relation'
-export const customIdNumberSlug = 'custom-id-number-relation'
+export const chainedRelSlug = 'chained'
+export const customIdSlug = 'custom-id'
+export const customIdNumberSlug = 'custom-id-number'
 export default buildConfigWithDefaults({
   collections: [
     {

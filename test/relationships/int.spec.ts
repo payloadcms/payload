@@ -261,7 +261,7 @@ describe('Relationships', () => {
 
       beforeAll(async () => {
         const thirdLevelDoc = await payload.create({
-          collection: 'chained-relation',
+          collection: 'chained',
           data: {
             name: 'third',
           },
@@ -270,7 +270,7 @@ describe('Relationships', () => {
         thirdLevelID = thirdLevelDoc.id
 
         const secondLevelDoc = await payload.create({
-          collection: 'chained-relation',
+          collection: 'chained',
           data: {
             name: 'second',
             relation: thirdLevelID,
@@ -280,7 +280,7 @@ describe('Relationships', () => {
         secondLevelID = secondLevelDoc.id
 
         const firstLevelDoc = await payload.create({
-          collection: 'chained-relation',
+          collection: 'chained',
           data: {
             name: 'first',
             relation: secondLevelID,
@@ -292,7 +292,7 @@ describe('Relationships', () => {
 
       it('should allow querying one level deep', async () => {
         const query1 = await payload.find({
-          collection: 'chained-relation',
+          collection: 'chained',
           where: {
             'relation.name': {
               equals: 'second',
@@ -304,7 +304,7 @@ describe('Relationships', () => {
         expect(query1.docs[0].id).toStrictEqual(firstLevelID)
 
         const query2 = await payload.find({
-          collection: 'chained-relation',
+          collection: 'chained',
           where: {
             'relation.name': {
               equals: 'third',
@@ -318,7 +318,7 @@ describe('Relationships', () => {
 
       it('should allow querying two levels deep', async () => {
         const query = await payload.find({
-          collection: 'chained-relation',
+          collection: 'chained',
           where: {
             'relation.relation.name': {
               equals: 'third',

@@ -18,7 +18,9 @@ import { buildConfig } from 'payload/config'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
-  db: mongooseAdapter({}),
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
   // ...rest of config
 })
 

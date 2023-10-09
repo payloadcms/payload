@@ -1,4 +1,200 @@
-# [1.14.0](https://github.com/payloadcms/payload/compare/v1.13.4...v1.14.0) (2023-08-16)
+## [2.0.0](https://github.com/payloadcms/payload/releases/tag/v2.0.0) (2023-10-09)
+
+### Features
+
+- New [database adapter pattern](https://payloadcms.com/docs/database/overview)
+- Official [Postgres adapter](https://payloadcms.com/docs/database/postgres) released, built on [Drizzle ORM](https://orm.drizzle.team)
+- Database [transactions](https://payloadcms.com/docs/database/transactions) added
+- Full, first-party [migration support](https://payloadcms.com/docs/database/migrations) added
+- The admin UI has been redesigned to be more extensible and offer more horizontal real estate
+- Admin UI sidebar is now collapsible
+- [Live preview](https://payloadcms.com/docs/live-preview/overview) added to admin UI, including usable frontend hooks
+- New "Views" API added, which allows for custom sub-views on List and Edit views within Admin UI
+- New [bundler adapter pattern](https://payloadcms.com/docs/admin/bundlers) released
+- Official [Vite bundler](https://payloadcms.com/docs/admin/vite) released
+- Offical [Lexical rich text adapter](https://payloadcms.com/docs/rich-text/lexical) released
+- Lexical rich text editor now supports drag and drop of rich text elements
+- Lexical rich text now supports Payload blocks directly within rich text editor
+- Upload image cropping added
+- Upload "focal point" controls added
+- New "API" view added to Edit view(s), allowing for quick and customizable references to API response
+- MongoDB draft querying has been significantly improved and is now much faster
+- Arabic / RTL UI support added
+- Locales can now be further configured to accept settings like `rtl`, human-friendly labels, etc.
+- The `tsconfig` `path` pointing to your generated Payload types is no longer required for types to work
+
+### BREAKING CHANGES
+
+#### You now need to provide your Payload config with a database, a bundler, and a rich text adapter
+
+Here's an example of a barebones Payload config, set up to work as 1.0 did:
+
+```ts
+import { mongooseAdapter } from "@payloadcms/db-mongodb";
+import { slateEditor } from "@payloadcms/richtext-slate";
+import { webpackBundler } from "@payloadcms/bundler-webpack";
+import { buildConfig } from "payload/config";
+
+export default buildConfig({
+  admin: {
+    bundler: webpackBundler(),
+  },
+  editor: slateEditor({}),
+  collections: [
+    // your collections here
+  ],
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
+});
+```
+
+These new properties are all now required for Payload to function, and you will have to install each separate adapter that you use. Feel free to swap out any of the adapters with your choice (Lexical, Postgres, Vite, etc.)
+
+#### Draft versions now require a `latest: true` property to be set on the most recent draft in your `_versions` collections(s)
+
+We have a ready-to-go migration script for your versions from v1 to v2, and to use it, all you have to do is run the following commands:
+
+**1. Create a migration, using the new Payload migration API**
+
+```bash
+npm run payload migrate:create --file @payloadcms/db-mongodb/versions-v1-v2
+```
+
+The above command will output a migration file into your `./src/migrations` folder (default migrations location). It contains a migration script to automatically add a `latest: true` flag to each of your newest drafts, for all draft-enabled collections. It works out of the box!
+
+**2. Run migrations**
+
+From there, you need to run migrations. Run the following command to execute your new migration:
+
+```bash
+npm run payload migrate
+```
+
+And you'll be all good!
+
+#### Array and block field validations now accept the full array of field data as their validation argument instead of the value.length
+
+This change should only affect you if you have a custom array / block validation defined.
+
+#### For MongoDB, all models have been moved from the Payload object to the database adapter
+
+For example, if you are leveraging Mongoose models directly, in 1.0, you would have accessed them via `payload.collections[myCollectionSlug].Model`. Now, you can access the Mongoose model from `payload.db.collections[myCollectionSlug]`.
+
+Version models can be accessed from `payload.db.versions[myEntitySlug]`, and the global model can be accessed via `payload.db.globals`.
+
+#### User preferences data shape has changed, and you will lose preferences unless you manually migrate them to the new shape
+
+We don't have a migration ready to go yet for user preferences, and this typically wouldn't be a big deal for most Payload projects. So don't let it stop you from updating unless you have a serious amount of user preferences that you'd like to keep. If so, we'll come up with a migration script for you and hook you up. Just reach out to us on Discord to ask for this.
+
+#### Node 16 is now the minimum required node version and Node 14 is no longer supported
+
+Pretty self-explanatory on this one. Node 14 is old.
+
+#### The Pino logger has been updated, which may require you to make changes to your Pino config if you have a custom one
+
+If you don't have anything custom with the Pino logger, this does not apply to you.
+
+#### Transactions are now enabled by default if your database supports them
+
+MongoDB requires a replica set for transactions to work, so they likely are not going to work for you unless you do indeed have a replica set configured. But if you do, transactions will now instantly work for all internal Payload operations.
+
+This means that in some fringe cases, if you are creating a doc and then instantly trying to update it within an `afterChange` hook, the newly created doc may not truly exist yet. This should not cause any problems for 99% of projects, but if you think this applies to you, might be good to double-check through your code.
+
+To avoid any issues, you can pass the `req.transactionID` through to your Local API calls, so that your Local API calls are included as part of the parent transaction.
+
+#### Admin panel CSS classes may have changed
+
+The revisions we've made in 2.0 required changes to both HTML and CSS within the admin panel. For this reason, if you were loading custom CSS into the admin panel to customize the look and feel, your stylesheets may need to be updated. If your CSS is targeting elements on the page using HTML selectors or class names, you may need to update these selectors based on the current markup. It may also be necessary to update your style definitions if the core Payload component you are targeting has undergone significant change.
+
+In many cases, our classnames and structure have remained the same, but technically, this could be a breaking change.
+
+#### Custom admin views API has changed
+
+These changes only affect apps that are using custom views via the `admin.components.routes` config.
+
+The type `AdminRoute` was renamed to `AdminViewConfig`. Simply update your instances with this new type and it will continue to work as expected. The properties of this type have not changed.
+
+The `admin.components.routes` config has been merged with `admin.components.views`. Simply move your custom views to the `views` object. The properties of the config have not changed. Here is an example:
+
+Previous:
+
+```ts
+admin: {
+  components: {
+    routes: [
+      {
+        Component: MyCustomView,
+        path: "/custom-view",
+      },
+    ];
+  }
+}
+```
+
+Current:
+
+```ts
+admin: {
+  components: {
+    views: {
+      MyCustomView: {
+        Component: MyCustomView,
+        path: '/custom-view'
+      }
+    }]
+  }
+}
+```
+
+#### Rich text admin properties have moved
+
+If you have customized the Slate rich text editor via `admin.elements` or `admin.leaves` properties, you now need to add your customizations to a `slateEditor({ admin: {} })` property. The signatures are all the same, but you might have to move some properties around.
+
+Previous:
+
+```ts
+const myRichTextField: Field = {
+  name: "content",
+  type: "richText",
+  admin: {
+    elements: [
+      "h1",
+      "link",
+      // etc
+    ],
+  },
+};
+```
+
+Current:
+
+```ts
+import { slateEditor } from "@payloadcms/richtext-slate";
+
+const myRichTextField: Field = {
+  name: "content",
+  type: "richText",
+  editor: slateEditor({
+    // Move the admin property as shown below
+    admin: {
+      elements: [
+        "h1",
+        "link",
+        // etc
+      ],
+    },
+  }),
+};
+```
+
+### Recap
+
+That's it! Most of these changes will be instantly apparent to you thanks to TypeScript, and many may not apply to you at all. But this list should be comprehensive and we will do our best to keep everything up-to-date here accordingly. There are inevitably some types that have changed locations, and similar things like that, but overall, you should be able to swing the breaking changes and get updated.
+
+If you need a hand, reach out on Discord and we will hook you up!
+
+## [1.14.0](https://github.com/payloadcms/payload/compare/v1.13.4...v1.14.0) (2023-08-16)
 
 ### Bug Fixes
 
