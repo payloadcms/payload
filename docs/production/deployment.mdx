@@ -160,7 +160,7 @@ DigitalOcean provides extremely helpful documentation that can walk you through 
 
 ## Docker
 
-This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `MONGODB_URI` if needed.
+This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.
 
 ```dockerfile
 FROM node:18-alpine as base
@@ -210,7 +210,7 @@ services:
     depends_on:
       - mongo
     environment:
-      MONGODB_URI: mongodb://mongo:27017/payload
+      DATABASE_URI: mongodb://mongo:27017/payload
       PORT: 3000
       NODE_ENV: development
       PAYLOAD_SECRET: TESTING

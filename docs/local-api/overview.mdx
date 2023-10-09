@@ -412,7 +412,7 @@ dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 })
 
-const { PAYLOAD_SECRET, MONGODB_URI } = process.env
+const { PAYLOAD_SECRET } = process.env
 
 const doAction = async (): Promise<void> => {
   await payload.init({
