@@ -77,7 +77,7 @@
     "flatley": "5.2.0",
     "fs-extra": "10.1.0",
     "get-tsconfig": "4.6.2",
-    "graphql": "16.7.1",
+    "graphql": "16.8.1",
     "graphql-http": "1.21.0",
     "graphql-playground-middleware-express": "1.7.23",
     "graphql-query-complexity": "0.12.0",

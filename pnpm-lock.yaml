@@ -95,7 +95,7 @@ importers:
         version: 8.1.0
       graphql-request:
         specifier: 6.1.0
-        version: 6.1.0(graphql@16.7.1)
+        version: 6.1.0(graphql@16.8.1)
       husky:
         specifier: ^8.0.3
         version: 8.0.3
@@ -559,23 +559,23 @@ importers:
         specifier: 4.6.2
         version: 4.6.2
       graphql:
-        specifier: 16.7.1
-        version: 16.7.1
+        specifier: 16.8.1
+        version: 16.8.1
       graphql-http:
         specifier: 1.21.0
-        version: 1.21.0(graphql@16.7.1)
+        version: 1.21.0(graphql@16.8.1)
       graphql-playground-middleware-express:
         specifier: 1.7.23
         version: 1.7.23(express@4.18.2)
       graphql-query-complexity:
         specifier: 0.12.0
-        version: 0.12.0(graphql@16.7.1)
+        version: 0.12.0(graphql@16.8.1)
       graphql-scalars:
         specifier: 1.22.2
-        version: 1.22.2(graphql@16.7.1)
+        version: 1.22.2(graphql@16.8.1)
       graphql-type-json:
         specifier: 0.3.2
-        version: 0.3.2(graphql@16.7.1)
+        version: 0.3.2(graphql@16.8.1)
       html-webpack-plugin:
         specifier: 5.5.3
         version: 5.5.3(webpack@5.88.2)
@@ -885,7 +885,7 @@ importers:
         version: 5.1.1
       graphql-request:
         specifier: 3.7.0
-        version: 3.7.0(graphql@16.7.1)
+        version: 3.7.0(graphql@16.8.1)
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.88.2)
@@ -2691,12 +2691,12 @@ packages:
     resolution: {integrity: sha512-qprfWkn82Iw821mcKofJ5Pk9wgioHicxcQMxx+5zt5GSKoqdWvgG5AxVmpmUUjzTLPVSH5auBrhI93Deayn/DA==}
     dev: false
 
-  /@graphql-typed-document-node/core@3.2.0(graphql@16.7.1):
+  /@graphql-typed-document-node/core@3.2.0(graphql@16.8.1):
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
     dev: true
 
   /@hapi/hoek@9.3.0:
@@ -8882,13 +8882,13 @@ packages:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: false
 
-  /graphql-http@1.21.0(graphql@16.7.1):
+  /graphql-http@1.21.0(graphql@16.8.1):
     resolution: {integrity: sha512-yrItPfHj5WeT4n7iusbVin+vGSQjXFAX6U/GnYytdCJRXVad1TWGtYFDZ2ROjCKpXQzIwvfbiWCEwfuXgR3B6A==}
     engines: {node: '>=12'}
     peerDependencies:
       graphql: '>=0.11 <=16'
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
     dev: false
 
   /graphql-playground-html@1.6.30:
@@ -8906,16 +8906,16 @@ packages:
       graphql-playground-html: 1.6.30
     dev: false
 
-  /graphql-query-complexity@0.12.0(graphql@16.7.1):
+  /graphql-query-complexity@0.12.0(graphql@16.8.1):
     resolution: {integrity: sha512-fWEyuSL6g/+nSiIRgIipfI6UXTI7bAxrpPlCY1c0+V3pAEUo1ybaKmSBgNr1ed2r+agm1plJww8Loig9y6s2dw==}
     peerDependencies:
       graphql: ^14.6.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
       lodash.get: 4.4.2
     dev: false
 
-  /graphql-request@3.7.0(graphql@16.7.1):
+  /graphql-request@3.7.0(graphql@16.8.1):
     resolution: {integrity: sha512-dw5PxHCgBneN2DDNqpWu8QkbbJ07oOziy8z+bK/TAXufsOLaETuVO4GkXrbs0WjhdKhBMN3BkpN/RIvUHkmNUQ==}
     peerDependencies:
       graphql: 14 - 16
@@ -8923,43 +8923,43 @@ packages:
       cross-fetch: 3.1.8
       extract-files: 9.0.0
       form-data: 3.0.1
-      graphql: 16.7.1
+      graphql: 16.8.1
     transitivePeerDependencies:
       - encoding
     dev: true
 
-  /graphql-request@6.1.0(graphql@16.7.1):
+  /graphql-request@6.1.0(graphql@16.8.1):
     resolution: {integrity: sha512-p+XPfS4q7aIpKVcgmnZKhMNqhltk20hfXtkaIkTfjjmiKMJ5xrt5c743cL03y/K7y1rg3WrIC49xGiEQ4mxdNw==}
     peerDependencies:
       graphql: 14 - 16
     dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.7.1)
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
       cross-fetch: 3.1.8
-      graphql: 16.7.1
+      graphql: 16.8.1
     transitivePeerDependencies:
       - encoding
     dev: true
 
-  /graphql-scalars@1.22.2(graphql@16.7.1):
+  /graphql-scalars@1.22.2(graphql@16.8.1):
     resolution: {integrity: sha512-my9FB4GtghqXqi/lWSVAOPiTzTnnEzdOXCsAC2bb5V7EFNQjVjwy3cSSbUvgYOtDuDibd+ZsCDhz+4eykYOlhQ==}
     engines: {node: '>=10'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
       tslib: 2.6.2
     dev: false
 
-  /graphql-type-json@0.3.2(graphql@16.7.1):
+  /graphql-type-json@0.3.2(graphql@16.8.1):
     resolution: {integrity: sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==}
     peerDependencies:
       graphql: '>=0.8.0'
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
     dev: false
 
-  /graphql@16.7.1:
-    resolution: {integrity: sha512-DRYR9tf+UGU0KOsMcKAlXeFfX89UiiIZ0dRU3mR0yJfu6OjZqUcp68NnFLnqQU5RexygFoDy1EW+ccOYcPfmHg==}
+  /graphql@16.8.1:
+    resolution: {integrity: sha512-59LZHPdGZVh695Ud9lRzPBVTtlX9ZCV150Er2W43ro37wVof0ctenSaskPPjN7lVTIN8mSZt8PHUNKZuNQUuxw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   /gzip-size@6.0.0:
