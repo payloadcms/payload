@@ -173,6 +173,7 @@ describe('admin', () => {
       await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
       await page.locator('#field-title').fill('')
       await expect(page.locator('.doc-header__title.render-title')).toContainText('ID: ')
+      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText('[Untitled]')
     })
 
     test('global - should render custom, localized label', async () => {
