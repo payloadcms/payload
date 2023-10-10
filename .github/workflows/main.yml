@@ -108,6 +108,7 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-latest
     needs: core-build
+    container: mcr.microsoft.com/playwright:v1.38.1
     strategy:
       fail-fast: false
       matrix:
