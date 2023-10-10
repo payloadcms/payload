@@ -24,7 +24,7 @@
     "script:release:beta": "./scripts/release_beta.sh",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
-    "test:e2e": "ts-node -T ./test/runE2E.ts",
+    "test:e2e": "npx playwright install --with-deps && ts-node -T ./test/runE2E.ts",
     "test:e2e:debug": "cross-env PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "test:int:postgres": "cross-env PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
@@ -77,7 +77,6 @@
     "slash": "3.0.0",
     "slate": "0.91.4",
     "ts-node": "10.9.1",
-    "tsx": "^3.13.0",
     "turbo": "^1.10.15",
     "typescript": "5.2.2",
     "uuid": "^9.0.0"

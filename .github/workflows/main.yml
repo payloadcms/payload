@@ -169,11 +169,22 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
-# DB Adapters
-
-  build-db-mongodb:
+  build-packages:
+    name: Build Packages
     runs-on: ubuntu-latest
     needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg:
+          - db-mongodb
+          - db-postgres
+          - bundler-webpack
+          - bundler-vite
+          - richtext-slate
+          - richtext-lexical
+          - live-preview
+          - live-preview-react
 
     steps:
       - name: Use Node.js 18
@@ -193,162 +204,5 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-      - name: Build db-mongodb
-        run: pnpm turbo run build --filter=db-mongodb
-
-  build-db-postgres:
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build db-postgres
-        run: pnpm turbo run build --filter=db-postgres
-
-# Bundlers
-
-  build-bundler-webpack:
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build bundler-webpack
-        run: pnpm turbo run build --filter=bundler-webpack
-
-  build-bundler-vite:
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build bundler-vite
-        run: pnpm turbo run build --filter=bundler-vite
-
-# Other Plugins
-
-  build-plugin-richtext-slate:
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build richtext-slate
-        run: pnpm turbo run build --filter=richtext-slate
-
-  build-plugin-richtext-lexical:
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build richtext-lexical
-        run: pnpm turbo run build --filter=richtext-lexical
-
-  build-plugin-live-preview:
-    runs-on: ubuntu-latest
-    needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Build live-preview
-        run: pnpm turbo run build --filter=live-preview
-
-      - name: Build live-preview-react
-        run: pnpm turbo run build --filter=live-preview-react
+      - name: Build ${{ matrix.pkg }}
+        run: pnpm turbo run build --filter=${{ matrix.pkg }}
