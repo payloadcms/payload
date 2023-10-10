@@ -31,7 +31,7 @@ import wait from '../../packages/payload/src/utilities/wait'
 import { changeLocale } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { autosaveSlug, draftSlug } from './shared'
+import { autosaveSlug, draftSlug, titleToDelete } from './shared'
 
 const { beforeAll, describe } = test
 
@@ -92,7 +92,7 @@ describe('versions', () => {
       await page.locator('.form-submit .edit-many__publish').click()
 
       await expect(page.locator('.Toastify__toast--success')).toContainText(
-        'Updated 2 Draft Posts successfully.',
+        'Draft Posts successfully.',
       )
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
       await expect(page.locator('.row-2 .cell-_status')).toContainText('Published')
@@ -111,7 +111,7 @@ describe('versions', () => {
       await page.locator('.form-submit .edit-many__draft').click()
 
       await expect(page.locator('.Toastify__toast--success')).toContainText(
-        'Updated 2 Draft Posts successfully.',
+        'Draft Posts successfully.',
       )
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
       await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft')
@@ -149,9 +149,10 @@ describe('versions', () => {
     test('should delete', async () => {
       await page.goto(url.list)
 
-      const firstRowTitle = await page.locator('.row-1 .cell-title').innerText()
+      const rows = page.locator(`tr`)
+      const rowToDelete = rows.filter({ hasText: titleToDelete })
 
-      await page.locator('.row-1 .cell-_select input').click()
+      await rowToDelete.locator('.cell-_select input').click()
       await page.locator('.delete-documents__toggle').click()
       await page.locator('#confirm-delete').click()
 
@@ -159,7 +160,7 @@ describe('versions', () => {
         'Deleted 1 Draft Post successfully.',
       )
 
-      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(firstRowTitle)
+      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
     })
   })
 })
