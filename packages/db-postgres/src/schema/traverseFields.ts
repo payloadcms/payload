@@ -34,6 +34,7 @@ type Args = {
   buildRelationships: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
+  disableNotNull: boolean
   disableUnique?: boolean
   fieldPrefix?: string
   fields: (Field | TabAsField)[]
@@ -62,6 +63,7 @@ export const traverseFields = ({
   buildRelationships,
   columnPrefix,
   columns,
+  disableNotNull,
   disableUnique = false,
   fieldPrefix,
   fields,
@@ -218,6 +220,7 @@ export const traverseFields = ({
             adapter,
             baseColumns,
             baseExtraConfig,
+            disableNotNull,
             disableUnique,
             fields: [],
             tableName: selectTableName,
@@ -274,6 +277,7 @@ export const traverseFields = ({
           adapter,
           baseColumns,
           baseExtraConfig,
+          disableNotNull,
           disableUnique,
           fields: field.fields,
           rootRelationsToBuild,
@@ -339,6 +343,7 @@ export const traverseFields = ({
               adapter,
               baseColumns,
               baseExtraConfig,
+              disableNotNull,
               disableUnique,
               fields: block.fields,
               rootRelationsToBuild,
@@ -399,6 +404,7 @@ export const traverseFields = ({
             buildRelationships,
             columnPrefix,
             columns,
+            disableNotNull,
             disableUnique,
             fieldPrefix,
             fields: field.fields,
@@ -432,6 +438,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
+          disableNotNull,
           disableUnique,
           fieldPrefix: `${fieldName}_`,
           fields: field.fields,
@@ -466,6 +473,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix,
           columns,
+          disableNotNull,
           disableUnique,
           fieldPrefix,
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
@@ -502,6 +510,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix,
           columns,
+          disableNotNull,
           disableUnique,
           fieldPrefix,
           fields: field.fields,
@@ -544,7 +553,13 @@ export const traverseFields = ({
 
     const condition = field.admin && field.admin.condition
 
-    if (targetTable[fieldName] && 'required' in field && field.required && !condition) {
+    if (
+      !disableNotNull &&
+      targetTable[fieldName] &&
+      'required' in field &&
+      field.required &&
+      !condition
+    ) {
       targetTable[fieldName].notNull()
     }
   })

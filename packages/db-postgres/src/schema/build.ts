@@ -27,6 +27,7 @@ type Args = {
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
+  disableNotNull: boolean
   disableUnique: boolean
   fields: Field[]
   rootRelationsToBuild?: Map<string, string>
@@ -46,6 +47,7 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   buildRelationships,
+  disableNotNull,
   disableUnique = false,
   fields,
   rootRelationsToBuild,
@@ -102,6 +104,7 @@ export const buildTable = ({
     adapter,
     buildRelationships,
     columns,
+    disableNotNull,
     disableUnique,
     fields,
     indexes,

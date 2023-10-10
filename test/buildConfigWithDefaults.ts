@@ -9,7 +9,9 @@ import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 import { slateEditor } from '../packages/richtext-slate/src'
 
-// process.env.PAYLOAD_DATABASE = 'postgres'
+process.env.PAYLOAD_DATABASE = 'postgres'
+process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payload'
+process.env.PAYLOAD_DROP_DATABASE = 'true'
 
 const bundlerAdapters = {
   vite: viteBundler(),
