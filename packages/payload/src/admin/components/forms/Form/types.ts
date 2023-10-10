@@ -109,17 +109,17 @@ export type REMOVE_ROW = {
 
 export type ADD_ROW = {
   blockType?: string
+  initialRowData?: Fields
   path: string
   rowIndex?: number
-  subFieldState?: Fields
   type: 'ADD_ROW'
 }
 
 export type REPLACE_ROW = {
   blockType?: string
+  initialRowData?: Fields
   path: string
   rowIndex: number
-  subFieldState?: Fields
   type: 'REPLACE_ROW'
 }
 
@@ -190,7 +190,7 @@ export type Context = {
   getField: GetField
   getFields: GetFields
   getSiblingData: GetSiblingData
-  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => Promise<void>
+  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     data,
     path,

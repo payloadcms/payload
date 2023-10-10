@@ -431,7 +431,7 @@ const Form: React.FC<Props> = (props) => {
     [],
   )
 
-  const getRowConfigByPath = React.useCallback(
+  const getRowSchemaByPath = React.useCallback(
     ({ blockType, path }: { blockType?: string; path: string }) => {
       const rowConfig = traverseRowConfigs({
         fieldConfig: collection?.fields || global?.fields,
@@ -449,17 +449,17 @@ const Form: React.FC<Props> = (props) => {
   const addFieldRow: Context['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
       const preferences = await getDocPreferences()
-      const fieldConfig = getRowConfigByPath({
+      const rowSchema = getRowSchemaByPath({
         blockType: data?.blockType,
         path,
       })
 
-      if (fieldConfig) {
+      if (rowSchema) {
         const subFieldState = await buildStateFromSchema({
           id,
           config,
           data,
-          fieldSchema: fieldConfig,
+          fieldSchema: rowSchema,
           locale,
           operation,
           preferences,
@@ -468,18 +468,18 @@ const Form: React.FC<Props> = (props) => {
         })
         dispatchFields({
           blockType: data?.blockType,
+          initialRowData: reduceFieldsToValues(subFieldState, true),
           path,
           rowIndex,
-          subFieldState,
           type: 'ADD_ROW',
         })
       }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath, config],
+    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
   )
 
   const removeFieldRow: Context['removeFieldRow'] = useCallback(
-    async ({ path, rowIndex }) => {
+    ({ path, rowIndex }) => {
       dispatchFields({ path, rowIndex, type: 'REMOVE_ROW' })
     },
     [dispatchFields],
@@ -488,17 +488,17 @@ const Form: React.FC<Props> = (props) => {
   const replaceFieldRow: Context['replaceFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
       const preferences = await getDocPreferences()
-      const fieldConfig = getRowConfigByPath({
+      const rowSchema = getRowSchemaByPath({
         blockType: data?.blockType,
         path,
       })
 
-      if (fieldConfig) {
+      if (rowSchema) {
         const subFieldState = await buildStateFromSchema({
           id,
           config,
           data,
-          fieldSchema: fieldConfig,
+          fieldSchema: rowSchema,
           locale,
           operation,
           preferences,
@@ -507,14 +507,14 @@ const Form: React.FC<Props> = (props) => {
         })
         dispatchFields({
           blockType: data?.blockType,
+          initialRowData: reduceFieldsToValues(subFieldState, true),
           path,
           rowIndex,
-          subFieldState,
           type: 'REPLACE_ROW',
         })
       }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath, config],
+    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef])
