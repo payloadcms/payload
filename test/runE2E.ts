@@ -10,11 +10,10 @@ const playwrightBin = path.resolve(__dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
 const { _: args, bail, part } = minimist(process.argv.slice(2))
-console.log({ args, bail, part })
 const suiteName = args[0]
 
 // Run all
-if (!suiteName || args[0].startsWith('-')) {
+if (!suiteName) {
   let files = glob.sync(`${path.resolve(__dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
 
   const totalFiles = files.length
