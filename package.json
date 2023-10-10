@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@playwright/test": "1.37.1",
+    "@playwright/test": "1.38.1",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.29",
     "@swc/register": "0.1.10",
