@@ -5,9 +5,9 @@ import type { Props } from './types'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { RowProvider } from './provider'
-import { fieldBaseClass } from '../shared'
 
 const Row: React.FC<Props> = (props) => {
   const {
@@ -29,7 +29,6 @@ const Row: React.FC<Props> = (props) => {
         }))}
         fieldTypes={fieldTypes}
         indexPath={indexPath}
-        margins={false}
         permissions={permissions}
         readOnly={readOnly}
       />
