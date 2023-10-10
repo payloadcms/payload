@@ -18,11 +18,11 @@ export const PageClient: React.FC<{
 
   return (
     <React.Fragment>
-      <Hero {...data.hero} />
+      <Hero {...data?.hero} />
       <Blocks
-        blocks={data.layout}
+        blocks={data?.layout}
         disableTopPadding={
-          !data.hero || data.hero?.type === 'none' || data.hero?.type === 'lowImpact'
+          !data?.hero || data?.hero?.type === 'none' || data?.hero?.type === 'lowImpact'
         }
       />
     </React.Fragment>

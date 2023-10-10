@@ -443,17 +443,14 @@ importers:
         specifier: workspace:*
         version: link:../live-preview
       react:
-        specifier: 18.2.0
+        specifier: ^16.8.0 || ^17.0.0 || ^18.0.0
         version: 18.2.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
-      '@types/node':
-        specifier: 20.5.7
-        version: 20.5.7
       '@types/react':
-        specifier: 18.2.15
+        specifier: ^18.2.0
         version: 18.2.15
       payload:
         specifier: workspace:*
