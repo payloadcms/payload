@@ -69,7 +69,9 @@ export type MigrateUpArgs = { payload: Payload }
 export type MigrateDownArgs = { payload: Payload }
 
 declare module 'payload' {
-  export interface DatabaseAdapter extends Omit<Args, 'pool'> {
+  export interface DatabaseAdapter
+    extends Omit<Args, 'migrationDir' | 'pool'>,
+      BaseDatabaseAdapter {
     drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
     pool: Pool
