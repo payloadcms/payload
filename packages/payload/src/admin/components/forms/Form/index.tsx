@@ -466,11 +466,12 @@ const Form: React.FC<Props> = (props) => {
           t,
           user,
         })
+
         dispatchFields({
           blockType: data?.blockType,
-          initialRowData: reduceFieldsToValues(subFieldState, true),
           path,
           rowIndex,
+          subFieldState,
           type: 'ADD_ROW',
         })
       }
@@ -507,9 +508,9 @@ const Form: React.FC<Props> = (props) => {
         })
         dispatchFields({
           blockType: data?.blockType,
-          initialRowData: reduceFieldsToValues(subFieldState, true),
           path,
           rowIndex,
+          subFieldState,
           type: 'REPLACE_ROW',
         })
       }

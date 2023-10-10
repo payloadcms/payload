@@ -132,7 +132,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'ADD_ROW': {
-      const { blockType, initialRowData, path, rowIndex } = action
+      const { blockType, path, rowIndex, subFieldState } = action
 
       const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata.splice(
@@ -148,7 +148,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       )
 
       if (blockType) {
-        initialRowData.blockType = {
+        subFieldState.blockType = {
           initialValue: blockType,
           valid: true,
           value: blockType,
@@ -156,9 +156,11 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       }
 
       const { remainingFields, rows } = separateRows(path, state)
+      rows.splice(rowIndex, 0, subFieldState)
 
-      // actual form state (value saved in db)
-      rows.splice(rowIndex, 0, initialRowData)
+      const currentValue = Array.isArray(state[path]?.value) ? state[path]?.value : []
+      const newValue = [...(currentValue as Fields[])]
+      newValue.splice(rowIndex, 0, reduceFieldsToValues(subFieldState, true))
 
       const newState: Fields = {
         ...remainingFields,
@@ -167,7 +169,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: rows,
+          value: newValue,
         },
       }
 
@@ -175,7 +177,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'REPLACE_ROW': {
-      const { blockType, initialRowData, path, rowIndex: rowIndexArg } = action
+      const { blockType, path, rowIndex: rowIndexArg, subFieldState } = action
       const { remainingFields, rows } = separateRows(path, state)
       const rowIndex = Math.max(0, Math.min(rowIndexArg, rows?.length - 1 || 0))
 
@@ -188,7 +190,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       }
 
       if (blockType) {
-        initialRowData.blockType = {
+        subFieldState.blockType = {
           initialValue: blockType,
           valid: true,
           value: blockType,
@@ -196,7 +198,11 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       }
 
       // replace form field state
-      rows[rowIndex] = initialRowData
+      rows[rowIndex] = subFieldState
+
+      const currentValue = Array.isArray(state[path]?.value) ? state[path]?.value : []
+      const newValue = [...(currentValue as Fields[])]
+      newValue[rowIndex] = reduceFieldsToValues(subFieldState, true)
 
       const newState: Fields = {
         ...remainingFields,
@@ -205,7 +211,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: rows,
+          value: newValue,
         },
       }
 

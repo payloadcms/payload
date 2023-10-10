@@ -12,16 +12,9 @@ export const separateRows = (path: string, fields: Fields): Result => {
     const newRows = incomingRows
 
     if (fieldPath.indexOf(`${path}.`) === 0) {
-      const [rowIndex, ...childPathSegments] = fieldPath.replace(`${path}.`, '').split('.')
-      const isParentPath = childPathSegments.length > 0
-
-      if (isParentPath) {
-        remainingFields[fieldPath] = field
-      } else {
-        // only add rows without children
-        if (!newRows[rowIndex]) newRows[rowIndex] = {}
-        newRows[rowIndex][fieldPath.replace(`${path}.${String(rowIndex)}.`, '')] = { ...field }
-      }
+      const [rowIndex] = fieldPath.replace(`${path}.`, '').split('.')
+      if (!newRows[rowIndex]) newRows[rowIndex] = {}
+      newRows[rowIndex][fieldPath.replace(`${path}.${String(rowIndex)}.`, '')] = { ...field }
     } else {
       remainingFields[fieldPath] = field
     }
