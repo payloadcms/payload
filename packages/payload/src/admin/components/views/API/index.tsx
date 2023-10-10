@@ -122,12 +122,19 @@ const RecursivelyRenderObjectData = ({
             }
 
             if (type === 'date' || type === 'string' || type === 'null' || type === 'number') {
+              const parentHasKey = Boolean(parentType === 'object' && key)
+
+              const rowClasses = [
+                `${baseClass}__row-line`,
+                `${baseClass}__value-type--${type}`,
+                `${baseClass}__row-line--${objectKey ? 'nested' : 'top'}`,
+              ]
+                .filter(Boolean)
+                .join(' ')
+
               return (
-                <li
-                  className={`${baseClass}__row-line ${baseClass}__value-type--${type}`}
-                  key={`${key}-${keyIndex}`}
-                >
-                  {parentType === 'object' ? <span>{`"${key}": `}</span> : null}
+                <li className={rowClasses} key={`${key}-${keyIndex}`}>
+                  {parentHasKey ? <span>{`"${key}": `}</span> : null}
 
                   {type === 'string' ? (
                     <span className={`${baseClass}__value`}>{`"${value}"`}</span>

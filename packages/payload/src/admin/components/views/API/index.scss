@@ -7,6 +7,10 @@
   gap: calc(var(--base) * 2);
   align-items: flex-start;
 
+  ul {
+    padding-left: calc(var(--base) * 1);
+  }
+
   &--fullscreen {
     padding-left: 0;
     .query-inspector__configuration {
@@ -171,6 +175,10 @@
         color: var(--string-color);
       }
     }
+  }
+
+  &__row-line--nested {
+    margin-left: 25px;
   }
 
   &__bracket {
