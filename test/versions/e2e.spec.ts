@@ -53,6 +53,24 @@ describe('versions', () => {
       url = new AdminUrlUtil(serverURL, draftSlug)
     })
 
+    // This test has to run before bulk updates that will rename the title
+    test('should delete', async () => {
+      await page.goto(url.list)
+
+      const rows = page.locator(`tr`)
+      const rowToDelete = rows.filter({ hasText: titleToDelete })
+
+      await rowToDelete.locator('.cell-_select input').click()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
+
+      await expect(page.locator('.Toastify__toast--success')).toContainText(
+        'Deleted 1 Draft Post successfully.',
+      )
+
+      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
+    })
+
     test('should bulk publish', async () => {
       await page.goto(url.list)
 
@@ -144,23 +162,6 @@ describe('versions', () => {
       await page.reload()
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDescription)
-    })
-
-    test('should delete', async () => {
-      await page.goto(url.list)
-
-      const rows = page.locator(`tr`)
-      const rowToDelete = rows.filter({ hasText: titleToDelete })
-
-      await rowToDelete.locator('.cell-_select input').click()
-      await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
-
-      await expect(page.locator('.Toastify__toast--success')).toContainText(
-        'Deleted 1 Draft Post successfully.',
-      )
-
-      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
     })
   })
 })
