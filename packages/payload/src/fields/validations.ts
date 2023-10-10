@@ -82,12 +82,11 @@ export const number: Validate<unknown, unknown, NumberField> = (
 
 export const text: Validate<unknown, unknown, TextField> = (
   value: string,
-  { maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
 ) => {
   let maxLength: number
 
-  if (typeof payload?.config?.defaultMaxTextLength === 'number')
-    maxLength = payload.config.defaultMaxTextLength
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
   if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
   if (value && maxLength && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
@@ -108,12 +107,11 @@ export const text: Validate<unknown, unknown, TextField> = (
 
 export const password: Validate<unknown, unknown, TextField> = (
   value: string,
-  { maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
 ) => {
   let maxLength: number
 
-  if (typeof payload?.config?.defaultMaxTextLength === 'number')
-    maxLength = payload.config.defaultMaxTextLength
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
   if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
 
   if (value && maxLength && value.length > maxLength) {
@@ -141,12 +139,11 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
 
 export const textarea: Validate<unknown, unknown, TextareaField> = (
   value: string,
-  { maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
 ) => {
   let maxLength: number
 
-  if (typeof payload?.config?.defaultMaxTextLength === 'number')
-    maxLength = payload.config.defaultMaxTextLength
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
   if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
   if (value && maxLength && value.length > maxLength) {
     return t('validation:shorterThanMax', { maxLength })
@@ -318,9 +315,10 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
   }
 
   if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
-    const idField = options?.payload?.collections[options.relationTo]?.config?.fields?.find(
-      (field) => fieldAffectsData(field) && field.name === 'id',
-    )
+    const idField = options?.config?.collections
+      ?.find((collection) => collection.slug === options.relationTo)
+      ?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id')
+
     const type = getIDType(idField, options?.payload?.db?.defaultIDType)
 
     if (!isValidID(value, type)) {
@@ -335,10 +333,10 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
   value: RelationshipValue,
   options,
 ) => {
-  const { maxRows, minRows, payload, relationTo, required, t } = options
+  const { config, maxRows, minRows, payload, relationTo, required, t } = options
 
   if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
-    return options.t('validation:required')
+    return t('validation:required')
   }
 
   if (Array.isArray(value)) {
@@ -355,11 +353,11 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     const values = Array.isArray(value) ? value : [value]
 
     const invalidRelationships = values.filter((val) => {
-      let collection: string
+      let collectionSlug: string
       let requestedID
 
       if (typeof relationTo === 'string') {
-        collection = relationTo
+        collectionSlug = relationTo
 
         // custom id
         if (val) {
@@ -368,17 +366,17 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
       }
 
       if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
-        collection = val.relationTo
+        collectionSlug = val.relationTo
         requestedID = val.value
       }
 
       if (requestedID === null) return false
 
-      const idField = payload.collections[collection]?.config?.fields?.find(
-        (field) => fieldAffectsData(field) && field.name === 'id',
-      )
+      const idField = config?.collections
+        ?.find((collection) => collection.slug === collectionSlug)
+        ?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id')
 
-      const type = getIDType(idField, options?.payload?.db?.defaultIDType)
+      const type = getIDType(idField, payload?.db?.defaultIDType)
 
       return !isValidID(requestedID, type)
     })

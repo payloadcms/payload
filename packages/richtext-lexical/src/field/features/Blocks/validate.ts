@@ -40,10 +40,12 @@ export const blockValidationHOC = (
       if ('validate' in field && typeof field.validate === 'function' && field.validate) {
         const fieldValue = 'name' in field ? node.fields.data[field.name] : null
         const validationResult = await field.validate(fieldValue, {
+          ...field,
           id: validation.options.id,
           config: payloadConfig,
           data: fieldValue,
           operation: validation.options.operation,
+          payload: validation.options.payload,
           siblingData: validation.options.siblingData,
           t: validation.options.t,
           user: validation.options.user,

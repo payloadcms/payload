@@ -193,20 +193,25 @@ describe('Field Validations', () => {
   })
 
   describe('relationship', () => {
+    const relationCollection = {
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+        },
+      ],
+      slug: 'relation',
+    }
+
     const relationshipOptions = {
       ...options,
+      config: {
+        collections: [relationCollection],
+      },
       payload: {
         collections: {
           relation: {
-            config: {
-              fields: [
-                {
-                  name: 'id',
-                  type: 'text',
-                },
-              ],
-              slug: 'relation',
-            },
+            config: relationCollection,
           },
         },
       },
