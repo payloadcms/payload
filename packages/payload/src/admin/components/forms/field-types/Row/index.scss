@@ -14,10 +14,17 @@
   }
 
   @include mid-break {
-    flex-direction: column;
+    display: block;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
 
     > * {
+      margin-left: 0;
+      margin-right: 0;
       width: 100% !important;
+      padding-left: 0;
+      padding-right: 0;
     }
   }
 }
