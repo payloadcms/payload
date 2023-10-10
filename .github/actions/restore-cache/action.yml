@@ -1,0 +1,21 @@
+name: 'Restore Node Build Cache'
+description: 'Setup Node and restore build cache'
+
+runs:
+  steps:
+    - name: Use Node.js 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
+
+    - name: Restore build
+      uses: actions/cache@v3
+      with:
+        path: ./*
+        key: ${{ github.sha }}-${{ github.run_number }}
