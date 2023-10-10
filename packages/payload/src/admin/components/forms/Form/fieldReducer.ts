@@ -149,6 +149,14 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         },
       )
 
+      if (blockType) {
+        subFieldState.blockType = {
+          initialValue: blockType,
+          valid: true,
+          value: blockType,
+        }
+      }
+
       // add new row to array _field state_
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
       siblingRows.splice(rowIndex, 0, subFieldState)
@@ -182,6 +190,14 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         blockType: blockType || undefined,
         childErrorPaths: new Set(),
         collapsed: false,
+      }
+
+      if (blockType) {
+        subFieldState.blockType = {
+          initialValue: blockType,
+          valid: true,
+          value: blockType,
+        }
       }
 
       // replace form _field state_
