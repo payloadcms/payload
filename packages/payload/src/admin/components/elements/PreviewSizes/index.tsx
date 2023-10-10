@@ -28,8 +28,8 @@ const PreviewSizes: React.FC<{
   doc?: Data & {
     sizes?: FileSizes
   }
-  updatedAt?: string
-}> = ({ collection, doc, updatedAt }) => {
+  imageCacheTag?: string
+}> = ({ collection, doc, imageCacheTag }) => {
   const {
     upload: { imageSizes, staticURL },
   } = collection
@@ -39,20 +39,15 @@ const PreviewSizes: React.FC<{
   const [selectedSize, setSelectedSize] = useState<null | string>(
     orderedSizes?.[imageSizes[0]?.name]?.filename ? imageSizes[0]?.name : null,
   )
-  const [appendUrl, setAppendUrl] = useState<boolean>(false)
 
   const generateImageUrl = (filename) => {
-    const query = appendUrl ? `?${Date.now()}` : ''
-    return `${staticURL}/${filename}${query}`
+    return `${staticURL}/${filename}${imageCacheTag ? `?${imageCacheTag}` : ''}`
   }
-
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
-  }, [sizes, imageSizes, updatedAt])
+  }, [sizes, imageSizes, imageCacheTag])
 
-  useEffect(() => {
-    setAppendUrl(true)
-  }, [updatedAt])
+  const mainPreviewSrc = generateImageUrl(`${orderedSizes[selectedSize]?.filename}`)
 
   return (
     <div className={baseClass}>
@@ -61,17 +56,15 @@ const PreviewSizes: React.FC<{
           <div className={`${baseClass}__sizeName`}>{selectedSize}</div>
           <Meta {...(selectedSize && orderedSizes[selectedSize])} staticURL={staticURL} />
         </div>
-        <img
-          alt={doc.filename}
-          className={`${baseClass}__preview`}
-          src={generateImageUrl(`${orderedSizes[selectedSize]?.filename}`)}
-        />
+        <img alt={doc.filename} className={`${baseClass}__preview`} src={mainPreviewSrc} />
       </div>
       <div className={`${baseClass}__listWrap`}>
         <div className={`${baseClass}__list`}>
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
-            if (val?.filename) {
+            const previewSrc = generateImageUrl(val.filename)
+
+            if (previewSrc) {
               return (
                 <div
                   className={[`${baseClass}__sizeOption`, selected && `${baseClass}--selected`]
@@ -88,7 +81,7 @@ const PreviewSizes: React.FC<{
                   tabIndex={0}
                 >
                   <div className={`${baseClass}__image`}>
-                    <img alt={val.filename} src={generateImageUrl(val.filename)} />
+                    <img alt={val.filename} src={previewSrc} />
                   </div>
                   <div className={`${baseClass}__sizeMeta`}>
                     <div className={`${baseClass}__sizeName`}>{key}</div>

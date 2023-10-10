@@ -14,7 +14,7 @@
   }
 
   &__preview {
-    max-height: calc(100% - base(4));
+    max-height: calc(100% - base(6));
     padding: base(1.5) base(1.5) base(1.5) var(--gutter-h);
     object-fit: contain;
   }
