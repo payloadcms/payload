@@ -30,6 +30,18 @@ export const UploadAndRichTextBlock: Block = {
   slug: 'uploadAndRichText',
 }
 
+export const RelationshipBlock: Block = {
+  fields: [
+    {
+      name: 'rel',
+      type: 'relationship',
+      relationTo: 'uploads',
+      required: true,
+    },
+  ],
+  slug: 'relationshipBlock',
+}
+
 export const SelectFieldBlock: Block = {
   fields: [
     {

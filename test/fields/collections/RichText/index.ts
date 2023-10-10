@@ -8,7 +8,7 @@ import {
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
 import { slateEditor } from '../../../../packages/richtext-slate/src'
-import { SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
+import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
 import { generateLexicalRichText } from './generateLexicalRichText'
 import { generateSlateRichText } from './generateSlateRichText'
 
@@ -63,7 +63,7 @@ const RichTextFields: CollectionConfig = {
             },
           }),
           BlocksFeature({
-            blocks: [TextBlock, UploadAndRichTextBlock, SelectFieldBlock],
+            blocks: [TextBlock, UploadAndRichTextBlock, SelectFieldBlock, RelationshipBlock],
           }),
         ],
       }),
