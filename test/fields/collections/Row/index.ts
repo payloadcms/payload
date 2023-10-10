@@ -26,6 +26,27 @@ const RowFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'field_with_width_a',
+          label: 'Field with 50% width',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'field_with_width_b',
+          label: 'Field with 50% width',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
 }
 
