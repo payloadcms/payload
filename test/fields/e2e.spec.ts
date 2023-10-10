@@ -79,42 +79,43 @@ describe('fields', () => {
       await expect(textCell).toHaveText(String(numberDoc.number))
     })
 
-
     test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
-      await page.goto(url.list);
+      await page.goto(url.list)
 
       // should have 3 entries
-      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3);
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
       // open the filter options
-      await page.locator('.list-controls__toggle-where').click();
-      await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible();
-      await page.locator('.where-builder__add-first-filter').click();
+      await page.locator('.list-controls__toggle-where').click()
+      await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+      await page.locator('.where-builder__add-first-filter').click()
 
-      const initialField = page.locator('.condition__field');
-      const operatorField = page.locator('.condition__operator');
-      const valueField = page.locator('.condition__value >> input');
+      const initialField = page.locator('.condition__field')
+      const operatorField = page.locator('.condition__operator')
+      const valueField = page.locator('.condition__value >> input')
 
       // select Number field to filter on
-      await initialField.click();
-      const initialFieldOptions = initialField.locator('.rs__option');
-      await initialFieldOptions.locator('text=number').first().click();
-      expect(initialField.locator('.rs__single-value')).toContainText('Number');
+      await initialField.click()
+      const initialFieldOptions = initialField.locator('.rs__option')
+      await initialFieldOptions.locator('text=number').first().click()
+      await expect(initialField.locator('.rs__single-value')).toContainText('Number')
 
       // select >= operator
-      await operatorField.click();
-      const operatorOptions = operatorField.locator('.rs__option');
-      await operatorOptions.last().click();
-      expect(operatorField.locator('.rs__single-value')).toContainText('is greater than or equal to');
+      await operatorField.click()
+      const operatorOptions = operatorField.locator('.rs__option')
+      await operatorOptions.last().click()
+      await expect(operatorField.locator('.rs__single-value')).toContainText(
+        'is greater than or equal to',
+      )
 
       // enter value of 3
-      await valueField.fill('3');
-      await expect(valueField).toHaveValue('3');
-      await wait(300);
+      await valueField.fill('3')
+      await expect(valueField).toHaveValue('3')
+      await wait(300)
 
       // should have 2 entries after filtering
-      await expect(page.locator('table >> tbody >> tr')).toHaveCount(2);
-    });
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+    })
 
     test('should create', async () => {
       const input = 5
@@ -675,6 +676,22 @@ describe('fields', () => {
       // Go back to row tab, make sure the new value is still present
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
+    })
+
+    test('should render array data within unnamed tabs', async () => {
+      await page.goto(url.list)
+      await page.locator('.cell-id a').click()
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
+      await expect(page.locator('#field-array__0__text')).toHaveValue("Hello, I'm the first row")
+    })
+
+    test('should render array data within named tabs', async () => {
+      await page.goto(url.list)
+      await page.locator('.cell-id a').click()
+      await page.locator('.tabs-field__tab-button:nth-child(5)').click()
+      await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
+        "Hello, I'm the first row, in a named tab",
+      )
     })
   })
 
