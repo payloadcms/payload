@@ -3,11 +3,14 @@
 .field-type.row {
   display: flex;
   flex-wrap: wrap;
-  width: 100%;
-  gap: var(--base);
+  width: calc(100% + var(--base));
+  margin-left: calc(var(--base) * -0.5);
+  margin-right: calc(var(--base) * -0.5);
 
   > * {
     flex-grow: 1;
+    padding-left: calc(var(--base) * 0.5);
+    padding-right: calc(var(--base) * 0.5);
   }
 
   @include mid-break {
