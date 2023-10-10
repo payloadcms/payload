@@ -13,7 +13,7 @@ import { useConfig } from '../../../utilities/Config'
 export const SetStepNav: React.FC<
   | {
       collection: SanitizedCollectionConfig
-      id: string
+      id: number | string
       isEditing: boolean
     }
   | {
@@ -27,7 +27,7 @@ export const SetStepNav: React.FC<
   let pluralLabel: SanitizedCollectionConfig['labels']['plural']
   let slug: string
   let isEditing = false
-  let id: string | undefined
+  let id: number | string | undefined
 
   if ('collection' in props) {
     const {
@@ -70,7 +70,7 @@ export const SetStepNav: React.FC<
 
       if (isEditing) {
         nav.push({
-          label: useAsTitle && useAsTitle !== 'id' ? title || `[${t('untitled')}]` : id,
+          label: useAsTitle && useAsTitle !== 'id' ? title || `[${t('untitled')}]` : `${id}`,
         })
       } else {
         nav.push({
