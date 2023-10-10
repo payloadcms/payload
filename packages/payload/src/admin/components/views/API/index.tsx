@@ -1,6 +1,8 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { EditViewProps } from '../types'
+
 import { Chevron } from '../..'
 import { requests } from '../../../api'
 import CopyToClipboard from '../../elements/CopyToClipboard'
@@ -11,6 +13,7 @@ import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import './index.scss'
 
 const chars = {
@@ -156,7 +159,8 @@ function createURL(url: string) {
   }
 }
 
-export const API = ({ apiURL }) => {
+export const API: React.FC<EditViewProps> = (props) => {
+  const { apiURL } = props
   const { i18n } = useTranslation()
   const {
     localization,
@@ -201,8 +205,15 @@ export const API = ({ apiURL }) => {
 
   const classes = [baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')
 
+  let isEditing: boolean
+
+  if ('collection' in props) {
+    isEditing = props?.isEditing
+  }
+
   return (
     <Gutter className={classes} right={false}>
+      <SetStepNav collection={collection} global={global} id={id} isEditing={isEditing} />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>
