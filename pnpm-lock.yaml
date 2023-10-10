@@ -429,20 +429,10 @@ importers:
         version: 1.15.0(eslint@8.48.0)
 
   packages/live-preview:
-    dependencies:
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
-      '@types/node':
-        specifier: 20.5.7
-        version: 20.5.7
-      '@types/react':
-        specifier: 18.2.15
-        version: 18.2.15
       payload:
         specifier: workspace:*
         version: link:../payload

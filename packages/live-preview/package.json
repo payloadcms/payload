@@ -16,13 +16,8 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
-  "dependencies": {
-    "react": "18.2.0"
-  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/node": "20.5.7",
-    "@types/react": "18.2.15",
     "payload": "workspace:*"
   },
   "exports": {
