@@ -433,9 +433,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
-      '@types/node':
-        specifier: 20.5.7
-        version: 20.5.7
       payload:
         specifier: workspace:*
         version: link:../payload
