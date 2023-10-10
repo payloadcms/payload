@@ -132,7 +132,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'ADD_ROW': {
-      const { blockType, path, rowIndex, subFieldState } = action
+      const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState } = action
+      const rowIndex =
+        typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0
 
       const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata.splice(
@@ -155,19 +157,22 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         }
       }
 
-      const { remainingFields, rows } = separateRows(path, state)
+      // add new row to array _field state_
+      const { remainingFields, rows: siblingRows } = separateRows(path, state)
+      siblingRows.splice(rowIndex, 0, subFieldState)
 
-      // actual form state (value saved in db)
-      rows.splice(rowIndex, 0, subFieldState)
+      // add new row to array _value_
+      const currentValue = (Array.isArray(state[path]?.value) ? state[path]?.value : []) as Fields[]
+      const newValue = currentValue.splice(rowIndex, 0, reduceFieldsToValues(subFieldState, true))
 
       const newState: Fields = {
         ...remainingFields,
-        ...flattenRows(path, rows),
+        ...flattenRows(path, siblingRows),
         [path]: {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: rows,
+          value: newValue,
         },
       }
 
@@ -176,8 +181,8 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'REPLACE_ROW': {
       const { blockType, path, rowIndex: rowIndexArg, subFieldState } = action
-      const { remainingFields, rows } = separateRows(path, state)
-      const rowIndex = Math.max(0, Math.min(rowIndexArg, rows?.length - 1 || 0))
+      const { remainingFields, rows: siblingRows } = separateRows(path, state)
+      const rowIndex = Math.max(0, Math.min(rowIndexArg, siblingRows?.length - 1 || 0))
 
       const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata[rowIndex] = {
@@ -195,17 +200,21 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         }
       }
 
-      // replace form field state
-      rows[rowIndex] = subFieldState
+      // replace form _field state_
+      siblingRows[rowIndex] = subFieldState
+
+      // replace array _value_
+      const newValue = Array.isArray(state[path]?.value) ? state[path]?.value : []
+      newValue[rowIndex] = reduceFieldsToValues(subFieldState, true)
 
       const newState: Fields = {
         ...remainingFields,
-        ...flattenRows(path, rows),
+        ...flattenRows(path, siblingRows),
         [path]: {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: rows,
+          value: newValue,
         },
       }
 

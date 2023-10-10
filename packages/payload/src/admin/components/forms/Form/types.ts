@@ -174,7 +174,10 @@ export type Context = {
   }: {
     data?: Data
     path: string
-    rowIndex: number
+    /*
+     * by default the new row will be added to the end of the list
+     */
+    rowIndex?: number
   }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
@@ -190,7 +193,7 @@ export type Context = {
   getField: GetField
   getFields: GetFields
   getSiblingData: GetSiblingData
-  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => Promise<void>
+  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     data,
     path,
