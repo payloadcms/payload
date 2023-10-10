@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Field } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/types'
+import { fieldAffectsData, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types'
@@ -31,6 +31,42 @@ export const traverseFields = ({
   topLevelTableName,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
+    if (field.type === 'collapsible' || field.type === 'row') {
+      traverseFields({
+        _locales,
+        adapter,
+        currentArgs,
+        currentTableName,
+        depth,
+        fields: field.fields,
+        path,
+        topLevelArgs,
+        topLevelTableName,
+      })
+
+      return
+    }
+
+    if (field.type === 'tabs') {
+      field.tabs.forEach((tab) => {
+        const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
+
+        traverseFields({
+          _locales,
+          adapter,
+          currentArgs,
+          currentTableName,
+          depth,
+          fields: tab.fields,
+          path: tabPath,
+          topLevelArgs,
+          topLevelTableName,
+        })
+      })
+
+      return
+    }
+
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array': {

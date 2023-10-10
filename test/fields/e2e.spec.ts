@@ -677,6 +677,22 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
     })
+
+    test('should render array data within unnamed tabs', async () => {
+      await page.goto(url.list)
+      await page.locator('.cell-id a').click()
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
+      await expect(page.locator('#field-array__0__text')).toHaveValue("Hello, I'm the first row")
+    })
+
+    test('should render array data within named tabs', async () => {
+      await page.goto(url.list)
+      await page.locator('.cell-id a').click()
+      await page.locator('.tabs-field__tab-button:nth-child(5)').click()
+      await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
+        "Hello, I'm the first row, in a named tab",
+      )
+    })
   })
 
   describe('richText', () => {
