@@ -3,89 +3,126 @@ import { ExecSyncOptions, execSync } from 'child_process'
 import chalk from 'chalk'
 import prompts from 'prompts'
 import minimist from 'minimist'
+import chalkTemplate from 'chalk-template'
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
+const args = minimist(process.argv.slice(2))
 
 async function main() {
-  const args = minimist(process.argv.slice(2))
-  const { _: packageNames } = args
-
-  // If packageNames contains a comma, parse
-  if (packageNames[0]?.includes(',')) {
-    packageNames.length = 0
-    const splitNames = process.argv[2].split(',')
-    packageNames.push(...splitNames)
-  }
+  const { _: packageNames, tag = 'latest', bump = 'patch' } = args
 
   if (packageNames.length === 0) {
-    console.error('Please specify a package to publish')
-    process.exit(1)
+    abort('Please specify a package to publish')
   }
 
-  if (packageNames.length > 1 && packageNames.find((p) => p === 'payload')) {
-    console.error(chalk.bold.red('Cannot publish payload with other packages'))
-    process.exit(1)
+  if (packageNames.find((p) => p === 'payload' && packageNames.length > 1)) {
+    abort('Cannot publish payload with other packages')
   }
 
-  console.log(`\n${chalk.bold.green('Publishing packages:')}\n`)
-  console.log(`${packageNames.map((p) => `  ${p}`).join('\n')}`)
-  console.log('\n')
+  // Get current version of each package from package.json
+  const packageDetails = await Promise.all(
+    packageNames.map(async (packageName) => {
+      const packageDir = `packages/${packageName}`
+      if (!(await fse.pathExists(packageDir))) {
+        abort(`Package path ${packageDir} does not exist`)
+      }
+      const packageObj = await fse.readJson(`${packageDir}/package.json`)
 
-  const { confirm } = await prompts(
-    {
-      name: 'confirm',
-      initial: false,
-      message: `Publish ${packageNames.length} package(s)?`,
-      type: 'confirm',
-    },
-    {
-      onCancel: () => {
-        console.log(chalk.bold.red('\nAborted'))
-        process.exit(0)
-      },
-    },
+      return { name: packageName, version: packageObj.version, dir: packageDir }
+    }),
   )
 
-  if (!confirm) {
-    console.log(chalk.bold.red('\nAborted\n'))
-    process.exit(0)
+  console.log(chalkTemplate`
+  {bold.green Publishing packages:}
+
+  {bold.yellow Bump: ${bump}}
+  {bold.yellow Tag: ${tag}}
+
+${packageDetails.map((p) => `  ${p.name} - current: ${p.version}`).join('\n')}
+`)
+
+  const confirmPublish = await confirm(`Publish ${packageNames.length} package(s)?`)
+
+  if (!confirmPublish) {
+    abort()
   }
 
   const results: { name: string; success: boolean }[] = []
 
-  for (const packageName of packageNames) {
-    const packageDir = `packages/${packageName}`
-    try {
-      console.log(chalk.bold(`Publishing ${packageName}...`))
-      execSync(`npm --prefix ${packageDir} version pre --preid beta`, execOpts)
-      execSync(`git add ${packageDir}/package.json`, execOpts)
+  for (const pkg of packageDetails) {
+    const { dir, name } = pkg
 
-      const packageObj = await fse.readJson(`${packageDir}/package.json`)
+    try {
+      console.log(chalk.bold(`\n\nPublishing ${name}...\n\n`))
+
+      execSync(`npm --no-git-tag-version --prefix ${dir} version ${bump}`, execOpts)
+      execSync(`git add ${dir}/package.json`, execOpts)
+
+      const packageObj = await fse.readJson(`${dir}/package.json`)
       const newVersion = packageObj.version
 
-      execSync(`git commit -m "chore(release): ${packageName}@${newVersion}"`, execOpts)
-      execSync(`pnpm publish -C ${packageDir} --tag latest --no-git-checks`, execOpts)
-      results.push({ name: packageName, success: true })
+      const tagName = `${name}/${newVersion}`
+      execSync(`git commit -m "chore(release): ${tagName}"`, execOpts)
+      execSync(`git tag -a ${tagName} -m "${tagName}"`, execOpts)
+      execSync(`pnpm publish -C ${dir} --no-git-checks`, execOpts)
+      results.push({ name, success: true })
     } catch (error) {
-      console.error(`ERROR: ${error.message}`)
-      results.push({ name: packageName, success: false })
+      console.error(chalk.bold.red(`ERROR: ${error.message}`))
+      results.push({ name, success: false })
     }
   }
 
-  console.log('\n')
-  console.log(`${chalk.bold('Results:')}\n`)
-  console.log(
-    results
-      .map(
-        ({ name, success }) =>
-          `  ${success ? chalk.bold.green('✔') : chalk.bold.red('✘')} ${name}`,
-      )
-      .join('\n'),
+  console.log(chalkTemplate`
+
+  {bold.green Results:}
+
+${results
+  .map(({ name, success }) => `  ${success ? chalk.bold.green('✔') : chalk.bold.red('✘')} ${name}`)
+  .join('\n')}
+`)
+
+  // Show unpushed commits and tags
+  execSync(
+    `git log --oneline $(git rev-parse --abbrev-ref --symbolic-full-name @{u})..HEAD`,
+    execOpts,
   )
+
   console.log('\n')
+
+  const push = await confirm(`Push commits and tags?`)
+
+  if (push) {
+    console.log(chalk.bold(`\n\nPushing commits and tags...\n\n`))
+    execSync(`git push --follow-tags`, execOpts)
+  }
+
+  console.log(chalk.bold.green(`\n\nDone!\n\n`))
 }
 
 main().catch((error) => {
   console.error(error)
   process.exit(1)
 })
+
+async function abort(message = 'Abort', exitCode = 1) {
+  console.error(chalk.bold.red(`\n${message}\n`))
+  process.exit(exitCode)
+}
+
+async function confirm(message: string): Promise<boolean> {
+  const { confirm } = await prompts(
+    {
+      name: 'confirm',
+      initial: false,
+      message,
+      type: 'confirm',
+    },
+    {
+      onCancel: () => {
+        abort()
+      },
+    },
+  )
+
+  return confirm
+}
