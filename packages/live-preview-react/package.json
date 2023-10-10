@@ -17,14 +17,15 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "react": "18.2.0",
     "@payloadcms/live-preview": "workspace:*"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/node": "20.5.7",
-    "@types/react": "18.2.15",
+    "@types/react": "^18.2.0",
     "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "exports": {
     ".": {
