@@ -18,8 +18,8 @@ import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
 import Error from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import Label from '../../Label'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const baseClass = 'upload'
 
@@ -81,7 +81,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   })
 
   useEffect(() => {
-    if (typeof value === 'string' && value !== '') {
+    if (typeof value !== 'undefined' && value !== '') {
       const fetchFile = async () => {
         const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
           credentials: 'include',
