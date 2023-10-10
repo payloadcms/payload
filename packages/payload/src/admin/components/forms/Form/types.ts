@@ -174,7 +174,10 @@ export type Context = {
   }: {
     data?: Data
     path: string
-    rowIndex: number
+    /*
+     * by default the new row will be added to the end of the list
+     */
+    rowIndex?: number
   }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
