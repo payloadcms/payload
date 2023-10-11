@@ -25,6 +25,7 @@
     "css-loader": "5.2.7",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "file-loader": "6.2.0",
+    "find-node-modules": "^2.1.3",
     "html-webpack-plugin": "^5.5.0",
     "md5": "2.3.0",
     "mini-css-extract-plugin": "1.6.2",
@@ -48,6 +49,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/extract-text-webpack-plugin": "^3.0.7",
+    "@types/find-node-modules": "^2.1.0",
     "@types/html-webpack-plugin": "^3.2.6",
     "@types/mini-css-extract-plugin": "^1.4.3",
     "@types/optimize-css-assets-webpack-plugin": "^5.0.5",
