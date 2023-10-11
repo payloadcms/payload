@@ -273,7 +273,7 @@
     "near": "in der Nähe"
   },
   "upload": {
-    "crop": "Ernte",
+    "crop": "Zuschneiden",
     "cropToolDescription": "Ziehen Sie die Ecken des ausgewählten Bereichs, zeichnen Sie einen neuen Bereich oder passen Sie die Werte unten an.",
     "dragAndDrop": "Ziehen Sie eine Datei per Drag-and-Drop",
     "dragAndDropHere": "oder ziehe eine Datei hier",
