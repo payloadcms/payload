@@ -35,11 +35,6 @@ $header-height: base(5);
     text-wrap: nowrap;
   }
 
-  &__cancel,
-  &__save {
-    width: 50%;
-  }
-
   &__toolWrap {
     display: flex;
     justify-content: flex-end;
