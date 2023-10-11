@@ -13,13 +13,13 @@ import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 export const PostHero: React.FC<{
   post: Post
 }> = ({ post }) => {
-  const { id, title, meta: { image: metaImage, description } = {}, createdAt } = post
+  const { id, meta: { image: metaImage, description } = {}, createdAt } = post
 
   return (
     <Fragment>
       <Gutter className={classes.postHero}>
         <div className={classes.content}>
-          <h1 className={classes.title}>{title}</h1>
+          <RichText content={post?.hero?.richText} className={classes.richText} />
           <p className={classes.meta}>
             {createdAt && (
               <Fragment>

@@ -58,13 +58,16 @@ const Preview: React.FC<
       const values = reduceFieldsToValues(fields, true)
 
       // TODO: only send `fieldSchemaToJSON` one time
-      const message = JSON.stringify({ data: values, fieldSchemaJSON, type: 'livePreview' })
+      const message = JSON.stringify({
+        data: values,
+        fieldSchemaJSON,
+        type: 'payload-live-preview',
+      })
 
       // external window
       if (isPopupOpen) {
         setIframeHasLoaded(false)
-
-        if (popupHasLoaded && popupRef.current) {
+        if (popupRef.current) {
           popupRef.current.postMessage(message, url)
         }
       }

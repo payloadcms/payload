@@ -55,8 +55,8 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
       : livePreviewConfig?.url
 
   const popupState = usePopupWindow({
-    eventType: 'livePreview',
-    href: url,
+    eventType: 'payload-live-preview',
+    url,
   })
 
   const { apiURL, data, permissions } = props
