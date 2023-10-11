@@ -1,5 +1,5 @@
 import { subscribe, unsubscribe } from '@payloadcms/live-preview'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 // To prevent the flicker of missing data on initial load,
 // you can pass in the initial page data from the server
@@ -17,6 +17,7 @@ export const useLivePreview = <T extends any>(props: {
   const { depth = 0, initialData, serverURL } = props
   const [data, setData] = useState<T>(initialData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const hasSubscribed = useRef(false)
 
   const onChange = useCallback((mergedData) => {
     setData(mergedData)
@@ -24,6 +25,9 @@ export const useLivePreview = <T extends any>(props: {
   }, [])
 
   useEffect(() => {
+    if (hasSubscribed.current) return
+    hasSubscribed.current = true
+
     const subscription = subscribe({
       callback: onChange,
       depth,
@@ -34,7 +38,7 @@ export const useLivePreview = <T extends any>(props: {
     return () => {
       unsubscribe(subscription)
     }
-  }, [serverURL, onChange, depth, initialData])
+  }, [initialData, onChange, serverURL, depth])
 
   return {
     data,
