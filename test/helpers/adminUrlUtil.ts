@@ -22,7 +22,8 @@ export class AdminUrlUtil {
     return `${this.list}/${id}`
   }
 
-  global(slug: string): string {
-    return `${this.admin}/globals/${slug}`
+  global(slug: string, view?: 'api'): string {
+    const viewSegment = view ? `/${view}` : ''
+    return `${this.admin}/globals/${slug}${viewSegment}`
   }
 }

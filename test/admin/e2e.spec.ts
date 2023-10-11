@@ -352,6 +352,16 @@ describe('admin', () => {
     })
   })
 
+  describe('API view', () => {
+    // Basic test to ensure the front-end renders for globals.
+    test('renders for globals', async () => {
+      await page.goto(url.global(globalSlug, 'api'))
+
+      // Major page element chosen arbitrarily to signal a successful page load.
+      await expect(page.locator('.query-inspector__results-wrapper')).toBeAttached()
+    })
+  })
+
   describe('list view', () => {
     const tableRowLocator = 'table > tbody > tr'
 
