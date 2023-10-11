@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
 import type { SanitizedGlobalConfig } from '../../../../../exports/types'
 import type { StepNavItem } from '../../../elements/StepNav/types'
+import type { ContextType as DocumentInfo } from '../../../utilities/DocumentInfo/types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import useTitle from '../../../../hooks/useTitle'
@@ -11,14 +12,7 @@ import { useStepNav } from '../../../elements/StepNav'
 import { useConfig } from '../../../utilities/Config'
 
 export const SetStepNav: React.FC<
-  | {
-      collection: SanitizedCollectionConfig
-      id: number | string
-      isEditing: boolean
-    }
-  | {
-      global: SanitizedGlobalConfig
-    }
+  Pick<DocumentInfo, 'id' | 'collection' | 'global'> & { isEditing?: boolean }
 > = (props) => {
   let collection: SanitizedCollectionConfig | undefined
   let global: SanitizedGlobalConfig | undefined
@@ -29,7 +23,7 @@ export const SetStepNav: React.FC<
   let isEditing = false
   let id: number | string | undefined
 
-  if ('collection' in props) {
+  if (props.collection) {
     const {
       id: idFromProps,
       collection: collectionFromProps,
@@ -43,7 +37,7 @@ export const SetStepNav: React.FC<
     id = idFromProps
   }
 
-  if ('global' in props) {
+  if (props.global) {
     const { global: globalFromProps } = props
     global = globalFromProps
     slug = globalFromProps?.slug
