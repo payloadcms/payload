@@ -96,9 +96,6 @@ importers:
       glob:
         specifier: 8.1.0
         version: 8.1.0
-      graphql-request:
-        specifier: 6.1.0
-        version: 6.1.0(graphql@16.7.1)
       husky:
         specifier: ^8.0.3
         version: 8.0.3
@@ -318,8 +315,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       mongoose:
-        specifier: 6.11.4
-        version: 6.11.4
+        specifier: 6.12.0
+        version: 6.12.0
       mongoose-aggregate-paginate-v2:
         specifier: 1.0.6
         version: 1.0.6
@@ -358,11 +355,11 @@ importers:
         specifier: 2.11.2
         version: 2.11.2
       drizzle-kit:
-        specifier: 0.19.13-e99bac1
-        version: 0.19.13-e99bac1
+        specifier: 0.19.13
+        version: 0.19.13
       drizzle-orm:
         specifier: 0.28.5
-        version: 0.28.5(@libsql/client@0.3.4)(@types/pg@8.10.2)(better-sqlite3@8.6.0)(pg@8.11.3)
+        version: 0.28.5(@libsql/client@0.3.4)(@types/pg@8.10.2)(pg@8.11.3)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -552,23 +549,23 @@ importers:
         specifier: 4.6.2
         version: 4.6.2
       graphql:
-        specifier: 16.7.1
-        version: 16.7.1
+        specifier: 16.8.1
+        version: 16.8.1
       graphql-http:
         specifier: 1.21.0
-        version: 1.21.0(graphql@16.7.1)
+        version: 1.21.0(graphql@16.8.1)
       graphql-playground-middleware-express:
         specifier: 1.7.23
         version: 1.7.23(express@4.18.2)
       graphql-query-complexity:
         specifier: 0.12.0
-        version: 0.12.0(graphql@16.7.1)
+        version: 0.12.0(graphql@16.8.1)
       graphql-scalars:
         specifier: 1.22.2
-        version: 1.22.2(graphql@16.7.1)
+        version: 1.22.2(graphql@16.8.1)
       graphql-type-json:
         specifier: 0.3.2
-        version: 0.3.2(graphql@16.7.1)
+        version: 0.3.2(graphql@16.8.1)
       html-webpack-plugin:
         specifier: 5.5.3
         version: 5.5.3(webpack@5.88.2)
@@ -877,8 +874,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       graphql-request:
-        specifier: 3.7.0
-        version: 3.7.0(graphql@16.7.1)
+        specifier: 6.1.0
+        version: 6.1.0(graphql@16.8.1)
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.88.2)
@@ -2417,7 +2414,7 @@ packages:
     resolution: {integrity: sha512-FxEMIkJKnodyA1OaCUoEvbYRkoZlLZ4d/eXFu9Fh8CbBBgP5EmZxrfTRyN0qpXZ4vOvqnE5YdRdcrmUUXuU+dA==}
     dependencies:
       '@esbuild-kit/core-utils': 3.3.2
-      get-tsconfig: 4.7.0
+      get-tsconfig: 4.7.2
     dev: false
 
   /@esbuild/android-arm64@0.18.20:
@@ -2684,12 +2681,12 @@ packages:
     resolution: {integrity: sha512-qprfWkn82Iw821mcKofJ5Pk9wgioHicxcQMxx+5zt5GSKoqdWvgG5AxVmpmUUjzTLPVSH5auBrhI93Deayn/DA==}
     dev: false
 
-  /@graphql-typed-document-node/core@3.2.0(graphql@16.7.1):
+  /@graphql-typed-document-node/core@3.2.0(graphql@16.8.1):
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
     dev: true
 
   /@hapi/hoek@9.3.0:
@@ -3333,7 +3330,6 @@ packages:
     requiresBuild: true
     dependencies:
       sparse-bitfield: 3.0.3
-    dev: true
     optional: true
 
   /@nodelib/fs.scandir@2.1.5:
@@ -4501,7 +4497,7 @@ packages:
   /@types/mongoose-aggregate-paginate-v2@1.0.9:
     resolution: {integrity: sha512-YKDKtSuE1vzMY/SAtlDTWJr52UhTYdrOypCqyx7T2xFYEWfybLnV98m4ZoVgYJH0XowVl7Y2Gnn6p1sF+3NbLA==}
     dependencies:
-      mongoose: 6.11.4
+      mongoose: 6.12.0
     transitivePeerDependencies:
       - aws-crt
       - supports-color
@@ -7288,8 +7284,8 @@ packages:
       wordwrap: 1.0.0
     dev: false
 
-  /drizzle-kit@0.19.13-e99bac1:
-    resolution: {integrity: sha512-25Ahwm7CoaXCcrSuDjNqNH7vwrjt1s+I4O1yXVDBwYnyRe4RY8ZD57s5iA9PE5C+IJwBJtxBSXYWkat+efb3ug==}
+  /drizzle-kit@0.19.13:
+    resolution: {integrity: sha512-Rba5VW1O2JfJlwVBeZ8Zwt2E2us5oZ08PQBDiVSGlug53TOc8hzXjblZFuF+dnll9/RQEHrkzBmJFgqTvn5Rxg==}
     hasBin: true
     dependencies:
       '@drizzle-team/studio': 0.0.5
@@ -7308,7 +7304,7 @@ packages:
       - supports-color
     dev: false
 
-  /drizzle-orm@0.28.5(@libsql/client@0.3.4)(@types/pg@8.10.2)(better-sqlite3@8.6.0)(pg@8.11.3):
+  /drizzle-orm@0.28.5(@libsql/client@0.3.4)(@types/pg@8.10.2)(pg@8.11.3):
     resolution: {integrity: sha512-6r6Iw4c38NAmW6TiKH3TUpGUQ1YdlEoLJOQptn8XPx3Z63+vFNKfAiANqrIiYZiMjKR9+NYAL219nFrmo1duXA==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -7372,7 +7368,6 @@ packages:
     dependencies:
       '@libsql/client': 0.3.4
       '@types/pg': 8.10.2
-      better-sqlite3: 8.6.0
       pg: 8.11.3
     dev: false
 
@@ -8237,11 +8232,6 @@ packages:
       tmp: 0.0.33
     dev: true
 
-  /extract-files@9.0.0:
-    resolution: {integrity: sha512-CvdFfHkC95B4bBBk36hcEmvdR2awOdhhVUYH6S/zrVj3477zven/fJMYg7121h4T1xHZC+tetUpubpAhxwI7hQ==}
-    engines: {node: ^10.17.0 || ^12.0.0 || >= 13.7.0}
-    dev: true
-
   /fast-copy@3.0.1:
     resolution: {integrity: sha512-Knr7NOtK3HWRYGtHoJrjkaWepqT8thIVGAwt0p0aUs1zqkAzXZV4vo9fFNwyb5fcqK1GKYFYxldQdIDVKhUAfA==}
     dev: false
@@ -8647,17 +8637,10 @@ packages:
       resolve-pkg-maps: 1.0.0
     dev: false
 
-  /get-tsconfig@4.7.0:
-    resolution: {integrity: sha512-pmjiZ7xtB8URYm74PlGJozDNyhvsVLUcpBa8DZBG3bWHwaHa9bPiRpiSfovw+fjhwONSCWKRyk+JQHEGZmMrzw==}
-    dependencies:
-      resolve-pkg-maps: 1.0.0
-    dev: false
-
   /get-tsconfig@4.7.2:
     resolution: {integrity: sha512-wuMsz4leaj5hbGgg4IvDU0bqJagpftG5l5cXIAvo8uZrqn0NJqwtfupTN00VnkQJPcIRrxYrm1Ue24btpCha2A==}
     dependencies:
       resolve-pkg-maps: 1.0.0
-    dev: true
 
   /get-uri@6.0.1:
     resolution: {integrity: sha512-7ZqONUVqaabogsYNWlYj0t3YZaL6dhuEueZXGF+/YVmf6dHmaFg8/6psJKqhx9QykIDKzpGcy2cn4oV4YC7V/Q==}
@@ -8885,13 +8868,13 @@ packages:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: false
 
-  /graphql-http@1.21.0(graphql@16.7.1):
+  /graphql-http@1.21.0(graphql@16.8.1):
     resolution: {integrity: sha512-yrItPfHj5WeT4n7iusbVin+vGSQjXFAX6U/GnYytdCJRXVad1TWGtYFDZ2ROjCKpXQzIwvfbiWCEwfuXgR3B6A==}
     engines: {node: '>=12'}
     peerDependencies:
       graphql: '>=0.11 <=16'
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
     dev: false
 
   /graphql-playground-html@1.6.30:
@@ -8909,60 +8892,47 @@ packages:
       graphql-playground-html: 1.6.30
     dev: false
 
-  /graphql-query-complexity@0.12.0(graphql@16.7.1):
+  /graphql-query-complexity@0.12.0(graphql@16.8.1):
     resolution: {integrity: sha512-fWEyuSL6g/+nSiIRgIipfI6UXTI7bAxrpPlCY1c0+V3pAEUo1ybaKmSBgNr1ed2r+agm1plJww8Loig9y6s2dw==}
     peerDependencies:
       graphql: ^14.6.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
       lodash.get: 4.4.2
     dev: false
 
-  /graphql-request@3.7.0(graphql@16.7.1):
-    resolution: {integrity: sha512-dw5PxHCgBneN2DDNqpWu8QkbbJ07oOziy8z+bK/TAXufsOLaETuVO4GkXrbs0WjhdKhBMN3BkpN/RIvUHkmNUQ==}
-    peerDependencies:
-      graphql: 14 - 16
-    dependencies:
-      cross-fetch: 3.1.8
-      extract-files: 9.0.0
-      form-data: 3.0.1
-      graphql: 16.7.1
-    transitivePeerDependencies:
-      - encoding
-    dev: true
-
-  /graphql-request@6.1.0(graphql@16.7.1):
+  /graphql-request@6.1.0(graphql@16.8.1):
     resolution: {integrity: sha512-p+XPfS4q7aIpKVcgmnZKhMNqhltk20hfXtkaIkTfjjmiKMJ5xrt5c743cL03y/K7y1rg3WrIC49xGiEQ4mxdNw==}
     peerDependencies:
       graphql: 14 - 16
     dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.7.1)
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
       cross-fetch: 3.1.8
-      graphql: 16.7.1
+      graphql: 16.8.1
     transitivePeerDependencies:
       - encoding
     dev: true
 
-  /graphql-scalars@1.22.2(graphql@16.7.1):
+  /graphql-scalars@1.22.2(graphql@16.8.1):
     resolution: {integrity: sha512-my9FB4GtghqXqi/lWSVAOPiTzTnnEzdOXCsAC2bb5V7EFNQjVjwy3cSSbUvgYOtDuDibd+ZsCDhz+4eykYOlhQ==}
     engines: {node: '>=10'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
       tslib: 2.6.2
     dev: false
 
-  /graphql-type-json@0.3.2(graphql@16.7.1):
+  /graphql-type-json@0.3.2(graphql@16.8.1):
     resolution: {integrity: sha512-J+vjof74oMlCWXSvt0DOf2APEdZOCdubEvGDUAlqH//VBYcOYsGgRW7Xzorr44LvkjiuvecWc8fChxuZZbChtg==}
     peerDependencies:
       graphql: '>=0.8.0'
     dependencies:
-      graphql: 16.7.1
+      graphql: 16.8.1
     dev: false
 
-  /graphql@16.7.1:
-    resolution: {integrity: sha512-DRYR9tf+UGU0KOsMcKAlXeFfX89UiiIZ0dRU3mR0yJfu6OjZqUcp68NnFLnqQU5RexygFoDy1EW+ccOYcPfmHg==}
+  /graphql@16.8.1:
+    resolution: {integrity: sha512-59LZHPdGZVh695Ud9lRzPBVTtlX9ZCV150Er2W43ro37wVof0ctenSaskPPjN7lVTIN8mSZt8PHUNKZuNQUuxw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   /gzip-size@6.0.0:
@@ -11125,19 +11095,6 @@ packages:
       - supports-color
     dev: true
 
-  /mongodb@4.16.0:
-    resolution: {integrity: sha512-0EB113Fsucaq1wsY0dOhi1fmZOwFtLOtteQkiqOXGklvWMnSH3g2QS53f0KTP+/6qOkuoXE2JksubSZNmxeI+g==}
-    engines: {node: '>=12.9.0'}
-    dependencies:
-      bson: 4.7.2
-      mongodb-connection-string-url: 2.6.0
-      socks: 2.7.1
-    optionalDependencies:
-      '@aws-sdk/credential-providers': 3.414.0
-      saslprep: 1.0.3
-    transitivePeerDependencies:
-      - aws-crt
-
   /mongodb@4.17.1:
     resolution: {integrity: sha512-MBuyYiPUPRTqfH2dV0ya4dcr2E5N52ocBuZ8Sgg/M030nGF78v855B3Z27mZJnp8PxjnUquEnAtjOsphgMZOlQ==}
     engines: {node: '>=12.9.0'}
@@ -11150,7 +11107,6 @@ packages:
       '@mongodb-js/saslprep': 1.1.0
     transitivePeerDependencies:
       - aws-crt
-    dev: true
 
   /mongoose-aggregate-paginate-v2@1.0.6:
     resolution: {integrity: sha512-UuALu+mjhQa1K9lMQvjLL3vm3iALvNw8PQNIh2gp1b+tO5hUa0NC0Wf6/8QrT9PSJVTihXaD8hQVy3J4e0jO0Q==}
@@ -11162,13 +11118,13 @@ packages:
     engines: {node: '>=4.0.0'}
     dev: false
 
-  /mongoose@6.11.4:
-    resolution: {integrity: sha512-q9NaW9/BBYZofx80SqlR7uoSR09CS3g02y+KMj1lNLUxcFFsPshupY3WWisNFauYG9gyuDF4L/RgyIK3obSghg==}
+  /mongoose@6.12.0:
+    resolution: {integrity: sha512-sd/q83C6TBRPBrrD2A/POSbA/exbCFM2WOuY7Lf2JuIJFlHFG39zYSDTTAEiYlzIfahNOLmXPxBGFxdAch41Mw==}
     engines: {node: '>=12.0.0'}
     dependencies:
       bson: 4.7.2
       kareem: 2.5.1
-      mongodb: 4.16.0
+      mongodb: 4.17.1
       mpath: 0.9.0
       mquery: 4.0.3
       ms: 2.1.3
@@ -13699,14 +13655,6 @@ packages:
     dependencies:
       truncate-utf8-bytes: 1.0.2
     dev: false
-
-  /saslprep@1.0.3:
-    resolution: {integrity: sha512-/MY/PEMbk2SuY5sScONwhUDsV2p77Znkb/q3nSVstq/yQzYJOH/Azh29p9oJLsl3LnQwSvZDKagDGBsBwSooag==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      sparse-bitfield: 3.0.3
-    optional: true
 
   /sass-loader@12.6.0(sass@1.64.0)(webpack@5.88.2):
     resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
