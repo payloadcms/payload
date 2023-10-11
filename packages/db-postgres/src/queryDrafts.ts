@@ -32,6 +32,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
     req,
     sort,
     tableName,
+    version: true,
     where: combinedWhere,
   })
 
