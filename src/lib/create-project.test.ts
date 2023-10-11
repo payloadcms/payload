@@ -2,7 +2,7 @@ import fse from 'fs-extra'
 import path from 'path'
 import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types'
 import { createProject } from './create-project'
-import { bundlerPackages, dbPackages } from './packages'
+import { bundlerPackages, dbPackages, editorPackages } from './packages'
 
 const projectDir = path.resolve(__dirname, './tmp')
 describe('createProject', () => {
@@ -102,15 +102,22 @@ describe('createProject', () => {
 
         const dbReplacement = dbPackages[db as DbType]
         const bundlerReplacement = bundlerPackages[bundler as BundlerType]
+        const editorReplacement = editorPackages['slate']
 
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
 
         // Check deps
-        expect(packageJson.dependencies[dbReplacement.packageName]).toBeDefined()
-        expect(
-          packageJson.dependencies[bundlerReplacement.packageName],
-        ).toBeDefined()
+        expect(packageJson.dependencies['payload']).toEqual('^2.0.0')
+        expect(packageJson.dependencies[dbReplacement.packageName]).toEqual(
+          dbReplacement.version,
+        )
+        expect(packageJson.dependencies[bundlerReplacement.packageName]).toEqual(
+          bundlerReplacement.version,
+        )
+        expect(packageJson.dependencies[editorReplacement.packageName]).toEqual(
+          editorReplacement.version,
+        )
 
         const payloadConfigPath = path.resolve(projectDir, 'src/payload.config.ts')
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')

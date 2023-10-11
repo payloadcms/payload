@@ -4,18 +4,21 @@ type DbAdapterReplacement = {
   packageName: string
   importReplacement: string
   configReplacement: string[]
+  version: string
 }
 
 type BundlerReplacement = {
   packageName: string
   importReplacement: string
   configReplacement: string
+  version: string
 }
 
 type EditorReplacement = {
   packageName: string
   importReplacement: string
   configReplacement: string
+  version: string
 }
 
 const mongodbReplacement: DbAdapterReplacement = {
@@ -27,6 +30,7 @@ const mongodbReplacement: DbAdapterReplacement = {
     '    url: process.env.DATABASE_URI,',
     '  }),',
   ],
+  version: '^1.0.0',
 }
 
 const postgresReplacement: DbAdapterReplacement = {
@@ -39,6 +43,7 @@ const postgresReplacement: DbAdapterReplacement = {
     '    },',
     '  }),',
   ],
+  version: '^0.x', // up to, not including 1.0.0
 }
 
 export const dbPackages: Record<DbType, DbAdapterReplacement> = {
@@ -51,12 +56,14 @@ const webpackReplacement: BundlerReplacement = {
   importReplacement: "import { webpackBundler } from '@payloadcms/bundler-webpack'",
   // Replacement of line containing `// bundler-config`
   configReplacement: '    bundler: webpackBundler(),',
+  version: '^1.0.0',
 }
 
 const viteReplacement: BundlerReplacement = {
   packageName: '@payloadcms/bundler-vite',
   importReplacement: "import { viteBundler } from '@payloadcms/bundler-vite'",
   configReplacement: '  bundler: viteBundler(),',
+  version: '^0.x', // up to, not including 1.0.0
 }
 
 export const bundlerPackages: Record<BundlerType, BundlerReplacement> = {
@@ -69,11 +76,13 @@ export const editorPackages: Record<EditorType, EditorReplacement> = {
     packageName: '@payloadcms/richtext-slate',
     importReplacement: "import { slateEditor } from '@payloadcms/richtext-slate'",
     configReplacement: '  editor: slateEditor({}),',
+    version: '^1.0.0',
   },
   lexical: {
     packageName: '@payloadcms/richtext-lexical',
     importReplacement:
       "import { lexicalEditor } from '@payloadcms/richtext-lexical'",
     configReplacement: '  editor: lexicalEditor({}),',
+    version: '^0.x', // up to, not including 1.0.0
   },
 }
