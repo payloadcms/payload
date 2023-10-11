@@ -15,8 +15,18 @@ export const subscribe = <T>(args: {
     }
 
     window.addEventListener('message', handleMessageCallback)
-    window.parent.postMessage('ready', serverURL)
 
-    return handleMessageCallback
+    // This subscription may have been from either an iframe `src` or `window.open()`
+    // i.e. `window?.opener` || `window?.parent`
+
+    window?.opener?.postMessage(
+      JSON.stringify({
+        popupReady: true,
+        type: 'payload-live-preview',
+      }),
+      serverURL,
+    )
   }
+
+  return null
 }
