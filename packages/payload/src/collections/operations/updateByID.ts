@@ -243,8 +243,8 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       const { hash, salt } = await generatePasswordSaltHash({ password })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash
+      delete dataToUpdate.password
       delete data.password
-      delete result.password
     }
 
     // /////////////////////////////////////
