@@ -5,3 +5,5 @@ export const versionSlug = 'version-posts'
 
 export const autoSaveGlobalSlug = 'autosave-global'
 export const draftGlobalSlug = 'draft-global'
+
+export const titleToDelete = 'title to delete'

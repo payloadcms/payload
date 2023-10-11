@@ -6,16 +6,16 @@ import Posts from './collections/Posts'
 import VersionPosts from './collections/Versions'
 import AutosaveGlobal from './globals/Autosave'
 import DraftGlobal from './globals/Draft'
-import { draftSlug } from './shared'
+import { draftSlug, titleToDelete } from './shared'
 
 export default buildConfigWithDefaults({
   collections: [Posts, AutosavePosts, DraftPosts, VersionPosts],
   globals: [AutosaveGlobal, DraftGlobal],
-  localization: {
-    locales: ['en', 'es'],
-    defaultLocale: 'en',
-  },
   indexSortableFields: true,
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -27,43 +27,52 @@ export default buildConfigWithDefaults({
 
     const { id: draftID } = await payload.create({
       collection: draftSlug,
-      draft: true,
       data: {
         id: 1,
-        title: 'draft title',
         description: 'draft description',
         radio: 'test',
+        title: 'draft title',
       },
+      draft: true,
     })
 
     await payload.create({
       collection: draftSlug,
-      draft: false,
       data: {
         id: 2,
-        title: 'published title',
+        _status: 'published',
         description: 'published description',
         radio: 'test',
-        _status: 'published',
+        title: 'published title',
       },
+      draft: false,
+    })
+
+    await payload.create({
+      collection: draftSlug,
+      data: {
+        description: 'published description',
+        title: titleToDelete,
+      },
+      draft: true,
     })
 
     await payload.update({
-      collection: draftSlug,
       id: draftID,
-      draft: true,
+      collection: draftSlug,
       data: {
         title: 'draft title 2',
       },
+      draft: true,
     })
 
     await payload.update({
-      collection: draftSlug,
       id: draftID,
-      draft: true,
+      collection: draftSlug,
       data: {
         title: 'draft title 3',
       },
+      draft: true,
     })
   },
 })
