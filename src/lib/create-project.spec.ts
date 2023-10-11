@@ -3,6 +3,7 @@ import path from 'path'
 import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types'
 import { createProject } from './create-project'
 import { bundlerPackages, dbPackages, editorPackages } from './packages'
+import exp from 'constants'
 
 const projectDir = path.resolve(__dirname, './tmp')
 describe('createProject', () => {
@@ -112,6 +113,14 @@ describe('createProject', () => {
         expect(packageJson.dependencies[dbReplacement.packageName]).toEqual(
           dbReplacement.version,
         )
+
+        // Should only have one db adapter
+        expect(
+          Object.keys(packageJson.dependencies).filter(n =>
+            n.startsWith('@payloadcms/db-'),
+          ),
+        ).toHaveLength(1)
+
         expect(packageJson.dependencies[bundlerReplacement.packageName]).toEqual(
           bundlerReplacement.version,
         )

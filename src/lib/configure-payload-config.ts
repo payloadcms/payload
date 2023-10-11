@@ -25,6 +25,13 @@ export async function configurePayloadConfig(args: {
     const bundlerPackage = bundlerPackages['webpack']
     const editorPackage = editorPackages['slate']
 
+    // Delete all other db adapters
+    Object.values(dbPackages).forEach(p => {
+      if (p.packageName !== dbPackage.packageName) {
+        delete packageObj.dependencies[p.packageName]
+      }
+    })
+
     packageObj.dependencies[dbPackage.packageName] = dbPackage.version
     packageObj.dependencies[bundlerPackage.packageName] = bundlerPackage.version
     packageObj.dependencies[editorPackage.packageName] = editorPackage.version
