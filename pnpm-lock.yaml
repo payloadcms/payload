@@ -202,9 +202,6 @@ importers:
 
   packages/bundler-webpack:
     dependencies:
-      '@swc/core':
-        specifier: '>= 1.3.76'
-        version: 1.3.76
       compression:
         specifier: 1.7.4
         version: 1.7.4
