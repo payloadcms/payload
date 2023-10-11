@@ -8,13 +8,13 @@ export const subscribe = <T>(args: {
 }): ((event: MessageEvent) => void) => {
   const { callback, depth, initialData, serverURL } = args
 
-  if (typeof window !== 'undefined') {
-    const handleMessageCallback = async (event: MessageEvent) => {
-      const mergedData = await handleMessage({ depth, event, initialData, serverURL })
-      callback(mergedData)
-    }
+  const onMessage = async (event: MessageEvent) => {
+    const mergedData = await handleMessage({ depth, event, initialData, serverURL })
+    callback(mergedData)
+  }
 
-    window.addEventListener('message', handleMessageCallback)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('message', onMessage)
 
     // This subscription may have been from either an iframe `src` or `window.open()`
     // i.e. `window?.opener` || `window?.parent`
@@ -28,5 +28,5 @@ export const subscribe = <T>(args: {
     )
   }
 
-  return null
+  return onMessage
 }
