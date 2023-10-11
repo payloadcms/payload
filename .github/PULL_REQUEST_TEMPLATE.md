@@ -2,7 +2,7 @@
 
 <!-- Please include a summary of the pull request and any related issues it fixes. Please also include relevant motivation and context. -->
 
-- [ ] I have read and understand the [CONTRIBUTING.md](../CONTRIBUTING.md) document in this repository.
+- [ ] I have read and understand the [CONTRIBUTING.md](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md) document in this repository.
 
 ## Type of change
 
