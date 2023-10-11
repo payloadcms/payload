@@ -69,6 +69,9 @@ importers:
       chalk:
         specifier: ^5.3.0
         version: 5.3.0
+      chalk-template:
+        specifier: 1.1.0
+        version: 1.1.0
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -150,6 +153,9 @@ importers:
       ts-node:
         specifier: 10.9.1
         version: 10.9.1(@swc/core@1.3.76)(@types/node@20.5.7)(typescript@5.2.2)
+      tsx:
+        specifier: ^3.13.0
+        version: 3.13.0
       turbo:
         specifier: ^1.10.15
         version: 1.10.15
@@ -6044,6 +6050,13 @@ packages:
   /caniuse-lite@1.0.30001535:
     resolution: {integrity: sha512-48jLyUkiWFfhm/afF7cQPqPjaUmSraEhK4j+FCTJpgnGGEZHqyLe3hmWH7lIooZdSzXL0ReMvHz0vKDoTBsrwg==}
 
+  /chalk-template@1.1.0:
+    resolution: {integrity: sha512-T2VJbcDuZQ0Tb2EWwSotMPJjgpy1/tGee1BTpUNsGZ/qgNjV2t7Mvu+d4600U564nbLesN1x2dPL+xii174Ekg==}
+    engines: {node: '>=14.16'}
+    dependencies:
+      chalk: 5.3.0
+    dev: true
+
   /chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
     engines: {node: '>=4'}
@@ -8639,6 +8652,12 @@ packages:
     dependencies:
       resolve-pkg-maps: 1.0.0
     dev: false
+
+  /get-tsconfig@4.7.2:
+    resolution: {integrity: sha512-wuMsz4leaj5hbGgg4IvDU0bqJagpftG5l5cXIAvo8uZrqn0NJqwtfupTN00VnkQJPcIRrxYrm1Ue24btpCha2A==}
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+    dev: true
 
   /get-uri@6.0.1:
     resolution: {integrity: sha512-7ZqONUVqaabogsYNWlYj0t3YZaL6dhuEueZXGF+/YVmf6dHmaFg8/6psJKqhx9QykIDKzpGcy2cn4oV4YC7V/Q==}
@@ -13545,7 +13564,6 @@ packages:
 
   /resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
-    dev: false
 
   /resolve.exports@2.0.2:
     resolution: {integrity: sha512-X2UW6Nw3n/aMgDVy+0rSqgHlv39WZAlZrXCdnbyEiKm17DSqHX4MmQMaST3FbeWR5FTuRcUwYAziZajji0Y7mg==}
@@ -14748,6 +14766,17 @@ packages:
       tslib: 1.14.1
       typescript: 5.2.2
     dev: false
+
+  /tsx@3.13.0:
+    resolution: {integrity: sha512-rjmRpTu3as/5fjNq/kOkOtihgLxuIz6pbKdj9xwP4J5jOLkBxw/rjN5ANw+KyrrOXV5uB7HC8+SrrSJxT65y+A==}
+    hasBin: true
+    dependencies:
+      esbuild: 0.18.20
+      get-tsconfig: 4.7.2
+      source-map-support: 0.5.21
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
 
   /tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
