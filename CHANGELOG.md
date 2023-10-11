@@ -121,6 +121,12 @@ This means that in some fringe cases, if you are creating a doc and then instant
 
 To avoid any issues, you can pass the `req.transactionID` through to your Local API calls, so that your Local API calls are included as part of the parent transaction.
 
+### ⚠️ Locales now have more functionality, and in some places, you might need to update custom code
+
+Payload's locales have become more powerful and now allow you to customize more aspects per locale such as a human-friendly label and if the locale is RTL or not. 
+
+This means that certain functions now return a different shape, such as `useLocale`. This hook used to return a string of the locale code you are currently editing, but it now returns an object with type of `Locale`.
+
 ### ⚠️ Admin panel CSS classes may have changed
 
 The revisions we've made in 2.0 required changes to both HTML and CSS within the admin panel. For this reason, if you were loading custom CSS into the admin panel to customize the look and feel, your stylesheets may need to be updated. If your CSS is targeting elements on the page using HTML selectors or class names, you may need to update these selectors based on the current markup. It may also be necessary to update your style definitions if the core Payload component you are targeting has undergone significant change.
