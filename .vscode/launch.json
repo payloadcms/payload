@@ -17,7 +17,7 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev:postgres collections-graphql",
+      "command": "pnpm run dev:postgres fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",

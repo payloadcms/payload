@@ -174,7 +174,7 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = `enum_${newTableName}_${columnPrefix || ''}${toSnakeCase(field.name)}`
+        const enumName = `enum_${newTableName}_${toSnakeCase(field.name)}`
 
         adapter.enums[enumName] = pgEnum(
           enumName,
@@ -188,7 +188,7 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
-          const selectTableName = `${newTableName}_${toSnakeCase(fieldName)}`
+          const selectTableName = `${newTableName}_${toSnakeCase(field.name)}`
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
             parent: parentIDColumnMap[parentIDColType]('parent_id')
