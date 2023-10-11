@@ -42,11 +42,11 @@ describe('Auth', () => {
       // language=graphQL
       const query = `mutation {
           loginUser(email: "${devUser.email}", password: "${devUser.password}") {
-          token
-            user {
-              id
-              email
-            }
+              token
+              user {
+                  id
+                  email
+              }
           }
       }`
       const response = await client.request(query)
@@ -62,7 +62,7 @@ describe('Auth', () => {
 
     it('should have fields saved to JWT', async () => {
       const decoded = jwtDecode<User>(token)
-      const { email: jwtEmail, collection, roles, iat, exp } = decoded
+      const { collection, email: jwtEmail, exp, iat, roles } = decoded
 
       expect(jwtEmail).toBeDefined()
       expect(collection).toEqual('users')
@@ -132,6 +132,19 @@ describe('Auth', () => {
         loggedInUser = data.user
       })
 
+      it('should allow a user to change password without returning password', async () => {
+        const result = await payload.update({
+          id: loggedInUser.id,
+          collection: slug,
+          data: {
+            password: 'test',
+          },
+        })
+
+        expect(result.id).toStrictEqual(loggedInUser.id)
+        expect(result.password).toBeUndefined()
+      })
+
       it('should return a logged in user from /me', async () => {
         const response = await fetch(`${apiUrl}/${slug}/me`, {
           headers: {
@@ -149,16 +162,16 @@ describe('Auth', () => {
       it('should have fields saved to JWT', async () => {
         const decoded = jwtDecode<User>(token)
         const {
-          email: jwtEmail,
           collection,
+          email: jwtEmail,
+          exp,
+          iat,
           roles,
           [saveToJWTKey]: customJWTPropertyKey,
-          'x-lifted-from-group': liftedFromGroup,
-          'x-tab-field': unnamedTabSaveToJWTString,
           tabLiftedSaveToJWT,
           unnamedTabSaveToJWTFalse,
-          iat,
-          exp,
+          'x-lifted-from-group': liftedFromGroup,
+          'x-tab-field': unnamedTabSaveToJWTString,
         } = decoded
 
         const group = decoded['x-group'] as Record<string, unknown>
@@ -190,9 +203,9 @@ describe('Auth', () => {
         const user = await payload.create({
           collection: slug,
           data: {
+            apiKey,
             email: 'dev@example.com',
             password: 'test',
-            apiKey,
           },
         })
 
@@ -212,10 +225,10 @@ describe('Auth', () => {
 
       it('should refresh a token and reset its expiration', async () => {
         const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
-          method: 'post',
           headers: {
             Authorization: `JWT ${token}`,
           },
+          method: 'post',
         })
 
         const data = await response.json()
@@ -228,18 +241,18 @@ describe('Auth', () => {
         expect(loggedInUser?.custom).toBe('Hello, world!')
 
         await payload.update({
-          collection: slug,
           id: loggedInUser?.id || '',
+          collection: slug,
           data: {
             custom: 'Goodbye, world!',
           },
         })
 
         const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
-          method: 'post',
           headers: {
             Authorization: `JWT ${token}`,
           },
+          method: 'post',
         })
 
         const data = await response.json()
@@ -303,7 +316,7 @@ describe('Auth', () => {
           },
         })
 
-        const { _verified, _verificationToken } = userResult.docs[0]
+        const { _verificationToken, _verified } = userResult.docs[0]
 
         expect(_verified).toBe(false)
         expect(_verificationToken).toBeDefined()
@@ -331,7 +344,7 @@ describe('Auth', () => {
           },
         })
 
-        const { _verified: afterVerified, _verificationToken: afterToken } =
+        const { _verificationToken: afterToken, _verified: afterVerified } =
           afterVerifyResult.docs[0]
         expect(afterVerified).toBe(true)
         expect(afterToken).toBeNull()
@@ -374,8 +387,8 @@ describe('Auth', () => {
               password,
             }),
             headers: {
-              'Content-Type': 'application/json',
               Authorization: `JWT ${token}`,
+              'Content-Type': 'application/json',
             },
             method: 'post',
           })
@@ -396,7 +409,7 @@ describe('Auth', () => {
             },
           })
 
-          const { loginAttempts, lockUntil } = userResult.docs[0]
+          const { lockUntil, loginAttempts } = userResult.docs[0]
 
           expect(loginAttempts).toBe(2)
           expect(lockUntil).toBeDefined()
@@ -409,13 +422,13 @@ describe('Auth', () => {
 
           await payload.update({
             collection: slug,
+            data: {
+              lockUntil: Date.now() - 605 * 1000,
+            },
             where: {
               email: {
                 equals: userEmail,
               },
-            },
-            data: {
-              lockUntil: Date.now() - 605 * 1000,
             },
           })
 
@@ -443,7 +456,7 @@ describe('Auth', () => {
             },
           })
 
-          const { loginAttempts, lockUntil } = userResult.docs[0]
+          const { lockUntil, loginAttempts } = userResult.docs[0]
 
           expect(loginAttempts).toBe(0)
           expect(lockUntil).toBeNull()
@@ -454,13 +467,13 @@ describe('Auth', () => {
     it('should allow forgot-password by email', async () => {
       // TODO: Spy on payload sendEmail function
       const response = await fetch(`${apiUrl}/${slug}/forgot-password`, {
-        method: 'post',
         body: JSON.stringify({
           email,
         }),
         headers: {
           'Content-Type': 'application/json',
         },
+        method: 'post',
       })
 
       // expect(mailSpy).toHaveBeenCalled();
@@ -495,10 +508,10 @@ describe('Auth', () => {
       const user = await payload.create({
         collection: slug,
         data: {
+          adminOnlyField: 'admin secret',
           email: 'insecure@me.com',
           password: 'test',
           roles: ['admin'],
-          adminOnlyField: 'admin secret',
         },
       })
 
@@ -520,8 +533,8 @@ describe('Auth', () => {
       expect(adminMe.user.adminOnlyField).toEqual('admin secret')
 
       await payload.update({
-        collection: slug,
         id: user?.id || '',
+        collection: slug,
         data: {
           roles: ['editor'],
         },
@@ -546,8 +559,8 @@ describe('Auth', () => {
 
       const success = await fetch(`${apiUrl}/api-keys/${user2.id}`, {
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `api-keys API-Key ${user2.apiKey}`,
+          'Content-Type': 'application/json',
         },
       }).then((res) => res.json())
 
@@ -555,8 +568,8 @@ describe('Auth', () => {
 
       const fail = await fetch(`${apiUrl}/api-keys/${user1.id}`, {
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `api-keys API-Key ${user2.apiKey}`,
+          'Content-Type': 'application/json',
         },
       })
 
