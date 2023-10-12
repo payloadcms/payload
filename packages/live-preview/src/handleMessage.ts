@@ -7,11 +7,10 @@ export const handleMessage = async <T>(args: {
   serverURL: string
 }): Promise<T> => {
   const { depth, event, initialData, serverURL } = args
-
   if (event.origin === serverURL && event.data) {
     const eventData = JSON.parse(event?.data)
 
-    if (eventData.type === 'livePreview') {
+    if (eventData.type === 'payload-live-preview') {
       const mergedData = await mergeData<T>({
         depth,
         fieldSchema: eventData.fieldSchemaJSON,
