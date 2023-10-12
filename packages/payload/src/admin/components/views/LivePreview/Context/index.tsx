@@ -5,7 +5,6 @@ import type { LivePreviewConfig } from '../../../../../exports/config'
 import type { EditViewProps } from '../../types'
 import type { usePopupWindow } from '../usePopupWindow'
 
-import { useResize } from '../../../../utilities/useResize'
 import { customCollisionDetection } from './collisionDetection'
 import { LivePreviewContext } from './context'
 import { sizeReducer } from './sizeReducer'
@@ -26,8 +25,6 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
-  const deviceFrameRef = React.useRef<HTMLDivElement>(null)
-
   const [iframeHasLoaded, setIframeHasLoaded] = React.useState(false)
 
   const [zoom, setZoom] = React.useState(1)
@@ -35,6 +32,11 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
 
   const [size, setSize] = React.useReducer(sizeReducer, { height: 0, width: 0 })
+
+  const [measuredDeviceSize, setMeasuredDeviceSize] = React.useState({
+    height: 0,
+    width: 0,
+  })
 
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
@@ -92,22 +94,18 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
     }
   }, [breakpoint, breakpoints])
 
-  // keep an accurate measurement of the actual device size as it is truly rendered
-  // this is helpful when `sizes` are non-number units like percentages, etc.
-  const { size: measuredDeviceSize } = useResize(deviceFrameRef)
-
   return (
     <LivePreviewContext.Provider
       value={{
         breakpoint,
         breakpoints,
-        deviceFrameRef,
         iframeHasLoaded,
         iframeRef,
         measuredDeviceSize,
         setBreakpoint,
         setHeight,
         setIframeHasLoaded,
+        setMeasuredDeviceSize,
         setSize,
         setToolbarPosition: setPosition,
         setWidth,

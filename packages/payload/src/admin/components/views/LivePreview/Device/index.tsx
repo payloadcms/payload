@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
+import { useResize } from '../../../../utilities/useResize'
 import { useLivePreviewContext } from '../Context/context'
 
 export const DeviceContainer: React.FC<{
@@ -7,7 +8,22 @@ export const DeviceContainer: React.FC<{
 }> = (props) => {
   const { children } = props
 
-  const { breakpoint, deviceFrameRef, size, zoom } = useLivePreviewContext()
+  const deviceFrameRef = React.useRef<HTMLDivElement>(null)
+
+  const { breakpoint, setMeasuredDeviceSize, size, zoom } = useLivePreviewContext()
+
+  // Keep an accurate measurement of the actual device size as it is truly rendered
+  // This is helpful when `sizes` are non-number units like percentages, etc.
+  const { size: measuredDeviceSize } = useResize(deviceFrameRef)
+
+  // Sync the measured device size with the context so that other components can use it
+  // This happens from the bottom up so that as this component mounts and unmounts,
+  // Its size is freshly populated again upon re-mounting, i.e. going from iframe->popup->iframe
+  useEffect(() => {
+    if (measuredDeviceSize) {
+      setMeasuredDeviceSize(measuredDeviceSize)
+    }
+  }, [measuredDeviceSize, setMeasuredDeviceSize])
 
   let x = '0'
   let margin = '0'
