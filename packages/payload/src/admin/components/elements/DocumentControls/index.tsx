@@ -167,7 +167,10 @@ export const DocumentControls: React.FC<{
           <div className={`${baseClass}__controls`}>
             {showPreviewButton && (
               <PreviewButton
-                CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
+                CustomComponent={
+                  collection?.admin?.components?.edit?.PreviewButton ||
+                  global?.admin?.components?.elements?.PreviewButton
+                }
                 generatePreviewURL={collection?.admin?.preview || global?.admin?.preview}
               />
             )}
@@ -178,13 +181,26 @@ export const DocumentControls: React.FC<{
                     {((collection?.versions?.drafts && !collection?.versions?.drafts?.autosave) ||
                       (global?.versions?.drafts && !global?.versions?.drafts?.autosave)) && (
                       <SaveDraft
-                        CustomComponent={collection?.admin?.components?.edit?.SaveDraftButton}
+                        CustomComponent={
+                          collection?.admin?.components?.edit?.SaveDraftButton ||
+                          global?.admin?.components?.elements?.SaveDraftButton
+                        }
                       />
                     )}
-                    <Publish CustomComponent={collection?.admin?.components?.edit?.PublishButton} />
+                    <Publish
+                      CustomComponent={
+                        collection?.admin?.components?.edit?.PublishButton ||
+                        global?.admin?.components?.elements?.PublishButton
+                      }
+                    />
                   </React.Fragment>
                 ) : (
-                  <Save CustomComponent={collection?.admin?.components?.edit?.SaveButton} />
+                  <Save
+                    CustomComponent={
+                      collection?.admin?.components?.edit?.SaveButton ||
+                      global?.admin?.components?.elements?.SaveButton
+                    }
+                  />
                 )}
               </React.Fragment>
             )}
