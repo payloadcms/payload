@@ -90,7 +90,7 @@ const BlocksField: React.FC<Props> = (props) => {
     showError,
     valid,
     value,
-  } = useField<[]>({
+  } = useField<number>({
     condition,
     hasRows: true,
     path,
@@ -128,8 +128,8 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 
   const removeRow = useCallback(
-    async (rowIndex: number) => {
-      await removeFieldRow({ path, rowIndex })
+    (rowIndex: number) => {
+      removeFieldRow({ path, rowIndex })
       setModified(true)
     },
     [path, removeFieldRow, setModified],
@@ -297,7 +297,7 @@ const BlocksField: React.FC<Props> = (props) => {
           </DrawerToggler>
           <BlocksDrawer
             addRow={addRow}
-            addRowIndex={value?.length || 0}
+            addRowIndex={value || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
             labels={labels}

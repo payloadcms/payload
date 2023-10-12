@@ -123,7 +123,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           disableFormData: rows.length > 0,
           rows: rowsMetadata,
-          value: rows,
+          value: rows.length,
         },
         ...flattenRows(path, rows),
       }
@@ -161,10 +161,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
       siblingRows.splice(rowIndex, 0, subFieldState)
 
-      // add new row to array _value_
-      const currentValue = (Array.isArray(state[path]?.value) ? state[path]?.value : []) as Fields[]
-      const newValue = currentValue.splice(rowIndex, 0, reduceFieldsToValues(subFieldState, true))
-
       const newState: Fields = {
         ...remainingFields,
         ...flattenRows(path, siblingRows),
@@ -172,7 +168,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: newValue,
+          value: siblingRows.length,
         },
       }
 
@@ -203,10 +199,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       // replace form _field state_
       siblingRows[rowIndex] = subFieldState
 
-      // replace array _value_
-      const newValue = Array.isArray(state[path]?.value) ? state[path]?.value : []
-      newValue[rowIndex] = reduceFieldsToValues(subFieldState, true)
-
       const newState: Fields = {
         ...remainingFields,
         ...flattenRows(path, siblingRows),
@@ -214,7 +206,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: newValue,
+          value: siblingRows.length,
         },
       }
 
@@ -245,7 +237,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: rows,
+          value: rows.length,
         },
         ...flattenRows(path, rows),
       }
