@@ -88,13 +88,14 @@ This package provides the following functions:
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`subscribe`**       | Subscribes to the Admin panel's `window.postMessage` events and calls the provided callback function.                                                                                       |
 | **`unsubscribe`**     | Unsubscribes from the Admin panel's `window.postMessage` events.                                                                                                                            |
+| **`ready`**           | Sends a `window.postMessage` event to the Admin panel to indicate that the front-end is ready to receive messages.                                                                          |
 
 The `subscribe` function takes the following args:
 
 | Path                  | Description                                                                                                                                                                                 |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`callback`** \*     | A callback function that is called with `data` every time a change is made to the document.                                                                                                 |
-| **`serverURL`** \*    | The URL of your Payload server.                                                                                                                                                        git s     |
+| **`serverURL`** \*    | The URL of your Payload server.                                                                                                                                                             |
 | **`initialData`**     | The initial data of the document. The live data will be merged in as changes are made.                                                                                                      |
 | **`depth`**           | The depth of the relationships to fetch. Defaults to `0`.                                                                                                                                   |
 
@@ -103,18 +104,23 @@ With these functions, you can build your own hook using your front-end framework
 ```tsx
 import { subscribe, unsubscribe } from '@payloadcms/live-preview';
 
-// Build your own hook to subscribe to the live preview events
-// This function will handle everything for you like
-// 1. subscribing to `window.postMessage` events
-// 2. merging initial page data with incoming form state
-// 3. populating relationships and uploads
+// To build your own hook, subscribe to Live Preview events using the`subscribe` function
+// It handles everything from:
+// 1. Listening to `window.postMessage` events
+// 2. Merging initial data with active form state
+// 3. Populating relationships and uploads
+// 4. Calling the `onChange` callback with the result
+// Your hook should also:
+// 1. Tell the Admin panel when it is ready to receive messages
+// 2. Handle the results of the `onChange` callback to update the UI
+// 3. Unsubscribe from the `window.postMessage` events when it unmounts
 ```
 
 Here is an example of what the same `useLivePreview` React hook from above looks like under the hood:
 
 ```tsx
-import { subscribe, unsubscribe } from '@payloadcms/live-preview'
-import { useCallback, useEffect, useState } from 'react'
+import { subscribe, unsubscribe, ready } from '@payloadcms/live-preview'
+import { useCallback, useEffect, useState, useRef } from 'react'
 
 export const useLivePreview = <T extends any>(props: {
   depth?: number
@@ -127,6 +133,7 @@ export const useLivePreview = <T extends any>(props: {
   const { depth = 0, initialData, serverURL } = props
   const [data, setData] = useState<T>(initialData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const hasSentReadyMessage = useRef<boolean>(false)
 
   const onChange = useCallback((mergedData) => {
     setData(mergedData)
@@ -134,12 +141,24 @@ export const useLivePreview = <T extends any>(props: {
   }, [])
 
   useEffect(() => {
+    // Listen for `window.postMessage` events from the Admin panel
+    // When a change is made, the `onChange` callback will be called with the merged data
     const subscription = subscribe({
       callback: onChange,
       depth,
       initialData,
       serverURL,
     })
+
+    // Once subscribed, send a `ready` message back up to the Admin panel
+    // This will indicate that the front-end is ready to receive messages
+    if (!hasSentReadyMessage.current) {
+      hasSentReadyMessage.current = true
+
+      ready({
+        serverURL
+      })
+    }
 
     return () => {
       unsubscribe(subscription)
