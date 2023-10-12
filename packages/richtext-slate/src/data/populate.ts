@@ -7,7 +7,7 @@ type Arguments = {
   currentDepth?: number
   data: unknown
   depth: number
-  field: RichTextField<AdapterArguments>
+  field: RichTextField<any[], AdapterArguments>
   key: number | string
   overrideAccess?: boolean
   req: PayloadRequest
