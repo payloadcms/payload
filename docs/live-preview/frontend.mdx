@@ -136,6 +136,8 @@ export const useLivePreview = <T extends any>(props: {
   const hasSentReadyMessage = useRef<boolean>(false)
 
   const onChange = useCallback((mergedData) => {
+    // When a change is made, the `onChange` callback will be called with the merged data
+    // Set this merged data into state so that React will re-render the UI
     setData(mergedData)
     setIsLoading(false)
   }, [])
@@ -160,6 +162,7 @@ export const useLivePreview = <T extends any>(props: {
       })
     }
 
+    // When the component unmounts, unsubscribe from the `window.postMessage` events
     return () => {
       unsubscribe(subscription)
     }
