@@ -1,3 +1,4 @@
+import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
@@ -26,8 +27,10 @@ export type LexicalEditorProps = {
   lexical?: LexicalEditorConfig
 }
 
-export function lexicalEditor(props?: LexicalEditorProps): RichTextAdapter<AdapterProps> {
-  let finalSanitizedEditorConfig: SanitizedEditorConfig = null
+export function lexicalEditor(
+  props?: LexicalEditorProps,
+): RichTextAdapter<SerializedEditorState, AdapterProps> {
+  let finalSanitizedEditorConfig: SanitizedEditorConfig
   if (!props || (!props.features && !props.lexical)) {
     finalSanitizedEditorConfig = cloneDeep(defaultSanitizedEditorConfig)
   } else {

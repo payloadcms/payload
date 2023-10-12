@@ -517,7 +517,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter
+  editor: RichTextAdapter<any, any>
   /**
    * Email configuration options. This value is overridden by `email` in Payload.init if passed.
    *

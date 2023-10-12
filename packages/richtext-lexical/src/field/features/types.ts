@@ -24,7 +24,7 @@ export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexical
   afterReadPromises: Map<string, Array<AfterReadPromise>>
   currentDepth: number
   depth: number
-  field: RichTextField<AdapterProps>
+  field: RichTextField<SerializedEditorState, AdapterProps>
   node: T
   overrideAccess: boolean
   req: PayloadRequest

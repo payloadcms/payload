@@ -87,13 +87,17 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
               return <plugin.Component anchorElem={floatingAnchorElem} key={plugin.key} />
             }
           })}
+          {editor.isEditable() && (
+            <React.Fragment>
+              <FloatingSelectToolbarPlugin anchorElem={floatingAnchorElem} />
+              <SlashMenuPlugin anchorElem={floatingAnchorElem} />
+            </React.Fragment>
+          )}
         </React.Fragment>
       )}
       {editor.isEditable() && (
         <React.Fragment>
           <HistoryPlugin />
-          <FloatingSelectToolbarPlugin />
-          <SlashMenuPlugin />
           <MarkdownShortcutPlugin />
         </React.Fragment>
       )}
