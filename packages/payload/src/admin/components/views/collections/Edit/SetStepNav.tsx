@@ -31,14 +31,13 @@ export const SetStepNav: React.FC<
   let slug: string
   let isEditing = false
   let id: number | string | undefined
-  let view: string | undefined
+  const view: string | undefined = props?.view || undefined
 
   if ('collection' in props) {
     const {
       id: idFromProps,
       collection: collectionFromProps,
       isEditing: isEditingFromProps,
-      view: viewFromProps,
     } = props
 
     if (collectionFromProps) {
@@ -48,15 +47,15 @@ export const SetStepNav: React.FC<
       slug = collection.slug
       isEditing = isEditingFromProps
       id = idFromProps
-      view = viewFromProps
     }
   }
 
   if ('global' in props) {
-    const { global: globalFromProps, view: viewFromProps } = props
-    global = globalFromProps
-    slug = globalFromProps?.slug
-    view = viewFromProps
+    const { global: globalFromProps } = props
+    if (globalFromProps) {
+      global = globalFromProps
+      slug = globalFromProps?.slug
+    }
   }
 
   const title = useTitle({ collection, global })
@@ -77,13 +76,13 @@ export const SetStepNav: React.FC<
     if (collection) {
       nav.push({
         label: getTranslation(pluralLabel, i18n),
-        url: `${admin}/collections/${slug || collection.slug}`,
+        url: `${admin}/collections/${slug}`,
       })
 
       if (isEditing) {
         nav.push({
           label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
-          url: `${admin}/collections/${slug || collection.slug}/${id}`,
+          url: `${admin}/collections/${slug}/${id}`,
         })
       } else {
         nav.push({
@@ -118,6 +117,7 @@ export const SetStepNav: React.FC<
     global,
     collection,
     view,
+    drawerDepth,
   ])
 
   return null
