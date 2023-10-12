@@ -85,7 +85,7 @@ Here is an example of using a function that returns a dynamic URL:
         locale
       }) => `${data.tenant.url}${ // Multi-tenant top-level domain
         documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
-      `}?locale=${locale}`, // Localization query param
+      }${locale ? `?locale=${locale?.code}` : ''}`, // Localization query param
       collections: ['pages'],
     },
   }
