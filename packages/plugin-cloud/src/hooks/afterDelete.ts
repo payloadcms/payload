@@ -18,10 +18,11 @@ export const getAfterDeleteHook = ({
 
       const filesToDelete: string[] = [
         doc.filename,
-        ...Object.values(doc?.sizes || []).map(resizedFileData => resizedFileData?.filename),
+        // @ts-expect-error Errored after import from external repo
+        ...Object.values(doc?.sizes || []).map((resizedFileData) => resizedFileData?.filename),
       ]
 
-      const promises = filesToDelete.map(async filename => {
+      const promises = filesToDelete.map(async (filename) => {
         await storageClient.deleteObject({
           Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
           Key: createKey({ collection: collection.slug, filename, identityID }),

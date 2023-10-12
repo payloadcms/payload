@@ -30,24 +30,10 @@
     "@types/express": "^4.17.9",
     "@types/jest": "^29.5.1",
     "@types/nodemailer": "^6.4.7",
-    "@typescript-eslint/eslint-plugin": "5.12.1",
-    "@typescript-eslint/parser": "5.12.1",
-    "cross-env": "^7.0.3",
-    "dotenv": "^8.2.0",
-    "eslint": "^8.19.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "2.25.4",
-    "eslint-plugin-prettier": "^4.0.0",
-    "jest": "^29.5.0",
     "nodemailer": "^6.9.1",
-    "nodemon": "^2.0.6",
     "payload": "^1.11.6",
-    "prettier": "^2.7.1",
-    "rimraf": "^4.1.2",
     "ts-jest": "^29.1.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "webpack": "^5.78.0"
   },
   "files": [
     "dist"
