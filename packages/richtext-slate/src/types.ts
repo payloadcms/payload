@@ -73,4 +73,4 @@ export type AdapterArguments = {
   }
 }
 
-export type FieldProps = RichTextFieldProps<AdapterArguments>
+export type FieldProps = RichTextFieldProps<any, AdapterArguments>

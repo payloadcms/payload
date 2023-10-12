@@ -5,18 +5,36 @@ import { createArrayFromCommaDelineated } from 'payload/utilities'
 type SanitizeQueryValueArgs = {
   field: Field | TabAsField
   operator: string
+  relationOrPath: string
   val: any
 }
 
 export const sanitizeQueryValue = ({
   field,
   operator: operatorArg,
+  relationOrPath,
   val,
 }: SanitizeQueryValueArgs): { operator: string; value: unknown } => {
   let operator = operatorArg
   let formattedValue = val
 
   if (!fieldAffectsData(field)) return { operator, value: formattedValue }
+
+  if (
+    (field.type === 'relationship' || field.type === 'upload') &&
+    !relationOrPath.endsWith('relationTo') &&
+    Array.isArray(formattedValue)
+  ) {
+    const allPossibleIDTypes: (number | string)[] = []
+    formattedValue.forEach((val) => {
+      if (typeof val === 'string') {
+        allPossibleIDTypes.push(val, parseInt(val))
+      } else {
+        allPossibleIDTypes.push(val, String(val))
+      }
+    })
+    formattedValue = allPossibleIDTypes
+  }
 
   // Cast incoming values as proper searchable types
   if (field.type === 'checkbox' && typeof val === 'string') {

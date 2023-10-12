@@ -15,7 +15,6 @@ import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../config/EditorConfigProvider'
 import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
-import { getSelectedNode } from '../../utils/getSelectedNode'
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
 import { ToolbarButton } from './ToolbarButton'
 import { ToolbarDropdown } from './ToolbarDropdown'
@@ -33,28 +32,41 @@ function FloatingSelectToolbar({
 
   const { editorConfig } = useEditorConfigContext()
 
-  function mouseMoveListener(e: MouseEvent) {
-    if (popupCharStylesEditorRef?.current && (e.buttons === 1 || e.buttons === 3)) {
+  const closeFloatingToolbar = useCallback(() => {
+    if (popupCharStylesEditorRef?.current) {
       const isOpacityZero = popupCharStylesEditorRef.current.style.opacity === '0'
       const isPointerEventsNone = popupCharStylesEditorRef.current.style.pointerEvents === 'none'
-      if (!isOpacityZero || !isPointerEventsNone) {
-        // Check if the mouse is not over the popup
-        const x = e.clientX
-        const y = e.clientY
-        const elementUnderMouse = document.elementFromPoint(x, y)
-        if (!popupCharStylesEditorRef.current.contains(elementUnderMouse)) {
-          // Mouse is not over the target element => not a normal click, but probably a drag
-          if (!isOpacityZero) {
-            popupCharStylesEditorRef.current.style.opacity = '0'
-          }
-          if (!isPointerEventsNone) {
-            popupCharStylesEditorRef.current.style.pointerEvents = 'none'
+
+      if (!isOpacityZero) {
+        popupCharStylesEditorRef.current.style.opacity = '0'
+      }
+      if (!isPointerEventsNone) {
+        popupCharStylesEditorRef.current.style.pointerEvents = 'none'
+      }
+    }
+  }, [popupCharStylesEditorRef])
+
+  const mouseMoveListener = useCallback(
+    (e: MouseEvent) => {
+      if (popupCharStylesEditorRef?.current && (e.buttons === 1 || e.buttons === 3)) {
+        const isOpacityZero = popupCharStylesEditorRef.current.style.opacity === '0'
+        const isPointerEventsNone = popupCharStylesEditorRef.current.style.pointerEvents === 'none'
+        if (!isOpacityZero || !isPointerEventsNone) {
+          // Check if the mouse is not over the popup
+          const x = e.clientX
+          const y = e.clientY
+          const elementUnderMouse = document.elementFromPoint(x, y)
+          if (!popupCharStylesEditorRef.current.contains(elementUnderMouse)) {
+            // Mouse is not over the target element => not a normal click, but probably a drag
+            closeFloatingToolbar()
           }
         }
       }
-    }
-  }
-  function mouseUpListener(e: MouseEvent) {
+    },
+    [closeFloatingToolbar],
+  )
+
+  const mouseUpListener = useCallback(() => {
     if (popupCharStylesEditorRef?.current) {
       if (popupCharStylesEditorRef.current.style.opacity !== '1') {
         popupCharStylesEditorRef.current.style.opacity = '1'
@@ -63,7 +75,7 @@ function FloatingSelectToolbar({
         popupCharStylesEditorRef.current.style.pointerEvents = 'auto'
       }
     }
-  }
+  }, [popupCharStylesEditorRef])
 
   useEffect(() => {
     document.addEventListener('mousemove', mouseMoveListener)
@@ -73,7 +85,7 @@ function FloatingSelectToolbar({
       document.removeEventListener('mousemove', mouseMoveListener)
       document.removeEventListener('mouseup', mouseUpListener)
     }
-  }, [popupCharStylesEditorRef])
+  }, [popupCharStylesEditorRef, mouseMoveListener, mouseUpListener])
 
   const updateTextFormatFloatingToolbar = useCallback(() => {
     const selection = $getSelection()

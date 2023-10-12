@@ -1,3 +1,4 @@
+import type { SerializedEditorState } from 'lexical'
 import type { PayloadRequest } from 'payload/types'
 import type { Collection, Field, RichTextField } from 'payload/types'
 
@@ -7,7 +8,7 @@ type Arguments = {
   currentDepth?: number
   data: unknown
   depth: number
-  field: RichTextField<AdapterProps>
+  field: RichTextField<SerializedEditorState, AdapterProps>
   key: number | string
   overrideAccess?: boolean
   req: PayloadRequest

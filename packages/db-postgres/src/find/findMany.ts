@@ -150,7 +150,10 @@ export const findMany = async function find({
     const countResult = await chainMethods({
       methods: selectCountMethods,
       query: db
-        .select({ count: sql<number>`count(*)` })
+        .select({
+          count: sql<number>`count
+              (*)`,
+        })
         .from(table)
         .where(where),
     })

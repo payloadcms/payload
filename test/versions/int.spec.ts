@@ -6,7 +6,7 @@ import { initPayloadTest } from '../helpers/configHelpers'
 import AutosavePosts from './collections/Autosave'
 import configPromise from './config'
 import AutosaveGlobal from './globals/Autosave'
-import { autosaveSlug } from './shared'
+import { autosaveSlug, draftSlug } from './shared'
 
 let collectionLocalPostID: string
 let collectionLocalVersionID
@@ -199,6 +199,44 @@ describe('Versions', () => {
 
         expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle)
         expect(versions.docs[0].version.title.es).toStrictEqual(spanishTitle)
+      })
+
+      it('should query drafts with sort', async () => {
+        const draftsAscending = await payload.find({
+          collection: draftSlug,
+          draft: true,
+          sort: 'title',
+        })
+        const draftsDescending = await payload.find({
+          collection: draftSlug,
+          draft: true,
+          sort: '-title',
+        })
+
+        expect(draftsAscending).toBeDefined()
+        expect(draftsDescending).toBeDefined()
+        expect(draftsAscending.docs[0]).toMatchObject(
+          draftsDescending.docs[draftsDescending.docs.length - 1],
+        )
+      })
+
+      it('should findVersions with sort', async () => {
+        const draftsAscending = await payload.findVersions({
+          collection: draftSlug,
+          draft: true,
+          sort: 'createdAt',
+        })
+        const draftsDescending = await payload.findVersions({
+          collection: draftSlug,
+          draft: true,
+          sort: '-updatedAt',
+        })
+
+        expect(draftsAscending).toBeDefined()
+        expect(draftsDescending).toBeDefined()
+        expect(draftsAscending.docs[0]).toMatchObject(
+          draftsDescending.docs[draftsDescending.docs.length - 1],
+        )
       })
     })
 
