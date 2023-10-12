@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "target": "es5",
     "outDir": "./dist",
     "allowJs": true,
@@ -15,9 +11,7 @@
     "declaration": true,
     "declarationDir": "./dist",
     "skipLibCheck": true,
-    "strict": true,
+    "strict": true
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"]
 }

@@ -1,15 +1,17 @@
 import type { CollectionConfig } from 'payload/types'
 import type { Readable } from 'stream'
+
 import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types'
+
 import { createKey } from './utilities/createKey'
 import { getStorageClient } from './utilities/getStorageClient'
 
 interface Args {
-  collection: CollectionConfig
   cachingOptions?: PluginOptions['uploadCaching']
+  collection: CollectionConfig
 }
 
-export const getStaticHandler = ({ collection, cachingOptions }: Args): StaticHandler => {
+export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHandler => {
   let maxAge = 86400 // 24 hours default
   let collCacheConfig: CollectionCachingConfig | undefined
   if (cachingOptions !== false) {
@@ -21,14 +23,14 @@ export const getStaticHandler = ({ collection, cachingOptions }: Args): StaticHa
   // Set maxAge using collection-specific override
   maxAge = collCacheConfig?.maxAge || maxAge
 
-  let cachingEnabled =
+  const cachingEnabled =
     cachingOptions !== false &&
     !!process.env.PAYLOAD_CLOUD_CACHE_KEY &&
     collCacheConfig?.enabled !== false
 
   return async (req, res, next) => {
     try {
-      const { storageClient, identityID } = await getStorageClient()
+      const { identityID, storageClient } = await getStorageClient()
 
       const Key = createKey({
         collection: collection.slug,
@@ -54,7 +56,7 @@ export const getStaticHandler = ({ collection, cachingOptions }: Args): StaticHa
 
       return next()
     } catch (err: unknown) {
-      req.payload.logger.error({ msg: 'Error getting file from cloud storage', err })
+      req.payload.logger.error({ err, msg: 'Error getting file from cloud storage' })
       return next()
     }
   }

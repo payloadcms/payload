@@ -1,8 +1,8 @@
 import type { NextFunction, Response } from 'express'
+import type { Config } from 'payload/config'
 import type { TypeWithID } from 'payload/dist/collections/config/types'
 import type { FileData } from 'payload/dist/uploads/types'
 import type { CollectionConfig, PayloadRequest } from 'payload/types'
-import type { Config } from 'payload/config'
 
 export interface File {
   buffer: Buffer
@@ -14,9 +14,9 @@ export interface File {
 
 export type HandleUpload = (args: {
   collection: CollectionConfig
-  req: PayloadRequest
   data: any
   file: File
+  req: PayloadRequest
 }) => Promise<void> | void
 
 export interface TypeWithPrefix {
@@ -25,16 +25,16 @@ export interface TypeWithPrefix {
 
 export type HandleDelete = (args: {
   collection: CollectionConfig
-  req: PayloadRequest
   doc: TypeWithID & FileData & TypeWithPrefix
   filename: string
+  req: PayloadRequest
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
-  filename: string
   collection: CollectionConfig
+  filename: string
   prefix?: string
-}) => string | Promise<string>
+}) => Promise<string> | string
 
 export type StaticHandler = (
   req: PayloadRequest,
@@ -43,23 +43,23 @@ export type StaticHandler = (
 ) => Promise<unknown> | unknown
 
 export interface PayloadCloudEmailOptions {
-  config: Config
   apiKey: string
+  config: Config
   defaultDomain: string
 }
 
 export interface PluginOptions {
+  /** Payload Cloud Email
+   * @default true
+   */
+  email?: false
+
   /**
    * Payload Cloud API endpoint
    *
    * @internal Endpoint override for developement
    */
   endpoint?: string
-
-  /** Payload Cloud Email
-   * @default true
-   */
-  email?: false
 
   /** Payload Cloud Storage
    * @default true
@@ -86,28 +86,28 @@ export interface PluginOptions {
    */
 
   uploadCaching?:
-    | false
     | {
-        /** Caching in seconds override for all collections
-         * @default 86400 (24 hours)
-         */
-        maxAge?: number
         /**
          * Caching configuration per-collection
          */
         collections?: Record<string, CollectionCachingConfig>
+        /** Caching in seconds override for all collections
+         * @default 86400 (24 hours)
+         */
+        maxAge?: number
       }
+    | false
 }
 
 export type CollectionCachingConfig = {
-  /** Caching in seconds override for this collection
-   * @default 86400 (24 hours)
-   */
-  maxAge?: number
   /**
    * Enable/disable caching for this collection
    *
    * @default true
    */
   enabled?: boolean
+  /** Caching in seconds override for this collection
+   * @default 86400 (24 hours)
+   */
+  maxAge?: number
 }

@@ -1,12 +1,14 @@
-import fs from 'fs'
 import type { TypeWithID } from 'payload/dist/collections/config/types'
-import { Upload } from '@aws-sdk/lib-storage'
 import type { FileData } from 'payload/dist/uploads/types'
-import type stream from 'stream'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+import type stream from 'stream'
+
+import { Upload } from '@aws-sdk/lib-storage'
+import fs from 'fs'
+
+import { createKey } from '../utilities/createKey'
 import { getIncomingFiles } from '../utilities/getIncomingFiles'
 import { getStorageClient } from '../utilities/getStorageClient'
-import { createKey } from '../utilities/createKey'
 
 interface Args {
   collection: CollectionConfig
@@ -16,22 +18,22 @@ const MB = 1024 * 1024
 
 export const getBeforeChangeHook =
   ({ collection }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
-  async ({ req, data }) => {
+  async ({ data, req }) => {
     try {
-      const files = getIncomingFiles({ req, data })
+      const files = getIncomingFiles({ data, req })
 
       req.payload.logger.debug({
         msg: `Preparing to upload ${files.length} files`,
       })
 
-      const { storageClient, identityID } = await getStorageClient()
+      const { identityID, storageClient } = await getStorageClient()
 
-      const promises = files.map(async file => {
+      const promises = files.map(async (file) => {
         const fileKey = file.filename
 
         req.payload.logger.debug({
-          msg: `File buffer length: ${file.buffer.length / MB}MB`,
           fileKey,
+          msg: `File buffer length: ${file.buffer.length / MB}MB`,
           tempFilePath: file.tempFilePath ?? 'undefined',
         })
 
@@ -41,15 +43,15 @@ export const getBeforeChangeHook =
 
         if (file.buffer.length > 0) {
           req.payload.logger.debug({
-            msg: `Uploading ${fileKey} from buffer. Size: ${file.buffer.length / MB}MB`,
             fileKey,
+            msg: `Uploading ${fileKey} from buffer. Size: ${file.buffer.length / MB}MB`,
           })
 
           await storageClient.putObject({
-            Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
-            Key: createKey({ collection: collection.slug, filename: fileKey, identityID }),
             Body: fileBufferOrStream,
+            Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
             ContentType: file.mimeType,
+            Key: createKey({ collection: collection.slug, filename: fileKey, identityID }),
           })
         }
 
@@ -57,14 +59,14 @@ export const getBeforeChangeHook =
         const parallelUploadS3 = new Upload({
           client: storageClient,
           params: {
-            Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
-            Key: createKey({ collection: collection.slug, filename: fileKey, identityID }),
             Body: fileBufferOrStream,
+            Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
             ContentType: file.mimeType,
+            Key: createKey({ collection: collection.slug, filename: fileKey, identityID }),
           },
         })
 
-        parallelUploadS3.on('httpUploadProgress', progress => {
+        parallelUploadS3.on('httpUploadProgress', (progress) => {
           if (progress.total) {
             req.payload.logger.debug({
               fileKey,

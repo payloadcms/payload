@@ -1,7 +1,9 @@
-import { defaults } from 'payload/dist/config/defaults'
 import type { Config } from 'payload/config'
-import { payloadCloud } from './plugin'
+
 import nodemailer from 'nodemailer'
+import { defaults } from 'payload/dist/config/defaults'
+
+import { payloadCloud } from './plugin'
 
 describe('plugin', () => {
   beforeAll(() => {
@@ -69,16 +71,16 @@ describe('plugin', () => {
       it('should not modify existing email transport', () => {
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
-          version: '0.0.1',
-          send: async mail => {
+          send: async (mail) => {
             console.log('mock send', mail)
           },
+          version: '0.0.1',
         })
 
         const configWithTransport = createConfig({
           email: {
-            fromName: 'Test',
             fromAddress: 'test@test.com',
+            fromName: 'Test',
             transport: existingTransport,
           },
         })
@@ -96,8 +98,8 @@ describe('plugin', () => {
       it('should allow setting fromName and fromAddress', () => {
         const configWithPartialEmail = createConfig({
           email: {
-            fromName: 'Test',
             fromAddress: 'test@test.com',
+            fromName: 'Test',
           },
         })
 

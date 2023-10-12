@@ -25,7 +25,7 @@ import { payloadCloud } from '@payloadcms/plugin-cloud'
 import { buildConfig } from 'payload/config'
 
 export default buildConfig({
-  plugins: [payloadCloud()]
+  plugins: [payloadCloud()],
   // rest of config
 })
 ```
@@ -39,8 +39,8 @@ If you wish to opt-out of any Payload cloud features, the plugin also accepts op
 ```ts
 payloadCloud({
   storage: false, // Disable file storage
-  email: false,   // Disable email delivery
-  uploadCaching: false // Disable upload caching
+  email: false, // Disable email delivery
+  uploadCaching: false, // Disable upload caching
 })
 ```
 
@@ -53,12 +53,12 @@ payloadCloud({
   uploadCaching: {
     maxAge: 604800, // Override default maxAge for all collections
     collection1Slug: {
-      maxAge: 10 // Collection-specific maxAge, takes precedence over others
+      maxAge: 10, // Collection-specific maxAge, takes precedence over others
     },
     collection2Slug: {
-      enabled: false // Disable caching for this collection
-    }
-  }
+      enabled: false, // Disable caching for this collection
+    },
+  },
 })
 ```
 

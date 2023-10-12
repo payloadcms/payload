@@ -1,6 +1,8 @@
+import type { EmailTransport } from 'payload/config'
+
 import nodemailer from 'nodemailer'
 import { Resend } from 'resend'
-import type { EmailTransport } from 'payload/config'
+
 import type { PayloadCloudEmailOptions } from './types'
 
 type TransportArgs = Parameters<typeof nodemailer.createTransport>[0]
@@ -14,25 +16,28 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
   if (!args.defaultDomain)
     throw new Error('defaultDomain must be provided to use Payload Cloud Email')
 
-  const { apiKey, defaultDomain, config } = args
+  const { apiKey, config, defaultDomain } = args
 
   const customDomainEnvs = Object.keys(process.env).filter(
-    e => e.startsWith('PAYLOAD_CLOUD_EMAIL_DOMAIN_') && !e.endsWith('API_KEY'),
+    (e) => e.startsWith('PAYLOAD_CLOUD_EMAIL_DOMAIN_') && !e.endsWith('API_KEY'),
   )
 
   // Match up the envs with api keys: { key: PAYLOAD_CLOUD_EMAIL_DOMAIN_${i}, value: domain }
   const customDomainsResendMap =
-    customDomainEnvs?.reduce((acc, envKey) => {
-      const apiKey = process.env[`${envKey}_API_KEY`]
-      if (!apiKey) {
-        throw new Error(
-          `PAYLOAD_CLOUD_EMAIL_DOMAIN_${envKey} is missing a corresponding PAYLOAD_CLOUD_EMAIL_DOMAIN_${envKey}_API_KEY`,
-        )
-      }
+    customDomainEnvs?.reduce(
+      (acc, envKey) => {
+        const apiKey = process.env[`${envKey}_API_KEY`]
+        if (!apiKey) {
+          throw new Error(
+            `PAYLOAD_CLOUD_EMAIL_DOMAIN_${envKey} is missing a corresponding PAYLOAD_CLOUD_EMAIL_DOMAIN_${envKey}_API_KEY`,
+          )
+        }
 
-      acc[process.env[envKey] as string] = new Resend(apiKey)
-      return acc
-    }, {} as Record<string, Resend>) || {}
+        acc[process.env[envKey] as string] = new Resend(apiKey)
+        return acc
+      },
+      {} as Record<string, Resend>,
+    ) || {}
 
   const customDomains = Object.keys(customDomainsResendMap)
 
@@ -55,17 +60,16 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
 
   if (existingTransport) {
     return {
-      fromName: fromName,
       fromAddress: fromAddress,
+      fromName: fromName,
       transport: existingTransport,
     }
   }
 
   const transportConfig: TransportArgs = {
     name: 'payload-cloud',
-    version: '0.0.1',
     send: async (mail, callback) => {
-      const { from, to, subject, html, text } = mail.data
+      const { from, html, subject, text, to } = mail.data
 
       if (!to) return callback(new Error('No "to" address provided'), null)
 
@@ -74,7 +78,7 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
       const cleanTo: string[] = []
       const toArr = Array.isArray(to) ? to : [to]
 
-      toArr.forEach(toItem => {
+      toArr.forEach((toItem) => {
         if (typeof toItem === 'string') {
           cleanTo.push(toItem)
         } else {
@@ -116,9 +120,9 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
       try {
         const sendResponse = await resend.sendEmail({
           from: fromToUse,
-          to: cleanTo,
-          subject: subject || '<No subject>',
           html: (html || text) as string,
+          subject: subject || '<No subject>',
+          to: cleanTo,
         })
 
         if ('error' in sendResponse) {
@@ -141,18 +145,19 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
         }
       }
     },
+    version: '0.0.1',
   }
 
   return {
-    fromName: fromName,
     fromAddress: fromAddress,
+    fromName: fromName,
     transport: nodemailer.createTransport(transportConfig),
   }
 }
 
 type ResendError = {
-  name: string
   message: string
+  name: string
   statusCode: number
 }
 

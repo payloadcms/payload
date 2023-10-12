@@ -1,4 +1,5 @@
 import type { CognitoUserSession } from 'amazon-cognito-identity-js'
+
 import { AuthenticationDetails, CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
 let sessionAndToken: CognitoUserSession | null = null
@@ -18,22 +19,22 @@ export const authAsCognitoUser = async (
   })
 
   const authenticationDetails = new AuthenticationDetails({
-    Username: username,
     Password: password,
+    Username: username,
   })
 
   const cognitoUser = new CognitoUser({
-    Username: username,
     Pool: userPool,
+    Username: username,
   })
 
   const result: CognitoUserSession = await new Promise((resolve, reject) => {
     cognitoUser.authenticateUser(authenticationDetails, {
-      onSuccess: res => {
-        resolve(res)
-      },
-      onFailure: err => {
+      onFailure: (err) => {
         reject(err)
+      },
+      onSuccess: (res) => {
+        resolve(res)
       },
     })
   })

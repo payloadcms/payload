@@ -11,7 +11,7 @@ export default buildConfig({
     // NOTE - these webpack extensions are only required
     // for development of this plugin.
     // No need to use these aliases within your own projects.
-    webpack: config => {
+    webpack: (config) => {
       return {
         ...config,
         resolve: {
@@ -30,7 +30,7 @@ export default buildConfig({
   },
   // @ts-expect-error local reference
   plugins: [payloadCloud()],
-  onInit: async payload => {
+  onInit: async (payload) => {
     const users = await payload.find({
       collection: 'users',
       limit: 1,

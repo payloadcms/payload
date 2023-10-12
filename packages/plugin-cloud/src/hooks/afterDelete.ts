@@ -1,7 +1,9 @@
 import type { TypeWithID } from 'payload/dist/globals/config/types'
 import type { FileData } from 'payload/dist/uploads/types'
 import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
+
 import type { TypeWithPrefix } from '../types'
+
 import { createKey } from '../utilities/createKey'
 import { getStorageClient } from '../utilities/getStorageClient'
 
@@ -12,9 +14,9 @@ interface Args {
 export const getAfterDeleteHook = ({
   collection,
 }: Args): CollectionAfterDeleteHook<FileData & TypeWithID & TypeWithPrefix> => {
-  return async ({ req, doc }) => {
+  return async ({ doc, req }) => {
     try {
-      const { storageClient, identityID } = await getStorageClient()
+      const { identityID, storageClient } = await getStorageClient()
 
       const filesToDelete: string[] = [
         doc.filename,

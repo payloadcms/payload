@@ -1,12 +1,14 @@
-import * as AWS from '@aws-sdk/client-s3'
-import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
-import { fromCognitoIdentityPool } from '@aws-sdk/credential-providers'
 import type { CognitoUserSession } from 'amazon-cognito-identity-js'
+
+import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
+import * as AWS from '@aws-sdk/client-s3'
+import { fromCognitoIdentityPool } from '@aws-sdk/credential-providers'
+
 import { authAsCognitoUser } from './authAsCognitoUser'
 
 export type GetStorageClient = () => Promise<{
-  storageClient: AWS.S3
   identityID: string
+  storageClient: AWS.S3
 }>
 
 let storageClient: AWS.S3 | null = null
@@ -16,8 +18,8 @@ let identityID: string
 export const getStorageClient: GetStorageClient = async () => {
   if (storageClient && session?.isValid()) {
     return {
-      storageClient,
       identityID,
+      storageClient,
     }
   }
 
@@ -45,12 +47,12 @@ export const getStorageClient: GetStorageClient = async () => {
   identityID = credentials.identityId
 
   storageClient = new AWS.S3({
-    region: process.env.PAYLOAD_CLOUD_BUCKET_REGION,
     credentials,
+    region: process.env.PAYLOAD_CLOUD_BUCKET_REGION,
   })
 
   return {
-    storageClient,
     identityID,
+    storageClient,
   }
 }

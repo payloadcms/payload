@@ -1,1 +1,1 @@
-export const payloadCloud = () => config => config
+export const payloadCloud = () => (config) => config

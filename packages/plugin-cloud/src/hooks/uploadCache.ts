@@ -1,4 +1,8 @@
-import { CollectionAfterChangeHook, CollectionAfterDeleteHook, PayloadRequest } from 'payload/types'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  PayloadRequest,
+} from 'payload/types'
 
 interface Args {
   endpoint: string
@@ -6,14 +10,14 @@ interface Args {
 
 export const getCacheUploadsAfterChangeHook =
   ({ endpoint }: Args): CollectionAfterChangeHook =>
-  async ({ operation, req, doc }) => {
+  async ({ doc, operation, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
     const { res } = req
     if (res) {
       if (operation === 'update') {
         // Unawaited promise
-        purge({ endpoint, doc, req, operation })
+        purge({ doc, endpoint, operation, req })
       }
     }
     return doc
@@ -21,25 +25,25 @@ export const getCacheUploadsAfterChangeHook =
 
 export const getCacheUploadsAfterDeleteHook =
   ({ endpoint }: Args): CollectionAfterDeleteHook =>
-  async ({ req, doc }) => {
+  async ({ doc, req }) => {
     if (!req || !process.env.PAYLOAD_CLOUD_CACHE_KEY) return doc
 
     const { res } = req
     if (res) {
       // Unawaited promise
-      purge({ endpoint, doc, req, operation: 'delete' })
+      purge({ doc, endpoint, operation: 'delete', req })
     }
     return doc
   }
 
 type PurgeRequest = {
-  endpoint: string
   doc: any
-  req: PayloadRequest
+  endpoint: string
   operation: string
+  req: PayloadRequest
 }
 
-async function purge({ endpoint, doc, req, operation }: PurgeRequest) {
+async function purge({ doc, endpoint, operation, req }: PurgeRequest) {
   const filePath = doc.url
 
   if (!filePath) {
@@ -53,36 +57,36 @@ async function purge({ endpoint, doc, req, operation }: PurgeRequest) {
   }
 
   const body = {
-    projectID: process.env.PAYLOAD_CLOUD_PROJECT_ID,
     cacheKey: process.env.PAYLOAD_CLOUD_CACHE_KEY,
     filepath: doc.url,
+    projectID: process.env.PAYLOAD_CLOUD_PROJECT_ID,
   }
   req.payload.logger.debug({
+    filepath: doc.url,
     msg: 'Attempting to purge cache',
+    operation,
     project: {
       id: process.env.PAYLOAD_CLOUD_PROJECT_ID,
     },
-    operation,
-    filepath: doc.url,
   })
 
   try {
     const purgeRes = await fetch(`${endpoint}/api/purge-cache`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         ...body,
       }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
     })
 
     req.payload.logger.debug({
       msg: 'Purge cache result',
-      statusCode: purgeRes.status,
       operation,
+      statusCode: purgeRes.status,
     })
   } catch (err: unknown) {
-    req.payload.logger.error({ msg: '/purge-cache call failed', err, body })
+    req.payload.logger.error({ body, err, msg: '/purge-cache call failed' })
   }
 }

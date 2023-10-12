@@ -1,11 +1,13 @@
 import type { Config } from 'payload/config'
-import { extendWebpackConfig } from './webpack'
-import { getBeforeChangeHook } from './hooks/beforeChange'
-import { getAfterDeleteHook } from './hooks/afterDelete'
-import { getStaticHandler } from './staticHandler'
-import { payloadCloudEmail } from './email'
+
 import type { PluginOptions } from './types'
+
+import { payloadCloudEmail } from './email'
+import { getAfterDeleteHook } from './hooks/afterDelete'
+import { getBeforeChangeHook } from './hooks/beforeChange'
 import { getCacheUploadsAfterChangeHook, getCacheUploadsAfterDeleteHook } from './hooks/uploadCache'
+import { getStaticHandler } from './staticHandler'
+import { extendWebpackConfig } from './webpack'
 
 export const payloadCloud =
   (pluginOptions?: PluginOptions) =>
@@ -31,34 +33,12 @@ export const payloadCloud =
     if (pluginOptions?.storage !== false) {
       config = {
         ...config,
-        upload: {
-          ...(config.upload || {}),
-          useTempFiles: true,
-        },
-        collections: (config.collections || []).map(collection => {
+        collections: (config.collections || []).map((collection) => {
           if (collection.upload) {
             return {
               ...collection,
-              upload: {
-                ...(typeof collection.upload === 'object' ? collection.upload : {}),
-                handlers: [
-                  ...(typeof collection.upload === 'object' &&
-                  Array.isArray(collection.upload.handlers)
-                    ? collection.upload.handlers
-                    : []),
-                  getStaticHandler({
-                    collection,
-                    cachingOptions: pluginOptions?.uploadCaching,
-                  }),
-                ],
-                disableLocalStorage: true,
-              },
               hooks: {
                 ...(collection.hooks || {}),
-                beforeChange: [
-                  ...(collection.hooks?.beforeChange || []),
-                  getBeforeChangeHook({ collection }),
-                ],
                 afterChange: [
                   ...(collection.hooks?.afterChange || []),
                   ...(cachingEnabled
@@ -72,12 +52,34 @@ export const payloadCloud =
                     ? [getCacheUploadsAfterDeleteHook({ endpoint: apiEndpoint })]
                     : []),
                 ],
+                beforeChange: [
+                  ...(collection.hooks?.beforeChange || []),
+                  getBeforeChangeHook({ collection }),
+                ],
+              },
+              upload: {
+                ...(typeof collection.upload === 'object' ? collection.upload : {}),
+                disableLocalStorage: true,
+                handlers: [
+                  ...(typeof collection.upload === 'object' &&
+                  Array.isArray(collection.upload.handlers)
+                    ? collection.upload.handlers
+                    : []),
+                  getStaticHandler({
+                    cachingOptions: pluginOptions?.uploadCaching,
+                    collection,
+                  }),
+                ],
               },
             }
           }
 
           return collection
         }),
+        upload: {
+          ...(config.upload || {}),
+          useTempFiles: true,
+        },
       }
     }
 
@@ -86,8 +88,8 @@ export const payloadCloud =
     const defaultDomain = process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN
     if (pluginOptions?.email !== false && apiKey && defaultDomain) {
       config.email = payloadCloudEmail({
-        config,
         apiKey,
+        config,
         defaultDomain,
       })
     }

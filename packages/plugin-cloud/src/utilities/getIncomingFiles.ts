@@ -1,10 +1,11 @@
 import type { FileData } from 'payload/dist/uploads/types'
 import type { PayloadRequest } from 'payload/types'
+
 import type { File } from '../types'
 
 export function getIncomingFiles({
-  req,
   data,
+  req,
 }: {
   data: Partial<FileData>
   req: PayloadRequest
@@ -15,11 +16,11 @@ export function getIncomingFiles({
 
   if (file && data.filename && data.mimeType) {
     const mainFile: File = {
-      filename: data.filename,
-      mimeType: data.mimeType,
       buffer: file.data,
-      tempFilePath: file.tempFilePath,
+      filename: data.filename,
       filesize: file.size,
+      mimeType: data.mimeType,
+      tempFilePath: file.tempFilePath,
     }
 
     files = [mainFile]
@@ -29,10 +30,10 @@ export function getIncomingFiles({
         if (req.payloadUploadSizes?.[key] && data.mimeType) {
           files = files.concat([
             {
-              filename: `${resizedFileData.filename}`,
-              mimeType: data.mimeType,
               buffer: req.payloadUploadSizes[key],
+              filename: `${resizedFileData.filename}`,
               filesize: req.payloadUploadSizes[key].length,
+              mimeType: data.mimeType,
             },
           ])
         }

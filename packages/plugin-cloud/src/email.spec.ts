@@ -1,7 +1,8 @@
+import type { Config } from 'payload/config'
+
 import { defaults } from 'payload/dist/config/defaults'
 
 import { payloadCloudEmail } from './email'
-import { Config } from 'payload/config'
 
 describe('email', () => {
   let defaultConfig: Config
@@ -17,8 +18,8 @@ describe('email', () => {
     it('should return undefined', () => {
       const email = payloadCloudEmail({
         apiKey: 'test',
-        defaultDomain: 'test',
         config: defaultConfig,
+        defaultDomain: 'test',
       })
 
       expect(email).toBeUndefined()
@@ -33,8 +34,8 @@ describe('email', () => {
     it('should respect PAYLOAD_CLOUD env var', () => {
       const email = payloadCloudEmail({
         apiKey: 'test',
-        defaultDomain: 'test',
         config: defaultConfig,
+        defaultDomain: 'test',
       })
       expect(email?.fromName).toBeDefined()
       expect(email?.fromAddress).toBeDefined()
@@ -47,13 +48,13 @@ describe('email', () => {
       const configWithFrom: Config = {
         ...defaultConfig,
         email: {
-          fromName,
           fromAddress,
+          fromName,
         },
       }
       const email = payloadCloudEmail({
-        config: configWithFrom,
         apiKey: 'test',
+        config: configWithFrom,
         defaultDomain: 'test',
       })
 
