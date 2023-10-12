@@ -9,3 +9,5 @@ export const slugSingularLabel = 'Post'
 export const slugPluralLabel = 'Posts'
 
 export const globalSlug = 'global'
+
+export const group1GlobalSlug = 'group-globals-one'

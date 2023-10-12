@@ -17,7 +17,13 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { globalSlug, group1Collection1Slug, postsSlug, slugPluralLabel } from './shared'
+import {
+  globalSlug,
+  group1Collection1Slug,
+  group1GlobalSlug,
+  postsSlug,
+  slugPluralLabel,
+} from './shared'
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
@@ -150,7 +156,7 @@ describe('admin', () => {
   })
 
   describe('ui', () => {
-    test('should render preview button when `admin.preview` is set', async () => {
+    test('collection - should render preview button when `admin.preview` is set', async () => {
       const collectionWithPreview = new AdminUrlUtil(serverURL, postsSlug)
       await page.goto(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
@@ -158,9 +164,25 @@ describe('admin', () => {
       await expect(page.locator('.btn.preview-btn')).toBeVisible()
     })
 
-    test('should not render preview button when `admin.preview` is not set', async () => {
+    test('collection - should not render preview button when `admin.preview` is not set', async () => {
       const collectionWithoutPreview = new AdminUrlUtil(serverURL, group1Collection1Slug)
       await page.goto(collectionWithoutPreview.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.btn.preview-btn')).toBeHidden()
+    })
+
+    test('global - should render preview button when `admin.preview` is set', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(globalWithPreview.global(globalSlug))
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.btn.preview-btn')).toBeVisible()
+    })
+
+    test('global - should not render preview button when `admin.preview` is not set', async () => {
+      const globalWithoutPreview = new AdminUrlUtil(serverURL, group1GlobalSlug)
+      await page.goto(globalWithoutPreview.global(group1GlobalSlug))
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await expect(page.locator('.btn.preview-btn')).toBeHidden()

@@ -21,6 +21,7 @@ import {
   globalSlug,
   group1Collection1Slug,
   group1Collection2Slug,
+  group1GlobalSlug,
   postsSlug,
   slugPluralLabel,
   slugSingularLabel,
@@ -295,6 +296,7 @@ export default buildConfigWithDefaults({
       },
       admin: {
         group: 'Group',
+        preview: () => 'https://payloadcms.com',
       },
       versions: {
         drafts: true,
@@ -364,7 +366,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'group-globals-one',
+      slug: group1GlobalSlug,
       label: 'Group Globals 1',
       admin: {
         group: 'Group',
