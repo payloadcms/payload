@@ -503,6 +503,7 @@ export function LexicalMenu({
 }
 
 export function useMenuAnchorRef(
+  anchorElem: HTMLElement,
   resolution: MenuResolution | null,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
@@ -517,7 +518,9 @@ export function useMenuAnchorRef(
 
     const menuEle = containerDiv.firstChild as Element
     if (rootElement !== null && resolution !== null) {
-      const { height, left, top, width } = resolution.getRect()
+      let { height, left, top, width } = resolution.getRect()
+      top -= anchorElem.getBoundingClientRect().top + window.scrollY
+      left -= anchorElem.getBoundingClientRect().left + window.scrollX
       containerDiv.style.top = `${top + window.scrollY + VERTICAL_OFFSET}px`
       containerDiv.style.left = `${left + window.scrollX}px`
       containerDiv.style.height = `${height}px`
@@ -558,12 +561,12 @@ export function useMenuAnchorRef(
         containerDiv.setAttribute('role', 'listbox')
         containerDiv.style.display = 'block'
         containerDiv.style.position = 'absolute'
-        document.body.append(containerDiv)
+        anchorElem.append(containerDiv)
       }
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'typeahead-menu')
     }
-  }, [editor, resolution, className])
+  }, [editor, resolution, className, anchorElem])
 
   useEffect(() => {
     const rootElement = editor.getRootElement()
