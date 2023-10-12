@@ -6,12 +6,6 @@ export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
-  versions: true,
-  admin: {
-    livePreview: {
-      url: 'http://localhost:3000',
-    },
-  },
   fields: [
     {
       name: 'text',
