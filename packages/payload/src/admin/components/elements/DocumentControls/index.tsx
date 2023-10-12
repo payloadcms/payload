@@ -55,23 +55,7 @@ export const DocumentControls: React.FC<{
 
   const { i18n, t } = useTranslation('general')
 
-  let showPreviewButton = false
-
-  if (collection) {
-    showPreviewButton = Boolean(
-      isEditing &&
-        collection?.admin?.preview &&
-        (!collection?.versions?.drafts || collection?.versions?.drafts?.autosave),
-    )
-  }
-
-  if (global) {
-    showPreviewButton = Boolean(
-      isEditing &&
-        global?.admin?.preview &&
-        (!global?.versions?.drafts || global?.versions?.drafts?.autosave),
-    )
-  }
+  const showPreviewButton = Boolean(collection?.admin?.preview || global?.admin?.preview)
 
   const showDotMenu = Boolean(collection && id && !disableActions)
 
