@@ -1,0 +1,55 @@
+{
+  "name": "@payloadcms/plugin-cloud",
+  "description": "The official Payload Cloud plugin",
+  "version": "2.2.5",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "build:watch": "tsc -w",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "clean": "rimraf dist && rimraf dev/yarn.lock",
+    "prepublishOnly": "yarn clean && yarn build && yarn test"
+  },
+  "peerDependencies": {
+    "nodemailer": "^6.9.0",
+    "payload": "^1.8.2 || ^2.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity": "^3.289.0",
+    "@aws-sdk/client-s3": "^3.142.0",
+    "@aws-sdk/credential-providers": "^3.289.0",
+    "@aws-sdk/lib-storage": "^3.267.0",
+    "amazon-cognito-identity-js": "^6.1.2",
+    "resend": "^0.17.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.9",
+    "@types/jest": "^29.5.1",
+    "@types/nodemailer": "^6.4.7",
+    "@typescript-eslint/eslint-plugin": "5.12.1",
+    "@typescript-eslint/parser": "5.12.1",
+    "cross-env": "^7.0.3",
+    "dotenv": "^8.2.0",
+    "eslint": "^8.19.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^29.5.0",
+    "nodemailer": "^6.9.1",
+    "nodemon": "^2.0.6",
+    "payload": "^1.11.6",
+    "prettier": "^2.7.1",
+    "rimraf": "^4.1.2",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "files": [
+    "dist"
+  ]
+}
