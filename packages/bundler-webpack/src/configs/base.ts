@@ -1,6 +1,7 @@
 import type { SanitizedConfig } from 'payload/config'
 import type { Configuration } from 'webpack'
 
+import findNodeModules from 'find-node-modules'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import path from 'path'
 import webpack from 'webpack'
@@ -8,7 +9,8 @@ import webpack from 'webpack'
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 
-const nodeModulesPath = path.resolve(__dirname, '../../../../')
+const nodeModulesPaths = findNodeModules({ cwd: process.cwd() })
+const nodeModulesPath = path.resolve(nodeModulesPaths[0])
 const adminFolderPath = path.resolve(nodeModulesPath, 'payload/dist/admin')
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => ({
