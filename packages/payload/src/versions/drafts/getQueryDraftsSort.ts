@@ -3,10 +3,15 @@
  * @param sort
  */
 export const getQueryDraftsSort = (sort: string): string => {
-  let result = sort
-  if (sort) {
-    const direction = sort[0] === '-' ? '-' : ''
-    result = `${direction}version.${direction.length === 1 ? sort.substring(1) : sort}`
+  if (!sort) return sort
+
+  let direction = ''
+  let orderBy = sort
+
+  if (sort[0] === '-') {
+    direction = '-'
+    orderBy = sort.substring(1)
   }
-  return result
+
+  return `${direction}version.${orderBy}`
 }
