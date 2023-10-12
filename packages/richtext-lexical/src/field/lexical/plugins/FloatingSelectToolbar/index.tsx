@@ -209,7 +209,6 @@ function useFloatingTextFormatToolbar(
   editor: LexicalEditor,
   anchorElem: HTMLElement,
 ): JSX.Element | null {
-  console.log('useFloatingTextFormatToolbar')
   const [isText, setIsText] = useState(false)
 
   const updatePopup = useCallback(() => {

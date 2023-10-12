@@ -519,9 +519,10 @@ export function useMenuAnchorRef(
     const menuEle = containerDiv.firstChild as Element
     if (rootElement !== null && resolution !== null) {
       let { height, left, top, width } = resolution.getRect()
+      const rawTop = top
+      const rawLeft = left
       top -= anchorElem.getBoundingClientRect().top + window.scrollY
       left -= anchorElem.getBoundingClientRect().left + window.scrollX
-      containerDiv.style.top = `${top + window.scrollY + VERTICAL_OFFSET}px`
       containerDiv.style.left = `${left + window.scrollX}px`
       containerDiv.style.height = `${height}px`
       containerDiv.style.width = `${width}px`
@@ -536,19 +537,18 @@ export function useMenuAnchorRef(
           containerDiv.style.left = `${rootElementRect.right - menuWidth + window.scrollX}px`
         }
 
-        const wouldGoOffTopOfScreen = top < menuHeight
-        const wouldGoOffBottomOfContainer = top + menuHeight > rootElementRect.bottom
+        const wouldGoOffBottomOfScreen = rawTop + menuHeight + VERTICAL_OFFSET > window.innerHeight
+        //const wouldGoOffBottomOfContainer = top + menuHeight > rootElementRect.bottom
+        const wouldGoOffTopOfScreen = rawTop < 0
 
         // Position slash menu above the cursor instead of below (default) if it would otherwise go off the bottom of the screen.
-        if (
-          (top + menuHeight > window.innerHeight ||
-            (wouldGoOffBottomOfContainer && !wouldGoOffTopOfScreen)) &&
-          top - rootElementRect.top > menuHeight
-        ) {
+        if (wouldGoOffBottomOfScreen && !wouldGoOffTopOfScreen) {
           const margin = 24
           containerDiv.style.top = `${
             top + VERTICAL_OFFSET - menuHeight + window.scrollY - (height + margin)
           }px`
+        } else {
+          containerDiv.style.top = `${top + window.scrollY + VERTICAL_OFFSET}px`
         }
       }
 
