@@ -7,7 +7,7 @@ export const DeviceContainer: React.FC<{
 }> = (props) => {
   const { children } = props
 
-  const { breakpoint, breakpoints, deviceFrameRef, size, zoom } = useLivePreviewContext()
+  const { breakpoint, breakpoints, size, zoom } = useLivePreviewContext()
 
   const foundBreakpoint = breakpoint && breakpoints?.find((bp) => bp.name === breakpoint)
 
@@ -31,7 +31,6 @@ export const DeviceContainer: React.FC<{
 
   return (
     <div
-      ref={deviceFrameRef}
       style={{
         height:
           foundBreakpoint && foundBreakpoint?.name !== 'responsive'
