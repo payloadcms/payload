@@ -111,21 +111,26 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'REMOVE_ROW': {
       const { path, rowIndex } = action
-      const { remainingFields, rows } = separateRows(path, state)
+      const { remainingFields, rows: siblingRows } = separateRows(path, state)
       const rowsMetadata = [...(state[path]?.rows || [])]
 
-      rows.splice(rowIndex, 1)
+      // remove row from array _field state_
+      siblingRows.splice(rowIndex, 1)
       rowsMetadata.splice(rowIndex, 1)
+
+      // remove row from array _value_
+      const currentValue = (Array.isArray(state[path]?.value) ? state[path]?.value : []) as Fields[]
+      const newValue = currentValue.splice(rowIndex, 1)
 
       const newState: Fields = {
         ...remainingFields,
         [path]: {
           ...state[path],
-          disableFormData: rows.length > 0,
+          disableFormData: siblingRows.length > 0,
           rows: rowsMetadata,
-          value: rows,
+          value: newValue,
         },
-        ...flattenRows(path, rows),
+        ...flattenRows(path, siblingRows),
       }
 
       return newState
@@ -200,10 +205,10 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         }
       }
 
-      // replace form _field state_
+      // replace array row _field state_
       siblingRows[rowIndex] = subFieldState
 
-      // replace array _value_
+      // replace array row _value_
       const newValue = Array.isArray(state[path]?.value) ? state[path]?.value : []
       newValue[rowIndex] = reduceFieldsToValues(subFieldState, true)
 
@@ -223,21 +228,25 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'DUPLICATE_ROW': {
       const { path, rowIndex } = action
-      const { remainingFields, rows } = separateRows(path, state)
+      const { remainingFields, rows: siblingRows } = separateRows(path, state)
       const rowsMetadata = state[path]?.rows || []
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex])
       if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString()
 
-      const duplicateRowState = deepCopyObject(rows[rowIndex])
+      const duplicateRowState = deepCopyObject(siblingRows[rowIndex])
       if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString()
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {
-        // Add new object containing subfield names to unflattenedRows array
-        rows.splice(rowIndex + 1, 0, duplicateRowState)
+        // duplicate array row _field state_
+        siblingRows.splice(rowIndex + 1, 0, duplicateRowState)
         rowsMetadata.splice(rowIndex + 1, 0, duplicateRowMetadata)
       }
+
+      // duplicate array row _value_
+      const newValue = Array.isArray(state[path]?.value) ? state[path]?.value : []
+      newValue[rowIndex] = reduceFieldsToValues(duplicateRowState, true)
 
       const newState = {
         ...remainingFields,
@@ -245,9 +254,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           disableFormData: true,
           rows: rowsMetadata,
-          value: rows,
+          value: newValue,
         },
-        ...flattenRows(path, rows),
+        ...flattenRows(path, siblingRows),
       }
 
       return newState
