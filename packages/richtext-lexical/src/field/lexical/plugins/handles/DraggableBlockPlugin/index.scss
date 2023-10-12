@@ -46,5 +46,12 @@
   top: 0;
   opacity: 0;
   will-change: transform;
-  transition: transform 0.05s;
+  transition: transform 0.04s;
+}
+
+/* This targets Firefox 57+. The transition looks ugly on firefox, thus we disable it here */
+@-moz-document url-prefix() {
+  .draggable-block-target-line {
+    transition: none;
+  }
 }

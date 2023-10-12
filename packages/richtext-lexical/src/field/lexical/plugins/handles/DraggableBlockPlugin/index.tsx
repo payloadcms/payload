@@ -46,7 +46,6 @@ function setDragImage(dataTransfer: DataTransfer, draggableBlockElem: HTMLElemen
   const { transform } = draggableBlockElem.style
 
   // Remove dragImage borders
-  draggableBlockElem.style.transform = 'translateZ(0)'
   dataTransfer.setDragImage(draggableBlockElem, 0, 0)
 
   setTimeout(() => {
@@ -60,11 +59,9 @@ function hideTargetLine(
 ) {
   if (targetLineElem) {
     targetLineElem.style.opacity = '0'
-    targetLineElem.style.transform = 'translate(-10000px, -10000px)'
   }
   if (lastTargetBlockElem) {
     lastTargetBlockElem.style.opacity = '1'
-    lastTargetBlockElem.style.transform = 'translate(0, 0)'
     //lastTargetBlockElem.style.border = 'none'
   }
 }
