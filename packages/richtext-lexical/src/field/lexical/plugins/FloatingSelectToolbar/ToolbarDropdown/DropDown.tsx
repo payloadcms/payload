@@ -99,6 +99,11 @@ export function DropDownItem({
           })
         }
       }}
+      onMouseDown={(e) => {
+        // This is required for Firefox compatibility. Without it, the dropdown will disappear without the onClick being called.
+        // This only happens in Firefox. Must be something about how Firefox handles focus events differently.
+        e.preventDefault()
+      }}
       ref={ref}
       title={title}
       type="button"
