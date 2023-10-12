@@ -58,19 +58,19 @@ export const DocumentControls: React.FC<{
   let showPreviewButton = false
 
   if (collection) {
-    showPreviewButton =
+    showPreviewButton = Boolean(
       isEditing &&
-      collection?.admin?.preview &&
-      collection?.versions?.drafts &&
-      !collection?.versions?.drafts?.autosave
+        collection?.admin?.preview &&
+        (!collection?.versions?.drafts || collection?.versions?.drafts?.autosave),
+    )
   }
 
   if (global) {
-    showPreviewButton =
+    showPreviewButton = Boolean(
       isEditing &&
-      global?.admin?.preview &&
-      global?.versions?.drafts &&
-      !global?.versions?.drafts?.autosave
+        global?.admin?.preview &&
+        (!global?.versions?.drafts || global?.versions?.drafts?.autosave),
+    )
   }
 
   const showDotMenu = Boolean(collection && id && !disableActions)
