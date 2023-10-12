@@ -1,10 +1,17 @@
 /** @type {import('prettier').Config} */
 module.exports = {
   extends: ['@payloadcms'],
+  ignorePatterns: ['README.md', '**/*.spec.ts'],
   overrides: [
     {
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
       files: ['*.js', '*.cjs', '*.json', '*.md', '*.yml', '*.yaml'],
+    },
+    {
+      files: ['**/*.ts', '**/*.tsx'],
+      rules: {
+        'no-console': 'off',
+      },
     },
     {
       files: ['package.json', 'tsconfig.json'],

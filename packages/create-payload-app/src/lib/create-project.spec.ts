@@ -18,7 +18,7 @@ describe('createProject', () => {
   })
   afterEach(() => {
     if (fse.existsSync(projectDir)) {
-      fse.rmdirSync(projectDir, { recursive: true })
+      fse.rmSync(projectDir, { recursive: true })
     }
   })
 
@@ -110,15 +110,11 @@ describe('createProject', () => {
 
         // Check deps
         expect(packageJson.dependencies['payload']).toEqual('^2.0.0')
-        expect(packageJson.dependencies[dbReplacement.packageName]).toEqual(
-          dbReplacement.version,
-        )
+        expect(packageJson.dependencies[dbReplacement.packageName]).toEqual(dbReplacement.version)
 
         // Should only have one db adapter
         expect(
-          Object.keys(packageJson.dependencies).filter(n =>
-            n.startsWith('@payloadcms/db-'),
-          ),
+          Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@payloadcms/db-')),
         ).toHaveLength(1)
 
         expect(packageJson.dependencies[bundlerReplacement.packageName]).toEqual(

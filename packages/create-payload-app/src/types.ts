@@ -1,17 +1,17 @@
 import type arg from 'arg'
 
 export interface Args extends arg.Spec {
+  '--beta': BooleanConstructor
+  '--db': StringConstructor
+  '--dry-run': BooleanConstructor
   '--help': BooleanConstructor
   '--name': StringConstructor
-  '--template': StringConstructor
-  '--db': StringConstructor
-  '--secret': StringConstructor
-  '--use-npm': BooleanConstructor
-  '--use-yarn': BooleanConstructor
-  '--use-pnpm': BooleanConstructor
   '--no-deps': BooleanConstructor
-  '--dry-run': BooleanConstructor
-  '--beta': BooleanConstructor
+  '--secret': StringConstructor
+  '--template': StringConstructor
+  '--use-npm': BooleanConstructor
+  '--use-pnpm': BooleanConstructor
+  '--use-yarn': BooleanConstructor
   '-h': string
   '-n': string
   '-t': string
@@ -40,19 +40,19 @@ export interface PluginTemplate extends Template {
 }
 
 interface Template {
+  description?: string
   name: string
   type: ProjectTemplate['type']
-  description?: string
 }
 
-export type PackageManager = 'npm' | 'yarn' | 'pnpm'
+export type PackageManager = 'npm' | 'pnpm' | 'yarn'
 
 export type DbType = 'mongodb' | 'postgres'
 
 export type DbDetails = {
-  type: DbType
   dbUri: string
+  type: DbType
 }
 
-export type BundlerType = 'webpack' | 'vite'
+export type BundlerType = 'vite' | 'webpack'
 export type EditorType = 'lexical' | 'slate'

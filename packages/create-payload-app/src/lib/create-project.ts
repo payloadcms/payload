@@ -1,12 +1,13 @@
-import path from 'path'
 import chalk from 'chalk'
-import fse from 'fs-extra'
-import execa from 'execa'
-import ora from 'ora'
 import degit from 'degit'
+import execa from 'execa'
+import fse from 'fs-extra'
+import ora from 'ora'
+import path from 'path'
 
-import { success, error, warning } from '../utils/log'
 import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types'
+
+import { error, success, warning } from '../utils/log'
 import { configurePayloadConfig } from './configure-payload-config'
 
 async function createOrFindProjectDir(projectDir: string): Promise<void> {
@@ -18,10 +19,10 @@ async function createOrFindProjectDir(projectDir: string): Promise<void> {
 
 async function installDeps(args: {
   cliArgs: CliArgs
-  projectDir: string
   packageManager: PackageManager
+  projectDir: string
 }): Promise<boolean> {
-  const { cliArgs, projectDir, packageManager } = args
+  const { cliArgs, packageManager, projectDir } = args
   if (cliArgs['--no-deps']) {
     return true
   }
@@ -46,14 +47,13 @@ async function installDeps(args: {
 
 export async function createProject(args: {
   cliArgs: CliArgs
-  projectName: string
-  projectDir: string
-  template: ProjectTemplate
-  packageManager: PackageManager
   dbDetails?: DbDetails
+  packageManager: PackageManager
+  projectDir: string
+  projectName: string
+  template: ProjectTemplate
 }): Promise<void> {
-  const { cliArgs, projectName, projectDir, template, packageManager, dbDetails } =
-    args
+  const { cliArgs, dbDetails, packageManager, projectDir, projectName, template } = args
 
   await createOrFindProjectDir(projectDir)
 
@@ -66,8 +66,8 @@ export async function createProject(args: {
 
   const spinner = ora('Checking latest Payload version...').start()
 
-  await updatePackageJSON({ projectName, projectDir })
-  await configurePayloadConfig({ projectDir, dbDetails })
+  await updatePackageJSON({ projectDir, projectName })
+  await configurePayloadConfig({ dbDetails, projectDir })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
   const lockPath = path.resolve(projectDir, 'yarn.lock')
@@ -76,7 +76,7 @@ export async function createProject(args: {
   }
 
   spinner.text = 'Installing dependencies...'
-  const result = await installDeps({ cliArgs, projectDir, packageManager })
+  const result = await installDeps({ cliArgs, packageManager, projectDir })
   spinner.stop()
   spinner.clear()
   if (result) {
@@ -87,10 +87,10 @@ export async function createProject(args: {
 }
 
 export async function updatePackageJSON(args: {
-  projectName: string
   projectDir: string
+  projectName: string
 }): Promise<void> {
-  const { projectName, projectDir } = args
+  const { projectDir, projectName } = args
   const packageJsonPath = path.resolve(projectDir, 'package.json')
   try {
     const packageObj = await fse.readJson(packageJsonPath)

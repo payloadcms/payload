@@ -1,12 +1,13 @@
 import chalk from 'chalk'
 import figures from 'figures'
-import terminalLink from 'terminal-link'
-import { getValidTemplates } from '../lib/templates'
-import type { ProjectTemplate } from '../types'
 import path from 'path'
+import terminalLink from 'terminal-link'
 
-const header = (message: string): string =>
-  `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
+import type { ProjectTemplate } from '../types'
+
+import { getValidTemplates } from '../lib/templates'
+
+const header = (message: string): string => `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
 
 export const welcomeMessage = chalk`
   {green Welcome to Payload. Let's create a project! }
@@ -14,8 +15,8 @@ export const welcomeMessage = chalk`
 
 const spacer = ' '.repeat(8)
 
-export async function helpMessage(): Promise<string> {
-  const validTemplates = await getValidTemplates()
+export function helpMessage(): string {
+  const validTemplates = getValidTemplates()
   return chalk`
   {bold USAGE}
 
@@ -40,7 +41,7 @@ export async function helpMessage(): Promise<string> {
 
 function formatTemplates(templates: ProjectTemplate[]) {
   return `\n\n${spacer}${templates
-    .map(t => `${t.name}${' '.repeat(28 - t.name.length)}${t.description}`)
+    .map((t) => `${t.name}${' '.repeat(28 - t.name.length)}${t.description}`)
     .join(`\n${spacer}`)}`
 }
 
@@ -52,9 +53,9 @@ export function successMessage(projectDir: string, packageManager: string): stri
     - ${
       packageManager === 'yarn' ? 'yarn' : 'npm run'
     } dev or follow directions in ${createTerminalLink(
-    'README.md',
-    `file://${path.resolve(projectDir, 'README.md')}`,
-  )}
+      'README.md',
+      `file://${path.resolve(projectDir, 'README.md')}`,
+    )}
 
   ${header('Documentation:')}
 
@@ -62,10 +63,7 @@ export function successMessage(projectDir: string, packageManager: string): stri
       'Getting Started',
       'https://payloadcms.com/docs/getting-started/what-is-payload',
     )}
-    - ${createTerminalLink(
-      'Configuration',
-      'https://payloadcms.com/docs/configuration/overview',
-    )}
+    - ${createTerminalLink('Configuration', 'https://payloadcms.com/docs/configuration/overview')}
 
 `
 }

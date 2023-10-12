@@ -1,41 +1,33 @@
-import path from 'path'
 import fs from 'fs-extra'
+import path from 'path'
+
 import type { ProjectTemplate } from '../types'
+
 import { error, success } from '../utils/log'
 
 /** Parse and swap .env.example values and write .env */
 export async function writeEnvFile(args: {
   databaseUri: string
   payloadSecret: string
-  template: ProjectTemplate
   projectDir: string
+  template: ProjectTemplate
 }): Promise<void> {
-  const { databaseUri, payloadSecret, template, projectDir } = args
+  const { databaseUri, payloadSecret, projectDir, template } = args
   try {
-    if (
-      template.type === 'starter' &&
-      fs.existsSync(path.join(projectDir, '.env.example'))
-    ) {
+    if (template.type === 'starter' && fs.existsSync(path.join(projectDir, '.env.example'))) {
       // Parse .env file into key/value pairs
-      const envFile = await fs.readFile(
-        path.join(projectDir, '.env.example'),
-        'utf8',
-      )
+      const envFile = await fs.readFile(path.join(projectDir, '.env.example'), 'utf8')
       const envWithValues: string[] = envFile
         .split('\n')
-        .filter(e => e)
-        .map(line => {
+        .filter((e) => e)
+        .map((line) => {
           if (line.startsWith('#') || !line.includes('=')) return line
 
           const split = line.split('=')
           const key = split[0]
           let value = split[1]
 
-          if (
-            key === 'MONGODB_URI' ||
-            key === 'MONGO_URL' ||
-            key === 'DATABASE_URI'
-          ) {
+          if (key === 'MONGODB_URI' || key === 'MONGO_URL' || key === 'DATABASE_URI') {
             value = databaseUri
           }
           if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {

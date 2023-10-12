@@ -1,4 +1,5 @@
 import prompts from 'prompts'
+
 import type { CliArgs, ProjectTemplate } from '../types'
 
 export async function parseTemplate(
@@ -7,23 +8,23 @@ export async function parseTemplate(
 ): Promise<ProjectTemplate> {
   if (args['--template']) {
     const templateName = args['--template']
-    const template = validTemplates.find(t => t.name === templateName)
+    const template = validTemplates.find((t) => t.name === templateName)
     if (!template) throw new Error('Invalid template given')
     return template
   }
 
   const response = await prompts(
     {
-      type: 'select',
       name: 'value',
-      message: 'Choose project template',
-      choices: validTemplates.map(p => {
+      choices: validTemplates.map((p) => {
         return {
+          description: p.description,
           title: p.name,
           value: p.name,
-          description: p.description,
         }
       }),
+      message: 'Choose project template',
+      type: 'select',
       validate: (value: string) => !!value.length,
     },
     {
@@ -33,7 +34,7 @@ export async function parseTemplate(
     },
   )
 
-  const template = validTemplates.find(t => t.name === response.value)
+  const template = validTemplates.find((t) => t.name === response.value)
   if (!template) throw new Error('Template is undefined')
 
   return template

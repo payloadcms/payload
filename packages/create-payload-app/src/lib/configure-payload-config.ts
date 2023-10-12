@@ -2,13 +2,14 @@ import fse from 'fs-extra'
 import path from 'path'
 
 import type { DbDetails } from '../types'
+
 import { warning } from '../utils/log'
 import { bundlerPackages, dbPackages, editorPackages } from './packages'
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
-  projectDir: string
   dbDetails: DbDetails | undefined
+  projectDir: string
 }): Promise<void> {
   if (!args.dbDetails) {
     return
@@ -26,7 +27,7 @@ export async function configurePayloadConfig(args: {
     const editorPackage = editorPackages['slate']
 
     // Delete all other db adapters
-    Object.values(dbPackages).forEach(p => {
+    Object.values(dbPackages).forEach((p) => {
       if (p.packageName !== dbPackage.packageName) {
         delete packageObj.dependencies[p.packageName]
       }
@@ -49,7 +50,7 @@ export async function configurePayloadConfig(args: {
 
     let payloadConfigPath: string | undefined
 
-    possiblePaths.forEach(p => {
+    possiblePaths.forEach((p) => {
       if (fse.pathExistsSync(p) && !payloadConfigPath) {
         payloadConfigPath = p
       }

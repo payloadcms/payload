@@ -1,42 +1,34 @@
-import prompts from 'prompts'
 import slugify from '@sindresorhus/slugify'
+import prompts from 'prompts'
+
 import type { CliArgs, DbDetails, DbType } from '../types'
 
 type DbChoice = {
-  value: DbType
-  title: string
   dbConnectionPrefix: `${string}/`
+  title: string
+  value: DbType
 }
 
 const dbChoiceRecord: Record<DbType, DbChoice> = {
   mongodb: {
-    value: 'mongodb',
-    title: 'MongoDB',
     dbConnectionPrefix: 'mongodb://127.0.0.1/',
+    title: 'MongoDB',
+    value: 'mongodb',
   },
   postgres: {
-    value: 'postgres',
-    title: 'PostgreSQL (beta)',
     dbConnectionPrefix: 'postgres://127.0.0.1:5432/',
+    title: 'PostgreSQL (beta)',
+    value: 'postgres',
   },
 }
 
-export async function selectDb(
-  args: CliArgs,
-  projectName: string,
-): Promise<DbDetails> {
+export async function selectDb(args: CliArgs, projectName: string): Promise<DbDetails> {
   let dbType: DbType | undefined = undefined
   if (args['--db']) {
-    if (
-      !Object.values(dbChoiceRecord).some(
-        dbChoice => dbChoice.value === args['--db'],
-      )
-    ) {
+    if (!Object.values(dbChoiceRecord).some((dbChoice) => dbChoice.value === args['--db'])) {
       throw new Error(
-        `Invalid database type given. Valid types are: ${Object.values(
-          dbChoiceRecord,
-        )
-          .map(dbChoice => dbChoice.value)
+        `Invalid database type given. Valid types are: ${Object.values(dbChoiceRecord)
+          .map((dbChoice) => dbChoice.value)
           .join(', ')}`,
       )
     }
@@ -44,15 +36,15 @@ export async function selectDb(
   } else {
     const dbTypeRes = await prompts(
       {
-        type: 'select',
         name: 'value',
-        message: 'Select a database',
-        choices: Object.values(dbChoiceRecord).map(dbChoice => {
+        choices: Object.values(dbChoiceRecord).map((dbChoice) => {
           return {
             title: dbChoice.title,
             value: dbChoice.value,
           }
         }),
+        message: 'Select a database',
+        type: 'select',
         validate: (value: string) => !!value.length,
       },
       {
@@ -64,18 +56,16 @@ export async function selectDb(
     dbType = dbTypeRes.value
   }
 
-  const dbChoice = dbChoiceRecord[dbType as DbType]
+  const dbChoice = dbChoiceRecord[dbType]
 
   const dbUriRes = await prompts(
     {
-      type: 'text',
       name: 'value',
-      message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
       initial: `${dbChoice.dbConnectionPrefix}${
-        projectName === '.'
-          ? `payload-${getRandomDigitSuffix()}`
-          : slugify(projectName)
+        projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
       }`,
+      message: `Enter ${dbChoice.title.split(' ')[0]} connection string`, // strip beta from title
+      type: 'text',
       validate: (value: string) => !!value.length,
     },
     {
@@ -86,8 +76,8 @@ export async function selectDb(
   )
 
   return {
-    type: dbChoice.value,
     dbUri: dbUriRes.value,
+    type: dbChoice.value,
   }
 }
 

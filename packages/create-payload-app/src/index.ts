@@ -5,6 +5,4 @@ async function main(): Promise<void> {
   await new Main().init()
 }
 
-main().catch(e =>
-  error(`An error has occurred: ${e instanceof Error ? e.message : e}`),
-)
+main().catch((e) => error(`An error has occurred: ${e instanceof Error ? e.message : e}`))
