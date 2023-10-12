@@ -2097,6 +2097,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/escape-html@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/escape-html/-/escape-html-1.0.2.tgz#072b7b13784fb3cee9c2450c22f36405983f5e3c"
+  integrity sha512-gaBLT8pdcexFztLSPRtriHeXY/Kn4907uOCZ4Q3lncFBkheAWOuNt53ypsF8szgxbEJ513UeBzcf4utN0EzEwA==
+
 "@types/eslint-scope@^3.7.3":
   version "3.7.5"
   resolved "https://registry.yarnpkg.com/@types/eslint-scope/-/eslint-scope-3.7.5.tgz#e28b09dbb1d9d35fdfa8a884225f00440dfc5a3e"
@@ -2240,7 +2245,7 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.5.tgz#5f19d2b85a98e9558036f6a3cacc8819420f05cf"
   integrity sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==
 
-"@types/qs@*":
+"@types/qs@*", "@types/qs@^6.9.8":
   version "6.9.8"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.8.tgz#f2a7de3c107b89b441e071d5472e6b726b4adf45"
   integrity sha512-u95svzDlTysU5xecFNTgfFG5RUWu1A9P0VzgpcIiGZA9iraHOdSzcxMxQ55DyeRaGCSxQi7LxXDI4rzq/MYfdg==
@@ -4027,7 +4032,7 @@ escalade@^3.1.1:
   resolved "https://registry.yarnpkg.com/escalade/-/escalade-3.1.1.tgz#d8cfdc7000965c5a0174b4a82eaa5c0552742e40"
   integrity sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==
 
-escape-html@~1.0.3:
+escape-html@^1.0.3, escape-html@~1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
   integrity sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==
@@ -6442,10 +6447,10 @@ payload-admin-bar@^1.0.6:
   resolved "https://registry.yarnpkg.com/payload-admin-bar/-/payload-admin-bar-1.0.6.tgz#ca25e369a4f319c3d61ff3db4021c1c2fd9d0148"
   integrity sha512-hpQdOiPq4LpWTkbuAnvxDf5wQ2ysMp9kQt+X2U+FfvBwD1U6qoxJfmUymG1OjLlaZzCZ93FlOdTl4u4Z0/m/SA==
 
-payload@beta:
-  version "2.0.0-beta.30"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-2.0.0-beta.30.tgz#56594994d70eef83ca95850a38dadad2c30e6494"
-  integrity sha512-haQ/LCJMNKWgimRlPs5HmNWbT2jP4SHYFxd2ht43hESZ4gE5uFvwsgpqeWwQiO+QCttmgNBkrfmJfNLLDm7hgw==
+payload@latest:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/payload/-/payload-2.0.4.tgz#e659f69d342789eab18dfe6d675218aad3796834"
+  integrity sha512-Eh75yw2xyDdir4Bfk3Gy6laJ4Q+FFvWkkRgGwJ1oDC60V6ztqMFLbejSdXNxLlfj800GYa9LwnXlFjUDV+2pmQ==
   dependencies:
     "@date-io/date-fns" "2.16.0"
     "@dnd-kit/core" "6.0.8"
