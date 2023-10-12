@@ -17,7 +17,7 @@
     "@aws-sdk/lib-storage": "^3.267.0",
     "@azure/storage-blob": "^12.11.0",
     "@google-cloud/storage": "^6.4.1",
-    "payload": "^1.7.2"
+    "payload": "^1.7.2 || ^2.0.0"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/client-s3": {
