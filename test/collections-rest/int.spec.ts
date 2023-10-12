@@ -7,7 +7,14 @@ import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
-import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug, } from './config'
+import config, {
+  customIdNumberSlug,
+  customIdSlug,
+  errorOnHookSlug,
+  pointSlug,
+  relationSlug,
+  slug,
+} from './config'
 
 let client: RESTClient
 
@@ -676,6 +683,72 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1)
       })
 
+      it('not_in (relationships)', async () => {
+        const relationship = await payload.create({
+          collection: relationSlug,
+          data: {},
+        })
+
+        await createPost({ relationField: relationship.id, title: 'not-me' })
+        // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
+        const post2 = await createPost({ title: 'me' })
+        const { result, status } = await client.find<Post>({
+          query: {
+            relationField: {
+              not_in: [relationship.id],
+            },
+          },
+        })
+
+        // do not want to error for empty arrays
+        const { status: emptyNotInStatus } = await client.find<Post>({
+          query: {
+            relationField: {
+              not_in: [],
+            },
+          },
+        })
+
+        expect(emptyNotInStatus).toEqual(200)
+
+        expect(status).toEqual(200)
+        expect(result.docs).toEqual([post2])
+        expect(result.totalDocs).toEqual(1)
+      })
+
+      it('in (relationships)', async () => {
+        const relationship = await payload.create({
+          collection: relationSlug,
+          data: {},
+        })
+
+        const post1 = await createPost({ relationField: relationship.id, title: 'me' })
+        // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
+        await createPost({ title: 'not-me' })
+        const { result, status } = await client.find<Post>({
+          query: {
+            relationField: {
+              in: [relationship.id],
+            },
+          },
+        })
+
+        // do not want to error for empty arrays
+        const { status: emptyNotInStatus } = await client.find<Post>({
+          query: {
+            relationField: {
+              in: [],
+            },
+          },
+        })
+
+        expect(emptyNotInStatus).toEqual(200)
+
+        expect(status).toEqual(200)
+        expect(result.docs).toEqual([post1])
+        expect(result.totalDocs).toEqual(1)
+      })
+
       it('like', async () => {
         const post1 = await createPost({ title: 'prefix-value' })
 
@@ -1175,18 +1248,18 @@ describe('collections-rest', () => {
   })
 })
 
-async function createPost (overrides?: Partial<Post>) {
+async function createPost(overrides?: Partial<Post>) {
   const { doc } = await client.create<Post>({ data: { title: 'title', ...overrides } })
   return doc
 }
 
-async function createPosts (count: number) {
+async function createPosts(count: number) {
   await mapAsync([...Array(count)], async () => {
     await createPost()
   })
 }
 
-async function clearDocs (): Promise<void> {
+async function clearDocs(): Promise<void> {
   const allDocs = await payload.find({ collection: slug, limit: 100 })
   const ids = allDocs.docs.map((doc) => doc.id)
   await mapAsync(ids, async (id) => {
