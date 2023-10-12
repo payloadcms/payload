@@ -20,7 +20,6 @@ export const getAfterDeleteHook = ({
 
       const filesToDelete: string[] = [
         doc.filename,
-        // @ts-expect-error Errored after import from external repo
         ...Object.values(doc?.sizes || []).map((resizedFileData) => resizedFileData?.filename),
       ]
 
