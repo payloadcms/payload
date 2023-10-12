@@ -37,6 +37,16 @@ export default buildConfigWithDefaults({
                 },
               ],
             },
+            {
+              type: 'group',
+              name: 'rowGroupFields',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'rowGroupTextField',
+                },
+              ],
+            },
           ],
         },
       ],
