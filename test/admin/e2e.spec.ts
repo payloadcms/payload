@@ -167,14 +167,15 @@ describe('admin', () => {
     })
 
     test('collection - should render `id` as `useAsTitle` fallback', async () => {
-      await page.goto(url.create)
+      const { id } = await createPost()
+      await page.goto(url.edit(id))
       await page.locator('#field-title').fill(title)
       await expect(page.locator('.doc-header__title.render-title')).toContainText(title)
       await saveDocAndAssert(page)
       await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
       await page.locator('#field-title').fill('')
       await expect(page.locator('.doc-header__title.render-title')).toContainText('ID: ')
-      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText('[Untitled]')
+      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(id)
       await saveDocAndAssert(page)
     })
 

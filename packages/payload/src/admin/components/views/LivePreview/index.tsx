@@ -55,8 +55,8 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
       : livePreviewConfig?.url
 
   const popupState = usePopupWindow({
-    eventType: 'livePreview',
-    href: url,
+    eventType: 'payload-live-preview',
+    url,
   })
 
   const { apiURL, data, permissions } = props
@@ -94,7 +94,13 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
 
   return (
     <Fragment>
-      <SetStepNav collection={collection} global={global} id={id} isEditing={isEditing} />
+      <SetStepNav
+        collection={collection}
+        global={global}
+        id={id}
+        isEditing={isEditing}
+        view={t('livePreview')}
+      />
       <DocumentControls
         apiURL={apiURL}
         collection={collection}
