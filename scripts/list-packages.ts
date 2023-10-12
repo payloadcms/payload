@@ -2,15 +2,18 @@ import path from 'path'
 import fse from 'fs-extra'
 import chalk from 'chalk'
 import chalkTemplate from 'chalk-template'
+import simpleGit from 'simple-git'
 
-const packagesPath = path.resolve(__dirname, '../packages')
+const git = simpleGit()
+
+const packagesDir = path.resolve(__dirname, '../packages')
 
 async function main() {
   // List all public packages excluding eslint-config-payload
-  const packageDirs = fse.readdirSync(packagesPath).filter((d) => d !== 'eslint-config-payload')
+  const packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
   const packageDetails = await Promise.all(
-    packageDirs.map(async (dir) => {
-      const packageJson = await fse.readJson(`${packagesPath}/${dir}/package.json`)
+    packageDirs.map(async (dirName) => {
+      const packageJson = await fse.readJson(`${packagesDir}/${dirName}/package.json`)
       const isPublic = packageJson.private !== true
       if (!isPublic) return null
 
@@ -22,10 +25,19 @@ async function main() {
       const publishedVersion = json?.['dist-tags']?.latest
       const publishDate = json?.time?.[publishedVersion]
 
+      const prevGitTag = `${dirName}/${packageJson.version}`
+      const prevGitTagHash = await git.revparse(prevGitTag)
+
+      const newCommits = await git.log({
+        from: prevGitTagHash,
+        file: `packages/${dirName}`,
+      })
+
       return {
         name: packageJson.name,
-        packageDir: dir,
-        packagePath: `packages/${dir}`,
+        newCommits: newCommits.total,
+        packageDir: dirName,
+        packagePath: `packages/${dirName}`,
         publishedVersion,
         publishDate,
         version: packageJson.version,
@@ -34,17 +46,22 @@ async function main() {
   )
   console.log(chalkTemplate`
 
-  {bold.green Package List:}
+  {bold Packages:}
 
 ${packageDetails
-  .map(
-    (p) =>
-      `  ${chalk.bold(p?.packageDir.padEnd(28))} ${p?.publishedVersion} at ${p?.publishDate
-        .split(':')
-        .slice(0, 2)
-        .join(':')
-        .replace('T', ' ')}`,
-  )
+  .map((p) => {
+    const name = p?.newCommits
+      ? chalk.bold.green(p?.packageDir.padEnd(28))
+      : p?.packageDir.padEnd(28)
+    const publishData = `${p?.publishedVersion} at ${p?.publishDate
+      .split(':')
+      .slice(0, 2)
+      .join(':')
+      .replace('T', ' ')}`
+    const newCommits = `${p?.newCommits ? `${chalk.bold.green(p?.newCommits)} new commits` : ''}`
+
+    return `  ${name}${publishData}    ${newCommits}`
+  })
   .join('\n')}
 
 `)
