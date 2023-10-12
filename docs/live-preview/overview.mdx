@@ -8,7 +8,7 @@ keywords: live preview, preview, live, iframe, iframe preview, visual editing, d
 
 **With Live Preview you can render your front-end application directly within the Admin panel. As you type, your changes take effect in real-time. No need to save a draft or publish your changes.**
 
-Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin panel communicates with your app through `window.postMessage` events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives.
+Live Preview works by rendering an iframe on the page that loads your front-end application. The Admin panel communicates with your app through [`window.postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) events. These events are emitted every time a change is made to the document. Your app then listens for these events and re-renders itself with the data it receives.
 
 {/* IMAGE OF LIVE PREVIEW HERE */}
 
@@ -84,7 +84,7 @@ Here is an example of using a function that returns a dynamic URL:
         documentInfo,
         locale
       }) => `${data.tenant.url}${ // Multi-tenant top-level domain
-        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `/${data.slug}
+        documentInfo.slug === 'posts' ? `/posts/${data.slug}` : `${data.slug !== 'home' : `/${data.slug}` : ''}`
       `}?locale=${locale}`, // Localization query param
       collections: ['pages'],
     },

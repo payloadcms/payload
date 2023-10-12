@@ -10,7 +10,8 @@ export const Pages: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) => `${process.env.PAYLOAD_PUBLIC_SITE_URL}/${data.slug}`,
+      url: ({ data }) =>
+        `${process.env.PAYLOAD_PUBLIC_SITE_URL}${data.slug !== 'home' ? `/${data.slug}` : ''}`,
     },
   },
   access: {

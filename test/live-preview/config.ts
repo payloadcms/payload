@@ -25,8 +25,8 @@ export default buildConfigWithDefaults({
       // The Live Preview config is inherited from the top down
       url: ({ data, documentInfo }) =>
         `http://localhost:3001${
-          documentInfo.slug !== 'pages' ? `/${documentInfo.slug}` : ''
-        }/${data?.slug}`,
+          documentInfo?.slug && documentInfo.slug !== 'pages' ? `/${documentInfo.slug}` : ''
+        }${data?.slug && data.slug !== 'home' ? `/${data.slug}` : ''}`,
       breakpoints: [
         {
           label: 'Mobile',
