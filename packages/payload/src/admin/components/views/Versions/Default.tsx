@@ -1,87 +1,29 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { StepNavItem } from '../../elements/StepNav/types'
 import type { Props } from './types'
 
-import { getTranslation } from '../../../../utilities/getTranslation'
 import { Gutter } from '../../elements/Gutter'
 import { LoadingOverlayToggle } from '../../elements/Loading'
 import Paginator from '../../elements/Paginator'
 import PerPage from '../../elements/PerPage'
-import { useStepNav } from '../../elements/StepNav'
 import { Table } from '../../elements/Table'
-import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
 import { useSearchParams } from '../../utilities/SearchParams'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { buildVersionColumns } from './columns'
 import './index.scss'
 
 const baseClass = 'versions'
 
 export const DefaultVersionsView: React.FC<Props> = (props) => {
-  const { id, collection, data, editURL, entityLabel, global, isLoadingVersions, versionsData } =
-    props
+  const { id, collection, data, entityLabel, global, isLoadingVersions, versionsData } = props
 
-  const {
-    routes: { admin },
-  } = useConfig()
-
-  const { setStepNav } = useStepNav()
-
-  const { i18n, t } = useTranslation('version')
+  const { t } = useTranslation('version')
 
   const { limit } = useSearchParams()
 
   const useAsTitle = collection?.admin?.useAsTitle || 'id'
-
-  useEffect(() => {
-    let nav: StepNavItem[] = []
-
-    if (collection) {
-      let docLabel = ''
-
-      if (data) {
-        if (useAsTitle) {
-          if (data[useAsTitle]) {
-            docLabel = data[useAsTitle]
-          } else {
-            docLabel = `[${t('general:untitled')}]`
-          }
-        } else {
-          docLabel = data.id
-        }
-      }
-
-      nav = [
-        {
-          label: getTranslation(collection.labels.plural, i18n),
-          url: `${admin}/collections/${collection.slug}`,
-        },
-        {
-          label: docLabel,
-          url: editURL,
-        },
-        {
-          label: t('versions'),
-        },
-      ]
-    }
-
-    if (global) {
-      nav = [
-        {
-          label: getTranslation(global.label, i18n),
-          url: editURL,
-        },
-        {
-          label: t('versions'),
-        },
-      ]
-    }
-
-    setStepNav(nav)
-  }, [setStepNav, collection, global, useAsTitle, data, admin, id, editURL, t, i18n])
 
   let metaDesc: string
   let metaTitle: string
@@ -100,6 +42,7 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
+      <SetStepNav collection={collection} global={global} id={id} isEditing view={t('versions')} />
       <LoadingOverlayToggle name="versions" show={isLoadingVersions} />
       <main className={baseClass}>
         <Meta description={metaDesc} title={metaTitle} />

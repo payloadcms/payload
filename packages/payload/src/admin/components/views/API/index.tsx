@@ -220,7 +220,13 @@ export const API: React.FC<EditViewProps> = (props) => {
 
   return (
     <Gutter className={classes} right={false}>
-      <SetStepNav collection={collection} global={global} id={id} isEditing={isEditing} />
+      <SetStepNav
+        collection={collection}
+        global={global}
+        id={id}
+        isEditing={isEditing}
+        view="API"
+      />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>
