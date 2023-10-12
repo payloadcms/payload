@@ -6,7 +6,7 @@
     "create-payload-app": "bin/cli.js"
   },
   "scripts": {
-    "build": "tsc && yarn copyfiles",
+    "build": "tsc && pnpm copyfiles",
     "copyfiles": "copyfiles -u 1 \"src/templates/**\" \"src/lib/common-files/**\" dist",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
@@ -14,7 +14,7 @@
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
     "lint-staged": "lint-staged --quiet",
     "test": "jest",
-    "prepublishOnly": "yarn test && yarn clean && yarn build"
+    "prepublishOnly": "pnpm test && pnpm clean && pnpm build"
   },
   "files": [
     "package.json",
