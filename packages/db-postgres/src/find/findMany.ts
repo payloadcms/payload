@@ -15,7 +15,6 @@ type Args = Omit<FindArgs, 'collection'> & {
   adapter: PostgresAdapter
   fields: Field[]
   tableName: string
-  version?: boolean
 }
 
 export const findMany = async function find({
@@ -27,9 +26,8 @@ export const findMany = async function find({
   pagination,
   req = {} as PayloadRequest,
   skip,
-  sort: sortArg,
+  sort,
   tableName,
-  version,
   where: whereArg,
 }: Args) {
   const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
@@ -42,11 +40,6 @@ export const findMany = async function find({
   let hasNextPage: boolean
   let pagingCounter: number
   let selectDistinctResult
-  let sort = sortArg
-  if (version && sort) {
-    const direction = sort[0] === '-' ? '-' : ''
-    sort = `${direction}version.${direction.length === 1 ? sort.substring(1) : sort}`
-  }
 
   const { joinAliases, joins, orderBy, selectFields, where } = await buildQuery({
     adapter,

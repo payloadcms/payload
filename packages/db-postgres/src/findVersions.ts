@@ -39,7 +39,6 @@ export const findVersions: FindVersions = async function findVersions(
     skip,
     sort,
     tableName,
-    version: true,
     where,
   })
 }

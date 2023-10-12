@@ -12,6 +12,7 @@ import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey'
+import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort'
 import { buildAfterOperation } from './utils'
 
 export type Arguments = {
@@ -127,7 +128,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         page: sanitizedPage,
         pagination: usePagination,
         req,
-        sort,
+        sort: getQueryDraftsSort(sort),
         where: fullWhere,
       })
     } else {
