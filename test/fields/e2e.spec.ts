@@ -545,10 +545,12 @@ describe('fields', () => {
         // Save document
         await saveDocAndAssert(page)
 
-        // Expect the remaining row to be the third row added above
-        await expect(
-          page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow'),
-        ).toHaveValue(assertGroupText3)
+        // Scroll to array row (fields are not rendered in DOM until on screen)
+        await page.locator('#field-potentiallyEmptyArray__0__groupInRow').scrollIntoViewIfNeeded()
+
+        // Expect the remaining row to be the third row
+        const input = page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
+        await expect(input).toHaveValue(assertGroupText3)
 
         // Duplicate row
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
