@@ -21,4 +21,11 @@
       margin: 0;
     }
   }
+
+  &__inputWrap {
+    margin-bottom: base(0.25);
+    & > *:first-child {
+      margin-bottom: base(1);
+    }
+  }
 }

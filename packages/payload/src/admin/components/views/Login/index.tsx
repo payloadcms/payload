@@ -75,22 +75,32 @@ const Login: React.FC = () => {
               action={`${serverURL}${api}/${userSlug}/login`}
               className={`${baseClass}__form`}
               disableSuccessStatus
-              initialData={{
-                email: autoLogin && autoLogin.prefillOnly ? autoLogin.email : undefined,
-                password: autoLogin && autoLogin.prefillOnly ? autoLogin.password : undefined,
-              }}
+              initialData={
+                autoLogin &&
+                autoLogin.prefillOnly && {
+                  email: autoLogin.email,
+                  password: autoLogin.password,
+                }
+              }
               method="post"
               onSuccess={onSuccess}
               waitForAutocomplete
             >
               <FormLoadingOverlayToggle action="loading" name="login-form" />
-              <Email
-                admin={{ autoComplete: 'email' }}
-                label={t('general:email')}
-                name="email"
-                required
-              />
-              <Password autoComplete="off" label={t('general:password')} name="password" required />
+              <div className={`${baseClass}__inputWrap`}>
+                <Email
+                  admin={{ autoComplete: 'email' }}
+                  label={t('general:email')}
+                  name="email"
+                  required
+                />
+                <Password
+                  autoComplete="off"
+                  label={t('general:password')}
+                  name="password"
+                  required
+                />
+              </div>
               <Link to={`${admin}/forgot`}>{t('forgotPasswordQuestion')}</Link>
               <FormSubmit>{t('login')}</FormSubmit>
             </Form>
