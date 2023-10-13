@@ -1,5 +1,3 @@
-import { loremIpsum } from './loremIpsum'
-
 export function generateLexicalRichText() {
   return {
     root: {
@@ -9,312 +7,39 @@ export function generateLexicalRichText() {
       version: 1,
       children: [
         {
-          children: [
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: "Hello, I'm a rich text field.",
-              type: 'text',
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
-          format: 'center',
-          indent: 0,
-          type: 'heading',
-          version: 1,
-          tag: 'h1',
-        },
-        {
-          children: [
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: 'I can do all kinds of fun stuff like ',
-              type: 'text',
-              version: 1,
-            },
-            {
-              children: [
-                {
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'render links',
-                  type: 'text',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              type: 'link',
-              version: 1,
-              fields: {
-                url: 'https://payloadcms.com',
-                newTab: true,
-                linkType: 'custom',
-              },
-            },
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: ', ',
-              type: 'text',
-              version: 1,
-            },
-            {
-              children: [
-                {
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'link to relationships',
-                  type: 'text',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              type: 'link',
-              version: 1,
-              fields: {
-                url: 'https://',
-                doc: {
-                  value: {
-                    id: '{{ARRAY_DOC_ID}}',
-                  },
-                  relationTo: 'array-fields',
-                },
-                newTab: false,
-                linkType: 'internal',
-              },
-            },
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: ', and store nested relationship fields:',
-              type: 'text',
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
           format: '',
-          indent: 0,
-          type: 'paragraph',
+          type: 'block',
           version: 1,
-        },
-        {
-          format: '',
-          type: 'relationship',
-          version: 1,
-          value: {
-            id: '{{TEXT_DOC_ID}}',
-          },
-          relationTo: 'text-fields',
-        },
-        {
-          children: [
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: 'You can build your own elements, too.',
-              type: 'text',
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          type: 'paragraph',
-          version: 1,
-        },
-        {
-          children: [
-            {
-              children: [
-                {
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: "It's built with Lexical",
-                  type: 'text',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              type: 'listitem',
-              version: 1,
-              value: 1,
-            },
-            {
-              children: [
-                {
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'It stores content as JSON so you can use it wherever you need',
-                  type: 'text',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              type: 'listitem',
-              version: 1,
-              value: 2,
-            },
-            {
-              children: [
-                {
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: "It's got a great editing experience for non-technical users",
-                  type: 'text',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              type: 'listitem',
-              version: 1,
-              value: 3,
-            },
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          type: 'list',
-          version: 1,
-          listType: 'bullet',
-          start: 1,
-          tag: 'ul',
-        },
-        {
-          children: [
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: 'And a whole lot more.',
-              type: 'text',
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          type: 'paragraph',
-          version: 1,
-        },
-        {
-          format: '',
-          type: 'upload',
-          version: 1,
-          relationTo: 'uploads',
-          value: {
-            id: '{{UPLOAD_DOC_ID}}',
-          },
           fields: {
-            caption: {
-              root: {
-                type: 'root',
-                format: '',
-                indent: 0,
-                version: 1,
-                children: [
-                  ...[...Array(4)].map(() => ({
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    type: 'paragraph',
-                    version: 1,
-                    children: [
-                      {
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: loremIpsum,
-                        type: 'text',
-                        version: 1,
+            data: {
+              id: '65298129c06820f57f482ab8',
+              richText: {
+                root: {
+                  type: 'root',
+                  format: '',
+                  indent: 0,
+                  version: 1,
+                  children: [
+                    {
+                      format: '',
+                      type: 'relationship',
+                      version: 1,
+                      relationTo: 'text-fields',
+                      value: {
+                        id: '{{TEXT_DOC_ID}}',
                       },
-                    ],
-                  })),
-                ],
-                direction: 'ltr',
+                    },
+                  ],
+                  direction: null,
+                },
               },
+              blockName: 'blocky',
+              blockType: 'richText',
             },
           },
-        },
-        {
-          children: [],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          type: 'paragraph',
-          version: 1,
-        },
-        {
-          children: [
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. Nunc posuere purus rhoncus pulvinar aliquam. Ut aliquet tristique nisl vitae volutpat. Nulla aliquet porttitor venenatis. Donec a dui et dui fringilla consectetur id nec massa. Aliquam erat volutpat. Sed ut dui ut lacus dictum fermentum vel tincidunt neque. Sed sed lacinia lectus. Duis sit amet sodales felis. Duis nunc eros, mattis at dui ac, convallis semper risus. In adipiscing ultrices tellus, in suscipit massa vehicula eu.',
-              type: 'text',
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          type: 'paragraph',
-          version: 1,
-        },
-        {
-          children: [
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam hendrerit nisi sed sollicitudin pellentesque. Nunc posuere purus rhoncus pulvinar aliquam. Ut aliquet tristique nisl vitae volutpat. Nulla aliquet porttitor venenatis. Donec a dui et dui fringilla consectetur id nec massa. Aliquam erat volutpat. Sed ut dui ut lacus dictum fermentum vel tincidunt neque. Sed sed lacinia lectus. Duis sit amet sodales felis. Duis nunc eros, mattis at dui ac, convallis semper risus. In adipiscing ultrices tellus, in suscipit massa vehicula eu.',
-              type: 'text',
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          type: 'paragraph',
-          version: 1,
         },
       ],
-      direction: 'ltr',
+      direction: null,
     },
   }
 }

@@ -9,6 +9,7 @@ import {
 } from '../../../../packages/richtext-lexical/src'
 import {
   RelationshipBlock,
+  RichTextBlock,
   SelectFieldBlock,
   SubBlockBlock,
   TextBlock,
@@ -68,6 +69,7 @@ export const LexicalFields: CollectionConfig = {
           }),
           BlocksFeature({
             blocks: [
+              RichTextBlock,
               TextBlock,
               UploadAndRichTextBlock,
               SelectFieldBlock,
@@ -81,7 +83,7 @@ export const LexicalFields: CollectionConfig = {
   ],
 }
 
-export const lexicalRichTextDoc = {
+export const LexicalRichTextDoc = {
   title: 'Rich Text',
   richTextLexicalCustomFields: generateLexicalRichText(),
 }

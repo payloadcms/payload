@@ -14,7 +14,7 @@ import DateFields, { dateDoc } from './collections/Date'
 import GroupFields, { groupDoc } from './collections/Group'
 import IndexedFields from './collections/Indexed'
 import JSONFields, { jsonDoc } from './collections/JSON'
-import { LexicalFields } from './collections/Lexical'
+import { LexicalFields, LexicalRichTextDoc } from './collections/Lexical'
 import NumberFields, { numberDoc } from './collections/Number'
 import PointFields, { pointDoc } from './collections/Point'
 import RadioFields, { radiosDoc } from './collections/Radio'
@@ -150,7 +150,7 @@ export default buildConfigWithDefaults({
     )
 
     const lexicalRichTextDocWithRelId = JSON.parse(
-      JSON.stringify(richTextDoc)
+      JSON.stringify(LexicalRichTextDoc)
         .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, formattedID)
         .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, formattedJPGID)
         .replace(/"\{\{TEXT_DOC_ID\}\}"/g, formattedTextID),

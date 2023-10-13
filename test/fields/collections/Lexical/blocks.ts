@@ -13,6 +13,17 @@ export const TextBlock: Block = {
   slug: 'text',
 }
 
+export const RichTextBlock: Block = {
+  fields: [
+    {
+      name: 'richText',
+      type: 'richText',
+      editor: lexicalEditor(),
+    },
+  ],
+  slug: 'richText',
+}
+
 export const UploadAndRichTextBlock: Block = {
   fields: [
     {

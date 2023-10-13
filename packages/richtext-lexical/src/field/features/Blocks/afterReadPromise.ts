@@ -1,3 +1,5 @@
+import type { Block } from 'payload/types'
+
 import { sanitizeFields } from 'payload/config'
 
 import type { BlocksFeatureProps } from '.'
@@ -20,39 +22,40 @@ export const blockAfterReadPromiseHOC = (
     showHiddenFields,
     siblingDoc,
   }) => {
+    const blocks: Block[] = props.blocks
+    const blockFieldData = node.fields.data
+
     const promises: Promise<void>[] = []
 
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
     const payloadConfig = req.payload.config
     const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
-    props.blocks = props.blocks.map((block) => {
-      const unsanitizedBlock = { ...block }
-      unsanitizedBlock.fields = sanitizeFields({
+    blocks.forEach((block) => {
+      block.fields = sanitizeFields({
         config: payloadConfig,
         fields: block.fields,
         validRelationships,
       })
-      return unsanitizedBlock
     })
 
-    if (Array.isArray(props.blocks)) {
-      props.blocks.forEach((block) => {
-        if (block?.fields) {
-          recurseNestedFields({
-            afterReadPromises,
-            currentDepth,
-            data: node.fields.data || {},
-            depth,
-            fields: block.fields,
-            overrideAccess,
-            promises,
-            req,
-            showHiddenFields,
-            siblingDoc,
-          })
-        }
-      })
+    // find block used in this node
+    const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)
+    if (!block || !block?.fields?.length || !blockFieldData) {
+      return promises
     }
+
+    recurseNestedFields({
+      afterReadPromises,
+      currentDepth,
+      data: blockFieldData,
+      depth,
+      fields: block.fields,
+      overrideAccess,
+      promises,
+      req,
+      showHiddenFields,
+      siblingDoc,
+    })
 
     return promises
   }
