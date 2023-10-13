@@ -6,7 +6,7 @@ import type { AdminViewComponent } from '../../../../../packages/payload/src/con
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
 
-const CustomDefaultView: AdminViewComponent = ({
+const CustomDefaultEditView: AdminViewComponent = ({
   canAccessAdmin,
   // collection,
   //  global,
@@ -72,4 +72,4 @@ const CustomDefaultView: AdminViewComponent = ({
   )
 }
 
-export default CustomDefaultView
+export default CustomDefaultEditView
