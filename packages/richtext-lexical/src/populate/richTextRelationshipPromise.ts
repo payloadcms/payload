@@ -59,7 +59,7 @@ export const recurseRichText = ({
         }
       }
 
-      if ('children' in node && node?.children) {
+      if ('children' in node && Array.isArray(node?.children) && node?.children?.length) {
         recurseRichText({
           afterReadPromises,
           children: node.children as SerializedLexicalNode[],
