@@ -29,7 +29,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
   const config = useConfig()
 
-  const { getData, getSiblingData, setModified } = useForm()
+  const { getData, getDataByPath, getSiblingData, setModified } = useForm()
 
   const value = field?.value as T
   const initialValue = field?.initialValue as T
@@ -116,8 +116,14 @@ const useField = <T,>(options: Options): FieldType<T> => {
           user,
         }
 
+        let valueToValidate = value
+
+        if (Array.isArray(field.rows)) {
+          valueToValidate = getDataByPath(path)
+        }
+
         const validationResult =
-          typeof validate === 'function' ? await validate(value, validateOptions) : true
+          typeof validate === 'function' ? await validate(valueToValidate, validateOptions) : true
 
         if (typeof validationResult === 'string') {
           action.errorMessage = validationResult
@@ -142,6 +148,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       dispatchField,
       getData,
       getSiblingData,
+      getDataByPath,
       id,
       operation,
       path,

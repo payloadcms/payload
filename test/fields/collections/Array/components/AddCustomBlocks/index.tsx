@@ -8,7 +8,7 @@ const baseClass = 'custom-blocks-field-management'
 
 export const AddCustomBlocks: React.FC = () => {
   const { addFieldRow, replaceFieldRow } = useForm()
-  const { value } = useField({ path: 'customBlocks' })
+  const { value } = useField<number>({ path: 'customBlocks' })
 
   return (
     <div className={baseClass}>
@@ -47,12 +47,12 @@ export const AddCustomBlocks: React.FC = () => {
             replaceFieldRow({
               data: { block1Title: 'REPLACED BLOCK', blockType: 'block-1' },
               path: 'customBlocks',
-              rowIndex: (Array.isArray(value) ? value.length : 0) - 1,
+              rowIndex: value - 1,
             })
           }
           type="button"
         >
-          Replace Block {Array.isArray(value) ? value.length : 0}
+          Replace Block {value}
         </button>
       </div>
     </div>

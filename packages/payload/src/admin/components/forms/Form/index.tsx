@@ -167,7 +167,13 @@ const Form: React.FC<Props> = (props) => {
           let validationResult: boolean | string = true
 
           if (typeof field.validate === 'function') {
-            validationResult = await field.validate(field.value, {
+            let valueToValidate = field.value
+
+            if (Array.isArray(field.rows)) {
+              valueToValidate = contextRef.current.getDataByPath(path)
+            }
+
+            validationResult = await field.validate(valueToValidate, {
               id,
               config,
               data,

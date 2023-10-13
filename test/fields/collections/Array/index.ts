@@ -83,6 +83,16 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
           name: 'text',
         },
+        {
+          type: 'group',
+          name: 'groupInRow',
+          fields: [
+            {
+              type: 'text',
+              name: 'textInGroupInRow',
+            },
+          ],
+        },
       ],
     },
     {
