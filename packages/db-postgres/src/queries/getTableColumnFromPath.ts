@@ -40,6 +40,7 @@ type Args = {
   joins: BuildQueryJoins
   locale?: string
   pathSegments: string[]
+  rootTableName?: string
   selectFields: Record<string, GenericColumn>
   tableName: string
 }
@@ -59,11 +60,14 @@ export const getTableColumnFromPath = ({
   joins,
   locale: incomingLocale,
   pathSegments: incomingSegments,
+  rootTableName: incomingRootTableName,
   selectFields,
   tableName,
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
+  const rootTableName = incomingRootTableName || tableName
+
   const field = flattenTopLevelFields(fields as Field[]).find(
     (fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath,
   ) as Field | TabAsField
@@ -114,6 +118,7 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
+          rootTableName,
           selectFields,
           tableName: newTableName,
         })
@@ -131,6 +136,7 @@ export const getTableColumnFromPath = ({
             joins,
             locale,
             pathSegments: pathSegments.slice(1),
+            rootTableName,
             selectFields,
             tableName: newTableName,
           })
@@ -146,6 +152,7 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
+          rootTableName,
           selectFields,
           tableName: newTableName,
         })
@@ -178,6 +185,7 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
+          rootTableName,
           selectFields,
           tableName: newTableName,
         })
@@ -212,6 +220,7 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
+          rootTableName,
           selectFields,
           tableName: newTableName,
         })
@@ -235,6 +244,7 @@ export const getTableColumnFromPath = ({
               joins,
               locale,
               pathSegments: pathSegments.slice(1),
+              rootTableName,
               selectFields: blockSelectFields,
               tableName: newTableName,
             })
@@ -283,7 +293,7 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         let relationshipFields
-        const relationTableName = `${tableName}_rels`
+        const relationTableName = `${rootTableName}_rels`
         const newCollectionPath = pathSegments.slice(1).join('.')
 
         const aliasRelationshipTableName = uuid()
@@ -368,6 +378,7 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
+          rootTableName: newTableName,
           selectFields,
           tableName: newTableName,
         })
