@@ -27,7 +27,8 @@
       }
 
       &__fields {
-        & > .tabs-field {
+        & > .tabs-field,
+        & > .group-field {
           margin-right: calc(var(--base) * -2);
         }
       }
@@ -110,7 +111,8 @@
         }
 
         &__fields {
-          & > .tabs-field {
+          & > .tabs-field,
+          & > .group-field {
             margin-right: calc(var(--gutter-h) * -1);
           }
         }
