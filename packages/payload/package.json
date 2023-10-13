@@ -208,8 +208,7 @@
     "webpack": "^5.78.0"
   },
   "engines": {
-    "node": ">=14",
-    "pnpm": ">=8"
+    "node": ">=14"
   },
   "files": [
     "bin.js",
