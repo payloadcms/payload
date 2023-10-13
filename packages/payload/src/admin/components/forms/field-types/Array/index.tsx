@@ -91,7 +91,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     valid,
     value,
-  } = useField<[]>({
+  } = useField<number>({
     condition,
     hasRows: true,
     path,
@@ -123,8 +123,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 
   const removeRow = useCallback(
-    async (rowIndex: number) => {
-      await removeFieldRow({ path, rowIndex })
+    (rowIndex: number) => {
+      removeFieldRow({ path, rowIndex })
       setModified(true)
     },
     [removeFieldRow, path, setModified],
@@ -278,7 +278,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
-          onClick={() => addRow(value?.length || 0)}
+          onClick={() => addRow(value || 0)}
         >
           {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
