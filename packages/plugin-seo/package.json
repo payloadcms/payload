@@ -26,7 +26,7 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.18.5 || ^1.0.0",
+    "payload": "^0.18.5 || ^1.0.0 || ^2.0.0",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
