@@ -66,6 +66,24 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'relationship',
+      type: 'relationship',
+      relationTo: 'posts',
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'sidebarField',
       type: 'text',
       admin: {

@@ -56,7 +56,7 @@
     position: sticky;
     top: var(--doc-controls-height);
     width: 33.33%;
-    height: 100%;
+    height: calc(100vh - var(--doc-controls-height));
   }
 
   &__sidebar {
