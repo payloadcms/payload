@@ -17,7 +17,15 @@ import CustomEditView from './components/views/CustomEdit'
 import CustomMinimalRoute from './components/views/CustomMinimal'
 import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
-import { globalSlug, postsSlug, slugPluralLabel, slugSingularLabel } from './shared'
+import {
+  globalSlug,
+  group1Collection1Slug,
+  group1Collection2Slug,
+  group1GlobalSlug,
+  postsSlug,
+  slugPluralLabel,
+  slugSingularLabel,
+} from './shared'
 
 export interface Post {
   createdAt: Date
@@ -211,7 +219,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'group-one-collection-ones',
+      slug: group1Collection1Slug,
       admin: {
         group: 'One',
       },
@@ -223,7 +231,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'group-one-collection-twos',
+      slug: group1Collection2Slug,
       admin: {
         group: 'One',
       },
@@ -288,6 +296,7 @@ export default buildConfigWithDefaults({
       },
       admin: {
         group: 'Group',
+        preview: () => 'https://payloadcms.com',
       },
       versions: {
         drafts: true,
@@ -357,7 +366,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'group-globals-one',
+      slug: group1GlobalSlug,
       label: 'Group Globals 1',
       admin: {
         group: 'Group',
