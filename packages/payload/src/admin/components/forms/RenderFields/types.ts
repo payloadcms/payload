@@ -8,7 +8,7 @@ export type Props = {
   fieldTypes: FieldTypes
   forceRender?: boolean
   margins?: 'small' | false
-  permissions:
+  permissions?:
     | {
         [field: string]: FieldPermissions
       }
@@ -16,11 +16,13 @@ export type Props = {
   readOnly?: boolean
 } & (
   | {
+      // Fields to be filtered by the component
       fieldSchema: FieldWithPath[]
       filter?: (field: Field) => boolean
       indexPath?: string
     }
   | {
+      // Pre-filtered fields to be simply rendered
       fields: ReducedField[]
     }
 )
