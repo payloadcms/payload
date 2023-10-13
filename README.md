@@ -26,7 +26,8 @@
 </h4>
 <hr/>
 
-### 🎉 Payload 2.0 is now available! Read more in the [announcement post](https://payloadcms.com/blog/payload-2-0).
+> [!IMPORTANT]
+> 🎉 <strong>Payload 2.0 is now available!<strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
 
 <h3>Benefits over a regular CMS</h3>
 <ul>

@@ -1,6 +1,8 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { EditViewProps } from '../types'
+
 import { Chevron } from '../..'
 import { requests } from '../../../api'
 import CopyToClipboard from '../../elements/CopyToClipboard'
@@ -11,6 +13,7 @@ import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import './index.scss'
 
 const chars = {
@@ -119,12 +122,19 @@ const RecursivelyRenderObjectData = ({
             }
 
             if (type === 'date' || type === 'string' || type === 'null' || type === 'number') {
+              const parentHasKey = Boolean(parentType === 'object' && key)
+
+              const rowClasses = [
+                `${baseClass}__row-line`,
+                `${baseClass}__value-type--${type}`,
+                `${baseClass}__row-line--${objectKey ? 'nested' : 'top'}`,
+              ]
+                .filter(Boolean)
+                .join(' ')
+
               return (
-                <li
-                  className={`${baseClass}__row-line ${baseClass}__value-type--${type}`}
-                  key={`${key}-${keyIndex}`}
-                >
-                  {parentType === 'object' ? <span>{`"${key}": `}</span> : null}
+                <li className={rowClasses} key={`${key}-${keyIndex}`}>
+                  {parentHasKey ? <span>{`"${key}": `}</span> : null}
 
                   {type === 'string' ? (
                     <span className={`${baseClass}__value`}>{`"${value}"`}</span>
@@ -156,7 +166,8 @@ function createURL(url: string) {
   }
 }
 
-export const API = ({ apiURL }) => {
+export const API: React.FC<EditViewProps> = (props) => {
+  const { apiURL } = props
   const { i18n } = useTranslation()
   const {
     localization,
@@ -201,8 +212,21 @@ export const API = ({ apiURL }) => {
 
   const classes = [baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')
 
+  let isEditing: boolean
+
+  if ('collection' in props) {
+    isEditing = props?.isEditing
+  }
+
   return (
     <Gutter className={classes} right={false}>
+      <SetStepNav
+        collection={collection}
+        global={global}
+        id={id}
+        isEditing={isEditing}
+        view="API"
+      />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>

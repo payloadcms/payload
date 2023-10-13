@@ -9,7 +9,7 @@ import wait from '../../packages/payload/src/utilities/wait'
 import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { collapsibleFieldsSlug } from './collections/Collapsible'
+import { collapsibleFieldsSlug } from './collections/Collapsible/shared'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
 import { pointFieldsSlug } from './collections/Point'
@@ -79,42 +79,43 @@ describe('fields', () => {
       await expect(textCell).toHaveText(String(numberDoc.number))
     })
 
-
     test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
-      await page.goto(url.list);
+      await page.goto(url.list)
 
       // should have 3 entries
-      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3);
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
       // open the filter options
-      await page.locator('.list-controls__toggle-where').click();
-      await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible();
-      await page.locator('.where-builder__add-first-filter').click();
+      await page.locator('.list-controls__toggle-where').click()
+      await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+      await page.locator('.where-builder__add-first-filter').click()
 
-      const initialField = page.locator('.condition__field');
-      const operatorField = page.locator('.condition__operator');
-      const valueField = page.locator('.condition__value >> input');
+      const initialField = page.locator('.condition__field')
+      const operatorField = page.locator('.condition__operator')
+      const valueField = page.locator('.condition__value >> input')
 
       // select Number field to filter on
-      await initialField.click();
-      const initialFieldOptions = initialField.locator('.rs__option');
-      await initialFieldOptions.locator('text=number').first().click();
-      expect(initialField.locator('.rs__single-value')).toContainText('Number');
+      await initialField.click()
+      const initialFieldOptions = initialField.locator('.rs__option')
+      await initialFieldOptions.locator('text=number').first().click()
+      await expect(initialField.locator('.rs__single-value')).toContainText('Number')
 
       // select >= operator
-      await operatorField.click();
-      const operatorOptions = operatorField.locator('.rs__option');
-      await operatorOptions.last().click();
-      expect(operatorField.locator('.rs__single-value')).toContainText('is greater than or equal to');
+      await operatorField.click()
+      const operatorOptions = operatorField.locator('.rs__option')
+      await operatorOptions.last().click()
+      await expect(operatorField.locator('.rs__single-value')).toContainText(
+        'is greater than or equal to',
+      )
 
       // enter value of 3
-      await valueField.fill('3');
-      await expect(valueField).toHaveValue('3');
-      await wait(300);
+      await valueField.fill('3')
+      await expect(valueField).toHaveValue('3')
+      await wait(300)
 
       // should have 2 entries after filtering
-      await expect(page.locator('table >> tbody >> tr')).toHaveCount(2);
-    });
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+    })
 
     test('should create', async () => {
       const input = 5
@@ -504,120 +505,117 @@ describe('fields', () => {
     })
 
     describe('row manipulation', () => {
-      test('should add 2 new rows', async () => {
+      test('should add, remove and duplicate rows', async () => {
+        const assertText0 = 'array row 1'
+        const assertGroupText0 = 'text in group in row 1'
+        const assertText1 = 'array row 2'
+        const assertText3 = 'array row 3'
+        const assertGroupText3 = 'text in group in row 3'
         await page.goto(url.create)
 
+        // Add 3 rows
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
-        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2')
-
-        await saveDocAndAssert(page)
-      })
-
-      test('should remove 2 new rows', async () => {
-        await page.goto(url.create)
-
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
-        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2')
 
-        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
+        // Fill out row 1
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill(assertText0)
         await page
-          .locator('#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__remove')
+          .locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
+          .fill(assertGroupText0)
+        // Fill out row 2
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill(assertText1)
+        // Fill out row 3
+        await page.locator('#field-potentiallyEmptyArray__2__text').fill(assertText3)
+        await page
+          .locator('#field-potentiallyEmptyArray__2__groupInRow__textInGroupInRow')
+          .fill(assertGroupText3)
+
+        // Remove row 1
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
+        await page
+          .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
           .click()
+        // Remove row 2
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
           .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
           .click()
 
-        const rows = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows')
-
-        await expect(rows).toBeHidden()
-      })
-
-      test('should remove existing row', async () => {
-        await page.goto(url.create)
-
-        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
-
+        // Save document
         await saveDocAndAssert(page)
 
+        // Scroll to array row (fields are not rendered in DOM until on screen)
+        await page.locator('#field-potentiallyEmptyArray__0__groupInRow').scrollIntoViewIfNeeded()
+
+        // Expect the remaining row to be the third row
+        const input = page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
+        await expect(input).toHaveValue(assertGroupText3)
+
+        // Duplicate row
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
           .locator(
-            '#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__action.array-actions__remove',
+            '#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__duplicate',
           )
           .click()
 
-        const rows = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows')
+        // Update duplicated row group field text
+        await page
+          .locator('#field-potentiallyEmptyArray__1__groupInRow__textInGroupInRow')
+          .fill(`${assertGroupText3} duplicate`)
 
-        await expect(rows).toBeHidden()
+        // Save document
+        await saveDocAndAssert(page)
+
+        // Expect the second row to be a duplicate of the remaining row
+        await expect(
+          page.locator('#field-potentiallyEmptyArray__1__groupInRow__textInGroupInRow'),
+        ).toHaveValue(`${assertGroupText3} duplicate`)
+
+        // Remove row 1
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
+        await page
+          .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
+          .click()
+
+        // Save document
+        await saveDocAndAssert(page)
+
+        // Expect the remaining row to be the copy of the duplicate row
+        await expect(
+          page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow'),
+        ).toHaveValue(`${assertGroupText3} duplicate`)
       })
 
-      test('should add row after removing existing row', async () => {
-        await page.goto(url.create)
+      describe('react hooks', () => {
+        test('should add 2 new block rows', async () => {
+          await page.goto(url.create)
 
-        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1')
-        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2')
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Add Block 1' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
+          ).toHaveValue('Block 1: Prefilled Title')
 
-        await saveDocAndAssert(page)
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Add Block 2' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
+          ).toHaveValue('Block 2: Prefilled Title')
 
-        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
-        await page
-          .locator(
-            '#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__action.array-actions__remove',
-          )
-          .click()
-        await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
-
-        await page.locator('#field-potentiallyEmptyArray__1__text').fill('updated array row 2')
-
-        await saveDocAndAssert(page)
-
-        const rowsContainer = page.locator(
-          '#field-potentiallyEmptyArray > .array-field__draggable-rows',
-        )
-        const directChildDivCount = await rowsContainer.evaluate((element) => {
-          const childDivCount = element.querySelectorAll(':scope > div')
-          return childDivCount.length
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Replace Block 2' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
+          ).toHaveValue('REPLACED BLOCK')
         })
-
-        expect(directChildDivCount).toBe(2)
-      })
-    })
-
-    describe('row react hooks', () => {
-      test('should add 2 new block rows', async () => {
-        await page.goto(url.create)
-
-        await page
-          .locator('.custom-blocks-field-management')
-          .getByRole('button', { name: 'Add Block 1' })
-          .click()
-        await expect(
-          page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
-        ).toHaveValue('Block 1: Prefilled Title')
-
-        await page
-          .locator('.custom-blocks-field-management')
-          .getByRole('button', { name: 'Add Block 2' })
-          .click()
-        await expect(
-          page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
-        ).toHaveValue('Block 2: Prefilled Title')
-
-        await page
-          .locator('.custom-blocks-field-management')
-          .getByRole('button', { name: 'Replace Block 2' })
-          .click()
-        await expect(
-          page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
-        ).toHaveValue('REPLACED BLOCK')
       })
     })
   })
@@ -675,6 +673,22 @@ describe('fields', () => {
       // Go back to row tab, make sure the new value is still present
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
+    })
+
+    test('should render array data within unnamed tabs', async () => {
+      await page.goto(url.list)
+      await page.locator('.cell-id a').click()
+      await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
+      await expect(page.locator('#field-array__0__text')).toHaveValue("Hello, I'm the first row")
+    })
+
+    test('should render array data within named tabs', async () => {
+      await page.goto(url.list)
+      await page.locator('.cell-id a').click()
+      await page.locator('.tabs-field__tab-button:nth-child(5)').click()
+      await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
+        "Hello, I'm the first row, in a named tab",
+      )
     })
   })
 
@@ -1429,6 +1443,19 @@ describe('fields', () => {
       const idHeadings = page.locator('th#heading-id')
       await expect(idHeadings).toBeVisible()
       await expect(idHeadings).toHaveCount(1)
+    })
+
+    test('should render row fields inline', async () => {
+      await page.goto(url.create)
+      const fieldA = page.locator('input#field-field_with_width_a')
+      await expect(fieldA).toBeVisible()
+      const fieldB = page.locator('input#field-field_with_width_b')
+      await expect(fieldB).toBeVisible()
+      const fieldABox = await fieldA.boundingBox()
+      const fieldBBox = await fieldB.boundingBox()
+      // give it some wiggle room of like 2px to account for differences in rendering
+      const difference = Math.abs(fieldABox.width - fieldBBox.width)
+      expect(difference).toBeLessThanOrEqual(2)
     })
   })
 

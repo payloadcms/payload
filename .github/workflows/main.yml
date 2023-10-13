@@ -170,7 +170,6 @@ jobs:
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
   build-packages:
-    name: Build Packages
     runs-on: ubuntu-latest
     needs: core-build
     strategy:
@@ -206,3 +205,38 @@ jobs:
 
       - name: Build ${{ matrix.pkg }}
         run: pnpm turbo run build --filter=${{ matrix.pkg }}
+
+  plugins:
+    runs-on: ubuntu-latest
+    needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg:
+          - plugin-cloud
+          - create-payload-app
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Build ${{ matrix.pkg }}
+        run: pnpm turbo run build --filter=${{ matrix.pkg }}
+
+      - name: Test ${{ matrix.pkg }}
+        run: pnpm --filter ${{ matrix.pkg }} run test
+        if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions

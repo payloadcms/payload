@@ -8,15 +8,14 @@ export const subscribe = <T>(args: {
 }): ((event: MessageEvent) => void) => {
   const { callback, depth, initialData, serverURL } = args
 
-  if (typeof window !== 'undefined') {
-    const handleMessageCallback = async (event: MessageEvent) => {
-      const mergedData = await handleMessage({ depth, event, initialData, serverURL })
-      callback(mergedData)
-    }
-
-    window.addEventListener('message', handleMessageCallback)
-    window.parent.postMessage('ready', serverURL)
-
-    return handleMessageCallback
+  const onMessage = async (event: MessageEvent) => {
+    const mergedData = await handleMessage({ depth, event, initialData, serverURL })
+    callback(mergedData)
   }
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('message', onMessage)
+  }
+
+  return onMessage
 }

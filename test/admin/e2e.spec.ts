@@ -17,7 +17,13 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { globalSlug, postsSlug, slugPluralLabel } from './shared'
+import {
+  globalSlug,
+  group1Collection1Slug,
+  group1GlobalSlug,
+  postsSlug,
+  slugPluralLabel,
+} from './shared'
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
@@ -149,6 +155,38 @@ describe('admin', () => {
     })
   })
 
+  describe('ui', () => {
+    test('collection - should render preview button when `admin.preview` is set', async () => {
+      const collectionWithPreview = new AdminUrlUtil(serverURL, postsSlug)
+      await page.goto(collectionWithPreview.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.btn.preview-btn')).toBeVisible()
+    })
+
+    test('collection - should not render preview button when `admin.preview` is not set', async () => {
+      const collectionWithoutPreview = new AdminUrlUtil(serverURL, group1Collection1Slug)
+      await page.goto(collectionWithoutPreview.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.btn.preview-btn')).toBeHidden()
+    })
+
+    test('global - should render preview button when `admin.preview` is set', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(globalWithPreview.global(globalSlug))
+      await expect(page.locator('.btn.preview-btn')).toBeVisible()
+    })
+
+    test('global - should not render preview button when `admin.preview` is not set', async () => {
+      const globalWithoutPreview = new AdminUrlUtil(serverURL, group1GlobalSlug)
+      await page.goto(globalWithoutPreview.global(group1GlobalSlug))
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.btn.preview-btn')).toBeHidden()
+    })
+  })
+
   describe('doc titles', () => {
     test('collection - should render fallback titles when creating new', async () => {
       await page.goto(url.create)
@@ -167,14 +205,15 @@ describe('admin', () => {
     })
 
     test('collection - should render `id` as `useAsTitle` fallback', async () => {
-      await page.goto(url.create)
+      const { id } = await createPost()
+      await page.goto(url.edit(id))
       await page.locator('#field-title').fill(title)
       await expect(page.locator('.doc-header__title.render-title')).toContainText(title)
       await saveDocAndAssert(page)
       await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
       await page.locator('#field-title').fill('')
       await expect(page.locator('.doc-header__title.render-title')).toContainText('ID: ')
-      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText('[Untitled]')
+      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(id)
       await saveDocAndAssert(page)
     })
 

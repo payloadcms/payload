@@ -168,6 +168,7 @@ export function useBasicTypeaheadTriggerMatch(
 
 export type TypeaheadMenuPluginProps = {
   anchorClassName?: string
+  anchorElem: HTMLElement
   groupsWithOptions: Array<SlashMenuGroup>
   menuRenderFn: MenuRenderFn
   onClose?: () => void
@@ -188,6 +189,7 @@ export const ENABLE_SLASH_MENU_COMMAND: LexicalCommand<{
 
 export function LexicalTypeaheadMenuPlugin({
   anchorClassName,
+  anchorElem,
   groupsWithOptions,
   menuRenderFn,
   onClose,
@@ -198,7 +200,7 @@ export function LexicalTypeaheadMenuPlugin({
 }: TypeaheadMenuPluginProps): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
   const [resolution, setResolution] = useState<MenuResolution | null>(null)
-  const anchorElementRef = useMenuAnchorRef(resolution, setResolution, anchorClassName)
+  const anchorElementRef = useMenuAnchorRef(anchorElem, resolution, setResolution, anchorClassName)
 
   const closeTypeahead = useCallback(() => {
     setResolution(null)

@@ -9,15 +9,18 @@ import { getTranslation } from '../../../../../utilities/getTranslation'
 import useTitle from '../../../../hooks/useTitle'
 import { useStepNav } from '../../../elements/StepNav'
 import { useConfig } from '../../../utilities/Config'
+import { useEditDepth } from '../../../utilities/EditDepth'
 
 export const SetStepNav: React.FC<
   | {
       collection: SanitizedCollectionConfig
-      id: string
+      id: number | string
       isEditing: boolean
+      view?: string
     }
   | {
       global: SanitizedGlobalConfig
+      view?: string
     }
 > = (props) => {
   let collection: SanitizedCollectionConfig | undefined
@@ -27,7 +30,8 @@ export const SetStepNav: React.FC<
   let pluralLabel: SanitizedCollectionConfig['labels']['plural']
   let slug: string
   let isEditing = false
-  let id: string | undefined
+  let id: number | string | undefined
+  const view: string | undefined = props?.view || undefined
 
   if ('collection' in props) {
     const {
@@ -35,18 +39,23 @@ export const SetStepNav: React.FC<
       collection: collectionFromProps,
       isEditing: isEditingFromProps,
     } = props
-    collection = collectionFromProps
-    useAsTitle = collection.admin.useAsTitle
-    pluralLabel = collection.labels.plural
-    slug = collection.slug
-    isEditing = isEditingFromProps
-    id = idFromProps
+
+    if (collectionFromProps) {
+      collection = collectionFromProps
+      useAsTitle = collection.admin.useAsTitle
+      pluralLabel = collection.labels.plural
+      slug = collection.slug
+      isEditing = isEditingFromProps
+      id = idFromProps
+    }
   }
 
   if ('global' in props) {
     const { global: globalFromProps } = props
-    global = globalFromProps
-    slug = globalFromProps?.slug
+    if (globalFromProps) {
+      global = globalFromProps
+      slug = globalFromProps?.slug
+    }
   }
 
   const title = useTitle({ collection, global })
@@ -59,6 +68,8 @@ export const SetStepNav: React.FC<
     routes: { admin },
   } = useConfig()
 
+  const drawerDepth = useEditDepth()
+
   useEffect(() => {
     const nav: StepNavItem[] = []
 
@@ -70,7 +81,8 @@ export const SetStepNav: React.FC<
 
       if (isEditing) {
         nav.push({
-          label: useAsTitle && useAsTitle !== 'id' ? title || `[${t('untitled')}]` : id,
+          label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
+          url: `${admin}/collections/${slug}/${id}`,
         })
       } else {
         nav.push({
@@ -84,7 +96,13 @@ export const SetStepNav: React.FC<
       })
     }
 
-    setStepNav(nav)
+    if (view) {
+      nav.push({
+        label: view,
+      })
+    }
+
+    if (drawerDepth <= 1) setStepNav(nav)
   }, [
     setStepNav,
     isEditing,
@@ -98,6 +116,8 @@ export const SetStepNav: React.FC<
     title,
     global,
     collection,
+    view,
+    drawerDepth,
   ])
 
   return null

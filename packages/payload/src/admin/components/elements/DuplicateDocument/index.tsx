@@ -51,6 +51,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
           },
           params: {
             depth: 0,
+            draft: true,
             locale,
           },
         })

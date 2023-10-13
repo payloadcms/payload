@@ -23,7 +23,9 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
     entry: {
       ...baseConfig.entry,
       main: [
-        `webpack-hot-middleware/client?path=${payloadConfig.routes.admin}/__webpack_hmr`,
+        `${require.resolve('webpack-hot-middleware/client')}?path=${
+          payloadConfig.routes.admin
+        }/__webpack_hmr`,
         ...(baseConfig.entry.main as string[]),
       ],
     },

@@ -110,6 +110,19 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     })
 
     // /////////////////////////////////////
+    // Delete versions
+    // /////////////////////////////////////
+
+    if (collectionConfig.versions) {
+      await deleteCollectionVersions({
+        id,
+        payload,
+        req,
+        slug: collectionConfig.slug,
+      })
+    }
+
+    // /////////////////////////////////////
     // Delete document
     // /////////////////////////////////////
 
@@ -129,19 +142,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       payload,
       req,
     })
-
-    // /////////////////////////////////////
-    // Delete versions
-    // /////////////////////////////////////
-
-    if (collectionConfig.versions) {
-      await deleteCollectionVersions({
-        id,
-        payload,
-        req,
-        slug: collectionConfig.slug,
-      })
-    }
 
     // /////////////////////////////////////
     // afterRead - Fields

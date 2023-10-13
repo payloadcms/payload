@@ -1,5 +1,5 @@
 import type { LexicalCommand } from 'lexical'
-import type { Fields } from 'payload/types'
+import type { Data, Fields } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -14,7 +14,6 @@ import {
   createCommand,
 } from 'lexical'
 import { formatDrawerSlug } from 'payload/components/elements'
-import { reduceFieldsToValues } from 'payload/components/forms'
 import {
   buildStateFromSchema,
   useAuth,
@@ -317,17 +316,14 @@ export function LinkEditor({
       <LinkDrawer
         drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
-        handleModalSubmit={(fields: Fields) => {
+        handleModalSubmit={(fields: Fields, data: Data) => {
           closeModal(drawerSlug)
-
-          const data = reduceFieldsToValues(fields, true)
 
           if (data?.fields?.doc?.value) {
             data.fields.doc.value = {
               id: data.fields.doc.value,
             }
           }
-
           const newLinkPayload: LinkPayload = data as LinkPayload
 
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)

@@ -329,43 +329,45 @@ const RichText: React.FC<FieldProps> = (props) => {
           value={valueToRender as any[]}
         >
           <div className={`${baseClass}__wrapper`}>
-            <div
-              className={[`${baseClass}__toolbar`, drawerIsOpen && `${baseClass}__drawerIsOpen`]
-                .filter(Boolean)
-                .join(' ')}
-              ref={toolbarRef}
-            >
-              <div className={`${baseClass}__toolbar-wrap`}>
-                {elements.map((element, i) => {
-                  let elementName: string
-                  if (typeof element === 'object' && element?.name) elementName = element.name
-                  if (typeof element === 'string') elementName = element
+            {elements?.length + leaves?.length > 0 && (
+              <div
+                className={[`${baseClass}__toolbar`, drawerIsOpen && `${baseClass}__drawerIsOpen`]
+                  .filter(Boolean)
+                  .join(' ')}
+                ref={toolbarRef}
+              >
+                <div className={`${baseClass}__toolbar-wrap`}>
+                  {elements.map((element, i) => {
+                    let elementName: string
+                    if (typeof element === 'object' && element?.name) elementName = element.name
+                    if (typeof element === 'string') elementName = element
 
-                  const elementType = enabledElements[elementName]
-                  const Button = elementType?.Button
+                    const elementType = enabledElements[elementName]
+                    const Button = elementType?.Button
 
-                  if (Button) {
-                    return <Button fieldProps={props} key={i} path={path} />
-                  }
+                    if (Button) {
+                      return <Button fieldProps={props} key={i} path={path} />
+                    }
 
-                  return null
-                })}
-                {leaves.map((leaf, i) => {
-                  let leafName: string
-                  if (typeof leaf === 'object' && leaf?.name) leafName = leaf.name
-                  if (typeof leaf === 'string') leafName = leaf
+                    return null
+                  })}
+                  {leaves.map((leaf, i) => {
+                    let leafName: string
+                    if (typeof leaf === 'object' && leaf?.name) leafName = leaf.name
+                    if (typeof leaf === 'string') leafName = leaf
 
-                  const leafType = enabledLeaves[leafName]
-                  const Button = leafType?.Button
+                    const leafType = enabledLeaves[leafName]
+                    const Button = leafType?.Button
 
-                  if (Button) {
-                    return <Button fieldProps={props} key={i} path={path} />
-                  }
+                    if (Button) {
+                      return <Button fieldProps={props} key={i} path={path} />
+                    }
 
-                  return null
-                })}
+                    return null
+                  })}
+                </div>
               </div>
-            </div>
+            )}
             <div className={`${baseClass}__editor`} ref={editorRef}>
               <Editable
                 className={`${baseClass}__input`}

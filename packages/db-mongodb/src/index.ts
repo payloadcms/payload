@@ -68,7 +68,9 @@ export type MongooseAdapter = BaseDatabaseAdapter &
 type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
 
 declare module 'payload' {
-  export interface DatabaseAdapter extends Args {
+  export interface DatabaseAdapter
+    extends Omit<BaseDatabaseAdapter, 'sessions'>,
+      Omit<Args, 'migrationDir'> {
     collections: {
       [slug: string]: CollectionModel
     }

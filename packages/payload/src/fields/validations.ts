@@ -211,7 +211,7 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required, t
   return true
 }
 
-export const richText: Validate<unknown, unknown, RichTextField, RichTextField> = async (
+export const richText: Validate<object, unknown, RichTextField, RichTextField> = async (
   value,
   options,
 ) => {

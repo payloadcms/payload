@@ -15,6 +15,8 @@ html[data-theme='light'] {
   font-family: var(--font-body);
   max-height: 300px;
   overflow-y: scroll;
+  z-index: 10;
+  position: absolute;
 
   .group {
     padding-bottom: 8px;

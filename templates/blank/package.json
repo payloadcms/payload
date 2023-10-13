@@ -15,14 +15,14 @@
     "generate:graphQLSchema": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:graphQLSchema"
   },
   "dependencies": {
-    "@payloadcms/bundler-webpack": "latest",
-    "@payloadcms/db-mongodb": "latest",
-    "@payloadcms/plugin-cloud": "^0.0.10",
-    "@payloadcms/richtext-slate": "latest",
+    "@payloadcms/bundler-webpack": "^1.0.0",
+    "@payloadcms/db-mongodb": "^1.0.0",
+    "@payloadcms/plugin-cloud": "^2.0.0",
+    "@payloadcms/richtext-slate": "^1.0.0",
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "latest"
+    "payload": "^2.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",

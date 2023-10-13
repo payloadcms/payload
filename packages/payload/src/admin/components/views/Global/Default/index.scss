@@ -49,8 +49,9 @@
 
   &__sidebar-wrap {
     position: sticky;
-    top: 0;
-    flex-grow: 1;
+    top: var(--doc-controls-height);
+    width: 33.33%;
+    height: 100%;
   }
 
   &__sidebar {

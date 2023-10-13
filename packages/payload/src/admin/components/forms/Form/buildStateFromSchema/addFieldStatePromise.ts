@@ -61,6 +61,7 @@ export const addFieldStatePromise = async ({
       user,
       value: data?.[field.name],
     })
+
     if (data?.[field.name]) {
       data[field.name] = valueWithDefault
     }
@@ -145,8 +146,8 @@ export const addFieldStatePromise = async ({
           fieldState.value = null
           fieldState.initialValue = null
         } else {
-          fieldState.value = arrayValue
-          fieldState.initialValue = arrayValue
+          fieldState.value = arrayValue.length
+          fieldState.initialValue = arrayValue.length
 
           if (arrayValue.length > 0) {
             fieldState.disableFormData = true
@@ -236,8 +237,8 @@ export const addFieldStatePromise = async ({
           fieldState.value = null
           fieldState.initialValue = null
         } else {
-          fieldState.value = blocksValue
-          fieldState.initialValue = blocksValue
+          fieldState.value = blocksValue.length
+          fieldState.initialValue = blocksValue.length
 
           if (blocksValue.length > 0) {
             fieldState.disableFormData = true

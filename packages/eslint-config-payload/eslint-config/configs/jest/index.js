@@ -3,6 +3,6 @@ module.exports = {
     jest: true,
   },
   plugins: ['jest', 'jest-dom'],
-  extends: ['./rules/jest.cjs', './rules/jest-dom.cjs'].map(require.resolve),
+  extends: ['./rules/jest.js', './rules/jest-dom.js'].map(require.resolve),
   rules: {},
 }

@@ -4,6 +4,12 @@
   display: flex;
   isolation: isolate;
 
+  .errorBoundary {
+    pre {
+      text-wrap: unset;
+    }
+  }
+
   &__wrap {
     width: 100%;
     position: relative;

@@ -90,9 +90,8 @@ export const DefaultGlobalEdit: React.FC<GlobalEditViewProps> = (props) => {
               <div className={`${baseClass}__sidebar-sticky-wrap`}>
                 <div className={`${baseClass}__sidebar-fields`}>
                   <RenderFields
-                    fieldSchema={fields}
                     fieldTypes={fieldTypes}
-                    filter={(field) => field.admin.position === 'sidebar'}
+                    fields={sidebarFields}
                     permissions={permissions.fields}
                     readOnly={!hasSavePermission}
                   />

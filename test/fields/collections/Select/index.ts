@@ -122,12 +122,30 @@ const SelectFields: CollectionConfig = {
       type: 'select',
       options: ['One', 'Two', 'Three'],
     },
+    {
+      type: 'group',
+      name: 'settings',
+      fields: [
+        {
+          name: 'category',
+          type: 'select',
+          hasMany: true,
+          options: [
+            { value: 'a', label: 'A' },
+            { value: 'b', label: 'B' },
+          ],
+        },
+      ],
+    },
   ],
 }
 
 export const selectsDoc = {
   select: 'one',
   selectHasMany: ['two', 'four'],
+  settings: {
+    category: ['a'],
+  },
 }
 
 export default SelectFields

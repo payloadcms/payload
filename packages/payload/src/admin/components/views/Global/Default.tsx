@@ -8,6 +8,7 @@ import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
 import { OperationContext } from '../../utilities/OperationProvider'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { GlobalRoutes } from './Routes'
 import { CustomGlobalComponent } from './Routes/CustomComponent'
 import './index.scss'
@@ -40,6 +41,7 @@ const DefaultGlobalView: React.FC<
   return (
     <main className={baseClass}>
       <OperationContext.Provider value="update">
+        <SetStepNav global={global} />
         <Form
           action={action}
           className={`${baseClass}__form`}

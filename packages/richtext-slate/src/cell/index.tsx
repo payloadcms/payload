@@ -4,7 +4,7 @@ import React from 'react'
 
 import type { AdapterArguments } from '../types'
 
-const RichTextCell: React.FC<CellComponentProps<RichTextField<AdapterArguments>, any>> = ({
+const RichTextCell: React.FC<CellComponentProps<RichTextField<any[], AdapterArguments>, any>> = ({
   data,
 }) => {
   const flattenedText = data?.map((i) => i?.children?.map((c) => c.text)).join(' ')

@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
+import { and, ilike, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
@@ -147,6 +147,7 @@ export async function parseParams({
                 const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
                   field,
                   operator,
+                  relationOrPath,
                   val,
                 })
 
@@ -157,6 +158,17 @@ export async function parseParams({
                       /* eslint-disable @typescript-eslint/no-explicit-any */
                       ne<any>(rawColumn || table[columnName], queryValue),
                     ),
+                  )
+                } else if (
+                  (field.type === 'relationship' || field.type === 'upload') &&
+                  Array.isArray(queryValue) &&
+                  operator === 'not_in'
+                ) {
+                  constraints.push(
+                    sql`${notInArray(table[columnName], queryValue)} OR
+                    ${table[columnName]}
+                    IS
+                    NULL`,
                   )
                 } else {
                   constraints.push(
