@@ -23,9 +23,9 @@
   }
 
   &__inputWrap {
+    display: flex;
+    flex-direction: column;
+    gap: base(1);
     margin-bottom: base(0.25);
-    & > *:first-child {
-      margin-bottom: base(1);
-    }
   }
 }

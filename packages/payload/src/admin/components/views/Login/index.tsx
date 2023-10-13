@@ -44,6 +44,8 @@ const Login: React.FC = () => {
     }
   }
 
+  const prefillForm = autoLogin && autoLogin.prefillOnly
+
   return (
     <React.Fragment>
       {user ? (
@@ -76,11 +78,12 @@ const Login: React.FC = () => {
               className={`${baseClass}__form`}
               disableSuccessStatus
               initialData={
-                autoLogin &&
-                autoLogin.prefillOnly && {
-                  email: autoLogin.email,
-                  password: autoLogin.password,
-                }
+                prefillForm
+                  ? {
+                      email: autoLogin.email,
+                      password: autoLogin.password,
+                    }
+                  : undefined
               }
               method="post"
               onSuccess={onSuccess}
