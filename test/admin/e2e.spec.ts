@@ -330,10 +330,12 @@ describe('admin', () => {
       await page.locator('input#select-all').check()
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
-      const options = page.locator('.rs__option')
-      const titleOption = options.locator('text=Title')
 
-      await expect(titleOption).toHaveText('Title')
+      const titleOption = page.locator('.rs__option', {
+        hasText: exactText('Title'),
+      })
+
+      await expect(titleOption).toBeVisible()
 
       await titleOption.click()
       const titleInput = page.locator('#field-title')
