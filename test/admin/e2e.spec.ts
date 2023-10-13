@@ -175,8 +175,6 @@ describe('admin', () => {
     test('global - should render preview button when `admin.preview` is set', async () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(globalWithPreview.global(globalSlug))
-      await page.locator('#field-title').fill(title)
-      await saveDocAndAssert(page)
       await expect(page.locator('.btn.preview-btn')).toBeVisible()
     })
 
