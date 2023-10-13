@@ -2,7 +2,12 @@ import type React from 'react'
 import type { Dispatch } from 'react'
 
 import type { User } from '../../../../auth/types'
-import type { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types'
+import type {
+  Condition,
+  Field,
+  Field as FieldConfig,
+  Validate,
+} from '../../../../fields/config/types'
 
 export type Row = {
   blockType?: string
@@ -41,6 +46,12 @@ export type Props = {
   className?: string
   disableSuccessStatus?: boolean
   disabled?: boolean
+  /**
+   * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
+   * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks
+   * feature of the Lexical Rich Text field)
+   */
+  fields?: Field[]
   handleResponse?: (res: Response) => void
   initialData?: Data
   initialState?: Fields

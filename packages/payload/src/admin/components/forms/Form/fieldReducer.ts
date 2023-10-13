@@ -8,6 +8,9 @@ import getSiblingData from './getSiblingData'
 import reduceFieldsToValues from './reduceFieldsToValues'
 import { flattenRows, separateRows } from './rows'
 
+/**
+ * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.
+ */
 export function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {
     case 'REPLACE_STATE': {
