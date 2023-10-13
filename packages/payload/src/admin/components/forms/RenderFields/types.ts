@@ -6,8 +6,8 @@ import type { ReducedField } from './filterFields'
 export type Props = {
   className?: string
   fieldTypes: FieldTypes
-  margins?: 'small' | false
   forceRender?: boolean
+  margins?: 'small' | false
 } & (
   | {
       fieldSchema: FieldWithPath[]

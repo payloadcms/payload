@@ -24,6 +24,11 @@ type Props = {
   nodeKey: string
 }
 
+/**
+ * The actual content of the Block. This should be INSIDE a Form component,
+ * scoped to the block. All format operations in here are thus scoped to the block's form, and
+ * not the whole document.
+ */
 export const BlockContent: React.FC<Props> = (props) => {
   const { baseClass, block, field, fields, nodeKey } = props
   const { i18n } = useTranslation()

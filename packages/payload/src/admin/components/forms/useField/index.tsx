@@ -118,7 +118,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
         let valueToValidate = value
 
-        if (Array.isArray(field.rows)) {
+        if (field?.rows && Array.isArray(field.rows)) {
           valueToValidate = getDataByPath(path)
         }
 
@@ -138,7 +138,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
         }
       }
 
-      validateField()
+      void validateField()
     },
     150,
     [

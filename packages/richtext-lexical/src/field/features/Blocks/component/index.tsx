@@ -1,14 +1,20 @@
 import { type ElementFormatType } from 'lexical'
 import { Form, buildInitialState, useFormSubmitted } from 'payload/components/forms'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode'
 const baseClass = 'lexical-block'
 
 import type { Data } from 'payload/types'
 
-import { useConfig } from 'payload/components/utilities'
+import {
+  buildStateFromSchema,
+  useConfig,
+  useDocumentInfo,
+  useLocale,
+} from 'payload/components/utilities'
 import { sanitizeFields } from 'payload/config'
+import { useTranslation } from 'react-i18next'
 
 import type { BlocksFeatureProps } from '..'
 
@@ -43,13 +49,49 @@ export const BlockComponent: React.FC<Props> = (props) => {
     validRelationships,
   })
 
-  const initialDataRef = React.useRef<Data>(buildInitialState(fields.data || {})) // Store initial value in a ref, so it doesn't change on re-render and only gets initialized once
+  const initialStateRef = React.useRef<Data>(buildInitialState(fields.data || {})) // Store initial value in a ref, so it doesn't change on re-render and only gets initialized once
+
+  const config = useConfig()
+  const { t } = useTranslation('general')
+  const { code: locale } = useLocale()
+  const { getDocPreferences } = useDocumentInfo()
+
+  // initialState State
+
+  const [initialState, setInitialState] = React.useState<Data>(null)
+
+  useEffect(() => {
+    async function buildInitialState() {
+      const preferences = await getDocPreferences()
+
+      const stateFromSchema = await buildStateFromSchema({
+        config,
+        data: fields.data,
+        fieldSchema: block.fields,
+        locale,
+        operation: 'update',
+        preferences,
+        t,
+      })
+
+      // We have to merge the output of buildInitialState (above this useEffect) with the output of buildStateFromSchema.
+      // That's because the output of buildInitialState provides important properties necessary for THIS block,
+      // like blockName, blockType and id, while buildStateFromSchema provides the correct output of this block's data,
+      // e.g. if this block has a sub-block (like the `rows` property)
+      setInitialState({
+        ...initialStateRef?.current,
+        ...stateFromSchema,
+      })
+    }
+    void buildInitialState()
+  }, [setInitialState, config, block, locale, getDocPreferences, t]) // do not add fields here, it causes an endless loop
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
     return (
-      block && (
-        <Form initialState={initialDataRef?.current} submitted={submitted}>
+      block &&
+      initialState && (
+        <Form fields={block.fields} initialState={initialState} submitted={submitted}>
           <BlockContent
             baseClass={baseClass}
             block={block}
@@ -60,7 +102,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         </Form>
       )
     )
-  }, [block, field, nodeKey, submitted])
+  }, [block, field, nodeKey, submitted, initialState])
 
   return <div className={baseClass}>{formContent}</div>
 }

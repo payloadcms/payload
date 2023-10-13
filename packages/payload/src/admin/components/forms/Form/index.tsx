@@ -50,12 +50,15 @@ import reduceFieldsToValues from './reduceFieldsToValues'
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
+  const { id, collection, getDocPreferences, global } = useDocumentInfo() // TODO: Remove and then this? See other todo. Or at least collection and maybe global.
+
   const {
     action,
     children,
     className,
     disableSuccessStatus,
     disabled,
+    fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialData, // values only, paths are required as key - form should build initial state as convenience
     initialState, // fully formed initial field state
@@ -71,7 +74,6 @@ const Form: React.FC<Props> = (props) => {
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation('general')
   const { refreshCookie, user } = useAuth()
-  const { id, collection, getDocPreferences, global } = useDocumentInfo()
   const operation = useOperation()
 
   const config = useConfig()
@@ -90,6 +92,10 @@ const Form: React.FC<Props> = (props) => {
   if (initialState) initialFieldState = initialState
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialFieldState)
+  /**
+   * `fields` is the current, up-to-date state/data of all fields in the form. It can be modified by using dispatchFields,
+   * which calls the fieldReducer, which then updates the state.
+   */
   const [fields, dispatchFields] = fieldsReducer
 
   contextRef.current.fields = fields
@@ -169,7 +175,7 @@ const Form: React.FC<Props> = (props) => {
           if (typeof field.validate === 'function') {
             let valueToValidate = field.value
 
-            if (Array.isArray(field.rows)) {
+            if (field?.rows && Array.isArray(field.rows)) {
               valueToValidate = contextRef.current.getDataByPath(path)
             }
 
@@ -440,7 +446,7 @@ const Form: React.FC<Props> = (props) => {
   const getRowSchemaByPath = React.useCallback(
     ({ blockType, path }: { blockType?: string; path: string }) => {
       const rowConfig = traverseRowConfigs({
-        fieldConfig: collection?.fields || global?.fields,
+        fieldConfig: fieldsFromProps,
         path,
       })
       const rowFieldConfigs = buildFieldSchemaMap(rowConfig)
@@ -448,10 +454,11 @@ const Form: React.FC<Props> = (props) => {
       const fieldKey = pathSegments.at(-1)
       return rowFieldConfigs.get(blockType ? `${fieldKey}.${blockType}` : fieldKey)
     },
-    [traverseRowConfigs, collection?.fields, global?.fields],
+    [traverseRowConfigs, fieldsFromProps],
   )
 
-  // Array/Block row manipulation
+  // Array/Block row manipulation. This is called when, for example, you add a new block to a blocks field.
+  // The block data is saved in the rows property of the state, which is modified updated here.
   const addFieldRow: Context['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
       const preferences = await getDocPreferences()
