@@ -115,7 +115,14 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-sticky-wrap`}>
                 <div className={`${baseClass}__sidebar-fields`}>
-                  <RenderFields fieldTypes={fieldTypes} fields={sidebarFields} />
+                  <RenderFields
+                    className={`${baseClass}__fields`}
+                    fieldSchema={fields}
+                    fieldTypes={fieldTypes}
+                    filter={(field) => field?.admin?.position === 'sidebar'}
+                    permissions={permissions.fields}
+                    readOnly={!hasSavePermission}
+                  />
                 </div>
               </div>
             </div>
