@@ -10,7 +10,9 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src",
-    "lint:fix": "eslint --fix --ext .ts,.tsx src"
+    "lint:fix": "eslint --fix --ext .ts,.tsx src",
+    "clean": "rimraf dist",
+    "prepublishOnly": "yarn clean && yarn build"
   },
   "keywords": [
     "payload",
@@ -26,7 +28,7 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^1.1.8"
+    "payload": "^1.1.8 || ^2.0.0"
   },
   "dependencies": {
     "@types/uuid": "^9.0.0",
