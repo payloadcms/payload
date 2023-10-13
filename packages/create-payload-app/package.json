@@ -1,0 +1,47 @@
+{
+  "name": "create-payload-app",
+  "version": "0.5.2",
+  "license": "MIT",
+  "bin": {
+    "create-payload-app": "bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && pnpm copyfiles",
+    "copyfiles": "copyfiles -u 1 \"src/templates/**\" \"src/lib/common-files/**\" dist",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "lint-staged": "lint-staged --quiet",
+    "test": "jest",
+    "prepublishOnly": "pnpm test && pnpm clean && pnpm build"
+  },
+  "files": [
+    "package.json",
+    "dist",
+    "bin"
+  ],
+  "dependencies": {
+    "@sindresorhus/slugify": "^1.1.0",
+    "arg": "^5.0.0",
+    "chalk": "^4.1.0",
+    "command-exists": "^1.2.9",
+    "degit": "^2.8.4",
+    "execa": "^5.0.0",
+    "figures": "^3.2.0",
+    "fs-extra": "^9.0.1",
+    "handlebars": "^4.7.7",
+    "ora": "^5.1.0",
+    "prompts": "^2.4.2",
+    "terminal-link": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/command-exists": "^1.2.0",
+    "@types/degit": "^2.8.3",
+    "@types/fs-extra": "^9.0.12",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^16.6.2",
+    "@types/prompts": "^2.4.1",
+    "ts-jest": "^29.1.0"
+  }
+}
