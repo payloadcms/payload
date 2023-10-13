@@ -50,7 +50,7 @@ import reduceFieldsToValues from './reduceFieldsToValues'
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
-  const { id, collection, getDocPreferences, global } = useDocumentInfo() // TODO: Remove and then this? See other todo. Or at least collection and maybe global.
+  const { id, collection, getDocPreferences, global } = useDocumentInfo()
 
   const {
     action,
