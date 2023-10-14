@@ -1,8 +1,8 @@
 import { Drawer } from 'payload/components/elements'
 import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
+import { fieldTypes } from 'payload/components/forms'
 import { useHotkey } from 'payload/components/hooks'
 import { useEditDepth } from 'payload/components/utilities'
-import { fieldTypes } from 'payload/config'
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
