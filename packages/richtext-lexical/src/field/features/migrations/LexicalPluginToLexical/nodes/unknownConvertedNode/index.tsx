@@ -60,7 +60,7 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
   decorate(): JSX.Element | null {
     return (
       <div>
-        Unknown converted Slate node: <strong>{this.__data?.nodeType}</strong>
+        Unknown converted payload-plugin-lexical node: <strong>{this.__data?.nodeType}</strong>
       </div>
     )
   }
