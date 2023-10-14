@@ -34,9 +34,6 @@
     "@types/to-snake-case": "1.0.0",
     "payload": "workspace:*"
   },
-  "peerDependencies": {
-    "better-sqlite3": "^8.5.0"
-  },
   "publishConfig": {
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
