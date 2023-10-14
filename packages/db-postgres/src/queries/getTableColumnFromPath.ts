@@ -34,6 +34,7 @@ type Args = {
   aliasTable?: GenericTable
   collectionPath: string
   columnPrefix?: string
+  constraintPath?: string
   constraints?: Constraint[]
   fields: (Field | TabAsField)[]
   joinAliases: BuildQueryJoinAliases
@@ -54,6 +55,7 @@ export const getTableColumnFromPath = ({
   aliasTable,
   collectionPath,
   columnPrefix = '',
+  constraintPath: incomingConstraintPath,
   constraints = [],
   fields,
   joinAliases,
@@ -67,6 +69,7 @@ export const getTableColumnFromPath = ({
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
   const rootTableName = incomingRootTableName || tableName
+  let constraintPath = incomingConstraintPath || ''
 
   const field = flattenTopLevelFields(fields as Field[]).find(
     (fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath,
@@ -109,6 +112,7 @@ export const getTableColumnFromPath = ({
           aliasTable,
           collectionPath,
           columnPrefix,
+          constraintPath,
           constraints,
           fields: field.tabs.map((tab) => ({
             ...tab,
@@ -130,6 +134,7 @@ export const getTableColumnFromPath = ({
             aliasTable,
             collectionPath,
             columnPrefix: `${columnPrefix}${field.name}_`,
+            constraintPath,
             constraints,
             fields: field.fields,
             joinAliases,
@@ -146,6 +151,7 @@ export const getTableColumnFromPath = ({
           aliasTable,
           collectionPath,
           columnPrefix,
+          constraintPath,
           constraints,
           fields: field.fields,
           joinAliases,
@@ -179,6 +185,7 @@ export const getTableColumnFromPath = ({
           aliasTable,
           collectionPath,
           columnPrefix: `${columnPrefix}${field.name}_`,
+          constraintPath,
           constraints,
           fields: field.fields,
           joinAliases,
@@ -193,6 +200,7 @@ export const getTableColumnFromPath = ({
 
       case 'array': {
         newTableName = `${tableName}_${toSnakeCase(field.name)}`
+        constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
             eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
@@ -214,6 +222,7 @@ export const getTableColumnFromPath = ({
         return getTableColumnFromPath({
           adapter,
           collectionPath,
+          constraintPath,
           constraints,
           fields: field.fields,
           joinAliases,
@@ -238,6 +247,7 @@ export const getTableColumnFromPath = ({
             result = getTableColumnFromPath({
               adapter,
               collectionPath,
+              constraintPath: '',
               constraints: blockConstraints,
               fields: block.fields,
               joinAliases,
@@ -295,7 +305,7 @@ export const getTableColumnFromPath = ({
         let relationshipFields
         const relationTableName = `${rootTableName}_rels`
         const newCollectionPath = pathSegments.slice(1).join('.')
-
+        // missing FROM-clause entry for table "relationship_fields_array"
         const aliasRelationshipTableName = uuid()
         const aliasRelationshipTable = alias(
           adapter.tables[relationTableName],
@@ -305,7 +315,7 @@ export const getTableColumnFromPath = ({
         // Join in the relationships table
         joinAliases.push({
           condition: eq(
-            (aliasTable || adapter.tables[tableName]).id,
+            (aliasTable || adapter.tables[rootTableName]).id,
             aliasRelationshipTable.parent,
           ),
           table: aliasRelationshipTable,
@@ -316,7 +326,7 @@ export const getTableColumnFromPath = ({
         constraints.push({
           columnName: 'path',
           table: aliasRelationshipTable,
-          value: field.name,
+          value: `${constraintPath}${field.name}`,
         })
 
         let newAliasTable
