@@ -89,9 +89,16 @@ const RichText: React.FC<FieldProps> = (props) => {
             fieldProps={props}
             initialState={initialValue}
             onChange={(editorState, editor, tags) => {
-              const json = editorState.toJSON()
+              let serializedEditorState = editorState.toJSON()
 
-              setValue(json)
+              // Transform state through save hooks
+              if (editorConfig?.features?.hooks?.save?.length) {
+                editorConfig.features.hooks.save.forEach((hook) => {
+                  serializedEditorState = hook({ incomingEditorState: serializedEditorState })
+                })
+              }
+
+              setValue(serializedEditorState)
             }}
             readOnly={readOnly}
             setValue={setValue}

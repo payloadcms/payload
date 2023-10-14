@@ -54,7 +54,8 @@ export const blockAfterReadPromiseHOC = (
       promises,
       req,
       showHiddenFields,
-      siblingDoc,
+      // The afterReadPromise gets its data from looking for field.name inside of the siblingDoc. Thus, here we cannot pass the whole document's siblingDoc, but only the siblingDoc (sibling fields) of the current field.
+      siblingDoc: blockFieldData,
     })
 
     return promises

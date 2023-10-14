@@ -6,11 +6,12 @@
 
 // drizzle-kit@utils
 
-import { generateDrizzleJson, generateMigration, pushSchema } from 'drizzle-kit/utils'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 
 async function generateUsage() {
+  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/utils')
+
   // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
   const schema = await import('./data/users')
   // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
@@ -25,6 +26,8 @@ async function generateUsage() {
 }
 
 async function pushUsage() {
+  const { pushSchema } = require('drizzle-kit/utils')
+
   // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
   const schemaAfter = await import('./data/users-after')
 

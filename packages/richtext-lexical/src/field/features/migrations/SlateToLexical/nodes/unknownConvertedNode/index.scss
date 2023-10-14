@@ -1,0 +1,16 @@
+@import 'payload/scss';
+
+span.unknownConverted {
+  text-transform: uppercase;
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 2px;
+  font-size: base(0.5);
+  margin: 0 0 base(1);
+  background: red;
+  color: white;
+  display: inline-block;
+
+  div {
+    background: red;
+  }
+}

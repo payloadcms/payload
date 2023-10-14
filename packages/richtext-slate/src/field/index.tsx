@@ -1,3 +1,4 @@
+'use client'
 import { ShimmerEffect } from 'payload/components'
 import React, { Suspense, lazy } from 'react'
 

@@ -21,7 +21,16 @@ export type LexicalProviderProps = {
   value: SerializedEditorState
 }
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, initialState, onChange, readOnly, setValue, value } = props
+  const { editorConfig, fieldProps, onChange, readOnly, setValue } = props
+  let { initialState, value } = props
+
+  // Transform initialState through load hooks
+  if (editorConfig?.features?.hooks?.load?.length) {
+    editorConfig.features.hooks.load.forEach((hook) => {
+      initialState = hook({ incomingEditorState: initialState })
+      value = hook({ incomingEditorState: value })
+    })
+  }
 
   if (
     (value && Array.isArray(value) && !('root' in value)) ||

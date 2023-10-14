@@ -173,7 +173,7 @@ export const recurseNestedFields = ({
               promises,
               req,
               showHiddenFields,
-              siblingDoc,
+              siblingDoc: data[field.name][i], // This has to be scoped to the blocks's fields, otherwise there may be population issues, e.g. for a relationship field with Blocks Node, with a Blocks Field, with a RichText Field, With Relationship Node. The last richtext field would try to find itself using siblingDoc[field.nane], which only works if the siblingDoc is scoped to the blocks's fields
             })
           }
         })
@@ -191,14 +191,13 @@ export const recurseNestedFields = ({
             promises,
             req,
             showHiddenFields,
-            siblingDoc,
+            siblingDoc, // TODO: if there's any population issues, this might have to be data[field.name][i] as well
           })
         })
       }
     }
 
     if (field.type === 'richText') {
-      // TODO: This does not properly work yet. E.g. it does not handle a relationship inside of lexical inside of block inside of lexical
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.afterReadPromise) {
