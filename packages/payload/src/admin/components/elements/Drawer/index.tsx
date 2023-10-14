@@ -75,17 +75,6 @@ export const Drawer: React.FC<Props> = ({
   if (isOpen) {
     // IMPORTANT: do not render the drawer until it is explicitly open, this is to avoid large html trees especially when nesting drawers
 
-    let closeButtonWidth
-    if (midBreak) {
-      closeButtonWidth = 'var(--gutter-h)'
-    } else if (closeAreaSize === 'default') {
-      closeButtonWidth = 'var(--nav-width)'
-    } else if (closeAreaSize === 'small') {
-      closeButtonWidth = 'calc(var(--nav-width) / 5)'
-    }
-
-    closeButtonWidth = `calc(${closeButtonWidth} + (25px * ${drawerDepth + 1}))`
-
     return (
       <Modal
         className={[className, baseClass, animateIn && `${baseClass}--is-open`]
@@ -102,9 +91,6 @@ export const Drawer: React.FC<Props> = ({
           className={`${baseClass}__close`}
           id={`close-drawer__${slug}`}
           onClick={() => closeModal(slug)}
-          style={{
-            width: closeButtonWidth,
-          }}
           type="button"
         />
         <div className={`${baseClass}__content`}>
@@ -117,7 +103,7 @@ export const Drawer: React.FC<Props> = ({
                     <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
                       {title}
                     </h2>
-                      <button
+                    <button
                       aria-label={t('close')}
                       className={`${baseClass}__header__close`}
                       id={`close-drawer__${slug}`}
