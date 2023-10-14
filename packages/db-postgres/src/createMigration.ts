@@ -2,7 +2,6 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/utils'
 import type { CreateMigration } from 'payload/database'
 
-import { generateDrizzleJson, generateMigration } from 'drizzle-kit/utils'
 import fs from 'fs'
 import prompts from 'prompts'
 
@@ -60,6 +59,8 @@ export const createMigration: CreateMigration = async function createMigration(
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
+
+  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/utils')
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')

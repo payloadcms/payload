@@ -1,6 +1,5 @@
 import type { Connect } from 'payload/database'
 
-import { pushSchema } from 'drizzle-kit/utils'
 import { eq, sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { numeric, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core'
@@ -39,6 +38,8 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     this.push === false
   )
     return
+
+  const { pushSchema } = require('drizzle-kit/utils')
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
