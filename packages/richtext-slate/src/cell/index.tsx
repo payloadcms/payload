@@ -1,3 +1,4 @@
+'use client'
 import type { CellComponentProps, RichTextField } from 'payload/types'
 
 import React from 'react'
