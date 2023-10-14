@@ -2,9 +2,7 @@
 import type { Payload } from 'payload'
 import type { Migration } from 'payload/database'
 
-import { generateDrizzleJson } from 'drizzle-kit/utils'
 import { readMigrationFiles } from 'payload/database'
-import { DatabaseError } from 'pg'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
@@ -78,6 +76,8 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
+  const { generateDrizzleJson } = require('drizzle-kit/utils')
+
   const start = Date.now()
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
