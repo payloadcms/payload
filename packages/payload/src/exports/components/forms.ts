@@ -18,16 +18,18 @@ export {
    */
   useWatchForm,
 } from '../../admin/components/forms/Form/context'
+
 export { createNestedFieldPath } from '../../admin/components/forms/Form/createNestedFieldPath'
-
 export { default as getSiblingData } from '../../admin/components/forms/Form/getSiblingData'
+
 export { default as reduceFieldsToValues } from '../../admin/components/forms/Form/reduceFieldsToValues'
-
 export { default as Label } from '../../admin/components/forms/Label'
-export { default as RenderFields } from '../../admin/components/forms/RenderFields'
 
+export { default as RenderFields } from '../../admin/components/forms/RenderFields'
 export { default as Submit } from '../../admin/components/forms/Submit'
+
 export { default as FormSubmit } from '../../admin/components/forms/Submit'
+export { fieldTypes } from '../../admin/components/forms/field-types'
 export { default as Checkbox } from '../../admin/components/forms/field-types/Checkbox'
 
 export { default as Collapsible } from '../../admin/components/forms/field-types/Collapsible'

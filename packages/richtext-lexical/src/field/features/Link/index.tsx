@@ -5,7 +5,7 @@ import type { Field } from 'payload/types'
 import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin'
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
-import { withMergedProps } from 'payload/components/utilities'
+import { withMergedProps } from 'payload/utilities'
 
 import type { FeatureProvider } from '../types'
 import type { LinkFields } from './nodes/LinkNode'
