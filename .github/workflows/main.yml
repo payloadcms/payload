@@ -214,6 +214,7 @@ jobs:
       matrix:
         pkg:
           - plugin-cloud
+          - create-payload-app
 
     steps:
       - name: Use Node.js 18
@@ -238,3 +239,4 @@ jobs:
 
       - name: Test ${{ matrix.pkg }}
         run: pnpm --filter ${{ matrix.pkg }} run test
+        if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions

@@ -27,7 +27,8 @@
       }
 
       &__fields {
-        & > .tabs-field {
+        & > .tabs-field,
+        & > .group-field {
           margin-right: calc(var(--base) * -2);
         }
       }
@@ -55,7 +56,7 @@
     position: sticky;
     top: var(--doc-controls-height);
     width: 33.33%;
-    height: 100%;
+    height: calc(100vh - var(--doc-controls-height));
   }
 
   &__sidebar {
@@ -106,7 +107,8 @@
         }
 
         &__fields {
-          & > .tabs-field {
+          & > .tabs-field,
+          & > .group-field {
             margin-right: calc(var(--gutter-h) * -1);
           }
         }

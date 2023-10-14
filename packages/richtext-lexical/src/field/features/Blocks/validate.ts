@@ -15,12 +15,12 @@ export const blockValidationHOC = (
     payloadConfig,
     validation,
   }) => {
-    const blockFieldValues = node.fields.data
-
+    const blockFieldData = node.fields.data
     const blocks: Block[] = props.blocks
+
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
+    const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
     blocks.forEach((block) => {
-      const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
       block.fields = sanitizeFields({
         config: payloadConfig,
         fields: block.fields,
@@ -29,7 +29,7 @@ export const blockValidationHOC = (
     })
 
     // find block
-    const block = props.blocks.find((block) => block.slug === blockFieldValues.blockType)
+    const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)
 
     // validate block
     if (!block) {

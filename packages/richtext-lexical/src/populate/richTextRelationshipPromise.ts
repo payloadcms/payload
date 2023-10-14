@@ -4,7 +4,9 @@ import type { PayloadRequest, RichTextAdapter, RichTextField } from 'payload/typ
 import type { AfterReadPromise } from '../field/features/types'
 import type { AdapterProps } from '../types'
 
-export type Args = Parameters<RichTextAdapter<AdapterProps>['afterReadPromise']>[0] & {
+export type Args = Parameters<
+  RichTextAdapter<SerializedEditorState, AdapterProps>['afterReadPromise']
+>[0] & {
   afterReadPromises: Map<string, Array<AfterReadPromise>>
 }
 
@@ -13,7 +15,7 @@ type RecurseRichTextArgs = {
   children: SerializedLexicalNode[]
   currentDepth: number
   depth: number
-  field: RichTextField<AdapterProps>
+  field: RichTextField<SerializedEditorState, AdapterProps>
   overrideAccess: boolean
   promises: Promise<void>[]
   req: PayloadRequest
@@ -57,7 +59,7 @@ export const recurseRichText = ({
         }
       }
 
-      if ('children' in node && node?.children) {
+      if ('children' in node && Array.isArray(node?.children) && node?.children?.length) {
         recurseRichText({
           afterReadPromises,
           children: node.children as SerializedLexicalNode[],

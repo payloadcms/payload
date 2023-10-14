@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -208,8 +208,7 @@
     "webpack": "^5.78.0"
   },
   "engines": {
-    "node": ">=14",
-    "pnpm": ">=8"
+    "node": ">=14"
   },
   "files": [
     "bin.js",

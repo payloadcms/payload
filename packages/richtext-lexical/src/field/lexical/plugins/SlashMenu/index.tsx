@@ -64,7 +64,11 @@ function SlashMenuItem({
   )
 }
 
-export function SlashMenuPlugin(): JSX.Element {
+export function SlashMenuPlugin({
+  anchorElem = document.body,
+}: {
+  anchorElem?: HTMLElement
+}): JSX.Element {
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
@@ -162,6 +166,7 @@ export function SlashMenuPlugin(): JSX.Element {
   return (
     <React.Fragment>
       <LexicalTypeaheadMenuPlugin
+        anchorElem={anchorElem}
         groupsWithOptions={groups}
         menuRenderFn={(
           anchorElementRef,

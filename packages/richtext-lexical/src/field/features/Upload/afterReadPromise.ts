@@ -51,7 +51,7 @@ export const uploadAfterReadPromiseHOC = (
           promises,
           req,
           showHiddenFields,
-          siblingDoc,
+          siblingDoc: node.fields || {},
         })
       }
     }

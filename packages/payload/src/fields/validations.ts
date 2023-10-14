@@ -211,7 +211,7 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required, t
   return true
 }
 
-export const richText: Validate<unknown, unknown, RichTextField, RichTextField> = async (
+export const richText: Validate<object, unknown, RichTextField, RichTextField> = async (
   value,
   options,
 ) => {
@@ -382,7 +382,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     })
 
     if (invalidRelationships.length > 0) {
-      return `This field has the following invalid selections: ${invalidRelationships
+      return `This relationship field has the following invalid relationships: ${invalidRelationships
         .map((err, invalid) => {
           return `${err} ${JSON.stringify(invalid)}`
         })

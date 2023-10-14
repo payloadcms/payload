@@ -10,6 +10,10 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
     floatingSelectToolbar: {
       sections: [],
     },
+    hooks: {
+      load: [],
+      save: [],
+    },
     markdownTransformers: [],
     nodes: [],
     plugins: [],
@@ -21,6 +25,15 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
   }
 
   features.forEach((feature) => {
+    if (feature.hooks) {
+      if (feature.hooks?.load?.length) {
+        sanitized.hooks.load = sanitized.hooks.load.concat(feature.hooks.load)
+      }
+      if (feature.hooks?.save?.length) {
+        sanitized.hooks.save = sanitized.hooks.save.concat(feature.hooks.save)
+      }
+    }
+
     if (feature.nodes?.length) {
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
       feature.nodes.forEach((node) => {

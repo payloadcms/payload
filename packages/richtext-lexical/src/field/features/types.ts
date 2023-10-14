@@ -24,7 +24,7 @@ export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexical
   afterReadPromises: Map<string, Array<AfterReadPromise>>
   currentDepth: number
   depth: number
-  field: RichTextField<AdapterProps>
+  field: RichTextField<SerializedEditorState, AdapterProps>
   node: T
   overrideAccess: boolean
   req: PayloadRequest
@@ -50,6 +50,18 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
 export type Feature = {
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
+  }
+  hooks?: {
+    load?: ({
+      incomingEditorState,
+    }: {
+      incomingEditorState: SerializedEditorState
+    }) => SerializedEditorState
+    save?: ({
+      incomingEditorState,
+    }: {
+      incomingEditorState: SerializedEditorState
+    }) => SerializedEditorState
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<{
@@ -122,6 +134,22 @@ export type SanitizedFeatures = Required<
   enabledFeatures: string[]
   floatingSelectToolbar: {
     sections: FloatingToolbarSection[]
+  }
+  hooks: {
+    load: Array<
+      ({
+        incomingEditorState,
+      }: {
+        incomingEditorState: SerializedEditorState
+      }) => SerializedEditorState
+    >
+    save: Array<
+      ({
+        incomingEditorState,
+      }: {
+        incomingEditorState: SerializedEditorState
+      }) => SerializedEditorState
+    >
   }
   plugins?: Array<
     | {

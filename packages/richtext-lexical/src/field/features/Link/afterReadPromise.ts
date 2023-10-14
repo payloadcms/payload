@@ -52,7 +52,7 @@ export const linkAfterReadPromiseHOC = (
         promises,
         req,
         showHiddenFields,
-        siblingDoc,
+        siblingDoc: node.fields || {},
       })
     }
     return promises

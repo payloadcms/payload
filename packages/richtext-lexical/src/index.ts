@@ -1,3 +1,4 @@
+import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
@@ -26,8 +27,10 @@ export type LexicalEditorProps = {
   lexical?: LexicalEditorConfig
 }
 
-export function lexicalEditor(props?: LexicalEditorProps): RichTextAdapter<AdapterProps> {
-  let finalSanitizedEditorConfig: SanitizedEditorConfig = null
+export function lexicalEditor(
+  props?: LexicalEditorProps,
+): RichTextAdapter<SerializedEditorState, AdapterProps> {
+  let finalSanitizedEditorConfig: SanitizedEditorConfig
   if (!props || (!props.features && !props.lexical)) {
     finalSanitizedEditorConfig = cloneDeep(defaultSanitizedEditorConfig)
   } else {
@@ -150,6 +153,7 @@ export { IndentFeature } from './field/features/indent'
 export { CheckListFeature } from './field/features/lists/CheckList'
 export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnoderedListFeature } from './field/features/lists/UnorderedList'
+export { SlateToLexicalFeature } from './field/features/migrations/SlateToLexical'
 export type {
   AfterReadPromise,
   Feature,
@@ -198,6 +202,20 @@ export { isHTMLElement } from './field/lexical/utils/guard'
 export { invariant } from './field/lexical/utils/invariant'
 export { joinClasses } from './field/lexical/utils/joinClasses'
 export { createBlockNode } from './field/lexical/utils/markdown/createBlockNode'
+export {
+  DETAIL_TYPE_TO_DETAIL,
+  DOUBLE_LINE_BREAK,
+  ELEMENT_FORMAT_TO_TYPE,
+  ELEMENT_TYPE_TO_FORMAT,
+  IS_ALL_FORMATTING,
+  LTR_REGEX,
+  NON_BREAKING_SPACE,
+  NodeFormat,
+  RTL_REGEX,
+  TEXT_MODE_TO_TYPE,
+  TEXT_TYPE_TO_FORMAT,
+  TEXT_TYPE_TO_MODE,
+} from './field/lexical/utils/nodeFormat'
 export { Point, isPoint } from './field/lexical/utils/point'
 export { Rect } from './field/lexical/utils/rect'
 export { setFloatingElemPosition } from './field/lexical/utils/setFloatingElemPosition'
