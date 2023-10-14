@@ -27,10 +27,6 @@ export const BulkUploads: React.FC<Props> = ({ collection }) => {
     [openModal],
   )
 
-  React.useEffect(() => {
-    openModal(bulkAddFilesSlug)
-  }, [openModal])
-
   return (
     <div className={baseClass}>
       <Pill onClick={() => openModal(bulkAddFilesSlug)}>Bulk Upload</Pill>

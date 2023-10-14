@@ -13,12 +13,11 @@ import { FormLoadingOverlayToggle } from '../../../../../elements/Loading'
 import RenderTitle from '../../../../../elements/RenderTitle'
 import Form from '../../../../../forms/Form'
 import RenderFields from '../../../../../forms/RenderFields'
-import fieldTypes from '../../../../../forms/field-types'
-import LeaveWithoutSaving from '../../../../../modals/LeaveWithoutSaving'
+import { fieldTypes } from '../../../../../forms/field-types'
+import { LeaveWithoutSaving } from '../../../../../modals/LeaveWithoutSaving'
 import { useAuth } from '../../../../../utilities/Auth'
 import { useConfig } from '../../../../../utilities/Config'
 import { useLocale } from '../../../../../utilities/Locale'
-import { SetStepNav } from '../../../Edit/SetStepNav'
 import { Upload } from '../../../Edit/Upload'
 import { AddFilesDrawer } from '../AddFilesDrawer'
 import { useBulkUploadFormData } from '../Provider'
@@ -97,7 +96,6 @@ export const ManageFilesDrawer: React.FC<Props> = ({ collection, initialFiles })
                 name={`collection-edit--${getTranslation(collection.labels.singular, i18n)}`}
                 type="withoutNav"
               />
-              <SetStepNav collection={collection} context="bulkUpload" id={null} />
 
               <div>
                 <Eyebrow />
