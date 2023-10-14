@@ -51,6 +51,18 @@ export type Feature = {
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
   }
+  hooks?: {
+    load?: ({
+      incomingEditorState,
+    }: {
+      incomingEditorState: SerializedEditorState
+    }) => SerializedEditorState
+    save?: ({
+      incomingEditorState,
+    }: {
+      incomingEditorState: SerializedEditorState
+    }) => SerializedEditorState
+  }
   markdownTransformers?: Transformer[]
   nodes?: Array<{
     afterReadPromises?: Array<AfterReadPromise>
@@ -122,6 +134,22 @@ export type SanitizedFeatures = Required<
   enabledFeatures: string[]
   floatingSelectToolbar: {
     sections: FloatingToolbarSection[]
+  }
+  hooks: {
+    load: Array<
+      ({
+        incomingEditorState,
+      }: {
+        incomingEditorState: SerializedEditorState
+      }) => SerializedEditorState
+    >
+    save: Array<
+      ({
+        incomingEditorState,
+      }: {
+        incomingEditorState: SerializedEditorState
+      }) => SerializedEditorState
+    >
   }
   plugins?: Array<
     | {

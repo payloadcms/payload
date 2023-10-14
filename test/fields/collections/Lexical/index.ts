@@ -21,6 +21,7 @@ export const LexicalFields: CollectionConfig = {
   slug: 'lexical-fields',
   admin: {
     useAsTitle: 'title',
+    listSearchableFields: ['title', 'richTextLexicalCustomFields'],
   },
   access: {
     read: () => true,
