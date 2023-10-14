@@ -4,6 +4,7 @@ import { createContext, useContext } from 'react'
 
 import type { LivePreviewConfig } from '../../../../../exports/config'
 import type { fieldSchemaToJSON } from '../../../../../utilities/fieldSchemaToJSON'
+import type { usePopupWindow } from '../usePopupWindow'
 import type { SizeReducerAction } from './sizeReducer'
 
 export interface LivePreviewContextType {
@@ -18,6 +19,7 @@ export interface LivePreviewContextType {
     height: number
     width: number
   }
+  openPopupWindow: ReturnType<typeof usePopupWindow>['openPopupWindow']
   popupRef?: React.MutableRefObject<Window | null>
   previewWindowType: 'iframe' | 'popup'
   setAppIsReady: (appIsReady: boolean) => void
@@ -54,6 +56,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
     height: 0,
     width: 0,
   },
+  openPopupWindow: () => {},
   popupRef: undefined,
   previewWindowType: 'iframe',
   setAppIsReady: () => {},

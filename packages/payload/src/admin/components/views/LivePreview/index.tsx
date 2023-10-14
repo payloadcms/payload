@@ -164,7 +164,7 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
     },
   ]
 
-  const { isPopupOpen, popupRef } = usePopupWindow({
+  const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
     url,
   })
@@ -174,6 +174,7 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
       {...props}
       breakpoints={breakpoints}
       isPopupOpen={isPopupOpen}
+      openPopupWindow={openPopupWindow}
       popupRef={popupRef}
       url={url}
     >

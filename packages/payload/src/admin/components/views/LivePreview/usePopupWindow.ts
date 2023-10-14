@@ -19,7 +19,7 @@ export const usePopupWindow = (props: {
   url: string
 }): {
   isPopupOpen: boolean
-  openPopupWindow: (e: React.MouseEvent<HTMLAnchorElement>) => void
+  openPopupWindow: () => void
   popupRef?: React.MutableRefObject<Window | null>
 } => {
   const { eventType, onMessage, url } = props
@@ -61,47 +61,42 @@ export const usePopupWindow = (props: {
   }, [onMessage, eventType, url, serverURL, isOpen])
 
   // Customize the size, position, and style of the popup window
-  const openPopupWindow = useCallback(
-    (e) => {
-      e.preventDefault()
+  const openPopupWindow = useCallback(() => {
+    const features = {
+      height: 700,
+      left: 'auto',
+      menubar: 'no',
+      popup: 'yes',
+      toolbar: 'no',
+      top: 'auto',
+      width: 800,
+    }
 
-      const features = {
-        height: 700,
-        left: 'auto',
-        menubar: 'no',
-        popup: 'yes',
-        toolbar: 'no',
-        top: 'auto',
-        width: 800,
-      }
-
-      const popupOptions = Object.entries(features)
-        .reduce((str, [key, value]) => {
-          let strCopy = str
-          if (value === 'auto') {
-            if (key === 'top') {
-              const v = Math.round(window.innerHeight / 2 - features.height / 2)
-              strCopy += `top=${v},`
-            } else if (key === 'left') {
-              const v = Math.round(window.innerWidth / 2 - features.width / 2)
-              strCopy += `left=${v},`
-            }
-            return strCopy
+    const popupOptions = Object.entries(features)
+      .reduce((str, [key, value]) => {
+        let strCopy = str
+        if (value === 'auto') {
+          if (key === 'top') {
+            const v = Math.round(window.innerHeight / 2 - features.height / 2)
+            strCopy += `top=${v},`
+          } else if (key === 'left') {
+            const v = Math.round(window.innerWidth / 2 - features.width / 2)
+            strCopy += `left=${v},`
           }
-
-          strCopy += `${key}=${value},`
           return strCopy
-        }, '')
-        .slice(0, -1) // remove last ',' (comma)
+        }
 
-      const newWindow = window.open(url, '_blank', popupOptions)
+        strCopy += `${key}=${value},`
+        return strCopy
+      }, '')
+      .slice(0, -1) // remove last ',' (comma)
 
-      popupRef.current = newWindow
+    const newWindow = window.open(url, '_blank', popupOptions)
 
-      setIsOpen(true)
-    },
-    [url],
-  )
+    popupRef.current = newWindow
+
+    setIsOpen(true)
+  }, [url])
 
   // this is the most stable and widely supported way to check if a popup window is no longer open
   // we poll its ref every x ms and use the popup window's `closed` property

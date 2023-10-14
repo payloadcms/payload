@@ -1,9 +1,10 @@
 import { DndContext } from '@dnd-kit/core'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LivePreviewConfig } from '../../../../../exports/config'
 import type { Field } from '../../../../../fields/config/types'
 import type { EditViewProps } from '../../types'
+import type { usePopupWindow } from '../usePopupWindow'
 
 import { fieldSchemaToJSON } from '../../../../../utilities/fieldSchemaToJSON'
 import { customCollisionDetection } from './collisionDetection'
@@ -19,12 +20,13 @@ export type LivePreviewProviderProps = EditViewProps & {
     width: number
   }
   isPopupOpen?: boolean
+  openPopupWindow?: ReturnType<typeof usePopupWindow>['openPopupWindow']
   popupRef?: React.MutableRefObject<Window>
   url?: string
 }
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) => {
-  const { breakpoints, children, isPopupOpen, popupRef, url } = props
+  const { breakpoints, children, isPopupOpen, openPopupWindow, popupRef, url } = props
 
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
 
@@ -44,6 +46,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
     height: 0,
     width: 0,
   })
+
+  const openPopupOnceAppDisabled = useRef(false)
 
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
@@ -137,6 +141,22 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
     }
   }, [url])
 
+  useEffect(() => {
+    if (openPopupOnceAppDisabled.current) {
+      openPopupWindow()
+      openPopupOnceAppDisabled.current = false
+    }
+  }, [appIsReady, openPopupWindow])
+
+  const handleWindowChange = useCallback((type: 'iframe' | 'popup') => {
+    if (type === 'popup') {
+      openPopupOnceAppDisabled.current = true
+      setAppIsReady(false)
+    }
+
+    setPreviewWindowType(type)
+  }, [])
+
   return (
     <LivePreviewContext.Provider
       value={{
@@ -148,6 +168,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
         iframeRef,
         isPopupOpen,
         measuredDeviceSize,
+        openPopupWindow,
         popupRef,
         previewWindowType,
         setAppIsReady,
@@ -155,7 +176,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
         setHeight,
         setIframeHasLoaded,
         setMeasuredDeviceSize,
-        setPreviewWindowType,
+        setPreviewWindowType: handleWindowChange,
         setSize,
         setToolbarPosition: setPosition,
         setWidth,
