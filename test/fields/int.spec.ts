@@ -77,6 +77,7 @@ describe('Fields', () => {
   describe('relationship', () => {
     let textDoc
     let otherTextDoc
+    let selfReferencing
     let parent
     let child
     let grandChild
