@@ -252,6 +252,8 @@ export const traverseFields = ({
       }
 
       case 'array': {
+        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
+
         const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
@@ -277,7 +279,7 @@ export const traverseFields = ({
           adapter,
           baseColumns,
           baseExtraConfig,
-          disableNotNull,
+          disableNotNull: disableNotNullFromHere,
           disableUnique,
           fields: field.fields,
           rootRelationsToBuild,
@@ -314,6 +316,8 @@ export const traverseFields = ({
       }
 
       case 'blocks': {
+        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
+
         field.blocks.forEach((block) => {
           const blockTableName = `${rootTableName}_blocks_${toSnakeCase(block.slug)}`
           if (!adapter.tables[blockTableName]) {
@@ -343,7 +347,7 @@ export const traverseFields = ({
               adapter,
               baseColumns,
               baseExtraConfig,
-              disableNotNull,
+              disableNotNull: disableNotNullFromHere,
               disableUnique,
               fields: block.fields,
               rootRelationsToBuild,
@@ -428,6 +432,8 @@ export const traverseFields = ({
           break
         }
 
+        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
+
         const {
           hasLocalizedField: groupHasLocalizedField,
           hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
@@ -438,7 +444,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
-          disableNotNull,
+          disableNotNull: disableNotNullFromHere,
           disableUnique,
           fieldPrefix: `${fieldName}_`,
           fields: field.fields,
@@ -463,6 +469,8 @@ export const traverseFields = ({
       }
 
       case 'tabs': {
+        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
+
         const {
           hasLocalizedField: tabHasLocalizedField,
           hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
@@ -473,7 +481,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix,
           columns,
-          disableNotNull,
+          disableNotNull: disableNotNullFromHere,
           disableUnique,
           fieldPrefix,
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
@@ -500,6 +508,7 @@ export const traverseFields = ({
 
       case 'row':
       case 'collapsible': {
+        const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
         const {
           hasLocalizedField: rowHasLocalizedField,
           hasLocalizedManyNumberField: rowHasLocalizedManyNumberField,
@@ -510,7 +519,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix,
           columns,
-          disableNotNull,
+          disableNotNull: disableNotNullFromHere,
           disableUnique,
           fieldPrefix,
           fields: field.fields,
