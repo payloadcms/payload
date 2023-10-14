@@ -33,6 +33,9 @@
     "@types/react": "18.2.15",
     "payload": "workspace:*"
   },
+  "peerDependencies": {
+    "payload": "^2.0.6"
+  },
   "exports": {
     ".": {
       "default": "./src/index.ts",
