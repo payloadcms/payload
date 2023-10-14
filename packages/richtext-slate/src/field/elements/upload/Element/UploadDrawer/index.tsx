@@ -2,7 +2,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { Drawer } from 'payload/components/elements'
-import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
+import { Form, FormSubmit, RenderFields, fieldTypes } from 'payload/components/forms'
 import {
   buildStateFromSchema,
   useAuth,
@@ -10,7 +10,7 @@ import {
   useDocumentInfo,
   useLocale,
 } from 'payload/components/utilities'
-import { fieldTypes, sanitizeFields } from 'payload/config'
+import { sanitizeFields } from 'payload/config'
 import { deepCopyObject, getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'

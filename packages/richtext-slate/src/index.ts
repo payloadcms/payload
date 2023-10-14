@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps } from 'payload/components/utilities'
+import { withMergedProps } from 'payload/utilities'
 
 import type { AdapterArguments } from './types'
 
