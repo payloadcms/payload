@@ -1093,7 +1093,7 @@ describe('fields', () => {
         .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
         .click()
 
-      const textField = page.locator('#field-text')
+      const textField = page.locator('.drawer__content #field-text')
       const textValue = 'hello'
 
       await textField.fill(textValue)
@@ -1217,7 +1217,7 @@ describe('fields', () => {
         .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
         .click()
 
-      await page.locator('#field-text').fill('something')
+      await page.locator('.drawer__content #field-text').fill('something')
 
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
@@ -1290,7 +1290,7 @@ describe('fields', () => {
       await page.getByRole('button', { name: 'Edit Seeded text document' }).click()
 
       // Fill 'text' field of 'Seeded text document'
-      await page.locator('#field-text').fill('some updated text value')
+      await page.locator('.drawer__content #field-text').fill('some updated text value')
 
       // Save drawer (not parent page) with hotkey
       await saveDocHotkeyAndAssert(page)

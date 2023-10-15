@@ -21,6 +21,7 @@ import {
 } from './collections/Group'
 import { defaultNumber, numberDoc } from './collections/Number'
 import { pointDoc } from './collections/Point'
+import { relationshipFieldsSlug } from './collections/Relationship'
 import { tabsDoc } from './collections/Tabs'
 import {
   localizedTextValue,
@@ -70,6 +71,122 @@ describe('Fields', () => {
       })
 
       await expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
+    })
+  })
+
+  describe('relationship', () => {
+    let textDoc
+    let otherTextDoc
+    let selfReferencing
+    let parent
+    let child
+    let grandChild
+    let relationshipInArray
+    const textDocText = 'text document'
+    const otherTextDocText = 'alt text'
+    const relationshipText = 'relationship text'
+
+    beforeAll(async () => {
+      textDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: textDocText,
+        },
+      })
+      otherTextDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: otherTextDocText,
+        },
+      })
+      const relationship = { relationTo: 'text-fields', value: textDoc.id }
+      parent = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      child = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationToSelf: parent.id,
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      grandChild = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationToSelf: child.id,
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      selfReferencing = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      relationshipInArray = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          array: [
+            {
+              relationship: otherTextDoc.id,
+            },
+          ],
+          relationship,
+        },
+      })
+    })
+
+    it('should query parent self-reference', async () => {
+      const childResult = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationToSelf: { equals: parent.id },
+        },
+      })
+
+      const grandChildResult = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationToSelf: { equals: child.id },
+        },
+      })
+
+      const anyChildren = await payload.find({
+        collection: relationshipFieldsSlug,
+      })
+      const allChildren = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          'relationToSelf.text': { equals: relationshipText },
+        },
+      })
+
+      expect(childResult.docs[0].id).toStrictEqual(child.id)
+      expect(grandChildResult.docs[0].id).toStrictEqual(grandChild.id)
+      expect(allChildren.docs).toHaveLength(2)
+    })
+
+    it('should query relationship inside array', async () => {
+      const result = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          'array.relationship.text': { equals: otherTextDocText },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]).toMatchObject(relationshipInArray)
     })
   })
 
