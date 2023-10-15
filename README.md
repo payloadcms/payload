@@ -110,7 +110,7 @@ const adapter = azureBlobStorageAdapter({
 
 To use the S3 adapter, some peer dependencies need to be installed:
 
-`yarn add @aws-sdk/client-s3 @aws-sdk/lib-storage`.
+`yarn add @aws-sdk/client-s3 @aws-sdk/lib-storage aws-crt`.
 
 From there, create the adapter, passing in all of its required properties:
 
