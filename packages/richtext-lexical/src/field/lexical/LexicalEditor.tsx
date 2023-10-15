@@ -17,7 +17,9 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
 import { LexicalContentEditable } from './ui/ContentEditable'
 
-export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
+export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>> = (
+  props,
+) => {
   const { editorConfig, onChange } = props
   const [editor] = useLexicalComposerContext()
 

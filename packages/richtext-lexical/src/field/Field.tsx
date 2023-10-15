@@ -47,7 +47,7 @@ const RichText: React.FC<FieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const { errorMessage, initialValue, setValue, showError, value } = fieldType
+  const { errorMessage, setValue, showError, value } = fieldType
 
   let valueToUse = value
 
@@ -87,7 +87,6 @@ const RichText: React.FC<FieldProps> = (props) => {
           <LexicalProvider
             editorConfig={editorConfig}
             fieldProps={props}
-            initialState={initialValue}
             onChange={(editorState, editor, tags) => {
               let serializedEditorState = editorState.toJSON()
 
@@ -101,7 +100,6 @@ const RichText: React.FC<FieldProps> = (props) => {
               setValue(serializedEditorState)
             }}
             readOnly={readOnly}
-            setValue={setValue}
             value={value}
           />
           <FieldDescription description={description} value={value} />
