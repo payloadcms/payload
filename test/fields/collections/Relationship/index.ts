@@ -3,63 +3,81 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 export const relationshipFieldsSlug = 'relationship-fields'
 
 const RelationshipFields: CollectionConfig = {
-  slug: relationshipFieldsSlug,
   fields: [
     {
+      name: 'text',
+      type: 'text',
+    },
+    {
       name: 'relationship',
-      type: 'relationship',
       relationTo: ['text-fields', 'array-fields'],
       required: true,
+      type: 'relationship',
     },
     {
       name: 'relationToSelf',
-      type: 'relationship',
       relationTo: relationshipFieldsSlug,
+      type: 'relationship',
     },
     {
       name: 'relationToSelfSelectOnly',
-      type: 'relationship',
-      relationTo: relationshipFieldsSlug,
       admin: {
         allowCreate: false,
       },
+      relationTo: relationshipFieldsSlug,
+      type: 'relationship',
     },
     {
       name: 'relationWithDynamicDefault',
-      type: 'relationship',
+      defaultValue: ({ user }) => user?.id,
       relationTo: 'users',
-      defaultValue: ({ user }) => user.id,
+      type: 'relationship',
     },
     {
       name: 'relationHasManyWithDynamicDefault',
-      type: 'relationship',
+      defaultValue: ({ user }) =>
+        user
+          ? {
+              relationTo: 'users',
+              value: user.id,
+            }
+          : undefined,
       relationTo: ['users'],
-      defaultValue: ({ user }) => ({
-        relationTo: 'users',
-        value: user.id,
-      }),
+      type: 'relationship',
     },
     {
       name: 'relationshipWithMin',
-      type: 'relationship',
-      relationTo: 'text-fields',
       hasMany: true,
       minRows: 2,
+      relationTo: 'text-fields',
+      type: 'relationship',
     },
     {
       name: 'relationshipWithMax',
-      type: 'relationship',
-      relationTo: 'text-fields',
       hasMany: true,
       maxRows: 2,
+      relationTo: 'text-fields',
+      type: 'relationship',
     },
     {
       name: 'relationshipHasMany',
-      type: 'relationship',
-      relationTo: 'text-fields',
       hasMany: true,
+      relationTo: 'text-fields',
+      type: 'relationship',
+    },
+    {
+      name: 'array',
+      fields: [
+        {
+          name: 'relationship',
+          relationTo: 'text-fields',
+          type: 'relationship',
+        },
+      ],
+      type: 'array',
     },
   ],
+  slug: relationshipFieldsSlug,
 }
 
 export default RelationshipFields
