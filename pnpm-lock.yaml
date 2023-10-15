@@ -943,9 +943,6 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
-      graphql-request:
-        specifier: 6.1.0
-        version: 6.1.0(graphql@16.8.1)
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.88.2)
