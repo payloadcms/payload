@@ -42,11 +42,17 @@ export const sanitizeQueryValue = ({
     if (val.toLowerCase() === 'false') formattedValue = false
   }
 
-  if (['all', 'in', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
-    formattedValue = createArrayFromCommaDelineated(formattedValue)
+  if (['all', 'in', 'not_in'].includes(operator)) {
+    if (formattedValue === 'string') {
+      formattedValue = createArrayFromCommaDelineated(formattedValue)
 
-    if (field.type === 'number') {
-      formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
+      if (field.type === 'number') {
+        formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
+      }
+    }
+
+    if (!Array.isArray(formattedValue) || formattedValue.length === 0) {
+      return null
     }
   }
 

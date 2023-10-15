@@ -33,7 +33,7 @@ export const findMany = async function find({
   const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
   const table = adapter.tables[tableName]
 
-  let limit = limitArg
+  let limit = limitArg ?? 10
   let totalDocs: number
   let totalPages: number
   let hasPrevPage: boolean
@@ -119,7 +119,11 @@ export const findMany = async function find({
     findManyArgs.where = inArray(adapter.tables[tableName].id, Object.keys(orderedIDMap))
   } else {
     findManyArgs.limit = limitArg === 0 ? undefined : limitArg
-    findManyArgs.offset = skip || (page - 1) * limitArg
+
+    const offset = skip || (page - 1) * limitArg
+
+    if (!Number.isNaN(offset)) findManyArgs.offset = offset
+
     if (where) {
       findManyArgs.where = where
     }

@@ -187,7 +187,6 @@
     "file-loader": "6.2.0",
     "form-data": "3.0.1",
     "get-port": "5.1.1",
-    "graphql-request": "6.1.0",
     "mini-css-extract-plugin": "1.6.2",
     "node-fetch": "2.6.12",
     "nodemon": "3.0.1",

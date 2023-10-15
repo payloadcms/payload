@@ -96,6 +96,9 @@ importers:
       glob:
         specifier: 8.1.0
         version: 8.1.0
+      graphql-request:
+        specifier: 6.1.0
+        version: 6.1.0(graphql@16.8.1)
       husky:
         specifier: ^8.0.3
         version: 8.0.3
