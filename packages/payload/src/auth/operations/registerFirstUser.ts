@@ -69,6 +69,7 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
         data: {
           _verified: true,
         },
+        req,
       })
     }
 
