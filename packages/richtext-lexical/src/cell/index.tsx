@@ -1,3 +1,4 @@
+'use client'
 import type { SerializedEditorState } from 'lexical'
 import type { CellComponentProps, RichTextField } from 'payload/types'
 
