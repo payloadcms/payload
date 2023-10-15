@@ -148,12 +148,18 @@ export async function parseParams({
                   break
                 }
 
-                const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
+                const sanitizedQueryValue = sanitizeQueryValue({
                   field,
                   operator,
                   relationOrPath,
                   val,
                 })
+
+                if (sanitizedQueryValue === null) {
+                  break
+                }
+
+                const { operator: queryOperator, value: queryValue } = sanitizedQueryValue
 
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
@@ -163,7 +169,10 @@ export async function parseParams({
                       ne<any>(rawColumn || table[columnName], queryValue),
                     ),
                   )
-                } else if (
+                  break
+                }
+
+                if (
                   (field.type === 'relationship' || field.type === 'upload') &&
                   Array.isArray(queryValue) &&
                   operator === 'not_in'
@@ -174,11 +183,13 @@ export async function parseParams({
                     IS
                     NULL`,
                   )
-                } else {
-                  constraints.push(
-                    operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
-                  )
+
+                  break
                 }
+
+                constraints.push(
+                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                )
               }
             }
           }
