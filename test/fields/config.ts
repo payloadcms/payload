@@ -44,18 +44,18 @@ export default buildConfigWithDefaults({
   collections: [
     LexicalFields,
     {
-      slug: 'users',
-      auth: true,
       admin: {
         useAsTitle: 'email',
       },
+      auth: true,
       fields: [
         {
           name: 'canViewConditionalField',
-          type: 'checkbox',
           defaultValue: true,
+          type: 'checkbox',
         },
       ],
+      slug: 'users',
     },
     ArrayFields,
     BlockFields,
@@ -81,8 +81,8 @@ export default buildConfigWithDefaults({
   ],
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
     fallback: true,
+    locales: ['en', 'es'],
   },
   onInit: async (payload) => {
     await payload.create({

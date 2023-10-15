@@ -100,7 +100,11 @@ export async function parseParams({
                 const val = where[relationOrPath][operator]
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
-                  constraints.push(operatorMap.equals(constraintTable[col], value))
+                  if (typeof value === 'string' && value.indexOf('%') > -1) {
+                    constraints.push(operatorMap.like(constraintTable[col], value))
+                  } else {
+                    constraints.push(operatorMap.equals(constraintTable[col], value))
+                  }
                 })
 
                 if (['json', 'richText'].includes(field.type) && Array.isArray(pathSegments)) {
