@@ -43,7 +43,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (['all', 'in', 'not_in'].includes(operator)) {
-    if (formattedValue === 'string') {
+    if (typeof formattedValue === 'string') {
       formattedValue = createArrayFromCommaDelineated(formattedValue)
 
       if (field.type === 'number') {
