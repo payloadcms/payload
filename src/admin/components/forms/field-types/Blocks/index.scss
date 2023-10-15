@@ -58,6 +58,7 @@
 
   &__block-header {
     display: inline-flex;
+    width: 100%;
     max-width: 100%;
     overflow: hidden;
     gap: base(.375);
@@ -75,6 +76,7 @@
 
   .section-title {
     min-width: 0;
+    flex-grow: 1;
   }
 
   &__row {
