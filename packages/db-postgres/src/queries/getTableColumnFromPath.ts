@@ -305,7 +305,6 @@ export const getTableColumnFromPath = ({
         let relationshipFields
         const relationTableName = `${rootTableName}_rels`
         const newCollectionPath = pathSegments.slice(1).join('.')
-        // missing FROM-clause entry for table "relationship_fields_array"
         const aliasRelationshipTableName = uuid()
         const aliasRelationshipTable = alias(
           adapter.tables[relationTableName],
