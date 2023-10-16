@@ -58,7 +58,6 @@ describe('Collections - Uploads', () => {
         expect(sizes).toHaveProperty('tablet')
         expect(sizes).toHaveProperty('mobile')
         expect(sizes).toHaveProperty('icon')
-        expect(doc.url).not.toContain('undefined')
       })
 
       it('creates from form data given an svg', async () => {
@@ -81,6 +80,22 @@ describe('Collections - Uploads', () => {
         expect(doc.width).toBeDefined()
         expect(doc.height).toBeDefined()
       })
+    })
+
+    it('should have valid image url', async () => {
+      const formData = new FormData()
+      formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')))
+
+      const { status, doc } = await client.create({
+        file: true,
+        data: formData,
+      })
+
+      expect(status).toBe(201)
+      const expectedPath = path.join(__dirname, './media')
+      expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+
+      expect(doc.url).not.toContain('undefined')
     })
 
     it('creates images that do not require all sizes', async () => {
