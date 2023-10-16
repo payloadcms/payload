@@ -89,7 +89,7 @@ export const Drawer: React.FC<Props> = ({
           type="button"
         />
         <div className={`${baseClass}__content`}>
-          {/* <div className={`${baseClass}__blur-bg`} /> */}
+          <div className={`${baseClass}__blur-bg`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
             <EditDepthContext.Provider value={drawerDepth + 1}>
               {header && header}
