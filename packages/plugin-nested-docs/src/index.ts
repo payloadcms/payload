@@ -1,4 +1,4 @@
-import type { Config } from 'payload/config'
+import type { Plugin } from 'payload/config'
 
 import createBreadcrumbsField from './fields/breadcrumbs'
 import createParentField from './fields/parent'
@@ -8,10 +8,10 @@ import type { PluginConfig } from './types'
 import populateBreadcrumbs from './utilities/populateBreadcrumbs'
 
 const nestedDocs =
-  (pluginConfig: PluginConfig) =>
-  (config: Config): Config => ({
+  (pluginConfig: PluginConfig): Plugin =>
+  (config) => ({
     ...config,
-    collections: (config.collections || []).map(collection => {
+    collections: (config.collections || []).map((collection) => {
       if (pluginConfig.collections.indexOf(collection.slug) > -1) {
         const fields = [...(collection?.fields || [])]
 
