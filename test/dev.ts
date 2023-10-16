@@ -11,7 +11,9 @@ import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
 dotenv.config()
 
 const [testSuiteDir] = process.argv.slice(4)
-
+process.env.NODE_ENV = 'test'
+process.PAYLOAD_TEST_MONGO_URL =
+  'mongodb+srv://payload:1yRj3h85yfRTemo2@cluster0.jc6zenu.mongodb.net/?retryWrites=true&w=majority'
 /**
  * The default logger's options did not allow for forcing sync logging
  * Using these options, to force both pretty print and sync logging
