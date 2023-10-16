@@ -45,6 +45,10 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     isMergeableObject: isPlainObject,
   }) as Config
 
+  if (!configWithDefaults.serverURL) {
+    configWithDefaults.serverURL = ''
+  }
+
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
   if (config.localization && config.localization.locales?.length > 0) {
@@ -82,10 +86,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))
   configWithDefaults.collections.push(migrationsCollection)
-
-  if (typeof config.serverURL === 'undefined') {
-    configWithDefaults.serverURL = ''
-  }
 
   config.collections = config.collections.map((collection) =>
     sanitizeCollection(configWithDefaults, collection),
