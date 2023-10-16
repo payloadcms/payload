@@ -18,6 +18,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
   locale?: string
   overrideAccess?: boolean
   page?: number
+  req?: PayloadRequest
   showHiddenFields?: boolean
   slug: T
   sort?: string
@@ -36,6 +37,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     page,
+    req: incomingReq,
     showHiddenFields,
     slug: globalSlug,
     sort,
@@ -57,6 +59,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     payload,
     payloadAPI: 'local',
     t: i18n.t,
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req)
