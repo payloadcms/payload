@@ -14,7 +14,7 @@ const getParents = async (
 
   if (parent) {
     // If not auto-populated, and we have an ID
-    if (typeof parent === 'string') {
+    if (typeof parent === 'string' || typeof parent === 'number') {
       retrievedParent = await req.payload.findByID({
         req,
         id: parent,

@@ -259,7 +259,7 @@ const validateFilterOptions: Validate = async (
 
         if (valueIDs.length > 0) {
           const findWhere = {
-            and: [{ id: { in: valueIDs } }, optionFilter],
+            and: [{ id: { in: valueIDs } }],
           }
 
           if (optionFilter) findWhere.and.push(optionFilter)

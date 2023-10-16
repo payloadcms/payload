@@ -1,4 +1,4 @@
-import type { FieldHook } from 'payload/types'
+import type { FieldHook } from '../../../packages/payload/src/fields/config/types'
 
 export const generateFullTitle = (breadcrumbs: Array<{ label: string }>): string | undefined => {
   if (Array.isArray(breadcrumbs)) {

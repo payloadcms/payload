@@ -17,12 +17,18 @@ const populateBreadcrumbs = async (
       ...originalDoc,
       ...data,
     })),
-    {
-      ...originalDoc,
-      ...data,
-      id: originalDoc?.id,
-    },
   ]
+
+  const currentDocBreadcrumb = {
+    ...originalDoc,
+    ...data,
+  }
+
+  if (originalDoc?.id) {
+    currentDocBreadcrumb.id = originalDoc?.id
+  }
+
+  breadcrumbDocs.push(currentDocBreadcrumb)
 
   const breadcrumbs = breadcrumbDocs.map((_, i) =>
     formatBreadcrumb(pluginConfig, collection, breadcrumbDocs.slice(0, i + 1)),
