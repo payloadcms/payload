@@ -167,10 +167,12 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding products page...`)
 
-  let { id: productsPageID } = await payload.create({
+  const productsPageDoc = await payload.create({
     collection: 'pages',
     data: productsPage,
   })
+
+  let productsPageID = productsPageDoc.id
 
   if (payload.db.defaultIDType === 'text') {
     productsPageID = `"${productsPageID}"`
@@ -202,7 +204,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.updateGlobal({
     slug: 'settings',
     data: {
-      productsPage: productsPageID,
+      productsPage: productsPageDoc.id,
     },
   })
 
@@ -217,7 +219,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'reference',
             reference: {
               relationTo: 'pages',
-              value: productsPageID,
+              value: productsPageDoc.id,
             },
             label: 'Shop',
           },
