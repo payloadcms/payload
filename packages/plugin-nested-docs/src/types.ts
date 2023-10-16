@@ -1,7 +1,7 @@
 export interface Breadcrumb {
   url?: string
   label: string
-  doc: string
+  doc: string | number
 }
 
 export type GenerateURL = (
@@ -20,4 +20,5 @@ export interface PluginConfig {
   generateLabel?: GenerateLabel
   parentFieldSlug?: string
   breadcrumbsFieldSlug?: string
+  dbType?: 'mongoose' | 'postgres'
 }

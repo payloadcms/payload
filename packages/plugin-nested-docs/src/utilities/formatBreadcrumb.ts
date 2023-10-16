@@ -23,10 +23,13 @@ const formatBreadcrumb = (
     label = lastDoc[useAsTitle] as string
   }
 
+  const docId =
+    pluginConfig.dbType === 'mongoose' ? (lastDoc.id as string) : parseInt(lastDoc.id as string)
+
   return {
     label,
     url,
-    doc: lastDoc.id as string,
+    doc: docId,
   }
 }
 
