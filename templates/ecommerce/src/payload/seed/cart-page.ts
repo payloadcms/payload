@@ -51,10 +51,7 @@ export const cartPage: Partial<Page> = {
           link: {
             type: 'reference',
             url: '',
-            reference: {
-              relationTo: 'pages',
-              value: '',
-            },
+            reference: null,
             label: '',
           },
           richText: [

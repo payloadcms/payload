@@ -1442,10 +1442,10 @@
     amazon-cognito-identity-js "^6.1.2"
     resend "^0.17.2"
 
-"@payloadcms/plugin-nested-docs@^1.0.4":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-nested-docs/-/plugin-nested-docs-1.0.6.tgz#7fece37ae3a5192e080444d220616edc90ce9c65"
-  integrity sha512-+rPMWYYjxxIQeCO+MFlfsj4baLaK3S7RzP4dGouWcCtORbZEXbVPUGXgWWNyAP3FolQh4YDEgFVB4PHyIa+O/A==
+"@payloadcms/plugin-nested-docs@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.npmjs.org/@payloadcms/plugin-nested-docs/-/plugin-nested-docs-1.0.8.tgz#81c1e349044a0b6f7ffe57774b0bef586d648413"
+  integrity sha512-yL43tIqI5RHC8dBwvvPWvrOa2pq93+2U7n+/0P5ikzEiDlnC8v5U9g/6Ek1P8KiAuXJEAsMcAA4Y214sClFbkQ==
 
 "@payloadcms/plugin-redirects@^1.0.0":
   version "1.0.0"
