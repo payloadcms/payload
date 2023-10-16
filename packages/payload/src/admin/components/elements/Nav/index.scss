@@ -41,7 +41,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: var(--app-header-height) base(1.5) base(2) base(1.25);
+    padding: var(--app-header-height) base(1) base(2) base(1);
     overflow-y: auto;
 
     // remove the scrollbar here to prevent layout shift as nav groups are toggled
@@ -128,12 +128,7 @@
 
   @include mid-break {
     &__scroll {
-      padding: var(--app-header-height) base(0.75) base(2) base(0.75);
-    }
-
-    nav a {
-      font-size: base(0.875);
-      line-height: base(1.5);
+      padding: var(--app-header-height) base(0.5) base(2);
     }
   }
 
@@ -141,9 +136,12 @@
     &__scroll {
       padding: var(--app-header-height) var(--gutter-h) base(2);
     }
-  }
 
-  @include extra-small-break {
+    nav a {
+      font-size: base(0.875);
+      line-height: base(1.5);
+    }
+
     &--nav-open {
       transition: none;
     }

@@ -21,7 +21,7 @@
     }
   }
 
-  &__nav-toggler {
+  &__nav-toggler-wrapper {
     position: fixed;
     z-index: var(--z-modal);
     top: 0;
@@ -40,111 +40,30 @@
     position: relative;
   }
 
-  &__nav-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    background: var(--theme-overlay);
-    padding: 0;
-    border: 0;
-    z-index: var(--z-modal);
-    cursor: pointer;
-    pointer-events: none;
-    display: none;
-  }
-
-  // on large break, push the document off the screen
-  // show an overlay to prevent clicking on the document
-  @include large-break {
-    width: calc(100% + var(--nav-width));
-    transform: translate3d(0, 0, 0);
-
-    &__wrap {
-      transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
-    }
-
-    &__nav-overlay {
-      display: block;
-    }
-
-    &--nav-open {
-      transform: translate3d(0, 0, 0);
-
-      .template-default {
-        &__wrap {
-          pointer-events: none;
-          transform: translate3d(0, 0, 0);
-          transition: transform var(--nav-trans-time) linear;
-        }
-
-        &__nav-overlay {
-          opacity: 1;
-          pointer-events: auto;
-        }
-      }
-    }
-
-    &__nav-toggler {
-      .hamburger {
-        left: calc(var(--base) * 1.25);
-      }
-    }
-  }
-
   @include mid-break {
-    &__nav-toggler {
+    &__nav-toggler-wrapper {
       .hamburger {
-        left: calc(var(--base) * 0.75);
+        left: unset;
       }
     }
   }
 
   @include small-break {
-    &__nav-toggler {
-      .hamburger {
-        left: calc(var(--base) * 0.5);
-      }
-      &.nav-toggler--is-open .hamburger {
-        display: flex;
-        display: inline;
-      }
-    }
-  }
-
-  @include small-break {
-    &__nav-toggler {
-      width: unset;
-      justify-content: unset;
-
-      .hamburger {
-        opacity: none;
-      }
-    }
-
-    &__nav-toggler.nav-toggler--is-open .hamburger {
-      display: flex;
-      display: inline;
-    }
-  }
-
-  @include extra-small-break {
     &--nav-open {
       transition: none;
     }
 
-    &__nav-toggler.nav-toggler--is-open .hamburger {
-      display: none;
+    &__nav-toggler-wrapper {
+      width: unset;
+      justify-content: unset;
+
+      .hamburger {
+        display: none;
+      }
     }
 
     .template-default {
       &__wrap {
-        transition: none;
-      }
-
-      &__nav-overlay {
         transition: none;
       }
     }

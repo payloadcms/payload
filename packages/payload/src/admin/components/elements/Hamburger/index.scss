@@ -6,15 +6,21 @@
   cursor: pointer;
   background-color: transparent;
   outline: none;
-  position: absolute;
+  position: relative;
 
-  --hamburger-padding: 5px;
+  --hamburger-padding: 8px;
   --hamburger-size: 9px;
   --hamburger-line-gap: 3px;
+
   padding: var(--hamburger-padding);
-  border: 1px solid var(--theme-elevation-350);
+  border: 1px solid var(--theme-elevation-150);
   color: var(--theme-text);
   border-radius: 3px;
+
+  &:hover {
+    border: 1px solid var(--theme-elevation-500);
+    background-color: var(--theme-elevation-100);
+  }
 
   &:focus {
     outline: none;

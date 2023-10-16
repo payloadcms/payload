@@ -3,13 +3,10 @@
 .collection-default-edit {
   width: 100%;
   display: flex;
+  --doc-sidebar-width: 500px;
 
   &--has-sidebar {
     .collection-default-edit {
-      &__main {
-        width: 66.66%;
-      }
-
       &__edit {
         [dir='ltr'] & {
           top: 0;
@@ -40,6 +37,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100%;
+    flex-grow: 1;
   }
 
   &__edit {
@@ -55,8 +53,9 @@
   &__sidebar-wrap {
     position: sticky;
     top: var(--doc-controls-height);
-    width: 33.33%;
     height: calc(100vh - var(--doc-controls-height));
+    width: var(--doc-sidebar-width);
+    flex-shrink: 0;
   }
 
   &__sidebar {
@@ -83,6 +82,10 @@
 
   &__label {
     color: var(--theme-elevation-400);
+  }
+
+  @include large-break {
+    --doc-sidebar-width: 350px;
   }
 
   @include mid-break {
@@ -154,6 +157,10 @@
   }
 
   @include small-break {
+    &__sidebar-wrap {
+      min-width: initial;
+    }
+
     &__edit {
       padding-top: calc(var(--base) / 2);
     }
