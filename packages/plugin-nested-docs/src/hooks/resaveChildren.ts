@@ -8,6 +8,7 @@ const resaveChildren =
   ({ req: { payload, locale }, req, doc }) => {
     const resaveChildrenAsync = async (): Promise<void> => {
       const children = await payload.find({
+        req,
         collection: collection.slug,
         where: {
           parent: {
@@ -26,6 +27,7 @@ const resaveChildren =
             child._status !== 'published'
 
           payload.update({
+            req,
             id: child.id,
             collection: collection.slug,
             draft: updateAsDraft,
