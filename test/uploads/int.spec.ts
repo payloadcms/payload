@@ -58,6 +58,7 @@ describe('Collections - Uploads', () => {
         expect(sizes).toHaveProperty('tablet')
         expect(sizes).toHaveProperty('mobile')
         expect(sizes).toHaveProperty('icon')
+        expect(doc.url).not.toContain('undefined')
       })
 
       it('creates from form data given an svg', async () => {

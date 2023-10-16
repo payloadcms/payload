@@ -83,6 +83,10 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))
   configWithDefaults.collections.push(migrationsCollection)
 
+  if (typeof config.serverURL === 'undefined') {
+    configWithDefaults.serverURL = ''
+  }
+
   config.collections = config.collections.map((collection) =>
     sanitizeCollection(configWithDefaults, collection),
   )
@@ -90,10 +94,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   if (config.globals.length > 0) {
     config.globals = sanitizeGlobals(config as SanitizedConfig)
-  }
-
-  if (typeof config.serverURL === 'undefined') {
-    config.serverURL = ''
   }
 
   if (config.serverURL !== '') {
