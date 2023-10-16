@@ -37,6 +37,7 @@
     { "path": "./packages/richtext-slate" },
     { "path": "./packages/richtext-lexical" },
     { "path": "./packages/payload" },
+    { "path": "./packages/plugin-nested-docs" },
     { "path": "./packages/live-preview" },
     { "path": "./packages/live-preview-react" }
   ]

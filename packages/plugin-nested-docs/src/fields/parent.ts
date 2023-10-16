@@ -1,4 +1,4 @@
-import type { RelationshipField } from 'payload/dist/fields/config/types'
+import { RelationshipField } from 'payload/types'
 
 const createParentField = (
   relationTo: string,

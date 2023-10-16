@@ -1,18 +1,25 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "es5",
-    "outDir": "./dist",
-    "allowJs": true,
-    "module": "commonjs",
-    "sourceMap": true,
-    "jsx": "react",
-    "esModuleInterop": true,
-    "declaration": true,
-    "declarationDir": "./dist",
-    "skipLibCheck": true,
-    "strict": true,
+    "composite": true, // Make sure typescript knows that this module depends on their references
+    "noEmit": false /* Do not emit outputs. */,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "jsx": "react"
   },
-  "include": [
-    "src/**/*"
+  "exclude": [
+    "dist",
+    "build",
+    "tests",
+    "test",
+    "node_modules",
+    ".eslintrc.js",
+    "src/**/*.spec.js",
+    "src/**/*.spec.jsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx"
   ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "references": [{ "path": "../payload" }] // db-mongodb depends on payload
 }
