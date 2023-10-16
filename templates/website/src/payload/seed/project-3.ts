@@ -40,10 +40,7 @@ export const project3: Partial<Project> = {
             },
           ],
           link: {
-            reference: {
-              relationTo: 'pages',
-              value: '',
-            },
+            reference: null,
             url: '',
             label: '',
           },

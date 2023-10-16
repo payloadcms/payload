@@ -1,10 +1,7 @@
 import type { Media } from '../payload-types'
 
-export const image2: Media = {
+export const image2: Omit<Media, 'id' | 'createdAt' | 'updatedAt'> = {
   alt: 'E-Book',
-  id: '',
-  createdAt: '',
-  updatedAt: '',
   caption: [
     {
       children: [
