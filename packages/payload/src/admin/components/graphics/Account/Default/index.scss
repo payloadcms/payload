@@ -48,6 +48,12 @@
       .graphic-account {
         &__bg {
           fill: var(--theme-elevation-300);
+          stroke: var(--theme-elevation-600);
+        }
+
+        &__head,
+        &__body {
+          fill: var(--theme-elevation-600);
         }
       }
     }
