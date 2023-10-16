@@ -67,6 +67,7 @@ export type FilterOptionsProps<T = any> = {
 export type FilterOptions<T = any> =
   | ((options: FilterOptionsProps<T>) => Promise<Where> | Where)
   | Where
+  | null
 
 type Admin = {
   className?: string
