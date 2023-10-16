@@ -1035,6 +1035,15 @@ importers:
         specifier: ^5.78.0
         version: 5.88.2(@swc/core@1.3.78)(webpack-cli@4.10.0)
 
+  packages/plugin-nested-docs:
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
