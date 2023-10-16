@@ -137,7 +137,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     case 'ADD_ROW': {
       const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState } = action
       const rowIndex =
-        typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length - 1 || 0
+        typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0
 
       const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata.splice(
