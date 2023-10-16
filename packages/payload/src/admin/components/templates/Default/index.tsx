@@ -44,17 +44,13 @@ const Default: React.FC<Props> = ({ children, className }) => {
         <div className={`${baseClass}__wrap`}>
           <AppHeader />
           {children}
-          <button
-            aria-label={t('close')}
-            className={`${baseClass}__nav-overlay`}
-            onClick={() => setNavOpen(!navOpen)}
-            type="button"
-          />
         </div>
       </div>
-      <NavToggler className={`${baseClass}__nav-toggler`} id="nav-toggler">
-        <Hamburger closeIcon="collapse" isActive={navOpen} />
-      </NavToggler>
+      <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
+        <NavToggler className={`${baseClass}__nav-toggler`}>
+          <Hamburger closeIcon="collapse" isActive={navOpen} />
+        </NavToggler>
+      </div>
     </Fragment>
   )
 }
