@@ -40,7 +40,7 @@ export default function findResolver(collection: Collection): Resolver {
       sort: args.sort,
       where: args.where,
     }
-
+    console.log('HERE', options.collection)
     const results = await find(options)
     return results
   }
