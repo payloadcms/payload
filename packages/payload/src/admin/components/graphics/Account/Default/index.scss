@@ -1,17 +1,23 @@
 .graphic-account {
+  vector-effect: non-scaling-stroke;
+  overflow: visible;
+
   &__bg {
-    fill: var(--theme-elevation-100);
+    fill: var(--theme-elevation-50);
+    stroke: var(--theme-elevation-200);
+    stroke-width: 1px;
   }
 
   &__head,
   &__body {
-    fill: var(--theme-elevation-300);
+    fill: var(--theme-elevation-200);
   }
 
   &--active {
     .graphic-account {
       &__bg {
         fill: var(--theme-elevation-500);
+        stroke: var(--theme-text);
       }
 
       &__head,
@@ -25,6 +31,7 @@
     .graphic-account {
       &__bg {
         fill: var(--theme-elevation-200);
+        stroke: var(--theme-elevation-600);
       }
 
       &__head,

@@ -19,11 +19,21 @@ export const NavContext = React.createContext<NavContextType>({
 
 export const useNav = () => React.useContext(NavContext)
 
+const getNavPreference = async (getPreference): Promise<boolean> => {
+  const navPrefs = await getPreference('nav')
+  const preferredState = navPrefs?.open
+  if (typeof preferredState === 'boolean') {
+    return preferredState
+  } else {
+    return true
+  }
+}
+
 export const NavProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
   const {
-    breakpoints: { l: largeBreak },
+    breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
   } = useWindowInfo()
 
   const { getPreference } = usePreferences()
@@ -40,16 +50,11 @@ export const NavProvider: React.FC<{
   useEffect(() => {
     if (largeBreak === false) {
       const setNavFromPreferences = async () => {
-        const navPrefs = await getPreference('nav')
-        const preferredState = navPrefs?.open
-        if (typeof preferredState === 'boolean') {
-          setNavOpen(preferredState)
-        } else {
-          setNavOpen(true)
-        }
+        const preferredState = await getNavPreference(getPreference)
+        setNavOpen(preferredState)
       }
 
-      setNavFromPreferences()
+      setNavFromPreferences() // eslint-disable-line @typescript-eslint/no-floating-promises
     }
   }, [largeBreak, getPreference, setNavOpen])
 
@@ -58,7 +63,7 @@ export const NavProvider: React.FC<{
   useEffect(() => {
     let unlisten: () => void
 
-    if (largeBreak) {
+    if (midBreak) {
       unlisten = history.listen(() => {
         setNavOpen(false)
       })
@@ -67,27 +72,28 @@ export const NavProvider: React.FC<{
     }
 
     return () => unlisten && unlisten()
-  }, [history, setNavOpen, largeBreak])
-
-  // on smaller screens where the nav is a modal
-  // close the nav when the user resizes down to a smaller screen
-  useEffect(() => {
-    if (largeBreak) {
-      setNavOpen(false)
-    }
-  }, [largeBreak])
+  }, [history, setNavOpen, midBreak])
 
   // on open and close, lock the body scroll
   // do not do this on desktop, the sidebar is not a modal
   useEffect(() => {
     if (navRef.current) {
-      if (navOpen && largeBreak) {
+      if (navOpen && midBreak) {
         disableBodyScroll(navRef.current)
       } else {
         enableBodyScroll(navRef.current)
       }
     }
-  }, [navOpen, largeBreak])
+  }, [navOpen, midBreak])
+
+  // on smaller screens where the nav is a modal
+  // close the nav when the user resizes down to mobile
+  // the sidebar is a modal on mobile
+  useEffect(() => {
+    if (largeBreak === false || midBreak === false || smallBreak === false) {
+      setNavOpen(false)
+    }
+  }, [largeBreak, midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {
