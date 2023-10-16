@@ -2,7 +2,8 @@ import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 
 import { formatDate } from '../../../utilities/formatDate'
 import { useConfig } from '../../utilities/Config'
