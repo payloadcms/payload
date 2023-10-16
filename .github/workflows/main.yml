@@ -213,8 +213,9 @@ jobs:
       fail-fast: false
       matrix:
         pkg:
-          - plugin-cloud
           - create-payload-app
+          - plugin-cloud
+          - plugin-nested-docs
 
     steps:
       - name: Use Node.js 18
