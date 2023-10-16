@@ -302,17 +302,20 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding posts page...`)
 
-  let { id: postsPageID } = await payload.create({
+  const postsPageDoc = await payload.create({
     collection: 'pages',
     data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, image1ID)),
   })
 
   payload.logger.info(`— Seeding projects page...`)
 
-  let { id: projectsPageID } = await payload.create({
+  const projectsPageDoc = await payload.create({
     collection: 'pages',
     data: JSON.parse(JSON.stringify(projectsPage).replace(/"\{\{IMAGE\}\}"/g, image1ID)),
   })
+
+  let postsPageID = postsPageDoc.id
+  let projectsPageID = projectsPageDoc.id
 
   if (payload.db.defaultIDType === 'text') {
     postsPageID = `"${postsPageID}"`
@@ -337,8 +340,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.updateGlobal({
     slug: 'settings',
     data: {
-      postsPage: postsPageID,
-      projectsPage: projectsPageID,
+      postsPage: postsPageDoc.id,
+      projectsPage: projectsPageDoc.id,
     },
   })
 
@@ -353,7 +356,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'reference',
             reference: {
               relationTo: 'pages',
-              value: postsPageID,
+              value: postsPageDoc.id,
             },
             label: 'Posts',
           },
@@ -363,7 +366,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'reference',
             reference: {
               relationTo: 'pages',
-              value: projectsPageID,
+              value: projectsPageDoc.id,
             },
             label: 'Projects',
           },
