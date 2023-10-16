@@ -297,7 +297,7 @@ const BlocksField: React.FC<Props> = (props) => {
           </DrawerToggler>
           <BlocksDrawer
             addRow={addRow}
-            addRowIndex={typeof value === 'number' ? value - 1 : 0}
+            addRowIndex={rows?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
             labels={labels}
