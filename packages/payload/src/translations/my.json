@@ -333,7 +333,7 @@
     "currentDocumentStatus": "လက်ရှိ {{docStatus}} ဖိုင်",
     "draft": "မူကြမ်း",
     "draftSavedSuccessfully": "မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။",
-    "lastSavedAgo": "နောက်ဆုံး ပြင်ဆင်ခဲ့သည်။ {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး",
     "noFurtherVersionsFound": "နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။",
     "noRowsFound": "{{label}} အားမတွေ့ပါ။",
     "preview": "နမူနာပြရန်",

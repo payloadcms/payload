@@ -6,13 +6,13 @@ import { toast } from 'react-toastify'
 import type { Props } from './types'
 
 import useDebounce from '../../../hooks/useDebounce'
+import { formatTimeToNow } from '../../../utilities/formatDate'
 import { useAllFormFields, useFormModified } from '../../forms/Form/context'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import './index.scss'
-
 const baseClass = 'autosave'
 
 const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdatedAt }) => {
@@ -163,7 +163,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
       {!saving && lastSaved && (
         <React.Fragment>
           {t('lastSavedAgo', {
-            distance: Math.round((Number(new Date(lastSaved)) - Number(new Date())) / 1000 / 60),
+            distance: formatTimeToNow(lastSaved, i18n.language),
           })}
         </React.Fragment>
       )}

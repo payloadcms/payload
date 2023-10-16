@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Поточний статус {{docStatus}} документа",
     "draft": "Чернетка",
     "draftSavedSuccessfully": "Чернетка успішно збережена.",
-    "lastSavedAgo": "Останній запис {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Останній раз збережено {{distance}} тому",
     "noFurtherVersionsFound": "Інших версій не знайдено",
     "noRowsFound": "Не знайдено {{label}}",
     "preview": "Попередній перегляд",

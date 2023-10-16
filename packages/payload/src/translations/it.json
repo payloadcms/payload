@@ -334,7 +334,7 @@
     "currentDocumentStatus": "Documento {{docStatus}} corrente",
     "draft": "Bozza",
     "draftSavedSuccessfully": "Bozza salvata con successo.",
-    "lastSavedAgo": "Ultimo salvataggio {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Ultimo salvataggio {{distance}} fa",
     "noFurtherVersionsFound": "Non sono state trovate ulteriori versioni",
     "noRowsFound": "Nessun {{label}} trovato",
     "preview": "Anteprima",

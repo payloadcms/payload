@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Aktueller Dokumentenstatus: {{docStatus}}",
     "draft": "Entwurf",
     "draftSavedSuccessfully": "Entwurf erfolgreich gespeichert.",
-    "lastSavedAgo": "Zuletzt gespeichert {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Zuletzt vor {{distance}} gespeichert",
     "noFurtherVersionsFound": "Keine weiteren Versionen vorhanden",
     "noRowsFound": "Kein {{label}} gefunden",
     "preview": "Vorschau",

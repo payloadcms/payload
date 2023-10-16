@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Текущий статус {{docStatus}} документа",
     "draft": "Черновик",
     "draftSavedSuccessfully": "Черновик успешно сохранен.",
-    "lastSavedAgo": "Последнее сохранение было {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Последний раз сохранено {{distance}} назад",
     "noFurtherVersionsFound": "Другие версии не найдены",
     "noRowsFound": "Не найдено {{label}}",
     "preview": "Предпросмотр",

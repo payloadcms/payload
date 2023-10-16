@@ -333,7 +333,7 @@
     "currentDocumentStatus": "المستند {{docStatus}} الحالي",
     "draft": "مسودّة",
     "draftSavedSuccessfully": "تمّ حفظ المسودّة بنجاح.",
-    "lastSavedAgo": "آخر حفظ في {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "تم الحفظ آخر مرة قبل {{distance}}",
     "noFurtherVersionsFound": "لم يتمّ العثور على نسخات أخرى",
     "noRowsFound": "لم يتمّ العثور على {{label}}",
     "preview": "معاينة",

@@ -333,7 +333,7 @@
     "currentDocumentStatus": "เอกสารปัจจุบัน",
     "draft": "ฉบับร่าง",
     "draftSavedSuccessfully": "บันทึกร่างสำเร็จ",
-    "lastSavedAgo": "บันทึกล่าสุดเมื่อ {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "บันทึกครั้งล่าสุด {{distance}} ที่ผ่านมา",
     "noFurtherVersionsFound": "ไม่พบเวอร์ชันอื่น ๆ",
     "noRowsFound": "ไม่พบ {{label}}",
     "preview": "ตัวอย่าง",

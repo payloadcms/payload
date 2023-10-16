@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Documento {{docStatus}} actual",
     "draft": "Borrador",
     "draftSavedSuccessfully": "Borrador guardado con éxito.",
-    "lastSavedAgo": "Último guardado {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Guardado por última vez hace {{distance}}",
     "noFurtherVersionsFound": "No se encontraron más versiones",
     "noRowsFound": "No encontramos {{label}}",
     "preview": "Previsualizar",
