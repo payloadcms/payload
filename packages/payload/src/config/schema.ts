@@ -93,7 +93,8 @@ export default joi.object({
   editor: joi.object().required().keys({
     CellComponent: component.required(),
     FieldComponent: component.required(),
-    afterReadPromise: joi.func().required(),
+    afterReadPromise: joi.func().optional(),
+    populationPromise: joi.func().optional(),
     validate: joi.func().required(),
   }),
   email: joi.object(),

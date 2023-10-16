@@ -4,11 +4,11 @@ import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { UploadIcon } from '../../lexical/ui/icons/Upload'
-import { uploadAfterReadPromiseHOC } from './afterReadPromise'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'
 import { UploadNode } from './nodes/UploadNode'
 import { UploadPlugin } from './plugin'
+import { uploadPopulationPromiseHOC } from './populationPromise'
 import { uploadValidation } from './validate'
 
 export type UploadFeatureProps = {
@@ -21,11 +21,11 @@ export type UploadFeatureProps = {
 
 export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         nodes: [
           {
-            afterReadPromises: [uploadAfterReadPromiseHOC(props)],
+            afterReadPromises: [uploadPopulationPromiseHOC(props)],
             node: UploadNode,
             type: UploadNode.getType(),
             validations: [uploadValidation()],

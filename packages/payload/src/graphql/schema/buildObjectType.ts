@@ -434,8 +434,8 @@ function buildObjectType({
           // is run here again, with the provided depth.
           // In the graphql find.ts resolver, the depth is then hard-coded to 0.
           // Effectively, this means that the afterReadPromise for GraphQL is only run here, and not in the find.ts resolver / normal afterRead promise.
-          if (editor?.afterReadPromise) {
-            await editor?.afterReadPromise({
+          if (editor?.populationPromise) {
+            await editor?.populationPromise({
               depth,
               field,
               req: context.req,

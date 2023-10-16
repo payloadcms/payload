@@ -6,27 +6,27 @@ import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/typ
 import type React from 'react'
 
 import type { AdapterProps } from '../../types'
-import type { EditorConfig } from '..//lexical/config/types'
+import type { EditorConfig } from '../lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 
-export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
-  afterReadPromises,
+export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   currentDepth,
   depth,
   field,
   node,
   overrideAccess,
+  populationPromises,
   req,
   showHiddenFields,
   siblingDoc,
 }: {
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
   currentDepth: number
   depth: number
   field: RichTextField<SerializedEditorState, AdapterProps>
   node: T
   overrideAccess: boolean
+  populationPromises: Map<string, Array<PopulationPromise>>
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
@@ -52,6 +52,15 @@ export type Feature = {
     sections: FloatingToolbarSection[]
   }
   hooks?: {
+    afterReadPromise?: ({
+      field,
+      incomingEditorState,
+      siblingDoc,
+    }: {
+      field: RichTextField<SerializedEditorState, AdapterProps>
+      incomingEditorState: SerializedEditorState
+      siblingDoc: Record<string, unknown>
+    }) => Promise<void> | null
     load?: ({
       incomingEditorState,
     }: {
@@ -65,8 +74,8 @@ export type Feature = {
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<{
-    afterReadPromises?: Array<AfterReadPromise>
     node: Klass<LexicalNode>
+    populationPromises?: Array<PopulationPromise>
     type: string
     validations?: Array<NodeValidation>
   }>
@@ -128,14 +137,23 @@ export type FeatureProviderMap = Map<string, FeatureProvider>
 export type SanitizedFeatures = Required<
   Pick<ResolvedFeature, 'markdownTransformers' | 'nodes'>
 > & {
-  /**  The node types mapped to their afterReadPromises */
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
   /** The keys of all enabled features */
   enabledFeatures: string[]
   floatingSelectToolbar: {
     sections: FloatingToolbarSection[]
   }
   hooks: {
+    afterReadPromises: Array<
+      ({
+        field,
+        incomingEditorState,
+        siblingDoc,
+      }: {
+        field: RichTextField<SerializedEditorState, AdapterProps>
+        incomingEditorState: SerializedEditorState
+        siblingDoc: Record<string, unknown>
+      }) => Promise<void> | null
+    >
     load: Array<
       ({
         incomingEditorState,
@@ -166,6 +184,8 @@ export type SanitizedFeatures = Required<
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }
   >
+  /**  The node types mapped to their populationPromises */
+  populationPromises: Map<string, Array<PopulationPromise>>
   slashMenu: {
     dynamicOptions: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]

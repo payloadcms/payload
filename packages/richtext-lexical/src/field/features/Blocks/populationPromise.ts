@@ -3,24 +3,22 @@ import type { Block } from 'payload/types'
 import { sanitizeFields } from 'payload/config'
 
 import type { BlocksFeatureProps } from '.'
-import type { AfterReadPromise } from '../types'
+import type { PopulationPromise } from '../types'
 import type { SerializedBlockNode } from './nodes/BlocksNode'
 
 import { recurseNestedFields } from '../../../populate/recurseNestedFields'
 
-export const blockAfterReadPromiseHOC = (
+export const blockPopulationPromiseHOC = (
   props: BlocksFeatureProps,
-): AfterReadPromise<SerializedBlockNode> => {
-  const blockAfterReadPromise: AfterReadPromise<SerializedBlockNode> = ({
-    afterReadPromises,
+): PopulationPromise<SerializedBlockNode> => {
+  const blockPopulationPromise: PopulationPromise<SerializedBlockNode> = ({
     currentDepth,
     depth,
-    field,
     node,
     overrideAccess,
+    populationPromises,
     req,
     showHiddenFields,
-    siblingDoc,
   }) => {
     const blocks: Block[] = props.blocks
     const blockFieldData = node.fields.data
@@ -45,12 +43,12 @@ export const blockAfterReadPromiseHOC = (
     }
 
     recurseNestedFields({
-      afterReadPromises,
       currentDepth,
       data: blockFieldData,
       depth,
       fields: block.fields,
       overrideAccess,
+      populationPromises,
       promises,
       req,
       showHiddenFields,
@@ -61,5 +59,5 @@ export const blockAfterReadPromiseHOC = (
     return promises
   }
 
-  return blockAfterReadPromise
+  return blockPopulationPromise
 }

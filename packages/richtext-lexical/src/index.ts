@@ -59,7 +59,29 @@ export function lexicalEditor(
       Component: RichTextField,
       toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
     }),
-    afterReadPromise({
+    afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
+      return new Promise<void>((resolve, reject) => {
+        const promises: Promise<void>[] = []
+
+        if (finalSanitizedEditorConfig?.features?.hooks?.afterReadPromises?.length) {
+          for (const afterReadPromise of finalSanitizedEditorConfig.features.hooks
+            .afterReadPromises) {
+            promises.push(
+              afterReadPromise({
+                field,
+                incomingEditorState,
+                siblingDoc,
+              }),
+            )
+          }
+        }
+
+        Promise.all(promises)
+          .then(() => resolve())
+          .catch((error) => reject(error))
+      })
+    },
+    populationPromise({
       currentDepth,
       depth,
       field,
@@ -69,13 +91,13 @@ export function lexicalEditor(
       siblingDoc,
     }) {
       // check if there are any features with nodes which have afterReadPromises for this field
-      if (finalSanitizedEditorConfig?.features?.afterReadPromises?.size) {
+      if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
         return richTextRelationshipPromise({
-          afterReadPromises: finalSanitizedEditorConfig.features.afterReadPromises,
           currentDepth,
           depth,
           field,
           overrideAccess,
+          populationPromises: finalSanitizedEditorConfig.features.populationPromises,
           req,
           showHiddenFields,
           siblingDoc,
@@ -99,8 +121,8 @@ export {
   BlockNode,
   type SerializedBlockNode,
 } from './field/features/Blocks/nodes/BlocksNode'
-
 export { HeadingFeature } from './field/features/Heading'
+
 export { LinkFeature } from './field/features/Link'
 export type { LinkFeatureProps } from './field/features/Link'
 export {
@@ -109,7 +131,6 @@ export {
   AutoLinkNode,
   type SerializedAutoLinkNode,
 } from './field/features/Link/nodes/AutoLinkNode'
-
 export {
   $createLinkNode,
   $isLinkNode,
@@ -118,6 +139,7 @@ export {
   type SerializedLinkNode,
   TOGGLE_LINK_COMMAND,
 } from './field/features/Link/nodes/LinkNode'
+
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
 export {
@@ -139,6 +161,7 @@ export {
 } from './field/features/Upload/nodes/UploadNode'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
+export { HTMLConverterFeature } from './field/features/converters/html'
 export { TreeviewFeature } from './field/features/debug/TreeView'
 
 export { BoldTextFeature } from './field/features/format/Bold'
@@ -157,11 +180,11 @@ export { LexicalPluginToLexicalFeature } from './field/features/migrations/Lexic
 export { SlateToLexicalFeature } from './field/features/migrations/SlateToLexical'
 
 export type {
-  AfterReadPromise,
   Feature,
   FeatureProvider,
   FeatureProviderMap,
   NodeValidation,
+  PopulationPromise,
   ResolvedFeature,
   ResolvedFeatureMap,
   SanitizedFeatures,

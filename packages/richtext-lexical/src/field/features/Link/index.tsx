@@ -13,7 +13,6 @@ import type { LinkFields } from './nodes/LinkNode'
 import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
-import { linkAfterReadPromiseHOC } from './afterReadPromise'
 import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
@@ -21,6 +20,7 @@ import { AutoLinkPlugin } from './plugins/autoLink'
 import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
 import { LinkPlugin } from './plugins/link'
+import { linkPopulationPromiseHOC } from './populationPromise'
 
 export type LinkFeatureProps = {
   fields?:
@@ -29,7 +29,7 @@ export type LinkFeatureProps = {
 }
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
@@ -74,7 +74,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
-            afterReadPromises: [linkAfterReadPromiseHOC(props)],
+            afterReadPromises: [linkPopulationPromiseHOC(props)],
             node: LinkNode,
             type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
