@@ -60,6 +60,9 @@ importers:
       '@types/react':
         specifier: 18.2.15
         version: 18.2.15
+      '@types/semver':
+        specifier: ^7.5.3
+        version: 7.5.3
       '@types/shelljs':
         specifier: 0.8.12
         version: 0.8.12
@@ -141,6 +144,9 @@ importers:
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
+      semver:
+        specifier: ^7.5.4
+        version: 7.5.4
       shelljs:
         specifier: 0.8.5
         version: 0.8.5
@@ -5794,6 +5800,10 @@ packages:
   /@types/semver@7.5.2:
     resolution: {integrity: sha512-7aqorHYgdNO4DM36stTiGO3DvKoex9TQRwsJU6vMaFGyqpBA1MNZkz+PG3gaNUPpTAOYhT1WR7M1JyA3fbS9Cw==}
     dev: false
+
+  /@types/semver@7.5.3:
+    resolution: {integrity: sha512-OxepLK9EuNEIPxWNME+C6WwbRAOOI2o2BaQEGzz5Lu2e4Z5eDnEo+/aVEDMIXywoJitJ7xWd641wrGLZdtwRyw==}
+    dev: true
 
   /@types/send@0.17.1:
     resolution: {integrity: sha512-Cwo8LE/0rnvX7kIIa3QHCkcuF21c05Ayb0ZfxPiv0W8VRiZiNW/WuRupHKpqqGVGf7SUA44QSOUKaEd9lIrd/Q==}

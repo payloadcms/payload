@@ -5,12 +5,17 @@ import prompts from 'prompts'
 import minimist from 'minimist'
 import chalkTemplate from 'chalk-template'
 import { PackageDetails, getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
+import semver from 'semver'
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
 async function main() {
   const { tag = 'latest', bump = 'patch' } = args
+
+  if (!semver.RELEASE_TYPES.includes(bump)) {
+    abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
+  }
 
   const packageDetails = await getPackageDetails()
   showPackageDetails(packageDetails)
@@ -58,7 +63,7 @@ async function main() {
 ${packagesToRelease
   .map((p) => {
     const { shortName, version } = packageMap[p]
-    return `  ${shortName.padEnd(24)} ${version}`
+    return `  ${shortName.padEnd(24)} ${version} -> ${semver.inc(version, bump)}`
   })
   .join('\n')}
 `)
