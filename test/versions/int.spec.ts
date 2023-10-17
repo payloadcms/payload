@@ -238,6 +238,43 @@ describe('Versions', () => {
           draftsDescending.docs[draftsDescending.docs.length - 1],
         )
       })
+
+      it('should create and update versions with blocks', async () => {
+        const versionWithBlock = await payload.create({
+          collection: draftSlug,
+          data: {
+            blocksField: [
+              {
+                blockType: 'block',
+                text: 'test',
+              },
+            ],
+          },
+          draft: true,
+        })
+
+        const updated = 'updated'
+        // @ts-ignore
+        const updatedVersionWithBlock = await payload.update({
+          id: versionWithBlock.id,
+          collection: draftSlug,
+          data: {
+            blocksField: [
+              {
+                id: versionWithBlock.blocksField[0].id,
+                blockType: 'block',
+                text: updated,
+              },
+            ],
+          },
+          draft: true,
+        })
+
+        expect(versionWithBlock.blocksField[0].id).toStrictEqual(
+          updatedVersionWithBlock.blocksField[0].id,
+        )
+        expect(updatedVersionWithBlock.blocksField[0].text).toStrictEqual(updated)
+      })
     })
 
     describe('Restore', () => {
