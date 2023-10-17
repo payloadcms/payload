@@ -81,8 +81,11 @@ ${packagesToRelease
 
     try {
       console.log(chalk.bold(`\n\nPublishing ${shortName}...\n\n`))
-
-      execSync(`npm --no-git-tag-version --prefix ${packagePath} version ${bump}`, execOpts)
+      let npmVersionCmd = `npm --no-git-tag-version --prefix ${packagePath} version ${bump}`
+      if (tag !== 'latest') {
+        npmVersionCmd += ` --preid ${tag}`
+      }
+      execSync(npmVersionCmd, execOpts)
       execSync(`git add ${packagePath}/package.json`, execOpts)
 
       const packageObj = await fse.readJson(`${packagePath}/package.json`)
@@ -91,7 +94,13 @@ ${packagesToRelease
       const tagName = `${shortName}/${newVersion}`
       execSync(`git commit -m "chore(release): ${tagName}"`, execOpts)
       execSync(`git tag -a ${tagName} -m "${tagName}"`, execOpts)
-      execSync(`pnpm publish -C ${packagePath} --no-git-checks`, execOpts)
+
+      let publishCmd = `pnpm publish -C ${packagePath} --no-git-checks`
+      if (tag !== 'latest') {
+        publishCmd += ` --tag ${tag}`
+      }
+      execSync(publishCmd, execOpts)
+
       results.push({ name: shortName, success: true })
     } catch (error) {
       console.error(chalk.bold.red(`ERROR: ${error.message}`))
