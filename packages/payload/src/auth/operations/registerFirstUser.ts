@@ -80,6 +80,7 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     const { token } = await payload.login({
       ...args,
       collection: slug,
+      req,
     })
 
     const resultToReturn = {
