@@ -238,49 +238,12 @@ describe('Versions', () => {
           draftsDescending.docs[draftsDescending.docs.length - 1],
         )
       })
-
-      it('should create and update versions with blocks', async () => {
-        const versionWithBlock = await payload.create({
-          collection: draftSlug,
-          data: {
-            blocksField: [
-              {
-                blockType: 'block',
-                text: 'test',
-              },
-            ],
-          },
-          draft: true,
-        })
-
-        const updated = 'updated'
-        // @ts-ignore
-        const updatedVersionWithBlock = await payload.update({
-          id: versionWithBlock.id,
-          collection: draftSlug,
-          data: {
-            blocksField: [
-              {
-                id: versionWithBlock.blocksField[0].id,
-                blockType: 'block',
-                text: updated,
-              },
-            ],
-          },
-          draft: true,
-        })
-
-        expect(versionWithBlock.blocksField[0].id).toStrictEqual(
-          updatedVersionWithBlock.blocksField[0].id,
-        )
-        expect(updatedVersionWithBlock.blocksField[0].text).toStrictEqual(updated)
-      })
     })
 
     describe('Restore', () => {
       it('should versions be in correct order', async () => {
         const somePost = await payload.create({
-          collection,
+          collection: draftSlug,
           data: {
             description: 'description 1',
             title: 'first post',
@@ -289,58 +252,106 @@ describe('Versions', () => {
 
         const updatedPost = await payload.update({
           id: collectionLocalPostID,
-          collection,
+          collection: draftSlug,
           data: {
             title: 'This should be the latest version',
           },
         })
 
         const versions = await payload.findVersions({
-          collection,
+          collection: draftSlug,
         })
 
         expect(versions.docs[0].version.title).toBe(updatedPost.title)
       })
       it('should allow a version to be restored', async () => {
         const title2 = 'Another updated post title in EN'
+        const updated = 'updated'
 
-        const updatedPost = await payload.update({
-          id: collectionLocalPostID,
-          collection,
+        const versionedPost = await payload.create({
+          collection: draftSlug,
           data: {
+            description: 'version description',
+            title: 'version title',
+          },
+          draft: true,
+        })
+
+        // @ts-ignore
+        let updatedPost = await payload.update({
+          id: versionedPost.id,
+          collection: draftSlug,
+          data: {
+            blocksField: [
+              {
+                blockType: 'block',
+                text: 'text',
+              },
+            ],
             title: title2,
           },
+          draft: true,
+        })
+        // @ts-ignore
+        updatedPost = await payload.update({
+          id: versionedPost.id,
+          collection: draftSlug,
+          data: {
+            blocksField: [
+              {
+                id: updatedPost.blocksField[0].id,
+                blockType: 'block',
+                text: updated,
+              },
+            ],
+            title: title2,
+          },
+          draft: true,
         })
 
         expect(updatedPost.title).toBe(title2)
+        expect(updatedPost.blocksField[0].text).toBe(updated)
 
         // Make sure it was updated correctly
         const draftFromUpdatedPost = await payload.findByID({
-          id: collectionLocalPostID,
-          collection,
+          id: versionedPost.id,
+          collection: draftSlug,
           draft: true,
         })
         expect(draftFromUpdatedPost.title).toBe(title2)
+        expect(draftFromUpdatedPost.blocksField).toHaveLength(1)
 
         const versions = await payload.findVersions({
-          collection,
+          collection: draftSlug,
+          where: {
+            parent: {
+              equals: versionedPost.id,
+            },
+          },
         })
 
-        // restore to latest version
+        const versionToRestore = versions.docs[versions.docs.length - 1]
+        // restore to previous version
         const restoredVersion = await payload.restoreVersion({
-          id: versions.docs[1].id,
-          collection,
+          id: versionToRestore.id,
+          collection: draftSlug,
         })
 
-        expect(restoredVersion.title).toBeDefined()
+        expect({ ...restoredVersion }).toMatchObject({
+          ...versionToRestore.version,
+          updatedAt: restoredVersion.updatedAt,
+        })
 
         const latestDraft = await payload.findByID({
-          id: collectionLocalPostID,
-          collection,
+          id: versionedPost.id,
+          collection: draftSlug,
           draft: true,
         })
 
-        expect(latestDraft.title).toBe(versions.docs[1].version.title)
+        expect(latestDraft).toMatchObject({
+          ...versionToRestore.version,
+          updatedAt: latestDraft.updatedAt,
+        })
       })
     })
 
