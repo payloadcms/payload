@@ -163,7 +163,7 @@ const collectionSchema = joi.object().keys({
       crop: joi.bool(),
       disableLocalStorage: joi.bool(),
       focalPoint: joi.bool(),
-      filesRequired: joi.bool(),
+      filesRequiredOnCreate: joi.bool(),
       formatOptions: joi.object().keys({
         format: joi.string(),
         options: joi.object(),
