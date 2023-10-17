@@ -14,9 +14,9 @@ import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
 import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'group-field'
 
@@ -26,6 +26,7 @@ const Group: React.FC<Props> = (props) => {
     admin: { className, description, hideGutter = false, readOnly, style, width },
     fieldTypes,
     fields,
+    forceRender = false,
     indexPath,
     label,
     path: pathFromProps,
@@ -88,6 +89,7 @@ const Group: React.FC<Props> = (props) => {
               path: createNestedFieldPath(path, subField),
             }))}
             fieldTypes={fieldTypes}
+            forceRender={forceRender}
             indexPath={indexPath}
             margins="small"
             permissions={permissions?.fields}

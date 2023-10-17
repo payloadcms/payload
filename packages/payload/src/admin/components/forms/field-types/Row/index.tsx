@@ -14,6 +14,7 @@ const Row: React.FC<Props> = (props) => {
     admin: { className, readOnly },
     fieldTypes,
     fields,
+    forceRender = false,
     indexPath,
     path,
     permissions,
@@ -28,6 +29,7 @@ const Row: React.FC<Props> = (props) => {
           path: createNestedFieldPath(path, field),
         }))}
         fieldTypes={fieldTypes}
+        forceRender={forceRender}
         indexPath={indexPath}
         permissions={permissions}
         readOnly={readOnly}

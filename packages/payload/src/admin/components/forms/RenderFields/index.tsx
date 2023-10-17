@@ -113,6 +113,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       readOnly,
                     },
                     fieldTypes,
+                    forceRender,
                     indexPath:
                       'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
                     path: field.path || (isFieldAffectingData && 'name' in field ? field.name : ''),
