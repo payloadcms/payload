@@ -33,7 +33,8 @@ export const getPackageDetails = async (): Promise<PackageDetails[]> => {
       const publishedVersion = json?.['dist-tags']?.latest
       const publishDate = json?.time?.[publishedVersion]
 
-      const prevGitTag = `${dirName}/${packageJson.version}`
+      const prevGitTag =
+        dirName === 'payload' ? `v${packageJson.version}` : `${dirName}/${packageJson.version}`
       const prevGitTagHash = await git.revparse(prevGitTag)
 
       const newCommits = await git.log({

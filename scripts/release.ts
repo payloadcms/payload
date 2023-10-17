@@ -92,8 +92,12 @@ ${packagesToRelease
       const newVersion = packageObj.version
 
       const tagName = `${shortName}/${newVersion}`
-      execSync(`git commit -m "chore(release): ${tagName}"`, execOpts)
+      execSync(`git commit -m "chore(release): ${tagName} [skip ci]" `, execOpts)
       execSync(`git tag -a ${tagName} -m "${tagName}"`, execOpts)
+
+      if (pkg === 'payload') {
+        execSync(`git tag -a v${newVersion} -m "v${newVersion}"`, execOpts)
+      }
 
       let publishCmd = `pnpm publish -C ${packagePath} --no-git-checks`
       if (tag !== 'latest') {

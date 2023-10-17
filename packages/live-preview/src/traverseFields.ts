@@ -1,9 +1,11 @@
+import type { fieldSchemaToJSON } from 'payload/utilities'
+
 import { promise } from './promise'
 
 type Args<T> = {
   apiRoute?: string
   depth: number
-  fieldSchema: Record<string, unknown>[]
+  fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
   populationPromises: Promise<void>[]
   result: T
@@ -19,12 +21,11 @@ export const traverseFields = <T>({
   result,
   serverURL,
 }: Args<T>): void => {
-  fieldSchema.forEach((field) => {
-    if ('name' in field && typeof field.name === 'string') {
-      // TODO: type this
-      const fieldName = field.name
+  fieldSchema.forEach((fieldJSON) => {
+    if ('name' in fieldJSON && typeof fieldJSON.name === 'string') {
+      const fieldName = fieldJSON.name
 
-      switch (field.type) {
+      switch (fieldJSON.type) {
         case 'array':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((row, i) => {
@@ -38,7 +39,7 @@ export const traverseFields = <T>({
               traverseFields({
                 apiRoute,
                 depth,
-                fieldSchema: field.fields as Record<string, unknown>[], // TODO: type this
+                fieldSchema: fieldJSON.fields,
                 incomingData: row,
                 populationPromises,
                 result: newRow,
@@ -53,7 +54,7 @@ export const traverseFields = <T>({
         case 'blocks':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((row, i) => {
-              const matchedBlock = field.blocks[row.blockType]
+              const matchedBlock = fieldJSON.blocks[row.blockType]
 
               const hasExistingRow =
                 Array.isArray(result[fieldName]) &&
@@ -70,7 +71,7 @@ export const traverseFields = <T>({
               traverseFields({
                 apiRoute,
                 depth,
-                fieldSchema: matchedBlock.fields as Record<string, unknown>[], // TODO: type this
+                fieldSchema: matchedBlock.fields,
                 incomingData: row,
                 populationPromises,
                 result: newRow,
@@ -82,7 +83,7 @@ export const traverseFields = <T>({
           }
           break
 
-        case 'tab':
+        case 'tabs':
         case 'group':
           if (!result[fieldName]) {
             result[fieldName] = {}
@@ -91,7 +92,7 @@ export const traverseFields = <T>({
           traverseFields({
             apiRoute,
             depth,
-            fieldSchema: field.fields as Record<string, unknown>[], // TODO: type this
+            fieldSchema: fieldJSON.fields,
             incomingData: incomingData[fieldName] || {},
             populationPromises,
             result: result[fieldName],
@@ -102,7 +103,7 @@ export const traverseFields = <T>({
 
         case 'upload':
         case 'relationship':
-          if (field.hasMany && Array.isArray(incomingData[fieldName])) {
+          if (fieldJSON.hasMany && Array.isArray(incomingData[fieldName])) {
             const existingValue = Array.isArray(result[fieldName]) ? [...result[fieldName]] : []
             result[fieldName] = Array.isArray(result[fieldName])
               ? [...result[fieldName]].slice(0, incomingData[fieldName].length)
@@ -110,7 +111,7 @@ export const traverseFields = <T>({
 
             incomingData[fieldName].forEach((relation, i) => {
               // Handle `hasMany` polymorphic
-              if (Array.isArray(field.relationTo)) {
+              if (Array.isArray(fieldJSON.relationTo)) {
                 const existingID = existingValue[i]?.value?.id
 
                 if (
@@ -134,7 +135,7 @@ export const traverseFields = <T>({
                   )
                 }
               } else {
-                // Handle `hasMany` singular
+                // Handle `hasMany` monomorphic
                 const existingID = existingValue[i]?.id
 
                 if (existingID !== relation) {
@@ -143,7 +144,7 @@ export const traverseFields = <T>({
                       id: relation,
                       accessor: i,
                       apiRoute,
-                      collection: String(field.relationTo),
+                      collection: String(fieldJSON.relationTo),
                       depth,
                       ref: result[fieldName],
                       serverURL,
@@ -154,7 +155,7 @@ export const traverseFields = <T>({
             })
           } else {
             // Handle `hasOne` polymorphic
-            if (Array.isArray(field.relationTo)) {
+            if (Array.isArray(fieldJSON.relationTo)) {
               const hasNewValue =
                 typeof incomingData[fieldName] === 'object' && incomingData[fieldName] !== null
               const hasOldValue =
@@ -190,31 +191,37 @@ export const traverseFields = <T>({
                 result[fieldName] = null
               }
             } else {
-              const hasNewValue =
-                typeof incomingData[fieldName] === 'object' && incomingData[fieldName] !== null
-              const hasOldValue =
-                typeof result[fieldName] === 'object' && result[fieldName] !== null
+              // Handle `hasOne` monomorphic
+              const newID: string =
+                (typeof incomingData[fieldName] === 'string' && incomingData[fieldName]) ||
+                (typeof incomingData[fieldName] === 'object' &&
+                  incomingData[fieldName] !== null &&
+                  incomingData[fieldName].id) ||
+                ''
 
-              const newValue = hasNewValue ? incomingData[fieldName].value : ''
+              const oldID: string =
+                (typeof result[fieldName] === 'string' && result[fieldName]) ||
+                (typeof result[fieldName] === 'object' &&
+                  result[fieldName] !== null &&
+                  result[fieldName].id) ||
+                ''
 
-              const oldValue = hasOldValue ? result[fieldName].value : ''
-
-              if (newValue !== oldValue) {
-                if (newValue) {
+              if (newID !== oldID) {
+                if (newID) {
                   populationPromises.push(
                     promise({
-                      id: newValue,
+                      id: newID,
                       accessor: fieldName,
                       apiRoute,
-                      collection: String(field.relationTo),
+                      collection: String(fieldJSON.relationTo),
                       depth,
                       ref: result as Record<string, unknown>,
                       serverURL,
                     }),
                   )
+                } else {
+                  result[fieldName] = null
                 }
-              } else {
-                result[fieldName] = null
               }
             }
           }
