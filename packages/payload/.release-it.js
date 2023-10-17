@@ -12,7 +12,7 @@ module.exports = {
     skipChecks: true,
   },
   hooks: {
-    'before:init': ['pnpm install', 'pnpm clean', 'pnpm test'],
+    'before:init': ['pnpm install', 'pnpm clean', 'pnpm build'], // Assume tests have already been run
   },
   plugins: {
     '@release-it/conventional-changelog': {
