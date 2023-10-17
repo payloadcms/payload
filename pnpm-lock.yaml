@@ -519,7 +519,7 @@ importers:
   packages/live-preview-react:
     dependencies:
       '@payloadcms/live-preview':
-        specifier: workspace:*
+        specifier: workspace:^0.x
         version: link:../live-preview
       react:
         specifier: ^16.8.0 || ^17.0.0 || ^18.0.0
