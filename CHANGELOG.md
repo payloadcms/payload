@@ -1,3 +1,28 @@
+
+
+## [2.0.8](https://github.com/payloadcms/payload/compare/v2.0.7...v2.0.8) (2023-10-17)
+
+
+### Features
+
+* allows filterOptions to return null ([c4cac99](https://github.com/payloadcms/payload/commit/c4cac998752730e7084598c92c77789da8c82e0d))
+* **live-preview:** caches field schema ([#3711](https://github.com/payloadcms/payload/issues/3711)) ([dd0ac06](https://github.com/payloadcms/payload/commit/dd0ac066ce2ed88b85025309303610a95b6089e1))
+
+### Bug Fixes
+
+* autosave time shown minutes only ([#3492](https://github.com/payloadcms/payload/issues/3492)) ([e311e8f](https://github.com/payloadcms/payload/commit/e311e8fff9cd4264d7a71903f63c4fa825a3564d))
+* blocks within groups in postgres ([45a62ba](https://github.com/payloadcms/payload/commit/45a62ba949aca33b25e0808773a5c2f1cf4adf82))
+* bug with seeding ecommerce ([993568a](https://github.com/payloadcms/payload/commit/993568a1959ea10f960e35e4ed7a8e06af672a72))
+* corrects add block index ([#3681](https://github.com/payloadcms/payload/issues/3681)) ([3c50443](https://github.com/payloadcms/payload/commit/3c5044368d5b30c76a2ff20c25b9234ef89dc205))
+* misc upload crop/focal point updates ([#3580](https://github.com/payloadcms/payload/issues/3580)) ([d616772](https://github.com/payloadcms/payload/commit/d6167727401a01282345e63636560e029ae8e0f3))
+* renders mobile document controls ([#3695](https://github.com/payloadcms/payload/issues/3695)) ([1625ff2](https://github.com/payloadcms/payload/commit/1625ff244e6e81e6edc0357037c3abc1a3bf8ba7))
+* some local operations missing req.transactionID ([#3651](https://github.com/payloadcms/payload/issues/3651)) ([150799e](https://github.com/payloadcms/payload/commit/150799e10e580281d1af49388eb142ee9639a002))
+* **richtext-*:** extra fields not being iterated correctly ([#3693](https://github.com/payloadcms/payload/issues/3693)) ([b8a5866](https://github.com/payloadcms/payload/commit/b8a58666e70f604af1e1cf349bcb4f9add0147e7))
+* **richtext-*:** link drawer form receiving incorrect field schema ([#3696](https://github.com/payloadcms/payload/issues/3696)) ([cb39354](https://github.com/payloadcms/payload/commit/cb39354a9de3d20960110e453f62c4aa166d8448))
+* **richtext-lexical:** [#3682](https://github.com/payloadcms/payload/issues/3682) isolated editor container causing z-index issues ([24918fe](https://github.com/payloadcms/payload/commit/24918fe1d2ca251e211632765d370c214cef2a38))
+* **templates:** user access control ([#3712](https://github.com/payloadcms/payload/issues/3712)) ([8b8ceab](https://github.com/payloadcms/payload/commit/8b8ceabbdd6354761e7d744cacb1192cac3a2427))
+
+
 ## [2.0.6](https://github.com/payloadcms/payload/compare/v2.0.5...v2.0.6) (2023-10-14)
 
 ### Bug Fixes
