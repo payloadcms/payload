@@ -7,7 +7,9 @@ export { configToJSONSchema, entityToJSONSchema } from '../utilities/configToJSO
 
 export { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated'
 export { deepCopyObject } from '../utilities/deepCopyObject'
+
 export { deepMerge } from '../utilities/deepMerge'
+export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON'
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields'
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels'
 export { getIDType } from '../utilities/getIDType'
