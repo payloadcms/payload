@@ -1,3 +1,4 @@
+import type { TransactionOptions } from 'mongodb'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
@@ -5,8 +6,6 @@ import type { BaseDatabaseAdapter } from 'payload/database'
 import mongoose from 'mongoose'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
-
-export type { MigrateDownArgs, MigrateUpArgs } from './types'
 
 import type { CollectionModel, GlobalModel } from './types'
 
@@ -38,6 +37,8 @@ import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateOne } from './updateOne'
 import { updateVersion } from './updateVersion'
 
+export type { MigrateDownArgs, MigrateUpArgs } from './types'
+
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
@@ -47,6 +48,10 @@ export interface Args {
     useFacet?: boolean
   }
   migrationDir?: string
+  /**
+   * set to false to disable using transactions
+   */
+  transactions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
@@ -60,6 +65,7 @@ export type MongooseAdapter = BaseDatabaseAdapter &
     globals: GlobalModel
     mongoMemoryServer: any
     sessions: Record<number | string, ClientSession>
+    transactionOptions: TransactionOptions | false
     versions: {
       [slug: string]: CollectionModel
     }
@@ -70,7 +76,7 @@ type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
 declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<BaseDatabaseAdapter, 'sessions'>,
-      Omit<Args, 'migrationDir'> {
+      Omit<Args, 'migrationDir' | 'transactions'> {
     collections: {
       [slug: string]: CollectionModel
     }
@@ -88,6 +94,7 @@ export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
   migrationDir: migrationDirArg,
+  transactions,
   url,
 }: Args): MongooseAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
@@ -108,6 +115,12 @@ export function mongooseAdapter({
       globals: undefined,
       mongoMemoryServer: undefined,
       sessions: {},
+      transactionOptions: transactions ?? {
+        readConcern: { level: 'local' },
+        // TODO: this needs to be dynamic based on the operation
+        readPreference: 'nearest',
+        // readPreference: 'primary', // primary for write
+      },
       url,
       versions: {},
 

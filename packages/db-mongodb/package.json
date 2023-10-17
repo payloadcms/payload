@@ -29,9 +29,12 @@
     "prompts": "2.4.2",
     "uuid": "9.0.0"
   },
+  "peerDependencies": {
+  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
+    "mongodb": "^6.1.0",
     "mongodb-memory-server": "8.13.0",
     "payload": "workspace:*"
   },

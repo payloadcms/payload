@@ -7,6 +7,12 @@ module.exports = {
       files: ['*.js', '*.cjs', '*.json', '*.md', '*.yml', '*.yaml'],
     },
     {
+      files: ['**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-redundant-type-constituents': 'off',
+      },
+    },
+    {
       files: ['package.json', 'tsconfig.json'],
       rules: {
         'perfectionist/sort-array-includes': 'off',

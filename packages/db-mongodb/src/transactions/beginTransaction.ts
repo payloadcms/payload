@@ -1,4 +1,3 @@
-// @ts-expect-error // TODO: Fix this import
 import type { TransactionOptions } from 'mongodb'
 import type { BeginTransaction } from 'payload/database'
 
@@ -7,8 +6,11 @@ import { v4 as uuid } from 'uuid'
 
 let transactionsNotAvailable: boolean
 export const beginTransaction: BeginTransaction = async function beginTransaction(
-  options: TransactionOptions = {},
+  options?: TransactionOptions,
 ) {
+  if (this.transactionOptions === false) {
+    return null
+  }
   let id = null
   if (!this.connection) {
     throw new APIError('beginTransaction called while no connection to the database exists')
@@ -27,7 +29,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
     if (this.sessions[id].inTransaction()) {
       this.payload.logger.warn('beginTransaction called while transaction already exists')
     } else {
-      await this.sessions[id].startTransaction(options)
+      await this.sessions[id].startTransaction(options || this.transactionOptions)
     }
   }
   return id
