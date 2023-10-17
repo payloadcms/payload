@@ -17,47 +17,17 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import Meta from '../../utilities/Meta'
 import { SetStepNav } from '../collections/Edit/SetStepNav'
+import { LivePreviewProvider } from './Context'
+import { useLivePreviewContext } from './Context/context'
 import { LivePreview } from './Preview'
 import './index.scss'
 import { usePopupWindow } from './usePopupWindow'
 
 const baseClass = 'live-preview'
 
-export const LivePreviewView: React.FC<EditViewProps> = (props) => {
+const PreviewView: React.FC<EditViewProps> = (props) => {
   const { i18n, t } = useTranslation('general')
-  const config = useConfig()
-  const documentInfo = useDocumentInfo()
-  const locale = useLocale()
-
-  let livePreviewConfig: LivePreviewConfig = config?.admin?.livePreview
-
-  if ('collection' in props) {
-    livePreviewConfig = {
-      ...(livePreviewConfig || {}),
-      ...(props?.collection.admin.livePreview || {}),
-    }
-  }
-
-  if ('global' in props) {
-    livePreviewConfig = {
-      ...(livePreviewConfig || {}),
-      ...(props?.global.admin.livePreview || {}),
-    }
-  }
-
-  const url =
-    typeof livePreviewConfig?.url === 'function'
-      ? livePreviewConfig?.url({
-          data: props?.data,
-          documentInfo,
-          locale,
-        })
-      : livePreviewConfig?.url
-
-  const popupState = usePopupWindow({
-    eventType: 'payload-live-preview',
-    url,
-  })
+  const { previewWindowType } = useLivePreviewContext()
 
   const { apiURL, data, permissions } = props
 
@@ -113,14 +83,14 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
         permissions={permissions}
       />
       <div
-        className={[baseClass, popupState?.isPopupOpen && `${baseClass}--detached`]
+        className={[baseClass, previewWindowType === 'popup' && `${baseClass}--detached`]
           .filter(Boolean)
           .join(' ')}
       >
         <div
           className={[
             `${baseClass}__main`,
-            popupState?.isPopupOpen && `${baseClass}__main--popup-open`,
+            previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
           ]
             .filter(Boolean)
             .join(' ')}
@@ -148,13 +118,66 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
             )}
           </Gutter>
         </div>
-        <LivePreview
-          {...props}
-          livePreviewConfig={livePreviewConfig}
-          popupState={popupState}
-          url={url}
-        />
+        <LivePreview {...props} />
       </div>
     </Fragment>
+  )
+}
+
+export const LivePreviewView: React.FC<EditViewProps> = (props) => {
+  const config = useConfig()
+  const documentInfo = useDocumentInfo()
+  const locale = useLocale()
+
+  let livePreviewConfig: LivePreviewConfig = config?.admin?.livePreview
+
+  if ('collection' in props) {
+    livePreviewConfig = {
+      ...(livePreviewConfig || {}),
+      ...(props?.collection.admin.livePreview || {}),
+    }
+  }
+
+  if ('global' in props) {
+    livePreviewConfig = {
+      ...(livePreviewConfig || {}),
+      ...(props?.global.admin.livePreview || {}),
+    }
+  }
+
+  const url =
+    typeof livePreviewConfig?.url === 'function'
+      ? livePreviewConfig?.url({
+          data: props?.data,
+          documentInfo,
+          locale,
+        })
+      : livePreviewConfig?.url
+
+  const breakpoints: LivePreviewConfig['breakpoints'] = [
+    ...(livePreviewConfig?.breakpoints || []),
+    {
+      name: 'responsive',
+      height: '100%',
+      label: 'Responsive',
+      width: '100%',
+    },
+  ]
+
+  const { isPopupOpen, popupRef } = usePopupWindow({
+    eventType: 'payload-live-preview',
+    url,
+  })
+
+  return (
+    <LivePreviewProvider
+      {...props}
+      breakpoints={breakpoints}
+      isPopupOpen={isPopupOpen}
+      popupRef={popupRef}
+      url={url}
+    >
+      <PreviewView {...props} />
+    </LivePreviewProvider>
   )
 }

@@ -20,16 +20,13 @@ export const usePopupWindow = (props: {
 }): {
   isPopupOpen: boolean
   openPopupWindow: (e: React.MouseEvent<HTMLAnchorElement>) => void
-  popupHasLoaded: boolean
   popupRef?: React.MutableRefObject<Window | null>
 } => {
   const { eventType, onMessage, url } = props
   const isReceivingMessage = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [popupHasLoaded, setPopupHasLoaded] = useState(false)
   const { serverURL } = useConfig()
   const popupRef = useRef<Window | null>(null)
-  const hasAttachedMessageListener = useRef(false)
 
   // Optionally broadcast messages back out to the parent component
   useEffect(() => {
@@ -106,27 +103,6 @@ export const usePopupWindow = (props: {
     [url],
   )
 
-  // the only cross-origin way of detecting when a popup window has loaded
-  // we catch a message event that the site rendered within the popup window fires
-  // there is no way in js to add an event listener to a popup window across domains
-  useEffect(() => {
-    if (hasAttachedMessageListener.current) return
-    hasAttachedMessageListener.current = true
-
-    window.addEventListener('message', (event) => {
-      const data = JSON.parse(event.data)
-
-      if (
-        url.startsWith(event.origin) &&
-        data.type === eventType &&
-        data.popupReady &&
-        !popupHasLoaded
-      ) {
-        setPopupHasLoaded(true)
-      }
-    })
-  }, [url, eventType, popupHasLoaded])
-
   // this is the most stable and widely supported way to check if a popup window is no longer open
   // we poll its ref every x ms and use the popup window's `closed` property
   useEffect(() => {
@@ -137,7 +113,6 @@ export const usePopupWindow = (props: {
         if (popupRef.current.closed) {
           clearInterval(timer)
           setIsOpen(false)
-          setPopupHasLoaded(false)
         }
       }, 1000)
     } else {
@@ -154,7 +129,6 @@ export const usePopupWindow = (props: {
   return {
     isPopupOpen: isOpen,
     openPopupWindow,
-    popupHasLoaded,
     popupRef,
   }
 }

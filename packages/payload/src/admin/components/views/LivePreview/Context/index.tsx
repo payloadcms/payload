@@ -1,45 +1,68 @@
 import { DndContext } from '@dnd-kit/core'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { LivePreviewConfig } from '../../../../../exports/config'
+import type { Field } from '../../../../../fields/config/types'
 import type { EditViewProps } from '../../types'
-import type { usePopupWindow } from '../usePopupWindow'
 
+import { fieldSchemaToJSON } from '../../../../../utilities/fieldSchemaToJSON'
 import { customCollisionDetection } from './collisionDetection'
 import { LivePreviewContext } from './context'
 import { sizeReducer } from './sizeReducer'
 
-export type ToolbarProviderProps = EditViewProps & {
+export type LivePreviewProviderProps = EditViewProps & {
+  appIsReady?: boolean
   breakpoints?: LivePreviewConfig['breakpoints']
   children: React.ReactNode
   deviceSize?: {
     height: number
     width: number
   }
-  popupState: ReturnType<typeof usePopupWindow>
+  isPopupOpen?: boolean
+  popupRef?: React.MutableRefObject<Window>
   url?: string
 }
 
-export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
-  const { breakpoints, children } = props
+export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) => {
+  const { breakpoints, children, isPopupOpen, popupRef, url } = props
+
+  const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
+
+  const [appIsReady, setAppIsReady] = useState(false)
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
-  const [iframeHasLoaded, setIframeHasLoaded] = React.useState(false)
+  const [iframeHasLoaded, setIframeHasLoaded] = useState(false)
 
-  const [zoom, setZoom] = React.useState(1)
+  const [zoom, setZoom] = useState(1)
 
-  const [position, setPosition] = React.useState({ x: 0, y: 0 })
+  const [position, setPosition] = useState({ x: 0, y: 0 })
 
   const [size, setSize] = React.useReducer(sizeReducer, { height: 0, width: 0 })
 
-  const [measuredDeviceSize, setMeasuredDeviceSize] = React.useState({
+  const [measuredDeviceSize, setMeasuredDeviceSize] = useState({
     height: 0,
     width: 0,
   })
 
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
+
+  const [fieldSchemaJSON] = useState(() => {
+    let fields: Field[]
+
+    if ('collection' in props) {
+      const { collection } = props
+      fields = collection.fields
+    }
+
+    if ('global' in props) {
+      const { global } = props
+      fields = global.fields
+    }
+
+    return fieldSchemaToJSON(fields)
+  })
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
@@ -94,24 +117,52 @@ export const LivePreviewProvider: React.FC<ToolbarProviderProps> = (props) => {
     }
   }, [breakpoint, breakpoints])
 
+  // Receive the `ready` message from the popup window
+  // This indicates that the app is ready to receive `window.postMessage` events
+  // This is also the only cross-origin way of detecting when a popup window has loaded
+  // Unlike iframe elements which have an `onLoad` handler, there is no way to access `window.open` on popups
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data)
+
+      if (url.startsWith(event.origin) && data.type === 'payload-live-preview' && data.ready) {
+        setAppIsReady(true)
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [url])
+
   return (
     <LivePreviewContext.Provider
       value={{
+        appIsReady,
         breakpoint,
         breakpoints,
+        fieldSchemaJSON,
         iframeHasLoaded,
         iframeRef,
+        isPopupOpen,
         measuredDeviceSize,
+        popupRef,
+        previewWindowType,
+        setAppIsReady,
         setBreakpoint,
         setHeight,
         setIframeHasLoaded,
         setMeasuredDeviceSize,
+        setPreviewWindowType,
         setSize,
         setToolbarPosition: setPosition,
         setWidth,
         setZoom,
         size,
         toolbarPosition: position,
+        url,
         zoom,
       }}
     >

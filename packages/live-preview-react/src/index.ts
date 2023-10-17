@@ -19,13 +19,13 @@ export const useLivePreview = <T extends any>(props: {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const hasSentReadyMessage = useRef<boolean>(false)
 
-  const onChange = useCallback((mergedData) => {
+  const onChange = useCallback((mergedData: T) => {
     setData(mergedData)
     setIsLoading(false)
   }, [])
 
   useEffect(() => {
-    const subscription = subscribe({
+    const subscription = subscribe<T>({
       callback: onChange,
       depth,
       initialData,
