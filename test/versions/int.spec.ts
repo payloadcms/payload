@@ -241,7 +241,7 @@ describe('Versions', () => {
     })
 
     describe('Restore', () => {
-      it('should versions be in correct order', async () => {
+      it('should return findVersions in correct order', async () => {
         const somePost = await payload.create({
           collection: draftSlug,
           data: {
@@ -251,7 +251,7 @@ describe('Versions', () => {
         })
 
         const updatedPost = await payload.update({
-          id: collectionLocalPostID,
+          id: somePost.id,
           collection: draftSlug,
           data: {
             title: 'This should be the latest version',
@@ -260,6 +260,9 @@ describe('Versions', () => {
 
         const versions = await payload.findVersions({
           collection: draftSlug,
+          where: {
+            parent: { equals: somePost.id },
+          },
         })
 
         expect(versions.docs[0].version.title).toBe(updatedPost.title)
