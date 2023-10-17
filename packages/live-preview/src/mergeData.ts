@@ -1,9 +1,11 @@
+import type { fieldSchemaToJSON } from 'payload/utilities'
+
 import { traverseFields } from './traverseFields'
 
 export type MergeLiveDataArgs<T> = {
   apiRoute?: string
   depth: number
-  fieldSchema: Record<string, unknown>[]
+  fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
   initialData: T
   serverURL: string
