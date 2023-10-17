@@ -16,7 +16,6 @@ export default function parseCookies(req: Request): { [key: string]: string } {
       } catch (e) {
         console.error(`Error decoding cookie value for key ${key}: ${e}`)
       }
-      list[parts.shift().trim()] = decodeURI(parts.join('='))
     })
   }
 
