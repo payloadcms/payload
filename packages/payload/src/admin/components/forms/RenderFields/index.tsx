@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
@@ -44,6 +44,14 @@ const RenderFields: React.FC<Props> = (props) => {
   const shouldRender = forceRender || isIntersecting || isAboveViewport
   const operation = useOperation()
 
+  const actualDivRef = useRef(null)
+
+  useEffect(() => {
+    if (!forceRender && actualDivRef.current) {
+      intersectionRef(actualDivRef.current)
+    }
+  }, [forceRender, actualDivRef, intersectionRef])
+
   useEffect(() => {
     if (shouldRender && !hasRendered) {
       setHasRendered(true)
@@ -76,7 +84,7 @@ const RenderFields: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        ref={intersectionRef}
+        ref={actualDivRef}
       >
         {hasRendered &&
           fieldsToRender.map((reducedField, fieldIndex) => {
