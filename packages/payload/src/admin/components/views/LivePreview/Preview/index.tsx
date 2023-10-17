@@ -25,7 +25,8 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
 
   const { breakpoint, fieldSchemaJSON } = useLivePreviewContext()
 
-  const hasSentSchema = React.useRef(false)
+  const prevWindowType =
+    React.useRef<ReturnType<typeof useLivePreviewContext>['previewWindowType']>()
 
   const [fields] = useAllFormFields()
 
@@ -38,23 +39,28 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
       const values = reduceFieldsToValues(fields, true)
 
       // To reduce on large `postMessage` payloads, only send `fieldSchemaToJSON` one time
+      // To do this, the underlying JS function maintains a cache of this value
+      // So we need to send it through each time the window type changes
+      // But only once per window type change, not on every render, because this is a potentially large obj
+      const shouldSendSchema =
+        !prevWindowType.current || prevWindowType.current !== previewWindowType
+
+      prevWindowType.current = previewWindowType
+
       const message = JSON.stringify({
         data: values,
-        fieldSchemaJSON: !hasSentSchema.current ? fieldSchemaJSON : undefined,
+        fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
         type: 'payload-live-preview',
       })
 
       // Post message to external popup window
       if (previewWindowType === 'popup' && popupRef.current) {
         popupRef.current.postMessage(message, url)
-        hasSentSchema.current = true
       }
 
       // Post message to embedded iframe
       if (previewWindowType === 'iframe' && iframeRef.current) {
-        console.log('posting to iframe')
         iframeRef.current.contentWindow?.postMessage(message, url)
-        hasSentSchema.current = true
       }
     }
   }, [

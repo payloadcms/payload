@@ -47,8 +47,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
     width: 0,
   })
 
-  const openPopupOnceAppDisabled = useRef(false)
-
   const [breakpoint, setBreakpoint] =
     React.useState<LivePreviewConfig['breakpoints'][0]['name']>('responsive')
 
@@ -141,21 +139,22 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
     }
   }, [url])
 
-  useEffect(() => {
-    if (openPopupOnceAppDisabled.current) {
-      openPopupWindow()
-      openPopupOnceAppDisabled.current = false
-    }
-  }, [appIsReady, openPopupWindow])
-
-  const handleWindowChange = useCallback((type: 'iframe' | 'popup') => {
-    if (type === 'popup') {
-      openPopupOnceAppDisabled.current = true
+  const handleWindowChange = useCallback(
+    (type: 'iframe' | 'popup') => {
       setAppIsReady(false)
-    }
+      setPreviewWindowType(type)
+      if (type === 'popup') openPopupWindow()
+    },
+    [openPopupWindow],
+  )
 
-    setPreviewWindowType(type)
-  }, [])
+  // when the user closes the popup window, switch back to the iframe
+  // the `usePopupWindow` reports the `isPopupOpen` state for us to use here
+  useEffect(() => {
+    if (!isPopupOpen) {
+      handleWindowChange('iframe')
+    }
+  }, [isPopupOpen, handleWindowChange])
 
   return (
     <LivePreviewContext.Provider
