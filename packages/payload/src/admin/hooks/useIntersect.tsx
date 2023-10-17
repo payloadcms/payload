@@ -3,7 +3,10 @@ import { useEffect, useRef, useState } from 'react'
 
 type Intersect = [setNode: React.Dispatch<Element>, entry: IntersectionObserverEntry]
 
-const useIntersect = ({ root = null, rootMargin = '0px', threshold = 0 } = {}): Intersect => {
+const useIntersect = (
+  { root = null, rootMargin = '0px', threshold = 0 } = {},
+  disable?: boolean,
+): Intersect => {
   const [entry, updateEntry] = useState<IntersectionObserverEntry>()
   const [node, setNode] = useState(null)
 
@@ -16,13 +19,16 @@ const useIntersect = ({ root = null, rootMargin = '0px', threshold = 0 } = {}): 
   )
 
   useEffect(() => {
+    if (disable) {
+      return
+    }
     const { current: currentObserver } = observer
     currentObserver.disconnect()
 
     if (node) currentObserver.observe(node)
 
     return () => currentObserver.disconnect()
-  }, [node])
+  }, [node, disable])
 
   return [setNode, entry]
 }

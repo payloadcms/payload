@@ -37,20 +37,12 @@ const RenderFields: React.FC<Props> = (props) => {
 
   const { i18n, t } = useTranslation('general')
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
-  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions)
+  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions, forceRender)
 
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0
   const shouldRender = forceRender || isIntersecting || isAboveViewport
   const operation = useOperation()
-
-  const actualDivRef = useRef(null)
-
-  useEffect(() => {
-    if (!forceRender && actualDivRef.current) {
-      intersectionRef(actualDivRef.current)
-    }
-  }, [forceRender, actualDivRef, intersectionRef])
 
   useEffect(() => {
     if (shouldRender && !hasRendered) {
@@ -84,7 +76,7 @@ const RenderFields: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        ref={actualDivRef}
+        ref={intersectionRef}
       >
         {hasRendered &&
           fieldsToRender.map((reducedField, fieldIndex) => {
