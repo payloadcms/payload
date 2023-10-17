@@ -32,6 +32,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     admin: { className, components, condition, description, readOnly },
     fieldTypes,
     fields,
+    forceRender = false,
     indexPath,
     localized,
     maxRows,
@@ -234,6 +235,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   duplicateRow={duplicateRow}
                   fieldTypes={fieldTypes}
                   fields={fields}
+                  forceRender={forceRender}
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
                   labels={labels}

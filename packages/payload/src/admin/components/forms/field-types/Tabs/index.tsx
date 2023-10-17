@@ -18,9 +18,9 @@ import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { TabsProvider } from './provider'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'tabs-field'
 
@@ -72,6 +72,7 @@ const TabsField: React.FC<Props> = (props) => {
   const {
     admin: { className, readOnly },
     fieldTypes,
+    forceRender = false,
     indexPath,
     path,
     permissions,
@@ -188,7 +189,7 @@ const TabsField: React.FC<Props> = (props) => {
                     }
                   })}
                   fieldTypes={fieldTypes}
-                  forceRender
+                  forceRender={forceRender}
                   indexPath={indexPath}
                   key={String(activeTabConfig.label)}
                   margins="small"

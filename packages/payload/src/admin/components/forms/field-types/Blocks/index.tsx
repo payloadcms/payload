@@ -37,6 +37,7 @@ const BlocksField: React.FC<Props> = (props) => {
     admin: { className, condition, description, readOnly },
     blocks,
     fieldTypes,
+    forceRender = false,
     indexPath,
     label,
     labels: labelsFromProps,
@@ -238,6 +239,7 @@ const BlocksField: React.FC<Props> = (props) => {
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       fieldTypes={fieldTypes}
+                      forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}
                       labels={labels}

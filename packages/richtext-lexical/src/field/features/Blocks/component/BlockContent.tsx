@@ -163,6 +163,7 @@ export const BlockContent: React.FC<Props> = (props) => {
             path: createNestedFieldPath(null, field),
           }))}
           fieldTypes={field.fieldTypes}
+          forceRender
           margins="small"
           permissions={field.permissions?.blocks?.[fields?.data?.blockType]?.fields}
           readOnly={field.admin.readOnly}

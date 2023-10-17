@@ -24,6 +24,7 @@ type ArrayRowProps = UseDraggableSortableReturn &
     CustomRowLabel?: RowLabelType
     addRow: (rowIndex: number) => void
     duplicateRow: (rowIndex: number) => void
+    forceRender?: boolean
     hasMaxRows?: boolean
     moveRow: (fromIndex: number, toIndex: number) => void
     readOnly?: boolean
@@ -40,6 +41,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   duplicateRow,
   fieldTypes,
   fields,
+  forceRender = false,
   hasMaxRows,
   indexPath,
   labels,
@@ -126,10 +128,11 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             path: createNestedFieldPath(path, field),
           }))}
           fieldTypes={fieldTypes}
+          forceRender={forceRender}
           indexPath={indexPath}
+          margins="small"
           permissions={permissions?.fields}
           readOnly={readOnly}
-          margins="small"
         />
       </Collapsible>
     </div>
