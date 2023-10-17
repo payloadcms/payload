@@ -1,0 +1,42 @@
+{
+  "name": "@payloadcms/plugin-nested-docs",
+  "version": "1.0.8",
+  "description": "The official Nested Docs plugin for Payload",
+  "repository": "https://github.com/payloadcms/payload",
+  "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "author": "Payload CMS, Inc.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "exports": null,
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
+  },
+  "files": [
+    "dist",
+    "fields.js",
+    "fields.d.ts",
+    "types.js",
+    "types.d.ts"
+  ]
+}

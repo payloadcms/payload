@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
@@ -37,7 +37,7 @@ const RenderFields: React.FC<Props> = (props) => {
 
   const { i18n, t } = useTranslation('general')
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
-  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions)
+  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions, forceRender)
 
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0
@@ -105,6 +105,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       readOnly,
                     },
                     fieldTypes,
+                    forceRender,
                     indexPath:
                       'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
                     path: field.path || (isFieldAffectingData && 'name' in field ? field.name : ''),

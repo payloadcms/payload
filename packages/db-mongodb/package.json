@@ -35,6 +35,9 @@
     "mongodb-memory-server": "8.13.0",
     "payload": "workspace:*"
   },
+  "peerDependencies": {
+    "payload": "^2.0.0"
+  },
   "publishConfig": {
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",

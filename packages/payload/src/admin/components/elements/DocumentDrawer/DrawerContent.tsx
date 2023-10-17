@@ -1,4 +1,5 @@
 import { useModal } from '@faceless-ui/modal'
+import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
@@ -16,6 +17,7 @@ import X from '../../icons/X'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useFormQueryParams } from '../../utilities/FormQueryParams'
 import { useLocale } from '../../utilities/Locale'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import DefaultEdit from '../../views/collections/Edit/Default'
@@ -42,6 +44,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const config = useConfig()
+  const { formQueryParams } = useFormQueryParams()
+  const formattedQueryParams = queryString.stringify(formQueryParams)
 
   const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
 
@@ -117,8 +121,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}` : null
 
   const action = `${serverURL}${api}/${collectionSlug}${
-    id ? `/${id}` : ''
-  }?locale=${locale}&fallback-locale=null`
+    isEditing ? `/${id}` : ''
+  }?${formattedQueryParams}`
 
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||

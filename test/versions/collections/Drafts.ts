@@ -82,6 +82,33 @@ const DraftPosts: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'cta',
+          fields: [
+            {
+              name: 'linkGroup',
+              type: 'group',
+              fields: [
+                {
+                  name: 'links',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'url',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

@@ -913,4 +913,19 @@ describe('Fields', () => {
       expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
     })
   })
+
+  describe('relationships', () => {
+    it('should not crash if querying with empty in operator', async () => {
+      const query = await payload.find({
+        collection: 'relationship-fields',
+        where: {
+          'relationship.value': {
+            in: [],
+          },
+        },
+      })
+
+      expect(query.docs).toBeDefined()
+    })
+  })
 })

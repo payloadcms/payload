@@ -17,6 +17,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "sourceMap": true,
     "isolatedModules": true,
     "plugins": [
       {

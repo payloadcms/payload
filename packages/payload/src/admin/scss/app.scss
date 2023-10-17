@@ -40,23 +40,18 @@
   --spacing-view-bottom: var(--gutter-h);
   --app-header-height: calc(var(--base) * 3);
   --doc-controls-height: calc(var(--base) * 3);
-  --nav-width: 300px;
+  --nav-width: 275px;
   --nav-trans-time: 150ms;
 
   @include mid-break {
     --gutter-h: #{base(2)};
     --app-header-height: calc(var(--base) * 2);
-    --doc-controls-height: calc(var(--base) * 1.5);
-    // set to xs-breakpoint to achieve a seamless transition to full screen
-    --nav-width: var(--breakpoint-xs-width);
+    --doc-controls-height: calc(var(--base) * 2.5);
   }
 
   @include small-break {
     --gutter-h: #{base(0.5)};
     --spacing-view-bottom: calc(var(--base) * 2);
-  }
-
-  @include extra-small-break {
     --nav-width: 100vw;
   }
 }

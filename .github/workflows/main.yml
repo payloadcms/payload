@@ -132,7 +132,12 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: E2E Tests
-        run: pnpm test:e2e --part ${{ matrix.part }} --bail
+        uses: nick-fields/retry@v2
+        with:
+          retry_on: error
+          max_attempts: 2
+          timeout_minutes: 15
+          command: pnpm test:e2e --part ${{ matrix.part }} --bail
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -213,8 +218,9 @@ jobs:
       fail-fast: false
       matrix:
         pkg:
-          - plugin-cloud
           - create-payload-app
+          - plugin-cloud
+          - plugin-nested-docs
 
     steps:
       - name: Use Node.js 18

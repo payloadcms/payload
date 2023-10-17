@@ -201,7 +201,7 @@ export const Upload: React.FC<Props> = (props) => {
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: doc?.filename })}
         >
-          <PreviewSizes collection={collection} doc={doc} updatedAt={updatedAt} />
+          <PreviewSizes collection={collection} doc={doc} />
         </Drawer>
       )}
     </div>

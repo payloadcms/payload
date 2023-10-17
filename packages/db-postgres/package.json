@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "description": "The officially supported Postgres database adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -33,6 +33,9 @@
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "^2.0.0"
   },
   "publishConfig": {
     "main": "./dist/index.js",

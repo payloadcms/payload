@@ -333,7 +333,7 @@
     "currentDocumentStatus": "جاری {{docStatus}} سند",
     "draft": "پیش‌نویس",
     "draftSavedSuccessfully": "پیش‌نویس با موفقیت ذخیره شد.",
-    "lastSavedAgo": "آخرین ذخیره‌سازی {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "آخرین بار {{distance}} پیش ذخیره شد",
     "noFurtherVersionsFound": "نگارش دیگری یافت نشد",
     "noRowsFound": "هیچ {{label}} یافت نشد",
     "preview": "پیش‌نمایش",

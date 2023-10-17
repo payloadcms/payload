@@ -32,7 +32,6 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
     internalState,
     isEditing,
     permissions,
-    updatedAt,
   } = props
 
   const { auth, fields, upload } = collection
@@ -97,9 +96,7 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
                 verify={auth.verify}
               />
             )}
-            {upload && (
-              <Upload collection={collection} internalState={internalState} updatedAt={updatedAt} />
-            )}
+            {upload && <Upload collection={collection} internalState={internalState} />}
             <RenderFields
               className={`${baseClass}__fields`}
               fieldSchema={fields}

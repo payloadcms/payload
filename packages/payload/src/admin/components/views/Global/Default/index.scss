@@ -3,13 +3,10 @@
 .global-default-edit {
   width: 100%;
   display: flex;
+  --doc-sidebar-width: 325px;
 
   &--has-sidebar {
     .global-default-edit {
-      &__main {
-        width: 66.66%;
-      }
-
       &__edit {
         [dir='ltr'] & {
           top: 0;
@@ -40,6 +37,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100%;
+    flex-grow: 1;
   }
 
   &__edit {
@@ -48,11 +46,16 @@
     flex-grow: 1;
   }
 
+  &__auth {
+    margin-bottom: var(--base);
+  }
+
   &__sidebar-wrap {
     position: sticky;
     top: var(--doc-controls-height);
     width: 33.33%;
     height: calc(100vh - var(--doc-controls-height));
+    min-width: var(--doc-sidebar-width);
   }
 
   &__sidebar {
@@ -71,22 +74,14 @@
     display: flex;
     flex-direction: column;
     gap: var(--base);
-    padding: calc(var(--base) * 1.5) var(--gutter-h) var(--spacing-view-bottom)
-      calc(var(--base) * 2);
+    padding-top: calc(var(--base) * 1.5);
+    padding-left: calc(var(--base) * 2);
+    padding-right: var(--gutter-h);
+    padding-bottom: var(--spacing-view-bottom);
   }
 
   &__label {
     color: var(--theme-elevation-400);
-  }
-
-  @include large-break {
-    &--no-sidebar {
-      .global-default-edit {
-        &__main {
-          width: 100%;
-        }
-      }
-    }
   }
 
   @include mid-break {
@@ -130,6 +125,7 @@
       height: initial;
       border-left: 0;
       margin-top: calc(var(--base) / 2);
+      width: var(--doc-sidebar-width);
     }
 
     &__form {
@@ -158,6 +154,11 @@
   }
 
   @include small-break {
+    &__sidebar-wrap {
+      min-width: initial;
+      width: 100%;
+    }
+
     &__edit {
       padding-top: calc(var(--base) / 2);
     }

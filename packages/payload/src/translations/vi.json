@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Trạng thái tài liệu hiện tại: {{docStatus}}",
     "draft": "Bản nháp",
     "draftSavedSuccessfully": "Bản nháp đã được lưu thành công.",
-    "lastSavedAgo": "Bản lưu mới nhất: {{distance, relativetime(minutes)}} trước",
+    "lastSavedAgo": "Lần lưu cuối cùng {{distance}} trước đây",
     "noFurtherVersionsFound": "Không tìm thấy phiên bản cũ hơn",
     "noRowsFound": "Không tìm thấy: {{label}}",
     "preview": "Bản xem trước",

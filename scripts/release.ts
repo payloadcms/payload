@@ -4,32 +4,54 @@ import chalk from 'chalk'
 import prompts from 'prompts'
 import minimist from 'minimist'
 import chalkTemplate from 'chalk-template'
+import { PackageDetails, getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
+import semver from 'semver'
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
 async function main() {
-  const { _: packageNames, tag = 'latest', bump = 'patch' } = args
+  const { tag = 'latest', bump = 'patch' } = args
 
-  if (packageNames.length === 0) {
+  if (!semver.RELEASE_TYPES.includes(bump)) {
+    abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
+  }
+
+  const packageDetails = await getPackageDetails()
+  showPackageDetails(packageDetails)
+
+  const { packagesToRelease } = (await prompts({
+    type: 'multiselect',
+    name: 'packagesToRelease',
+    message: 'Select packages to release',
+    instructions: 'Space to select. Enter to submit.',
+    choices: packageDetails.map((p) => {
+      const title = p?.newCommits ? chalk.bold.green(p?.shortName) : p?.shortName
+      return {
+        title,
+        value: p.shortName,
+      }
+    }),
+  })) as { packagesToRelease: string[] }
+
+  if (!packagesToRelease) {
+    abort()
+  }
+
+  if (packagesToRelease.length === 0) {
     abort('Please specify a package to publish')
   }
 
-  if (packageNames.find((p) => p === 'payload' && packageNames.length > 1)) {
-    abort('Cannot publish payload with other packages')
+  if (packagesToRelease.find((p) => p === 'payload' && packagesToRelease.length > 1)) {
+    abort('Cannot publish payload with other packages. Release Payload first.')
   }
 
-  // Get current version of each package from package.json
-  const packageDetails = await Promise.all(
-    packageNames.map(async (packageName) => {
-      const packageDir = `packages/${packageName}`
-      if (!(await fse.pathExists(packageDir))) {
-        abort(`Package path ${packageDir} does not exist`)
-      }
-      const packageObj = await fse.readJson(`${packageDir}/package.json`)
-
-      return { name: packageName, version: packageObj.version, dir: packageDir }
-    }),
+  const packageMap = packageDetails.reduce(
+    (acc, p) => {
+      acc[p.shortName] = p
+      return acc
+    },
+    {} as Record<string, PackageDetails>,
   )
 
   console.log(chalkTemplate`
@@ -38,10 +60,15 @@ async function main() {
   {bold.yellow Bump: ${bump}}
   {bold.yellow Tag: ${tag}}
 
-${packageDetails.map((p) => `  ${p.name} - current: ${p.version}`).join('\n')}
+${packagesToRelease
+  .map((p) => {
+    const { shortName, version } = packageMap[p]
+    return `  ${shortName.padEnd(24)} ${version} -> ${semver.inc(version, bump)}`
+  })
+  .join('\n')}
 `)
 
-  const confirmPublish = await confirm(`Publish ${packageNames.length} package(s)?`)
+  const confirmPublish = await confirm(`Publish ${packagesToRelease.length} package(s)?`)
 
   if (!confirmPublish) {
     abort()
@@ -49,26 +76,35 @@ ${packageDetails.map((p) => `  ${p.name} - current: ${p.version}`).join('\n')}
 
   const results: { name: string; success: boolean }[] = []
 
-  for (const pkg of packageDetails) {
-    const { dir, name } = pkg
+  for (const pkg of packagesToRelease) {
+    const { packagePath, shortName } = packageMap[pkg]
 
     try {
-      console.log(chalk.bold(`\n\nPublishing ${name}...\n\n`))
+      console.log(chalk.bold(`\n\nPublishing ${shortName}...\n\n`))
+      let npmVersionCmd = `npm --no-git-tag-version --prefix ${packagePath} version ${bump}`
+      if (tag !== 'latest') {
+        npmVersionCmd += ` --preid ${tag}`
+      }
+      execSync(npmVersionCmd, execOpts)
+      execSync(`git add ${packagePath}/package.json`, execOpts)
 
-      execSync(`npm --no-git-tag-version --prefix ${dir} version ${bump}`, execOpts)
-      execSync(`git add ${dir}/package.json`, execOpts)
-
-      const packageObj = await fse.readJson(`${dir}/package.json`)
+      const packageObj = await fse.readJson(`${packagePath}/package.json`)
       const newVersion = packageObj.version
 
-      const tagName = `${name}/${newVersion}`
+      const tagName = `${shortName}/${newVersion}`
       execSync(`git commit -m "chore(release): ${tagName}"`, execOpts)
       execSync(`git tag -a ${tagName} -m "${tagName}"`, execOpts)
-      execSync(`pnpm publish -C ${dir} --no-git-checks`, execOpts)
-      results.push({ name, success: true })
+
+      let publishCmd = `pnpm publish -C ${packagePath} --no-git-checks`
+      if (tag !== 'latest') {
+        publishCmd += ` --tag ${tag}`
+      }
+      execSync(publishCmd, execOpts)
+
+      results.push({ name: shortName, success: true })
     } catch (error) {
       console.error(chalk.bold.red(`ERROR: ${error.message}`))
-      results.push({ name, success: false })
+      results.push({ name: shortName, success: false })
     }
   }
 

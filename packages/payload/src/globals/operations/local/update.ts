@@ -18,6 +18,7 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   fallbackLocale?: string
   locale?: string
   overrideAccess?: boolean
+  req?: PayloadRequest
   showHiddenFields?: boolean
   slug: TSlug
   user?: Document
@@ -34,6 +35,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     fallbackLocale = null,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
+    req: incomingReq,
     showHiddenFields,
     slug: globalSlug,
     user,
@@ -53,6 +55,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     payload,
     payloadAPI: 'local',
     t: i18n.t,
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req)

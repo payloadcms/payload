@@ -58,6 +58,9 @@
     "@types/webpack-hot-middleware": "2.25.6",
     "payload": "workspace:*"
   },
+  "peerDependencies": {
+    "payload": "^2.0.0"
+  },
   "publishConfig": {
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",

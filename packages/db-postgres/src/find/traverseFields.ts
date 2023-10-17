@@ -139,7 +139,7 @@ export const traverseFields = ({
                 currentTableName,
                 depth,
                 fields: block.fields,
-                path,
+                path: '',
                 topLevelArgs,
                 topLevelTableName,
               })

@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Document {{docStatus}} actuel",
     "draft": "Brouillon",
     "draftSavedSuccessfully": "Brouillon enregistré avec succès.",
-    "lastSavedAgo": "Enregistré il y a de cela {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Dernière sauvegarde il y a {{distance}}",
     "noFurtherVersionsFound": "Aucune autre version trouvée",
     "noRowsFound": "Aucun(e) {{label}} trouvé(e)",
     "preview": "Aperçu",

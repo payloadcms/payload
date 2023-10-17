@@ -92,6 +92,12 @@
       right: base(2);
     }
 
+    &--nav-open {
+      .app-header__localizer {
+        display: none;
+      }
+    }
+
     &__mobile-nav-toggler {
       display: flex;
       align-items: center;

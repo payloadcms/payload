@@ -1,18 +1,14 @@
 {
   "name": "create-payload-app",
-  "version": "0.5.2",
+  "version": "1.0.0",
   "license": "MIT",
   "bin": {
     "create-payload-app": "bin/cli.js"
   },
   "scripts": {
-    "build": "tsc && pnpm copyfiles",
-    "copyfiles": "copyfiles -u 1 \"src/templates/**\" \"src/lib/common-files/**\" dist",
+    "build": "pnpm build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "clean": "rimraf dist",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.ts\"",
-    "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "lint-staged": "lint-staged --quiet",
     "test": "jest",
     "prepublishOnly": "pnpm test && pnpm clean && pnpm build"
   },

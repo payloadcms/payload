@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Současný {{docStatus}} dokument",
     "draft": "Koncept",
     "draftSavedSuccessfully": "Koncept úspěšně uložen.",
-    "lastSavedAgo": "Naposledy uloženo {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Naposledy uloženo před {{distance}}",
     "noFurtherVersionsFound": "Nenalezeny další verze",
     "noRowsFound": "Nenalezen {{label}}",
     "preview": "Náhled",

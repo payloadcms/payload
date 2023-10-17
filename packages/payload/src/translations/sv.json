@@ -333,7 +333,7 @@
     "currentDocumentStatus": "Nuvarande {{docStatus}} dokument",
     "draft": "Utkast",
     "draftSavedSuccessfully": "Utkastet sparades framgångsrikt.",
-    "lastSavedAgo": "Sparades senast {{distance, relativetime(minutes)}}",
+    "lastSavedAgo": "Senast sparad för {{distance}} sedan",
     "noFurtherVersionsFound": "Inga fler versioner hittades",
     "noRowsFound": "Inga {{label}} hittades",
     "preview": "Förhandsvisa",

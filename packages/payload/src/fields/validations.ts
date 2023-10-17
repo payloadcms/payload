@@ -258,14 +258,18 @@ const validateFilterOptions: Validate = async (
         })
 
         if (valueIDs.length > 0) {
+          const findWhere = {
+            and: [{ id: { in: valueIDs } }],
+          }
+
+          if (optionFilter) findWhere.and.push(optionFilter)
+
           const result = await payload.find({
             collection,
             depth: 0,
             limit: 0,
             pagination: false,
-            where: {
-              and: [{ id: { in: valueIDs } }, optionFilter],
-            },
+            where: findWhere,
           })
 
           options[collection] = result.docs.map((doc) => doc.id)

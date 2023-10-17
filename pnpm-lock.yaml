@@ -60,6 +60,9 @@ importers:
       '@types/react':
         specifier: 18.2.15
         version: 18.2.15
+      '@types/semver':
+        specifier: ^7.5.3
+        version: 7.5.3
       '@types/shelljs':
         specifier: 0.8.12
         version: 0.8.12
@@ -96,6 +99,9 @@ importers:
       glob:
         specifier: 8.1.0
         version: 8.1.0
+      graphql-request:
+        specifier: 6.1.0
+        version: 6.1.0(graphql@16.8.1)
       husky:
         specifier: ^8.0.3
         version: 8.0.3
@@ -138,6 +144,9 @@ importers:
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
+      semver:
+        specifier: ^7.5.4
+        version: 7.5.4
       shelljs:
         specifier: 0.8.5
         version: 0.8.5
@@ -510,7 +519,7 @@ importers:
   packages/live-preview-react:
     dependencies:
       '@payloadcms/live-preview':
-        specifier: workspace:*
+        specifier: workspace:^0.x
         version: link:../live-preview
       react:
         specifier: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -940,9 +949,6 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
-      graphql-request:
-        specifier: 6.1.0
-        version: 6.1.0(graphql@16.8.1)
       mini-css-extract-plugin:
         specifier: 1.6.2
         version: 1.6.2(webpack@5.88.2)
@@ -1034,6 +1040,15 @@ importers:
       webpack:
         specifier: ^5.78.0
         version: 5.88.2(@swc/core@1.3.78)(webpack-cli@4.10.0)
+
+  packages/plugin-nested-docs:
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      payload:
+        specifier: workspace:*
+        version: link:../payload
 
   packages/richtext-lexical:
     dependencies:
@@ -5785,6 +5800,10 @@ packages:
   /@types/semver@7.5.2:
     resolution: {integrity: sha512-7aqorHYgdNO4DM36stTiGO3DvKoex9TQRwsJU6vMaFGyqpBA1MNZkz+PG3gaNUPpTAOYhT1WR7M1JyA3fbS9Cw==}
     dev: false
+
+  /@types/semver@7.5.3:
+    resolution: {integrity: sha512-OxepLK9EuNEIPxWNME+C6WwbRAOOI2o2BaQEGzz5Lu2e4Z5eDnEo+/aVEDMIXywoJitJ7xWd641wrGLZdtwRyw==}
+    dev: true
 
   /@types/send@0.17.1:
     resolution: {integrity: sha512-Cwo8LE/0rnvX7kIIa3QHCkcuF21c05Ayb0ZfxPiv0W8VRiZiNW/WuRupHKpqqGVGf7SUA44QSOUKaEd9lIrd/Q==}
