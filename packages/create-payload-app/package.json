@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "0.5.2",
+  "version": "1.0.0",
   "license": "MIT",
   "bin": {
     "create-payload-app": "bin/cli.js"
