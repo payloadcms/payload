@@ -128,7 +128,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       overwriteExistingFiles,
       req,
-      throwOnMissingFile: !shouldSaveDraft,
+      throwOnMissingFile:
+        !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
     })
 
     data = newFileData
