@@ -136,6 +136,7 @@ jobs:
         with:
           retry_on: error
           max_attempts: 2
+          timeout_minutes: 15
           command: pnpm test:e2e --part ${{ matrix.part }} --bail
 
       - uses: actions/upload-artifact@v3
