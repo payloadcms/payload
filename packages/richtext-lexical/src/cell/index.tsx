@@ -30,14 +30,19 @@ export const RichTextCell: React.FC<
       })
     }
 
+    if (!dataToUse || typeof dataToUse !== 'object') {
+      setPreview('')
+      return
+    }
+
     // If data is from Slate and not Lexical
-    if (dataToUse && Array.isArray(dataToUse) && !('root' in dataToUse)) {
+    if (Array.isArray(dataToUse) && !('root' in dataToUse)) {
       setPreview('')
       return
     }
 
     // If data is from payload-plugin-lexical
-    if (dataToUse && 'jsonContent' in dataToUse) {
+    if ('jsonContent' in dataToUse) {
       setPreview('')
       return
     }

@@ -28,6 +28,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     })
   }
 
+  if (value && typeof value !== 'object') {
+    throw new Error(
+      'The value passed to the Lexical editor is not an object. This is not supported. Please remove the data from the field and start again. This is the value that was passed in: ' +
+        JSON.stringify(value),
+    )
+  }
+
   if (value && Array.isArray(value) && !('root' in value)) {
     throw new Error(
       'You have tried to pass in data from the old, Slate editor, to the new, Lexical editor. This is not supported. There is no automatic conversion from Slate to Lexical data available yet (coming soon). Please remove the data from the field and start again.',
