@@ -14,7 +14,7 @@ import './index.scss'
 
 const baseClass = 'app-header'
 
-export const AppHeader: React.FC = (props) => {
+export const AppHeader: React.FC = () => {
   const { t } = useTranslation()
 
   const {

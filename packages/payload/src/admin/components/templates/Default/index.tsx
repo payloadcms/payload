@@ -26,7 +26,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
 
   const { t } = useTranslation('general')
 
-  const { navOpen, setNavOpen } = useNav()
+  const { navOpen } = useNav()
 
   return (
     <Fragment>
