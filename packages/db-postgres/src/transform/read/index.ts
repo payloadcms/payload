@@ -31,6 +31,7 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
   }
 
   const blocks = createBlocksMap(data)
+  const deletions = []
 
   const result = traverseFields<T>({
     blocks,
@@ -38,6 +39,7 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
     dataRef: {
       id: data.id,
     },
+    deletions,
     fieldPrefix: '',
     fields,
     numbers,
@@ -45,6 +47,8 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
     relationships,
     table: data,
   })
+
+  deletions.forEach((deletion) => deletion())
 
   return result
 }

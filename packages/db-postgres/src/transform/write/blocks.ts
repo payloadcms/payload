@@ -3,11 +3,13 @@ import type { BlockField } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
+import type { PostgresAdapter } from '../../types'
 import type { BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  adapter: PostgresAdapter
   baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
@@ -24,6 +26,7 @@ type Args = {
   }
 }
 export const transformBlocks = ({
+  adapter,
   baseTableName,
   blocks,
   data,
@@ -56,7 +59,20 @@ export const transformBlocks = ({
 
     const blockTableName = `${baseTableName}_blocks_${blockType}`
 
+    const hasUUID = adapter.tables[blockTableName]._uuid
+
+    // If we have declared a _uuid field on arrays,
+    // that means the ID has to be unique,
+    // and our ids within arrays are not unique.
+    // So move the ID to a uuid field for storage
+    // and allow the database to generate a serial id automatically
+    if (hasUUID) {
+      newRow.row._uuid = blockRow.id
+      delete blockRow.id
+    }
+
     traverseFields({
+      adapter,
       arrays: newRow.arrays,
       baseTableName,
       blocks,

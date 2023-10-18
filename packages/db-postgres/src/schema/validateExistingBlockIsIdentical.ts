@@ -22,7 +22,7 @@ export const validateExistingBlockIsIdentical = ({
     const fieldNames = flattenTopLevelFields(block.fields).flatMap((field) => field.name)
 
     Object.keys(table).forEach((fieldName) => {
-      if (!['_locale', '_order', '_parentID', '_path'].includes(fieldName)) {
+      if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
         if (fieldNames.indexOf(fieldName) === -1) {
           throw new InvalidConfiguration(
             `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${fieldName}, while the other block does not.`,
