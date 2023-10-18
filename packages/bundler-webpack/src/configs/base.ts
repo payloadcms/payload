@@ -13,13 +13,17 @@ const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 const nodeModulesPaths = findNodeModules({ cwd: process.cwd(), relative: false })
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => {
-  const nodeModulesPath = nodeModulesPaths.find((p) => {
+  let nodeModulesPath = nodeModulesPaths.find((p) => {
     const guess = path.resolve(p, 'payload/dist/admin')
     if (fs.existsSync(guess)) {
       return true
     }
     return false
   })
+
+  if (!nodeModulesPath) {
+    nodeModulesPath = process.cwd()
+  }
 
   const adminFolderPath = path.resolve(nodeModulesPath, 'payload/dist/admin')
 
