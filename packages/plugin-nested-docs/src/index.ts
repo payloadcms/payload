@@ -1,10 +1,11 @@
 import type { Plugin } from 'payload/config'
 
+import type { PluginConfig } from './types'
+
 import createBreadcrumbsField from './fields/breadcrumbs'
 import createParentField from './fields/parent'
 import resaveChildren from './hooks/resaveChildren'
 import resaveSelfAfterCreate from './hooks/resaveSelfAfterCreate'
-import type { PluginConfig } from './types'
 import populateBreadcrumbs from './utilities/populateBreadcrumbs'
 
 const nestedDocs =

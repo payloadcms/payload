@@ -1,7 +1,7 @@
 export interface Breadcrumb {
-  url?: string
-  label: string
   doc: string
+  label: string
+  url?: string
 }
 
 export type GenerateURL = (
@@ -15,9 +15,9 @@ export type GenerateLabel = (
 ) => string
 
 export interface PluginConfig {
-  collections: string[]
-  generateURL?: GenerateURL
-  generateLabel?: GenerateLabel
-  parentFieldSlug?: string
   breadcrumbsFieldSlug?: string
+  collections: string[]
+  generateLabel?: GenerateLabel
+  generateURL?: GenerateURL
+  parentFieldSlug?: string
 }
