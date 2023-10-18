@@ -246,3 +246,25 @@ jobs:
       - name: Test ${{ matrix.pkg }}
         run: pnpm --filter ${{ matrix.pkg }} run test
         if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions
+
+  templates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Check yarn
+        run: yarn -v
+
+      - name: Build Website
+        run: |
+          cd templates/website
+          yarn install
+          yarn build
