@@ -440,5 +440,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
     return result
   }, dataRef)
 
+  if (Array.isArray(table._locales)) {
+    delete table._locales
+  }
+
   return formatted as T
 }
