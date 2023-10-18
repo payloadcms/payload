@@ -99,7 +99,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (fieldAffectsData(field)) {
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
-
       if (field.type === 'array') {
         if (Array.isArray(fieldData)) {
           if (field.localized) {
@@ -109,6 +108,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 const locale = row._locale
                 const data = {}
                 delete row._locale
+                if (row._uuid) {
+                  row.id = row._uuid
+                  delete row._uuid
+                }
 
                 const rowResult = traverseFields<T>({
                   blocks,
@@ -129,6 +132,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
             }, {})
           } else {
             result[field.name] = fieldData.map((row, i) => {
+              if (row._uuid) {
+                row.id = row._uuid
+                delete row._uuid
+              }
               return traverseFields<T>({
                 blocks,
                 config,
@@ -155,6 +162,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
             result[field.name] = {}
 
             blocks[blockFieldPath].forEach((row) => {
+              if (row._uuid) {
+                row.id = row._uuid
+                delete row._uuid
+              }
               if (typeof row._locale === 'string') {
                 if (!result[field.name][row._locale]) result[field.name][row._locale] = []
                 result[field.name][row._locale].push(row)
@@ -189,6 +200,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
           } else {
             result[field.name] = blocks[blockFieldPath].map((row, i) => {
               delete row._order
+              if (row._uuid) {
+                row.id = row._uuid
+                delete row._uuid
+              }
               const block = field.blocks.find(({ slug }) => slug === row.blockType)
 
               if (block) {
