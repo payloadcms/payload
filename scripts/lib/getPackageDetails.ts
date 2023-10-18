@@ -13,6 +13,8 @@ export type PackageDetails = {
   newCommits: number
   shortName: string
   packagePath: string
+  prevGitTag: string
+  prevGitTagHash: string
   publishedVersion: string
   publishDate: string
   version: string
@@ -49,6 +51,8 @@ export const getPackageDetails = async (): Promise<PackageDetails[]> => {
         newCommits: newCommits.total,
         shortName: dirName,
         packagePath: `packages/${dirName}`,
+        prevGitTag,
+        prevGitTagHash,
         publishedVersion,
         publishDate,
         version: packageJson.version,
