@@ -9,6 +9,7 @@ import type { AdapterProps } from '../../types'
 import type { EditorConfig } from '../lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import type { HTMLConverter } from './converters/html/converter/types'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
   currentDepth,
@@ -74,6 +75,9 @@ export type Feature = {
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<{
+    converters?: {
+      html?: HTMLConverter
+    }
     node: Klass<LexicalNode>
     populationPromises?: Array<PopulationPromise>
     type: string
@@ -137,6 +141,10 @@ export type FeatureProviderMap = Map<string, FeatureProvider>
 export type SanitizedFeatures = Required<
   Pick<ResolvedFeature, 'markdownTransformers' | 'nodes'>
 > & {
+  /**  The node types mapped to their converters */
+  converters: {
+    html: HTMLConverter[]
+  }
   /** The keys of all enabled features */
   enabledFeatures: string[]
   floatingSelectToolbar: {

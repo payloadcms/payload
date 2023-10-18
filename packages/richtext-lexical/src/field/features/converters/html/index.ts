@@ -6,47 +6,28 @@ import type { HTMLConverter } from './converter/types'
 import { convertLexicalToHTML } from './converter'
 import { defaultConverters } from './converter/defaultConverters'
 
-type Props = {
+export type HTMLConverterFeatureProps = {
   converters?:
     | (({ defaultConverters }: { defaultConverters: HTMLConverter[] }) => HTMLConverter[])
     | HTMLConverter[]
-  /**
-   * @default '_html'
-   */
-  htmlFieldSuffix?: string
 }
 
-export const HTMLConverterFeature = (props?: Props): FeatureProvider => {
+/**
+ * This feature only manages the converters. They are read and actually run / executed by the
+ * Lexical field.
+ */
+export const HTMLConverterFeature = (props?: HTMLConverterFeatureProps): FeatureProvider => {
   if (!props) {
     props = {}
   }
+  /*const defaultConvertersWithConvertersFromFeatures = defaultConverters
+  defaultConvertersWithConver    tersFromFeatures.set(props?
 
-  props.converters =
-    props?.converters && typeof props?.converters === 'function'
-      ? props.converters({ defaultConverters: defaultConverters })
-      : (props?.converters as HTMLConverter[]) || defaultConverters
-  if (!props.htmlFieldSuffix) {
-    props.htmlFieldSuffix = '_html'
-  }
+  */
 
   return {
-    feature: () => {
+    feature: ({ resolvedFeatures }) => {
       return {
-        hooks: {
-          // eslint-disable-next-line @typescript-eslint/require-await
-          afterReadPromise: async ({ field, siblingDoc }) => {
-            const data: SerializedEditorState = siblingDoc[field.name] as SerializedEditorState
-            if (data) {
-              siblingDoc[field.name + props.htmlFieldSuffix] = convertLexicalToHTML({
-                converters: props?.converters as HTMLConverter[],
-                data,
-              })
-            }
-
-            return
-          },
-        },
-
         props,
       }
     },
