@@ -12,6 +12,7 @@ import {
   serial,
   timestamp,
   unique,
+  uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
@@ -28,7 +29,6 @@ type Args = {
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
   disableNotNull: boolean
-  disablePrimaryKey?: boolean
   disableUnique: boolean
   fields: Field[]
   rootRelationsToBuild?: Map<string, string>
@@ -49,7 +49,6 @@ export const buildTable = ({
   baseExtraConfig = {},
   buildRelationships,
   disableNotNull,
-  disablePrimaryKey = false,
   disableUnique = false,
   fields,
   rootRelationsToBuild,
@@ -83,27 +82,22 @@ export const buildTable = ({
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
   let idColType = 'integer'
 
-  const idColumnMap = {
-    integer: serial,
-    numeric,
-    varchar,
-  }
-
   if (idField) {
     if (idField.type === 'number') {
       idColType = 'numeric'
+      columns.id = numeric('id').primaryKey()
     }
 
     if (idField.type === 'text') {
       idColType = 'varchar'
+      columns.id = varchar('id').primaryKey()
     }
-  }
-
-  if (disablePrimaryKey) {
-    columns.id = idColumnMap[idColType]('id')
-    indexes.id = (cols) => index('id_idx').on(cols.id)
   } else {
-    columns.id = idColumnMap[idColType]('id').primaryKey()
+    if (disableUnique) {
+      columns.id = uuid('version_id').primaryKey()
+      columns.id = serial('id')
+    }
+    columns.id = serial('id').primaryKey()
   }
 
   ;({

@@ -86,6 +86,11 @@ const DraftPosts: CollectionConfig = {
               name: 'text',
               type: 'text',
             },
+            {
+              name: 'localized',
+              localized: true,
+              type: 'text',
+            },
           ],
           slug: 'block',
         },

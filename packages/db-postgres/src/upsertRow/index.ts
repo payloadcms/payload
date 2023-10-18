@@ -106,7 +106,13 @@ export const upsertRow = async <T extends TypeWithID>({
   Object.keys(rowToInsert.blocks).forEach((blockName) => {
     rowToInsert.blocks[blockName].forEach((blockRow) => {
       blockRow.row._parentID = insertedRow.id
+      if (blockRow.row.blockName === 'breakpoint') {
+        console.log('break')
+      }
       if (!blocksToInsert[blockName]) blocksToInsert[blockName] = []
+      if (blockRow.row.uuid) {
+        delete blockRow.row.uuid
+      }
       blocksToInsert[blockName].push(blockRow)
     })
   })
