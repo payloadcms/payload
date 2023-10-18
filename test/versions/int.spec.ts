@@ -360,7 +360,7 @@ describe('Versions', () => {
           ...versionToRestore.version,
           updatedAt: latestDraft.updatedAt,
         })
-        expect(latestDraft.blocksField[0]).toHaveLength(0)
+        expect(latestDraft.blocksField).toHaveLength(0)
       })
     })
 
