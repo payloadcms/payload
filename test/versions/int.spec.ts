@@ -306,7 +306,7 @@ describe('Versions', () => {
                 id: updatedPost.blocksField[0].id,
                 blockName: 'breakpoint',
                 blockType: 'block',
-                localized: 'text',
+                localized: updated,
                 text: updated,
               },
             ],
@@ -317,6 +317,7 @@ describe('Versions', () => {
 
         expect(updatedPost.title).toBe(title2)
         expect(updatedPost.blocksField[0].text).toBe(updated)
+        expect(updatedPost.blocksField[0].localized).toBe(updated)
 
         // Make sure it was updated correctly
         const draftFromUpdatedPost = await payload.findByID({
@@ -326,6 +327,7 @@ describe('Versions', () => {
         })
         expect(draftFromUpdatedPost.title).toBe(title2)
         expect(draftFromUpdatedPost.blocksField).toHaveLength(1)
+        expect(draftFromUpdatedPost.blocksField[0].localized).toStrictEqual(updated)
 
         const versions = await payload.findVersions({
           collection: draftSlug,
@@ -358,6 +360,7 @@ describe('Versions', () => {
           ...versionToRestore.version,
           updatedAt: latestDraft.updatedAt,
         })
+        expect(latestDraft.blocksField[0].localized).toStrictEqual('text')
       })
     })
 
@@ -784,25 +787,25 @@ describe('Versions', () => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
-          updateAutosavePost(id: ${formatGraphQLID(
-            collectionGraphQLPostID,
-          )}, data: {title: "${updatedTitle2}"}) {
-            title
-            updatedAt
-            createdAt
-          }
+            updateAutosavePost(id: ${formatGraphQLID(
+              collectionGraphQLPostID,
+            )}, data: {title: "${updatedTitle2}"}) {
+                title
+                updatedAt
+                createdAt
+            }
         }`
         await graphQLClient.request(update)
 
         // language=graphQL
         const query = `query {
-          versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
-            collectionGraphQLPostID,
-          )} } }) {
-            docs {
-              id
+            versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
+              collectionGraphQLPostID,
+            )} } }) {
+                docs {
+                    id
+                }
             }
-          }
         }`
 
         const response = await graphQLClient.request(query)
@@ -835,17 +838,17 @@ describe('Versions', () => {
       it('should allow read of versions by querying version content', async () => {
         // language=graphQL
         const query = `query {
-          versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
-            docs {
-              id
-              parent {
-                id
-              }
-              version {
-                title
-              }
+            versionsAutosavePosts(where: { version__title: {equals: "${collectionGraphQLOriginalTitle}" } }) {
+                docs {
+                    id
+                    parent {
+                        id
+                    }
+                    version {
+                        title
+                    }
+                }
             }
-          }
         }`
 
         const response = await graphQLClient.request(query)
@@ -864,25 +867,25 @@ describe('Versions', () => {
         // modify the post to create a new version
         // language=graphQL
         const update = `mutation {
-          updateAutosavePost(id: ${formatGraphQLID(
-            collectionGraphQLPostID,
-          )}, data: {title: "${collectionGraphQLOriginalTitle}"}) {
-            title
-            updatedAt
-            createdAt
-          }
+            updateAutosavePost(id: ${formatGraphQLID(
+              collectionGraphQLPostID,
+            )}, data: {title: "${collectionGraphQLOriginalTitle}"}) {
+                title
+                updatedAt
+                createdAt
+            }
         }`
         await graphQLClient.request(update)
 
         // language=graphQL
         const query = `query {
-          versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
-            collectionGraphQLPostID,
-          )} } }) {
-            docs {
-              id
+            versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
+              collectionGraphQLPostID,
+            )} } }) {
+                docs {
+                    id
+                }
             }
-          }
         }`
 
         const response = await graphQLClient.request(query)
@@ -1133,25 +1136,25 @@ describe('Versions', () => {
     beforeAll(async () => {
       // language=graphql
       const update = `mutation {
-        updateAutosaveGlobal(draft: true, data: {
-          title: "${globalGraphQLOriginalTitle}"
-        }) {
-          _status
-          title
-        }
+          updateAutosaveGlobal(draft: true, data: {
+              title: "${globalGraphQLOriginalTitle}"
+          }) {
+              _status
+              title
+          }
       }`
       await graphQLClient.request(update)
 
       // language=graphQL
       const query = `query {
-        versionsAutosaveGlobal(where: { version__title: { equals: "${globalGraphQLOriginalTitle}" } }) {
-          docs {
-            id
-            version {
-              title
-            }
+          versionsAutosaveGlobal(where: { version__title: { equals: "${globalGraphQLOriginalTitle}" } }) {
+              docs {
+                  id
+                  version {
+                      title
+                  }
+              }
           }
-        }
       }`
 
       const response = await graphQLClient.request(query)
@@ -1162,12 +1165,12 @@ describe('Versions', () => {
       it('should allow read of versions by version id', async () => {
         // language=graphql
         const query = `query {
-          versionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
-            id
-            version {
-              title
+            versionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
+                id
+                version {
+                    title
+                }
             }
-          }
         }`
 
         const response = await graphQLClient.request(query)
@@ -1181,14 +1184,14 @@ describe('Versions', () => {
       it('should allow read of versions by querying version content', async () => {
         // language=graphQL
         const query = `query {
-          versionsAutosaveGlobal(where: { version__title: {equals: "${globalGraphQLOriginalTitle}" } }) {
-            docs {
-              id
-              version {
-                title
-              }
+            versionsAutosaveGlobal(where: { version__title: {equals: "${globalGraphQLOriginalTitle}" } }) {
+                docs {
+                    id
+                    version {
+                        title
+                    }
+                }
             }
-          }
         }`
 
         const response = await graphQLClient.request(query)
@@ -1205,9 +1208,9 @@ describe('Versions', () => {
       it('should allow a version to be restored', async () => {
         // language=graphql
         const restore = `mutation {
-          restoreVersionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
-            title
-          }
+            restoreVersionAutosaveGlobal(id: ${formatGraphQLID(globalGraphQLVersionID)}) {
+                title
+            }
         }`
 
         await graphQLClient.request(restore)
