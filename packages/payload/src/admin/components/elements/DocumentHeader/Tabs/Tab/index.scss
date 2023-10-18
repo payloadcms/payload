@@ -10,6 +10,19 @@
     justify-content: center;
     align-items: center;
     white-space: nowrap;
+
+    // Use a pseudo element for the accessability so that it doesn't take up DOM space
+    // Also because the parent element has `overflow: hidden` which would clip an outline
+    &:focus-visible::after {
+      content: '';
+      border: var(--accessibility-outline);
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      pointer-events: none;
+    }
   }
 
   &:focus:not(:focus-visible) {

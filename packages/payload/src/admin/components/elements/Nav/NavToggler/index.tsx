@@ -12,8 +12,9 @@ export const NavToggler: React.FC<{
   children?: React.ReactNode
   className?: string
   id?: string
+  tabIndex?: number
 }> = (props) => {
-  const { id, children, className } = props
+  const { id, children, className, tabIndex = 0 } = props
 
   const { t } = useTranslation('general')
 
@@ -43,7 +44,7 @@ export const NavToggler: React.FC<{
           })
         }
       }}
-      tabIndex={0}
+      tabIndex={tabIndex}
       type="button"
     >
       {children}

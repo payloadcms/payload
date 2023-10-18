@@ -9,6 +9,8 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { useConfig } from '../../utilities/Config'
 import './index.scss'
 
+const baseClass = 'step-nav'
+
 const Context = createContext({} as ContextType)
 
 const StepNavProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
@@ -41,32 +43,34 @@ const StepNav: React.FC<{
   } = config
 
   return (
-    <nav className={['step-nav', className].filter(Boolean).join(' ')}>
+    <Fragment>
       {stepNav.length > 0 ? (
-        <Fragment>
-          <Link to={admin}>
+        <nav className={[baseClass, className].filter(Boolean).join(' ')}>
+          <Link className={`${baseClass}__home`} tabIndex={0} to={admin}>
             <IconGraphic />
           </Link>
           <span>/</span>
-        </Fragment>
-      ) : (
-        <IconGraphic />
-      )}
-      {stepNav.map((item, i) => {
-        const StepLabel = <span key={i}>{getTranslation(item.label, i18n)}</span>
-        const Step =
-          stepNav.length === i + 1 ? (
-            StepLabel
-          ) : (
-            <Fragment key={i}>
-              {item.url ? <Link to={item.url}>{StepLabel}</Link> : StepLabel}
-              <span>/</span>
-            </Fragment>
-          )
+          {stepNav.map((item, i) => {
+            const StepLabel = <span key={i}>{getTranslation(item.label, i18n)}</span>
+            const Step =
+              stepNav.length === i + 1 ? (
+                StepLabel
+              ) : (
+                <Fragment key={i}>
+                  {item.url ? <Link to={item.url}>{StepLabel}</Link> : StepLabel}
+                  <span>/</span>
+                </Fragment>
+              )
 
-        return Step
-      })}
-    </nav>
+            return Step
+          })}
+        </nav>
+      ) : (
+        <div className={[baseClass, className].filter(Boolean).join(' ')}>
+          <IconGraphic />
+        </div>
+      )}
+    </Fragment>
   )
 }
 

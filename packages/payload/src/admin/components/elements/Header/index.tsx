@@ -29,7 +29,7 @@ export const AppHeader: React.FC = () => {
       <div className={`${baseClass}__bg`} />
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
-          <NavToggler className={`${baseClass}__mobile-nav-toggler`}>
+          <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1}>
             <Hamburger />
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
@@ -46,6 +46,7 @@ export const AppHeader: React.FC = () => {
               <Link
                 aria-label={t('authentication:account')}
                 className={`${baseClass}__account`}
+                tabIndex={0}
                 to={`${adminRoute}/account`}
               >
                 <Account />
