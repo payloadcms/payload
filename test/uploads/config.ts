@@ -401,6 +401,24 @@ export default buildConfigWithDefaults({
     Uploads1,
     Uploads2,
     AdminThumbnailCol,
+    {
+      slug: 'optional-file',
+      upload: {
+        staticURL: '/optional',
+        staticDir: './optional',
+        filesRequiredOnCreate: false,
+      },
+      fields: [],
+    },
+    {
+      slug: 'required-file',
+      upload: {
+        staticURL: '/required',
+        staticDir: './required',
+        filesRequiredOnCreate: true,
+      },
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media')
