@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import fs from 'fs'
 import { compile } from 'json-schema-to-typescript'
-import { singular } from 'pluralize'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../exports/types'
 
 import payload from '..'
 import loadConfig from '../config/load'
 import { configToJSONSchema } from '../utilities/configToJSONSchema'
-import { toWords } from '../utilities/formatLabels'
 import Logger from '../utilities/logger'
 
 export async function generateTypes(): Promise<void> {
@@ -27,7 +25,7 @@ export async function generateTypes(): Promise<void> {
 
   const jsonSchema = configToJSONSchema(payload.config, payload.db.defaultIDType)
 
-  const declare = `declare module "payload" {\n  export interface GeneratedTypes extends Config {} \n}`
+  const declare = `declare module "payload" {\n  export interface GeneratedTypes extends Config {}\n}`
   
   compile(jsonSchema, 'Config', {
     bannerComment:
