@@ -1,10 +1,11 @@
 # Reproduction Guide
 
-1. [fork](https://github.com/payloadcms/payload/fork) this repo
-2. run `yarn` to install dependencies
-3. open up the `test/_community` directory
-4. add any necessary `collections/globals/fields` in this directory to recreate the issue you are experiencing
-5. run `yarn dev _community` to start the admin panel
+1. [Fork](https://github.com/payloadcms/payload/fork) this repo
+2. Optionally, create a new branch for your reproduction
+3. Run `pnpm install` to install dependencies
+4. Open up the `test/_community` directory
+5. Add any necessary `collections/globals/fields` in this directory to recreate the issue you are experiencing
+6. Run `pnpm dev _community` to start the admin panel
 
 **NOTE:** The goal is to isolate the problem by reducing the number of `collections/globals/fields` you add to the `test/_community` folder. This folder is _not_ meant for you to copy your project into, but rather recreate the issue you are experiencing with minimal config.
 
@@ -21,7 +22,7 @@
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
 - `int.spec.ts` [Optional] - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` [Optional] - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests.
-- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `yarn dev:generate-types _community`.
+- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types _community`.
 
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config. You should modify the files in `test/_community` to get started.
 
@@ -44,7 +45,7 @@ There are a couple ways run integration tests:
 - **Manually** - you can run all int tests in the `/test/_community/int.spec.ts` file by running the following command:
 
   ```bash
-  yarn test:int _community
+  pnpm test:int _community
   ```
 
 ### Running E2E tests (Admin Panel UI tests)
