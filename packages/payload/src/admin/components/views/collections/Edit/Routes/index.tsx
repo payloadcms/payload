@@ -41,13 +41,19 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
           <Unauthorized />
         )}
       </Route>
-      <Route
-        exact
-        key={`${collection.slug}-api`}
-        path={`${adminRoute}/collections/${collection.slug}/:id/api`}
-      >
-        {permissions?.read ? <CustomCollectionComponent view="API" {...props} /> : <Unauthorized />}
-      </Route>
+      {collection?.admin?.hideAPIURL !== true && (
+        <Route
+          exact
+          key={`${collection.slug}-api`}
+          path={`${adminRoute}/collections/${collection.slug}/:id/api`}
+        >
+          {permissions?.read ? (
+            <CustomCollectionComponent view="API" {...props} />
+          ) : (
+            <Unauthorized />
+          )}
+        </Route>
+      )}
       <Route
         exact
         key={`${collection.slug}-view-version`}
