@@ -48,7 +48,7 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
     table: data,
   })
 
-  deletions.forEach((deletion) => deletion)
+  deletions.forEach((deletion) => deletion())
 
   return result
 }
