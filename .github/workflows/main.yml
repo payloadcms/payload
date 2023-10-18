@@ -260,8 +260,10 @@ jobs:
         with:
           node-version: 18
 
-      - name: Check yarn
-        run: yarn -v
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
 
       - name: Build Website
         run: |
