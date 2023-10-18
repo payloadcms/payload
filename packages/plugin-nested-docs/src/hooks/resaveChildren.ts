@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 
 import type { PluginConfig } from '../types'
+
 import populateBreadcrumbs from '../utilities/populateBreadcrumbs'
 
 const resaveChildren =
