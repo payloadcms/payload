@@ -266,5 +266,6 @@ jobs:
       - name: Build Website
         run: |
           cd templates/website
+          cp .env.example .env
           yarn install
           yarn build
