@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
 
-  &::after {
+  &__divider {
     content: '';
     display: block;
     position: absolute;
