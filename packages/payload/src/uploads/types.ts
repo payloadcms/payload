@@ -74,6 +74,7 @@ export type IncomingUploadType = {
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   staticURL?: string
   trimOptions?: ImageUploadTrimOptions
+  filesRequiredOnCreate?: boolean
 }
 
 export type Upload = {
