@@ -22,7 +22,8 @@
   "dependencies": {
     "@payloadcms/bundler-webpack": "^1.0.0",
     "@payloadcms/db-mongodb": "^1.0.0",
-        "@payloadcms/plugin-cloud": "^2.0.0",
+    "@payloadcms/db-postgres": "^0.1.9",
+    "@payloadcms/plugin-cloud": "^2.0.0",
     "@payloadcms/plugin-form-builder": "^1.0.13",
     "@payloadcms/plugin-nested-docs": "^1.0.8",
     "@payloadcms/plugin-redirects": "^1.0.0",

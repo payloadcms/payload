@@ -12,7 +12,6 @@ import {
   serial,
   timestamp,
   unique,
-  uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
@@ -93,10 +92,6 @@ export const buildTable = ({
       columns.id = varchar('id').primaryKey()
     }
   } else {
-    if (disableUnique) {
-      columns.id = uuid('version_id').primaryKey()
-      columns.id = serial('id')
-    }
     columns.id = serial('id').primaryKey()
   }
 
