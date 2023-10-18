@@ -1,3 +1,9 @@
+import { ApolloServer } from '@apollo/server'
+import { expressMiddleware } from '@apollo/server/express4'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { stitchSchemas } from '@graphql-tools/stitch'
+import express from 'express'
+
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
@@ -6,31 +12,38 @@ import { postsSlug } from './collections/Posts'
 require('isomorphic-fetch')
 
 let apiUrl
-let jwt
 
 const headers = {
   'Content-Type': 'application/json',
 }
-const { email, password } = devUser
 describe('_Community Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
-
-    const response = await fetch(`${apiUrl}/users/login`, {
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-      headers,
-      method: 'post',
+    const app = express()
+    const { serverURL, payload } = await initPayloadTest({
+      __dirname,
+      init: {
+        express: app,
+      },
     })
 
-    const data = await response.json()
-    jwt = data.token
+    const schema1 = makeExecutableSchema({
+      resolvers: { Query: { hello: () => 'Hello world!' } },
+      typeDefs: `type Query { hello: String }`,
+    })
+    const schema2 = payload.schema
+
+    const stitchedSchema = stitchSchemas({
+      subschemas: [schema1, schema2],
+    })
+    const server = new ApolloServer({ schema: stitchedSchema })
+    await server.start()
+
+    app.use('/merged-graphql', express.json(), expressMiddleware(server))
+
+    apiUrl = `${serverURL}/merged-graphql`
   })
 
   afterAll(async () => {
@@ -39,34 +52,17 @@ describe('_Community Tests', () => {
     }
   })
 
-  // --__--__--__--__--__--__--__--__--__
-  // You can run tests against the local API or the REST API
-  // use the tests below as a guide
-  // --__--__--__--__--__--__--__--__--__
-
-  it('local API example', async () => {
-    const newPost = await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'LOCAL API EXAMPLE',
-      },
-    })
-
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
-  })
-
-  it('rest API example', async () => {
-    const newPost = await fetch(`${apiUrl}/${postsSlug}`, {
+  it('graphQL query', async () => {
+    const response = await fetch(`${apiUrl}`, {
       method: 'POST',
-      headers: {
-        ...headers,
-        Authorization: `JWT ${jwt}`,
-      },
       body: JSON.stringify({
-        text: 'REST API EXAMPLE',
+        query: 'query Test { hello Users { docs { id } } }',
+        operationName: 'Test',
       }),
+      headers,
     }).then((res) => res.json())
 
-    expect(newPost.doc.text).toEqual('REST API EXAMPLE')
+    expect(response['data']['hello']).toEqual('Hello world!')
+    expect(response['data']['Users']).not.toBeNull()
   })
 })
