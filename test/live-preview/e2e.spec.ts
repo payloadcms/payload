@@ -91,4 +91,36 @@ describe('Live Preview', () => {
 
     expect(iframe).toBeTruthy()
   })
+
+  test('renders iframe window width and height', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('Title')
+    await page.locator('#field-slug').fill('slug')
+
+    await saveDocAndAssert(page)
+
+    await page.goto(`${page.url()}/preview`)
+    const iframe = page.locator('iframe')
+
+    // Measure the actual iframe size and compare it with the inputs rendered in the toolbar
+
+    const iframeSize = await iframe.boundingBox()
+    const iframeWidthInPx = iframeSize?.width
+    const iframeHeightInPx = iframeSize?.height
+
+    const widthInput = page.locator('.live-preview-toolbar input[name="live-preview-width"]')
+    const heightInput = page.locator('.live-preview-toolbar input[name="live-preview-height"]')
+
+    const widthInputValue = await widthInput.getAttribute('value')
+    const width = parseInt(widthInputValue)
+    const heightInputValue = await heightInput.getAttribute('value')
+    const height = parseInt(heightInputValue)
+
+    // Allow a tolerance of a couple of pixels
+    const tolerance = 2
+    expect(iframeWidthInPx).toBeLessThanOrEqual(width + tolerance)
+    expect(iframeWidthInPx).toBeGreaterThanOrEqual(width - tolerance)
+    expect(iframeHeightInPx).toBeLessThanOrEqual(height + tolerance)
+    expect(iframeHeightInPx).toBeGreaterThanOrEqual(height - tolerance)
+  })
 })
