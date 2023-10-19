@@ -21,16 +21,6 @@ export default buildConfig({
     components: {
       beforeLogin: [BeforeLogin],
     },
-    webpack: config => ({
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve.alias,
-          dotenv: path.resolve(__dirname, './dotenv.js'),
-        },
-      },
-    }),
   },
   editor: slateEditor({}),
   db: mongooseAdapter({
