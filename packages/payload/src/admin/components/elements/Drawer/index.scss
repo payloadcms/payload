@@ -48,7 +48,7 @@ $transTime: 200;
       &__close {
         opacity: 0.1;
         transition: opacity #{$transTime}ms linear;
-        transition-delay: #{$transTime / 2}ms;
+        transition-delay: #{calc($transTime / 2)}ms;
       }
 
       &__content {
