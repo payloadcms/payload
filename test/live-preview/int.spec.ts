@@ -5,6 +5,7 @@ import type { Media, Page } from './payload-types'
 import { handleMessage } from '../../packages/live-preview/src/handleMessage'
 import { mergeData as mergeLivePreviewData } from '../../packages/live-preview/src/mergeData'
 import payload from '../../packages/payload/src'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -64,12 +65,17 @@ describe('Collections - Live Preview', () => {
       },
     })
 
+    // Create image
+    const filePath = path.resolve(__dirname, './seed/image-1.jpg')
+    const file = await getFileByPath(filePath)
+    file.name = 'image-1.jpg'
+
     media = await payload.create({
       collection: 'media',
-      filePath: path.resolve(__dirname, './seed/image-1.jpg'),
       data: {
         alt: 'Image 1',
       },
+      file,
     })
   })
 
