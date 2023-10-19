@@ -28,19 +28,40 @@ export type TypeWithID = {
 
 export type BeforeValidateHook = (args: {
   data?: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
   originalDoc?: any
   req?: PayloadRequest
 }) => any
 
-export type BeforeChangeHook = (args: { data: any; originalDoc?: any; req: PayloadRequest }) => any
+export type BeforeChangeHook = (args: {
+  data: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  originalDoc?: any
+  req: PayloadRequest
+}) => any
 
-export type AfterChangeHook = (args: { doc: any; previousDoc: any; req: PayloadRequest }) => any
+export type AfterChangeHook = (args: {
+  doc: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  previousDoc: any
+  req: PayloadRequest
+}) => any
 
-export type BeforeReadHook = (args: { doc: any; req: PayloadRequest }) => any
+export type BeforeReadHook = (args: {
+  doc: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  req: PayloadRequest
+}) => any
 
 export type AfterReadHook = (args: {
   doc: any
   findMany?: boolean
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
   query?: Where
   req: PayloadRequest
 }) => any

@@ -37,6 +37,13 @@ export const LexicalFields: CollectionConfig = {
     {
       name: 'richTextLexicalWithLexicalPluginData',
       type: 'richText',
+      hooks: {
+        afterRead: [
+          ({ siblingData, value, data, originalDoc }) => {
+            console.log('afterRead', { siblingData, value, data, originalDoc })
+          },
+        ],
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,

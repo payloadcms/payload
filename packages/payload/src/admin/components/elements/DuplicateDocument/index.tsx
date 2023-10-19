@@ -62,6 +62,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
 
         if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
           data = await collection.admin.hooks.beforeDuplicate({
+            collection,
             data,
             locale,
           })
@@ -108,6 +109,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
 
               if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
                 localizedDoc = await collection.admin.hooks.beforeDuplicate({
+                  collection,
                   data: localizedDoc,
                   locale,
                 })

@@ -6,13 +6,14 @@ import { deepCopyObject } from '../../../utilities/deepCopyObject'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth?: number
   depth: number
   doc: Record<string, unknown>
-  entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   findMany?: boolean
   flattenLocales?: boolean
+  global: SanitizedGlobalConfig | null
   overrideAccess: boolean
   req: PayloadRequest
   showHiddenFields: boolean
@@ -20,13 +21,14 @@ type Args = {
 
 export async function afterRead<T = any>(args: Args): Promise<T> {
   const {
+    collection,
     context,
     currentDepth: incomingCurrentDepth,
     depth: incomingDepth,
     doc: incomingDoc,
-    entityConfig,
     findMany,
     flattenLocales = true,
+    global,
     overrideAccess,
     req,
     showHiddenFields,
@@ -45,14 +47,16 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
   const currentDepth = incomingCurrentDepth || 1
 
   traverseFields({
+    collection,
     context,
     currentDepth,
     depth,
     doc,
     fieldPromises,
-    fields: entityConfig.fields,
+    fields: collection?.fields || global?.fields,
     findMany,
     flattenLocales,
+    global,
     overrideAccess,
     populationPromises,
     req,

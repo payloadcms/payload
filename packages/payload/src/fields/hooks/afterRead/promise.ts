@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign */
 import type { RichTextAdapter } from '../../../admin/components/forms/field-types/RichText/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'
@@ -8,6 +10,7 @@ import relationshipPopulationPromise from './relationshipPopulationPromise'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth: number
   depth: number
@@ -16,6 +19,7 @@ type Args = {
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
+  global: SanitizedGlobalConfig | null
   overrideAccess: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
@@ -32,6 +36,7 @@ type Args = {
 // - Populate relationships
 
 export const promise = async ({
+  collection,
   context,
   currentDepth,
   depth,
@@ -40,6 +45,7 @@ export const promise = async ({
   fieldPromises,
   findMany,
   flattenLocales,
+  global,
   overrideAccess,
   populationPromises,
   req,
@@ -179,8 +185,11 @@ export const promise = async ({
           const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
             (async () => {
               const hookedValue = await currentHook({
+                collection,
                 context,
                 data: doc,
+                field,
+                global,
                 operation: 'read',
                 originalDoc: doc,
                 req,
@@ -197,9 +206,12 @@ export const promise = async ({
           await Promise.all(hookPromises)
         } else {
           const hookedValue = await currentHook({
+            collection,
             context,
             data: doc,
+            field,
             findMany,
+            global,
             operation: 'read',
             originalDoc: doc,
             req,
@@ -252,6 +264,7 @@ export const promise = async ({
       if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
 
       traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -260,6 +273,7 @@ export const promise = async ({
         fields: field.fields,
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
@@ -276,6 +290,7 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         rows.forEach((row) => {
           traverseFields({
+            collection,
             context,
             currentDepth,
             depth,
@@ -284,6 +299,7 @@ export const promise = async ({
             fields: field.fields,
             findMany,
             flattenLocales,
+            global,
             overrideAccess,
             populationPromises,
             req,
@@ -296,6 +312,7 @@ export const promise = async ({
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row) => {
               traverseFields({
+                collection,
                 context,
                 currentDepth,
                 depth,
@@ -304,6 +321,7 @@ export const promise = async ({
                 fields: field.fields,
                 findMany,
                 flattenLocales,
+                global,
                 overrideAccess,
                 populationPromises,
                 req,
@@ -328,6 +346,7 @@ export const promise = async ({
 
           if (block) {
             traverseFields({
+              collection,
               context,
               currentDepth,
               depth,
@@ -336,6 +355,7 @@ export const promise = async ({
               fields: block.fields,
               findMany,
               flattenLocales,
+              global,
               overrideAccess,
               populationPromises,
               req,
@@ -352,6 +372,7 @@ export const promise = async ({
 
               if (block) {
                 traverseFields({
+                  collection,
                   context,
                   currentDepth,
                   depth,
@@ -360,6 +381,7 @@ export const promise = async ({
                   fields: block.fields,
                   findMany,
                   flattenLocales,
+                  global,
                   overrideAccess,
                   populationPromises,
                   req,
@@ -380,6 +402,7 @@ export const promise = async ({
     case 'row':
     case 'collapsible': {
       traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -388,6 +411,7 @@ export const promise = async ({
         fields: field.fields,
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
@@ -406,6 +430,7 @@ export const promise = async ({
       }
 
       await traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -414,6 +439,7 @@ export const promise = async ({
         fields: field.fields,
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
@@ -426,6 +452,7 @@ export const promise = async ({
 
     case 'tabs': {
       traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -434,6 +461,7 @@ export const promise = async ({
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
