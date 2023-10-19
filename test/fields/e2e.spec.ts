@@ -15,7 +15,7 @@ import { numberDoc } from './collections/Number'
 import { pointFieldsSlug } from './collections/Point'
 import { relationshipFieldsSlug } from './collections/Relationship'
 import { tabsSlug } from './collections/Tabs/constants'
-import { textDoc, textFieldsSlug } from './collections/Text'
+import { textDoc, textFieldsSlug } from './collections/Text/shared'
 
 const { afterEach, beforeAll, describe } = test
 
@@ -34,7 +34,7 @@ describe('fields', () => {
   describe('text', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, 'text-fields')
+      url = new AdminUrlUtil(serverURL, textFieldsSlug)
     })
 
     test('should display field in list view', async () => {
@@ -64,6 +64,40 @@ describe('fields', () => {
       await page.goto(url.create)
       const description = page.locator('.field-description-i18nText')
       await expect(description).toHaveText('en description')
+    })
+
+    test('should render custom label', async () => {
+      await page.goto(url.create)
+      const label = page.locator('label.custom-label[for="field-customLabel"]')
+      await expect(label).toHaveText('#label')
+    })
+
+    test('should render custom error', async () => {
+      await page.goto(url.create)
+      const input = page.locator('input[id="field-customError"]')
+      await input.fill('ab')
+      await expect(input).toHaveValue('ab')
+      const error = page.locator('.custom-error:near(input[id="field-customError"])')
+      const submit = page.locator('button[type="button"][id="action-save"]')
+      await submit.click()
+      await expect(error).toHaveText('#custom-error')
+    })
+
+    test('should render BeforeInput and AfterInput', async () => {
+      await page.goto(url.create)
+      const input = page.locator('input[id="field-beforeAndAfterInput"]')
+
+      const prevSibling = await input.evaluateHandle((el) => {
+        return el.previousElementSibling
+      })
+      const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
+      await expect(prevSiblingText).toEqual('#before-input')
+
+      const nextSibling = await input.evaluateHandle((el) => {
+        return el.nextElementSibling
+      })
+      const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
+      await expect(nextSiblingText).toEqual('#after-input')
     })
   })
 

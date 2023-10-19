@@ -1,7 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
-
-export const defaultText = 'default-text'
-export const textFieldsSlug = 'text-fields'
+import { AfterInput } from './AfterInput'
+import { BeforeInput } from './BeforeInput'
+import CustomError from './CustomError'
+import CustomLabel from './CustomLabel'
+import { defaultText, textFieldsSlug } from './shared'
 
 const TextFields: CollectionConfig = {
   slug: textFieldsSlug,
@@ -79,12 +81,36 @@ const TextFields: CollectionConfig = {
         ],
       },
     },
+    {
+      name: 'customLabel',
+      type: 'text',
+      admin: {
+        components: {
+          Label: CustomLabel,
+        },
+      },
+    },
+    {
+      name: 'customError',
+      type: 'text',
+      minLength: 3,
+      admin: {
+        components: {
+          Error: CustomError,
+        },
+      },
+    },
+    {
+      name: 'beforeAndAfterInput',
+      type: 'text',
+      admin: {
+        components: {
+          BeforeInput: BeforeInput,
+          AfterInput: AfterInput,
+        },
+      },
+    },
   ],
-}
-
-export const textDoc = {
-  text: 'Seeded text document',
-  localizedText: 'Localized text',
 }
 
 export default TextFields
