@@ -9,14 +9,15 @@ import { startLivePreviewDemo } from './startLivePreviewDemo'
 
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
+let serverURL: string
 
 describe('Live Preview', () => {
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    const { serverURL, payload } = await initPayloadE2E(__dirname)
-    url = new AdminUrlUtil(serverURL, 'pages')
-
+    const { serverURL: incomingServerURL, payload } = await initPayloadE2E(__dirname)
+    url = new AdminUrlUtil(incomingServerURL, 'pages')
+    serverURL = incomingServerURL
     const context = await browser.newContext()
     page = await context.newPage()
 
@@ -41,6 +42,32 @@ describe('Live Preview', () => {
     await page.locator('#field-slug').fill('slug')
 
     await saveDocAndAssert(page)
+    const docURL = page.url()
+
+    const livePreviewTab = page.locator('.doc-tab', {
+      hasText: exactText('Live Preview'),
+    })
+
+    expect(livePreviewTab).toBeTruthy()
+    await livePreviewTab.click()
+    expect(page.url()).toBe(`${docURL}/preview`)
+  })
+
+  test('global - has tab', async () => {
+    const global = new AdminUrlUtil(serverURL, 'header')
+    await page.goto(global.global('header'))
+
+    const livePreviewTab = page.locator('.doc-tab', {
+      hasText: exactText('Live Preview'),
+    })
+
+    expect(livePreviewTab).toBeTruthy()
+  })
+
+  test('global - has route', async () => {
+    const global = new AdminUrlUtil(serverURL, 'header')
+    await page.goto(global.global('header'))
+
     const docURL = page.url()
 
     const livePreviewTab = page.locator('.doc-tab', {

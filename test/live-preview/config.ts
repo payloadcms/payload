@@ -28,6 +28,7 @@ export default buildConfigWithDefaults({
         },
       ],
       collections: ['pages', 'posts'],
+      globals: ['header', 'footer'],
     },
   },
   cors: ['http://localhost:3001'],
