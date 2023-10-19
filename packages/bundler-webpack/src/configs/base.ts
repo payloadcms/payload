@@ -7,6 +7,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 import path from 'path'
 import webpack from 'webpack'
 
+const mockBundlerPath = path.resolve(__dirname, '../mocks/bundler.js')
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 
@@ -82,7 +83,7 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     ],
     resolve: {
       alias: {
-        '@payloadcms/bundler-webpack': mockModulePath,
+        '@payloadcms/bundler-webpack': mockBundlerPath,
         dotenv: mockDotENVPath,
         path: require.resolve('path-browserify'),
         payload$: mockModulePath,
