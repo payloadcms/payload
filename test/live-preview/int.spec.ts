@@ -50,18 +50,6 @@ describe('Collections - Live Preview', () => {
       data: {
         slug: 'home',
         title: 'Test Page',
-        layout: [
-          {
-            blockType: 'cta',
-            id: 'block-1',
-            richText: [
-              {
-                type: 'paragraph',
-                text: 'Block 1',
-              },
-            ],
-          },
-        ],
       },
     })
 
