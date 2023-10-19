@@ -83,7 +83,7 @@ describe('Cell Types', () => {
     it('renders date', () => {
       const timeStamp = '2020-10-06T14:07:39.033Z'
       const { container } = render(<DateCell data={timeStamp} field={field} />)
-      const dateMatch = /October\s6th\s2020,\s\d{1,2}:07\s[A|P]M/ // Had to account for timezones in CI
+      const dateMatch = /October\s[6|7]th\s2020,\s\d{1,2}:[0|3]7\s[A|P]M/ // Had to account for timezones in CI
       const el = container.querySelector('span')
       expect(el.textContent).toMatch(dateMatch)
     })
