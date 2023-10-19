@@ -19,6 +19,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
       {breakpoints?.length > 0 && (
         <select
           className={`${baseClass}__breakpoint`}
+          name="live-preview-breakpoint"
           onChange={(e) => setBreakpoint(e.target.value)}
           value={breakpoint}
         >
