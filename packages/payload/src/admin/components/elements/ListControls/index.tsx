@@ -128,17 +128,16 @@ const ListControls: React.FC<Props> = (props) => {
               {t('filters')}
             </Pill>
             {enableSort && (
-              <Button
+              <Pill
                 aria-controls={`${baseClass}-sort`}
                 aria-expanded={visibleDrawer === 'sort'}
-                buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
                 className={`${baseClass}__toggle-sort`}
-                icon="chevron"
-                iconStyle="none"
+                icon={<Chevron />}
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                pillStyle="light"
               >
                 {t('sort')}
-              </Button>
+              </Pill>
             )}
           </div>
         </div>
