@@ -32,7 +32,7 @@ export interface User {
   hash?: string
   loginAttempts?: number
   lockUntil?: string
-  password?: string
+  password: string
 }
 export interface Page {
   id: string
@@ -45,7 +45,7 @@ export interface Page {
     }[]
     media: string | Media
   }
-  layout: (
+  layout?: (
     | {
         invertBackground?: boolean
         richText?: {
@@ -174,7 +174,7 @@ export interface Post {
     }[]
     media: string | Media
   }
-  layout: (
+  layout?: (
     | {
         invertBackground?: boolean
         richText?: {
@@ -338,19 +338,5 @@ export interface Footer {
 }
 
 declare module 'payload' {
-  export interface GeneratedTypes {
-    collections: {
-      users: User
-      pages: Page
-      posts: Post
-      categories: Category
-      media: Media
-      'payload-preferences': PayloadPreference
-      'payload-migrations': PayloadMigration
-    }
-    globals: {
-      header: Header
-      footer: Footer
-    }
-  }
+  export interface GeneratedTypes extends Config {}
 }

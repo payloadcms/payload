@@ -1,3 +1,5 @@
+import path from 'path'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import Categories from './collections/Categories'
 import { Media } from './collections/Media'
@@ -17,6 +19,8 @@ export const mobileBreakpoint = {
   height: 667,
 }
 
+const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
+
 export default buildConfigWithDefaults({
   admin: {
     livePreview: {
@@ -30,6 +34,16 @@ export default buildConfigWithDefaults({
       collections: ['pages', 'posts'],
       globals: ['header', 'footer'],
     },
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config?.resolve?.alias,
+          fs: mockModulePath,
+        },
+      },
+    }),
   },
   cors: ['http://localhost:3001'],
   csrf: ['http://localhost:3001'],

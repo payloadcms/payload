@@ -53,34 +53,36 @@ export const traverseFields = <T>({
 
         case 'blocks':
           if (Array.isArray(incomingData[fieldName])) {
-            result[fieldName] = incomingData[fieldName].map((row, i) => {
-              const matchedBlock = fieldJSON.blocks[row.blockType]
+            result[fieldName] = incomingData[fieldName].map((incomingBlock, i) => {
+              const incomingBlockJSON = fieldJSON.blocks[incomingBlock.blockType]
 
-              const hasExistingRow =
+              // Compare the index and id to determine if this block already exists in the result
+              // If so, we want to use the existing block as the base, otherwise take the incoming block
+              // Either way, we will traverse the fields of the block to populate relationships
+              const isExistingBlock =
                 Array.isArray(result[fieldName]) &&
                 typeof result[fieldName][i] === 'object' &&
                 result[fieldName][i] !== null &&
-                result[fieldName][i].blockType === row.blockType
+                result[fieldName][i].id === incomingBlock.id
 
-              const newRow = hasExistingRow
-                ? { ...result[fieldName][i] }
-                : {
-                    blockType: matchedBlock.slug,
-                  }
+              const block = isExistingBlock ? result[fieldName][i] : incomingBlock
 
               traverseFields({
                 apiRoute,
                 depth,
-                fieldSchema: matchedBlock.fields,
-                incomingData: row,
+                fieldSchema: incomingBlockJSON.fields,
+                incomingData: incomingBlock,
                 populationPromises,
-                result: newRow,
+                result: block,
                 serverURL,
               })
 
-              return newRow
+              return block
             })
+          } else {
+            result[fieldName] = []
           }
+
           break
 
         case 'tabs':

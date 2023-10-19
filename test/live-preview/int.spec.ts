@@ -3,7 +3,7 @@ import path from 'path'
 import type { Media, Page } from './payload-types'
 
 import { handleMessage } from '../../packages/live-preview/src/handleMessage'
-import { mergeData as mergeLivePreviewData } from '../../packages/live-preview/src/mergeData'
+import { mergeData } from '../../packages/live-preview/src/mergeData'
 import payload from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
@@ -20,18 +20,7 @@ let serverURL
 let page: Page
 let media: Media
 
-let mergedData: Page
-
-// create a util so we don't have to rewrite the args on every test
-const mergeData = async (edits: Partial<Page>): Promise<Page> => {
-  return await mergeLivePreviewData<Page>({
-    depth: 1,
-    fieldSchema: fieldSchemaToJSON(Pages.fields),
-    incomingData: edits,
-    initialData: page,
-    serverURL,
-  })
-}
+const schemaJSON = fieldSchemaToJSON(Pages.fields)
 
 describe('Collections - Live Preview', () => {
   beforeAll(async () => {
@@ -75,7 +64,7 @@ describe('Collections - Live Preview', () => {
           data: {
             title: 'Test Page (Change 1)',
           },
-          fieldSchemaJSON: fieldSchemaToJSON(Pages.fields),
+          fieldSchemaJSON: schemaJSON,
           type: 'payload-live-preview',
         }),
         origin: serverURL,
@@ -108,14 +97,30 @@ describe('Collections - Live Preview', () => {
 
   it('merges data', async () => {
     expect(page?.id).toBeDefined()
-    mergedData = await mergeData({})
+
+    const mergedData = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: page,
+      initialData: page,
+      serverURL,
+    })
+
     expect(mergedData.id).toEqual(page.id)
   })
 
   it('merges strings', async () => {
-    mergedData = await mergeData({
-      title: 'Test Page (Change 3)',
+    const mergedData = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...page,
+        title: 'Test Page (Change 3)',
+      },
+      initialData: page,
+      serverURL,
     })
+
     expect(mergedData.title).toEqual('Test Page (Change 3)')
   })
 
@@ -124,23 +129,164 @@ describe('Collections - Live Preview', () => {
   // This test passes in MongoDB, though
   it.skip('adds and removes uploads', async () => {
     // Add upload
-    mergedData = await mergeData({
-      hero: {
-        type: 'highImpact',
-        media: media.id,
+    const mergedData = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...page,
+        hero: {
+          type: 'highImpact',
+          media: media.id,
+        },
       },
+      initialData: page,
+      serverURL,
     })
 
     expect(mergedData.hero.media).toMatchObject(media)
 
-    // Remove upload
-    mergedData = await mergeData({
-      hero: {
-        type: 'highImpact',
-        media: null,
+    // Add upload
+    const mergedDataWithoutUpload = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...mergedData,
+        hero: {
+          type: 'highImpact',
+          media: null,
+        },
       },
+      initialData: mergedData,
+      serverURL,
     })
 
-    expect(mergedData.hero.media).toEqual(null)
+    expect(mergedDataWithoutUpload.hero.media).toEqual(null)
+  })
+
+  it('add, reorder, and remove blocks', async () => {
+    // Add new blocks
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...page,
+        layout: [
+          {
+            blockType: 'cta',
+            id: 'block-1', // use fake ID, this is a new block that is only assigned an ID on the client
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 1 (Position 1)',
+              },
+            ],
+          },
+          {
+            blockType: 'cta',
+            id: 'block-2', // use fake ID, this is a new block that is only assigned an ID on the client
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 2 (Position 2)',
+              },
+            ],
+          },
+        ],
+      },
+      initialData: page,
+      serverURL,
+    })
+
+    // Check that the blocks have been merged and are in the correct order
+    expect(merge1.layout).toHaveLength(2)
+    const block1 = merge1.layout[0]
+    expect(block1.id).toEqual('block-1')
+    expect(block1.richText[0].text).toEqual('Block 1 (Position 1)')
+    const block2 = merge1.layout[1]
+    expect(block2.id).toEqual('block-2')
+    expect(block2.richText[0].text).toEqual('Block 2 (Position 2)')
+
+    // Reorder the blocks using the same IDs from the previous merge
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        layout: [
+          {
+            id: block2.id,
+            blockType: 'content',
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 2 (Position 1)',
+              },
+            ],
+          },
+          {
+            id: block1.id,
+            blockType: 'content',
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 1 (Position 2)',
+              },
+            ],
+          },
+        ],
+      },
+      initialData: merge1,
+      serverURL,
+    })
+
+    // Check that the blocks have been reordered
+    expect(merge2.layout).toHaveLength(2)
+    expect(merge2.layout[0].id).toEqual(block2.id)
+    expect(merge2.layout[1].id).toEqual(block1.id)
+    expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
+    expect(merge2.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
+
+    // Remove a block
+    const merge3 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge2,
+        layout: [
+          {
+            id: block2.id,
+            blockType: 'content',
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 2 (Position 1)',
+              },
+            ],
+          },
+        ],
+      },
+      initialData: merge2,
+      serverURL,
+    })
+
+    // Check that the block has been removed
+    expect(merge3.layout).toHaveLength(1)
+    expect(merge3.layout[0].id).toEqual(block2.id)
+    expect(merge3.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
+
+    // Remove the last block to ensure that all blocks can be cleared
+    const merge4 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge3,
+        layout: [],
+      },
+      initialData: merge3,
+      serverURL,
+    })
+
+    // Check that the block has been removed
+    expect(merge4.layout).toHaveLength(0)
   })
 })

@@ -3,6 +3,7 @@ import path from 'path'
 import type { Config } from '../../../packages/payload/src/config/types'
 
 import { devUser } from '../../credentials'
+import removeFiles from '../../helpers/removeFiles'
 import { postsSlug } from '../collections/Posts'
 import { pagesSlug } from '../config'
 import { footer } from './footer'
@@ -14,6 +15,9 @@ import { post3 } from './post-3'
 import { postsPage } from './posts-page'
 
 export const seed: Config['onInit'] = async (payload) => {
+  const uploadsDir = path.resolve(__dirname, './media')
+  removeFiles(path.normalize(uploadsDir))
+
   await payload.create({
     collection: 'users',
     data: {
