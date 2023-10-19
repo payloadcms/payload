@@ -1,6 +1,6 @@
 # Payload Live Preview Example
 
-The [Payload Live Preview Example](https://github.com/payloadcms/payload/tree/master/examples/live-preview/payload) demonstrates how to implement [Live Preview](https://payloadcms.com/docs/live-preview) in [Payload](https://github.com/payloadcms/payload). With Live Preview you can render your front-end application directly within the Admin panel. As you type, your changes take effect in real-time. No need to save a draft or publish your changes.
+The [Payload Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload) demonstrates how to implement [Live Preview](https://payloadcms.com/docs/live-preview) in [Payload](https://github.com/payloadcms/payload). With Live Preview you can render your front-end application directly within the Admin panel. As you type, your changes take effect in real-time. No need to save a draft or publish your changes.
 
 There are various fully working front-ends made explicitly for this example, including:
 
@@ -40,7 +40,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
   }
   ```
 
-  For additional help with authentication, see the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs or the official [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth).
+  For additional help with authentication, see the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs or the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth).
 
 - #### Pages
 
