@@ -78,4 +78,17 @@ describe('Live Preview', () => {
     await livePreviewTab.click()
     expect(page.url()).toBe(`${docURL}/preview`)
   })
+
+  test('renders preview iframe on the page', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('Title')
+    await page.locator('#field-slug').fill('slug')
+
+    await saveDocAndAssert(page)
+
+    await page.goto(`${page.url()}/preview`)
+    const iframe = page.locator('iframe')
+
+    expect(iframe).toBeTruthy()
+  })
 })

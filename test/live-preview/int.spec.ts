@@ -119,31 +119,28 @@ describe('Collections - Live Preview', () => {
     expect(mergedData.title).toEqual('Test Page (Change 3)')
   })
 
-  it.todo('adds and removes uploads')
-
   // TODO: this test is not working in Postgres
   // This is because of how relationships are handled in `mergeData`
   // This test passes in MongoDB, though
-  //
-  // it('adds and removes uploads', async () => {
-  //   // Add upload
-  //   mergedData = await mergeData({
-  //     hero: {
-  //       type: 'highImpact',
-  //       media: media.id,
-  //     },
-  //   })
+  it.skip('adds and removes uploads', async () => {
+    // Add upload
+    mergedData = await mergeData({
+      hero: {
+        type: 'highImpact',
+        media: media.id,
+      },
+    })
 
-  //   expect(mergedData.hero.media).toMatchObject(media)
+    expect(mergedData.hero.media).toMatchObject(media)
 
-  //   // Remove upload
-  //   mergedData = await mergeData({
-  //     hero: {
-  //       type: 'highImpact',
-  //       media: null,
-  //     },
-  //   })
+    // Remove upload
+    mergedData = await mergeData({
+      hero: {
+        type: 'highImpact',
+        media: null,
+      },
+    })
 
-  //   expect(mergedData.hero.media).toEqual(null)
-  // })
+    expect(mergedData.hero.media).toEqual(null)
+  })
 })
