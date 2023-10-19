@@ -1,7 +1,7 @@
 @import '../../../scss/styles.scss';
 
 .doc-controls {
-  @include blur-bg;
+  @include blur-bg-light;
   position: sticky;
   top: 0;
   width: 100%;

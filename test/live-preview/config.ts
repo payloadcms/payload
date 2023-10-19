@@ -10,6 +10,13 @@ import { seed } from './seed'
 
 export const pagesSlug = 'pages'
 
+export const mobileBreakpoint = {
+  label: 'Mobile',
+  name: 'mobile',
+  width: 375,
+  height: 667,
+}
+
 export default buildConfigWithDefaults({
   admin: {
     livePreview: {
@@ -19,15 +26,9 @@ export default buildConfigWithDefaults({
         `http://localhost:3001${
           documentInfo?.slug && documentInfo.slug !== 'pages' ? `/${documentInfo.slug}` : ''
         }${data?.slug && data.slug !== 'home' ? `/${data.slug}` : ''}`,
-      breakpoints: [
-        {
-          label: 'Mobile',
-          name: 'mobile',
-          width: 375,
-          height: 667,
-        },
-      ],
+      breakpoints: [mobileBreakpoint],
       collections: ['pages', 'posts'],
+      globals: ['header', 'footer'],
     },
   },
   cors: ['http://localhost:3001'],

@@ -128,7 +128,7 @@ export const traverseFields = ({
                 with: {},
               }
 
-              if (adapter.tables[`${topLevelTableName}_${toSnakeCase(block.slug)}_locales`])
+              if (adapter.tables[`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}_locales`])
                 withBlock.with._locales = _locales
               topLevelArgs.with[blockKey] = withBlock
 

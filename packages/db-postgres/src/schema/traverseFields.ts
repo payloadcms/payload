@@ -26,6 +26,7 @@ import type { GenericColumns, PostgresAdapter } from '../types'
 import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
 import { createIndex } from './createIndex'
+import { idToUUID } from './idToUUID'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical'
 
@@ -281,7 +282,7 @@ export const traverseFields = ({
           baseExtraConfig,
           disableNotNull: disableNotNullFromHere,
           disableUnique,
-          fields: field.fields,
+          fields: disableUnique ? idToUUID(field.fields) : field.fields,
           rootRelationsToBuild,
           rootRelationships: relationships,
           rootTableIDColType,
@@ -349,7 +350,7 @@ export const traverseFields = ({
               baseExtraConfig,
               disableNotNull: disableNotNullFromHere,
               disableUnique,
-              fields: block.fields,
+              fields: disableUnique ? idToUUID(block.fields) : block.fields,
               rootRelationsToBuild,
               rootRelationships: relationships,
               rootTableIDColType,

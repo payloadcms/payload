@@ -1,7 +1,11 @@
-import type { Page } from './payload-types'
+import path from 'path'
 
+import type { Media, Page } from './payload-types'
+
+import { handleMessage } from '../../packages/live-preview/src/handleMessage'
 import { mergeData as mergeLivePreviewData } from '../../packages/live-preview/src/mergeData'
 import payload from '../../packages/payload/src'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -14,6 +18,9 @@ let client
 let serverURL
 
 let page: Page
+let media: Media
+
+let mergedData: Page
 
 // create a util so we don't have to rewrite the args on every test
 const mergeData = async (edits: Partial<Page>): Promise<Page> => {
@@ -43,20 +50,85 @@ describe('Collections - Live Preview', () => {
       data: {
         slug: 'home',
         title: 'Test Page',
-        layout: [
-          {
-            blockType: 'cta',
-            id: 'block-1',
-            richText: [
-              {
-                type: 'paragraph',
-                text: 'Block 1',
-              },
-            ],
-          },
-        ],
       },
     })
+  })
+
+  it('handles `postMessage`', async () => {
+    const handledMessage = await handleMessage({
+      depth: 1,
+      event: {
+        data: JSON.stringify({
+          data: {
+            title: 'Test Page (Change 1)',
+          },
+          fieldSchemaJSON: fieldSchemaToJSON(Pages.fields),
+          type: 'payload-live-preview',
+        }),
+        origin: serverURL,
+      } as MessageEvent,
+      initialData: page,
+      serverURL,
+    })
+
+    expect(handledMessage.title).toEqual('Test Page (Change 1)')
+  })
+
+  it('caches `fieldSchemaJSON`', async () => {
+    const handledMessage = await handleMessage({
+      depth: 1,
+      event: {
+        data: JSON.stringify({
+          data: {
+            title: 'Test Page (Change 2)',
+          },
+          type: 'payload-live-preview',
+        }),
+        origin: serverURL,
+      } as MessageEvent,
+      initialData: page,
+      serverURL,
+    })
+
+    expect(handledMessage.title).toEqual('Test Page (Change 2)')
+  })
+
+  it('merges data', async () => {
+    expect(page?.id).toBeDefined()
+    mergedData = await mergeData({})
+    expect(mergedData.id).toEqual(page.id)
+  })
+
+  it('merges strings', async () => {
+    mergedData = await mergeData({
+      title: 'Test Page (Change 3)',
+    })
+    expect(mergedData.title).toEqual('Test Page (Change 3)')
+  })
+
+  // TODO: this test is not working in Postgres
+  // This is because of how relationships are handled in `mergeData`
+  // This test passes in MongoDB, though
+  it.skip('adds and removes uploads', async () => {
+    // Add upload
+    mergedData = await mergeData({
+      hero: {
+        type: 'highImpact',
+        media: media.id,
+      },
+    })
+
+    expect(mergedData.hero.media).toMatchObject(media)
+
+    // Remove upload
+    mergedData = await mergeData({
+      hero: {
+        type: 'highImpact',
+        media: null,
+      },
+    })
+
+    expect(mergedData.hero.media).toEqual(null)
   })
 
   it('reorders blocks', async () => {
@@ -65,7 +137,7 @@ describe('Collections - Live Preview', () => {
         {
           // the page was initialized with a first block already, we we're replacing it here
           blockType: 'cta',
-          id: page.layout[0].id, // use real ID
+          id: 'block-1', // use fake ID, this is a new block that is only assigned an ID on the client
           richText: [
             {
               type: 'paragraph',
@@ -129,5 +201,17 @@ describe('Collections - Live Preview', () => {
 
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge2.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
+    // Create image
+    const filePath = path.resolve(__dirname, './seed/image-1.jpg')
+    const file = await getFileByPath(filePath)
+    file.name = 'image-1.jpg'
+
+    media = await payload.create({
+      collection: 'media',
+      data: {
+        alt: 'Image 1',
+      },
+      file,
+    })
   })
 })

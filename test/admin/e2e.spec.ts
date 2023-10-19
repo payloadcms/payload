@@ -21,6 +21,8 @@ import {
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
+  noApiViewCollection,
+  noApiViewGlobal,
   postsSlug,
   slugPluralLabel,
 } from './shared'
@@ -152,6 +154,32 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
       await page.goto(url.global('hidden-global'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('should not show API tab on collection when disabled in config', async () => {
+      await page.goto(url.collection(noApiViewCollection))
+      await page.locator('.collection-list .table a').click()
+      await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
+    })
+
+    test('should not enable API route on collection when disabled in config', async () => {
+      const collectionItems = await payload.find({
+        collection: noApiViewCollection,
+        limit: 1,
+      })
+      expect(collectionItems.docs.length).toBe(1)
+      await page.goto(`${url.collection(noApiViewCollection)}/${collectionItems.docs[0].id}/api`)
+      await expect(page.locator('.not-found')).toHaveCount(1)
+    })
+
+    test('should not show API tab on global when disabled in config', async () => {
+      await page.goto(url.global(noApiViewGlobal))
+      await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
+    })
+
+    test('should not enable API route on global when disabled in config', async () => {
+      await page.goto(`${url.global(noApiViewGlobal)}/api`)
+      await expect(page.locator('.not-found')).toHaveCount(1)
     })
   })
 

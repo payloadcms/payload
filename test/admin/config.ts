@@ -11,6 +11,7 @@ import { CollectionGroup1B } from './collections/Group1B'
 import { CollectionGroup2A } from './collections/Group2A'
 import { CollectionGroup2B } from './collections/Group2B'
 import { CollectionHidden } from './collections/Hidden'
+import { CollectionNoApiView } from './collections/NoApiView'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import AfterDashboard from './components/AfterDashboard'
@@ -25,7 +26,8 @@ import { Global } from './globals/Global'
 import { GlobalGroup1A } from './globals/Group1A'
 import { GlobalGroup1B } from './globals/Group1B'
 import { GlobalHidden } from './globals/Hidden'
-import { postsSlug } from './shared'
+import { GlobalNoApiView } from './globals/NoApiView'
+import { noApiViewCollection, postsSlug } from './shared'
 
 export interface Post {
   createdAt: Date
@@ -77,6 +79,7 @@ export default buildConfigWithDefaults({
     Posts,
     Users,
     CollectionHidden,
+    CollectionNoApiView,
     CustomViews1,
     CustomViews2,
     CollectionGroup1A,
@@ -87,6 +90,7 @@ export default buildConfigWithDefaults({
   ],
   globals: [
     GlobalHidden,
+    GlobalNoApiView,
     Global,
     CustomGlobalViews1,
     CustomGlobalViews2,
@@ -138,6 +142,11 @@ export default buildConfigWithDefaults({
       data: {
         point: [5, -5],
       },
+    })
+
+    await payload.create({
+      collection: noApiViewCollection,
+      data: {},
     })
   },
 })

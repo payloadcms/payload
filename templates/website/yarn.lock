@@ -1677,10 +1677,10 @@
     prompts "2.4.2"
     uuid "9.0.0"
 
-"@payloadcms/db-postgres@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.npmjs.org/@payloadcms/db-postgres/-/db-postgres-0.1.8.tgz#8603056a8e5de115af59aaa2715abfcf9a6d7ece"
-  integrity sha512-3fXUVZeH1GT5oU/92MglREiQ5gU3IhF9lgLQR9W8GcGF9vlTY7k5I1qUzGALmIRu6FTCOXwDWTDMZxmmmt198w==
+"@payloadcms/db-postgres@^0.1.9":
+  version "0.1.9"
+  resolved "https://registry.npmjs.org/@payloadcms/db-postgres/-/db-postgres-0.1.9.tgz#17f3bbd6cd39ba3c9b0cf939953d1e11dac2cca8"
+  integrity sha512-PWtA1otpyCQasRZzA9U17BQNFaPjXRBFQOjx+CU6FiFjLkNkSEO4iK5Pdwsz23UrTlUbwNvgWd1u1+Xm4PHp9A==
   dependencies:
     "@libsql/client" "^0.3.1"
     console-table-printer "2.11.2"

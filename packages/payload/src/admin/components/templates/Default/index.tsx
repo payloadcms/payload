@@ -26,7 +26,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
 
   const { t } = useTranslation('general')
 
-  const { navOpen, setNavOpen } = useNav()
+  const { navOpen } = useNav()
 
   return (
     <Fragment>
@@ -35,6 +35,11 @@ const Default: React.FC<Props> = ({ children, className }) => {
         keywords={`${t('dashboard')}, Payload`}
         title={t('dashboard')}
       />
+      <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
+        <NavToggler className={`${baseClass}__nav-toggler`}>
+          <Hamburger closeIcon="collapse" isActive={navOpen} />
+        </NavToggler>
+      </div>
       <div
         className={[baseClass, className, navOpen && `${baseClass}--nav-open`]
           .filter(Boolean)
@@ -45,11 +50,6 @@ const Default: React.FC<Props> = ({ children, className }) => {
           <AppHeader />
           {children}
         </div>
-      </div>
-      <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-        <NavToggler className={`${baseClass}__nav-toggler`}>
-          <Hamburger closeIcon="collapse" isActive={navOpen} />
-        </NavToggler>
       </div>
     </Fragment>
   )

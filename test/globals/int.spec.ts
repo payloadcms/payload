@@ -224,5 +224,13 @@ describe('globals', () => {
 
       expect(doc).toMatchObject(data)
     })
+
+    it('should not show globals with disabled graphql', async () => {
+      const query = `query {
+        WithoutGraphql { __typename }
+      }`
+
+      await expect(client.request(query)).rejects.toHaveProperty('message')
+    })
   })
 })
