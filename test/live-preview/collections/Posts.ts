@@ -47,7 +47,6 @@ export const Posts: CollectionConfig = {
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
             },
             {
