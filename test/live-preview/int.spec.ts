@@ -1,5 +1,3 @@
-import path from 'path'
-
 import type { Page } from './payload-types'
 
 import { mergeData as mergeLivePreviewData } from '../../packages/live-preview/src/mergeData'
@@ -57,14 +55,6 @@ describe('Collections - Live Preview', () => {
             ],
           },
         ],
-      },
-    })
-
-    media = await payload.create({
-      collection: 'media',
-      filePath: path.resolve(__dirname, './seed/image-1.jpg'),
-      data: {
-        alt: 'Image 1',
       },
     })
   })
