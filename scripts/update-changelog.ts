@@ -21,32 +21,50 @@ const args = minimist(process.argv.slice(2))
 
 async function main() {
   const { tag = 'latest', bump = 'patch' } = args
+  const packageName = args._[0]
+
   const packageDetails = await getPackageDetails()
   showPackageDetails(packageDetails)
 
-  const { packageToUpdateChangelog } = (await prompts({
-    type: 'select',
-    name: 'packageToUpdateChangelog',
-    message: 'Select package to update changelog',
-    choices: packageDetails.map((p) => {
-      const title = p?.newCommits ? chalk.bold.green(p?.shortName) : p?.shortName
-      return {
-        title,
-        value: p,
-      }
-    }),
-  })) as { packageToUpdateChangelog: PackageDetails }
+  let pkg: PackageDetails | undefined
+  if (packageName) {
+    pkg = packageDetails.find((p) => p.shortName === packageName)
+    if (!pkg) {
+      abort(`Package not found: ${packageName}`)
+    }
+  } else {
+    ;({ pkg } = (await prompts({
+      type: 'select',
+      name: 'pkg',
+      message: 'Select package to update changelog',
+      choices: packageDetails.map((p) => {
+        const title = p?.newCommits ? chalk.bold.green(p?.shortName) : p?.shortName
+        return {
+          title,
+          value: p,
+        }
+      }),
+    })) as { pkg: PackageDetails })
+  }
 
-  console.log({ packageToUpdateChangelog })
+  console.log({ pkg })
+  if (!pkg) {
+    abort()
+    process.exit(1)
+  }
 
   // TODO: Locate changelog
+
+  // Prefix to find prev tag
+  const tagPrefix = pkg.shortName === 'payload' ? 'v2.0.10' : pkg.prevGitTag.split('/')[0] + '/'
 
   const config = {
     preset: 'conventionalcommits',
     append: true, // Does this work?
-    tagPrefix: packageToUpdateChangelog.prevGitTag.split('/')[0] + '/',
+    currentTag: 'v2.0.11', // The prefix is added automatically apparently?
+    tagPrefix,
     pkg: {
-      path: `${packageToUpdateChangelog.packagePath}/package.json`,
+      path: `${pkg.packagePath}/package.json`,
     },
     writerOpts: {
       commitGroupsSort: (a, b) => {
@@ -70,13 +88,22 @@ async function main() {
     },
   }
 
+  console.log({ config })
+
+  const generateChangelog = await confirm('Generate changelog?')
+  if (!generateChangelog) {
+    abort()
+  }
+
+  const nextReleaseVersion = semver.inc(pkg.version, bump) as string
   const changelogStream = conventionalChangelog(
     { ...config, debug: console.debug.bind(console) },
     {
-      version: semver.inc(packageToUpdateChangelog.version, bump) as string, // next release
+      version: nextReleaseVersion, // next release
+      // version: '2.0.11', // next release
     },
     {
-      path: packageToUpdateChangelog.packagePath,
+      path: pkg.packagePath,
     },
   ).on('error', (err) => {
     // if (flags.verbose) {
