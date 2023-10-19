@@ -20,9 +20,9 @@ You can run this command whenever you need to regenerate your types, and then yo
 
 ### Disable declare statement
 
-By default, `generate:types` will add a `declare` statement to your types file in order to better assist with type inference.
+By default, `generate:types` will add a `declare` statement to your types file, which automatically enables type inference within Payload.
 
-If you would like to disable this, you can add the `declare` property as false under the `typescript` settings.
+If you are using your `payload-types.ts` file in other repos, though, it might be better to disable this `declare` statement, so that you don't get any TS errors in projects that use your Payload types, but do not have Payload installed.
 
 ```ts
 // payload.config.ts
@@ -34,7 +34,7 @@ If you would like to disable this, you can add the `declare` property as false u
 }
 ```
 
-You can then manually add the `declare` statement to your types file if you wish in the following format:
+If you do disable the `declare` pattern, you'll need to manually add a `declare` statement to your code in order for Payload types to be recognized. Here's an example showing how to declare your types in your `payload.config.ts` file:
 
 ```ts
 import { Config } from './payload-types'

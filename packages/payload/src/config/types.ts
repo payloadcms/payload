@@ -660,7 +660,7 @@ export type Config = {
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
-    /** Disable declare block in generated types file*/
+    /** Disable declare block in generated types file */
     declare?: false
     /** Filename to write the generated types to */
     outputFile?: string
