@@ -75,6 +75,12 @@ export const text = baseField.keys({
       .alternatives()
       .try(joi.object().pattern(joi.string(), [joi.string()]), joi.string()),
     rtl: joi.boolean(),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+      BeforeInput: componentSchema,
+      AfterInput: componentSchema,
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   maxLength: joi.number(),

@@ -181,6 +181,12 @@ export type TextField = FieldBase & {
     autoComplete?: string
     placeholder?: Record<string, string> | string
     rtl?: boolean
+    components: {
+      Error?: React.ComponentType<any>
+      Label?: React.ComponentType<any>
+      BeforeInput?: React.ReactElement<any>
+      AfterInput?: React.ReactElement<any>
+    }
   }
   maxLength?: number
   minLength?: number
