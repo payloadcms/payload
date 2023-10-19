@@ -1,6 +1,9 @@
-import type { Page } from './payload-types'
+import path from 'path'
 
-import { mergeData } from '../../packages/live-preview/src/mergeData'
+import type { Media, Page } from './payload-types'
+
+import { handleMessage } from '../../packages/live-preview/src/handleMessage'
+import { mergeData as mergeLivePreviewData } from '../../packages/live-preview/src/mergeData'
 import payload from '../../packages/payload/src'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
 import { initPayloadTest } from '../helpers/configHelpers'
@@ -13,6 +16,22 @@ require('isomorphic-fetch')
 let client
 let serverURL
 
+let page: Page
+let media: Media
+
+let mergedData: Page
+
+// create a util so we don't have to rewrite the args on every test
+const mergeData = async (edits: Partial<Page>): Promise<Page> => {
+  return await mergeLivePreviewData<Page>({
+    depth: 1,
+    fieldSchema: fieldSchemaToJSON(Pages.fields),
+    incomingData: edits,
+    initialData: page,
+    serverURL,
+  })
+}
+
 describe('Collections - Live Preview', () => {
   beforeAll(async () => {
     const { serverURL: incomingServerURL } = await initPayloadTest({
@@ -24,37 +43,107 @@ describe('Collections - Live Preview', () => {
     const config = await configPromise
     client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
     await client.login()
-  })
 
-  it('merges live preview data', async () => {
-    const testPage = await payload.create({
+    page = await payload.create({
       collection: pagesSlug,
       data: {
         slug: 'home',
         title: 'Test Page',
         layout: [
           {
-            blockType: 'content',
-            richText: [],
+            blockType: 'cta',
+            id: 'block-1',
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 1',
+              },
+            ],
           },
         ],
       },
     })
 
-    expect(testPage?.id).toBeDefined()
+    media = await payload.create({
+      collection: 'media',
+      filePath: path.resolve(__dirname, './seed/image-1.jpg'),
+      data: {
+        alt: 'Image 1',
+      },
+    })
+  })
 
-    const pageEdits: Page = {
-      title: 'Test Page (Changed)',
-    } as Page
-
-    const mergedData = await mergeData<Page>({
+  it('handles `postMessage`', async () => {
+    const handledMessage = await handleMessage({
       depth: 1,
-      initialData: testPage,
-      fieldSchema: fieldSchemaToJSON(Pages.fields),
-      incomingData: pageEdits,
+      event: {
+        data: JSON.stringify({
+          data: {
+            title: 'Test Page (Change 1)',
+          },
+          fieldSchemaJSON: fieldSchemaToJSON(Pages.fields),
+          type: 'payload-live-preview',
+        }),
+        origin: serverURL,
+      } as MessageEvent,
+      initialData: page,
       serverURL,
     })
 
-    expect(mergedData.title).toEqual(pageEdits.title)
+    expect(handledMessage.title).toEqual('Test Page (Change 1)')
+  })
+
+  it('caches `fieldSchemaJSON`', async () => {
+    const handledMessage = await handleMessage({
+      depth: 1,
+      event: {
+        data: JSON.stringify({
+          data: {
+            title: 'Test Page (Change 2)',
+          },
+          type: 'payload-live-preview',
+        }),
+        origin: serverURL,
+      } as MessageEvent,
+      initialData: page,
+      serverURL,
+    })
+
+    expect(handledMessage.title).toEqual('Test Page (Change 2)')
+  })
+
+  it('merges data', async () => {
+    expect(page?.id).toBeDefined()
+    mergedData = await mergeData({})
+    expect(mergedData.id).toEqual(page.id)
+  })
+
+  it('merges strings', async () => {
+    mergedData = await mergeData({
+      title: 'Test Page (Change 3)',
+    })
+    expect(mergedData.title).toEqual('Test Page (Change 3)')
+  })
+
+  it('adds and removes uploads', async () => {
+    // Add upload
+    mergedData = await mergeData({
+      hero: {
+        type: 'highImpact',
+        media: media.id,
+      },
+    })
+
+    expect(mergedData.hero.media).toMatchObject(media)
+
+    // Remove upload
+    mergedData = await mergeData({
+      hero: {
+        type: 'highImpact',
+        media: null,
+      },
+    })
+
+    expect(mergedData.hero.media).toEqual(null)
   })
 })
