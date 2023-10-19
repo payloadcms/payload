@@ -3,7 +3,6 @@ import type { EditorProps } from '@monaco-editor/react'
 import type { TFunction } from 'i18next'
 import type { CSSProperties } from 'react'
 
-import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
 import type { Description } from '../../admin/components/forms/FieldDescription/types'
 import type { RowLabel } from '../../admin/components/forms/RowLabel/types'

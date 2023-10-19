@@ -4,6 +4,7 @@ import type { Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import configPromise, { pointSlug, slug } from './config'
 
@@ -685,11 +686,11 @@ describe('collections-graphql', () => {
 
       // language=graphQL
       const query = `query {
-        Posts(where: { title: { exists: true }}) {
-          docs {
-            badFieldName
+          Posts(where: { title: { exists: true }}) {
+              docs {
+                  badFieldName
+              }
           }
-        }
       }`
       await client.request(query).catch((err) => {
         error = err
@@ -702,12 +703,12 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation {
-        createPost(data: {min: 1}) {
-          id
-          min
-          createdAt
-          updatedAt
-        }
+          createPost(data: {min: 1}) {
+              id
+              min
+              createdAt
+              updatedAt
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -722,21 +723,21 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation createTest {
-        test1:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test1:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test2:createUser(data: { email: "test2@test.com", password: "" }) {
-          email
-        }
+          test2:createUser(data: { email: "test2@test.com", password: "" }) {
+              email
+          }
 
-        test3:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test3:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test4:createUser(data: { email: "", password: "test" }) {
-          email
-        }
+          test4:createUser(data: { email: "", password: "test" }) {
+              email
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -775,9 +776,9 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `query {
-        QueryWithInternalError {
-            text
-        }
+          QueryWithInternalError {
+              text
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -792,6 +793,46 @@ describe('collections-graphql', () => {
       expect(error.response.errors[0].extensions.name).toEqual('Error')
     })
   })
+
+  if (['postgres'].includes(process.env.PAYLOAD_DATABASE)) {
+    describe('Transactions', () => {
+      let token
+      let user
+
+      beforeAll(async () => {
+        // language=graphQL
+        const query = `mutation {
+            loginUser(email: "${devUser.email}", password: "${devUser.password}") {
+                token
+                user {
+                    id
+                    email
+                }
+            }
+        }`
+        const response = await client.request(query)
+        user = response.loginUser.user
+        token = response.loginUser.token
+        client.setHeaders({ Authorization: `JWT ${token}` })
+      })
+
+      it('should use transaction', async () => {
+        const query = `mutation {
+          createTransaction(data: {}) {
+          id
+          transactionID
+          sessions
+        }
+      }`
+        const response = await client.request(query)
+        const doc = response.createTransaction
+
+        expect(doc.transactionID).toBeDefined()
+        expect(doc.sessions).toBeDefined()
+        expect(doc.sessions).toContain(doc.transactionID)
+      })
+    })
+  }
 })
 
 async function createPost(overrides?: Partial<Post>) {
