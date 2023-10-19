@@ -239,5 +239,32 @@ describe('Collections - Live Preview', () => {
     expect(merge2.layout[1].id).toEqual(block1.id)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge2.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
+
+    // Remove a block
+    const merge3 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        layout: [
+          {
+            id: block2.id,
+            blockType: 'content',
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 2 (Position 1)',
+              },
+            ],
+          },
+        ],
+      },
+      initialData: merge2,
+      serverURL,
+    })
+
+    // Check that the block has been removed
+    expect(merge3.layout).toHaveLength(1)
+    expect(merge3.layout[0].id).toEqual(block2.id)
+    expect(merge3.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
   })
 })
