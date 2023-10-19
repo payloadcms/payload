@@ -52,6 +52,19 @@ describe('Collections - Live Preview', () => {
         title: 'Test Page',
       },
     })
+
+    // Create image
+    const filePath = path.resolve(__dirname, './seed/image-1.jpg')
+    const file = await getFileByPath(filePath)
+    file.name = 'image-1.jpg'
+
+    media = await payload.create({
+      collection: 'media',
+      data: {
+        alt: 'Image 1',
+      },
+      file,
+    })
   })
 
   it('handles `postMessage`', async () => {
