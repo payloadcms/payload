@@ -79,7 +79,10 @@ export const traverseFields = <T>({
 
               return block
             })
+          } else {
+            result[fieldName] = []
           }
+
           break
 
         case 'tabs':

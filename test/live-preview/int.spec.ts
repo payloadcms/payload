@@ -97,10 +97,11 @@ describe('Collections - Live Preview', () => {
 
   it('merges data', async () => {
     expect(page?.id).toBeDefined()
+
     const mergedData = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
-      incomingData: {},
+      incomingData: page,
       initialData: page,
       serverURL,
     })
@@ -113,6 +114,7 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...page,
         title: 'Test Page (Change 3)',
       },
       initialData: page,
@@ -131,6 +133,7 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...page,
         hero: {
           type: 'highImpact',
           media: media.id,
@@ -147,9 +150,10 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...mergedData,
         hero: {
           type: 'highImpact',
-          media: media.id,
+          media: null,
         },
       },
       initialData: mergedData,
@@ -165,6 +169,7 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...page,
         layout: [
           {
             blockType: 'cta',
@@ -206,6 +211,7 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...merge1,
         layout: [
           {
             id: block2.id,
@@ -245,6 +251,7 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...merge2,
         layout: [
           {
             id: block2.id,
@@ -266,5 +273,20 @@ describe('Collections - Live Preview', () => {
     expect(merge3.layout).toHaveLength(1)
     expect(merge3.layout[0].id).toEqual(block2.id)
     expect(merge3.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
+
+    // Remove the last block to ensure that all blocks can be cleared
+    const merge4 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge3,
+        layout: [],
+      },
+      initialData: merge3,
+      serverURL,
+    })
+
+    // Check that the block has been removed
+    expect(merge4.layout).toHaveLength(0)
   })
 })
