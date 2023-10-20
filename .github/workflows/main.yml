@@ -15,6 +15,9 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 25
     - uses: dorny/paths-filter@v2
       id: filter
       with:
