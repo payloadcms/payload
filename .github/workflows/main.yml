@@ -12,34 +12,27 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      packages: ${{ steps.filter.outputs.packages }}
-      tests: ${{ steps.filter.outputs.tests }}
+      needs_build: ${{ steps.filter.outputs.needs_build }}
       templates: ${{ steps.filter.outputs.templates }}
-      other_than_docs: ${{ steps.filter.outputs.other_than_docs }}
     steps:
-    # For pull requests it's not necessary to checkout the code
     - uses: dorny/paths-filter@v2
       id: filter
       with:
         filters: |
-          packages:
-            - 'packages/**'
-          tests:
-            - 'test/**'
+          needs_build:
+            - '!(docs/**)**'
+            - '!(examples/**)**'
+            - '!(templates/**)**'
           templates:
             - 'templates/**'
-          other_than_docs:
-            - '!(docs/**)**'
     - name: Log all filter results
       run: |
-        echo "packages=${{ steps.filter.outputs.packages }}"
-        echo "tests=${{ steps.filter.outputs.tests }}"
-        echo "templates=${{ steps.filter.outputs.templates }}"
-        echo "other_than_docs=${{ steps.filter.outputs.other_than_docs }}"
+        echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+        echo "templates: ${{ steps.filter.outputs.templates }}"
 
   core-build:
     needs: changes
-    if: ${{ needs.changes.outputs.other_than_docs == 'true' }}
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
