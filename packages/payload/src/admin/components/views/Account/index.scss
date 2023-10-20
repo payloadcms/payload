@@ -1,47 +1,19 @@
 @import '../../../scss/styles.scss';
 
 .account {
-  width: 100%;
-  padding-bottom: var(--spacing-view-bottom);
-
-  &__form {
-    height: 100%;
-  }
-
-  &__edit {
-    margin-top: calc(var(--base) * 3);
-  }
-
   &__auth {
-    margin-bottom: var(--base);
+    margin-bottom: calc(var(--base) * 2);
+    margin-top: calc(var(--base) * 0.5);
   }
 
-  &__header {
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__payload-settings {
-    margin-top: base(3);
-    padding-top: base(3);
-    border-top: 1px solid var(--theme-elevation-100);
-  }
-
-  &__language {
-    margin-bottom: $baseline;
+  &___settings {
+    margin-bottom: calc(var(--base) * 2);
   }
 
   @include small-break {
-    &__edit {
-      margin: var(--base) 0;
-    }
-
-    &__payload-settings {
-      margin-top: base(1);
-      padding-top: base(1);
-      padding-bottom: base(0.5);
-      border-top: 1px solid var(--theme-elevation-100);
-      border-bottom: 1px solid var(--theme-elevation-100);
+    &__auth {
+      margin-top: 0;
+      margin-bottom: var(--base);
     }
   }
 }

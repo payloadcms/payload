@@ -1,12 +1,12 @@
-@import '../../../../scss/styles.scss';
+@import '../../../scss/styles.scss';
 
-.global-default-edit {
+.document-fields {
   width: 100%;
   display: flex;
   --doc-sidebar-width: 325px;
 
   &--has-sidebar {
-    .global-default-edit {
+    .document-fields {
       &__edit {
         [dir='ltr'] & {
           top: 0;
@@ -46,10 +46,6 @@
     flex-grow: 1;
   }
 
-  &__auth {
-    margin-bottom: var(--base);
-  }
-
   &__sidebar-wrap {
     position: sticky;
     top: var(--doc-controls-height);
@@ -62,9 +58,6 @@
     width: 100%;
     height: 100%;
     overflow-y: auto;
-  }
-
-  &__sidebar-sticky-wrap {
     display: flex;
     flex-direction: column;
     min-height: 100%;
@@ -88,7 +81,7 @@
     display: block;
 
     &--has-sidebar {
-      .global-default-edit {
+      .document-fields {
         &__main {
           width: 100%;
         }
@@ -124,8 +117,6 @@
       width: 100%;
       height: initial;
       border-left: 0;
-      margin-top: calc(var(--base) / 2);
-      width: var(--doc-sidebar-width);
     }
 
     &__form {
@@ -136,6 +127,7 @@
       padding-top: 0;
       padding-left: var(--gutter-h);
       padding-right: var(--gutter-h);
+      padding-bottom: 0;
       gap: base(0.5);
 
       [dir='ltr'] & {
