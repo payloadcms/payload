@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { v4 as uuid } from 'uuid'
 
-import type { Field } from '../../../../../fields/config/types'
+import type { SanitizedCollectionConfig, Where } from '../../../../../exports/types'
 import type { ListIndexProps, ListPreferences, Props } from './types'
 
+import { type Field, fieldAffectsData } from '../../../../../fields/config/types'
+import flattenFields from '../../../../../utilities/flattenTopLevelFields'
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
 import { useStepNav } from '../../../elements/StepNav'
 import { TableColumnsProvider } from '../../../elements/TableColumns'
@@ -17,6 +19,16 @@ import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
 import { useSearchParams } from '../../../utilities/SearchParams'
 import DefaultList from './Default'
 import formatFields from './formatFields'
+
+const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
+  const {
+    admin: { useAsTitle },
+    fields,
+  } = collection
+
+  const topLevelFields = flattenFields(fields)
+  return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle)
+}
 
 /**
  * The ListView component is table which lists the collection's documents.
@@ -30,6 +42,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     collection: {
       admin: {
         components: { views: { List: CustomList } = {} } = {},
+        listSearchableFields,
         pagination: { defaultLimit },
       },
       labels: { plural },
@@ -45,7 +58,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const { permissions } = useAuth()
   const { setStepNav } = useStepNav()
   const { getPreference, setPreference } = usePreferences()
-  const { limit, page, sort, where } = useSearchParams()
+  const { limit, page, search, sort, where } = useSearchParams()
   const history = useHistory()
   const { t } = useTranslation('general')
   const [fetchURL, setFetchURL] = useState<string>('')
@@ -54,6 +67,11 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const hasCreatePermission = collectionPermissions?.create?.permission
   const newDocumentURL = `${admin}/collections/${slug}/create`
   const [{ data }, { setParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } })
+  const [titleField, setTitleField] = useState(getUseAsTitle(collection))
+
+  useEffect(() => {
+    setTitleField(getUseAsTitle(collection))
+  }, [collection])
 
   useEffect(() => {
     setStepNav([
@@ -69,23 +87,55 @@ const ListView: React.FC<ListIndexProps> = (props) => {
 
   const resetParams = useCallback<Props['resetParams']>(
     (overrides = {}) => {
-      const params: Record<string, unknown> = {
+      const params: Record<string, unknown> & { where?: Where } = {
         depth: 0,
         draft: 'true',
         limit,
         page: overrides?.page,
+        search: overrides?.search,
         sort: overrides?.sort,
-        where: overrides?.where,
+        where: overrides?.where || {},
       }
 
       if (page) params.page = page
       if (sort) params.sort = sort
-      if (where) params.where = where
+      if (where) params.where = where as Where
       params.invoke = uuid()
+
+      if (search) {
+        let copyOfWhere = { ...(where as Where) }
+
+        const searchAsConditions = (listSearchableFields || [titleField?.name]).map((fieldName) => {
+          return {
+            [fieldName]: {
+              like: search,
+            },
+          }
+        }, [])
+
+        if (searchAsConditions.length > 0) {
+          const conditionalSearchFields = {
+            or: [...searchAsConditions],
+          }
+          if ('and' in copyOfWhere) {
+            copyOfWhere.and.push(conditionalSearchFields)
+          } else if ('or' in copyOfWhere) {
+            copyOfWhere = {
+              and: [copyOfWhere, conditionalSearchFields],
+            }
+          } else {
+            copyOfWhere = {
+              and: [copyOfWhere, conditionalSearchFields],
+            }
+          }
+        }
+
+        params.where = copyOfWhere
+      }
 
       setParams(params)
     },
-    [limit, page, setParams, sort, where],
+    [limit, page, setParams, sort, where, search, listSearchableFields, titleField?.name],
   )
 
   useEffect(() => {
@@ -178,6 +228,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
           limit: limit || defaultLimit,
           newDocumentURL,
           resetParams,
+          titleField,
         }}
       />
     </TableColumnsProvider>
