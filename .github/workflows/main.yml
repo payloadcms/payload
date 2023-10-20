@@ -249,6 +249,10 @@ jobs:
 
   templates:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [blank, website, ecommerce]
 
     steps:
       - uses: actions/checkout@v4
@@ -267,7 +271,7 @@ jobs:
 
       - name: Build Website
         run: |
-          cd templates/website
+          cd templates/${{ matrix.template }}
           cp .env.example .env
           yarn install
           yarn build
