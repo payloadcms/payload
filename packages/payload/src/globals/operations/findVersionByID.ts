@@ -87,6 +87,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
       result =
         (await hook({
+          context: req.context,
           doc: result.version,
           global: globalConfig,
           req,
@@ -118,6 +119,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
       result.version =
         (await hook({
+          context: req.context,
           doc: result.version,
           global: globalConfig,
           query: findGlobalVersionsArgs.where,

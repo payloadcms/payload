@@ -126,6 +126,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
       data =
         (await hook({
+          context: req.context,
           data,
           global: globalConfig,
           originalDoc,
@@ -142,6 +143,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
       data =
         (await hook({
+          context: req.context,
           data,
           global: globalConfig,
           originalDoc,
@@ -228,6 +230,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
           global: globalConfig,
           req,
@@ -258,6 +261,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
           global: globalConfig,
           previousDoc: originalDoc,

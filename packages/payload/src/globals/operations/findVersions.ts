@@ -117,6 +117,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
             docRef.version =
               (await hook({
+                context: req.context,
                 doc: doc.version,
                 findMany: true,
                 global: globalConfig,

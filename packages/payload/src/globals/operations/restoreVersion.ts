@@ -116,6 +116,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
           global: globalConfig,
           req,
@@ -146,6 +147,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
           global: globalConfig,
           previousDoc,

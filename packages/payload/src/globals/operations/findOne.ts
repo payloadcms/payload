@@ -83,6 +83,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
       doc =
         (await hook({
+          context: req.context,
           doc,
           global: globalConfig,
           req,
@@ -113,6 +114,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
       doc =
         (await hook({
+          context: req.context,
           doc,
           global: globalConfig,
           req,
