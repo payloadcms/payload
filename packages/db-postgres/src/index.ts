@@ -49,6 +49,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
+      connectTimeout: args.connectTimeout || 10,
 
       // Postgres-specific
       drizzle: undefined,

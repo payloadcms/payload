@@ -357,7 +357,21 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     if (!options.disableDBConnect && this.db.connect) {
-      await this.db.connect(this)
+      const dbConnectTimeout = (this.db.connectTimeout || 10) * 1000
+      let connected = false
+      const start = new Date().valueOf()
+      while (!connected) {
+        try {
+          await this.db.connect(this)
+          connected = true
+        } catch (e) {
+          if (new Date().valueOf() - start > dbConnectTimeout) {
+            this.logger.error('Can not connect to DB')
+            process.exit(1)
+          }
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+      }
     }
 
     this.logger.info('Starting Payload...')

@@ -15,20 +15,15 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     ...this.enums,
   }
 
-  try {
-    this.pool = new Pool(this.poolOptions)
-    await this.pool.connect()
+  this.pool = new Pool(this.poolOptions)
+  await this.pool.connect()
 
-    this.drizzle = drizzle(this.pool, { schema: this.schema })
-    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info('---- DROPPING TABLES ----')
-      await this.drizzle.execute(sql`drop schema public cascade;
+  this.drizzle = drizzle(this.pool, { schema: this.schema })
+  if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+    this.payload.logger.info('---- DROPPING TABLES ----')
+    await this.drizzle.execute(sql`drop schema public cascade;
       create schema public;`)
-      this.payload.logger.info('---- DROPPED TABLES ----')
-    }
-  } catch (err) {
-    payload.logger.error(`Error: cannot connect to Postgres. Details: ${err.message}`, err)
-    process.exit(1)
+    this.payload.logger.info('---- DROPPED TABLES ----')
   }
 
   // Only push schema if not in production

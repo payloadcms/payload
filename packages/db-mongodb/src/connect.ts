@@ -45,17 +45,12 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     }
   }
 
-  try {
-    this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+  this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
 
-    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info('---- DROPPING DATABASE ----')
-      await mongoose.connection.dropDatabase()
-      this.payload.logger.info('---- DROPPED DATABASE ----')
-    }
-    this.payload.logger.info(successfulConnectionMessage)
-  } catch (err) {
-    this.payload.logger.error(`Error: cannot connect to MongoDB. Details: ${err.message}`, err)
-    process.exit(1)
+  if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+    this.payload.logger.info('---- DROPPING DATABASE ----')
+    await mongoose.connection.dropDatabase()
+    this.payload.logger.info('---- DROPPED DATABASE ----')
   }
+  this.payload.logger.info(successfulConnectionMessage)
 }

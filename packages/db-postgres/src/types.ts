@@ -14,6 +14,7 @@ import type { Pool, PoolConfig } from 'pg'
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
+  connectTimeout?: number
   migrationDir?: string
   pool: PoolConfig
   push?: boolean

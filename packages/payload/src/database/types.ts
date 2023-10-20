@@ -22,6 +22,8 @@ export interface BaseDatabaseAdapter {
    */
   connect?: Connect
 
+  connectTimeout?: number
+
   create: Create
 
   createGlobal: CreateGlobal

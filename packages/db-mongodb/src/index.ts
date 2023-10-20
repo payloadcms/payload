@@ -46,6 +46,7 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   }
+  connectTimeout?: number
   migrationDir?: string
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -87,6 +88,7 @@ declare module 'payload' {
 export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
+  connectTimeout = 10,
   migrationDir: migrationDirArg,
   url,
 }: Args): MongooseAdapterResult {
@@ -99,6 +101,7 @@ export function mongooseAdapter({
 
     return createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
+      connectTimeout: connectTimeout,
 
       // Mongoose-specific
       autoPluralization,
