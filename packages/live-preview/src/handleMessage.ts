@@ -14,24 +14,27 @@ export const handleMessage = async <T>(args: {
 }): Promise<T> => {
   const { depth, event, initialData, serverURL } = args
   if (event.origin === serverURL && event.data) {
-    const eventData = JSON.parse(event?.data)
+    try {
+      const eventData = JSON.parse(event?.data)
 
-    if (eventData.type === 'payload-live-preview') {
-      if (!payloadLivePreviewFieldSchema && eventData.fieldSchemaJSON) {
-        payloadLivePreviewFieldSchema = eventData.fieldSchemaJSON
+      if (eventData.type === 'payload-live-preview') {
+        if (!payloadLivePreviewFieldSchema && eventData.fieldSchemaJSON) {
+          payloadLivePreviewFieldSchema = eventData.fieldSchemaJSON
+        }
+
+        const mergedData = await mergeData<T>({
+          depth,
+          fieldSchema: payloadLivePreviewFieldSchema,
+          incomingData: eventData.data,
+          initialData,
+          serverURL,
+        })
+
+        return mergedData
       }
-
-      const mergedData = await mergeData<T>({
-        depth,
-        fieldSchema: payloadLivePreviewFieldSchema,
-        incomingData: eventData.data,
-        initialData,
-        serverURL,
-      })
-
-      return mergedData
+    } catch (e) {
+      return initialData
     }
   }
-
   return initialData
 }
