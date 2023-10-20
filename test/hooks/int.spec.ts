@@ -1,3 +1,5 @@
+import hash from 'object-hash'
+
 import type { NestedAfterReadHook } from './payload-types'
 
 import payload from '../../packages/payload/src'
@@ -8,6 +10,7 @@ import { RESTClient } from '../helpers/rest'
 import { afterOperationSlug } from './collections/AfterOperation'
 import { chainingHooksSlug } from './collections/ChainingHooks'
 import { contextHooksSlug } from './collections/ContextHooks'
+import { dataHooksSlug } from './collections/Data'
 import { hooksSlug } from './collections/Hook'
 import {
   generatedAfterReadText,
@@ -16,7 +19,7 @@ import {
 import { relationsSlug } from './collections/Relations'
 import { transformSlug } from './collections/Transform'
 import { hooksUsersSlug } from './collections/Users'
-import configPromise from './config'
+import configPromise, { HooksConfig } from './config'
 
 let client: RESTClient
 let apiUrl
@@ -291,6 +294,36 @@ describe('Hooks', () => {
           data: { email: regularUser.email, password: regularUser.password },
         }),
       ).rejects.toThrow(AuthenticationError)
+    })
+  })
+
+  describe('hook parameter data', () => {
+    it('should pass collection to collection.beforeOperation hook', async () => {
+      const sanitizedConfig = await HooksConfig
+      const sanitizedHooksCollection = sanitizedConfig.collections.find(
+        ({ slug }) => slug === dataHooksSlug,
+      )
+
+      const collectionHash = hash(JSON.stringify(sanitizedHooksCollection))
+
+      const doc = await payload.create({
+        collection: dataHooksSlug,
+        data: {},
+      })
+
+      expect(doc.collection_beforeOperation_collection).toEqual(collectionHash)
+      expect(doc.collection_beforeChange_collection).toEqual(collectionHash)
+      expect(doc.collection_afterChange_collection).toEqual(collectionHash)
+      expect(doc.collection_afterRead_collection).toEqual(collectionHash)
+      expect(doc.collection_afterOperation_collection).toEqual(collectionHash)
+
+      // BeforeRead is only run for find operations
+      const foundDoc = await payload.findByID({
+        collection: dataHooksSlug,
+        id: doc.id,
+      })
+
+      expect(foundDoc.collection_beforeRead_collection).toEqual(collectionHash)
     })
   })
 })

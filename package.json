@@ -71,6 +71,7 @@
     "mongodb-memory-server": "8.12.2",
     "node-fetch": "2.6.12",
     "nodemon": "3.0.1",
+    "object-hash": "^3.0.0",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",

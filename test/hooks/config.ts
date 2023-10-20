@@ -1,14 +1,16 @@
+import type { SanitizedConfig } from '../../packages/payload/src/config/types'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import AfterOperation from './collections/AfterOperation'
 import ChainingHooks from './collections/ChainingHooks'
 import ContextHooks from './collections/ContextHooks'
+import { DataHooks } from './collections/Data'
 import Hooks, { hooksSlug } from './collections/Hook'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks'
 import Relations from './collections/Relations'
 import TransformHooks from './collections/Transform'
 import Users, { seedHooksUsers } from './collections/Users'
-
-export default buildConfigWithDefaults({
+export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   collections: [
     AfterOperation,
     ContextHooks,
@@ -18,6 +20,7 @@ export default buildConfigWithDefaults({
     ChainingHooks,
     Relations,
     Users,
+    DataHooks,
   ],
   onInit: async (payload) => {
     await seedHooksUsers(payload)
@@ -38,3 +41,5 @@ export default buildConfigWithDefaults({
     })
   },
 })
+
+export default HooksConfig
