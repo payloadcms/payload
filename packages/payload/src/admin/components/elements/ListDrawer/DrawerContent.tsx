@@ -8,10 +8,9 @@ import type { Field } from '../../../../fields/config/types'
 import type { ListDrawerProps } from './types'
 
 import { baseClass } from '.'
-import { fieldAffectsData } from '../../../../exports/types'
-import flattenFields from '../../../../utilities/flattenTopLevelFields'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
+import { useUseTitleField } from '../../../hooks/useUseAsTitle'
 import Label from '../../forms/Label'
 import X from '../../icons/X'
 import { useAuth } from '../../utilities/Auth'
@@ -26,16 +25,6 @@ import Pill from '../Pill'
 import ReactSelect from '../ReactSelect'
 import { TableColumnsProvider } from '../TableColumns'
 import ViewDescription from '../ViewDescription'
-
-const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
-  const {
-    admin: { useAsTitle },
-    fields,
-  } = collection
-
-  const topLevelFields = flattenFields(fields)
-  return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle)
-}
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -70,6 +59,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [page, setPage] = useState(1)
   const [where, setWhere] = useState(null)
   const [search, setSearch] = useState('')
+
   const {
     collections,
     routes: { api },
@@ -98,6 +88,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   )
 
   const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
+
+  const titleField = useUseTitleField(selectedCollectionConfig)
 
   useEffect(() => {
     setFields(formatFields(selectedCollectionConfig))
@@ -142,7 +134,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   useEffect(() => {
     const { admin: { listSearchableFields } = {}, slug } = selectedCollectionConfig
-    const titleField = getUseAsTitle(selectedCollectionConfig)
     const params: {
       cacheBust?: number
       limit?: number
@@ -182,7 +173,18 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     if (copyOfWhere) params.where = copyOfWhere
 
     setParams(params)
-  }, [page, sort, where, search, cacheBust, filterOptions, selectedCollectionConfig, t, setParams])
+  }, [
+    page,
+    sort,
+    where,
+    search,
+    cacheBust,
+    filterOptions,
+    selectedCollectionConfig,
+    t,
+    setParams,
+    titleField,
+  ])
 
   useEffect(() => {
     const newPreferences = {

@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { v4 as uuid } from 'uuid'
 
-import type { SanitizedCollectionConfig, Where } from '../../../../../exports/types'
+import type { Where } from '../../../../../exports/types'
 import type { ListIndexProps, ListPreferences, Props } from './types'
 
-import { type Field, fieldAffectsData } from '../../../../../fields/config/types'
-import flattenFields from '../../../../../utilities/flattenTopLevelFields'
+import { type Field } from '../../../../../fields/config/types'
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
+import { useUseTitleField } from '../../../../hooks/useUseAsTitle'
 import { useStepNav } from '../../../elements/StepNav'
 import { TableColumnsProvider } from '../../../elements/TableColumns'
 import { useAuth } from '../../../utilities/Auth'
@@ -20,14 +20,20 @@ import { useSearchParams } from '../../../utilities/SearchParams'
 import DefaultList from './Default'
 import formatFields from './formatFields'
 
-const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
-  const {
-    admin: { useAsTitle },
-    fields,
-  } = collection
+const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
+  if ('and' in where) {
+    where.and.push(queryParams)
+  } else if ('or' in where) {
+    where = {
+      and: [where, queryParams],
+    }
+  } else {
+    where = {
+      and: [where, queryParams],
+    }
+  }
 
-  const topLevelFields = flattenFields(fields)
-  return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle)
+  return where
 }
 
 /**
@@ -67,11 +73,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const hasCreatePermission = collectionPermissions?.create?.permission
   const newDocumentURL = `${admin}/collections/${slug}/create`
   const [{ data }, { setParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } })
-  const [titleField, setTitleField] = useState(getUseAsTitle(collection))
-
-  useEffect(() => {
-    setTitleField(getUseAsTitle(collection))
-  }, [collection])
+  const titleField = useUseTitleField(collection)
 
   useEffect(() => {
     setStepNav([
@@ -103,7 +105,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
       params.invoke = uuid()
 
       if (search) {
-        let copyOfWhere = { ...(where as Where) }
+        let copyOfWhere = { ...((where as Where) || {}) }
 
         const searchAsConditions = (listSearchableFields || [titleField?.name]).map((fieldName) => {
           return {
@@ -117,17 +119,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
           const conditionalSearchFields = {
             or: [...searchAsConditions],
           }
-          if ('and' in copyOfWhere) {
-            copyOfWhere.and.push(conditionalSearchFields)
-          } else if ('or' in copyOfWhere) {
-            copyOfWhere = {
-              and: [copyOfWhere, conditionalSearchFields],
-            }
-          } else {
-            copyOfWhere = {
-              and: [copyOfWhere, conditionalSearchFields],
-            }
-          }
+          copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, conditionalSearchFields)
         }
 
         params.where = copyOfWhere
