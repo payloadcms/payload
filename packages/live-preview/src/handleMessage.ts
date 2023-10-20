@@ -32,7 +32,7 @@ export const handleMessage = async <T>(args: {
 
         return mergedData
       }
-    } catch (e) {
+    } catch (_e) {
       return initialData
     }
   }
