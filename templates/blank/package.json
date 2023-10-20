@@ -1,5 +1,5 @@
 {
-  "name": "template-blank-ope",
+  "name": "template-blank",
   "description": "A blank template to get started with Payload",
   "version": "1.0.0",
   "main": "dist/server.js",
