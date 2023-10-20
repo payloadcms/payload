@@ -78,10 +78,6 @@ export type Props = {
   onMenuScrollToBottom?: () => void
   options: Option[] | OptionGroup[]
   placeholder?: string
-  /**
-   * @deprecated Since version 1.0. Will be deleted in version 2.0. Use customProps instead.
-   */
-  selectProps?: CustomSelectProps
   showError?: boolean
   value?: Option | Option[]
 }
