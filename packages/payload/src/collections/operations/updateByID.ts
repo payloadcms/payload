@@ -20,6 +20,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
 import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion'
@@ -360,7 +361,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

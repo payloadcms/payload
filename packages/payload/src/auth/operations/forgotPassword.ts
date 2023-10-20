@@ -5,6 +5,7 @@ import type { PayloadRequest } from '../../express/types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
 import { APIError } from '../../errors'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -152,7 +153,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
       result: token,
     })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return token
   } catch (error: unknown) {

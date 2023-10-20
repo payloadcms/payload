@@ -4,6 +4,7 @@ import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 
 import { APIError } from '../../errors'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -45,7 +46,7 @@ async function verifyEmail(args: Args): Promise<boolean> {
       req,
     })
 
-    if (shouldCommit) await req.payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return true
   } catch (error: unknown) {

@@ -8,6 +8,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
@@ -166,7 +167,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

@@ -9,6 +9,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable'
@@ -52,7 +53,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     disableErrors,
     draft: draftEnabled = false,
     overrideAccess = false,
-    req: { locale, payload, t },
+    req: { locale, t },
     req,
     showHiddenFields,
   } = args
@@ -87,7 +88,11 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    if (!req.findByID) req.findByID = { [transactionID]: {} }
+    if (!req.findByID) {
+      req.findByID = { [transactionID]: {} }
+    } else if (!req.findByID[transactionID]) {
+      req.findByID[transactionID] = {}
+    }
 
     if (!req.findByID[transactionID][collectionConfig.slug]) {
       const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query)
@@ -190,7 +195,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
