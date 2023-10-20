@@ -20,9 +20,10 @@ jobs:
       with:
         filters: |
           needs_build:
-            - '!(docs/**)**'
-            - '!(examples/**)**'
-            - '!(templates/**)**'
+            - 'packages/**'
+            - 'test/**'
+            - 'pnpm-lock.yaml'
+            - 'package.json'
           templates:
             - 'templates/**'
     - name: Log all filter results
