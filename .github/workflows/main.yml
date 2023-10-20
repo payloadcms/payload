@@ -7,7 +7,39 @@ on:
     branches: ['main']
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      packages: ${{ steps.filter.outputs.packages }}
+      tests: ${{ steps.filter.outputs.tests }}
+      templates: ${{ steps.filter.outputs.templates }}
+      other_than_docs: ${{ steps.filter.outputs.other_than_docs }}
+    steps:
+    # For pull requests it's not necessary to checkout the code
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          packages:
+            - 'packages/**'
+          tests:
+            - 'test/**'
+          templates:
+            - 'templates/**'
+          other_than_docs:
+            - '!(docs/**)**'
+    - name: Log all filter results
+      run: |
+        echo "packages=${{ steps.filter.outputs.packages }}"
+        echo "tests=${{ steps.filter.outputs.tests }}"
+        echo "templates=${{ steps.filter.outputs.templates }}"
+        echo "other_than_docs=${{ steps.filter.outputs.other_than_docs }}"
+
   core-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.other_than_docs == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -246,3 +278,34 @@ jobs:
       - name: Test ${{ matrix.pkg }}
         run: pnpm --filter ${{ matrix.pkg }} run test
         if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions
+
+  templates:
+    needs: changes
+    if: ${{ needs.changes.outputs.templates == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [blank, website, ecommerce]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
+
+      - name: Build Website
+        run: |
+          cd templates/${{ matrix.template }}
+          cp .env.example .env
+          yarn install
+          yarn build
