@@ -1,0 +1,99 @@
+/* eslint-disable no-param-reassign */
+
+import hash from 'object-hash'
+
+import type { GlobalConfig } from '../../../../packages/payload/src/globals/config/types'
+
+export const dataHooksGlobalSlug = 'data-hooks-global'
+
+export const DataHooksGlobal: GlobalConfig = {
+  slug: dataHooksGlobalSlug,
+  access: {
+    read: () => true,
+    update: () => true,
+  },
+  hooks: {
+    beforeChange: [
+      ({ data, global, context }) => {
+        context['global_beforeChange_global'] = hash(JSON.stringify(global))
+
+        return data
+      },
+    ],
+    beforeRead: [
+      async ({ context, global }) => {
+        context['global_beforeRead_global'] = hash(JSON.stringify(global))
+      },
+    ],
+    afterRead: [
+      ({ context, global, doc }) => {
+        context['global_afterRead_global'] = hash(JSON.stringify(global))
+
+        // Needs to be done for both afterRead (for findOne test) and afterChange (for update test)
+        for (const contextKey in context) {
+          if (contextKey.startsWith('global_')) {
+            doc[contextKey] = context[contextKey]
+          }
+        }
+        return doc
+      },
+    ],
+    afterChange: [
+      async ({ context, global, doc }) => {
+        context['global_afterChange_global'] = hash(JSON.stringify(global))
+
+        // Needs to be done for both afterRead (for findOne test) and afterChange (for update test), as afterChange is called after afterRead
+        for (const contextKey in context) {
+          if (contextKey.startsWith('global_')) {
+            doc[contextKey] = context[contextKey]
+          }
+        }
+
+        return doc
+      },
+    ],
+  },
+  fields: [
+    {
+      name: 'field_globalAndField',
+      type: 'text',
+      hooks: {
+        beforeChange: [
+          ({ global, field, context, value }) => {
+            context['field_beforeChange_GlobalAndField'] =
+              hash(JSON.stringify(global)) + hash(JSON.stringify(field))
+
+            return value
+          },
+        ],
+
+        afterRead: [
+          ({ global, field, context }) => {
+            return (
+              (context['field_beforeChange_GlobalAndField'] as string) +
+              hash(JSON.stringify(global)) +
+              hash(JSON.stringify(field))
+            )
+          },
+        ],
+      },
+    },
+
+    {
+      name: 'global_beforeChange_global',
+      type: 'text',
+    },
+    {
+      name: 'global_afterChange_global',
+      type: 'text',
+    },
+    {
+      name: 'global_beforeRead_global',
+      type: 'text',
+    },
+    {
+      name: 'global_afterRead_global',
+      type: 'text',
+    },
+  ],
+}

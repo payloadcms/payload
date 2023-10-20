@@ -41,7 +41,7 @@ export const DataHooks: CollectionConfig = {
       },
     ],
     afterRead: [
-      ({ context, req, collection, doc }) => {
+      ({ context, collection, doc }) => {
         context['collection_afterRead_collection'] = hash(JSON.stringify(collection))
 
         return doc
@@ -61,6 +61,30 @@ export const DataHooks: CollectionConfig = {
     ],
   },
   fields: [
+    {
+      name: 'field_collectionAndField',
+      type: 'text',
+      hooks: {
+        beforeChange: [
+          ({ collection, field, context, value }) => {
+            context['field_beforeChange_CollectionAndField'] =
+              hash(JSON.stringify(collection)) + hash(JSON.stringify(field))
+
+            return value
+          },
+        ],
+
+        afterRead: [
+          ({ collection, field, context }) => {
+            return (
+              (context['field_beforeChange_CollectionAndField'] as string) +
+              hash(JSON.stringify(collection)) +
+              hash(JSON.stringify(field))
+            )
+          },
+        ],
+      },
+    },
     {
       name: 'collection_beforeOperation_collection',
       type: 'text',

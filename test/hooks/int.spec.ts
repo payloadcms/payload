@@ -20,6 +20,7 @@ import { relationsSlug } from './collections/Relations'
 import { transformSlug } from './collections/Transform'
 import { hooksUsersSlug } from './collections/Users'
 import configPromise, { HooksConfig } from './config'
+import { dataHooksGlobalSlug } from './globals/Data'
 
 let client: RESTClient
 let apiUrl
@@ -298,7 +299,7 @@ describe('Hooks', () => {
   })
 
   describe('hook parameter data', () => {
-    it('should pass collection to collection.beforeOperation hook', async () => {
+    it('should pass collection prop to collection hooks', async () => {
       const sanitizedConfig = await HooksConfig
       const sanitizedHooksCollection = sanitizedConfig.collections.find(
         ({ slug }) => slug === dataHooksSlug,
@@ -324,6 +325,83 @@ describe('Hooks', () => {
       })
 
       expect(foundDoc.collection_beforeRead_collection).toEqual(collectionHash)
+    })
+
+    it('should pass collection and field props to field hooks', async () => {
+      const sanitizedConfig = await HooksConfig
+      const sanitizedHooksCollection = sanitizedConfig.collections.find(
+        ({ slug }) => slug === dataHooksSlug,
+      )
+
+      const collectionHash = hash(JSON.stringify(sanitizedHooksCollection))
+
+      const fieldHash = hash(
+        JSON.stringify(
+          sanitizedHooksCollection.fields.find(
+            (field) => 'name' in field && field.name === 'field_collectionAndField',
+          ),
+        ),
+      )
+
+      const doc = await payload.create({
+        collection: dataHooksSlug,
+        data: {},
+      })
+
+      const collectionAndFieldHash = collectionHash + fieldHash
+
+      expect(doc.field_collectionAndField).toEqual(collectionAndFieldHash + collectionAndFieldHash)
+    })
+
+    it('should pass global prop to global hooks', async () => {
+      const sanitizedConfig = await HooksConfig
+      const sanitizedHooksGlobal = sanitizedConfig.globals.find(
+        ({ slug }) => slug === dataHooksGlobalSlug,
+      )
+
+      const globalHash = hash(JSON.stringify(sanitizedHooksGlobal))
+
+      const doc = await payload.updateGlobal({
+        slug: dataHooksGlobalSlug,
+        data: {},
+      })
+
+      expect(doc.global_beforeChange_global).toEqual(globalHash)
+      expect(doc.global_afterRead_global).toEqual(globalHash)
+      expect(doc.global_afterChange_global).toEqual(globalHash)
+
+      // beforeRead is only run for findOne operations
+      const foundDoc = await payload.findGlobal({
+        slug: dataHooksGlobalSlug,
+      })
+
+      expect(foundDoc.global_beforeRead_global).toEqual(globalHash)
+    })
+
+    it('should pass global and field props to global hooks', async () => {
+      const sanitizedConfig = await HooksConfig
+      const sanitizedHooksGlobal = sanitizedConfig.globals.find(
+        ({ slug }) => slug === dataHooksGlobalSlug,
+      )
+
+      const globalHash = hash(JSON.stringify(sanitizedHooksGlobal))
+
+      const fieldHash = hash(
+        JSON.stringify(
+          sanitizedHooksGlobal.fields.find(
+            (field) => 'name' in field && field.name === 'field_globalAndField',
+          ),
+        ),
+      )
+
+      const doc = await payload.updateGlobal({
+        slug: dataHooksGlobalSlug,
+        data: {},
+      })
+
+      const globalAndFieldHash = globalHash + fieldHash
+
+      expect(doc.field_globalAndField).toEqual(globalAndFieldHash + globalAndFieldHash)
     })
   })
 })

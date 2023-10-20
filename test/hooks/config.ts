@@ -10,6 +10,7 @@ import NestedAfterReadHooks from './collections/NestedAfterReadHooks'
 import Relations from './collections/Relations'
 import TransformHooks from './collections/Transform'
 import Users, { seedHooksUsers } from './collections/Users'
+import { DataHooksGlobal } from './globals/Data'
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   collections: [
     AfterOperation,
@@ -22,6 +23,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     Users,
     DataHooks,
   ],
+  globals: [DataHooksGlobal],
   onInit: async (payload) => {
     await seedHooksUsers(payload)
     await payload.create({
