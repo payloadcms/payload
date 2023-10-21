@@ -2,7 +2,6 @@ import type { i18n } from 'i18next'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 
-import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin'
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 import { withMergedProps } from 'payload/utilities'
@@ -20,6 +19,7 @@ import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
 import { AutoLinkPlugin } from './plugins/autoLink'
+import { ClickableLinkPlugin } from './plugins/clickableLink'
 import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
 import { LinkPlugin } from './plugins/link'
@@ -39,7 +39,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             FeaturesSectionWithEntries([
               {
                 ChildComponent: LinkIcon,
-                isActive: ({ editor, selection }) => {
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     const selectedNode = getSelectedNode(selection)
                     const linkParent = $findMatchingParent(selectedNode, $isLinkNode)
@@ -142,7 +142,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             position: 'normal',
           },
           {
-            Component: LexicalClickableLinkPlugin,
+            Component: ClickableLinkPlugin,
             position: 'normal',
           },
           {

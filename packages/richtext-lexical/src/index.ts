@@ -246,16 +246,16 @@ export {
   type FloatingToolbarSection,
   type FloatingToolbarSectionEntry,
 } from './field/lexical/plugins/FloatingSelectToolbar/types'
-export {
-  SlashMenuGroup,
-  SlashMenuOption,
-} from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
 // export SanitizedEditorConfig
 export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
 export { RichTextCell }
 export { RichTextField }
-export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
+export {
+  SlashMenuGroup,
+  SlashMenuOption,
+} from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 export { CAN_USE_DOM } from './field/lexical/utils/canUseDOM'
 export { cloneDeep } from './field/lexical/utils/cloneDeep'
 export { getDOMRangeRect } from './field/lexical/utils/getDOMRangeRect'

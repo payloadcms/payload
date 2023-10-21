@@ -8,7 +8,7 @@ import type React from 'react'
 import type { AdapterProps } from '../../types'
 import type { EditorConfig } from '../lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
-import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import type { HTMLConverter } from './converters/html/converter/types'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({

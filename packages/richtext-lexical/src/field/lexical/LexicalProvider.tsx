@@ -1,3 +1,4 @@
+'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer'
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { LexicalEditor } from 'lexical'

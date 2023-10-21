@@ -1,3 +1,4 @@
+'use client'
 import type { SerializedEditorState } from 'lexical'
 
 import { Error, FieldDescription, Label, useField, withCondition } from 'payload/components/forms'

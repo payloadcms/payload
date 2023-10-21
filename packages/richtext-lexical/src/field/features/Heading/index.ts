@@ -8,7 +8,7 @@ import { $getSelection, $isRangeSelection, DEPRECATED_$isGridSelection } from 'l
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { H1Icon } from '../../lexical/ui/icons/H1'
 import { H2Icon } from '../../lexical/ui/icons/H2'
 import { H3Icon } from '../../lexical/ui/icons/H3'

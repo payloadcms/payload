@@ -1,3 +1,4 @@
+'use client'
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -6,8 +7,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
-import type { SlashMenuGroup } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
-import type { SlashMenuOption } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
+import type { SlashMenuGroup, SlashMenuOption } from './LexicalTypeaheadMenuPlugin/types'
 
 import { useEditorConfigContext } from '../../config/EditorConfigProvider'
 import {

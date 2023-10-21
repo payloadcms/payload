@@ -1,3 +1,4 @@
+'use client'
 import { type ElementFormatType } from 'lexical'
 import { Form, buildInitialState, useFormSubmitted } from 'payload/components/forms'
 import React, { useEffect, useMemo } from 'react'

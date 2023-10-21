@@ -1,13 +1,13 @@
-import type { SerializedHeadingNode, SerializedQuoteNode } from '@lexical/rich-text'
+import type { SerializedQuoteNode } from '@lexical/rich-text'
 
-import { $createQuoteNode, HeadingNode, QuoteNode } from '@lexical/rich-text'
+import { $createQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
@@ -26,7 +26,6 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                 key: 'blockquote',
                 label: `Blockquote`,
                 onClick: ({ editor }) => {
-                  //setHeading(editor, headingSize)
                   editor.update(() => {
                     const selection = $getSelection()
                     if ($isRangeSelection(selection)) {
