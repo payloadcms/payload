@@ -266,6 +266,10 @@ const serialize = (children) =>
         text = <em key={i}>{text}</em>;
       }
 
+      if (node.text === '') {
+        text = <br />;
+      }
+
       // Handle other leaf types here...
 
       return <Fragment key={i}>{text}</Fragment>;
