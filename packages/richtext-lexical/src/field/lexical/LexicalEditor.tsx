@@ -1,3 +1,4 @@
+'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'

@@ -6,7 +6,7 @@ import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 import type { SerializedUploadNode } from './nodes/UploadNode'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { UploadIcon } from '../../lexical/ui/icons/Upload'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'

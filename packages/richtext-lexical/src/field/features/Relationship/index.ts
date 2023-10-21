@@ -1,6 +1,6 @@
 import type { FeatureProvider } from '../types'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { RelationshipIcon } from '../../lexical/ui/icons/Relationship'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'
@@ -34,7 +34,7 @@ export const RelationshipFeature = (): FeatureProvider => {
                 new SlashMenuOption('Relationship', {
                   Icon: RelationshipIcon,
                   keywords: ['relationship', 'relation', 'rel'],
-                  onSelect: ({ editor, queryString }) => {
+                  onSelect: ({ editor }) => {
                     // dispatch INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND
                     editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
                       replace: false,

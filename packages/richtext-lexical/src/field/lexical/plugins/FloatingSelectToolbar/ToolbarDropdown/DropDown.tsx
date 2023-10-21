@@ -1,3 +1,4 @@
+'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'

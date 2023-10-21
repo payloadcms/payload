@@ -9,7 +9,7 @@ import './index.scss'
 
 export const IndentFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [

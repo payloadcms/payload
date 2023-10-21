@@ -1,3 +1,4 @@
+'use client'
 import type { LexicalCommand } from 'lexical'
 import type { Data, Fields } from 'payload/types'
 

@@ -5,7 +5,7 @@ import { formatLabels, getTranslation } from 'payload/utilities'
 
 import type { FeatureProvider } from '../types'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { BlockIcon } from '../../lexical/ui/icons/Block'
 import './index.scss'
 import { BlockNode } from './nodes/BlocksNode'
