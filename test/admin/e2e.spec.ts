@@ -429,6 +429,18 @@ describe('admin', () => {
     })
 
     describe('filtering', () => {
+      test('should prefill search input from query param', async () => {
+        await createPost({ title: 'a' })
+        await createPost({ title: 'b' })
+
+        // prefill search with "a" from the query param
+        await page.goto(`${url.list}?search=a`)
+
+        // input should be filled out, list should filter
+        await expect(page.locator('.search-filter__input')).toHaveValue('a')
+        await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
       test('search by id', async () => {
         const { id } = await createPost()
         await page.locator('.search-filter__input').fill(id)
