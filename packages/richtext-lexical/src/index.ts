@@ -93,7 +93,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       showHiddenFields,
       siblingDoc,
     }) {
-      // check if there are any features with nodes which have afterReadPromises for this field
+      // check if there are any features with nodes which have populationPromises for this field
       if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
         return richTextRelationshipPromise({
           currentDepth,

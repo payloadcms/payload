@@ -25,8 +25,8 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
       return {
         nodes: [
           {
-            afterReadPromises: [uploadPopulationPromiseHOC(props)],
             node: UploadNode,
+            populationPromises: [uploadPopulationPromiseHOC(props)],
             type: UploadNode.getType(),
             validations: [uploadValidation()],
           },

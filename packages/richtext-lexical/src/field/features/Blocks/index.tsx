@@ -42,8 +42,8 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
       return {
         nodes: [
           {
-            afterReadPromises: [blockPopulationPromiseHOC(props)],
             node: BlockNode,
+            populationPromises: [blockPopulationPromiseHOC(props)],
             type: BlockNode.getType(),
             validations: [blockValidationHOC(props)],
           },

@@ -77,7 +77,6 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
-            afterReadPromises: [linkPopulationPromiseHOC(props)],
             converters: {
               html: {
                 converter: ({ converters, node }) => {
@@ -98,6 +97,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
               } as HTMLConverter<SerializedLinkNode>,
             },
             node: LinkNode,
+            populationPromises: [linkPopulationPromiseHOC(props)],
             type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
           },
@@ -122,6 +122,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
               } as HTMLConverter<SerializedAutoLinkNode>,
             },
             node: AutoLinkNode,
+            populationPromises: [linkPopulationPromiseHOC(props)],
             type: AutoLinkNode.getType(),
           },
         ],
