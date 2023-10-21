@@ -10,7 +10,7 @@ import Button from '../../../elements/Button'
 import DeleteMany from '../../../elements/DeleteMany'
 import EditMany from '../../../elements/EditMany'
 import { Gutter } from '../../../elements/Gutter'
-import ListControls from '../../../elements/ListControls'
+import { ListControls } from '../../../elements/ListControls'
 import ListSelection from '../../../elements/ListSelection'
 import Paginator from '../../../elements/Paginator'
 import PerPage from '../../../elements/PerPage'
@@ -41,6 +41,7 @@ const DefaultList: React.FC<Props> = (props) => {
     data,
     handlePageChange,
     handlePerPageChange,
+    handleSearchChange,
     handleSortChange,
     handleWhereChange,
     hasCreatePermission,
@@ -48,6 +49,7 @@ const DefaultList: React.FC<Props> = (props) => {
     modifySearchParams,
     newDocumentURL,
     resetParams,
+    titleField,
   } = props
 
   const {
@@ -99,10 +101,12 @@ const DefaultList: React.FC<Props> = (props) => {
           </header>
           <ListControls
             collection={collection}
+            handleSearchChange={handleSearchChange}
             handleSortChange={handleSortChange}
             handleWhereChange={handleWhereChange}
             modifySearchQuery={modifySearchParams}
             resetParams={resetParams}
+            titleField={titleField}
           />
           {Array.isArray(BeforeListTable) &&
             BeforeListTable.map((Component, i) => <Component key={i} {...props} />)}
