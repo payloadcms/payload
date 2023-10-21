@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 
-import hash from 'object-hash'
-
 import type { GlobalConfig } from '../../../../packages/payload/src/globals/config/types'
 
 export const dataHooksGlobalSlug = 'data-hooks-global'
@@ -15,19 +13,19 @@ export const DataHooksGlobal: GlobalConfig = {
   hooks: {
     beforeChange: [
       ({ data, global, context }) => {
-        context['global_beforeChange_global'] = hash(JSON.stringify(global))
+        context['global_beforeChange_global'] = JSON.stringify(global)
 
         return data
       },
     ],
     beforeRead: [
       async ({ context, global }) => {
-        context['global_beforeRead_global'] = hash(JSON.stringify(global))
+        context['global_beforeRead_global'] = JSON.stringify(global)
       },
     ],
     afterRead: [
       ({ context, global, doc }) => {
-        context['global_afterRead_global'] = hash(JSON.stringify(global))
+        context['global_afterRead_global'] = JSON.stringify(global)
 
         // Needs to be done for both afterRead (for findOne test) and afterChange (for update test)
         for (const contextKey in context) {
@@ -40,7 +38,7 @@ export const DataHooksGlobal: GlobalConfig = {
     ],
     afterChange: [
       async ({ context, global, doc }) => {
-        context['global_afterChange_global'] = hash(JSON.stringify(global))
+        context['global_afterChange_global'] = JSON.stringify(global)
 
         // Needs to be done for both afterRead (for findOne test) and afterChange (for update test), as afterChange is called after afterRead
         for (const contextKey in context) {
@@ -61,7 +59,7 @@ export const DataHooksGlobal: GlobalConfig = {
         beforeChange: [
           ({ global, field, context, value }) => {
             context['field_beforeChange_GlobalAndField'] =
-              hash(JSON.stringify(global)) + hash(JSON.stringify(field))
+              JSON.stringify(global) + JSON.stringify(field)
 
             return value
           },
@@ -71,8 +69,8 @@ export const DataHooksGlobal: GlobalConfig = {
           ({ global, field, context }) => {
             return (
               (context['field_beforeChange_GlobalAndField'] as string) +
-              hash(JSON.stringify(global)) +
-              hash(JSON.stringify(field))
+              JSON.stringify(global) +
+              JSON.stringify(field)
             )
           },
         ],

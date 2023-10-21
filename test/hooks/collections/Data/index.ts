@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 
-import hash from 'object-hash'
-
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 export const dataHooksSlug = 'data-hooks'
@@ -17,7 +15,7 @@ export const DataHooks: CollectionConfig = {
   hooks: {
     beforeOperation: [
       async ({ context, collection, args }) => {
-        context['collection_beforeOperation_collection'] = hash(JSON.stringify(collection))
+        context['collection_beforeOperation_collection'] = JSON.stringify(collection)
 
         return args
       },
@@ -25,31 +23,31 @@ export const DataHooks: CollectionConfig = {
 
     beforeChange: [
       ({ context, data, collection }) => {
-        context['collection_beforeChange_collection'] = hash(JSON.stringify(collection))
+        context['collection_beforeChange_collection'] = JSON.stringify(collection)
 
         return data
       },
     ],
     afterChange: [
       async ({ context, collection }) => {
-        context['collection_afterChange_collection'] = hash(JSON.stringify(collection))
+        context['collection_afterChange_collection'] = JSON.stringify(collection)
       },
     ],
     beforeRead: [
       async ({ context, collection }) => {
-        context['collection_beforeRead_collection'] = hash(JSON.stringify(collection))
+        context['collection_beforeRead_collection'] = JSON.stringify(collection)
       },
     ],
     afterRead: [
       ({ context, collection, doc }) => {
-        context['collection_afterRead_collection'] = hash(JSON.stringify(collection))
+        context['collection_afterRead_collection'] = JSON.stringify(collection)
 
         return doc
       },
     ],
     afterOperation: [
       ({ args, result, collection }) => {
-        args.req.context['collection_afterOperation_collection'] = hash(JSON.stringify(collection))
+        args.req.context['collection_afterOperation_collection'] = JSON.stringify(collection)
 
         for (const contextKey in args.req.context) {
           if (contextKey.startsWith('collection_')) {
@@ -68,7 +66,7 @@ export const DataHooks: CollectionConfig = {
         beforeChange: [
           ({ collection, field, context, value }) => {
             context['field_beforeChange_CollectionAndField'] =
-              hash(JSON.stringify(collection)) + hash(JSON.stringify(field))
+              JSON.stringify(collection) + JSON.stringify(field)
 
             return value
           },
@@ -78,8 +76,8 @@ export const DataHooks: CollectionConfig = {
           ({ collection, field, context }) => {
             return (
               (context['field_beforeChange_CollectionAndField'] as string) +
-              hash(JSON.stringify(collection)) +
-              hash(JSON.stringify(field))
+              JSON.stringify(collection) +
+              JSON.stringify(field)
             )
           },
         ],
