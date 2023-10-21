@@ -1,4 +1,34 @@
+## [2.0.11](https://github.com/payloadcms/payload/compare/v2.0.10...v2.0.11) (2023-10-19)
 
+### Features
+
+* add ability to opt out of type gen declare statement ([#3765](https://github.com/payloadcms/payload/pull/3765))
+
+### Bug Fixes
+
+* corrects versions collection casing ([#3739](https://github.com/payloadcms/payload/pull/3739))
+* updates req after file resize ([#3754](https://github.com/payloadcms/payload/pull/3754))
+* correctly renders focal point when crop is set to false ([#3759](https://github.com/payloadcms/payload/pull/3759))
+* account for many slug types in generate types ([#3698](https://github.com/payloadcms/payload/pull/3698))
+* handle graphQL: false on globals when building policy type ([#3729](https://github.com/payloadcms/payload/pull/3729))
+* renders id as fallback title in DeleteDocument ([#3745](https://github.com/payloadcms/payload/pull/3745))
+* properly handles hideAPIURL ([#3721](https://github.com/payloadcms/payload/pull/3721))
+* filesRequiredOnCreate typing, tests, linting ([#3737](https://github.com/payloadcms/payload/pull/3737))
+
+* **webpack-bundler:** corrects payload alias ([#3769](https://github.com/payloadcms/payload/pull/3769))
+* **bundler-webpack:** better node_modules resolution ([#3744](https://github.com/payloadcms/payload/pull/3744))
+* **db-postgres:** block and array inserts error ([#3714](https://github.com/payloadcms/payload/pull/3714))
+* **live-preview:** properly handles uploads and hasOne monomorphic relationships ([#3719](https://github.com/payloadcms/payload/pull/3719))
+
+## [2.0.10](https://github.com/payloadcms/payload/compare/v2.0.9...v2.0.10) (2023-10-17)
+
+### Features
+
+* filesRequired is optional for uploads ([#3668](https://github.com/payloadcms/payload/pull/3668)) ([48de897](https://github.com/payloadcms/payload/commit/48de89794b2c5d94183090b0830fd355d8d6c6f3))
+
+### Bug Fixes
+
+* Register first user verify update missing transaction id / req ([#3665](https://github.com/payloadcms/payload/pull/3665)) ([68c5a5751](https://github.com/payloadcms/payload/commit/68c5a57515ffbba37c9194a75d0f672bdb10d96b))
 
 ## [2.0.8](https://github.com/payloadcms/payload/compare/v2.0.7...v2.0.8) (2023-10-17)
 

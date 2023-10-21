@@ -8,6 +8,7 @@ const git = simpleGit()
 const packagesDir = path.resolve(__dirname, '../../packages')
 
 export type PackageDetails = {
+  commitMessage: string
   name: string
   newCommits: number
   shortName: string
@@ -33,7 +34,8 @@ export const getPackageDetails = async (): Promise<PackageDetails[]> => {
       const publishedVersion = json?.['dist-tags']?.latest
       const publishDate = json?.time?.[publishedVersion]
 
-      const prevGitTag = `${dirName}/${packageJson.version}`
+      const prevGitTag =
+        dirName === 'payload' ? `v${packageJson.version}` : `${dirName}/${packageJson.version}`
       const prevGitTagHash = await git.revparse(prevGitTag)
 
       const newCommits = await git.log({
@@ -42,6 +44,7 @@ export const getPackageDetails = async (): Promise<PackageDetails[]> => {
       })
 
       return {
+        commitMessage: newCommits.latest?.message ?? '',
         name: packageJson.name as string,
         newCommits: newCommits.total,
         shortName: dirName,
@@ -63,15 +66,20 @@ export const showPackageDetails = (details: PackageDetails[]) => {
 
 ${details
   .map((p) => {
-    const name = p?.newCommits ? chalk.bold.green(p?.shortName.padEnd(28)) : p?.shortName.padEnd(28)
-    const publishData = `${p?.publishedVersion} at ${p?.publishDate
-      .split(':')
-      .slice(0, 2)
-      .join(':')
-      .replace('T', ' ')}`
-    const newCommits = `${p?.newCommits ? `${chalk.bold.green(p?.newCommits)} new commits` : ''}`
+    const name = p?.newCommits
+      ? chalk.bold.green(p?.shortName.padEnd(28))
+      : chalk.dim(p?.shortName.padEnd(28))
+    const publishData = `${p?.publishedVersion.padEnd(8)}${p?.publishDate.split('T')[0]}`
+    const newCommits = p?.newCommits ? chalk.bold.green(`⇡${p?.newCommits}  `) : '    '
+    const commitMessage = p?.commitMessage
+      ? chalk.dim(
+          p.commitMessage.length < 57
+            ? p.commitMessage
+            : p.commitMessage.substring(0, 60).concat('...'),
+        )
+      : ''
 
-    return `  ${name}${publishData}    ${newCommits}`
+    return `  ${name}${newCommits}${publishData}    ${commitMessage}`
   })
   .join('\n')}
 

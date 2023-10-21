@@ -56,7 +56,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     user,
     where,
   } = options
-  setRequestContext(options.req, context)
+  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
   const defaultLocale = payload?.config?.localization

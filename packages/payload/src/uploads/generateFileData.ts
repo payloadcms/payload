@@ -1,5 +1,5 @@
 import type { UploadedFile } from 'express-fileupload'
-import type { Sharp } from 'sharp'
+import type { Sharp, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
 import mkdirp from 'mkdirp'
@@ -98,12 +98,13 @@ export const generateFileData = async <T>({
     let fileBuffer
     let ext
     let mime: string
+    const isSharpRequired = fileSupportsResize && (resizeOptions || formatOptions || trimOptions)
 
-    const sharpOptions: sharp.SharpOptions = {}
+    const sharpOptions: SharpOptions = {}
 
     if (fileIsAnimated) sharpOptions.animated = true
 
-    if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
+    if (isSharpRequired) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
@@ -170,7 +171,7 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
     let fileForResize = file
 
-    if (cropData) {
+    if (isSharpRequired && cropData) {
       const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
 
       filesToSave.push({
@@ -186,6 +187,7 @@ export const generateFileData = async <T>({
       fileData.width = info.width
       fileData.height = info.height
       fileData.filesize = info.size
+      req.files.file = fileForResize
     } else {
       filesToSave.push({
         buffer: fileBuffer?.data || file.data,

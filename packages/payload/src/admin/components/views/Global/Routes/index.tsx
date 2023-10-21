@@ -41,9 +41,11 @@ export const GlobalRoutes: React.FC<GlobalEditViewProps> = (props) => {
           <Unauthorized />
         )}
       </Route>
-      <Route exact key={`${global.slug}-api`} path={`${adminRoute}/globals/${global.slug}/api`}>
-        {permissions?.read ? <CustomGlobalComponent view="API" {...props} /> : <Unauthorized />}
-      </Route>
+      {global?.admin?.hideAPIURL !== true && (
+        <Route exact key={`${global.slug}-api`} path={`${adminRoute}/globals/${global.slug}/api`}>
+          {permissions?.read ? <CustomGlobalComponent view="API" {...props} /> : <Unauthorized />}
+        </Route>
+      )}
       <Route
         exact
         key={`${global.slug}-view-version`}

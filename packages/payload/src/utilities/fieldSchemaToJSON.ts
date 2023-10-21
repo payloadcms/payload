@@ -1,6 +1,17 @@
+import type { FieldTypes } from '../exports/config'
 import type { Field } from '../fields/config/types'
 
-export const fieldSchemaToJSON = (fields: Field[]): Record<string, unknown>[] => {
+export type FieldSchemaJSON = {
+  blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
+  fields?: FieldSchemaJSON // TODO: conditionally add based on `type`
+  hasMany?: boolean // TODO: conditionally add based on `type`
+  name: string
+  relationTo?: string // TODO: conditionally add based on `type`
+  slug?: string // TODO: conditionally add based on `type`
+  type: keyof FieldTypes
+}[]
+
+export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 

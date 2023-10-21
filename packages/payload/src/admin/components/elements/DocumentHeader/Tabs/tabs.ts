@@ -43,7 +43,7 @@ export const tabs: DocumentTabConfig[] = [
   // API
   {
     condition: ({ collection, global }) =>
-      !collection?.admin?.hideAPIURL || !global?.admin?.hideAPIURL,
+      (collection && !collection?.admin?.hideAPIURL) || (global && !global?.admin?.hideAPIURL),
     href: '/api',
     label: 'API',
   },

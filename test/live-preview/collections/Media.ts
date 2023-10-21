@@ -5,6 +5,7 @@ export const Media: CollectionConfig = {
   upload: true,
   access: {
     read: () => true,
+    create: () => true,
   },
   fields: [
     {

@@ -225,6 +225,7 @@ export const DocumentControls: React.FC<{
           )}
         </div>
       </div>
+      <div className={`${baseClass}__divider`} />
     </Gutter>
   )
 }

@@ -179,6 +179,7 @@ export default joi.object({
     }),
   telemetry: joi.boolean(),
   typescript: joi.object({
+    declare: joi.boolean(),
     outputFile: joi.string(),
   }),
   upload: joi.object(),

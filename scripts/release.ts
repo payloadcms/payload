@@ -17,6 +17,10 @@ async function main() {
     abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
   }
 
+  if (bump.startsWith('pre') && tag === 'latest') {
+    abort(`Prerelease bumps must have tag: beta or canary`)
+  }
+
   const packageDetails = await getPackageDetails()
   showPackageDetails(packageDetails)
 
@@ -63,7 +67,7 @@ async function main() {
 ${packagesToRelease
   .map((p) => {
     const { shortName, version } = packageMap[p]
-    return `  ${shortName.padEnd(24)} ${version} -> ${semver.inc(version, bump)}`
+    return `  ${shortName.padEnd(24)} ${version} -> ${semver.inc(version, bump, tag)}`
   })
   .join('\n')}
 `)
@@ -77,29 +81,43 @@ ${packagesToRelease
   const results: { name: string; success: boolean }[] = []
 
   for (const pkg of packagesToRelease) {
-    const { packagePath, shortName } = packageMap[pkg]
+    const { packagePath, shortName, name: registryName } = packageMap[pkg]
 
     try {
-      console.log(chalk.bold(`\n\nPublishing ${shortName}...\n\n`))
+      console.log(chalk.bold(`\n\n🚀 Publishing ${shortName}...\n\n`))
       let npmVersionCmd = `npm --no-git-tag-version --prefix ${packagePath} version ${bump}`
       if (tag !== 'latest') {
         npmVersionCmd += ` --preid ${tag}`
       }
       execSync(npmVersionCmd, execOpts)
-      execSync(`git add ${packagePath}/package.json`, execOpts)
 
       const packageObj = await fse.readJson(`${packagePath}/package.json`)
       const newVersion = packageObj.version
 
       const tagName = `${shortName}/${newVersion}`
-      execSync(`git commit -m "chore(release): ${tagName}"`, execOpts)
-      execSync(`git tag -a ${tagName} -m "${tagName}"`, execOpts)
+      const shouldCommit = await confirm(`🧑‍💻 Commit Release?`)
+      if (shouldCommit) {
+        execSync(`git add ${packagePath}/package.json`, execOpts)
+        execSync(`git commit -m "chore(release): ${tagName} [skip ci]" `, execOpts)
+      }
+
+      const shouldTag = await confirm(`🏷️  Tag ${tagName}?`)
+      if (shouldTag) {
+        execSync(`git tag -a ${tagName} -m "${tagName}"`, execOpts)
+
+        if (pkg === 'payload') {
+          execSync(`git tag -a v${newVersion} -m "v${newVersion}"`, execOpts)
+        }
+      }
 
       let publishCmd = `pnpm publish -C ${packagePath} --no-git-checks`
       if (tag !== 'latest') {
         publishCmd += ` --tag ${tag}`
       }
-      execSync(publishCmd, execOpts)
+      const shouldPublish = await confirm(`🚢 Publish ${registryName}${chalk.yellow('@' + tag)}?`)
+      if (shouldPublish) {
+        execSync(publishCmd, execOpts)
+      }
 
       results.push({ name: shortName, success: true })
     } catch (error) {

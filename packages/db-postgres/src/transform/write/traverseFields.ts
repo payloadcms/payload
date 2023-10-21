@@ -4,6 +4,7 @@ import type { Field } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
+import type { PostgresAdapter } from '../../types'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
@@ -14,6 +15,7 @@ import { transformRelationship } from './relationships'
 import { transformSelects } from './selects'
 
 type Args = {
+  adapter: PostgresAdapter
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
@@ -56,6 +58,7 @@ type Args = {
 }
 
 export const traverseFields = ({
+  adapter,
   arrays,
   baseTableName,
   blocks,
@@ -95,6 +98,7 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
               const newRows = transformArray({
+                adapter,
                 arrayTableName,
                 baseTableName,
                 blocks,
@@ -114,6 +118,7 @@ export const traverseFields = ({
         }
       } else {
         const newRows = transformArray({
+          adapter,
           arrayTableName,
           baseTableName,
           blocks,
@@ -138,6 +143,7 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
               transformBlocks({
+                adapter,
                 baseTableName,
                 blocks,
                 data: localeData,
@@ -154,6 +160,7 @@ export const traverseFields = ({
         }
       } else if (isArrayOfRows(fieldData)) {
         transformBlocks({
+          adapter,
           baseTableName,
           blocks,
           data: fieldData,
@@ -174,6 +181,7 @@ export const traverseFields = ({
         if (field.localized) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             traverseFields({
+              adapter,
               arrays,
               baseTableName,
               blocks,
@@ -195,6 +203,7 @@ export const traverseFields = ({
           })
         } else {
           traverseFields({
+            adapter,
             arrays,
             baseTableName,
             blocks,
@@ -225,6 +234,7 @@ export const traverseFields = ({
             if (tab.localized) {
               Object.entries(data[tab.name]).forEach(([localeKey, localeData]) => {
                 traverseFields({
+                  adapter,
                   arrays,
                   baseTableName,
                   blocks,
@@ -246,6 +256,7 @@ export const traverseFields = ({
               })
             } else {
               traverseFields({
+                adapter,
                 arrays,
                 baseTableName,
                 blocks,
@@ -267,6 +278,7 @@ export const traverseFields = ({
           }
         } else {
           traverseFields({
+            adapter,
             arrays,
             baseTableName,
             blocks,
@@ -290,6 +302,7 @@ export const traverseFields = ({
 
     if (field.type === 'row' || field.type === 'collapsible') {
       traverseFields({
+        adapter,
         arrays,
         baseTableName,
         blocks,

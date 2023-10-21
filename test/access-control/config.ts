@@ -283,9 +283,6 @@ export default buildConfigWithDefaults({
           name: 'approvedForRemoval',
           type: 'checkbox',
           defaultValue: false,
-          admin: {
-            position: 'sidebar',
-          },
         },
         {
           name: 'approvedTitle',
