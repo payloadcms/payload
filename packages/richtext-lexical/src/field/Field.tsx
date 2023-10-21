@@ -39,7 +39,10 @@ const RichText: React.FC<FieldProps> = (props) => {
     (value, validationOptions) => {
       return validate(value, { ...validationOptions, props, required })
     },
-    [validate, required, props],
+    // Important: do not add props to the dependencies array.
+    // This would cause an infinite loop and endless re-rendering.
+    // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
+    [validate, required],
   )
 
   const fieldType = useField<SerializedEditorState>({
