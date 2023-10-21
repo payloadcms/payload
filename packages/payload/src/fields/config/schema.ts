@@ -353,7 +353,7 @@ export const blocks = baseField.keys({
 export const richText = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.default(),
-  defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
+  defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func(), joi.object()),
   editor: joi
     .object()
     .keys({

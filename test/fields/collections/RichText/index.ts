@@ -75,6 +75,33 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextLexical',
       type: 'richText',
+      admin: {
+        description: 'This rich text field uses the lexical editor.',
+      },
+      defaultValue: {
+        root: {
+          children: [
+            {
+              children: [
+                {
+                  text: 'This is a paragraph.',
+                  type: 'text',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [...defaultFeatures, TreeviewFeature()],
       }),
