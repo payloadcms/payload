@@ -1,10 +1,5 @@
-import type { SerializedEditorState } from 'lexical'
-
 import type { FeatureProvider } from '../../types'
 import type { HTMLConverter } from './converter/types'
-
-import { convertLexicalToHTML } from './converter'
-import { defaultConverters } from './converter/defaultConverters'
 
 export type HTMLConverterFeatureProps = {
   converters?:
@@ -26,7 +21,7 @@ export const HTMLConverterFeature = (props?: HTMLConverterFeatureProps): Feature
   */
 
   return {
-    feature: ({ resolvedFeatures }) => {
+    feature: () => {
       return {
         props,
       }

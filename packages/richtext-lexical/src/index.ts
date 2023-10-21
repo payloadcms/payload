@@ -27,9 +27,11 @@ export type LexicalEditorProps = {
   lexical?: LexicalEditorConfig
 }
 
-export function lexicalEditor(
-  props?: LexicalEditorProps,
-): RichTextAdapter<SerializedEditorState, AdapterProps> {
+export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps> & {
+  editorConfig: SanitizedEditorConfig
+}
+
+export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
   let finalSanitizedEditorConfig: SanitizedEditorConfig
   if (!props || (!props.features && !props.lexical)) {
     finalSanitizedEditorConfig = cloneDeep(defaultSanitizedEditorConfig)
@@ -81,6 +83,7 @@ export function lexicalEditor(
           .catch((error) => reject(error))
       })
     },
+    editorConfig: finalSanitizedEditorConfig,
     populationPromise({
       currentDepth,
       depth,
@@ -161,7 +164,20 @@ export {
 } from './field/features/Upload/nodes/UploadNode'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
-export { HTMLConverterFeature } from './field/features/converters/html'
+export {
+  HTMLConverterFeature,
+  type HTMLConverterFeatureProps,
+} from './field/features/converters/html'
+export {
+  convertLexicalNodesToHTML,
+  convertLexicalToHTML,
+} from './field/features/converters/html/converter'
+export { ParagraphHTMLConverter } from './field/features/converters/html/converter/converters/paragraph'
+export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text'
+export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
+export type { HTMLConverter } from './field/features/converters/html/converter/types'
+export { lexicalHTML } from './field/features/converters/html/field'
+
 export { TreeviewFeature } from './field/features/debug/TreeView'
 
 export { BoldTextFeature } from './field/features/format/Bold'
@@ -178,6 +194,27 @@ export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnoderedListFeature } from './field/features/lists/UnorderedList'
 export { LexicalPluginToLexicalFeature } from './field/features/migrations/LexicalPluginToLexical'
 export { SlateToLexicalFeature } from './field/features/migrations/SlateToLexical'
+export { SlateHeadingConverter } from './field/features/migrations/SlateToLexical/converter/converters/heading'
+
+export { SlateIndentConverter } from './field/features/migrations/SlateToLexical/converter/converters/indent'
+export { SlateLinkConverter } from './field/features/migrations/SlateToLexical/converter/converters/link'
+export { SlateListItemConverter } from './field/features/migrations/SlateToLexical/converter/converters/listItem'
+export { SlateOrderedListConverter } from './field/features/migrations/SlateToLexical/converter/converters/orderedList'
+export { SlateRelationshipConverter } from './field/features/migrations/SlateToLexical/converter/converters/relationship'
+export { SlateUnknownConverter } from './field/features/migrations/SlateToLexical/converter/converters/unknown'
+export { SlateUnorderedListConverter } from './field/features/migrations/SlateToLexical/converter/converters/unorderedList'
+export { SlateUploadConverter } from './field/features/migrations/SlateToLexical/converter/converters/upload'
+export { defaultSlateConverters } from './field/features/migrations/SlateToLexical/converter/defaultConverters'
+
+export {
+  convertSlateNodesToLexical,
+  convertSlateToLexical,
+} from './field/features/migrations/SlateToLexical/converter/index'
+
+export type {
+  SlateNode,
+  SlateNodeConverter,
+} from './field/features/migrations/SlateToLexical/converter/types'
 
 export type {
   Feature,

@@ -1,6 +1,6 @@
 import type { HTMLConverter } from './types'
 
-import { ParagraphConverter } from './converters/paragraph'
-import { TextConverter } from './converters/text'
+import { ParagraphHTMLConverter } from './converters/paragraph'
+import { TextHTMLConverter } from './converters/text'
 
-export const defaultConverters: HTMLConverter[] = [ParagraphConverter, TextConverter]
+export const defaultHTMLConverters: HTMLConverter[] = [ParagraphHTMLConverter, TextHTMLConverter]

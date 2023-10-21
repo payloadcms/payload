@@ -1,12 +1,13 @@
 import type { SerializedEditorState } from 'lexical'
 import type { RichTextField, TextField } from 'payload/types'
 
+import type { LexicalRichTextAdapter } from '../../../../../index'
 import type { AdapterProps } from '../../../../../types'
 import type { HTMLConverter } from '../converter/types'
 import type { HTMLConverterFeatureProps } from '../index'
 
 import { convertLexicalToHTML } from '../converter'
-import { defaultConverters } from '../converter/defaultConverters'
+import { defaultHTMLConverters } from '../converter/defaultConverters'
 
 type Props = {
   name: string
@@ -19,12 +20,14 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
   const { name = 'lexicalHTML' } = props
   return {
     name: name,
+    admin: {
+      hidden: true,
+    },
     hooks: {
       afterRead: [
-        ({ context, data, originalDoc, req, siblingData }) => {
-          console.log('lexicalHTML afterRead', originalDoc, siblingData, data, context)
+        ({ collection, context, data, originalDoc, siblingData }) => {
           const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
-            req.payload.collections[originalDoc.slug].config.fields.find(
+            collection.fields.find(
               (field) => 'name' in field && field.name === lexicalFieldName,
             ) as RichTextField<SerializedEditorState, AdapterProps>
 
@@ -40,7 +43,13 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
             )
           }
 
-          const config = lexicalField.editorConfig
+          const config = (lexicalField?.editor as LexicalRichTextAdapter)?.editorConfig
+
+          if (!config) {
+            throw new Error(
+              'The linked lexical field does not have an editorConfig. This is needed for the lexicalHTML field.',
+            )
+          }
 
           if (!config?.resolvedFeatureMap?.has('htmlConverter')) {
             throw new Error(
@@ -50,7 +59,7 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
           const htmlConverterFeature = config.resolvedFeatureMap.get('htmlConverter')
           const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature.props
 
-          const defaultConvertersWithConvertersFromFeatures = defaultConverters
+          const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
           for (const converter of config.features.converters.html) {
             defaultConvertersWithConvertersFromFeatures.push(converter)
           }
@@ -68,8 +77,6 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
             converters: finalConverters,
             data: lexicalFieldData,
           })
-
-          return ''
         },
       ],
     },

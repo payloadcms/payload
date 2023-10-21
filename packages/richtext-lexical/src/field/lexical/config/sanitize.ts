@@ -6,7 +6,7 @@ import { loadFeatures } from './loader'
 export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeatures => {
   const sanitized: SanitizedFeatures = {
     converters: {
-      html: new Map(),
+      html: [],
     },
     enabledFeatures: [],
     floatingSelectToolbar: {
@@ -53,7 +53,7 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
           sanitized.validations.set(node.type, node.validations)
         }
         if (node?.converters?.html) {
-          sanitized.converters.html.set(node.type, node.converters.html)
+          sanitized.converters.html.push(node.converters.html)
         }
       })
     }
