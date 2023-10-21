@@ -1,8 +1,10 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { LivePreviewConfig } from '../../../../exports/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
+import type { Field } from '../../../../fields/config/types'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 import type { EditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
@@ -38,6 +40,8 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
   let hasSavePermission: boolean
   let isEditing: boolean
   let id: string
+  let fields: Field[] = []
+  let label: SanitizedGlobalConfig['label']
 
   if ('collection' in props) {
     collection = props?.collection
@@ -46,13 +50,14 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
     hasSavePermission = props?.hasSavePermission
     isEditing = props?.isEditing
     id = props?.id
+    fields = props?.collection?.fields
   }
 
   if ('global' in props) {
     global = props?.global
+    fields = props?.global?.fields
+    label = props?.global?.label
   }
-
-  const { fields } = collection
 
   const sidebarFields = filterFields({
     fieldSchema: fields,
@@ -64,6 +69,26 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
 
   return (
     <Fragment>
+      {collection && (
+        <Meta
+          description={t('editing')}
+          keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
+          title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+            collection.labels.singular,
+            i18n,
+          )}`}
+        />
+      )}
+      {global && (
+        <Meta
+          description={getTranslation(label, i18n)}
+          keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
+          title={getTranslation(label, i18n)}
+        />
+      )}
+      {((collection && !(collection.versions?.drafts && collection.versions?.drafts?.autosave)) ||
+        (global && !(global.versions?.drafts && global.versions?.drafts?.autosave))) &&
+        !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
       <SetStepNav
         collection={collection}
         global={global}
@@ -95,16 +120,6 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
             .filter(Boolean)
             .join(' ')}
         >
-          <Meta
-            description={t('editing')}
-            keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-            title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-              collection.labels.singular,
-              i18n,
-            )}`}
-          />
-          {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
-            !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
           <Gutter className={`${baseClass}__edit`}>
             <RenderFields
               fieldSchema={fields}
