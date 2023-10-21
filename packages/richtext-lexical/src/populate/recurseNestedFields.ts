@@ -36,6 +36,7 @@ export const recurseNestedFields = ({
       if (field.type === 'relationship') {
         if (field.hasMany && Array.isArray(data[field.name])) {
           if (Array.isArray(field.relationTo)) {
+            // polymorphic relationship
             data[field.name].forEach(({ relationTo, value }, i) => {
               const collection = req.payload.collections[relationTo]
               if (collection) {
@@ -99,21 +100,23 @@ export const recurseNestedFields = ({
         }
       }
       if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
-        const collection = req.payload.collections[field.relationTo]
-        promises.push(
-          populate({
-            id: data[field.name],
-            collection,
-            currentDepth,
-            data,
-            depth,
-            field,
-            key: field.name,
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }),
-        )
+        if (!('hasMany' in field) || !field.hasMany) {
+          const collection = req.payload.collections[field.relationTo]
+          promises.push(
+            populate({
+              id: data[field.name],
+              collection,
+              currentDepth,
+              data,
+              depth,
+              field,
+              key: field.name,
+              overrideAccess,
+              req,
+              showHiddenFields,
+            }),
+          )
+        }
       }
     } else if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {

@@ -76,21 +76,23 @@ export const recurseNestedFields = ({
           data[field.name]?.value &&
           data[field.name]?.relationTo
         ) {
-          const collection = req.payload.collections[data[field.name].relationTo]
-          promises.push(
-            populate({
-              id: data[field.name].value,
-              collection,
-              currentDepth,
-              data: data[field.name],
-              depth,
-              field,
-              key: 'value',
-              overrideAccess,
-              req,
-              showHiddenFields,
-            }),
-          )
+          if (!('hasMany' in field) || !field.hasMany) {
+            const collection = req.payload.collections[data[field.name].relationTo]
+            promises.push(
+              populate({
+                id: data[field.name].value,
+                collection,
+                currentDepth,
+                data: data[field.name],
+                depth,
+                field,
+                key: 'value',
+                overrideAccess,
+                req,
+                showHiddenFields,
+              }),
+            )
+          }
         }
       }
       if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
