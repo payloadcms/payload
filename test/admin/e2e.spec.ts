@@ -395,7 +395,7 @@ describe('admin', () => {
     test('should allow changing language', async () => {
       await page.goto(url.account)
 
-      const field = page.locator('.account__language .react-select')
+      const field = page.locator('.payload-settings__language .react-select')
 
       await field.click()
       const options = page.locator('.rs__option')
@@ -981,7 +981,7 @@ describe('admin', () => {
       test('should use fallback language on field titles', async () => {
         // change language German
         await page.goto(url.account)
-        await page.locator('.account__language .react-select').click()
+        await page.locator('.payload-settings__language .react-select').click()
         const languageSelect = page.locator('.rs__option')
         // text field does not have a 'de' label
         await languageSelect.locator('text=Deutsch').click()
