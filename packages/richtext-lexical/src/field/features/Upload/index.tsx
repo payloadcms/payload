@@ -1,6 +1,10 @@
 import type { Field } from 'payload/types'
 
+import payload from 'payload'
+
+import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
+import type { SerializedUploadNode } from './nodes/UploadNode'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { UploadIcon } from '../../lexical/ui/icons/Upload'
@@ -25,6 +29,24 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
       return {
         nodes: [
           {
+            converters: {
+              html: {
+                converter: async ({ converters, node }) => {
+                  const uploadDocument = await payload.findByID({
+                    id: node.value.id,
+                    collection: node.relationTo,
+                  })
+                  const url = (payload?.config?.serverURL || '') + uploadDocument?.url
+
+                  if (!(uploadDocument?.mimeType as string)?.startsWith('image')) {
+                    return `<a href="${url}" rel="noopener noreferrer">Upload node which is not an image</a>`
+                  }
+
+                  return `<img src="${url}" alt="${uploadDocument?.filename}" width="${uploadDocument?.width}"  height="${uploadDocument?.height}"/>`
+                },
+                nodeTypes: [UploadNode.getType()],
+              } as HTMLConverter<SerializedUploadNode>,
+            },
             node: UploadNode,
             populationPromises: [uploadPopulationPromiseHOC(props)],
             type: UploadNode.getType(),
