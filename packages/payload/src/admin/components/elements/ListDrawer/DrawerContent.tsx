@@ -183,7 +183,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     selectedCollectionConfig,
     t,
     setParams,
-    titleField,
+    titleField?.name,
   ])
 
   useEffect(() => {
@@ -299,6 +299,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             newDocumentURL: null,
             setLimit,
             setSort,
+            titleField,
           }}
         />
       </DocumentInfoProvider>

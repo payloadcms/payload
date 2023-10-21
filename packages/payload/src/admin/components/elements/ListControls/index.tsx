@@ -50,7 +50,9 @@ export const ListControls: React.FC<Props> = (props) => {
   const params = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
 
-  const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields))
+  const [textFieldsToBeSearched, setFieldsToBeSearched] = useState(
+    getTextFieldsToBeSearched(listSearchableFields, fields),
+  )
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
@@ -58,6 +60,10 @@ export const ListControls: React.FC<Props> = (props) => {
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
+
+  React.useEffect(() => {
+    setFieldsToBeSearched(getTextFieldsToBeSearched(listSearchableFields, fields))
+  }, [listSearchableFields, fields])
 
   return (
     <div className={baseClass}>
