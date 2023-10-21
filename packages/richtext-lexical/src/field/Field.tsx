@@ -49,19 +49,6 @@ const RichText: React.FC<FieldProps> = (props) => {
 
   const { errorMessage, setValue, showError, value } = fieldType
 
-  let valueToUse = value
-
-  if (typeof valueToUse === 'string') {
-    try {
-      const parsedJSON = JSON.parse(valueToUse)
-      valueToUse = parsedJSON
-    } catch (err) {
-      valueToUse = null
-    }
-  }
-
-  if (!valueToUse) valueToUse = defaultValueFromProps || defaultRichTextValueV2
-
   const classes = [
     baseClass,
     'field-type',
@@ -102,7 +89,6 @@ const RichText: React.FC<FieldProps> = (props) => {
             readOnly={readOnly}
             value={value}
           />
-          <FieldDescription description={description} value={value} />
         </ErrorBoundary>
         <FieldDescription description={description} value={value} />
       </div>
