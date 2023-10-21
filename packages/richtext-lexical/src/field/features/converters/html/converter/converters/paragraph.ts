@@ -9,7 +9,7 @@ export const ParagraphHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
     const childrenText = convertLexicalNodesToHTML({
       converters,
       lexicalNodes: node.children,
-      parentNodeType,
+      parentNodeType: 'paragraph',
     })
     return `<p>${childrenText}</p>`
   },

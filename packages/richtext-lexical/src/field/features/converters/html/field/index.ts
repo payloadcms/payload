@@ -6,6 +6,7 @@ import type { AdapterProps } from '../../../../../types'
 import type { HTMLConverter } from '../converter/types'
 import type { HTMLConverterFeatureProps } from '../index'
 
+import { cloneDeep } from '../../../../../index'
 import { convertLexicalToHTML } from '../converter'
 import { defaultHTMLConverters } from '../converter/defaultConverters'
 
@@ -59,7 +60,8 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
           const htmlConverterFeature = config.resolvedFeatureMap.get('htmlConverter')
           const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature.props
 
-          const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
+          const defaultConvertersWithConvertersFromFeatures = cloneDeep(defaultHTMLConverters)
+
           for (const converter of config.features.converters.html) {
             defaultConvertersWithConvertersFromFeatures.push(converter)
           }

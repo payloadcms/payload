@@ -7,12 +7,15 @@ import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 import { withMergedProps } from 'payload/utilities'
 
+import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
-import type { LinkFields } from './nodes/LinkNode'
+import type { SerializedAutoLinkNode } from './nodes/AutoLinkNode'
+import type { LinkFields, SerializedLinkNode } from './nodes/LinkNode'
 
 import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
+import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
@@ -75,11 +78,49 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         nodes: [
           {
             afterReadPromises: [linkPopulationPromiseHOC(props)],
+            converters: {
+              html: {
+                converter: ({ converters, node }) => {
+                  const childrenText = convertLexicalNodesToHTML({
+                    converters,
+                    lexicalNodes: node.children,
+                    parentNodeType: LinkNode.getType(),
+                  })
+
+                  const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+
+                  const href: string =
+                    node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
+
+                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                },
+                nodeTypes: [LinkNode.getType()],
+              } as HTMLConverter<SerializedLinkNode>,
+            },
             node: LinkNode,
             type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
           },
           {
+            converters: {
+              html: {
+                converter: ({ converters, node }) => {
+                  const childrenText = convertLexicalNodesToHTML({
+                    converters,
+                    lexicalNodes: node.children,
+                    parentNodeType: AutoLinkNode.getType(),
+                  })
+
+                  const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+
+                  const href: string =
+                    node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
+
+                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                },
+                nodeTypes: [AutoLinkNode.getType()],
+              } as HTMLConverter<SerializedAutoLinkNode>,
+            },
             node: AutoLinkNode,
             type: AutoLinkNode.getType(),
           },
