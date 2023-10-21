@@ -172,6 +172,7 @@ export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './field/features/converters/html/converter'
+export { LinebreakHTMLConverter } from './field/features/converters/html/converter/converters/linebreak'
 export { ParagraphHTMLConverter } from './field/features/converters/html/converter/converters/paragraph'
 export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text'
 export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
