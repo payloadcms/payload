@@ -88,11 +88,12 @@ async function findVersions<T extends TypeWithVersion<T>>(
         paginatedDocs.docs.map(async (data) => ({
           ...data,
           version: await afterRead({
+            collection: null,
             context: req.context,
             depth,
             doc: data.version,
-            entityConfig: globalConfig,
             findMany: true,
+            global: globalConfig,
             overrideAccess,
             req,
             showHiddenFields,
@@ -115,8 +116,14 @@ async function findVersions<T extends TypeWithVersion<T>>(
             await priorHook
 
             docRef.version =
-              (await hook({ doc: doc.version, findMany: true, query: fullWhere, req })) ||
-              doc.version
+              (await hook({
+                context: req.context,
+                doc: doc.version,
+                findMany: true,
+                global: globalConfig,
+                query: fullWhere,
+                req,
+              })) || doc.version
           }, Promise.resolve())
 
           return docRef

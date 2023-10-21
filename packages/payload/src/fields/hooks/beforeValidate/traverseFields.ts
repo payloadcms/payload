@@ -1,13 +1,17 @@
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { promise } from './promise'
 
 type Args<T> = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: T
   doc: T
   fields: (Field | TabAsField)[]
+  global: SanitizedGlobalConfig | null
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
@@ -18,10 +22,12 @@ type Args<T> = {
 
 export const traverseFields = async <T>({
   id,
+  collection,
   context,
   data,
   doc,
   fields,
+  global,
   operation,
   overrideAccess,
   req,
@@ -33,10 +39,12 @@ export const traverseFields = async <T>({
     promises.push(
       promise({
         id,
+        collection,
         context,
         data,
         doc,
         field,
+        global,
         operation,
         overrideAccess,
         req,

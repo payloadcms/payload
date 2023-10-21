@@ -47,7 +47,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     showHiddenFields,
     user,
   } = options
-  setRequestContext(options.req, context)
+  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
   const defaultLocale = payload?.config?.localization

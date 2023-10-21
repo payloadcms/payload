@@ -30,7 +30,7 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     expiration,
     req = {} as PayloadRequest,
   } = options
-  setRequestContext(options.req)
+  setRequestContext(req)
 
   const collection = payload.collections[collectionSlug]
 

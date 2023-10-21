@@ -18,6 +18,7 @@ import type {
   LivePreviewConfig,
 } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
+import type { RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { Where } from '../../types'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
@@ -27,20 +28,46 @@ export type TypeWithID = {
 }
 
 export type BeforeValidateHook = (args: {
+  context: RequestContext
   data?: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
   originalDoc?: any
   req?: PayloadRequest
 }) => any
 
-export type BeforeChangeHook = (args: { data: any; originalDoc?: any; req: PayloadRequest }) => any
+export type BeforeChangeHook = (args: {
+  context: RequestContext
+  data: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  originalDoc?: any
+  req: PayloadRequest
+}) => any
 
-export type AfterChangeHook = (args: { doc: any; previousDoc: any; req: PayloadRequest }) => any
+export type AfterChangeHook = (args: {
+  context: RequestContext
+  doc: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  previousDoc: any
+  req: PayloadRequest
+}) => any
 
-export type BeforeReadHook = (args: { doc: any; req: PayloadRequest }) => any
+export type BeforeReadHook = (args: {
+  context: RequestContext
+  doc: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  req: PayloadRequest
+}) => any
 
 export type AfterReadHook = (args: {
+  context: RequestContext
   doc: any
   findMany?: boolean
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
   query?: Where
   req: PayloadRequest
 }) => any

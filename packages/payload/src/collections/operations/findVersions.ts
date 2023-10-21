@@ -94,6 +94,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
             docRef.version =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: docRef.version,
                 query: fullWhere,
@@ -116,11 +117,12 @@ async function findVersions<T extends TypeWithVersion<T>>(
         result.docs.map(async (data) => ({
           ...data,
           version: await afterRead({
+            collection: collectionConfig,
             context: req.context,
             depth,
             doc: data.version,
-            entityConfig: collectionConfig,
             findMany: true,
+            global: null,
             overrideAccess,
             req,
             showHiddenFields,
@@ -144,6 +146,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
             docRef.version =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: doc.version,
                 findMany: true,
