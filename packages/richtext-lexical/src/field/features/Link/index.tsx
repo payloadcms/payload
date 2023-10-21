@@ -79,8 +79,8 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
           {
             converters: {
               html: {
-                converter: ({ converters, node }) => {
-                  const childrenText = convertLexicalNodesToHTML({
+                converter: async ({ converters, node }) => {
+                  const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
                     parentNodeType: LinkNode.getType(),
@@ -104,8 +104,8 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
           {
             converters: {
               html: {
-                converter: ({ converters, node }) => {
-                  const childrenText = convertLexicalNodesToHTML({
+                converter: async ({ converters, node }) => {
+                  const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
                     parentNodeType: AutoLinkNode.getType(),

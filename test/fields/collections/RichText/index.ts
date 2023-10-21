@@ -28,7 +28,6 @@ const RichTextFields: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    lexicalHTML('richTextLexicalCustomFields', { name: 'richTextLexicalCustomFields_htmll' }),
     {
       name: 'richTextLexicalCustomFields',
       type: 'richText',
@@ -72,6 +71,7 @@ const RichTextFields: CollectionConfig = {
         ],
       }),
     },
+    lexicalHTML('richTextLexicalCustomFields', { name: 'richTextLexicalCustomFields_htmll' }),
     {
       name: 'richTextLexical',
       type: 'richText',

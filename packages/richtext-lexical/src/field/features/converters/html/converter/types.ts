@@ -11,6 +11,6 @@ export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNod
     converters: HTMLConverter[]
     node: T
     parentNodeType: string
-  }) => string
+  }) => Promise<string> | string
   nodeTypes: string[]
 }

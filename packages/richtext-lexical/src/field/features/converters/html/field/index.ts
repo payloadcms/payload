@@ -26,7 +26,7 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
     },
     hooks: {
       afterRead: [
-        ({ collection, context, data, originalDoc, siblingData }) => {
+        async ({ collection, context, data, originalDoc, siblingData }) => {
           const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
             collection.fields.find(
               (field) => 'name' in field && field.name === lexicalFieldName,
@@ -75,7 +75,7 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
               : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
                 defaultConvertersWithConvertersFromFeatures
 
-          return convertLexicalToHTML({
+          return await convertLexicalToHTML({
             converters: finalConverters,
             data: lexicalFieldData,
           })
