@@ -5,6 +5,7 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist'
+import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { CHECK_LIST } from './markdownTransformers'
 
 // 345
@@ -19,10 +20,16 @@ export const CheckListFeature = (): FeatureProvider => {
             ? []
             : [
                 {
+                  converters: {
+                    html: ListHTMLConverter,
+                  },
                   node: ListNode,
                   type: ListNode.getType(),
                 },
                 {
+                  converters: {
+                    html: ListItemHTMLConverter,
+                  },
                   node: ListItemNode,
                   type: ListItemNode.getType(),
                 },

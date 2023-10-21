@@ -135,14 +135,28 @@ export const promise = async ({
 
     case 'richText': {
       const editor: RichTextAdapter = field?.editor
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor.afterReadPromise({
+      // This is run here AND in the GraphQL Resolver
+      if (editor?.populationPromise) {
+        const populationPromise = editor.populationPromise({
           currentDepth,
           depth,
           field,
           overrideAccess,
           req,
           showHiddenFields,
+          siblingDoc,
+        })
+
+        if (populationPromise) {
+          populationPromises.push(populationPromise)
+        }
+      }
+
+      // This is only run here, independent of depth
+      if (editor?.afterReadPromise) {
+        const afterReadPromise = editor?.afterReadPromise({
+          field,
+          incomingEditorState: siblingDoc[field.name] as object,
           siblingDoc,
         })
 

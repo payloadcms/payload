@@ -1,9 +1,9 @@
-import type { AfterReadPromise } from '../types'
+import type { PopulationPromise } from '../types'
 import type { SerializedRelationshipNode } from './nodes/RelationshipNode'
 
 import { populate } from '../../../populate/populate'
 
-export const relationshipAfterReadPromise: AfterReadPromise<SerializedRelationshipNode> = ({
+export const relationshipPopulationPromise: PopulationPromise<SerializedRelationshipNode> = ({
   currentDepth,
   depth,
   field,

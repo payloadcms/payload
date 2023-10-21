@@ -1,23 +1,22 @@
 import type { UploadFeatureProps } from '.'
-import type { AfterReadPromise } from '../types'
+import type { PopulationPromise } from '../types'
 import type { SerializedUploadNode } from './nodes/UploadNode'
 
 import { populate } from '../../../populate/populate'
 import { recurseNestedFields } from '../../../populate/recurseNestedFields'
 
-export const uploadAfterReadPromiseHOC = (
+export const uploadPopulationPromiseHOC = (
   props?: UploadFeatureProps,
-): AfterReadPromise<SerializedUploadNode> => {
-  const uploadAfterReadPromise: AfterReadPromise<SerializedUploadNode> = ({
-    afterReadPromises,
+): PopulationPromise<SerializedUploadNode> => {
+  const uploadPopulationPromise: PopulationPromise<SerializedUploadNode> = ({
     currentDepth,
     depth,
     field,
     node,
     overrideAccess,
+    populationPromises,
     req,
     showHiddenFields,
-    siblingDoc,
   }) => {
     const promises: Promise<void>[] = []
 
@@ -42,12 +41,12 @@ export const uploadAfterReadPromiseHOC = (
       }
       if (Array.isArray(props?.collections?.[node?.relationTo]?.fields)) {
         recurseNestedFields({
-          afterReadPromises,
           currentDepth,
           data: node.fields || {},
           depth,
           fields: props?.collections?.[node?.relationTo]?.fields,
           overrideAccess,
+          populationPromises,
           promises,
           req,
           showHiddenFields,
@@ -59,5 +58,5 @@ export const uploadAfterReadPromiseHOC = (
     return promises
   }
 
-  return uploadAfterReadPromise
+  return uploadPopulationPromise
 }

@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 
 import {
   BlocksFeature,
+  HTMLConverterFeature,
   LexicalPluginToLexicalFeature,
   LinkFeature,
   TreeviewFeature,
@@ -35,45 +36,6 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
-      name: 'richTextLexicalWithLexicalPluginData',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          LexicalPluginToLexicalFeature(),
-          TreeviewFeature(),
-          LinkFeature({
-            fields: [
-              {
-                name: 'rel',
-                label: 'Rel Attribute',
-                type: 'select',
-                hasMany: true,
-                options: ['noopener', 'noreferrer', 'nofollow'],
-                admin: {
-                  description:
-                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-                },
-              },
-            ],
-          }),
-          UploadFeature({
-            collections: {
-              uploads: {
-                fields: [
-                  {
-                    name: 'caption',
-                    type: 'richText',
-                    editor: lexicalEditor(),
-                  },
-                ],
-              },
-            },
-          }),
-        ],
-      }),
-    },
-    {
       name: 'richTextLexicalCustomFields',
       type: 'richText',
       required: true,
@@ -81,6 +43,7 @@ export const LexicalFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeviewFeature(),
+          HTMLConverterFeature(),
           LinkFeature({
             fields: [
               {
@@ -118,6 +81,45 @@ export const LexicalFields: CollectionConfig = {
               RelationshipBlock,
               SubBlockBlock,
             ],
+          }),
+        ],
+      }),
+    },
+    {
+      name: 'richTextLexicalWithLexicalPluginData',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          LexicalPluginToLexicalFeature(),
+          TreeviewFeature(),
+          LinkFeature({
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+                admin: {
+                  description:
+                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+                },
+              },
+            ],
+          }),
+          UploadFeature({
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                    editor: lexicalEditor(),
+                  },
+                ],
+              },
+            },
           }),
         ],
       }),

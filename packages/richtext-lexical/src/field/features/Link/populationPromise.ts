@@ -1,23 +1,22 @@
 import type { LinkFeatureProps } from '.'
-import type { AfterReadPromise } from '../types'
+import type { PopulationPromise } from '../types'
 import type { SerializedLinkNode } from './nodes/LinkNode'
 
 import { populate } from '../../../populate/populate'
 import { recurseNestedFields } from '../../../populate/recurseNestedFields'
 
-export const linkAfterReadPromiseHOC = (
+export const linkPopulationPromiseHOC = (
   props: LinkFeatureProps,
-): AfterReadPromise<SerializedLinkNode> => {
-  const linkAfterReadPromise: AfterReadPromise<SerializedLinkNode> = ({
-    afterReadPromises,
+): PopulationPromise<SerializedLinkNode> => {
+  const linkPopulationPromise: PopulationPromise<SerializedLinkNode> = ({
     currentDepth,
     depth,
     field,
     node,
     overrideAccess,
+    populationPromises,
     req,
     showHiddenFields,
-    siblingDoc,
   }) => {
     const promises: Promise<void>[] = []
 
@@ -43,12 +42,12 @@ export const linkAfterReadPromiseHOC = (
     }
     if (Array.isArray(props.fields)) {
       recurseNestedFields({
-        afterReadPromises,
         currentDepth,
         data: node.fields || {},
         depth,
         fields: props.fields,
         overrideAccess,
+        populationPromises,
         promises,
         req,
         showHiddenFields,
@@ -58,5 +57,5 @@ export const linkAfterReadPromiseHOC = (
     return promises
   }
 
-  return linkAfterReadPromise
+  return linkPopulationPromise
 }

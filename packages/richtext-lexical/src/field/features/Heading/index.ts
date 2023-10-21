@@ -1,10 +1,11 @@
-import type { HeadingTagType } from '@lexical/rich-text'
-import type { LexicalEditor } from 'lexical'
+import type { HeadingTagType, SerializedHeadingNode } from '@lexical/rich-text'
+import type React from 'react'
 
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection, DEPRECATED_$isGridSelection } from 'lexical'
 
+import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
@@ -15,9 +16,10 @@ import { H4Icon } from '../../lexical/ui/icons/H4'
 import { H5Icon } from '../../lexical/ui/icons/H5'
 import { H6Icon } from '../../lexical/ui/icons/H6'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
+import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import { MarkdownTransformer } from './markdownTransformer'
 
-const setHeading = (editor: LexicalEditor, headingSize: HeadingTagType) => {
+const setHeading = (headingSize: HeadingTagType) => {
   const selection = $getSelection()
   if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
     $setBlocksType(selection, () => $createHeadingNode(headingSize))
@@ -41,7 +43,7 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
   const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
@@ -49,12 +51,12 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
               TextDropdownSectionWithEntries([
                 {
                   ChildComponent: HeadingToIconMap[headingSize],
-                  isActive: ({ editor, selection }) => false,
+                  isActive: () => false,
                   key: headingSize,
                   label: `Heading ${headingSize.charAt(1)}`,
                   onClick: ({ editor }) => {
                     editor.update(() => {
-                      setHeading(editor, headingSize)
+                      setHeading(headingSize)
                     })
                   },
                   order: i + 2,
@@ -64,7 +66,29 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
           ],
         },
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
-        nodes: [{ node: HeadingNode, type: HeadingNode.getType() }],
+        nodes: [
+          {
+            converters: {
+              html: {
+                converter: async ({ converters, node, parent }) => {
+                  const childrenText = await convertLexicalNodesToHTML({
+                    converters,
+                    lexicalNodes: node.children,
+                    parent: {
+                      ...node,
+                      parent,
+                    },
+                  })
+
+                  return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'
+                },
+                nodeTypes: [HeadingNode.getType()],
+              } as HTMLConverter<SerializedHeadingNode>,
+            },
+            node: HeadingNode,
+            type: HeadingNode.getType(),
+          },
+        ],
         props,
         slashMenu: {
           options: [
@@ -74,8 +98,8 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
                   new SlashMenuOption(`Heading ${headingSize.charAt(1)}`, {
                     Icon: HeadingToIconMap[headingSize],
                     keywords: ['heading', headingSize],
-                    onSelect: ({ editor }) => {
-                      setHeading(editor, headingSize)
+                    onSelect: () => {
+                      setHeading(headingSize)
                     },
                   }),
                 ],

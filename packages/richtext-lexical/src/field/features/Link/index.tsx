@@ -7,13 +7,15 @@ import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 import { withMergedProps } from 'payload/utilities'
 
+import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
-import type { LinkFields } from './nodes/LinkNode'
+import type { SerializedAutoLinkNode } from './nodes/AutoLinkNode'
+import type { LinkFields, SerializedLinkNode } from './nodes/LinkNode'
 
 import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
-import { linkAfterReadPromiseHOC } from './afterReadPromise'
+import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
@@ -21,6 +23,7 @@ import { AutoLinkPlugin } from './plugins/autoLink'
 import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
 import { LinkPlugin } from './plugins/link'
+import { linkPopulationPromiseHOC } from './populationPromise'
 
 export type LinkFeatureProps = {
   fields?:
@@ -29,7 +32,7 @@ export type LinkFeatureProps = {
 }
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
@@ -74,13 +77,58 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
-            afterReadPromises: [linkAfterReadPromiseHOC(props)],
+            converters: {
+              html: {
+                converter: async ({ converters, node, parent }) => {
+                  const childrenText = await convertLexicalNodesToHTML({
+                    converters,
+                    lexicalNodes: node.children,
+                    parent: {
+                      ...node,
+                      parent,
+                    },
+                  })
+
+                  const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+
+                  const href: string =
+                    node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
+
+                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                },
+                nodeTypes: [LinkNode.getType()],
+              } as HTMLConverter<SerializedLinkNode>,
+            },
             node: LinkNode,
+            populationPromises: [linkPopulationPromiseHOC(props)],
             type: LinkNode.getType(),
             // TODO: Add validation similar to upload for internal links and fields
           },
           {
+            converters: {
+              html: {
+                converter: async ({ converters, node, parent }) => {
+                  const childrenText = await convertLexicalNodesToHTML({
+                    converters,
+                    lexicalNodes: node.children,
+                    parent: {
+                      ...node,
+                      parent,
+                    },
+                  })
+
+                  const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
+
+                  const href: string =
+                    node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
+
+                  return `<a href="${href}"${rel}>${childrenText}</a>`
+                },
+                nodeTypes: [AutoLinkNode.getType()],
+              } as HTMLConverter<SerializedAutoLinkNode>,
+            },
             node: AutoLinkNode,
+            populationPromises: [linkPopulationPromiseHOC(props)],
             type: AutoLinkNode.getType(),
           },
         ],

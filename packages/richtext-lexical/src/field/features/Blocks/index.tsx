@@ -7,10 +7,10 @@ import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { BlockIcon } from '../../lexical/ui/icons/Block'
-import { blockAfterReadPromiseHOC } from './afterReadPromise'
 import './index.scss'
 import { BlockNode } from './nodes/BlocksNode'
 import { BlocksPlugin, INSERT_BLOCK_COMMAND } from './plugin'
+import { blockPopulationPromiseHOC } from './populationPromise'
 import { blockValidationHOC } from './validate'
 
 export type BlocksFeatureProps = {
@@ -38,12 +38,12 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
     })
   }
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         nodes: [
           {
-            afterReadPromises: [blockAfterReadPromiseHOC(props)],
             node: BlockNode,
+            populationPromises: [blockPopulationPromiseHOC(props)],
             type: BlockNode.getType(),
             validations: [blockValidationHOC(props)],
           },
