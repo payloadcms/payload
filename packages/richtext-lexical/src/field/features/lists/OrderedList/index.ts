@@ -5,6 +5,7 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList'
+import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { ORDERED_LIST } from './markdownTransformer'
 
 export const OrderedListFeature = (): FeatureProvider => {
@@ -16,10 +17,19 @@ export const OrderedListFeature = (): FeatureProvider => {
           ? []
           : [
               {
+                converters: {
+                  html: ListHTMLConverter,
+                },
                 node: ListNode,
                 type: ListNode.getType(),
               },
-              { node: ListItemNode, type: ListItemNode.getType() },
+              {
+                converters: {
+                  html: ListItemHTMLConverter,
+                },
+                node: ListItemNode,
+                type: ListItemNode.getType(),
+              },
             ],
         plugins: featureProviderMap.has('unorderedList')
           ? []
