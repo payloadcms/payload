@@ -5,12 +5,16 @@ export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNod
     childIndex,
     converters,
     node,
-    parentNodeType,
+    parent,
   }: {
     childIndex: number
     converters: HTMLConverter[]
     node: T
-    parentNodeType: string
+    parent: SerializedLexicalNodeWithParent
   }) => Promise<string> | string
   nodeTypes: string[]
+}
+
+export type SerializedLexicalNodeWithParent = SerializedLexicalNode & {
+  parent?: SerializedLexicalNode
 }

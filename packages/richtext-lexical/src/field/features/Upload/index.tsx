@@ -31,7 +31,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
           {
             converters: {
               html: {
-                converter: async ({ converters, node }) => {
+                converter: async ({ node }) => {
                   const uploadDocument = await payload.findByID({
                     id: node.value.id,
                     collection: node.relationTo,

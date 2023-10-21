@@ -7,27 +7,33 @@ import type { HTMLConverter } from '../converters/html/converter/types'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
 
 export const ListHTMLConverter: HTMLConverter<SerializedListNode> = {
-  converter: async ({ converters, node }) => {
+  converter: async ({ converters, node, parent }) => {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
       lexicalNodes: node.children,
-      parentNodeType: ListNode.getType(),
+      parent: {
+        ...node,
+        parent,
+      },
     })
 
-    return `<${node?.tag} class="${node?.listType}" >${childrenText}</${node?.tag}>`
+    return `<${node?.tag} class="${node?.listType}">${childrenText}</${node?.tag}>`
   },
   nodeTypes: [ListNode.getType()],
 }
 
 export const ListItemHTMLConverter: HTMLConverter<SerializedListItemNode> = {
-  converter: async ({ converters, node }) => {
+  converter: async ({ converters, node, parent }) => {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
       lexicalNodes: node.children,
-      parentNodeType: ListItemNode.getType(),
+      parent: {
+        ...node,
+        parent,
+      },
     })
 
-    if (node?.checked != null) {
+    if ('listType' in parent && parent?.listType === 'check') {
       return `<li aria-checked=${node.checked ? 'true' : 'false'} class="${
         'list-item-checkbox' + node.checked
           ? 'list-item-checkbox-checked'

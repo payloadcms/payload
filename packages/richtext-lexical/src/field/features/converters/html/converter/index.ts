@@ -1,6 +1,6 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
-import type { HTMLConverter } from './types'
+import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types'
 
 export async function convertLexicalToHTML({
   converters,
@@ -13,7 +13,7 @@ export async function convertLexicalToHTML({
     return await convertLexicalNodesToHTML({
       converters,
       lexicalNodes: data?.root?.children,
-      parentNodeType: 'root',
+      parent: data?.root,
     })
   }
   return ''
@@ -22,11 +22,11 @@ export async function convertLexicalToHTML({
 export async function convertLexicalNodesToHTML({
   converters,
   lexicalNodes,
-  parentNodeType,
+  parent,
 }: {
   converters: HTMLConverter[]
   lexicalNodes: SerializedLexicalNode[]
-  parentNodeType: string
+  parent: SerializedLexicalNodeWithParent
 }): Promise<string> {
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
 
@@ -36,15 +36,17 @@ export async function convertLexicalNodesToHTML({
         converter.nodeTypes.includes(node.type),
       )
       if (!converterForNode) {
+        if (unknownConverter) {
+          return unknownConverter.converter({ childIndex: i, converters, node, parent })
+        }
         return '<span>unknown node</span>'
       }
-      const html = await converterForNode.converter({
+      return converterForNode.converter({
         childIndex: i,
         converters,
         node,
-        parentNodeType,
+        parent,
       })
-      return html
     }),
   )
 

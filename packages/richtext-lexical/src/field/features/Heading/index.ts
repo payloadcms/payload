@@ -70,11 +70,14 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
           {
             converters: {
               html: {
-                converter: async ({ converters, node }) => {
+                converter: async ({ converters, node, parent }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
-                    parentNodeType: HeadingNode.getType(),
+                    parent: {
+                      ...node,
+                      parent,
+                    },
                   })
 
                   return '<' + node?.tag + '>' + childrenText + '</' + node?.tag + '>'

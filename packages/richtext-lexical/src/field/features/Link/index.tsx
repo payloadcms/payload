@@ -79,11 +79,14 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
           {
             converters: {
               html: {
-                converter: async ({ converters, node }) => {
+                converter: async ({ converters, node, parent }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
-                    parentNodeType: LinkNode.getType(),
+                    parent: {
+                      ...node,
+                      parent,
+                    },
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
@@ -104,11 +107,14 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
           {
             converters: {
               html: {
-                converter: async ({ converters, node }) => {
+                converter: async ({ converters, node, parent }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
-                    parentNodeType: AutoLinkNode.getType(),
+                    parent: {
+                      ...node,
+                      parent,
+                    },
                   })
 
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''

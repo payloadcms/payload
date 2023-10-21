@@ -44,11 +44,14 @@ export const BlockQuoteFeature = (): FeatureProvider => {
           {
             converters: {
               html: {
-                converter: async ({ converters, node }) => {
+                converter: async ({ converters, node, parent }) => {
                   const childrenText = await convertLexicalNodesToHTML({
                     converters,
                     lexicalNodes: node.children,
-                    parentNodeType: QuoteNode.getType(),
+                    parent: {
+                      ...node,
+                      parent,
+                    },
                   })
 
                   return `<blockquote>${childrenText}</blockquote>`
