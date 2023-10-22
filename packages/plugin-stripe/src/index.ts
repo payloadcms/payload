@@ -1,6 +1,6 @@
 import type { NextFunction, Response } from 'express'
 import express from 'express'
-import type { Config } from 'payload/config'
+import type { Config, Endpoint } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
 
 import { extendWebpackConfig } from './extendWebpackConfig'
@@ -58,7 +58,7 @@ export const stripePlugin =
           ? [
               {
                 path: '/stripe/rest',
-                method: 'post',
+                method: 'post' as Endpoint['method'],
                 handler: (req: PayloadRequest, res: Response, next: NextFunction) => {
                   stripeREST({
                     req,
@@ -71,10 +71,10 @@ export const stripePlugin =
             ]
           : []),
       ],
-      collections: collections?.map(collection => {
+      collections: collections?.map((collection) => {
         const { hooks: existingHooks } = collection
 
-        const syncConfig = stripeConfig.sync?.find(sync => sync.collection === collection.slug)
+        const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug)
 
         if (syncConfig) {
           const fields = getFields({
@@ -88,7 +88,7 @@ export const stripePlugin =
               ...collection.hooks,
               beforeValidate: [
                 ...(existingHooks?.beforeValidate || []),
-                async args =>
+                async (args) =>
                   createNewInStripe({
                     ...args,
                     collection,
@@ -97,7 +97,7 @@ export const stripePlugin =
               ],
               beforeChange: [
                 ...(existingHooks?.beforeChange || []),
-                async args =>
+                async (args) =>
                   syncExistingWithStripe({
                     ...args,
                     collection,
@@ -106,7 +106,7 @@ export const stripePlugin =
               ],
               afterDelete: [
                 ...(existingHooks?.afterDelete || []),
-                async args =>
+                async (args) =>
                   deleteFromStripe({
                     ...args,
                     collection,
