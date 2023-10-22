@@ -1,6 +1,7 @@
 import type { CollectionConfig, Field } from 'payload/types'
 
 import type { SanitizedStripeConfig } from '../types'
+
 import { LinkToDoc } from '../ui/LinkToDoc'
 
 interface Args {
@@ -14,40 +15,40 @@ interface Args {
 export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field[] => {
   const stripeIDField: Field = {
     name: 'stripeID',
-    label: 'Stripe ID',
-    type: 'text',
-    saveToJWT: true,
     admin: {
       position: 'sidebar',
       readOnly: true,
     },
+    label: 'Stripe ID',
+    saveToJWT: true,
+    type: 'text',
   }
 
   const skipSyncField: Field = {
     name: 'skipSync',
-    label: 'Skip Sync',
-    type: 'checkbox',
     admin: {
       position: 'sidebar',
       readOnly: true,
     },
+    label: 'Skip Sync',
+    type: 'checkbox',
   }
 
   const docUrlField: Field = {
     name: 'docUrl',
-    type: 'ui',
     admin: {
-      position: 'sidebar',
       components: {
-        Field: args =>
+        Field: (args) =>
           LinkToDoc({
             ...args,
             isTestKey: stripeConfig.isTestKey,
-            stripeResourceType: syncConfig.stripeResourceType,
             nameOfIDField: 'stripeID',
+            stripeResourceType: syncConfig.stripeResourceType,
           }),
       },
+      position: 'sidebar',
     },
+    type: 'ui',
   }
 
   const fields = [...collection.fields, stripeIDField, skipSyncField, docUrlField]

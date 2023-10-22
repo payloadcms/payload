@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 
 import type { StripeProxy } from '../types'
 
-export const stripeProxy: StripeProxy = async ({ stripeSecretKey, stripeMethod, stripeArgs }) => {
+export const stripeProxy: StripeProxy = async ({ stripeArgs, stripeMethod, stripeSecretKey }) => {
   const stripe = new Stripe(stripeSecretKey, {
     apiVersion: '2022-08-01',
     appInfo: {
@@ -24,13 +24,13 @@ export const stripeProxy: StripeProxy = async ({ stripeSecretKey, stripeMethod, 
         try {
           const stripeResponse = await foundMethod(...stripeArgs)
           return {
-            status: 200,
             data: stripeResponse,
+            status: 200,
           }
         } catch (error: unknown) {
           return {
-            status: 404,
             message: `A Stripe API error has occurred: ${error}`,
+            status: 404,
           }
         }
       } else {

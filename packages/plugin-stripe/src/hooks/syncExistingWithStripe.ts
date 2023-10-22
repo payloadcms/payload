@@ -1,8 +1,10 @@
-import { APIError } from 'payload/errors'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+
+import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
 import type { StripeConfig } from '../types'
+
 import { deepen } from '../utilities/deepen'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
@@ -15,8 +17,8 @@ export type CollectionBeforeChangeHookWithArgs = (
   },
 ) => void
 
-export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async args => {
-  const { req, operation, data, originalDoc, collection, stripeConfig } = args
+export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async (args) => {
+  const { collection, data, operation, originalDoc, req, stripeConfig } = args
 
   const { logs, sync } = stripeConfig || {}
 
@@ -25,17 +27,20 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
   const { slug: collectionSlug } = collection || {}
 
   if (process.env.NODE_ENV !== 'test' && !data.skipSync) {
-    const syncConfig = sync?.find(conf => conf.collection === collectionSlug)
+    const syncConfig = sync?.find((conf) => conf.collection === collectionSlug)
 
     if (syncConfig) {
       if (operation === 'update') {
         // combine all fields of this object and match their respective values within the document
-        let syncedFields = syncConfig.fields.reduce((acc, field) => {
-          const { fieldPath, stripeProperty } = field
+        let syncedFields = syncConfig.fields.reduce(
+          (acc, field) => {
+            const { fieldPath, stripeProperty } = field
 
-          acc[stripeProperty] = data[fieldPath]
-          return acc
-        }, {} as Record<string, any>)
+            acc[stripeProperty] = data[fieldPath]
+            return acc
+          },
+          {} as Record<string, any>,
+        )
 
         syncedFields = deepen(syncedFields)
 

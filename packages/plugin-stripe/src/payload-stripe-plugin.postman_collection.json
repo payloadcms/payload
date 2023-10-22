@@ -1,42 +1,42 @@
 {
 	"info": {
-		"_postman_id": "130686e1-ddd9-40f1-b031-68ec1a6413ee",
 		"name": "Payload Stripe Plugin",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "4309346"
+		"_exporter_id": "4309346",
+		"_postman_id": "130686e1-ddd9-40f1-b031-68ec1a6413ee",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
 			"name": "Get All Subscriptions",
 			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "JWT {{PAYLOAD_API_TOKEN}}",
-						"type": "text"
-					}
-				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"stripeMethod\": \"subscriptions.list\",\n    \"stripeArgs\": {\n        \"customer\": \"cus_MGgt3Tuj3D66f2\"\n    }\n}"
 				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "JWT {{PAYLOAD_API_TOKEN}}"
+					}
+				],
+				"method": "POST",
 				"url": {
-					"raw": "localhost:3000/api/stripe/rest",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"stripe",
 						"rest"
-					]
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/stripe/rest"
 				}
 			},
 			"response": []
@@ -44,34 +44,34 @@
 		{
 			"name": "Get All Products",
 			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "JWT {{PAYLOAD_API_TOKEN}}",
-						"type": "text"
-					}
-				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"stripeMethod\": \"products.list\",\n    \"stripeArgs\": [{\n        \"limit\": 100\n    }]\n}"
 				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "JWT {{PAYLOAD_API_TOKEN}}"
+					}
+				],
+				"method": "POST",
 				"url": {
-					"raw": "localhost:3000/api/stripe/rest",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"stripe",
 						"rest"
-					]
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/stripe/rest"
 				}
 			},
 			"response": []
@@ -82,34 +82,34 @@
 				"disableBodyPruning": true
 			},
 			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "JWT {{PAYLOAD_API_TOKEN}}",
-						"type": "text"
-					}
-				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"stripeMethod\": \"subscriptions.list\",\n    \"stripeArgs\": {\n        \"customer\": \"cus_MGgt3Tuj3D66f2\"\n    }\n}"
 				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "JWT {{PAYLOAD_API_TOKEN}}"
+					}
+				],
+				"method": "GET",
 				"url": {
-					"raw": "localhost:3000/api/products/6344664c003348299a226249",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"products",
 						"6344664c003348299a226249"
-					]
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/products/6344664c003348299a226249"
 				}
 			},
 			"response": []
@@ -117,34 +117,34 @@
 		{
 			"name": "Update Product",
 			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "JWT {{PAYLOAD_API_TOKEN}}",
-						"type": "text"
-					}
-				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n   \"name\": \"Reactions\",\n    \"price\": {\n        \"stripePriceID\": \"price_1LXXU9H77M76aDnomGU5iIZu\"\n    },\n    \"stripeID\": \"prod_MG3bPl2yQGQK4x\",\n    \"skipSync\": true\n}"
 				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "JWT {{PAYLOAD_API_TOKEN}}"
+					}
+				],
+				"method": "PATCH",
 				"url": {
-					"raw": "localhost:3000/api/products/6344664c003348299a226249",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"products",
 						"6344664c003348299a226249"
-					]
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/products/6344664c003348299a226249"
 				}
 			},
 			"response": []
@@ -152,33 +152,33 @@
 		{
 			"name": "Create Product",
 			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "JWT {{PAYLOAD_API_TOKEN}}",
-						"type": "text"
-					}
-				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n   \"name\": \"Test\",\n    \"price\": {\n        \"stripePriceID\": \"price_1LXXU9H77M76aDnomGU5iIZu\"\n    },\n    \"stripeID\": \"prod_MG3bPl2yQGQK4x\",\n    \"skipSync\": true\n}"
 				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "JWT {{PAYLOAD_API_TOKEN}}"
+					}
+				],
+				"method": "POST",
 				"url": {
-					"raw": "localhost:3000/api/products",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"products"
-					]
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/products"
 				}
 			},
 			"response": []
@@ -186,34 +186,34 @@
 		{
 			"name": "Create Stripe Customer",
 			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "JWT {{PAYLOAD_API_TOKEN}}",
-						"type": "text"
-					}
-				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"stripeMethod\": \"customers.create\",\n    \"stripeArgs\": {\n        \"email\": \"cta@hulu.com\",\n        \"name\": \"Hulu\"\n    }\n}"
 				},
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "JWT {{PAYLOAD_API_TOKEN}}"
+					}
+				],
+				"method": "POST",
 				"url": {
-					"raw": "localhost:3000/api/stripe/rest",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"stripe",
 						"rest"
-					]
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/stripe/rest"
 				}
 			},
 			"response": []
@@ -233,36 +233,36 @@
 				}
 			],
 			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "",
-						"disabled": true
-					}
-				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"email\": \"jacob@trbl.design\",\n\t\"password\": \"test\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
-					}
+					},
+					"raw": "{\n\t\"email\": \"jacob@trbl.design\",\n\t\"password\": \"test\"\n}"
 				},
+				"description": "\t",
+				"header": [
+					{
+						"disabled": true,
+						"key": "Authorization",
+						"value": ""
+					}
+				],
+				"method": "POST",
 				"url": {
-					"raw": "localhost:3000/api/users/login",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"users",
 						"login"
-					]
-				},
-				"description": "\t"
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/users/login"
+				}
 			},
 			"response": []
 		},
@@ -272,28 +272,28 @@
 				"disabledSystemHeaders": {}
 			},
 			"request": {
-				"method": "POST",
-				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImphY29ic2ZsZXRjaEBnbWFpbC5jb20iLCJpZCI6IjYwODJlZjUxMzg5ZmM2MmYzNWI2MmM2ZiIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImZpcnN0TmFtZSI6IkphY29iIiwibGFzdE5hbWUiOiJGbGV0Y2hlciIsIm9yZ2FuaXphdGlvbiI6IjYwN2RiNGNmYjYzMGIyNWI5YzkzNmMzNSIsImlhdCI6MTYzMTExMDk3NSwiZXhwIjoxNjMyOTI1Mzc1fQ.OL9l8jFNaCZCU-ZDQpH-EJauaRM-5JT4_Y3J_-aC-aY\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
-					}
+					},
+					"raw": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImphY29ic2ZsZXRjaEBnbWFpbC5jb20iLCJpZCI6IjYwODJlZjUxMzg5ZmM2MmYzNWI2MmM2ZiIsImNvbGxlY3Rpb24iOiJ1c2VycyIsImZpcnN0TmFtZSI6IkphY29iIiwibGFzdE5hbWUiOiJGbGV0Y2hlciIsIm9yZ2FuaXphdGlvbiI6IjYwN2RiNGNmYjYzMGIyNWI5YzkzNmMzNSIsImlhdCI6MTYzMTExMDk3NSwiZXhwIjoxNjMyOTI1Mzc1fQ.OL9l8jFNaCZCU-ZDQpH-EJauaRM-5JT4_Y3J_-aC-aY\"\n}"
 				},
+				"header": [],
+				"method": "POST",
 				"url": {
-					"raw": "localhost:3000/api/users/refresh-token",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"users",
 						"refresh-token"
-					]
+					],
+					"port": "3000",
+					"raw": "localhost:3000/api/users/refresh-token"
 				}
 			},
 			"response": []
@@ -316,37 +316,37 @@
 				"disableBodyPruning": true
 			},
 			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "",
-						"disabled": true
-					}
-				],
 				"body": {
 					"mode": "raw",
 					"raw": ""
 				},
+				"description": "\t",
+				"header": [
+					{
+						"disabled": true,
+						"key": "Authorization",
+						"value": ""
+					}
+				],
+				"method": "GET",
 				"url": {
-					"raw": "localhost:3000/api/users/me?depth=1",
 					"host": [
 						"localhost"
 					],
-					"port": "3000",
 					"path": [
 						"api",
 						"users",
 						"me"
 					],
+					"port": "3000",
 					"query": [
 						{
 							"key": "depth",
 							"value": "1"
 						}
-					]
-				},
-				"description": "\t"
+					],
+					"raw": "localhost:3000/api/users/me?depth=1"
+				}
 			},
 			"response": []
 		}

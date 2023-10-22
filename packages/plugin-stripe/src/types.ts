@@ -3,10 +3,10 @@ import type { Config as PayloadConfig } from 'payload/config'
 import type Stripe from 'stripe'
 
 export type StripeWebhookHandler<T = any> = (args: {
-  payload: Payload
-  event: T
-  stripe: Stripe
   config: PayloadConfig
+  event: T
+  payload: Payload
+  stripe: Stripe
   stripeConfig?: StripeConfig
 }) => void
 
@@ -21,20 +21,20 @@ export interface FieldSyncConfig {
 
 export interface SyncConfig {
   collection: string
+  fields: FieldSyncConfig[]
   stripeResourceType: 'customers' | 'products' // TODO: get this from Stripe types
   stripeResourceTypeSingular: 'customer' | 'product' // TODO: there must be a better way to do this
-  fields: FieldSyncConfig[]
 }
 
 export interface StripeConfig {
-  stripeSecretKey: string
   isTestKey?: boolean
-  stripeWebhooksEndpointSecret?: string
+  logs?: boolean
   // @deprecated this will default as `false` in the next major version release
   rest?: boolean
-  webhooks?: StripeWebhookHandler | StripeWebhookHandlers
+  stripeSecretKey: string
+  stripeWebhooksEndpointSecret?: string
   sync?: SyncConfig[]
-  logs?: boolean
+  webhooks?: StripeWebhookHandler | StripeWebhookHandlers
 }
 
 export type SanitizedStripeConfig = StripeConfig & {
@@ -42,11 +42,11 @@ export type SanitizedStripeConfig = StripeConfig & {
 }
 
 export type StripeProxy = (args: {
-  stripeSecretKey: string
-  stripeMethod: string
   stripeArgs: any[]
+  stripeMethod: string
+  stripeSecretKey: string
 }) => Promise<{
-  status: number
-  message?: string
   data?: any
+  message?: string
+  status: number
 }>

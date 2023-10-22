@@ -1,17 +1,18 @@
 import { v4 as uuid } from 'uuid'
 
 import type { SanitizedStripeConfig, StripeWebhookHandler } from '../types'
+
 import { deepen } from '../utilities/deepen'
 
 type HandleCreatedOrUpdated = (
   args: Parameters<StripeWebhookHandler>[0] & {
-    syncConfig: SanitizedStripeConfig['sync'][0]
     resourceType: string
+    syncConfig: SanitizedStripeConfig['sync'][0]
   },
 ) => void
 
-export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async args => {
-  const { payload, event, resourceType, stripeConfig, config: payloadConfig, syncConfig } = args
+export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {
+  const { config: payloadConfig, event, payload, resourceType, stripeConfig, syncConfig } = args
 
   const { logs } = stripeConfig || {}
 
@@ -45,7 +46,7 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async args => {
     const collectionSlug = syncConfig?.collection
 
     const isAuthCollection = Boolean(
-      payloadConfig?.collections?.find(collection => collection.slug === collectionSlug)?.auth,
+      payloadConfig?.collections?.find((collection) => collection.slug === collectionSlug)?.auth,
     )
 
     // First, search for an existing document in Payload
@@ -61,17 +62,20 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async args => {
     const foundDoc = payloadQuery.docs[0] as any
 
     // combine all properties of the Stripe doc and match their respective fields within the document
-    let syncedData = syncConfig.fields.reduce((acc, field) => {
-      const { fieldPath, stripeProperty } = field
+    let syncedData = syncConfig.fields.reduce(
+      (acc, field) => {
+        const { fieldPath, stripeProperty } = field
 
-      acc[fieldPath] = stripeDoc[stripeProperty]
-      return acc
-    }, {} as Record<string, any>)
+        acc[fieldPath] = stripeDoc[stripeProperty]
+        return acc
+      },
+      {} as Record<string, any>,
+    )
 
     syncedData = deepen({
       ...syncedData,
-      stripeID,
       skipSync: true,
+      stripeID,
     })
 
     if (!foundDoc) {
@@ -106,8 +110,8 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async args => {
               // account exists by email, so update it instead
               try {
                 await payload.update({
-                  collection: collectionSlug,
                   id: authDoc.id,
+                  collection: collectionSlug,
                   data: syncedData,
                 })
 
@@ -173,8 +177,8 @@ export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async args => {
 
       try {
         await payload.update({
-          collection: collectionSlug,
           id: foundDoc.id,
+          collection: collectionSlug,
           data: syncedData,
         })
 

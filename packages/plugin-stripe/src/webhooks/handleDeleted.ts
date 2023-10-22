@@ -7,8 +7,8 @@ type HandleDeleted = (
   },
 ) => void
 
-export const handleDeleted: HandleDeleted = async args => {
-  const { payload, event, stripeConfig, resourceType, syncConfig } = args
+export const handleDeleted: HandleDeleted = async (args) => {
+  const { event, payload, resourceType, stripeConfig, syncConfig } = args
 
   const { logs } = stripeConfig || {}
 
@@ -59,8 +59,8 @@ export const handleDeleted: HandleDeleted = async args => {
 
         try {
           payload.delete({
-            collection: collectionSlug,
             id: foundDoc.id,
+            collection: collectionSlug,
           })
 
           // NOTE: the `afterDelete` hook will trigger, which will attempt to delete the document from Stripe and safely error out

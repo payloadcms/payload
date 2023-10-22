@@ -1,25 +1,27 @@
 import type { Response } from 'express'
-import { Forbidden } from 'payload/errors'
 import type { PayloadRequest } from 'payload/types'
 
+import { Forbidden } from 'payload/errors'
+
 import type { StripeConfig } from '../types'
+
 import { stripeProxy } from '../utilities/stripeProxy'
 
 export const stripeREST = async (args: {
+  next: any
   req: PayloadRequest
   res: Response
-  next: any
   stripeConfig: StripeConfig
 }): Promise<any> => {
   const { req, res, stripeConfig } = args
 
   const {
+    body: {
+      stripeArgs, // example: ['cus_MGgt3Tuj3D66f2'] or [{ limit: 100 }, { stripeAccount: 'acct_1J9Z4pKZ4Z4Z4Z4Z' }]
+      stripeMethod, // example: 'subscriptions.list',
+    },
     payload,
     user,
-    body: {
-      stripeMethod, // example: 'subscriptions.list',
-      stripeArgs, // example: ['cus_MGgt3Tuj3D66f2'] or [{ limit: 100 }, { stripeAccount: 'acct_1J9Z4pKZ4Z4Z4Z4Z' }]
-    },
   } = req
 
   const { stripeSecretKey } = stripeConfig
@@ -31,9 +33,9 @@ export const stripeREST = async (args: {
     }
 
     const pluginRes = await stripeProxy({
-      stripeSecretKey,
-      stripeMethod,
       stripeArgs,
+      stripeMethod,
+      stripeSecretKey,
     })
 
     const { status } = pluginRes

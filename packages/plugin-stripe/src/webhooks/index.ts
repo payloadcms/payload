@@ -1,9 +1,10 @@
 import type { StripeWebhookHandler } from '../types'
+
 import { handleCreatedOrUpdated } from './handleCreatedOrUpdated'
 import { handleDeleted } from './handleDeleted'
 
-export const handleWebhooks: StripeWebhookHandler = async args => {
-  const { payload, event, stripeConfig } = args
+export const handleWebhooks: StripeWebhookHandler = async (args) => {
+  const { event, payload, stripeConfig } = args
 
   if (stripeConfig?.logs)
     payload.logger.info(`🪝 Received Stripe '${event.type}' webhook event with ID: '${event.id}'.`)
@@ -14,7 +15,7 @@ export const handleWebhooks: StripeWebhookHandler = async args => {
   const method = event.type.split('.').pop()
 
   const syncConfig = stripeConfig?.sync?.find(
-    sync => sync.stripeResourceTypeSingular === resourceType,
+    (sync) => sync.stripeResourceTypeSingular === resourceType,
   )
 
   if (syncConfig) {

@@ -1,19 +1,21 @@
 import type { Response } from 'express'
 import type { Config as PayloadConfig } from 'payload/config'
 import type { PayloadRequest } from 'payload/dist/types'
+
 import Stripe from 'stripe'
 
 import type { StripeConfig } from '../types'
+
 import { handleWebhooks } from '../webhooks'
 
 export const stripeWebhooks = async (args: {
+  config: PayloadConfig
+  next: any
   req: PayloadRequest
   res: Response
-  next: any
-  config: PayloadConfig
   stripeConfig: StripeConfig
 }): Promise<any> => {
-  const { req, res, config, stripeConfig } = args
+  const { config, req, res, stripeConfig } = args
 
   const { stripeSecretKey, stripeWebhooksEndpointSecret, webhooks } = stripeConfig
 
@@ -45,20 +47,20 @@ export const stripeWebhooks = async (args: {
 
       if (event) {
         await handleWebhooks({
-          payload: req.payload,
-          event,
-          stripe,
           config,
+          event,
+          payload: req.payload,
+          stripe,
           stripeConfig,
         })
 
         // Fire external webhook handlers if they exist
         if (typeof webhooks === 'function') {
           webhooks({
-            payload: req.payload,
-            event,
-            stripe,
             config,
+            event,
+            payload: req.payload,
+            stripe,
             stripeConfig,
           })
         }
@@ -67,10 +69,10 @@ export const stripeWebhooks = async (args: {
           const webhookEventHandler = webhooks[event.type]
           if (typeof webhookEventHandler === 'function') {
             webhookEventHandler({
-              payload: req.payload,
-              event,
-              stripe,
               config,
+              event,
+              payload: req.payload,
+              stripe,
               stripeConfig,
             })
           }

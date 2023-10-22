@@ -1,5 +1,6 @@
-import { APIError } from 'payload/errors'
 import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
+
+import { APIError } from 'payload/errors'
 import Stripe from 'stripe'
 
 import type { StripeConfig } from '../types'
@@ -14,8 +15,8 @@ export type CollectionAfterDeleteHookWithArgs = (
   },
 ) => void
 
-export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async args => {
-  const { req, doc, stripeConfig, collection } = args
+export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) => {
+  const { collection, doc, req, stripeConfig } = args
 
   const { logs, sync } = stripeConfig || {}
 
@@ -30,7 +31,7 @@ export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async args =>
   if (process.env.NODE_ENV !== 'test') {
     if (logs) payload.logger.info(`- Deleting Stripe document with ID: '${doc.stripeID}'...`)
 
-    const syncConfig = sync?.find(conf => conf.collection === collectionSlug)
+    const syncConfig = sync?.find((conf) => conf.collection === collectionSlug)
 
     if (syncConfig) {
       try {

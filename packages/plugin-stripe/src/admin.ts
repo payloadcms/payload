@@ -1,7 +1,8 @@
 import type { Config } from 'payload/config'
 
-import { getFields } from './fields/getFields'
 import type { SanitizedStripeConfig, StripeConfig } from './types'
+
+import { getFields } from './fields/getFields'
 
 export const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
@@ -22,8 +23,8 @@ export const stripePlugin =
 
     return {
       ...config,
-      collections: collections?.map(collection => {
-        const syncConfig = stripeConfig.sync?.find(sync => sync.collection === collection.slug)
+      collections: collections?.map((collection) => {
+        const syncConfig = stripeConfig.sync?.find((sync) => sync.collection === collection.slug)
 
         if (syncConfig) {
           const fields = getFields({

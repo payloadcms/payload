@@ -1,7 +1,10 @@
 import type { NextFunction, Response } from 'express'
-import express from 'express'
 import type { Config, Endpoint } from 'payload/config'
 import type { PayloadRequest } from 'payload/types'
+
+import express from 'express'
+
+import type { SanitizedStripeConfig, StripeConfig } from './types'
 
 import { extendWebpackConfig } from './extendWebpackConfig'
 import { getFields } from './fields/getFields'
@@ -10,7 +13,6 @@ import { deleteFromStripe } from './hooks/deleteFromStripe'
 import { syncExistingWithStripe } from './hooks/syncExistingWithStripe'
 import { stripeREST } from './routes/rest'
 import { stripeWebhooks } from './routes/webhooks'
-import type { SanitizedStripeConfig, StripeConfig } from './types'
 
 export const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
@@ -35,42 +37,6 @@ export const stripePlugin =
         ...config.admin,
         webpack: extendWebpackConfig(config),
       },
-      endpoints: [
-        ...(config?.endpoints || []),
-        {
-          path: '/stripe/webhooks',
-          method: 'post',
-          root: true,
-          handler: [
-            express.raw({ type: 'application/json' }),
-            (req, res, next) => {
-              stripeWebhooks({
-                req,
-                res,
-                next,
-                config,
-                stripeConfig,
-              })
-            },
-          ],
-        },
-        ...(incomingStripeConfig?.rest
-          ? [
-              {
-                path: '/stripe/rest',
-                method: 'post' as Endpoint['method'],
-                handler: (req: PayloadRequest, res: Response, next: NextFunction) => {
-                  stripeREST({
-                    req,
-                    res,
-                    next,
-                    stripeConfig,
-                  })
-                },
-              },
-            ]
-          : []),
-      ],
       collections: collections?.map((collection) => {
         const { hooks: existingHooks } = collection
 
@@ -84,12 +50,13 @@ export const stripePlugin =
           })
           return {
             ...collection,
+            fields,
             hooks: {
               ...collection.hooks,
-              beforeValidate: [
-                ...(existingHooks?.beforeValidate || []),
+              afterDelete: [
+                ...(existingHooks?.afterDelete || []),
                 async (args) =>
-                  createNewInStripe({
+                  deleteFromStripe({
                     ...args,
                     collection,
                     stripeConfig,
@@ -104,21 +71,56 @@ export const stripePlugin =
                     stripeConfig,
                   }),
               ],
-              afterDelete: [
-                ...(existingHooks?.afterDelete || []),
+              beforeValidate: [
+                ...(existingHooks?.beforeValidate || []),
                 async (args) =>
-                  deleteFromStripe({
+                  createNewInStripe({
                     ...args,
                     collection,
                     stripeConfig,
                   }),
               ],
             },
-            fields,
           }
         }
 
         return collection
       }),
+      endpoints: [
+        ...(config?.endpoints || []),
+        {
+          handler: [
+            express.raw({ type: 'application/json' }),
+            (req, res, next) => {
+              stripeWebhooks({
+                config,
+                next,
+                req,
+                res,
+                stripeConfig,
+              })
+            },
+          ],
+          method: 'post',
+          path: '/stripe/webhooks',
+          root: true,
+        },
+        ...(incomingStripeConfig?.rest
+          ? [
+              {
+                handler: (req: PayloadRequest, res: Response, next: NextFunction) => {
+                  stripeREST({
+                    next,
+                    req,
+                    res,
+                    stripeConfig,
+                  })
+                },
+                method: 'post' as Endpoint['method'],
+                path: '/stripe/rest',
+              },
+            ]
+          : []),
+      ],
     }
   }
