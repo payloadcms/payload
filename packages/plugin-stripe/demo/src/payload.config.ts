@@ -13,7 +13,7 @@ export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
     user: Users.slug,
-    webpack: config => {
+    webpack: (config) => {
       const newConfig = {
         ...config,
         resolve: {

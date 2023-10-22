@@ -1,12 +1,10 @@
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 const Products: CollectionConfig = {
   slug: 'products',
   timestamps: true,
   admin: {
-    defaultColumns: [
-      'name',
-    ]
+    defaultColumns: ['name'],
   },
   fields: [
     {
@@ -33,9 +31,9 @@ const Products: CollectionConfig = {
           label: 'Stripe JSON',
           type: 'textarea',
         },
-      ]
-    }
-  ]
+      ],
+    },
+  ],
 }
 
-export default Products;
+export default Products

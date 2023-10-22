@@ -26,8 +26,8 @@ Core features:
 In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```js
-import { buildConfig } from "payload/config";
-import stripePlugin from "@payloadcms/plugin-stripe";
+import { buildConfig } from 'payload/config'
+import stripePlugin from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
   plugins: [
@@ -35,9 +35,9 @@ const config = buildConfig({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
     }),
   ],
-});
+})
 
-export default config;
+export default config
 ```
 
 ### Options
@@ -75,8 +75,8 @@ This option will setup a basic sync between Payload collections and Stripe resou
 > NOTE: Due to limitations in the Stripe API, this currently only works with top-level fields. This is because every Stripe object is a separate entity, making it difficult to abstract into a simple reusable library. In the future, we may find a pattern around this. But for now, cases like that will need to be hard-coded. See the [demo](./demo) for an example of this.
 
 ```js
-import { buildConfig } from "payload/config";
-import stripePlugin from "@payloadcms/plugin-stripe";
+import { buildConfig } from 'payload/config'
+import stripePlugin from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
   plugins: [
@@ -85,22 +85,22 @@ const config = buildConfig({
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       sync: [
         {
-          collection: "customers",
-          stripeResourceType: "customers",
-          stripeResourceTypeSingular: "customer",
+          collection: 'customers',
+          stripeResourceType: 'customers',
+          stripeResourceTypeSingular: 'customer',
           fields: [
             {
-              fieldPath: "name", // this is a field on your own Payload config
-              stripeProperty: "name", // use dot notation, if applicable
+              fieldPath: 'name', // this is a field on your own Payload config
+              stripeProperty: 'name', // use dot notation, if applicable
             },
           ],
         },
       ],
     }),
   ],
-});
+})
 
-export default config;
+export default config
 ```
 
 Using `sync` will do the following:
@@ -129,21 +129,21 @@ The following custom endpoints are automatically opened for you:
 
   ```js
   const res = await fetch(`/api/stripe/rest`, {
-    method: "POST",
-    credentials: "include",
+    method: 'POST',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       // Authorization: `JWT ${token}` // NOTE: do this if not in a browser (i.e. curl or Postman)
     },
     body: JSON.stringify({
-      stripeMethod: "stripe.subscriptions.list",
+      stripeMethod: 'stripe.subscriptions.list',
       stripeArgs: [
         {
-          customer: "abc",
+          customer: 'abc',
         },
       ],
     }),
-  });
+  })
   ```
 
 - #### `POST /stripe/webhooks`
@@ -169,8 +169,8 @@ Production:
 1. Then, handle these events using the `webhooks` portion of this plugin's config:
 
 ```js
-import { buildConfig } from "payload/config";
-import stripePlugin from "@payloadcms/plugin-stripe";
+import { buildConfig } from 'payload/config'
+import stripePlugin from '@payloadcms/plugin-stripe'
 
 const config = buildConfig({
   plugins: [
@@ -178,7 +178,7 @@ const config = buildConfig({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       webhooks: {
-        "customer.subscription.updated": ({ event, stripe, stripeConfig }) => {
+        'customer.subscription.updated': ({ event, stripe, stripeConfig }) => {
           // do something...
         },
       },
@@ -196,9 +196,9 @@ const config = buildConfig({
       // }
     }),
   ],
-});
+})
 
-export default config;
+export default config
 ```
 
 For a full list of available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
@@ -208,52 +208,52 @@ For a full list of available webhooks, see [here](https://stripe.com/docs/cli/tr
 On the server you should interface with Stripe directly using the [stripe](https://www.npmjs.com/package/stripe) npm module. That might look something like this:
 
 ```js
-import Stripe from "stripe";
+import Stripe from 'stripe'
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripe = new Stripe(stripeSecretKey, { apiVersion: "2022-08-01" });
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+const stripe = new Stripe(stripeSecretKey, { apiVersion: '2022-08-01' })
 
 export const MyFunction = async () => {
   try {
     const customer = await stripe.customers.create({
       email: data.email,
-    });
+    })
 
     // do something...
   } catch (error) {
-    console.error(error.message);
+    console.error(error.message)
   }
-};
+}
 ```
 
 Alternatively, you can interface with the Stripe using the `stripeProxy`, which is exactly what the `/api/stripe/rest` endpoint does behind-the-scenes. Here's the same example as above, but piped through the proxy:
 
 ```js
-import { stripeProxy } from "@payloadcms/plugin-stripe";
+import { stripeProxy } from '@payloadcms/plugin-stripe'
 
 export const MyFunction = async () => {
   try {
     const customer = await stripeProxy({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-      stripeMethod: "customers.create",
+      stripeMethod: 'customers.create',
       stripeArgs: [
         {
           email: data.email,
         },
       ],
-    });
+    })
 
     if (customer.status === 200) {
       // do something...
     }
 
     if (customer.status >= 400) {
-      throw new Error(customer.message);
+      throw new Error(customer.message)
     }
   } catch (error) {
-    console.error(error.message);
+    console.error(error.message)
   }
-};
+}
 ```
 
 ## TypeScript

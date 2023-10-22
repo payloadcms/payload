@@ -1,86 +1,84 @@
-import { APIError } from 'payload/errors';
+import { APIError } from 'payload/errors'
 
 export const subscriptionCreatedOrUpdated = async (args) => {
-  const {
-    event,
-    payload,
-    stripe,
-    stripeConfig
-  } = args;
+  const { event, payload, stripe, stripeConfig } = args
 
-  const customerStripeID = event.data.object.customer;
+  const customerStripeID = event.data.object.customer
 
-  payload.logger.info(`🪝 A new subscription was created or updated in Stripe on customer ID: ${customerStripeID}, syncing to Payload...`);
+  payload.logger.info(
+    `🪝 A new subscription was created or updated in Stripe on customer ID: ${customerStripeID}, syncing to Payload...`,
+  )
 
-  const {
-    id: eventID,
-    plan,
-    status: subscriptionStatus
-  } = event.data.object;
+  const { id: eventID, plan, status: subscriptionStatus } = event.data.object
 
-  let payloadProductID;
+  let payloadProductID
 
   // First lookup the product in Payload
   try {
-    payload.logger.info(`- Looking up existing Payload product with Stripe ID: ${plan.product}...`);
+    payload.logger.info(`- Looking up existing Payload product with Stripe ID: ${plan.product}...`)
 
     const productQuery = await payload.find({
       collection: 'products',
       depth: 0,
       where: {
         stripeID: {
-          equals: plan.product
-        }
-      }
-    });
+          equals: plan.product,
+        },
+      },
+    })
 
-    payloadProductID = productQuery.docs?.[0]?.id;
+    payloadProductID = productQuery.docs?.[0]?.id
 
     if (payloadProductID) {
-      payload.logger.info(`- Found existing product with Stripe ID: ${plan.product}. Creating relationship...`);
+      payload.logger.info(
+        `- Found existing product with Stripe ID: ${plan.product}. Creating relationship...`,
+      )
     }
-
   } catch (error: any) {
-    payload.logger.error(`Error finding product ${error?.message}`);
+    payload.logger.error(`Error finding product ${error?.message}`)
   }
 
   // Now look up the customer in Payload
   try {
-    payload.logger.info(`- Looking up existing Payload customer with Stripe ID: ${customerStripeID}.`);
+    payload.logger.info(
+      `- Looking up existing Payload customer with Stripe ID: ${customerStripeID}.`,
+    )
 
     const customerReq: any = await payload.find({
       collection: 'customers',
       depth: 0,
       where: {
-        stripeID: customerStripeID
+        stripeID: customerStripeID,
       },
     })
 
-    const foundCustomer = customerReq.docs[0];
+    const foundCustomer = customerReq.docs[0]
 
     if (foundCustomer) {
-      payload.logger.info(`- Found existing customer, now updating.`);
+      payload.logger.info(`- Found existing customer, now updating.`)
 
-      const subscriptions = foundCustomer.subscriptions || [];
+      const subscriptions = foundCustomer.subscriptions || []
 
-      const indexOfSubscription = subscriptions.findIndex(({ stripeSubscriptionID }) => stripeSubscriptionID === eventID);
+      const indexOfSubscription = subscriptions.findIndex(
+        ({ stripeSubscriptionID }) => stripeSubscriptionID === eventID,
+      )
 
       if (indexOfSubscription > -1) {
-        payload.logger.info(`- Subscription already exists, now updating.`);
+        payload.logger.info(`- Subscription already exists, now updating.`)
         // update existing subscription
         subscriptions[indexOfSubscription] = {
           stripeProductID: plan.product,
           product: payloadProductID,
-          status: subscriptionStatus
-        };
+          status: subscriptionStatus,
+        }
       } else {
-        payload.logger.info(`- This is a new subscription, now adding.`);
+        payload.logger.info(`- This is a new subscription, now adding.`)
         // create new subscription
         subscriptions.push({
           stripeSubscriptionID: eventID,
           stripeProductID: plan.product,
           product: payloadProductID,
-          status: subscriptionStatus
+          status: subscriptionStatus,
         })
       }
 
@@ -90,18 +88,20 @@ export const subscriptionCreatedOrUpdated = async (args) => {
           id: foundCustomer.id,
           data: {
             subscriptions,
-            skipSync: true
-          }
+            skipSync: true,
+          },
         })
 
-        payload.logger.info(`✅ Successfully updated subscription.`);
+        payload.logger.info(`✅ Successfully updated subscription.`)
       } catch (error) {
-        payload.logger.error(`- Error updating subscription: ${error}`);
+        payload.logger.error(`- Error updating subscription: ${error}`)
       }
     } else {
-      payload.logger.info(`- No existing customer found, cannot update subscription.`);
+      payload.logger.info(`- No existing customer found, cannot update subscription.`)
     }
   } catch (error) {
-    new APIError(`Error looking up customer with Stripe ID: '${customerStripeID}': ${error?.message}`);
+    new APIError(
+      `Error looking up customer with Stripe ID: '${customerStripeID}': ${error?.message}`,
+    )
   }
-};
+}

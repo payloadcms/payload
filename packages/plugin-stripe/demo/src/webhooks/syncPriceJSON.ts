@@ -1,62 +1,58 @@
 export const syncPriceJSON = async (args) => {
-  const {
-    event,
-    payload,
-    stripe
-  } = args;
+  const { event, payload, stripe } = args
 
-  const customerStripeID = event.data.object.customer;
+  const customerStripeID = event.data.object.customer
 
-  payload.logger.info(`🪝 A price was created or updated in Stripe on customer ID: ${customerStripeID}, syncing price JSON to Payload...`);
+  payload.logger.info(
+    `🪝 A price was created or updated in Stripe on customer ID: ${customerStripeID}, syncing price JSON to Payload...`,
+  )
 
-  const {
-    id: eventID,
-    default_price
-  } = event.data.object;
+  const { id: eventID, default_price } = event.data.object
 
-  console.log(event.data.object);
+  console.log(event.data.object)
 
-  let payloadProductID;
+  let payloadProductID
 
   // First lookup the product in Payload
   try {
-    payload.logger.info(`- Looking up existing Payload product with Stripe ID: ${eventID}...`);
+    payload.logger.info(`- Looking up existing Payload product with Stripe ID: ${eventID}...`)
 
     const productQuery = await payload.find({
       collection: 'products',
       where: {
         stripeID: {
-          equals: eventID
-        }
-      }
-    });
+          equals: eventID,
+        },
+      },
+    })
 
-    payloadProductID = productQuery.docs?.[0]?.id;
+    payloadProductID = productQuery.docs?.[0]?.id
 
     if (payloadProductID) {
-      payload.logger.info(`- Found existing product with Stripe ID: ${eventID}, saving price JSON...`);
+      payload.logger.info(
+        `- Found existing product with Stripe ID: ${eventID}, saving price JSON...`,
+      )
     }
-
   } catch (error: any) {
-    payload.logger.error(`Error finding product ${error?.message}`);
+    payload.logger.error(`Error finding product ${error?.message}`)
   }
 
   try {
-    const stripePrice = await stripe.prices.retrieve(default_price);
+    const stripePrice = await stripe.prices.retrieve(default_price)
 
     await payload.update({
       collection: 'products',
       id: payloadProductID,
       data: {
         price: {
-          stripeJSON: JSON.stringify(stripePrice)
+          stripeJSON: JSON.stringify(stripePrice),
         },
-        skipSync: true
-      }
+        skipSync: true,
+      },
     })
 
-    payload.logger.info(`✅ Successfully updated product price.`);
+    payload.logger.info(`✅ Successfully updated product price.`)
   } catch (error) {
-    payload.logger.error(`- Error updating product price: ${error}`);
+    payload.logger.error(`- Error updating product price: ${error}`)
   }
-};
+}

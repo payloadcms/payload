@@ -1,15 +1,12 @@
-import { CollectionConfig } from 'payload/types';
-import { LinkToDoc } from '../../../src/ui/LinkToDoc';
+import { CollectionConfig } from 'payload/types'
+import { LinkToDoc } from '../../../src/ui/LinkToDoc'
 
 const Customers: CollectionConfig = {
   slug: 'customers',
   timestamps: true,
   admin: {
     useAsTitle: 'email',
-    defaultColumns: [
-      'email',
-      'name',
-    ]
+    defaultColumns: ['email', 'name'],
   },
   auth: {
     useAPIKey: true,
@@ -25,7 +22,8 @@ const Customers: CollectionConfig = {
       label: 'Subscriptions',
       type: 'array',
       admin: {
-        description: 'All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.',
+        description:
+          'All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.',
       },
       fields: [
         {
@@ -34,81 +32,81 @@ const Customers: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
-              Field: (args) => LinkToDoc({
-                ...args,
-                isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
-                stripeResourceType: 'subscriptions',
-                nameOfIDField: `${args.path}.stripeSubscriptionID`
-              })
+              Field: (args) =>
+                LinkToDoc({
+                  ...args,
+                  isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
+                  stripeResourceType: 'subscriptions',
+                  nameOfIDField: `${args.path}.stripeSubscriptionID`,
+                }),
             },
-          }
+          },
         },
         {
           name: 'stripeSubscriptionID',
           label: 'Stripe ID',
           type: 'text',
           admin: {
-            readOnly: true
-          }
+            readOnly: true,
+          },
         },
         {
           name: 'stripeProductID',
           label: 'Product ID',
           type: 'text',
           admin: {
-            readOnly: true
-          }
+            readOnly: true,
+          },
         },
         {
           name: 'product',
           type: 'relationship',
           relationTo: 'products',
           admin: {
-            readOnly: true
-          }
+            readOnly: true,
+          },
         },
         {
           name: 'status',
           label: 'Status',
           type: 'select',
           admin: {
-            readOnly: true
+            readOnly: true,
           },
           options: [
             {
               label: 'Active',
-              value: 'active'
-
+              value: 'active',
             },
             {
               label: 'Canceled',
-              value: 'canceled'
+              value: 'canceled',
             },
             {
               label: 'Incomplete',
-              value: 'incomplete'
+              value: 'incomplete',
             },
             {
               label: 'Incomplete Expired',
-              value: 'incomplete_expired'
+              value: 'incomplete_expired',
             },
             {
               label: 'Past Due',
-              value: 'past_due'
+              value: 'past_due',
             },
             {
               label: 'Trialing',
-              value: 'trialing'
+              value: 'trialing',
             },
             {
               label: 'Unpaid',
-              value: 'unpaid'
-            }
+              value: 'unpaid',
+            },
           ],
-        }
-      ]
+        },
+      ],
     },
-  ]
+  ],
 }
 
-export default Customers;
+export default Customers
