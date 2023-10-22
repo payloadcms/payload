@@ -88,9 +88,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     }
 
     let { data } = args
-    const { password } = data
     const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
-    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
 
     // /////////////////////////////////////
     // Access
@@ -243,6 +241,8 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Handle potential password update
     // /////////////////////////////////////
 
+    const { password } = data
+    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
     const dataToUpdate: Record<string, unknown> = { ...result }
 
     if (shouldSavePassword && typeof password === 'string') {
