@@ -163,5 +163,36 @@ describe('versions', () => {
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDescription)
     })
+
+    test('should restore localized docs correctly', async () => {
+      const spanishLocale = 'es'
+      const spanishTitle = 'spanish title'
+      const englishTitle = 'english title'
+
+      await page.goto(url.create)
+
+      // fill out doc in english
+      await page.locator('#field-title').fill(englishTitle)
+      await page.locator('#field-description').fill('unchanged description')
+      await page.locator('#action-save').click()
+
+      // change locale to spanish
+      await changeLocale(page, spanishLocale)
+
+      // fill out doc in spanish
+      await page.locator('#field-title').fill(spanishTitle)
+      await page.locator('#action-save').click()
+
+      // fill out draft content in spanish
+      await page.locator('#field-title').fill(`${spanishTitle}--draft`)
+      await page.locator('#action-save-draft').click()
+
+      // revert to last published version
+      await page.locator('#action-revert-to-published').click()
+      await page.locator('#action-revert-to-published-confirm').click()
+
+      // verify that spanish content is reverted correctly
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+    })
   })
 })
