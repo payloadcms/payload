@@ -7,6 +7,7 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
+import { fieldTypes } from '../../forms/field-types'
 import { OperationContext } from '../../utilities/OperationProvider'
 import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { GlobalRoutes } from './Routes'
@@ -61,7 +62,7 @@ const DefaultGlobalView: React.FC<
               {disableRoutes ? (
                 <CustomGlobalComponent view="Default" {...props} />
               ) : (
-                <GlobalRoutes {...props} />
+                <GlobalRoutes {...props} fieldTypes={fieldTypes} />
               )}
             </React.Fragment>
           )}

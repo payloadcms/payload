@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../../types'
 
 import { getTranslation } from '../../../../../../utilities/getTranslation'
@@ -8,7 +9,6 @@ import { DocumentControls } from '../../../../elements/DocumentControls'
 import { Gutter } from '../../../../elements/Gutter'
 import RenderFields from '../../../../forms/RenderFields'
 import { filterFields } from '../../../../forms/RenderFields/filterFields'
-import { fieldTypes } from '../../../../forms/field-types'
 import { LeaveWithoutSaving } from '../../../../modals/LeaveWithoutSaving'
 import Meta from '../../../../utilities/Meta'
 import Auth from '../Auth'
@@ -18,7 +18,11 @@ import './index.scss'
 
 const baseClass = 'collection-default-edit'
 
-export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) => {
+export const DefaultCollectionEdit: React.FC<
+  CollectionEditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { i18n, t } = useTranslation('general')
 
   const {
@@ -28,6 +32,7 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
     data,
     disableActions,
     disableLeaveWithoutSaving,
+    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,

@@ -5,6 +5,7 @@ import type { SanitizedCollectionConfig } from '../../../../collections/config/t
 import type { LivePreviewConfig } from '../../../../exports/config'
 import type { Field } from '../../../../fields/config/types'
 import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
+import type { FieldTypes } from '../../forms/field-types'
 import type { EditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
@@ -12,7 +13,6 @@ import { DocumentControls } from '../../elements/DocumentControls'
 import { Gutter } from '../../elements/Gutter'
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
-import { fieldTypes } from '../../forms/field-types'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -27,11 +27,15 @@ import { usePopupWindow } from './usePopupWindow'
 
 const baseClass = 'live-preview'
 
-const PreviewView: React.FC<EditViewProps> = (props) => {
+const PreviewView: React.FC<
+  EditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { i18n, t } = useTranslation('general')
   const { previewWindowType } = useLivePreviewContext()
 
-  const { apiURL, data, permissions } = props
+  const { apiURL, data, fieldTypes, permissions } = props
 
   let collection: SanitizedCollectionConfig
   let global: SanitizedGlobalConfig
@@ -139,7 +143,11 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
   )
 }
 
-export const LivePreviewView: React.FC<EditViewProps> = (props) => {
+export const LivePreviewView: React.FC<
+  EditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const config = useConfig()
   const documentInfo = useDocumentInfo()
   const locale = useLocale()

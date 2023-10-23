@@ -7,6 +7,7 @@ import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
+import { fieldTypes } from '../../../forms/field-types'
 import { useAuth } from '../../../utilities/Auth'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import { CollectionRoutes } from './Routes'
@@ -96,7 +97,7 @@ const DefaultEditView: React.FC<
               {disableRoutes ? (
                 <CustomCollectionComponent view="Default" {...props} />
               ) : (
-                <CollectionRoutes {...props} />
+                <CollectionRoutes {...props} fieldTypes={fieldTypes} />
               )}
             </React.Fragment>
           )}
