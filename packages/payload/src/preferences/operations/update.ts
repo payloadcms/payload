@@ -39,19 +39,19 @@ async function update(args: PreferenceUpdateRequest) {
     await executeAccess({ req }, defaultAccess)
   }
 
-  // TODO: workaround to prevent race-conditions 500 errors from violating unique constraints
   try {
-    await payload.db.create({
-      collection,
-      data: preference,
-      req,
-    })
-  } catch (err: unknown) {
+    // try/catch because we attempt to update without first reading to check if it exists first to save on db calls
     await payload.db.updateOne({
       collection,
       data: preference,
       req,
       where: filter,
+    })
+  } catch (err: unknown) {
+    await payload.db.create({
+      collection,
+      data: preference,
+      req,
     })
   }
 

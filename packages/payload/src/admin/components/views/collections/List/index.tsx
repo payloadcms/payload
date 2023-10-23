@@ -135,11 +135,11 @@ const ListView: React.FC<ListIndexProps> = (props) => {
 
       const newPreferences = {
         ...currentPreferences,
-        limit,
-        sort,
+        ...(sort ? { sort } : {}),
+        ...(limit ? { limit } : {}),
       }
 
-      setPreference(preferenceKey, newPreferences)
+      setPreference(preferenceKey, newPreferences, true)
     })()
   }, [sort, limit, preferenceKey, setPreference, getPreference])
 

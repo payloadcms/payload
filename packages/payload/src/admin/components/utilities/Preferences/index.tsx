@@ -1,3 +1,4 @@
+import isDeepEqual from 'deep-equal'
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -7,7 +8,7 @@ import { useConfig } from '../Config'
 
 type PreferencesContext = {
   getPreference: <T = any>(key: string) => Promise<T> | T
-  setPreference: <T = any>(key: string, value: T) => Promise<void>
+  setPreference: <T = any>(key: string, value: T, merge?: boolean) => Promise<void>
 }
 
 const Context = createContext({} as PreferencesContext)
@@ -23,6 +24,7 @@ const requestOptions = (value, language) => ({
 export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const contextRef = useRef({} as PreferencesContext)
   const preferencesRef = useRef({})
+  const pendingUpdate = useRef({})
   const config = useConfig()
   const { user } = useAuth()
   const { i18n } = useTranslation()
@@ -43,7 +45,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
       const prefs = preferencesRef.current
       if (typeof prefs[key] !== 'undefined') return prefs[key]
       const promise = new Promise((resolve: (value: T) => void) => {
-        ;(async () => {
+        void (async () => {
           const request = await requests.get(`${serverURL}${api}/payload-preferences/${key}`, {
             headers: {
               'Accept-Language': i18n.language,
@@ -65,14 +67,57 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
   )
 
   const setPreference = useCallback(
-    async (key: string, value: unknown): Promise<void> => {
-      preferencesRef.current[key] = value
-      await requests.post(
-        `${serverURL}${api}/payload-preferences/${key}`,
-        requestOptions(value, i18n.language),
-      )
+    async (key: string, value: unknown, merge = false): Promise<void> => {
+      if (merge === false) {
+        preferencesRef.current[key] = value
+        await requests.post(
+          `${serverURL}${api}/payload-preferences/${key}`,
+          requestOptions(value, i18n.language),
+        )
+        return
+      }
+
+      let newValue = value
+      const currentPreference = await getPreference(key)
+      if (
+        typeof value === 'object' &&
+        typeof preferencesRef.current[key] === 'object' &&
+        typeof newValue === 'object'
+      ) {
+        newValue = { ...(currentPreference || {}), ...value }
+        if (isDeepEqual(newValue, currentPreference)) {
+          return
+        }
+        pendingUpdate.current[key] = {
+          ...pendingUpdate.current[key],
+          ...(newValue as Record<string, unknown>),
+        }
+      } else {
+        if (newValue === currentPreference) {
+          return
+        }
+        pendingUpdate.current[key] = newValue
+      }
+
+      const updatePreference = async () => {
+        if (isDeepEqual(pendingUpdate.current[key], preferencesRef.current[key])) {
+          return
+        }
+        preferencesRef.current[key] = pendingUpdate.current[key]
+
+        await requests.post(
+          `${serverURL}${api}/payload-preferences/${key}`,
+          requestOptions(preferencesRef.current[key], i18n.language),
+        )
+        delete pendingUpdate.current[key]
+      }
+
+      // use timeout to allow multiple changes of different values using the same key in one request
+      setTimeout(() => {
+        void updatePreference()
+      })
     },
-    [api, i18n.language, serverURL],
+    [api, getPreference, i18n.language, pendingUpdate, serverURL],
   )
 
   contextRef.current.getPreference = getPreference

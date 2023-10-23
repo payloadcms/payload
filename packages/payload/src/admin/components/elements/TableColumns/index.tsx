@@ -134,7 +134,7 @@ export const TableColumnsProvider: React.FC<{
         })),
       }
 
-      setPreference(preferenceKey, newPreferences)
+      setPreference(preferenceKey, newPreferences, true)
     }
 
     sync()
