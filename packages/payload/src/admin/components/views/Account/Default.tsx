@@ -75,8 +75,8 @@ const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
               permissions={permissions}
             />
             <DocumentFields
-              AfterFields={() => <Settings className={`${baseClass}__settings`} />}
-              BeforeFields={() => (
+              AfterFields={<Settings className={`${baseClass}__settings`} />}
+              BeforeFields={
                 <Auth
                   className={`${baseClass}__auth`}
                   collection={collection}
@@ -85,7 +85,7 @@ const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
                   readOnly={!hasSavePermission}
                   useAPIKey={auth.useAPIKey}
                 />
-              )}
+              }
               fieldTypes={fieldTypes}
               fields={fields}
               hasSavePermission={hasSavePermission}
