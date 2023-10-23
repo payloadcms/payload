@@ -1,7 +1,7 @@
 import type { Config } from 'payload/config'
 
 import nodemailer from 'nodemailer'
-import { defaults } from 'payload/dist/config/defaults'
+import { defaults } from 'payload/config'
 
 import { payloadCloud } from './plugin'
 
