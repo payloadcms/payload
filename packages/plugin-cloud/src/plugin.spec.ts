@@ -11,6 +11,7 @@ describe('plugin', () => {
   })
 
   describe('not in Payload Cloud', () => {
+    // eslint-disable-next-line jest/expect-expect
     it('should return unmodified config, with webpack aliases', () => {
       const plugin = payloadCloud()
       const config = plugin(createConfig())
@@ -28,6 +29,7 @@ describe('plugin', () => {
     })
 
     describe('storage', () => {
+      // eslint-disable-next-line jest/expect-expect
       it('should default to using payload cloud storage', () => {
         const plugin = payloadCloud()
         const config = plugin(createConfig())
@@ -35,6 +37,7 @@ describe('plugin', () => {
         assertCloudStorage(config)
       })
 
+      // eslint-disable-next-line jest/expect-expect
       it('should allow opt-out', () => {
         const plugin = payloadCloud({ storage: false })
         const config = plugin(createConfig())
@@ -44,6 +47,7 @@ describe('plugin', () => {
     })
 
     describe('email', () => {
+      // eslint-disable-next-line jest/expect-expect
       it('should default to using payload cloud email', () => {
         const plugin = payloadCloud()
         const config = plugin(createConfig())
@@ -51,6 +55,7 @@ describe('plugin', () => {
         assertCloudEmail(config)
       })
 
+      // eslint-disable-next-line jest/expect-expect
       it('should allow opt-out', () => {
         const plugin = payloadCloud({ email: false })
         const config = plugin(createConfig())
@@ -58,6 +63,7 @@ describe('plugin', () => {
         assertNoCloudEmail(config)
       })
 
+      // eslint-disable-next-line jest/expect-expect
       it('should allow PAYLOAD_CLOUD_EMAIL_* env vars to be unset', () => {
         delete process.env.PAYLOAD_CLOUD_EMAIL_API_KEY
         delete process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN
@@ -71,6 +77,7 @@ describe('plugin', () => {
       it('should not modify existing email transport', () => {
         const existingTransport = nodemailer.createTransport({
           name: 'existing-transport',
+          // eslint-disable-next-line @typescript-eslint/require-await
           send: async (mail) => {
             console.log('mock send', mail)
           },
@@ -148,5 +155,5 @@ function createConfig(overrides?: Partial<Config>): Config {
   return {
     ...defaults,
     ...overrides,
-  }
+  } as Config
 }
