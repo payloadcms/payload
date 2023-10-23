@@ -250,6 +250,7 @@ jobs:
           - create-payload-app
           - plugin-cloud
           - plugin-nested-docs
+          - plugin-search
 
     steps:
       - name: Use Node.js 18
