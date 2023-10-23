@@ -23,7 +23,9 @@ import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
+import fileExists from '../../uploads/fileExists'
 import { generateFileData } from '../../uploads/generateFileData'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -339,18 +341,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       req,
     })
 
-    // Remove temp files if enabled, as express-fileupload does not do this automatically
-    if (config.upload?.useTempFiles && collectionConfig.upload) {
-      const { files } = req
-      const fileArray = Array.isArray(files) ? files : [files]
-      await mapAsync(fileArray, async ({ file }) => {
-        // Still need this check because this will not be populated if using local API
-        if (file.tempFilePath) {
-          await unlinkFile(file.tempFilePath)
-        }
-      })
-    }
-
     // /////////////////////////////////////
     // afterChange - Collection
     // /////////////////////////////////////
@@ -383,17 +373,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       result,
     })
 
-    // Remove temp files if enabled, as express-fileupload does not do this automatically
-    if (config.upload?.useTempFiles && collectionConfig.upload) {
-      const { files } = req
-      const fileArray = Array.isArray(files) ? files : [files]
-      await mapAsync(fileArray, async ({ file }) => {
-        // Still need this check because this will not be populated if using local API
-        if (file.tempFilePath) {
-          await unlinkFile(file.tempFilePath)
-        }
-      })
-    }
+    await unlinkTempFiles({ collectionConfig, config, req })
 
     // /////////////////////////////////////
     // Return results
