@@ -3,30 +3,30 @@ import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 
 export interface DocToSync {
   [key: string]: any
-  title: string
   doc: {
     relationTo: string
     value: string
   }
+  title: string
 }
 
 export type BeforeSync = (args: {
   originalDoc: {
     [key: string]: any
   }
-  searchDoc: DocToSync
   payload: Payload
+  searchDoc: DocToSync
 }) => DocToSync | Promise<DocToSync>
 
 export interface SearchConfig {
-  searchOverrides?: Partial<CollectionConfig>
+  beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {
-    [collection: string]: number | ((doc: any) => number | Promise<number>)
+    [collection: string]: ((doc: any) => Promise<number> | number) | number
   }
-  beforeSync?: BeforeSync
-  syncDrafts?: boolean
   deleteDrafts?: boolean
+  searchOverrides?: Partial<CollectionConfig>
+  syncDrafts?: boolean
 }
 
 // TODO: extend this hook with additional args

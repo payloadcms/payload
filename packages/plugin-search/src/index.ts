@@ -1,9 +1,10 @@
 import type { Config } from 'payload/config'
 
+import type { SearchConfig } from './types'
+
 import { generateSearchCollection } from './Search'
 import deleteFromSearch from './Search/hooks/deleteFromSearch'
 import syncWithSearch from './Search/hooks/syncWithSearch'
-import type { SearchConfig } from './types'
 
 const Search =
   (incomingSearchConfig: SearchConfig) =>
@@ -13,14 +14,14 @@ const Search =
     if (collections) {
       const searchConfig: SearchConfig = {
         ...incomingSearchConfig,
-        syncDrafts: false,
         deleteDrafts: true,
+        syncDrafts: false,
         // write any config defaults here
       }
 
       // add a beforeChange hook to every search-enabled collection
       const collectionsWithSearchHooks = config?.collections
-        ?.map(collection => {
+        ?.map((collection) => {
           const { hooks: existingHooks } = collection
 
           const enabledCollections = searchConfig.collections || []

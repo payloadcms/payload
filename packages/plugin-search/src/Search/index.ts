@@ -1,67 +1,69 @@
 import type { CollectionConfig } from 'payload/types'
+
 import deepMerge from 'ts-deepmerge'
 
 import type { SearchConfig } from '../types'
+
 import { LinkToDoc } from './ui'
 
 // all settings can be overridden by the config
 export const generateSearchCollection = (searchConfig: SearchConfig): CollectionConfig =>
   deepMerge(
     {
-      slug: 'search',
-      labels: {
-        singular: 'Search Result',
-        plural: 'Search Results',
+      access: {
+        create: (): boolean => false,
+        read: (): boolean => true,
       },
       admin: {
-        useAsTitle: 'title',
         defaultColumns: ['title'],
         description:
           'This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.',
         enableRichTextRelationship: false,
-      },
-      access: {
-        read: (): boolean => true,
-        create: (): boolean => false,
+        useAsTitle: 'title',
       },
       fields: [
         {
           name: 'title',
-          type: 'text',
           admin: {
             readOnly: true,
           },
+          type: 'text',
         },
         {
           name: 'priority',
-          type: 'number',
           admin: {
             position: 'sidebar',
           },
+          type: 'number',
         },
         {
           name: 'doc',
-          type: 'relationship',
-          relationTo: searchConfig?.collections || [],
-          required: true,
+          admin: {
+            position: 'sidebar',
+            readOnly: true,
+          },
           index: true,
           maxDepth: 0,
-          admin: {
-            readOnly: true,
-            position: 'sidebar',
-          },
+          relationTo: searchConfig?.collections || [],
+          required: true,
+          type: 'relationship',
         },
         {
           name: 'docUrl',
-          type: 'ui',
           admin: {
-            position: 'sidebar',
             components: {
               Field: LinkToDoc,
             },
+            position: 'sidebar',
           },
+          type: 'ui',
         },
       ],
+      labels: {
+        plural: 'Search Results',
+        singular: 'Search Result',
+      },
+      slug: 'search',
     },
     searchConfig?.searchOverrides || {},
   )

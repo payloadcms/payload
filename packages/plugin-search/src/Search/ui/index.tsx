@@ -1,9 +1,10 @@
-import React from 'react'
+import type { Fields } from 'payload/dist/admin/components/forms/Form/types'
+import type { UIField } from 'payload/dist/fields/config/types'
+
 import { useWatchForm } from 'payload/components/forms'
 import { useConfig } from 'payload/components/utilities'
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
-import { Fields } from 'payload/dist/admin/components/forms/Form/types'
-import { UIField } from 'payload/dist/fields/config/types'
+import React from 'react'
 
 type FieldsWithDoc = Fields & {
   doc: {
@@ -27,10 +28,10 @@ export const LinkToDoc: React.FC<UIField> = () => {
   const config = useConfig()
 
   const {
-    serverURL,
     routes: {
       admin: adminRoute, // already includes leading slash
     } = {},
+    serverURL,
   } = config
 
   const href = `${serverURL}${adminRoute}/collections/${relationTo}/${docId}`
@@ -46,16 +47,16 @@ export const LinkToDoc: React.FC<UIField> = () => {
         >
           Doc URL
         </span>
-        <CopyToClipboard value={href as string} />
+        <CopyToClipboard value={href} />
       </div>
       <div
         style={{
+          fontWeight: '600',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          fontWeight: '600',
         }}
       >
-        <a href={href as string}>{href}</a>
+        <a href={href}>{href}</a>
       </div>
     </div>
   )

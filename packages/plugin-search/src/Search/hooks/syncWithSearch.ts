@@ -1,33 +1,33 @@
 import type { SearchConfig, SyncWithSearch } from '../../types'
 
-const syncWithSearch: SyncWithSearch = async args => {
+const syncWithSearch: SyncWithSearch = async (args) => {
   const {
-    req: { payload },
     doc,
     operation,
+    req: { payload },
     // @ts-expect-error
     collection,
     // @ts-expect-error
     searchConfig,
   } = args
 
-  const { title, id, _status: status } = doc || {}
+  const { id, _status: status, title } = doc || {}
 
-  const { beforeSync, syncDrafts, deleteDrafts, defaultPriorities } = searchConfig as SearchConfig // todo fix SyncWithSearch type, see note in ./types.ts
+  const { beforeSync, defaultPriorities, deleteDrafts, syncDrafts } = searchConfig as SearchConfig // todo fix SyncWithSearch type, see note in ./types.ts
 
   let dataToSave = {
-    title,
     doc: {
       relationTo: collection,
       value: id,
     },
+    title,
   }
 
   if (typeof beforeSync === 'function') {
     dataToSave = await beforeSync({
       originalDoc: doc,
-      searchDoc: dataToSave,
       payload,
+      searchDoc: dataToSave,
     })
   }
 
@@ -69,12 +69,12 @@ const syncWithSearch: SyncWithSearch = async args => {
         // find the correct doc to sync with
         const searchDocQuery = await payload.find({
           collection: 'search',
+          depth: 0,
           where: {
             'doc.value': {
               equals: id,
             },
           },
-          depth: 0,
         })
 
         const docs: Array<{
@@ -91,8 +91,8 @@ const syncWithSearch: SyncWithSearch = async args => {
             Promise.all(
               duplicativeDocs.map(({ id: duplicativeDocID }) =>
                 payload.delete({
-                  collection: 'search',
                   id: duplicativeDocID,
+                  collection: 'search',
                 }),
               ), // eslint-disable-line function-paren-newline
             )
@@ -108,8 +108,8 @@ const syncWithSearch: SyncWithSearch = async args => {
             // update the doc normally
             try {
               payload.update({
-                collection: 'search',
                 id: searchDocID,
+                collection: 'search',
                 data: {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
@@ -123,8 +123,8 @@ const syncWithSearch: SyncWithSearch = async args => {
             // do not include draft docs in search results, so delete the record
             try {
               payload.delete({
-                collection: 'search',
                 id: searchDocID,
+                collection: 'search',
               })
             } catch (err: unknown) {
               payload.logger.error(`Error deleting search document: ${err}`)
