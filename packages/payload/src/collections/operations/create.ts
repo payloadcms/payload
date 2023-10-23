@@ -65,6 +65,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       args =
         (await hook({
           args,
+          collection: args.collection.config,
           context: args.req.context,
           operation: 'create',
         })) || args
@@ -139,10 +140,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     data = await beforeValidate({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: {},
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       overrideAccess,
       req,
@@ -158,6 +160,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
         data =
           (await hook({
+            collection: collectionConfig,
             context: req.context,
             data,
             operation: 'create',
@@ -184,6 +187,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       data =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           data,
           operation: 'create',
@@ -196,11 +200,12 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const resultWithLocales = await beforeChange<Record<string, unknown>>({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: {},
       docWithLocales: {},
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       req,
       skipValidation: shouldSaveDraft,
@@ -293,10 +298,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -311,6 +317,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -322,10 +329,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterChange({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       previousDoc: {},
       req,
@@ -353,6 +361,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
         result =
           (await hook({
+            collection: collectionConfig,
             context: req.context,
             doc: result,
             operation: 'create',
@@ -369,6 +378,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'create',
       result,
     })

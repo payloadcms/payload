@@ -1,3 +1,4 @@
+'use client'
 import type {
   LexicalCommand,
   LexicalEditor,
@@ -18,14 +19,8 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
 
-import type {
-  MenuRenderFn,
-  MenuResolution,
-  MenuTextMatch,
-  SlashMenuGroup,
-  SlashMenuOption,
-  TriggerFn,
-} from './LexicalMenu'
+import type { MenuRenderFn, MenuResolution, MenuTextMatch, TriggerFn } from './LexicalMenu'
+import type { SlashMenuGroup, SlashMenuOption } from './types'
 
 import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu'
 

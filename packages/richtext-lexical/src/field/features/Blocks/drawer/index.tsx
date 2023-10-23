@@ -1,3 +1,4 @@
+'use client'
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {

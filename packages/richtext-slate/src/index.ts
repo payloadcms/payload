@@ -19,7 +19,7 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
       Component: RichTextField,
       toMergeIntoProps: args,
     }),
-    afterReadPromise({
+    populationPromise({
       currentDepth,
       depth,
       field,

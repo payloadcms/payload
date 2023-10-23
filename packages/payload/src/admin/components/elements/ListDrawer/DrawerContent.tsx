@@ -3,12 +3,14 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { Where } from '../../../../exports/types'
 import type { Field } from '../../../../fields/config/types'
 import type { ListDrawerProps } from './types'
 
 import { baseClass } from '.'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
+import { useUseTitleField } from '../../../hooks/useUseAsTitle'
 import Label from '../../forms/Label'
 import X from '../../icons/X'
 import { useAuth } from '../../utilities/Auth'
@@ -23,6 +25,22 @@ import Pill from '../Pill'
 import ReactSelect from '../ReactSelect'
 import { TableColumnsProvider } from '../TableColumns'
 import ViewDescription from '../ViewDescription'
+
+const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
+  if ('and' in where) {
+    where.and.push(queryParams)
+  } else if ('or' in where) {
+    where = {
+      and: [where, queryParams],
+    }
+  } else {
+    where = {
+      and: [where, queryParams],
+    }
+  }
+
+  return where
+}
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   collectionSlugs,
@@ -40,6 +58,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [sort, setSort] = useState(null)
   const [page, setPage] = useState(1)
   const [where, setWhere] = useState(null)
+  const [search, setSearch] = useState('')
+
   const {
     collections,
     routes: { api },
@@ -68,6 +88,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   )
 
   const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
+
+  const titleField = useUseTitleField(selectedCollectionConfig)
 
   useEffect(() => {
     setFields(formatFields(selectedCollectionConfig))
@@ -111,31 +133,58 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
+    const { admin: { listSearchableFields } = {}, slug } = selectedCollectionConfig
     const params: {
       cacheBust?: number
       limit?: number
       page?: number
+      search?: string
       sort?: string
       where?: unknown
     } = {}
 
-    if (page) params.page = page
+    let copyOfWhere = { ...(where || {}) }
 
-    params.where = {
-      ...(where ? { ...where } : {}),
-      ...(filterOptions?.[selectedCollectionConfig.slug]
-        ? {
-            ...filterOptions[selectedCollectionConfig.slug],
-          }
-        : {}),
+    if (filterOptions) {
+      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOptions[slug])
     }
 
+    if (search) {
+      const searchAsConditions = (listSearchableFields || [titleField?.name]).map((fieldName) => {
+        return {
+          [fieldName]: {
+            like: search,
+          },
+        }
+      }, [])
+
+      if (searchAsConditions.length > 0) {
+        const searchFilter: Where = {
+          or: [...searchAsConditions],
+        }
+
+        copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, searchFilter)
+      }
+    }
+
+    if (page) params.page = page
     if (sort) params.sort = sort
-    if (limit) params.limit = limit
     if (cacheBust) params.cacheBust = cacheBust
+    if (copyOfWhere) params.where = copyOfWhere
 
     setParams(params)
-  }, [setParams, page, sort, where, limit, cacheBust, filterOptions, selectedCollectionConfig])
+  }, [
+    page,
+    sort,
+    where,
+    search,
+    cacheBust,
+    filterOptions,
+    selectedCollectionConfig,
+    t,
+    setParams,
+    titleField?.name,
+  ])
 
   useEffect(() => {
     const newPreferences = {
@@ -241,6 +290,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             data,
             handlePageChange: setPage,
             handlePerPageChange: setLimit,
+            handleSearchChange: setSearch,
             handleSortChange: setSort,
             handleWhereChange: setWhere,
             hasCreatePermission,
@@ -249,6 +299,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             newDocumentURL: null,
             setLimit,
             setSort,
+            titleField,
           }}
         />
       </DocumentInfoProvider>

@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 
-import type { Where, WhereField } from '../../../../types'
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
@@ -27,7 +26,7 @@ const SearchFilter: React.FC<Props> = (props) => {
   const history = useHistory()
   const { i18n, t } = useTranslation('general')
 
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(typeof params?.search === 'string' ? params?.search : '')
   const [previousSearch, setPreviousSearch] = useState('')
 
   const placeholder = useRef(t('searchBy', { label: getTranslation(fieldLabel, i18n) }))
@@ -35,48 +34,15 @@ const SearchFilter: React.FC<Props> = (props) => {
   const debouncedSearch = useDebounce(search, 300)
 
   useEffect(() => {
-    const newWhere: Where = {
-      ...(typeof params?.where === 'object' ? (params.where as Where) : {}),
-    }
-    const fieldNamesToSearch =
-      listSearchableFields?.length > 0
-        ? [...listSearchableFields.map(({ name }) => name)]
-        : [fieldName]
-
-    fieldNamesToSearch.forEach((fieldNameToSearch) => {
-      const hasOrQuery = Array.isArray(newWhere.or)
-      const existingFieldSearchIndex = hasOrQuery
-        ? newWhere.or.findIndex((condition) => {
-            return (condition?.[fieldNameToSearch] as WhereField)?.like
-          })
-        : -1
-      if (debouncedSearch) {
-        if (!hasOrQuery) newWhere.or = []
-
-        if (existingFieldSearchIndex > -1) {
-          ;(newWhere.or[existingFieldSearchIndex][fieldNameToSearch] as WhereField).like =
-            debouncedSearch
-        } else {
-          newWhere.or.push({
-            [fieldNameToSearch]: {
-              like: debouncedSearch,
-            },
-          })
-        }
-      } else if (existingFieldSearchIndex > -1) {
-        newWhere.or.splice(existingFieldSearchIndex, 1)
-      }
-    })
-
     if (debouncedSearch !== previousSearch) {
-      if (handleChange) handleChange(newWhere)
+      if (handleChange) handleChange(debouncedSearch)
 
       if (modifySearchQuery) {
         history.replace({
           search: queryString.stringify({
             ...params,
             page: 1,
-            where: newWhere,
+            search: debouncedSearch || undefined,
           }),
         })
       }

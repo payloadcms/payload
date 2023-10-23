@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
 const baseClass = 'floating-select-toolbar-popup__button'

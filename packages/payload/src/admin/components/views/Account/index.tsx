@@ -7,6 +7,7 @@ import type { Fields } from '../../forms/Form/types'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { useStepNav } from '../../elements/StepNav'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import { fieldTypes } from '../../forms/field-types'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -136,6 +137,7 @@ const AccountView: React.FC = () => {
         apiURL,
         collection,
         data,
+        fieldTypes,
         hasSavePermission,
         initialState: internalState,
         isLoading,

@@ -5,18 +5,22 @@ import { loadFeatures } from './loader'
 
 export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeatures => {
   const sanitized: SanitizedFeatures = {
-    afterReadPromises: new Map(),
+    converters: {
+      html: [],
+    },
     enabledFeatures: [],
     floatingSelectToolbar: {
       sections: [],
     },
     hooks: {
+      afterReadPromises: [],
       load: [],
       save: [],
     },
     markdownTransformers: [],
     nodes: [],
     plugins: [],
+    populationPromises: new Map(),
     slashMenu: {
       dynamicOptions: [],
       groupsWithOptions: [],
@@ -26,6 +30,11 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
 
   features.forEach((feature) => {
     if (feature.hooks) {
+      if (feature.hooks.afterReadPromise) {
+        sanitized.hooks.afterReadPromises = sanitized.hooks.afterReadPromises.concat(
+          feature.hooks.afterReadPromise,
+        )
+      }
       if (feature.hooks?.load?.length) {
         sanitized.hooks.load = sanitized.hooks.load.concat(feature.hooks.load)
       }
@@ -37,11 +46,14 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
     if (feature.nodes?.length) {
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
       feature.nodes.forEach((node) => {
-        if (node?.afterReadPromises?.length) {
-          sanitized.afterReadPromises.set(node.type, node.afterReadPromises)
+        if (node?.populationPromises?.length) {
+          sanitized.populationPromises.set(node.type, node.populationPromises)
         }
         if (node?.validations?.length) {
           sanitized.validations.set(node.type, node.validations)
+        }
+        if (node?.converters?.html) {
+          sanitized.converters.html.push(node.converters.html)
         }
       })
     }

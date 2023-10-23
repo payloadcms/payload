@@ -1,17 +1,18 @@
 import { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
-import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin'
 
 import type { FeatureProvider } from '../../types'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist'
+import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { CHECK_LIST } from './markdownTransformers'
+import { LexicalCheckListPlugin } from './plugin'
 
 // 345
 // carbs 7
 export const CheckListFeature = (): FeatureProvider => {
   return {
-    feature: ({ featureProviderMap, resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: ({ featureProviderMap }) => {
       return {
         markdownTransformers: [CHECK_LIST],
         nodes:
@@ -19,17 +20,23 @@ export const CheckListFeature = (): FeatureProvider => {
             ? []
             : [
                 {
+                  converters: {
+                    html: ListHTMLConverter,
+                  },
                   node: ListNode,
                   type: ListNode.getType(),
                 },
                 {
+                  converters: {
+                    html: ListItemHTMLConverter,
+                  },
                   node: ListItemNode,
                   type: ListItemNode.getType(),
                 },
               ],
         plugins: [
           {
-            Component: CheckListPlugin,
+            Component: LexicalCheckListPlugin,
             position: 'normal',
           },
         ],

@@ -5,7 +5,7 @@ import type { AdapterArguments } from '../types'
 import { populate } from './populate'
 import { recurseNestedFields } from './recurseNestedFields'
 
-export type Args = Parameters<RichTextAdapter<any[], AdapterArguments>['afterReadPromise']>[0]
+export type Args = Parameters<RichTextAdapter<any[], AdapterArguments>['populationPromise']>[0]
 
 type RecurseRichTextArgs = {
   children: unknown[]

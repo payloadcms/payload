@@ -6,10 +6,11 @@ import { deepCopyObject } from '../../../utilities/deepCopyObject'
 import { traverseFields } from './traverseFields'
 
 type Args<T> = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: Record<string, unknown> | T
   doc?: Record<string, unknown> | T
-  entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
+  global: SanitizedGlobalConfig | null
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
@@ -18,10 +19,11 @@ type Args<T> = {
 
 export const beforeValidate = async <T extends Record<string, unknown>>({
   id,
+  collection,
   context,
   data: incomingData,
   doc,
-  entityConfig,
+  global,
   operation,
   overrideAccess,
   req,
@@ -30,10 +32,12 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
 
   await traverseFields({
     id,
+    collection,
     context,
     data,
     doc,
-    fields: entityConfig.fields,
+    fields: collection?.fields || global?.fields,
+    global,
     operation,
     overrideAccess,
     req,

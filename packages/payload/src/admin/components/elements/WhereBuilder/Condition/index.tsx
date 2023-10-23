@@ -76,7 +76,7 @@ const Condition: React.FC<Props> = (props) => {
               onChange={(field) =>
                 dispatch({
                   andIndex,
-                  field: field.value,
+                  field: field?.value || undefined,
                   orIndex,
                   type: 'update',
                 })
