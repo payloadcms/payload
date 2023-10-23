@@ -10,7 +10,7 @@
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo 'No tests available.'",
     "clean": "rimraf dist",
     "prepublishOnly": "yarn clean && yarn build"
   },
