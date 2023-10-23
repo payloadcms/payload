@@ -14,8 +14,8 @@ import './index.scss'
 const baseClass = 'document-fields'
 
 export const DocumentFields: React.FC<{
-  AfterFields?: React.FC
-  BeforeFields?: React.FC
+  AfterFields?: React.ReactNode
+  BeforeFields?: React.ReactNode
   description?: Description
   fields: FieldWithPath[]
   hasSavePermission: boolean
@@ -52,7 +52,7 @@ export const DocumentFields: React.FC<{
                 </div>
               )}
             </header>
-            {BeforeFields && <BeforeFields />}
+            {BeforeFields || null}
             <RenderFields
               className={`${baseClass}__fields`}
               fieldSchema={fields}
@@ -64,7 +64,7 @@ export const DocumentFields: React.FC<{
               permissions={permissions.fields}
               readOnly={!hasSavePermission}
             />
-            {AfterFields && <AfterFields />}
+            {AfterFields || null}
           </Gutter>
         </div>
         {hasSidebar && (

@@ -69,8 +69,8 @@ const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
               permissions={permissions}
             />
             <DocumentFields
-              AfterFields={() => <Settings className={`${baseClass}__settings`} />}
-              BeforeFields={() => (
+              AfterFields={<Settings className={`${baseClass}__settings`} />}
+              BeforeFields={
                 <Auth
                   className={`${baseClass}__auth`}
                   collection={collection}
@@ -79,7 +79,7 @@ const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
                   readOnly={!hasSavePermission}
                   useAPIKey={auth.useAPIKey}
                 />
-              )}
+              }
               fields={fields}
               hasSavePermission={hasSavePermission}
               permissions={permissions}

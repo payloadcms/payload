@@ -62,7 +62,7 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
         permissions={permissions}
       />
       <DocumentFields
-        BeforeFields={() => (
+        BeforeFields={
           <Fragment>
             {auth && (
               <Auth
@@ -78,7 +78,7 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
             )}
             {upload && <Upload collection={collection} internalState={internalState} />}
           </Fragment>
-        )}
+        }
         fields={fields}
         hasSavePermission={hasSavePermission}
         permissions={permissions}
