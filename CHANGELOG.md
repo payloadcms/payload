@@ -1,3 +1,19 @@
+## [2.0.12](https://github.com/payloadcms/payload/compare/v2.0.11...v2.0.12) (2023-10-23)
+
+### Features
+
+* collection, global and field props for hooks, fix request context initialization, add context to global hooks ([#3780](https://github.com/payloadcms/payload/pull/3780))
+* **richtext-lexical:** HTML Serializer ([#3685](https://github.com/payloadcms/payload/pull/3685))
+
+### Bug Fixes
+
+* remove duplicate removal of temp upload file ([#3818](https://github.com/payloadcms/payload/pull/3818))
+* simplify how the search input and query params are connected ([#3797](https://github.com/payloadcms/payload/pull/3797))
+* standardizes layout of document fields ([#3798](https://github.com/payloadcms/payload/pull/3798))
+* issue where dragging unsortable item would crash the page ([#3789](https://github.com/payloadcms/payload/pull/3789))
+* **richtext-lexical:** defaultValue property didn't fit into field schema ([b5c7bbed9](https://github.com/payloadcms/payload/commit/b5c7bbed93b532ec54a9c73537f4cb1290122a66))
+* **richtext-*:** hasMany relationships not populated correctly ([e197e0316](https://github.com/payloadcms/payload/commit/e197e0316f9c01f945dc7f6d21ac28f9f0420f1d))
+
 ## [2.0.11](https://github.com/payloadcms/payload/compare/v2.0.10...v2.0.11) (2023-10-19)
 
 ### Features
