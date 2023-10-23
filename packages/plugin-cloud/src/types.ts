@@ -1,7 +1,7 @@
 import type { NextFunction, Response } from 'express'
 import type { Config } from 'payload/config'
-import type { TypeWithID } from 'payload/dist/collections/config/types'
-import type { FileData } from 'payload/dist/uploads/types'
+import type { TypeWithID } from 'payload/types'
+import type { FileData } from 'payload/types'
 import type { CollectionConfig, PayloadRequest } from 'payload/types'
 
 export interface File {
