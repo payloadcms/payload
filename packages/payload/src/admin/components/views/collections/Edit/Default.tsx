@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
-import { fieldTypes } from '../../../forms/field-types'
 import { useAuth } from '../../../utilities/Auth'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import { CollectionRoutes } from './Routes'
@@ -16,12 +16,13 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 
-const DefaultEditView: React.FC<
-  CollectionEditViewProps & {
-    customHeader?: React.ReactNode
-    disableRoutes?: boolean
-  }
-> = (props) => {
+export type DefaultEditViewProps = CollectionEditViewProps & {
+  customHeader?: React.ReactNode
+  disableRoutes?: boolean
+  fieldTypes: FieldTypes
+}
+
+const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   const { i18n } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
@@ -33,6 +34,7 @@ const DefaultEditView: React.FC<
     customHeader,
     data,
     disableRoutes,
+    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,

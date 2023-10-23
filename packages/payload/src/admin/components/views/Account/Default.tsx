@@ -19,11 +19,11 @@ import './index.scss'
 
 const baseClass = 'account'
 
-const DefaultAccount: React.FC<
-  CollectionEditViewProps & {
-    fieldTypes: FieldTypes
-  }
-> = (props) => {
+export type DefaultAccountViewProps = CollectionEditViewProps & {
+  fieldTypes: FieldTypes
+}
+
+const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
   const {
     action,
     apiURL,
