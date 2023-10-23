@@ -11,6 +11,10 @@ const Tooltip: React.FC<Props> = (props) => {
   const [show, setShow] = React.useState(showFromProps)
   const [position, setPosition] = React.useState<'bottom' | 'top'>('top')
 
+  const messageThreshold = 50
+  const isLongMessage = (content) => content.length > messageThreshold
+  const messageIsLong = isLongMessage(children)
+
   const [ref, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,
     rootMargin: '-145px 0px 0px 100px',
@@ -42,14 +46,25 @@ const Tooltip: React.FC<Props> = (props) => {
     <React.Fragment>
       <aside
         aria-hidden="true"
-        className={['tooltip', className, 'tooltip--position-top'].filter(Boolean).join(' ')}
+        className={[
+          'tooltip',
+          className,
+          messageIsLong ? 'tooltip--position-right' : 'tooltip--position-top',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         ref={ref}
       >
         {children}
       </aside>
 
       <aside
-        className={['tooltip', className, show && 'tooltip--show', `tooltip--position-${position}`]
+        className={[
+          'tooltip',
+          className,
+          show && 'tooltip--show',
+          messageIsLong ? 'tooltip--position-right' : `tooltip--position-${position}`,
+        ]
           .filter(Boolean)
           .join(' ')}
       >

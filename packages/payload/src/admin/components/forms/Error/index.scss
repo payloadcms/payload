@@ -13,3 +13,16 @@
     border-top-color: var(--theme-error-500);
   }
 }
+
+.field-error.tooltip--position-right {
+  top: -50%;
+  left: calc(var(--base) * 1.5);
+  right: unset;
+  width: 300px;
+  white-space: unset;
+
+  &::after {
+    border-top-color: transparent;
+    border-right-color: var(--theme-error-500);
+  }
+}

@@ -3,8 +3,34 @@
 .field-type.text {
   position: relative;
 
+  .input-wrapper {
+    position: relative;
+
+    .error-icon-wrapper {
+      position: absolute;
+      top: 50%;
+      right: calc(var(--base) * 0.35);
+      margin-top: -1px;
+      transform: translateY(-50%);
+      cursor: pointer;
+
+      svg {
+        height: base(0.85);
+        width: base(0.85);
+      }
+
+      @include mid-break {
+        display: none;
+      }
+    }
+  }
+
   input {
     @include formInput;
+  }
+
+  .long-error {
+    padding: base(0.5) base(1.25) base(0.5) base(0.75);
   }
 }
 

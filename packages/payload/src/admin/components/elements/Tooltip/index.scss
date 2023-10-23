@@ -55,6 +55,19 @@
     }
   }
 
+  &--position-right {
+    &::after {
+      left: calc(-1 * var(--caret-size));
+      top: 10%;
+      transform: translateY(-50%);
+
+      border-top: var(--caret-size) solid transparent;
+      border-bottom: var(--caret-size) solid transparent;
+      border-left: none;
+      border-right: var(--caret-size) solid var(--theme-elevation-800);
+    }
+  }
+
   @include mid-break {
     display: none;
   }
