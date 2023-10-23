@@ -5,7 +5,6 @@ import React from 'react'
 import type { Props } from './types'
 
 import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types'
-import fieldComponents from './fields'
 import Nested from './fields/Nested'
 import { diffMethods } from './fields/diffMethods'
 import './index.scss'
@@ -14,6 +13,7 @@ const baseClass = 'render-field-diffs'
 
 const RenderFieldsToDiff: React.FC<Props> = ({
   comparison,
+  fieldComponents,
   fieldPermissions,
   fields,
   locales,

@@ -22,6 +22,7 @@ import Meta from '../../utilities/Meta'
 import NotFound from '../NotFound'
 import CompareVersion from './Compare'
 import RenderFieldsToDiff from './RenderFieldsToDiff'
+import fieldComponents from './RenderFieldsToDiff/fields'
 import Restore from './Restore'
 import SelectLocales from './SelectLocales'
 import './index.scss'
@@ -246,6 +247,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
         {doc?.version && (
           <RenderFieldsToDiff
             comparison={comparison}
+            fieldComponents={fieldComponents}
             fieldPermissions={fieldPermissions}
             fields={fields}
             locales={
