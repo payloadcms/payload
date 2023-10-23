@@ -3,10 +3,10 @@ import React from 'react'
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
 import type { FieldWithPath } from '../../../../fields/config/types'
 import type { Description } from '../../forms/FieldDescription/types'
+import type { FieldTypes } from '../../forms/field-types'
 
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
-import { fieldTypes } from '../../forms/field-types'
 import { Gutter } from '../Gutter'
 import ViewDescription from '../ViewDescription'
 import './index.scss'
@@ -17,11 +17,20 @@ export const DocumentFields: React.FC<{
   AfterFields?: React.ReactNode
   BeforeFields?: React.ReactNode
   description?: Description
+  fieldTypes: FieldTypes
   fields: FieldWithPath[]
   hasSavePermission: boolean
   permissions: CollectionPermission | GlobalPermission
 }> = (props) => {
-  const { AfterFields, BeforeFields, description, fields, hasSavePermission, permissions } = props
+  const {
+    AfterFields,
+    BeforeFields,
+    description,
+    fieldTypes,
+    fields,
+    hasSavePermission,
+    permissions,
+  } = props
 
   const sidebarFields = filterFields({
     fieldSchema: fields,

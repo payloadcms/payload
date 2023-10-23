@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../forms/field-types'
 import type { CollectionEditViewProps } from '../types'
 
 import { DocumentControls } from '../../elements/DocumentControls'
@@ -18,12 +19,17 @@ import './index.scss'
 
 const baseClass = 'account'
 
-const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
+export type DefaultAccountViewProps = CollectionEditViewProps & {
+  fieldTypes: FieldTypes
+}
+
+const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
   const {
     action,
     apiURL,
     collection,
     data,
+    fieldTypes,
     hasSavePermission,
     initialState,
     isLoading,
@@ -80,6 +86,7 @@ const DefaultAccount: React.FC<CollectionEditViewProps> = (props) => {
                   useAPIKey={auth.useAPIKey}
                 />
               }
+              fieldTypes={fieldTypes}
               fields={fields}
               hasSavePermission={hasSavePermission}
               permissions={permissions}

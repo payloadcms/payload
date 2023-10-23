@@ -12,6 +12,13 @@ const { beforeAll, describe } = test
 let url: AdminUrlUtil
 let serverURL: string
 
+const goToDoc = async (page: Page) => {
+  await page.goto(url.list)
+  const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
+  expect(linkToDoc).toBeTruthy()
+  await linkToDoc.click()
+}
+
 describe('Live Preview', () => {
   let page: Page
 
@@ -28,69 +35,65 @@ describe('Live Preview', () => {
   })
 
   test('collection - has tab', async () => {
-    await page.goto(url.create)
+    await goToDoc(page)
+    const docURL = page.url()
+    const pathname = new URL(docURL).pathname
 
     const livePreviewTab = page.locator('.doc-tab', {
       hasText: exactText('Live Preview'),
     })
 
     expect(livePreviewTab).toBeTruthy()
+    const href = await livePreviewTab.locator('a').first().getAttribute('href')
+    expect(href).toBe(`${pathname}/preview`)
   })
 
   test('collection - has route', async () => {
-    await page.goto(url.create)
-    await page.locator('#field-title').fill('Title 1')
-    await page.locator('#field-slug').fill('slug-1')
-
-    await saveDocAndAssert(page)
+    await goToDoc(page)
     const docURL = page.url()
-
-    const livePreviewTab = page.locator('.doc-tab', {
-      hasText: exactText('Live Preview'),
-    })
-
-    expect(livePreviewTab).toBeTruthy()
-    await livePreviewTab.click()
+    await page.goto(`${docURL}/preview`)
     expect(page.url()).toBe(`${docURL}/preview`)
+  })
+
+  test('collection - renders iframe', async () => {
+    await goToDoc(page)
+    const docURL = page.url()
+    await page.goto(`${docURL}/preview`)
+    expect(page.url()).toBe(`${docURL}/preview`)
+    const iframe = page.locator('iframe.live-preview-iframe')
+    await expect(iframe).toBeVisible()
   })
 
   test('global - has tab', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
+    const docURL = page.url()
+    const pathname = new URL(docURL).pathname
 
     const livePreviewTab = page.locator('.doc-tab', {
       hasText: exactText('Live Preview'),
     })
 
     expect(livePreviewTab).toBeTruthy()
+    const href = await livePreviewTab.locator('a').first().getAttribute('href')
+    expect(href).toBe(`${pathname}/preview`)
   })
 
   test('global - has route', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
-    await page.goto(global.global('header'))
-
-    const docURL = page.url()
-
-    const livePreviewTab = page.locator('.doc-tab', {
-      hasText: exactText('Live Preview'),
-    })
-
-    expect(livePreviewTab).toBeTruthy()
-    await livePreviewTab.click()
-    expect(page.url()).toBe(`${docURL}/preview`)
+    const previewURL = `${global.global('header')}/preview`
+    await page.goto(previewURL)
+    expect(page.url()).toBe(previewURL)
   })
 
-  test('renders preview iframe on the page', async () => {
-    await page.goto(url.create)
-    await page.locator('#field-title').fill('Title 2')
-    await page.locator('#field-slug').fill('slug-2')
-
-    await saveDocAndAssert(page)
+  test('global - renders iframe', async () => {
+    const global = new AdminUrlUtil(serverURL, 'header')
+    await page.goto(global.global('header'))
     const docURL = page.url()
     await page.goto(`${docURL}/preview`)
     expect(page.url()).toBe(`${docURL}/preview`)
-    const iframe = page.locator('iframe')
-    expect(iframe).toBeTruthy()
+    const iframe = page.locator('iframe.live-preview-iframe')
+    await expect(iframe).toBeVisible()
   })
 
   test('properly measures iframe and displays size', async () => {
