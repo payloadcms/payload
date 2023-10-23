@@ -24,32 +24,32 @@ Core features:
 In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```js
-import { buildConfig } from "payload/config";
-import search from "@payloadcms/plugin-search";
+import { buildConfig } from 'payload/config'
+import search from '@payloadcms/plugin-search'
 
 const config = buildConfig({
   collections: [
     {
-      slug: "pages",
+      slug: 'pages',
       fields: [],
     },
     {
-      slug: "posts",
+      slug: 'posts',
       fields: [],
     },
   ],
   plugins: [
     search({
-      collections: ["pages", "posts"],
+      collections: ['pages', 'posts'],
       defaultPriorities: {
         pages: 10,
         posts: 20,
       },
     }),
   ],
-});
+})
 
-export default config;
+export default config
 ```
 
 ### Options
@@ -66,11 +66,11 @@ The default priorities first set on `create` operations. Send an object of colle
 plugins: [
   searchPlugin({
     defaultPriorities: {
-      pages: ({ doc }) => (doc.title.startsWith("Hello, world!") ? 1 : 10),
+      pages: ({ doc }) => (doc.title.startsWith('Hello, world!') ? 1 : 10),
       posts: 20,
     },
   }),
-];
+]
 ```
 
 #### `searchOverrides`
@@ -81,10 +81,10 @@ Override anything on the search collection by sending a [Payload Collection Conf
 plugins: [
   searchPlugin({
     searchOverrides: {
-      slug: "search-results",
+      slug: 'search-results',
     },
   }),
-];
+]
 ```
 
 #### `beforeSync`
@@ -97,10 +97,10 @@ plugins: [
     beforeSync: ({ originalDoc, searchDoc }) => ({
       ...searchDoc,
       // Modify your docs in any way here, this can be async
-      excerpt: originalDoc?.excerpt || "This is a fallback excerpt",
+      excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
     }),
   }),
-];
+]
 ```
 
 #### `syncDrafts`
@@ -116,7 +116,7 @@ If true, will delete documents from search that change to draft status. True by 
 All types can be directly imported:
 
 ```js
-import { SearchConfig, BeforeSync } from "@payloadcms/plugin-search/dist/types";
+import { SearchConfig, BeforeSync } from '@payloadcms/plugin-search/dist/types'
 ```
 
 ## Screenshots

@@ -11,7 +11,7 @@ export default buildConfig({
   serverURL: 'http://localhost:3000',
   admin: {
     user: Users.slug,
-    webpack: config => {
+    webpack: (config) => {
       const newConfig = {
         ...config,
         resolve: {
