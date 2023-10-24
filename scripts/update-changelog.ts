@@ -56,13 +56,15 @@ async function main() {
   // TODO: Locate changelog
 
   // Prefix to find prev tag
-  const tagPrefix = pkg.shortName === 'payload' ? 'v2.0.10' : pkg.prevGitTag.split('/')[0] + '/'
+  // const tagPrefix = pkg.shortName === 'payload' ? 'v2.0.10' : pkg.prevGitTag.split('/')[0] + '/'
 
   const config = {
     preset: 'conventionalcommits',
     append: true, // Does this work?
-    currentTag: 'v2.0.11', // The prefix is added automatically apparently?
-    tagPrefix,
+    // currentTag: 'v2.0.11', // The prefix is added automatically apparently?
+    currentTag: pkg.prevGitTag, // The prefix is added automatically apparently?
+    // tagPrefix,
+    tagPrefix: 'v',
     pkg: {
       path: `${pkg.packagePath}/package.json`,
     },
