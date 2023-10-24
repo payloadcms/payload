@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
+import type { PayloadRequest } from '../../packages/payload/src/express/types'
 import type { Post } from './config'
 
 import payload from '../../packages/payload/src'
@@ -52,6 +53,7 @@ describe('admin', () => {
     // clear preferences
     await payload.db.deleteMany({
       collection: 'payload-preferences',
+      req: {} as PayloadRequest,
       where: {},
     })
   })
@@ -438,8 +440,8 @@ describe('admin', () => {
 
       test('search by title or description', async () => {
         await createPost({
-          title: 'find me',
           description: 'this is fun',
+          title: 'find me',
         })
 
         await page.locator('.search-filter__input').fill('find me')
@@ -613,8 +615,8 @@ describe('admin', () => {
         const whereQueryJSON = {
           point: {
             within: {
-              type: 'Polygon',
               coordinates: [polygon],
+              type: 'Polygon',
             },
           },
         }
@@ -1003,17 +1005,16 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsSlug,
     data: {
-      title,
       description,
+      title,
       ...overrides,
     },
   })
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find({ collection: postsSlug, limit: 100 })
-  const ids = allDocs.docs.map((doc) => doc.id)
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: postsSlug, id })
+  await payload.delete({
+    collection: postsSlug,
+    where: { id: { exists: true } },
   })
 }

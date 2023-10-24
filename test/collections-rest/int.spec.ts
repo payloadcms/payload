@@ -1260,9 +1260,8 @@ async function createPosts(count: number) {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find({ collection: slug, limit: 100 })
-  const ids = allDocs.docs.map((doc) => doc.id)
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ id, collection: slug })
+  await payload.delete({
+    collection: slug,
+    where: { id: { exists: true } },
   })
 }
