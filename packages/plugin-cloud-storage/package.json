@@ -52,7 +52,7 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "nodemon": "^2.0.6",
-    "payload": "^1.7.2",
+    "payload": "workspace:*",
     "rimraf": "^4.1.2",
     "ts-node": "^9.1.1",
     "webpack": "^5.78.0"

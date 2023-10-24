@@ -1,5 +1,4 @@
-import type { ImageSize } from 'payload/dist/uploads/types'
-import type { CollectionConfig, FieldHook } from 'payload/types'
+import type { CollectionConfig, FieldHook, ImageSize } from 'payload/types'
 
 import type { GenerateFileURL, GeneratedAdapter } from '../types'
 

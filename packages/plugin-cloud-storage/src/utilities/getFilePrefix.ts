@@ -1,5 +1,4 @@
-import type { IncomingUploadType } from 'payload/dist/uploads/types'
-import type { CollectionConfig, PayloadRequest } from 'payload/types'
+import type { CollectionConfig, IncomingUploadType, PayloadRequest } from 'payload/types'
 
 export async function getFilePrefix({
   collection,
@@ -22,5 +21,6 @@ export async function getFilePrefix({
       ],
     },
   })
-  return files?.docs?.[0]?.prefix || ''
+  const prefix = files?.docs?.[0]?.prefix
+  return prefix ? (prefix as string) : ''
 }

@@ -1,6 +1,6 @@
 import type { NextFunction, Response } from 'express'
-import type { TypeWithID } from 'payload/dist/collections/config/types'
-import type { FileData, ImageSize } from 'payload/dist/uploads/types'
+import type { FileData, ImageSize } from 'payload/types'
+import type { TypeWithID } from 'payload/types'
 import type { CollectionConfig, PayloadRequest } from 'payload/types'
 import type { Configuration as WebpackConfig } from 'webpack'
 
