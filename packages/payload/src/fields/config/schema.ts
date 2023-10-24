@@ -165,6 +165,12 @@ export const code = baseField.keys({
 
 export const json = baseField.keys({
   name: joi.string().required(),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+    }),
+  }),
   defaultValue: joi.alternatives().try(joi.array(), joi.object()),
   type: joi.string().valid('json').required(),
 })

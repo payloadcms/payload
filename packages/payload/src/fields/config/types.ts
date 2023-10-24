@@ -360,6 +360,10 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
 
 type JSONAdmin = Admin & {
   editorOptions?: EditorProps['options']
+  components?: {
+    Error?: React.ComponentType<ErrorProps>
+    Label?: React.ComponentType<LabelProps>
+  }
 }
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
