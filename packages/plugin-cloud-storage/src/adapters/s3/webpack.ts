@@ -1,4 +1,5 @@
 import type { Configuration as WebpackConfig } from 'webpack'
+
 import path from 'path'
 
 export const extendWebpackConfig = (existingWebpackConfig: WebpackConfig): WebpackConfig => {
@@ -6,13 +7,13 @@ export const extendWebpackConfig = (existingWebpackConfig: WebpackConfig): Webpa
     ...existingWebpackConfig,
     resolve: {
       ...(existingWebpackConfig.resolve || {}),
-      fallback: {
-        ...(existingWebpackConfig.resolve?.fallback ? existingWebpackConfig.resolve.fallback : {}),
-        stream: false,
-      },
       alias: {
         ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
         '@payloadcms/plugin-cloud-storage/s3': path.resolve(__dirname, './mock.js'),
+      },
+      fallback: {
+        ...(existingWebpackConfig.resolve?.fallback ? existingWebpackConfig.resolve.fallback : {}),
+        stream: false,
       },
     },
   }

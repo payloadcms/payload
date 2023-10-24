@@ -1,17 +1,18 @@
 import type { ImageSize } from 'payload/dist/uploads/types'
 import type { CollectionConfig, FieldHook } from 'payload/types'
-import type { GeneratedAdapter, GenerateFileURL } from '../types'
+
+import type { GenerateFileURL, GeneratedAdapter } from '../types'
 
 interface Args {
-  collection: CollectionConfig
   adapter: GeneratedAdapter
+  collection: CollectionConfig
   disablePayloadAccessControl?: boolean
-  size?: ImageSize
   generateFileURL?: GenerateFileURL
+  size?: ImageSize
 }
 
 export const getAfterReadHook =
-  ({ collection, adapter, size, disablePayloadAccessControl, generateFileURL }: Args): FieldHook =>
+  ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
   async ({ data, value }) => {
     const filename = size ? data?.sizes?.[size.name]?.filename : data?.filename
     const prefix = data?.prefix

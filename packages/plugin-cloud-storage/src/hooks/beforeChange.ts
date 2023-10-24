@@ -1,19 +1,21 @@
 import type { TypeWithID } from 'payload/dist/collections/config/types'
 import type { FileData } from 'payload/dist/uploads/types'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
+
 import type { GeneratedAdapter } from '../types'
+
 import { getIncomingFiles } from '../utilities/getIncomingFiles'
 
 interface Args {
-  collection: CollectionConfig
   adapter: GeneratedAdapter
+  collection: CollectionConfig
 }
 
 export const getBeforeChangeHook =
-  ({ collection, adapter }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
-  async ({ req, data, originalDoc }) => {
+  ({ adapter, collection }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
+  async ({ data, originalDoc, req }) => {
     try {
-      const files = getIncomingFiles({ req, data })
+      const files = getIncomingFiles({ data, req })
 
       if (files.length > 0) {
         // If there is an original doc,
@@ -29,22 +31,22 @@ export const getBeforeChangeHook =
           if (typeof originalDoc.sizes === 'object') {
             filesToDelete = filesToDelete.concat(
               Object.values(originalDoc?.sizes || []).map(
-                resizedFileData => resizedFileData?.filename,
+                (resizedFileData) => resizedFileData?.filename,
               ),
             )
           }
 
-          const deletionPromises = filesToDelete.map(async filename => {
+          const deletionPromises = filesToDelete.map(async (filename) => {
             if (filename) {
-              await adapter.handleDelete({ collection, doc: originalDoc, req, filename })
+              await adapter.handleDelete({ collection, doc: originalDoc, filename, req })
             }
           })
 
           await Promise.all(deletionPromises)
         }
 
-        const promises = files.map(async file => {
-          await adapter.handleUpload({ collection, data, req, file })
+        const promises = files.map(async (file) => {
+          await adapter.handleUpload({ collection, data, file, req })
         })
 
         await Promise.all(promises)

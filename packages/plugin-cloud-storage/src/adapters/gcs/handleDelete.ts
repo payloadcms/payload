@@ -1,14 +1,16 @@
+import type { Storage } from '@google-cloud/storage'
+
 import path from 'path'
-import { Storage } from '@google-cloud/storage'
+
 import type { HandleDelete } from '../../types'
 
 interface Args {
-  getStorageClient: () => Storage
   bucket: string
+  getStorageClient: () => Storage
 }
 
-export const getHandleDelete = ({ getStorageClient, bucket }: Args): HandleDelete => {
-  return async ({ filename, doc: { prefix = '' } }) => {
+export const getHandleDelete = ({ bucket, getStorageClient }: Args): HandleDelete => {
+  return async ({ doc: { prefix = '' }, filename }) => {
     await getStorageClient().bucket(bucket).file(path.posix.join(prefix, filename)).delete({
       ignoreNotFound: true,
     })

@@ -1,5 +1,7 @@
 import type { Config } from 'payload/config'
+
 import type { PluginOptions } from '../types'
+
 import { getFields } from './fields/getFields'
 
 // This is the admin plugin cloud-storage stubfile.
@@ -18,7 +20,7 @@ export const cloudStorage =
 
     return {
       ...config,
-      collections: (config.collections || []).map(existingCollection => {
+      collections: (config.collections || []).map((existingCollection) => {
         const options = allCollectionOptions[existingCollection.slug]
 
         if (options?.adapter) {

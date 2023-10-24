@@ -1,20 +1,22 @@
-import path from 'path'
 import type { Storage } from '@google-cloud/storage'
 import type { CollectionConfig } from 'payload/types'
+
+import path from 'path'
+
 import type { HandleUpload } from '../../types'
 
 interface Args {
-  collection: CollectionConfig
-  bucket: string
   acl?: 'Private' | 'Public'
-  prefix?: string
+  bucket: string
+  collection: CollectionConfig
   getStorageClient: () => Storage
+  prefix?: string
 }
 
 export const getHandleUpload = ({
-  getStorageClient,
-  bucket,
   acl,
+  bucket,
+  getStorageClient,
   prefix = '',
 }: Args): HandleUpload => {
   return async ({ data, file }) => {

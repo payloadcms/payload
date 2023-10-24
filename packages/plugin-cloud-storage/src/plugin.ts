@@ -1,9 +1,11 @@
 import type { Config } from 'payload/config'
-import { extendWebpackConfig } from './webpack'
+
 import type { PluginOptions } from './types'
-import { getBeforeChangeHook } from './hooks/beforeChange'
-import { getAfterDeleteHook } from './hooks/afterDelete'
+
 import { getFields } from './fields/getFields'
+import { getAfterDeleteHook } from './hooks/afterDelete'
+import { getBeforeChangeHook } from './hooks/beforeChange'
+import { extendWebpackConfig } from './webpack'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -20,7 +22,7 @@ export const cloudStorage =
     const { collections: allCollectionOptions, enabled } = pluginOptions
     const config = { ...incomingConfig }
 
-    const webpack = extendWebpackConfig({ options: pluginOptions, config: incomingConfig })
+    const webpack = extendWebpackConfig({ config: incomingConfig, options: pluginOptions })
 
     config.admin = {
       ...(config.admin || {}),
@@ -36,7 +38,7 @@ export const cloudStorage =
 
     return {
       ...config,
-      collections: (config.collections || []).map(existingCollection => {
+      collections: (config.collections || []).map((existingCollection) => {
         const options = allCollectionOptions[existingCollection.slug]
 
         if (options?.adapter) {
@@ -48,11 +50,11 @@ export const cloudStorage =
           if (adapter.onInit) initFunctions.push(adapter.onInit)
 
           const fields = getFields({
+            adapter,
             collection: existingCollection,
             disablePayloadAccessControl: options.disablePayloadAccessControl,
             generateFileURL: options.generateFileURL,
             prefix: options.prefix,
-            adapter,
           })
 
           const handlers = [
@@ -68,33 +70,33 @@ export const cloudStorage =
 
           return {
             ...existingCollection,
-            upload: {
-              ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
-              handlers,
-              disableLocalStorage:
-                typeof options.disableLocalStorage === 'boolean'
-                  ? options.disableLocalStorage
-                  : true,
-            },
+            fields,
             hooks: {
               ...(existingCollection.hooks || {}),
-              beforeChange: [
-                ...(existingCollection.hooks?.beforeChange || []),
-                getBeforeChangeHook({ adapter, collection: existingCollection }),
-              ],
               afterDelete: [
                 ...(existingCollection.hooks?.afterDelete || []),
                 getAfterDeleteHook({ adapter, collection: existingCollection }),
               ],
+              beforeChange: [
+                ...(existingCollection.hooks?.beforeChange || []),
+                getBeforeChangeHook({ adapter, collection: existingCollection }),
+              ],
             },
-            fields,
+            upload: {
+              ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
+              disableLocalStorage:
+                typeof options.disableLocalStorage === 'boolean'
+                  ? options.disableLocalStorage
+                  : true,
+              handlers,
+            },
           }
         }
 
         return existingCollection
       }),
-      onInit: async payload => {
-        initFunctions.forEach(fn => fn())
+      onInit: async (payload) => {
+        initFunctions.forEach((fn) => fn())
         if (config.onInit) await config.onInit(payload)
       },
     }

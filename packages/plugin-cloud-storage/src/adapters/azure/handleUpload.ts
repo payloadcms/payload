@@ -1,9 +1,11 @@
-import path from 'path'
-import fs from 'fs'
-import { Readable } from 'stream'
 import type { ContainerClient } from '@azure/storage-blob'
-import { AbortController } from '@azure/abort-controller'
 import type { CollectionConfig } from 'payload/types'
+
+import { AbortController } from '@azure/abort-controller'
+import fs from 'fs'
+import path from 'path'
+import { Readable } from 'stream'
+
 import type { HandleUpload } from '../../types'
 
 interface Args {

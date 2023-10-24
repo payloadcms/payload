@@ -1,24 +1,27 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import path from 'path'
 import type { CollectionConfig } from 'payload/types'
+
+import path from 'path'
+
 import type { StaticHandler } from '../../types'
+
 import { getFilePrefix } from '../../utilities/getFilePrefix'
 import getRangeFromHeader from '../../utilities/getRangeFromHeader'
 
 interface Args {
-  getStorageClient: () => ContainerClient
   collection: CollectionConfig
+  getStorageClient: () => ContainerClient
 }
 
-export const getHandler = ({ getStorageClient, collection }: Args): StaticHandler => {
+export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
   return async (req, res, next) => {
     try {
-      const prefix = await getFilePrefix({ req, collection })
+      const prefix = await getFilePrefix({ collection, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
         path.posix.join(prefix, req.params.filename),
       )
 
-      const { start, end } = await getRangeFromHeader(blockBlobClient, req.headers.range)
+      const { end, start } = await getRangeFromHeader(blockBlobClient, req.headers.range)
 
       const blob = await blockBlobClient.download(start, end)
       // eslint-disable-next-line no-underscore-dangle

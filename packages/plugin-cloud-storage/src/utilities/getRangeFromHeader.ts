@@ -1,17 +1,18 @@
 import type { BlockBlobClient } from '@azure/storage-blob'
+
 import parseRange from 'range-parser'
 
 const getRangeFromHeader = async (
   blockBlobClient: BlockBlobClient,
   rangeHeader?: string,
-): Promise<{ start: number; end: number | undefined }> => {
-  const fullRange = { start: 0, end: undefined }
+): Promise<{ end: number | undefined; start: number }> => {
+  const fullRange = { end: undefined, start: 0 }
 
   if (!rangeHeader) {
     return fullRange
   }
 
-  const size = await blockBlobClient.getProperties().then(props => props.contentLength)
+  const size = await blockBlobClient.getProperties().then((props) => props.contentLength)
   if (size === undefined) {
     return fullRange
   }

@@ -14,9 +14,9 @@ export interface File {
 
 export type HandleUpload = (args: {
   collection: CollectionConfig
-  req: PayloadRequest
   data: any
   file: File
+  req: PayloadRequest
 }) => Promise<void> | void
 
 export interface TypeWithPrefix {
@@ -25,16 +25,16 @@ export interface TypeWithPrefix {
 
 export type HandleDelete = (args: {
   collection: CollectionConfig
-  req: PayloadRequest
   doc: TypeWithID & FileData & TypeWithPrefix
   filename: string
+  req: PayloadRequest
 }) => Promise<void> | void
 
 export type GenerateURL = (args: {
-  filename: string
   collection: CollectionConfig
+  filename: string
   prefix?: string
-}) => string | Promise<string>
+}) => Promise<string> | string
 
 export type StaticHandler = (
   req: PayloadRequest,
@@ -43,12 +43,12 @@ export type StaticHandler = (
 ) => Promise<unknown> | unknown
 
 export interface GeneratedAdapter {
-  handleUpload: HandleUpload
-  handleDelete: HandleDelete
   generateURL: GenerateURL
+  handleDelete: HandleDelete
+  handleUpload: HandleUpload
+  onInit?: () => void
   staticHandler: StaticHandler
   webpack?: (config: WebpackConfig) => WebpackConfig
-  onInit?: () => void
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
@@ -61,19 +61,19 @@ export type GenerateFileURL = (args: {
 }) => Promise<string> | string
 
 export interface CollectionOptions {
+  adapter: Adapter | null
   disableLocalStorage?: boolean
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
   prefix?: string
-  adapter: Adapter | null
 }
 
 export interface PluginOptions {
+  collections: Record<string, CollectionOptions>
   /**
    * Whether or not to enable the plugin
    *
    * Default: true
    */
   enabled?: boolean
-  collections: Record<string, CollectionOptions>
 }

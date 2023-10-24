@@ -1,6 +1,7 @@
-import path from 'path'
 import type { GroupField, TextField } from 'payload/dist/fields/config/types'
 import type { CollectionConfig, Field } from 'payload/types'
+
+import path from 'path'
 
 interface Args {
   collection: CollectionConfig
@@ -10,21 +11,21 @@ interface Args {
 export const getFields = ({ collection, prefix }: Args): Field[] => {
   const baseURLField: Field = {
     name: 'url',
+    admin: {
+      hidden: true,
+      readOnly: true,
+    },
     label: 'URL',
     type: 'text',
-    admin: {
-      readOnly: true,
-      hidden: true,
-    },
   }
 
   const basePrefixField: Field = {
     name: 'prefix',
-    type: 'text',
     admin: {
-      readOnly: true,
       hidden: true,
+      readOnly: true,
     },
+    type: 'text',
   }
 
   const fields = [...collection.fields]
@@ -69,31 +70,31 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
     const sizesField: Field = {
       ...(existingSizesField || {}),
       name: 'sizes',
-      type: 'group',
       admin: {
         hidden: true,
       },
-      fields: collection.upload.imageSizes.map(size => {
+      fields: collection.upload.imageSizes.map((size) => {
         const existingSizeField = existingSizesField?.fields.find(
-          existingField => 'name' in existingField && existingField.name === size.name,
+          (existingField) => 'name' in existingField && existingField.name === size.name,
         ) as GroupField
 
         const existingSizeURLField = existingSizeField?.fields.find(
-          existingField => 'name' in existingField && existingField.name === 'url',
+          (existingField) => 'name' in existingField && existingField.name === 'url',
         ) as GroupField
 
         return {
           ...existingSizeField,
           name: size.name,
-          type: 'group',
           fields: [
             {
               ...(existingSizeURLField || {}),
               ...baseURLField,
             },
           ],
+          type: 'group',
         }
       }),
+      type: 'group',
     }
 
     fields.push(sizesField)

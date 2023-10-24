@@ -1,24 +1,27 @@
 import type { ContainerClient } from '@azure/storage-blob'
+
 import { BlobServiceClient } from '@azure/storage-blob'
+
 import type { Adapter, GeneratedAdapter } from '../../types'
-import { getHandler } from './staticHandler'
+
 import { getGenerateURL } from './generateURL'
 import { getHandleDelete } from './handleDelete'
 import { getHandleUpload } from './handleUpload'
+import { getHandler } from './staticHandler'
 import { extendWebpackConfig } from './webpack'
 
 export interface Args {
+  allowContainerCreate: boolean
+  baseURL: string
   connectionString: string
   containerName: string
-  baseURL: string
-  allowContainerCreate: boolean
 }
 
 export const azureBlobStorageAdapter = ({
-  connectionString,
   allowContainerCreate,
-  containerName,
   baseURL,
+  connectionString,
+  containerName,
 }: Args): Adapter => {
   let storageClient: ContainerClient | null = null
   const getStorageClient = () => {
@@ -33,14 +36,14 @@ export const azureBlobStorageAdapter = ({
 
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
+      generateURL: getGenerateURL({ baseURL, containerName }),
+      handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({
         collection,
         getStorageClient,
         prefix,
       }),
-      handleDelete: getHandleDelete({ collection, getStorageClient }),
-      generateURL: getGenerateURL({ containerName, baseURL }),
-      staticHandler: getHandler({ getStorageClient, collection }),
+      staticHandler: getHandler({ collection, getStorageClient }),
       webpack: extendWebpackConfig,
       ...(allowContainerCreate && { onInit: createContainerIfNotExists }),
     }

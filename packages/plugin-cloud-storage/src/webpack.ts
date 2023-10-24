@@ -1,6 +1,8 @@
-import path from 'path'
 import type { Config } from 'payload/config'
 import type { Configuration as WebpackConfig } from 'webpack'
+
+import path from 'path'
+
 import type { GeneratedAdapter, PluginOptions } from './types'
 
 interface Args {
@@ -10,7 +12,7 @@ interface Args {
 
 export const extendWebpackConfig =
   ({ config, options }: Args): ((webpackConfig: WebpackConfig) => WebpackConfig) =>
-  webpackConfig => {
+  (webpackConfig) => {
     const existingWebpackConfig =
       typeof config.admin?.webpack === 'function'
         ? config.admin.webpack(webpackConfig)
@@ -29,7 +31,7 @@ export const extendWebpackConfig =
 
     return Object.entries(options.collections).reduce(
       (resultingWebpackConfig, [slug, collectionOptions]) => {
-        const matchedCollection = config.collections?.find(coll => coll.slug === slug)
+        const matchedCollection = config.collections?.find((coll) => coll.slug === slug)
 
         if (matchedCollection && typeof collectionOptions.adapter === 'function') {
           const adapter: GeneratedAdapter = collectionOptions.adapter({

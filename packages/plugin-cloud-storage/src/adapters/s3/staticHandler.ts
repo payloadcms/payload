@@ -1,20 +1,23 @@
-import path from 'path'
-import type { Readable } from 'stream'
 import type * as AWS from '@aws-sdk/client-s3'
 import type { CollectionConfig } from 'payload/types'
+import type { Readable } from 'stream'
+
+import path from 'path'
+
 import type { StaticHandler } from '../../types'
+
 import { getFilePrefix } from '../../utilities/getFilePrefix'
 
 interface Args {
-  getStorageClient: () => AWS.S3
   bucket: string
   collection: CollectionConfig
+  getStorageClient: () => AWS.S3
 }
 
-export const getHandler = ({ getStorageClient, bucket, collection }: Args): StaticHandler => {
+export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
   return async (req, res, next) => {
     try {
-      const prefix = await getFilePrefix({ req, collection })
+      const prefix = await getFilePrefix({ collection, req })
 
       const object = await getStorageClient().getObject({
         Bucket: bucket,
