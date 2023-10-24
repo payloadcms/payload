@@ -6,9 +6,9 @@ import type { Props } from './types'
 import { date as dateValidation } from '../../../../../fields/validations'
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import DatePicker from '../../../elements/DatePicker'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
@@ -19,12 +19,25 @@ const baseClass = 'date-time-field'
 const DateTime: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, condition, date, description, placeholder, readOnly, style, width } = {},
+    admin: {
+      className,
+      condition,
+      date,
+      description,
+      placeholder,
+      readOnly,
+      style,
+      width,
+      components: { Error, Label } = {},
+    } = {},
     label,
     path: pathFromProps,
     required,
     validate = dateValidation,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const { i18n } = useTranslation()
 
@@ -60,9 +73,9 @@ const DateTime: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <Error message={errorMessage} showError={showError} />
+        <ErrorComp message={errorMessage} showError={showError} />
       </div>
-      <Label htmlFor={path} label={label} required={required} />
+      <LabelComp htmlFor={path} label={label} required={required} />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
         <DatePicker
           {...date}

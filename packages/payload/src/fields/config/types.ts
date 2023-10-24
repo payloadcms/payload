@@ -240,6 +240,10 @@ export type DateField = FieldBase & {
   admin?: Admin & {
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
   }
   type: 'date'
 }

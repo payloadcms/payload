@@ -440,6 +440,10 @@ export const date = baseField.keys({
       timeIntervals: joi.number(),
     }),
     placeholder: joi.string(),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   type: joi.string().valid('date').required(),
