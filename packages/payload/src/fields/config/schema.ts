@@ -94,6 +94,18 @@ export const number = baseField.keys({
     autoComplete: joi.string(),
     placeholder: joi.string(),
     step: joi.number(),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+      BeforeInput: joi
+        .array()
+        .items(componentSchema)
+        .when('hasMany', { not: true, otherwise: joi.forbidden() }),
+      AfterInput: joi
+        .array()
+        .items(componentSchema)
+        .when('hasMany', { not: true, otherwise: joi.forbidden() }),
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.number(), joi.func()),
   hasMany: joi.boolean().default(false),
