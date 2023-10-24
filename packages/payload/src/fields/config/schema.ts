@@ -315,6 +315,14 @@ export const checkbox = baseField.keys({
 
 export const point = baseField.keys({
   name: joi.string().required(),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+      BeforeInput: joi.array().items(componentSchema),
+      AfterInput: joi.array().items(componentSchema),
+    }),
+  }),
   defaultValue: joi.alternatives().try(joi.array().items(joi.number()).max(2).min(2), joi.func()),
   type: joi.string().valid('point').required(),
 })

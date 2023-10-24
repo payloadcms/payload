@@ -153,6 +153,12 @@ export type NumberField = FieldBase & {
     placeholder?: Record<string, string> | string
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      BeforeInput?: React.ReactElement<any>[]
+      AfterInput?: React.ReactElement<any>[]
+    }
   }
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
