@@ -50,13 +50,13 @@ const Localizer: React.FC<{
                 ) : null}
 
                 {locales.map((localeOption) => {
+                  if (locale.code === localeOption.code) return null
+
                   const newParams = {
                     ...searchParams,
                     locale: localeOption.code,
                   }
                   const search = qs.stringify(newParams)
-
-                  if (locale.code === localeOption.code) return null
 
                   return (
                     <PopupList.Button key={localeOption.code} onClick={close} to={{ search }}>
