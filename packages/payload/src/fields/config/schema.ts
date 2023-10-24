@@ -158,6 +158,10 @@ export const code = baseField.keys({
   admin: baseAdminFields.keys({
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
     language: joi.string(),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   type: joi.string().valid('code').required(),

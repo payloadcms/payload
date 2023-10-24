@@ -353,6 +353,10 @@ export type UploadField = FieldBase & {
 type CodeAdmin = Admin & {
   editorOptions?: EditorProps['options']
   language?: string
+  components?: {
+    Error?: React.ComponentType<ErrorProps>
+    Label?: React.ComponentType<LabelProps>
+  }
 }
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
