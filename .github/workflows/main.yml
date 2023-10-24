@@ -249,6 +249,7 @@ jobs:
         pkg:
           - create-payload-app
           - plugin-cloud
+          - plugin-cloud-storage
           - plugin-nested-docs
           - plugin-search
 

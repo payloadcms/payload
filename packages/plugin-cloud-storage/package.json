@@ -10,7 +10,8 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "yarn clean && yarn build",
+    "test": "echo \"No tests available.\""
   },
   "peerDependencies": {
     "@aws-sdk/client-s3": "^3.142.0",
