@@ -107,15 +107,24 @@ describe('Live Preview', () => {
     await expect(iframe).toBeVisible()
   })
 
+  test('global - can edit fields', async () => {
+    await goToGlobalPreview(page, 'header')
+    const field = page.locator('input#field-navItems__0__link__newTab')
+    await expect(field).toBeVisible()
+    await expect(field).toBeEnabled()
+    await field.check()
+    await saveDocHotkeyAndAssert(page)
+  })
+
   test('properly measures iframe and displays size', async () => {
     await page.goto(url.create)
     await page.locator('#field-title').fill('Title 3')
     await page.locator('#field-slug').fill('slug-3')
 
     await saveDocAndAssert(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToCollectionPreview(page)
+    expect(page.url()).toContain('/preview')
+
     const iframe = page.locator('iframe')
 
     // Measure the actual iframe size and compare it with the inputs rendered in the toolbar
@@ -148,9 +157,7 @@ describe('Live Preview', () => {
     await page.locator('#field-slug').fill('slug-4')
 
     await saveDocAndAssert(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToCollectionPreview(page)
 
     const breakpointSelector = page.locator(
       '.live-preview-toolbar select[name="live-preview-breakpoint"]',
