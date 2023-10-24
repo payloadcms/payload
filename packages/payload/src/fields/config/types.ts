@@ -14,6 +14,8 @@ import type { SanitizedConfig } from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Payload } from '../../payload'
 import type { Operation, Where } from '../../types'
+import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
+import type { Props as LabelProps } from '../../admin/components/forms/Label/types'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   context: RequestContext
@@ -182,8 +184,8 @@ export type TextField = FieldBase & {
     placeholder?: Record<string, string> | string
     rtl?: boolean
     components?: {
-      Error?: React.ComponentType<any>
-      Label?: React.ComponentType<any>
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
       BeforeInput?: React.ReactElement<any>[]
       AfterInput?: React.ReactElement<any>[]
     }
@@ -198,8 +200,8 @@ export type EmailField = FieldBase & {
     autoComplete?: string
     placeholder?: Record<string, string> | string
     components?: {
-      Error?: React.ComponentType<any>
-      Label?: React.ComponentType<any>
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
       BeforeInput?: React.ReactElement<any>[]
       AfterInput?: React.ReactElement<any>[]
     }
@@ -213,8 +215,8 @@ export type TextareaField = FieldBase & {
     rows?: number
     rtl?: boolean
     components?: {
-      Error?: React.ComponentType<any>
-      Label?: React.ComponentType<any>
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
       BeforeInput?: React.ReactElement<any>[]
       AfterInput?: React.ReactElement<any>[]
     }
@@ -328,8 +330,8 @@ export type UIField = {
 export type UploadField = FieldBase & {
   admin?: {
     components?: {
-      Error?: React.ComponentType<any>
-      Label?: React.ComponentType<any>
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
     }
   }
   filterOptions?: FilterOptions
@@ -364,8 +366,8 @@ export type SelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
     components?: {
-      Error?: React.ComponentType<any>
-      Label?: React.ComponentType<any>
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
     }
   }
   hasMany?: boolean
