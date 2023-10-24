@@ -212,6 +212,12 @@ export type TextareaField = FieldBase & {
     placeholder?: Record<string, string> | string
     rows?: number
     rtl?: boolean
+    components: {
+      Error?: React.ComponentType<any>
+      Label?: React.ComponentType<any>
+      BeforeInput?: React.ReactElement<any>[]
+      AfterInput?: React.ReactElement<any>[]
+    }
   }
   maxLength?: number
   minLength?: number

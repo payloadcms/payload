@@ -110,6 +110,12 @@ export const textarea = baseField.keys({
     placeholder: joi.string(),
     rows: joi.number(),
     rtl: joi.boolean(),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+      BeforeInput: joi.array().items(componentSchema),
+      AfterInput: joi.array().items(componentSchema),
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   maxLength: joi.number(),
