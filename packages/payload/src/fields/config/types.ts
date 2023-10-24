@@ -363,6 +363,10 @@ export type SelectField = FieldBase & {
   admin?: Admin & {
     isClearable?: boolean
     isSortable?: boolean
+    components?: {
+      Error?: React.ComponentType<any>
+      Label?: React.ComponentType<any>
+    }
   }
   hasMany?: boolean
   options: Option[]

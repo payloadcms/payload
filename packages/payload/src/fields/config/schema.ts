@@ -162,6 +162,10 @@ export const select = baseField.keys({
   admin: baseAdminFields.keys({
     isClearable: joi.boolean().default(false),
     isSortable: joi.boolean().default(false),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+    }),
   }),
   defaultValue: joi
     .alternatives()
@@ -286,9 +290,11 @@ export const array = baseField.keys({
 
 export const upload = baseField.keys({
   name: joi.string().required(),
-  components: baseAdminComponentFields.keys({
-    Label: componentSchema,
-    Error: componentSchema,
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.object(), joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
