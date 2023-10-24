@@ -1,11 +1,15 @@
-import fse from 'fs-extra'
+import fse, { createWriteStream, createReadStream } from 'fs-extra'
 import { ExecSyncOptions, execSync } from 'child_process'
 import chalk from 'chalk'
+import path from 'path'
 import prompts from 'prompts'
 import minimist from 'minimist'
 import chalkTemplate from 'chalk-template'
 import { PackageDetails, getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
 import semver from 'semver'
+import addStream from 'add-stream'
+// import tempfile from 'tempfile'
+import concatSream from 'concat-stream'
 import getStream from 'get-stream'
 import conventionalChangelogCore, {
   Options,
@@ -56,15 +60,14 @@ async function main() {
   // TODO: Locate changelog
 
   // Prefix to find prev tag
-  // const tagPrefix = pkg.shortName === 'payload' ? 'v2.0.10' : pkg.prevGitTag.split('/')[0] + '/'
+  const tagPrefix = pkg.shortName === 'payload' ? 'v' : pkg.prevGitTag.split('/')[0] + '/'
 
   const config = {
+    // infile: 'CHANGELOG.md',
     preset: 'conventionalcommits',
     append: true, // Does this work?
-    // currentTag: 'v2.0.11', // The prefix is added automatically apparently?
     currentTag: pkg.prevGitTag, // The prefix is added automatically apparently?
-    // tagPrefix,
-    tagPrefix: 'v',
+    tagPrefix,
     pkg: {
       path: `${pkg.packagePath}/package.json`,
     },
@@ -102,10 +105,12 @@ async function main() {
     { ...config, debug: console.debug.bind(console) },
     {
       version: nextReleaseVersion, // next release
-      // version: '2.0.11', // next release
     },
     {
-      path: pkg.packagePath,
+      // path: pkg.packagePath,
+      path: 'packages',
+      // from: pkg.prevGitTag,
+      // to: 'HEAD'
     },
   ).on('error', (err) => {
     // if (flags.verbose) {
@@ -116,8 +121,47 @@ async function main() {
     process.exit(1)
   })
 
-  changelogStream.pipe(process.stdout)
+  // const outStream = createWriteStream('NEW.md')
+  const changelogFile = 'CHANGELOG.md'
+  const readStream = fse.createReadStream(changelogFile)
+  // changelogStream.pipe(outStream)
+
+  const outfile = 'CHANGELOG.md'
+  // const tmp = tempfile()
+
+  // create temp file
+  const tmp = 'TMP.md'
+  fse.writeFileSync('TMP.md', '')
+
+  const writeStream = createWriteStream(outfile)
+
+  changelogStream
+    .pipe(addStream(readStream))
+    .pipe(createWriteStream(tmp))
+    .on('finish', () => {
+      createReadStream(tmp).pipe(createWriteStream(outfile))
+    })
+
+  const tempFileFullPath = path.resolve(tmp)
+  fse.unlinkSync(tempFileFullPath)
+
+  // delete temp file
+
+  // const currentChangelog = await getStream(fse.createReadStream('CHANGELOG.md'))
+  // const changelogWritableStream = fse.createWriteStream('NEW.md')
+
+  // For Debug
+  // changelogStream.pipe(process.stdout)
+
   // TODO: Update the changelog
+  // const appendToChangelog = await confirm('Append to changelog?')
+  // if (appendToChangelog) {
+  //   console.log(chalk.bold.green('DRYRUN: Appending to changelog...'))
+  // }
+
+  // const prevChangelog = await getStream(fse.createReadStream('CHANGELOG.md'))
+  // const changelog = await getStream(changelogStream)
+  // console.log({ changelog })
 }
 
 main().catch((error) => {
