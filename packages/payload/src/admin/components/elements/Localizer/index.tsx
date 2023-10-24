@@ -31,25 +31,41 @@ const Localizer: React.FC<{
           horizontalAlign="right"
           render={({ close }) => (
             <PopupList.ButtonGroup>
-              {locales.map((localeOption) => {
-                const newParams = {
-                  ...searchParams,
-                  locale: localeOption.code,
-                }
+              <React.Fragment>
+                {locale ? (
+                  <PopupList.Button
+                    active
+                    key={locale.code}
+                    onClick={close}
+                    to={{
+                      search: qs.stringify({
+                        ...searchParams,
+                        locale: locale.code,
+                      }),
+                    }}
+                  >
+                    {locale.label}
+                    {locale.label !== locale.code && ` (${locale.code})`}
+                  </PopupList.Button>
+                ) : null}
 
-                const search = qs.stringify(newParams)
+                {locales.map((localeOption) => {
+                  const newParams = {
+                    ...searchParams,
+                    locale: localeOption.code,
+                  }
+                  const search = qs.stringify(newParams)
 
-                if (localeOption.code !== locale.code) {
+                  if (locale.code === localeOption.code) return null
+
                   return (
                     <PopupList.Button key={localeOption.code} onClick={close} to={{ search }}>
                       {localeOption.label}
                       {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
                     </PopupList.Button>
                   )
-                }
-
-                return null
-              })}
+                })}
+              </React.Fragment>
             </PopupList.ButtonGroup>
           )}
           showScrollbar

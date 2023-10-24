@@ -147,18 +147,19 @@ describe('versions', () => {
       await page.goto(autosaveURL.create)
       await page.locator('#field-title').fill(title)
       await page.locator('#field-description').fill(description)
-      await wait(500)
+      await wait(500) // wait for autosave
 
       await changeLocale(page, spanishLocale)
       await page.locator('#field-title').fill(spanishTitle)
-      await wait(500)
+      await wait(500) // wait for autosave
 
       await changeLocale(page, locale)
       await page.locator('#field-description').fill(newDescription)
-      await wait(500)
+      await wait(500) // wait for autosave
 
       await changeLocale(page, spanishLocale)
-      await wait(500)
+      await wait(500) // wait for autosave
+
       await page.reload()
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDescription)
