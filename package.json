@@ -54,6 +54,7 @@
     "@types/semver": "^7.5.3",
     "@types/shelljs": "0.8.12",
     "@types/testing-library__jest-dom": "5.14.8",
+    "add-stream": "^1.0.0",
     "chalk": "^5.3.0",
     "chalk-template": "1.1.0",
     "concat-stream": "^2.0.0",

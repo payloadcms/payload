@@ -1,4 +1,5 @@
 import fse from 'fs-extra'
+import path from 'path'
 import { ExecSyncOptions, execSync } from 'child_process'
 import chalk from 'chalk'
 import prompts from 'prompts'
@@ -6,12 +7,16 @@ import minimist from 'minimist'
 import chalkTemplate from 'chalk-template'
 import { PackageDetails, getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
 import semver from 'semver'
+import { updateChangelog } from './utils/updateChangelog'
+import simpleGit from 'simple-git'
+
+const git = simpleGit(path.resolve(__dirname, '..'))
 
 const execOpts: ExecSyncOptions = { stdio: 'inherit' }
 const args = minimist(process.argv.slice(2))
 
 async function main() {
-  const { tag = 'latest', bump = 'patch' } = args
+  const { tag = 'latest', bump = 'patch', pkg } = args
 
   if (!semver.RELEASE_TYPES.includes(bump)) {
     abort(`Invalid bump type: ${bump}.\n\nMust be one of: ${semver.RELEASE_TYPES.join(', ')}`)
@@ -21,33 +26,38 @@ async function main() {
     abort(`Prerelease bumps must have tag: beta or canary`)
   }
 
-  const packageDetails = await getPackageDetails()
+  const packageDetails = await getPackageDetails(pkg)
   showPackageDetails(packageDetails)
 
-  const { packagesToRelease } = (await prompts({
-    type: 'multiselect',
-    name: 'packagesToRelease',
-    message: 'Select packages to release',
-    instructions: 'Space to select. Enter to submit.',
-    choices: packageDetails.map((p) => {
-      const title = p?.newCommits ? chalk.bold.green(p?.shortName) : p?.shortName
-      return {
-        title,
-        value: p.shortName,
-      }
-    }),
-  })) as { packagesToRelease: string[] }
+  let packagesToRelease: string[] = []
+  if (packageDetails.length > 1 && !pkg) {
+    ;({ packagesToRelease } = (await prompts({
+      type: 'multiselect',
+      name: 'packagesToRelease',
+      message: 'Select packages to release',
+      instructions: 'Space to select. Enter to submit.',
+      choices: packageDetails.map((p) => {
+        const title = p?.newCommits ? chalk.bold.green(p?.shortName) : p?.shortName
+        return {
+          title,
+          value: p.shortName,
+        }
+      }),
+    })) as { packagesToRelease: string[] })
 
-  if (!packagesToRelease) {
-    abort()
-  }
+    if (!packagesToRelease) {
+      abort()
+    }
 
-  if (packagesToRelease.length === 0) {
-    abort('Please specify a package to publish')
-  }
+    if (packagesToRelease.length === 0) {
+      abort('Please specify a package to publish')
+    }
 
-  if (packagesToRelease.find((p) => p === 'payload' && packagesToRelease.length > 1)) {
-    abort('Cannot publish payload with other packages. Release Payload first.')
+    if (packagesToRelease.find((p) => p === 'payload' && packagesToRelease.length > 1)) {
+      abort('Cannot publish payload with other packages. Release Payload first.')
+    }
+  } else {
+    packagesToRelease = [packageDetails[0].shortName]
   }
 
   const packageMap = packageDetails.reduce(
@@ -94,9 +104,19 @@ ${packagesToRelease
       const packageObj = await fse.readJson(`${packagePath}/package.json`)
       const newVersion = packageObj.version
 
+      if (pkg === 'payload') {
+        const shouldUpdateChangelog = await confirm(`🧑‍💻 Update Changelog?`)
+        if (shouldUpdateChangelog) {
+          updateChangelog({ pkg: packageMap[pkg], bump })
+        }
+      }
+
       const tagName = `${shortName}/${newVersion}`
       const shouldCommit = await confirm(`🧑‍💻 Commit Release?`)
       if (shouldCommit) {
+        if (pkg === 'payload') {
+          execSync(`git add CHANGELOG.md`, execOpts)
+        }
         execSync(`git add ${packagePath}/package.json`, execOpts)
         execSync(`git commit -m "chore(release): ${tagName} [skip ci]" `, execOpts)
       }
