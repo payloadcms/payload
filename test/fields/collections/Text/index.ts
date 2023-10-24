@@ -105,8 +105,8 @@ const TextFields: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          BeforeInput: BeforeInput,
-          AfterInput: AfterInput,
+          BeforeInput: [BeforeInput],
+          AfterInput: [AfterInput],
         },
       },
     },

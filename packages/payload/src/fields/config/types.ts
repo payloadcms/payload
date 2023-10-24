@@ -184,8 +184,8 @@ export type TextField = FieldBase & {
     components: {
       Error?: React.ComponentType<any>
       Label?: React.ComponentType<any>
-      BeforeInput?: React.ReactElement<any>
-      AfterInput?: React.ReactElement<any>
+      BeforeInput?: React.ReactElement<any>[]
+      AfterInput?: React.ReactElement<any>[]
     }
   }
   maxLength?: number
