@@ -1,3 +1,4 @@
+'use client'
 import type { SerializedEditorState } from 'lexical'
 
 import { Error, FieldDescription, Label, useField, withCondition } from 'payload/components/forms'
@@ -38,7 +39,10 @@ const RichText: React.FC<FieldProps> = (props) => {
     (value, validationOptions) => {
       return validate(value, { ...validationOptions, props, required })
     },
-    [validate, required, props],
+    // Important: do not add props to the dependencies array.
+    // This would cause an infinite loop and endless re-rendering.
+    // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
+    [validate, required],
   )
 
   const fieldType = useField<SerializedEditorState>({
@@ -48,19 +52,6 @@ const RichText: React.FC<FieldProps> = (props) => {
   })
 
   const { errorMessage, setValue, showError, value } = fieldType
-
-  let valueToUse = value
-
-  if (typeof valueToUse === 'string') {
-    try {
-      const parsedJSON = JSON.parse(valueToUse)
-      valueToUse = parsedJSON
-    } catch (err) {
-      valueToUse = null
-    }
-  }
-
-  if (!valueToUse) valueToUse = defaultValueFromProps || defaultRichTextValueV2
 
   const classes = [
     baseClass,
@@ -102,7 +93,6 @@ const RichText: React.FC<FieldProps> = (props) => {
             readOnly={readOnly}
             value={value}
           />
-          <FieldDescription description={description} value={value} />
         </ErrorBoundary>
         <FieldDescription description={description} value={value} />
       </div>

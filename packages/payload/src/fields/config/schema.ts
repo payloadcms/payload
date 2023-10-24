@@ -365,13 +365,17 @@ export const blocks = baseField.keys({
 export const richText = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.default(),
-  defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
-  editor: joi.object().keys({
-    CellComponent: componentSchema.required(),
-    FieldComponent: componentSchema.required(),
-    afterReadPromise: joi.func().required(),
-    validate: joi.func().required(),
-  }),
+  defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func(), joi.object()),
+  editor: joi
+    .object()
+    .keys({
+      CellComponent: componentSchema.required(),
+      FieldComponent: componentSchema.required(),
+      afterReadPromise: joi.func().optional(),
+      populationPromise: joi.func().optional(),
+      validate: joi.func().required(),
+    })
+    .unknown(),
   type: joi.string().valid('richText').required(),
 })
 

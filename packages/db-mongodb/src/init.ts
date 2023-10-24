@@ -52,7 +52,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
       const model = mongoose.model(
         versionModelName,
         versionSchema,
-        versionModelName,
+        this.autoPluralization === true ? undefined : versionModelName,
       ) as CollectionModel
       // this.payload.versions[collection.slug] = model;
       this.versions[collection.slug] = model

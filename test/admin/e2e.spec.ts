@@ -395,7 +395,7 @@ describe('admin', () => {
     test('should allow changing language', async () => {
       await page.goto(url.account)
 
-      const field = page.locator('.account__language .react-select')
+      const field = page.locator('.payload-settings__language .react-select')
 
       await field.click()
       const options = page.locator('.rs__option')
@@ -429,6 +429,18 @@ describe('admin', () => {
     })
 
     describe('filtering', () => {
+      test('should prefill search input from query param', async () => {
+        await createPost({ title: 'a' })
+        await createPost({ title: 'b' })
+
+        // prefill search with "a" from the query param
+        await page.goto(`${url.list}?search=a`)
+
+        // input should be filled out, list should filter
+        await expect(page.locator('.search-filter__input')).toHaveValue('a')
+        await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
       test('search by id', async () => {
         const { id } = await createPost()
         await page.locator('.search-filter__input').fill(id)
@@ -981,7 +993,7 @@ describe('admin', () => {
       test('should use fallback language on field titles', async () => {
         // change language German
         await page.goto(url.account)
-        await page.locator('.account__language .react-select').click()
+        await page.locator('.payload-settings__language .react-select').click()
         const languageSelect = page.locator('.rs__option')
         // text field does not have a 'de' label
         await languageSelect.locator('text=Deutsch').click()

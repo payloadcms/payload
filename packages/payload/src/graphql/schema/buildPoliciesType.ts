@@ -217,6 +217,9 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
   })
 
   Object.values(payload.config.globals).forEach((global: SanitizedGlobalConfig) => {
+    if (global.graphQL === false) {
+      return
+    }
     const globalPolicyType = buildPolicyType({
       entity: global,
       type: 'global',

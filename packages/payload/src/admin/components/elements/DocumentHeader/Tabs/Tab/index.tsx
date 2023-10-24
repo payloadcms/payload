@@ -64,6 +64,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
           className={`${baseClass}__link`}
           to={href}
           {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
+          tabIndex={isActive ? -1 : 0}
         >
           <span className={`${baseClass}__label`}>
             {labelToRender}

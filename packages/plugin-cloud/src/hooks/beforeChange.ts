@@ -1,5 +1,4 @@
-import type { TypeWithID } from 'payload/dist/collections/config/types'
-import type { FileData } from 'payload/dist/uploads/types'
+import type { TypeWithID, FileData } from 'payload/types'
 import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload/types'
 import type stream from 'stream'
 

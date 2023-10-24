@@ -135,10 +135,11 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -153,6 +154,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -164,10 +166,11 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // /////////////////////////////////////
 
     result = await afterChange({
+      collection: collectionConfig,
       context: req.context,
       data: result,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       previousDoc: prevDocWithLocales,
       req,
@@ -182,6 +185,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           operation: 'update',

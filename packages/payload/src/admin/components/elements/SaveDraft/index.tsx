@@ -44,6 +44,7 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({
 
   return (
     <FormSubmit
+      buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
       disabled={disabled}
@@ -73,7 +74,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
 
   const canSaveDraft = modified
 
-  const saveDraft = useCallback(() => {
+  const saveDraft = useCallback(async () => {
     const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`
     let action
     let method = 'POST'
@@ -87,7 +88,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
       action = `${serverURL}${api}/globals/${global.slug}${search}`
     }
 
-    submit({
+    await submit({
       action,
       method,
       overrides: {

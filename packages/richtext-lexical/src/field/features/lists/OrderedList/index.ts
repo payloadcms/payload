@@ -1,10 +1,11 @@
 import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
-import { ListPlugin } from '@lexical/react/LexicalListPlugin'
 
 import type { FeatureProvider } from '../../types'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList'
+import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
+import { LexicalListPlugin } from '../plugin'
 import { ORDERED_LIST } from './markdownTransformer'
 
 export const OrderedListFeature = (): FeatureProvider => {
@@ -16,16 +17,25 @@ export const OrderedListFeature = (): FeatureProvider => {
           ? []
           : [
               {
+                converters: {
+                  html: ListHTMLConverter,
+                },
                 node: ListNode,
                 type: ListNode.getType(),
               },
-              { node: ListItemNode, type: ListItemNode.getType() },
+              {
+                converters: {
+                  html: ListItemHTMLConverter,
+                },
+                node: ListItemNode,
+                type: ListItemNode.getType(),
+              },
             ],
         plugins: featureProviderMap.has('unorderedList')
           ? []
           : [
               {
-                Component: ListPlugin,
+                Component: LexicalListPlugin,
                 position: 'normal',
               },
             ],

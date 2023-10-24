@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 
 import type { Fields } from '../../forms/Form/types'
-import type { GlobalEditViewProps } from '../types'
+import type { DefaultGlobalViewProps } from './Default'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import { fieldTypes } from '../../forms/field-types'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -104,13 +105,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const isLoading = !initialState || !docPermissions || isLoadingData
 
-  const componentProps: GlobalEditViewProps = {
+  const componentProps: DefaultGlobalViewProps = {
     action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
     apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
       global.versions?.drafts ? '&draft=true' : ''
     }`,
     canAccessAdmin: permissions?.canAccessAdmin,
     data: dataToRender,
+    fieldTypes,
     global,
     initialState,
     isLoading,

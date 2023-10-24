@@ -54,6 +54,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args =
       (await hook({
         args,
+        collection: args.collection?.config,
         context: args.req.context,
         operation: 'login',
       })) || args
@@ -138,6 +139,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: args.req.context,
           req: args.req,
           user,
@@ -175,6 +177,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: args.req.context,
           req: args.req,
           token,
@@ -187,10 +190,11 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     user = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: user,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -205,6 +209,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: req.context,
           doc: user,
           req,
@@ -220,6 +225,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: req.context,
           doc: user,
           req,
@@ -238,6 +244,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: args.collection?.config,
       operation: 'login',
       result,
     })

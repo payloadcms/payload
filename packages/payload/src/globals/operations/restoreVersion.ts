@@ -97,10 +97,11 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: null,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: globalConfig,
+      global: globalConfig,
       overrideAccess,
       req,
       showHiddenFields,
@@ -115,7 +116,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
+          global: globalConfig,
           req,
         })) || result
     }, Promise.resolve())
@@ -125,10 +128,11 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     result = await afterChange({
+      collection: null,
       context: req.context,
       data: result,
       doc: result,
-      entityConfig: globalConfig,
+      global: globalConfig,
       operation: 'update',
       previousDoc,
       req,
@@ -143,7 +147,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
+          global: globalConfig,
           previousDoc,
           req,
         })) || result

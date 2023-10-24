@@ -97,7 +97,9 @@ export const EditUpload: React.FC<{
 
   const centerFocalPoint = () => {
     const containerRect = focalWrapRef.current.getBoundingClientRect()
-    const boundsRect = cropRef.current.getBoundingClientRect()
+    const boundsRect = showCrop
+      ? cropRef.current.getBoundingClientRect()
+      : imageRef.current.getBoundingClientRect()
     const xCenter =
       ((boundsRect.left - containerRect.left + boundsRect.width / 2) / containerRect.width) * 100
     const yCenter =
@@ -164,17 +166,19 @@ export const EditUpload: React.FC<{
             ) : (
               <img alt={t('upload:setFocalPoint')} ref={imageRef} src={fileSrcToUse} />
             )}
-            <DraggableElement
-              boundsRef={cropRef}
-              checkBounds={checkBounds}
-              className={`${baseClass}__focalPoint`}
-              containerRef={focalWrapRef}
-              initialPosition={pointPosition}
-              onDragEnd={onDragEnd}
-              setCheckBounds={setCheckBounds}
-            >
-              <Plus />
-            </DraggableElement>
+            {showFocalPoint && (
+              <DraggableElement
+                boundsRef={showCrop ? cropRef : imageRef}
+                checkBounds={showCrop ? checkBounds : false}
+                className={`${baseClass}__focalPoint`}
+                containerRef={focalWrapRef}
+                initialPosition={pointPosition}
+                onDragEnd={onDragEnd}
+                setCheckBounds={showCrop ? setCheckBounds : false}
+              >
+                <Plus />
+              </DraggableElement>
+            )}
           </div>
         </div>
         {(showCrop || showFocalPoint) && (

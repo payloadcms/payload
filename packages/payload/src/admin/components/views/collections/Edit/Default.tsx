@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
@@ -15,12 +16,13 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 
-const DefaultEditView: React.FC<
-  CollectionEditViewProps & {
-    customHeader?: React.ReactNode
-    disableRoutes?: boolean
-  }
-> = (props) => {
+export type DefaultEditViewProps = CollectionEditViewProps & {
+  customHeader?: React.ReactNode
+  disableRoutes?: boolean
+  fieldTypes: FieldTypes
+}
+
+const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   const { i18n } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
@@ -32,6 +34,7 @@ const DefaultEditView: React.FC<
     customHeader,
     data,
     disableRoutes,
+    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,
@@ -96,7 +99,7 @@ const DefaultEditView: React.FC<
               {disableRoutes ? (
                 <CustomCollectionComponent view="Default" {...props} />
               ) : (
-                <CollectionRoutes {...props} />
+                <CollectionRoutes {...props} fieldTypes={fieldTypes} />
               )}
             </React.Fragment>
           )}

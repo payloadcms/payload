@@ -80,6 +80,12 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'without-graphql',
+      access,
+      graphQL: false,
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

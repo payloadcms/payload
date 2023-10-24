@@ -1,6 +1,7 @@
 .graphic-account {
   vector-effect: non-scaling-stroke;
   overflow: visible;
+  position: relative;
 
   &__bg {
     fill: var(--theme-elevation-50);
