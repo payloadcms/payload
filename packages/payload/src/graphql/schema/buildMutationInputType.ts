@@ -247,7 +247,7 @@ function buildMutationInputType(
           if (requiresAtLeastOneField) type = new GraphQLNonNull(type)
 
           return {
-            ...inputObjectTypeConfig,
+            ...acc,
             [tab.name]: { type },
           }
         }
