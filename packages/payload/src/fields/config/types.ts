@@ -379,6 +379,10 @@ export type RelationshipField = FieldBase & {
   admin?: Admin & {
     allowCreate?: boolean
     isSortable?: boolean
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
   }
   filterOptions?: FilterOptions
   hasMany?: boolean

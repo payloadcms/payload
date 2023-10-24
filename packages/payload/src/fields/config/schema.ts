@@ -320,6 +320,10 @@ export const relationship = baseField.keys({
   admin: baseAdminFields.keys({
     allowCreate: joi.boolean().default(true),
     isSortable: joi.boolean().default(false),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
