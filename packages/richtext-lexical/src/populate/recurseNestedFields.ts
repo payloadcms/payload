@@ -2,17 +2,17 @@ import type { Field, PayloadRequest, RichTextAdapter } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
 
-import type { AfterReadPromise } from '../field/features/types'
+import type { PopulationPromise } from '../field/features/types'
 
 import { populate } from './populate'
 
 type NestedRichTextFieldsArgs = {
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
   currentDepth?: number
   data: unknown
   depth: number
   fields: Field[]
   overrideAccess: boolean
+  populationPromises: Map<string, Array<PopulationPromise>>
   promises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
@@ -20,12 +20,12 @@ type NestedRichTextFieldsArgs = {
 }
 
 export const recurseNestedFields = ({
-  afterReadPromises,
   currentDepth = 0,
   data,
   depth,
   fields,
   overrideAccess = false,
+  populationPromises,
   promises,
   req,
   showHiddenFields,
@@ -36,6 +36,7 @@ export const recurseNestedFields = ({
       if (field.type === 'relationship') {
         if (field.hasMany && Array.isArray(data[field.name])) {
           if (Array.isArray(field.relationTo)) {
+            // polymorphic relationship
             data[field.name].forEach(({ relationTo, value }, i) => {
               const collection = req.payload.collections[relationTo]
               if (collection) {
@@ -99,31 +100,33 @@ export const recurseNestedFields = ({
         }
       }
       if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
-        const collection = req.payload.collections[field.relationTo]
-        promises.push(
-          populate({
-            id: data[field.name],
-            collection,
-            currentDepth,
-            data,
-            depth,
-            field,
-            key: field.name,
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }),
-        )
+        if (!('hasMany' in field) || !field.hasMany) {
+          const collection = req.payload.collections[field.relationTo]
+          promises.push(
+            populate({
+              id: data[field.name],
+              collection,
+              currentDepth,
+              data,
+              depth,
+              field,
+              key: field.name,
+              overrideAccess,
+              req,
+              showHiddenFields,
+            }),
+          )
+        }
       }
     } else if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
         recurseNestedFields({
-          afterReadPromises,
           currentDepth,
           data: data[field.name],
           depth,
           fields: field.fields,
           overrideAccess,
+          populationPromises,
           promises,
           req,
           showHiddenFields,
@@ -131,12 +134,12 @@ export const recurseNestedFields = ({
         })
       } else {
         recurseNestedFields({
-          afterReadPromises,
           currentDepth,
           data,
           depth,
           fields: field.fields,
           overrideAccess,
+          populationPromises,
           promises,
           req,
           showHiddenFields,
@@ -146,12 +149,12 @@ export const recurseNestedFields = ({
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         recurseNestedFields({
-          afterReadPromises,
           currentDepth,
           data,
           depth,
           fields: tab.fields,
           overrideAccess,
+          populationPromises,
           promises,
           req,
           showHiddenFields,
@@ -164,12 +167,12 @@ export const recurseNestedFields = ({
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
             recurseNestedFields({
-              afterReadPromises,
               currentDepth,
               data: data[field.name][i],
               depth,
               fields: block.fields,
               overrideAccess,
+              populationPromises,
               promises,
               req,
               showHiddenFields,
@@ -182,12 +185,12 @@ export const recurseNestedFields = ({
       if (field.type === 'array') {
         data[field.name].forEach((_, i) => {
           recurseNestedFields({
-            afterReadPromises,
             currentDepth,
             data: data[field.name][i],
             depth,
             fields: field.fields,
             overrideAccess,
+            populationPromises,
             promises,
             req,
             showHiddenFields,
@@ -200,8 +203,8 @@ export const recurseNestedFields = ({
     if (field.type === 'richText') {
       const editor: RichTextAdapter = field?.editor
 
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor.afterReadPromise({
+      if (editor?.populationPromise) {
+        const afterReadPromise = editor.populationPromise({
           currentDepth,
           depth,
           field,

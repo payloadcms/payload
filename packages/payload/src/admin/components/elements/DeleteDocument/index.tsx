@@ -31,13 +31,14 @@ const DeleteDocument: React.FC<Props> = (props) => {
     routes: { admin, api },
     serverURL,
   } = useConfig()
+
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)
   const { toggleModal } = useModal()
   const history = useHistory()
   const { i18n, t } = useTranslation('general')
   const title = useTitle({ collection })
-  const titleToRender = titleFromProps || title
+  const titleToRender = titleFromProps || title || id
 
   const modalSlug = `delete-${id}`
 

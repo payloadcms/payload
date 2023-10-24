@@ -6,7 +6,7 @@ export type MergeLiveDataArgs<T> = {
   apiRoute?: string
   depth: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
-  incomingData: T
+  incomingData: Partial<T>
   initialData: T
   serverURL: string
 }

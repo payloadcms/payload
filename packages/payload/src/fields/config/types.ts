@@ -9,20 +9,27 @@ import type { Description } from '../../admin/components/forms/FieldDescription/
 import type { RowLabel } from '../../admin/components/forms/RowLabel/types'
 import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
 import type { User } from '../../auth'
-import type { TypeWithID } from '../../collections/config/types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
+import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { Payload } from '../../payload'
 import type { Operation, Where } from '../../types'
 import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
 import type { Props as LabelProps } from '../../admin/components/forms/Label/types'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+  /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<T>
+  /** The field which the hook is running against. */
+  field: FieldAffectingData
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
+  /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
+  global: SanitizedGlobalConfig | null
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */

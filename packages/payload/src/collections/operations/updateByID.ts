@@ -55,6 +55,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     args =
       (await hook({
         args,
+        collection: args.collection.config,
         context: args.req.context,
         operation: 'update',
       })) || args
@@ -123,10 +124,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     if (!docWithLocales && hasWherePolicy) throw new Forbidden(t)
 
     const originalDoc = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth: 0,
       doc: docWithLocales,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess: true,
       req,
       showHiddenFields: true,
@@ -166,10 +168,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
       id,
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: originalDoc,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       overrideAccess,
       req,
@@ -184,6 +187,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       data =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           data,
           operation: 'update',
@@ -209,6 +213,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       data =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           data,
           operation: 'update',
@@ -223,11 +228,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
       id,
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: originalDoc,
       docWithLocales,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       req,
       skipValidation: shouldSaveDraft || data._status === 'draft',
@@ -285,10 +291,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -303,6 +310,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -314,10 +322,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       previousDoc: originalDoc,
       req,
@@ -332,6 +341,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           operation: 'update',
@@ -346,6 +356,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'updateByID',
       result,
     })

@@ -1,3 +1,4 @@
+'use client'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'

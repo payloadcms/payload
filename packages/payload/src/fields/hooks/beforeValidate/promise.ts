@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types'
@@ -9,10 +11,12 @@ import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc'
 import { traverseFields } from './traverseFields'
 
 type Args<T> = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: T
   doc: T
   field: Field | TabAsField
+  global: SanitizedGlobalConfig | null
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
@@ -30,10 +34,12 @@ type Args<T> = {
 
 export const promise = async <T>({
   id,
+  collection,
   context,
   data,
   doc,
   field,
+  global,
   operation,
   overrideAccess,
   req,
@@ -209,8 +215,11 @@ export const promise = async <T>({
         await priorHook
 
         const hookedValue = await currentHook({
+          collection,
           context,
           data,
+          field,
+          global,
           operation,
           originalDoc: doc,
           req,
@@ -263,10 +272,12 @@ export const promise = async <T>({
 
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         overrideAccess,
         req,
@@ -282,14 +293,16 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           promises.push(
             traverseFields({
               id,
+              collection,
               context,
               data,
               doc,
               fields: field.fields,
+              global,
               operation,
               overrideAccess,
               req,
@@ -308,7 +321,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
           const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
           const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
@@ -319,10 +332,12 @@ export const promise = async <T>({
             promises.push(
               traverseFields({
                 id,
+                collection,
                 context,
                 data,
                 doc,
                 fields: block.fields,
+                global,
                 operation,
                 overrideAccess,
                 req,
@@ -342,10 +357,12 @@ export const promise = async <T>({
     case 'collapsible': {
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         overrideAccess,
         req,
@@ -372,10 +389,12 @@ export const promise = async <T>({
 
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         overrideAccess,
         req,
@@ -389,10 +408,12 @@ export const promise = async <T>({
     case 'tabs': {
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        global,
         operation,
         overrideAccess,
         req,

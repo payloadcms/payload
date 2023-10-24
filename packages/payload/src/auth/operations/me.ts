@@ -69,6 +69,7 @@ async function me({ collection, req }: Arguments): Promise<Result> {
 
     response =
       (await hook({
+        collection: collection?.config,
         context: req.context,
         req,
         response,

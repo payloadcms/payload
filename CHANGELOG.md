@@ -1,3 +1,55 @@
+## [2.0.13](https://github.com/payloadcms/payload/compare/v2.0.12...v2.0.13) (2023-10-24)
+
+### Bug Fixes
+
+* adjusts props to accept components for before and after fields instead of functions ([#3820](https://github.com/payloadcms/payload/issues/3820)) ([c476d01](https://github.com/payloadcms/payload/commit/c476d01f4e5016f9c2bc338103ef2c778139a536))
+* alignment of collapsible within row ([#3822](https://github.com/payloadcms/payload/issues/3822)) ([eaef0e7](https://github.com/payloadcms/payload/commit/eaef0e739546b4411d971da21170977ba73695f8))
+* named tabs not appearing in the gql mutation input type ([#3835](https://github.com/payloadcms/payload/issues/3835)) ([a0019d0](https://github.com/payloadcms/payload/commit/a0019d0a78504b5c4d6aeec4823d7a0e224f1d6b))
+* only parses live preview ready message when same origin ([#3791](https://github.com/payloadcms/payload/issues/3791)) ([e8f2377](https://github.com/payloadcms/payload/commit/e8f237783b9f48edf80b1d8c61142aeb2edb1c0b))
+* prevent storing duplicate user preferences ([#3833](https://github.com/payloadcms/payload/issues/3833)) ([7eee0ec](https://github.com/payloadcms/payload/commit/7eee0ec3558c8b65afc38df7377073f042402ee3))
+* prevents document sidebar from collapsing ([71a3e5b](https://github.com/payloadcms/payload/commit/71a3e5ba1037fe447dccad4a490fdfb1623ba0b0))
+* renders live preview for globals ([#3801](https://github.com/payloadcms/payload/issues/3801)) ([a13ec2e](https://github.com/payloadcms/payload/commit/a13ec2ebc4858029c643f4530daa4ed49a7b024e))
+* reverting localized versions ([#3831](https://github.com/payloadcms/payload/issues/3831)) ([5a0d0db](https://github.com/payloadcms/payload/commit/5a0d0dbc02850c0cd2035487361ba6e7a317bce7))
+
+
+## [2.0.12](https://github.com/payloadcms/payload/compare/v2.0.11...v2.0.12) (2023-10-23)
+
+### Features
+
+* collection, global and field props for hooks, fix request context initialization, add context to global hooks ([#3780](https://github.com/payloadcms/payload/pull/3780))
+* **richtext-lexical:** HTML Serializer ([#3685](https://github.com/payloadcms/payload/pull/3685))
+
+### Bug Fixes
+
+* remove duplicate removal of temp upload file ([#3818](https://github.com/payloadcms/payload/pull/3818))
+* simplify how the search input and query params are connected ([#3797](https://github.com/payloadcms/payload/pull/3797))
+* standardizes layout of document fields ([#3798](https://github.com/payloadcms/payload/pull/3798))
+* issue where dragging unsortable item would crash the page ([#3789](https://github.com/payloadcms/payload/pull/3789))
+* **richtext-lexical:** defaultValue property didn't fit into field schema ([b5c7bbed9](https://github.com/payloadcms/payload/commit/b5c7bbed93b532ec54a9c73537f4cb1290122a66))
+* **richtext-*:** hasMany relationships not populated correctly ([e197e0316](https://github.com/payloadcms/payload/commit/e197e0316f9c01f945dc7f6d21ac28f9f0420f1d))
+
+## [2.0.11](https://github.com/payloadcms/payload/compare/v2.0.10...v2.0.11) (2023-10-19)
+
+### Features
+
+* add ability to opt out of type gen declare statement ([#3765](https://github.com/payloadcms/payload/pull/3765))
+
+### Bug Fixes
+
+* corrects versions collection casing ([#3739](https://github.com/payloadcms/payload/pull/3739))
+* updates req after file resize ([#3754](https://github.com/payloadcms/payload/pull/3754))
+* correctly renders focal point when crop is set to false ([#3759](https://github.com/payloadcms/payload/pull/3759))
+* account for many slug types in generate types ([#3698](https://github.com/payloadcms/payload/pull/3698))
+* handle graphQL: false on globals when building policy type ([#3729](https://github.com/payloadcms/payload/pull/3729))
+* renders id as fallback title in DeleteDocument ([#3745](https://github.com/payloadcms/payload/pull/3745))
+* properly handles hideAPIURL ([#3721](https://github.com/payloadcms/payload/pull/3721))
+* filesRequiredOnCreate typing, tests, linting ([#3737](https://github.com/payloadcms/payload/pull/3737))
+
+* **webpack-bundler:** corrects payload alias ([#3769](https://github.com/payloadcms/payload/pull/3769))
+* **bundler-webpack:** better node_modules resolution ([#3744](https://github.com/payloadcms/payload/pull/3744))
+* **db-postgres:** block and array inserts error ([#3714](https://github.com/payloadcms/payload/pull/3714))
+* **live-preview:** properly handles uploads and hasOne monomorphic relationships ([#3719](https://github.com/payloadcms/payload/pull/3719))
+
 ## [2.0.10](https://github.com/payloadcms/payload/compare/v2.0.9...v2.0.10) (2023-10-17)
 
 ### Features

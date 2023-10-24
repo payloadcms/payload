@@ -429,8 +429,13 @@ function buildObjectType({
           if (typeof args.depth !== 'undefined') depth = args.depth
           const editor: RichTextAdapter = field?.editor
 
-          if (editor?.afterReadPromise) {
-            await editor?.afterReadPromise({
+          // RichText fields have their own depth argument in GraphQL.
+          // This is why the populationPromise (which populates richtext fields like uploads and relationships)
+          // is run here again, with the provided depth.
+          // In the graphql find.ts resolver, the depth is then hard-coded to 0.
+          // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
+          if (editor?.populationPromise) {
+            await editor?.populationPromise({
               depth,
               field,
               req: context.req,

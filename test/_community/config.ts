@@ -1,23 +1,8 @@
-import type { Media, Menu, Post, User } from './payload-types'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { MediaCollection } from './collections/Media'
 import { PostsCollection, postsSlug } from './collections/Posts'
 import { MenuGlobal } from './globals/Menu'
-
-declare module '../../packages/payload/src/index' {
-  export interface GeneratedTypes {
-    collections: {
-      media: Media
-      posts: Post
-      users: User
-    }
-    globals: {
-      menu: Menu
-    }
-  }
-}
 
 export default buildConfigWithDefaults({
   // ...extend config here

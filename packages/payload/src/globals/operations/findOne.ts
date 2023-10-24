@@ -83,7 +83,9 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
       doc =
         (await hook({
+          context: req.context,
           doc,
+          global: globalConfig,
           req,
         })) || doc
     }, Promise.resolve())
@@ -93,10 +95,11 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // /////////////////////////////////////
 
     doc = await afterRead({
+      collection: null,
       context: req.context,
       depth,
       doc,
-      entityConfig: globalConfig,
+      global: globalConfig,
       overrideAccess,
       req,
       showHiddenFields,
@@ -111,7 +114,9 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
       doc =
         (await hook({
+          context: req.context,
           doc,
+          global: globalConfig,
           req,
         })) || doc
     }, Promise.resolve())

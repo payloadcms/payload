@@ -2,11 +2,13 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 
 import {
   BlocksFeature,
+  HTMLConverterFeature,
   LinkFeature,
   TreeviewFeature,
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
+import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field'
 import { slateEditor } from '../../../../packages/richtext-slate/src'
 import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
 import { generateLexicalRichText } from './generateLexicalRichText'
@@ -34,6 +36,7 @@ const RichTextFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeviewFeature(),
+          HTMLConverterFeature({}),
           LinkFeature({
             fields: [
               {
@@ -68,9 +71,37 @@ const RichTextFields: CollectionConfig = {
         ],
       }),
     },
+    lexicalHTML('richTextLexicalCustomFields', { name: 'richTextLexicalCustomFields_htmll' }),
     {
       name: 'richTextLexical',
       type: 'richText',
+      admin: {
+        description: 'This rich text field uses the lexical editor.',
+      },
+      defaultValue: {
+        root: {
+          children: [
+            {
+              children: [
+                {
+                  text: 'This is a paragraph.',
+                  type: 'text',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [...defaultFeatures, TreeviewFeature()],
       }),
