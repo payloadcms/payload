@@ -286,6 +286,10 @@ export const array = baseField.keys({
 
 export const upload = baseField.keys({
   name: joi.string().required(),
+  components: baseAdminComponentFields.keys({
+    Label: componentSchema,
+    Error: componentSchema,
+  }),
   defaultValue: joi.alternatives().try(joi.object(), joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
   maxDepth: joi.number(),

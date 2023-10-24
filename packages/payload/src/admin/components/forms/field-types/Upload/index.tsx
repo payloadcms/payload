@@ -18,7 +18,15 @@ const Upload: React.FC<Props> = (props) => {
 
   const {
     name,
-    admin: { className, condition, description, readOnly, style, width } = {},
+    admin: {
+      className,
+      condition,
+      description,
+      readOnly,
+      style,
+      width,
+      components: { Error, Label } = {},
+    } = {},
     fieldTypes,
     filterOptions,
     label,
@@ -75,6 +83,8 @@ const Upload: React.FC<Props> = (props) => {
         style={style}
         value={value as string}
         width={width}
+        Error={Error}
+        Label={Label}
       />
     )
   }

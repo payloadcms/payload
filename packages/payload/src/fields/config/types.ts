@@ -326,6 +326,12 @@ export type UIField = {
 }
 
 export type UploadField = FieldBase & {
+  admin?: {
+    components?: {
+      Error?: React.ComponentType<any>
+      Label?: React.ComponentType<any>
+    }
+  }
   filterOptions?: FilterOptions
   maxDepth?: number
   relationTo: string
