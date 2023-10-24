@@ -2,7 +2,8 @@ import React from 'react'
 
 import Check from '../../../icons/Check'
 import Line from '../../../icons/Line'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
+import type { Props as LabelProps } from '../../Label/types'
 import './index.scss'
 
 const baseClass = 'checkbox-input'
@@ -19,6 +20,9 @@ type CheckboxInputProps = {
   readOnly?: boolean
   required?: boolean
   className?: string
+  Label?: React.ComponentType<LabelProps>
+  BeforeInput?: React.ReactElement<any>[]
+  AfterInput?: React.ReactElement<any>[]
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
@@ -34,7 +38,12 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     readOnly,
     required,
     className,
+    Label,
+    BeforeInput,
+    AfterInput,
   } = props
+
+  const LabelComp = Label || DefaultLabel
 
   return (
     <div
@@ -48,6 +57,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
         .join(' ')}
     >
       <div className={`${baseClass}__input`}>
+        {BeforeInput}
         <input
           aria-label={ariaLabel}
           defaultChecked={Boolean(checked)}
@@ -58,12 +68,13 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
           ref={inputRef}
           type="checkbox"
         />
+        {AfterInput}
         <span className={`${baseClass}__icon ${!partialChecked ? 'check' : 'partial'}`}>
           {!partialChecked && <Check />}
           {partialChecked && <Line />}
         </span>
       </div>
-      {label && <Label htmlFor={id} label={label} required={required} />}
+      {label && <LabelComp htmlFor={id} label={label} required={required} />}
     </div>
   )
 }

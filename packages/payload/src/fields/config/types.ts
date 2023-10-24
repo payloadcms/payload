@@ -234,6 +234,14 @@ export type TextareaField = FieldBase & {
 
 export type CheckboxField = FieldBase & {
   type: 'checkbox'
+  admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      BeforeInput?: React.ReactElement<any>[]
+      AfterInput?: React.ReactElement<any>[]
+    }
+  }
 }
 
 export type DateField = FieldBase & {
