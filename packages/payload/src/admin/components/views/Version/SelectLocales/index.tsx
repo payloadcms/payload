@@ -17,9 +17,9 @@ const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
       <ReactSelect
         isMulti
         onChange={onChange}
-        options={options.map(({ code }) => ({ label: code, value: code }))}
+        options={options}
         placeholder={t('selectLocales')}
-        value={value.map(({ code }) => ({ label: code, value: code }))}
+        value={value}
       />
     </div>
   )
