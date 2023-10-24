@@ -61,7 +61,7 @@ export default buildConfig({
     // NOTE - these webpack extensions are only required
     // for development of this plugin.
     // No need to use these aliases within your own projects.
-    webpack: config => {
+    webpack: (config) => {
       const newConfig = {
         ...config,
         resolve: {
@@ -104,7 +104,7 @@ export default buildConfig({
       },
     }),
   ],
-  onInit: async payload => {
+  onInit: async (payload) => {
     const users = await payload.find({
       collection: 'users',
       limit: 1,

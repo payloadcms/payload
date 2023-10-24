@@ -19,9 +19,9 @@ Add this package into your dependencies executing this code in your command line
 Now install this plugin within your Payload as follows:
 
 ```ts
-import { buildConfig } from 'payload/config';
-import path from 'path';
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage';
+import { buildConfig } from 'payload/config'
+import path from 'path'
+import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
 
 export default buildConfig({
   plugins: [
@@ -34,7 +34,7 @@ export default buildConfig({
     }),
   ],
   // The rest of your config goes here
-});
+})
 ```
 
 ### Conditionally Enabling/Disabling
@@ -52,7 +52,7 @@ cloudStorage({
 }),
 ```
 
-If the code is included *in any way in your config* but conditionally disabled in another fashion, you may run into issues such as `Webpack Build Error: Can't Resolve 'fs' and 'stream'` or similar because the plugin must be run at all times in order to properly extend the webpack config.
+If the code is included _in any way in your config_ but conditionally disabled in another fashion, you may run into issues such as `Webpack Build Error: Can't Resolve 'fs' and 'stream'` or similar because the plugin must be run at all times in order to properly extend the webpack config.
 
 ## Features
 
@@ -72,20 +72,20 @@ All adapters are implemented `dev` directory's [Payload Config](https://github.c
 
 This plugin is configurable to work across many different Payload collections. A `*` denotes that the property is required.
 
-| Option                  | Type                                    | Description |
-|-------------------------|-----------------------------------------| ----------- |
-| `collections` *         | Record<string, [CollectionOptions](https://github.com/payloadcms/plugin-cloud-storage/blob/c4a492a62abc2f21b4cd6a7c97778acd8e831212/src/types.ts#L48)> | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
-| `enabled`               |                                         | `boolean` to conditionally enable/disable plugin. Default: true. |
+| Option           | Type                                                                                                                                                   | Description                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `collections` \* | Record<string, [CollectionOptions](https://github.com/payloadcms/plugin-cloud-storage/blob/c4a492a62abc2f21b4cd6a7c97778acd8e831212/src/types.ts#L48)> | Object with keys set to the slug of collections you want to enable the plugin for, and values set to collection-specific options. |
+| `enabled`        |                                                                                                                                                        | `boolean` to conditionally enable/disable plugin. Default: true.                                                                  |
 
 **Collection-specific options:**
 
-| Option                        | Type                                                                                               | Description                                                                        |
-|-------------------------------|----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| `adapter` *                   | [Adapter](https://github.com/payloadcms/plugin-cloud-storage/blob/master/src/types.ts#L51)         | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage. |
-| `disableLocalStorage`         | `boolean`                                                                                          | Choose to disable local storage on this collection. Defaults to `true`. |
-| `disablePayloadAccessControl` | `true`                                                                                             | Set to `true` to disable Payload's access control. [More](#payload-access-control) |
-| `prefix`                      | `string`                                                                                           | Set to `media/images` to upload files inside `media/images` folder in the bucket. |
-| `generateFileURL`             | [GenerateFileURL](https://github.com/payloadcms/plugin-cloud-storage/blob/master/src/types.ts#L53) | Override the generated file URL with one that you create. |
+| Option                        | Type                                                                                               | Description                                                                                                                                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adapter` \*                  | [Adapter](https://github.com/payloadcms/plugin-cloud-storage/blob/master/src/types.ts#L51)         | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage. |
+| `disableLocalStorage`         | `boolean`                                                                                          | Choose to disable local storage on this collection. Defaults to `true`.                                                                                                                                       |
+| `disablePayloadAccessControl` | `true`                                                                                             | Set to `true` to disable Payload's access control. [More](#payload-access-control)                                                                                                                            |
+| `prefix`                      | `string`                                                                                           | Set to `media/images` to upload files inside `media/images` folder in the bucket.                                                                                                                             |
+| `generateFileURL`             | [GenerateFileURL](https://github.com/payloadcms/plugin-cloud-storage/blob/master/src/types.ts#L53) | Override the generated file URL with one that you create.                                                                                                                                                     |
 
 ### Azure Blob Storage Adapter
 
@@ -94,7 +94,7 @@ To use the Azure Blob Storage adapter, you need to have `@azure/storage-blob` in
 From there, create the adapter, passing in all of its required properties:
 
 ```js
-import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure';
+import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure'
 
 const adapter = azureBlobStorageAdapter({
   connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
@@ -115,7 +115,7 @@ To use the S3 adapter, some peer dependencies need to be installed:
 From there, create the adapter, passing in all of its required properties:
 
 ```js
-import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3';
+import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
 
 const adapter = s3Adapter({
   config: {
@@ -131,6 +131,7 @@ const adapter = s3Adapter({
 
 // Now you can pass this adapter to the plugin
 ```
+
 Note that the credentials option does not have to be used when you are using PayloadCMS on an EC2 instance that has been configured with an IAM Role with necessary permissions.
 
 Other S3 Client configuration is documented [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html).
@@ -142,7 +143,7 @@ Any upload over 50MB will automatically be uploaded using S3's multi-part upload
 If you're running an S3-compatible object storage such as MinIO or Digital Ocean Spaces, you'll have to set the `endpoint` appropriately for the provider.
 
 ```js
-import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3';
+import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
 
 const adapter = s3Adapter({
   config: {
@@ -160,14 +161,14 @@ To use the GCS adapter, you need to have `@google-cloud/storage` installed in yo
 From there, create the adapter, passing in all of its required properties:
 
 ```js
-import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs';
+import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs'
 
 const adapter = gcsAdapter({
   options: {
     // you can choose any method for authentication, and authorization which is being provided by `@google-cloud/storage`
     keyFilename: './gcs-credentials.json',
     //OR
-    credentials: JSON.parse(process.env.GCS_CREDENTIALS || "{}") // this env variable will have stringify version of your credentials.json file
+    credentials: JSON.parse(process.env.GCS_CREDENTIALS || '{}'), // this env variable will have stringify version of your credentials.json file
   },
   bucket: process.env.GCS_BUCKET,
 })
@@ -177,9 +178,9 @@ const adapter = gcsAdapter({
 
 ### Payload Access Control
 
-Payload ships with access control that runs *even on statically served files*. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
+Payload ships with access control that runs _even on statically served files_. The same `read` access control property on your `upload`-enabled collections is used, and it allows you to restrict who can request your uploaded files.
 
-To preserve this feature, by default, this plugin *keeps all file URLs exactly the same*. Your file URLs won't be updated to point directly to your cloud storage source, as in that case, Payload's access control will be completely bypassed and you would need public readability on your cloud-hosted files.
+To preserve this feature, by default, this plugin _keeps all file URLs exactly the same_. Your file URLs won't be updated to point directly to your cloud storage source, as in that case, Payload's access control will be completely bypassed and you would need public readability on your cloud-hosted files.
 
 Instead, all uploads will still be reached from the default `/collectionSlug/staticURL/filename` path. This plugin will "pass through" all files that are hosted on your third-party cloud service—with the added benefit of keeping your existing access control in place.
 

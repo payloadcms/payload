@@ -8,10 +8,7 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/dev",
-      "runtimeArgs": [
-        "-r",
-        "./node_modules/ts-node/register"
-      ],
+      "runtimeArgs": ["-r", "./node_modules/ts-node/register"],
       "name": "Debug Cloud Storage - S3",
       "program": "${workspaceFolder}/dev/src/server.ts",
       "outputCapture": "std",
@@ -24,10 +21,7 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/dev",
-      "runtimeArgs": [
-        "-r",
-        "./node_modules/ts-node/register"
-      ],
+      "runtimeArgs": ["-r", "./node_modules/ts-node/register"],
       "name": "Debug Cloud Storage - Azure",
       "program": "${workspaceFolder}/dev/src/server.ts",
       "outputCapture": "std",
@@ -35,6 +29,6 @@
         "PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER": "azure",
         "PAYLOAD_CONFIG_PATH": "${workspaceFolder}/dev/src/payload.config.ts"
       }
-    },
+    }
   ]
 }

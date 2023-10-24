@@ -2,8 +2,8 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
-      "source.fixAll": true,
+      "source.fixAll": true
     },
-    "editor.formatOnSave": true,
-  },
+    "editor.formatOnSave": true
+  }
 }
