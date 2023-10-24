@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { exactText, saveDocAndAssert } from '../helpers'
+import { exactText, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { mobileBreakpoint } from './config'
@@ -17,6 +17,17 @@ const goToDoc = async (page: Page) => {
   const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
   expect(linkToDoc).toBeTruthy()
   await linkToDoc.click()
+}
+
+const goToCollectionPreview = async (page: Page): Promise<void> => {
+  await goToDoc(page)
+  await page.goto(`${page.url()}/preview`)
+}
+
+const goToGlobalPreview = async (page: Page, slug: string): Promise<void> => {
+  const global = new AdminUrlUtil(serverURL, slug)
+  const previewURL = `${global.global(slug)}/preview`
+  await page.goto(previewURL)
 }
 
 describe('Live Preview', () => {
@@ -49,24 +60,29 @@ describe('Live Preview', () => {
   })
 
   test('collection - has route', async () => {
-    await goToDoc(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    const url = page.url()
+    await goToCollectionPreview(page)
+    expect(page.url()).toBe(`${url}/preview`)
   })
 
   test('collection - renders iframe', async () => {
-    await goToDoc(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToCollectionPreview(page)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
+  })
+
+  test('collection - can edit fields', async () => {
+    await goToCollectionPreview(page)
+    const field = page.locator('#field-title')
+    await expect(field).toBeVisible()
+    await field.fill('Title 1')
+    await saveDocHotkeyAndAssert(page)
   })
 
   test('global - has tab', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
+
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
 
@@ -80,18 +96,13 @@ describe('Live Preview', () => {
   })
 
   test('global - has route', async () => {
-    const global = new AdminUrlUtil(serverURL, 'header')
-    const previewURL = `${global.global('header')}/preview`
-    await page.goto(previewURL)
-    expect(page.url()).toBe(previewURL)
+    const url = page.url()
+    await goToGlobalPreview(page, 'header')
+    expect(page.url()).toBe(`${url}/preview`)
   })
 
   test('global - renders iframe', async () => {
-    const global = new AdminUrlUtil(serverURL, 'header')
-    await page.goto(global.global('header'))
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToGlobalPreview(page, 'header')
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
   })
