@@ -14,6 +14,10 @@ async function update(args: PreferenceUpdateRequest) {
     value,
   } = args
 
+  if (!user) {
+    throw new UnauthorizedError(req.t)
+  }
+
   const collection = 'payload-preferences'
 
   const filter = {
@@ -29,10 +33,6 @@ async function update(args: PreferenceUpdateRequest) {
       value: user.id,
     },
     value,
-  }
-
-  if (!user) {
-    throw new UnauthorizedError(req.t)
   }
 
   if (!overrideAccess) {
