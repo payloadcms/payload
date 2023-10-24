@@ -8,7 +8,7 @@ import chalkTemplate from 'chalk-template'
 import { PackageDetails, getPackageDetails, showPackageDetails } from './lib/getPackageDetails'
 import semver from 'semver'
 import addStream from 'add-stream'
-// import tempfile from 'tempfile'
+import tempfile from 'tempfile'
 import concatSream from 'concat-stream'
 import getStream from 'get-stream'
 import conventionalChangelogCore, {
@@ -57,43 +57,8 @@ async function main() {
     process.exit(1)
   }
 
-  // TODO: Locate changelog
-
   // Prefix to find prev tag
   const tagPrefix = pkg.shortName === 'payload' ? 'v' : pkg.prevGitTag.split('/')[0] + '/'
-
-  const config = {
-    // infile: 'CHANGELOG.md',
-    preset: 'conventionalcommits',
-    append: true, // Does this work?
-    currentTag: pkg.prevGitTag, // The prefix is added automatically apparently?
-    tagPrefix,
-    pkg: {
-      path: `${pkg.packagePath}/package.json`,
-    },
-    writerOpts: {
-      commitGroupsSort: (a, b) => {
-        const groupOrder = ['Features', 'Bug Fixes', 'Documentation']
-        return groupOrder.indexOf(a.title) - groupOrder.indexOf(b.title)
-      },
-
-      // Scoped commits at the end, alphabetical sort
-      commitsSort: (a, b) => {
-        if (a.scope || b.scope) {
-          if (!a.scope) return -1
-          if (!b.scope) return 1
-          return a.scope === b.scope
-            ? a.subject.localeCompare(b.subject)
-            : a.scope.localeCompare(b.scope)
-        }
-
-        // Alphabetical sort
-        return a.subject.localeCompare(b.subject)
-      },
-    },
-  }
-
-  console.log({ config })
 
   const generateChangelog = await confirm('Generate changelog?')
   if (!generateChangelog) {
@@ -102,66 +67,41 @@ async function main() {
 
   const nextReleaseVersion = semver.inc(pkg.version, bump) as string
   const changelogStream = conventionalChangelog(
-    { ...config, debug: console.debug.bind(console) },
+    {
+      preset: 'conventionalcommits',
+      append: true, // Does this work?
+      // currentTag: pkg.prevGitTag, // The prefix is added automatically apparently?
+      tagPrefix,
+      pkg: {
+        path: `${pkg.packagePath}/package.json`,
+      },
+    },
     {
       version: nextReleaseVersion, // next release
     },
     {
-      // path: pkg.packagePath,
       path: 'packages',
+      // path: pkg.packagePath,
       // from: pkg.prevGitTag,
       // to: 'HEAD'
     },
   ).on('error', (err) => {
-    // if (flags.verbose) {
     console.error(err.stack)
-    // } else {
     console.error(err.toString())
-    // }
     process.exit(1)
   })
 
-  // const outStream = createWriteStream('NEW.md')
   const changelogFile = 'CHANGELOG.md'
   const readStream = fse.createReadStream(changelogFile)
-  // changelogStream.pipe(outStream)
 
-  const outfile = 'CHANGELOG.md'
-  // const tmp = tempfile()
-
-  // create temp file
-  const tmp = 'TMP.md'
-  fse.writeFileSync('TMP.md', '')
-
-  const writeStream = createWriteStream(outfile)
+  const tmp = tempfile()
 
   changelogStream
     .pipe(addStream(readStream))
     .pipe(createWriteStream(tmp))
     .on('finish', () => {
-      createReadStream(tmp).pipe(createWriteStream(outfile))
+      createReadStream(tmp).pipe(createWriteStream(changelogFile))
     })
-
-  const tempFileFullPath = path.resolve(tmp)
-  fse.unlinkSync(tempFileFullPath)
-
-  // delete temp file
-
-  // const currentChangelog = await getStream(fse.createReadStream('CHANGELOG.md'))
-  // const changelogWritableStream = fse.createWriteStream('NEW.md')
-
-  // For Debug
-  // changelogStream.pipe(process.stdout)
-
-  // TODO: Update the changelog
-  // const appendToChangelog = await confirm('Append to changelog?')
-  // if (appendToChangelog) {
-  //   console.log(chalk.bold.green('DRYRUN: Appending to changelog...'))
-  // }
-
-  // const prevChangelog = await getStream(fse.createReadStream('CHANGELOG.md'))
-  // const changelog = await getStream(changelogStream)
-  // console.log({ changelog })
 }
 
 main().catch((error) => {
