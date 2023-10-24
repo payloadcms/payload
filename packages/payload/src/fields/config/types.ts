@@ -181,7 +181,7 @@ export type TextField = FieldBase & {
     autoComplete?: string
     placeholder?: Record<string, string> | string
     rtl?: boolean
-    components: {
+    components?: {
       Error?: React.ComponentType<any>
       Label?: React.ComponentType<any>
       BeforeInput?: React.ReactElement<any>[]
@@ -197,7 +197,7 @@ export type EmailField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
     placeholder?: Record<string, string> | string
-    components: {
+    components?: {
       Error?: React.ComponentType<any>
       Label?: React.ComponentType<any>
       BeforeInput?: React.ReactElement<any>[]
@@ -212,7 +212,7 @@ export type TextareaField = FieldBase & {
     placeholder?: Record<string, string> | string
     rows?: number
     rtl?: boolean
-    components: {
+    components?: {
       Error?: React.ComponentType<any>
       Label?: React.ComponentType<any>
       BeforeInput?: React.ReactElement<any>[]
