@@ -197,6 +197,12 @@ export type EmailField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
     placeholder?: Record<string, string> | string
+    components: {
+      Error?: React.ComponentType<any>
+      Label?: React.ComponentType<any>
+      BeforeInput?: React.ReactElement<any>[]
+      AfterInput?: React.ReactElement<any>[]
+    }
   }
   type: 'email'
 }

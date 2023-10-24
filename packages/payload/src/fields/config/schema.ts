@@ -122,6 +122,12 @@ export const email = baseField.keys({
   admin: baseAdminFields.keys({
     autoComplete: joi.string(),
     placeholder: joi.string(),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+      BeforeInput: joi.array().items(componentSchema),
+      AfterInput: joi.array().items(componentSchema),
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   maxLength: joi.number(),
