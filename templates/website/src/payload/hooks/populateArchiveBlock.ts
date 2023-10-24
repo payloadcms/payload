@@ -1,4 +1,4 @@
-import type { AfterReadHook } from 'payload/dist/globals/config/types'
+import type { AfterReadHook } from 'payload/dist/collections/config/types'
 
 import type { Page, Post } from '../payload-types'
 
