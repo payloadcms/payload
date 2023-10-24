@@ -165,7 +165,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding posts...`)
 
   // Do not create posts with `Promise.all` because we want the posts to be created in order
-  // This way we can sort them by `createdAt` or `publishedOn` and they will be in the expected order
+  // This way we can sort them by `createdAt` or `publishedAt` and they will be in the expected order
   const post1Doc = await payload.create({
     collection: 'posts',
     data: JSON.parse(
@@ -243,7 +243,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding projects...`)
 
   // Do not create posts with `Promise.all` because we want the posts to be created in order
-  // This way we can sort them by `createdAt` or `publishedOn` and they will be in the expected order
+  // This way we can sort them by `createdAt` or `publishedAt` and they will be in the expected order
   const project1Doc = await payload.create({
     collection: 'projects',
     data: JSON.parse(

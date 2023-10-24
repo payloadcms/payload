@@ -17,8 +17,6 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
         }
 
         if (archiveBlock.populateBy === 'collection') {
-          let sort = '-publishedDate'
-          if (archiveBlock.relationTo === 'posts') sort = '-publishedOn'
           const res: { totalDocs: number; docs: Post[] } = await payload.find({
             collection: archiveBlock.relationTo,
             limit: archiveBlock.limit || 10,
@@ -36,7 +34,7 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
                   }
                 : {}),
             },
-            sort,
+            sort: '-publishedAt',
           })
 
           return {
