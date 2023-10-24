@@ -193,6 +193,10 @@ export const radio = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
     layout: joi.string().valid('vertical', 'horizontal'),
+    components: baseAdminComponentFields.keys({
+      Label: componentSchema,
+      Error: componentSchema,
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
   options: joi

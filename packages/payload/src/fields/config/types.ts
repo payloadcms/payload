@@ -465,6 +465,10 @@ export type ArrayField = FieldBase & {
 export type RadioField = FieldBase & {
   admin?: Admin & {
     layout?: 'horizontal' | 'vertical'
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
   }
   options: Option[]
   type: 'radio'
