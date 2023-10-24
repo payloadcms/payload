@@ -1,3 +1,30 @@
+## [2.0.13](https://github.com/payloadcms/payload/compare/v2.0.12...v2.0.13) (2023-10-24)
+
+
+### Features
+
+* abstracts syncWithSearch ([7e44fa1](https://github.com/payloadcms/payload/commit/7e44fa101094a757e67dfdeffbf173460941fb1b))
+* attaches payload to beforeSync hook ([27a3b8c](https://github.com/payloadcms/payload/commit/27a3b8ca6d5aa8c7d5661014765ae2ba67023930))
+* builds plugin ([1b10111](https://github.com/payloadcms/payload/commit/1b10111ba95e120b1abe79cc8db0807b284b6d22))
+* enables defaultPriorities ([80da94c](https://github.com/payloadcms/payload/commit/80da94c3e079d005288baca9b270529f56651804))
+* supports versions api ([875d8dc](https://github.com/payloadcms/payload/commit/875d8dc27bbc44faa0e3d51150cad15465549924))
+* uses config provider to format linkToDoc ([1a2a576](https://github.com/payloadcms/payload/commit/1a2a576aa8be89bf2e8e232493ac756b55b48b5e))
+
+
+### Bug Fixes
+
+* adjusts payload peer dep range ([#8](https://github.com/payloadcms/payload/issues/8)) ([1142913](https://github.com/payloadcms/payload/commit/11429135eebf3a21ab91cb7da33b6846353b10a8))
+* adjusts props to accept components for before and after fields instead of functions ([#3820](https://github.com/payloadcms/payload/issues/3820)) ([c476d01](https://github.com/payloadcms/payload/commit/c476d01f4e5016f9c2bc338103ef2c778139a536))
+* alignment of collapsible within row ([#3822](https://github.com/payloadcms/payload/issues/3822)) ([eaef0e7](https://github.com/payloadcms/payload/commit/eaef0e739546b4411d971da21170977ba73695f8))
+* named tabs not appearing in the gql mutation input type ([#3835](https://github.com/payloadcms/payload/issues/3835)) ([a0019d0](https://github.com/payloadcms/payload/commit/a0019d0a78504b5c4d6aeec4823d7a0e224f1d6b))
+* only parses live preview ready message when same origin ([#3791](https://github.com/payloadcms/payload/issues/3791)) ([e8f2377](https://github.com/payloadcms/payload/commit/e8f237783b9f48edf80b1d8c61142aeb2edb1c0b))
+* prevent storing duplicate user preferences ([#3833](https://github.com/payloadcms/payload/issues/3833)) ([7eee0ec](https://github.com/payloadcms/payload/commit/7eee0ec3558c8b65afc38df7377073f042402ee3))
+* prevents document sidebar from collapsing ([71a3e5b](https://github.com/payloadcms/payload/commit/71a3e5ba1037fe447dccad4a490fdfb1623ba0b0))
+* renders live preview for globals ([#3801](https://github.com/payloadcms/payload/issues/3801)) ([a13ec2e](https://github.com/payloadcms/payload/commit/a13ec2ebc4858029c643f4530daa4ed49a7b024e))
+* reverting localized versions ([#3831](https://github.com/payloadcms/payload/issues/3831)) ([5a0d0db](https://github.com/payloadcms/payload/commit/5a0d0dbc02850c0cd2035487361ba6e7a317bce7))
+* syncWithSearch args and return type ([41d80a9](https://github.com/payloadcms/payload/commit/41d80a959cd9bba01cebfd3afb8d9c153e78bc10))
+
+
 ## [2.0.12](https://github.com/payloadcms/payload/compare/v2.0.11...v2.0.12) (2023-10-23)
 
 ### Features
