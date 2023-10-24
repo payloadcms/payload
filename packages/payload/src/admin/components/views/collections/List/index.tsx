@@ -172,18 +172,12 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   // /////////////////////////////////////
 
   useEffect(() => {
-    ;(async () => {
-      const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
+    void setPreference(preferenceKey, { sort }, true)
+  }, [sort, preferenceKey, setPreference])
 
-      const newPreferences = {
-        ...currentPreferences,
-        limit,
-        sort,
-      }
-
-      setPreference(preferenceKey, newPreferences)
-    })()
-  }, [sort, limit, preferenceKey, setPreference, getPreference])
+  useEffect(() => {
+    void setPreference(preferenceKey, { limit }, true)
+  }, [limit, preferenceKey, setPreference])
 
   // /////////////////////////////////////
   // Prevent going beyond page limit
