@@ -91,7 +91,7 @@ Please do note that this does not run before the client-side validation. If you 
 3. `validate` runs on the server
 
 ```ts
-import { CollectionBeforeOperationHook } from 'payload/types'
+import { CollectionBeforeValidateHook } from 'payload/types'
 
 const beforeValidateHook: CollectionBeforeValidateHook = async ({
   data, // incoming data to update or create with
