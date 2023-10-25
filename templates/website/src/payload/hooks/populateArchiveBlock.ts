@@ -1,4 +1,4 @@
-import type { AfterReadHook } from 'payload/dist/globals/config/types'
+import type { AfterReadHook } from 'payload/dist/collections/config/types'
 
 import type { Page, Post } from '../payload-types'
 
@@ -34,7 +34,7 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
                   }
                 : {}),
             },
-            sort: '-publishedDate',
+            sort: '-publishedAt',
           })
 
           return {
