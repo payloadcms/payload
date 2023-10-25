@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { exactText, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import { exactText, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { mobileBreakpoint } from './config'
@@ -76,7 +76,7 @@ describe('Live Preview', () => {
     const field = page.locator('#field-title')
     await expect(field).toBeVisible()
     await field.fill('Title 1')
-    await saveDocHotkeyAndAssert(page)
+    await saveDocAndAssert(page)
   })
 
   test('global - has tab', async () => {
@@ -113,7 +113,7 @@ describe('Live Preview', () => {
     await expect(field).toBeVisible()
     await expect(field).toBeEnabled()
     await field.check()
-    await saveDocHotkeyAndAssert(page)
+    await saveDocAndAssert(page)
   })
 
   test('properly measures iframe and displays size', async () => {
@@ -158,6 +158,7 @@ describe('Live Preview', () => {
 
     await saveDocAndAssert(page)
     await goToCollectionPreview(page)
+    expect(page.url()).toContain('/preview')
 
     const breakpointSelector = page.locator(
       '.live-preview-toolbar select[name="live-preview-breakpoint"]',
