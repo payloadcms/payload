@@ -44,7 +44,11 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         return
       }
 
-      const create = async (locale = ''): Promise<null | string> => {
+      const saveDocument = async ({
+        id,
+        locale = '',
+        duplicateID = '',
+      }): Promise<null | string> => {
         const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
           headers: {
             'Accept-Language': i18n.language,
@@ -57,19 +61,32 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         })
         let data = await response.json()
 
-        if ('createdAt' in data) delete data.createdAt
-        if ('updatedAt' in data) delete data.updatedAt
+        if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
+          data = await collection.admin.hooks.beforeDuplicate({
+            collection,
+            data,
+            locale,
+          })
+        }
 
-        const result = await requests.post(`${serverURL}${api}/${slug}`, {
-          body: JSON.stringify(data),
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
+        if (!duplicateID) {
+          if ('createdAt' in data) delete data.createdAt
+          if ('updatedAt' in data) delete data.updatedAt
+        }
+
+        const result = await requests[duplicateID ? 'patch' : 'post'](
+          `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`,
+          {
+            body: JSON.stringify(data),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
           },
-        })
+        )
         const json = await result.json()
 
-        if (result.status === 201) {
+        if (result.status === 201 || result.status === 200) {
           return json.doc.id
         }
         json.errors.forEach((error) => toast.error(error.message))
@@ -82,46 +99,10 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       if (localization) {
         await localization.localeCodes.reduce(async (priorLocalePatch, locale) => {
           await priorLocalePatch
-
-          if (!abort) {
-            const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-              headers: {
-                'Accept-Language': i18n.language,
-              },
-              params: {
-                depth: 0,
-                locale,
-              },
-            })
-            let localizedDoc = await res.json()
-
-            if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
-              localizedDoc = await collection.admin.hooks.beforeDuplicate({
-                collection,
-                data: localizedDoc,
-                locale,
-              })
-            }
-
-            if (!duplicateID) {
-              duplicateID = await create(locale)
-            } else {
-              const patchResult = await requests.patch(
-                `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`,
-                {
-                  body: JSON.stringify(localizedDoc),
-                  headers: {
-                    'Accept-Language': i18n.language,
-                    'Content-Type': 'application/json',
-                  },
-                },
-              )
-              if (patchResult.status > 400) {
-                abort = true
-                const json = await patchResult.json()
-                json.errors.forEach((error) => toast.error(error.message))
-              }
-            }
+          if (abort) return
+          duplicateID = await saveDocument({ locale, id, duplicateID })
+          if (!duplicateID) {
+            abort = true
           }
         }, Promise.resolve())
 
@@ -134,7 +115,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
           })
         }
       } else {
-        duplicateID = await create()
+        duplicateID = await saveDocument({ id })
       }
 
       if (!duplicateID) {
