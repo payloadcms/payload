@@ -39,6 +39,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     args =
       (await hook({
         args,
+        collection: args.collection.config,
         context: args.req.context,
         operation: 'read',
       })) || args
@@ -138,6 +139,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           query: findOneArgs.where,
@@ -150,11 +152,12 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       currentDepth,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -169,6 +172,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           query: findOneArgs.where,
@@ -182,6 +186,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     result = await buildAfterOperation<T>({
       args,
+      collection: collectionConfig,
       operation: 'findByID',
       result: result as any,
     }) // TODO: fix this typing

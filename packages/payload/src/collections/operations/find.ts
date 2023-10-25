@@ -46,6 +46,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     args =
       (await hook({
         args,
+        collection: args.collection.config,
         context: args.req.context,
         operation: 'read',
       })) || args
@@ -166,6 +167,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
             docRef =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
                 query: fullWhere,
@@ -187,12 +189,13 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       docs: await Promise.all(
         result.docs.map(async (doc) =>
           afterRead<T>({
+            collection: collectionConfig,
             context: req.context,
             currentDepth,
             depth,
             doc,
-            entityConfig: collectionConfig,
             findMany: true,
+            global: null,
             overrideAccess,
             req,
             showHiddenFields,
@@ -216,6 +219,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
             docRef =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
                 findMany: true,
@@ -235,6 +239,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
     result = await buildAfterOperation<T>({
       args,
+      collection: collectionConfig,
       operation: 'find',
       result,
     })

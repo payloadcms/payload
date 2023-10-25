@@ -11,13 +11,23 @@ export interface Config {
     relation: Relation
     audio: Audio
     'gif-resize': GifResize
+    'no-image-sizes': NoImageSize
+    'crop-only': CropOnly
+    'focal-only': FocalOnly
     media: Media
+    enlarge: Enlarge
+    reduce: Reduce
     'media-trim': MediaTrim
     'unstored-media': UnstoredMedia
     'externally-served-media': ExternallyServedMedia
     'uploads-1': Uploads1
     'uploads-2': Uploads2
+    'admin-thumbnail': AdminThumbnail
+    'optional-file': OptionalFile
+    'required-file': RequiredFile
     users: User
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
   }
   globals: {}
 }
@@ -70,6 +80,14 @@ export interface Media {
       filesize?: number
       filename?: string
     }
+    accidentalSameSize?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
     tablet?: {
       url?: string
       width?: number
@@ -87,6 +105,62 @@ export interface Media {
       filename?: string
     }
     icon?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest2?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest3?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest4?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest5?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest6?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest7?: {
       url?: string
       width?: number
       height?: number
@@ -122,6 +196,189 @@ export interface GifResize {
       filename?: string
     }
     large?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
+export interface NoImageSize {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+}
+export interface CropOnly {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  sizes?: {
+    focalTest?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest2?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest3?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
+export interface FocalOnly {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  sizes?: {
+    focalTest?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest2?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    focalTest3?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
+export interface Enlarge {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  sizes?: {
+    accidentalSameSize?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    sameSizeWithNewFormat?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    resizedLarger?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    resizedSmaller?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    widthLowerHeightLarger?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+  }
+}
+export interface Reduce {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+  sizes?: {
+    accidentalSameSize?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    sameSizeWithNewFormat?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    resizedLarger?: {
+      url?: string
+      width?: number
+      height?: number
+      mimeType?: string
+      filesize?: number
+      filename?: string
+    }
+    resizedSmaller?: {
       url?: string
       width?: number
       height?: number
@@ -217,6 +474,39 @@ export interface Uploads2 {
   width?: number
   height?: number
 }
+export interface AdminThumbnail {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+}
+export interface OptionalFile {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+}
+export interface RequiredFile {
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
+}
 export interface User {
   id: string
   updatedAt: string
@@ -228,5 +518,58 @@ export interface User {
   hash?: string
   loginAttempts?: number
   lockUntil?: string
-  password?: string
+  password: string
+}
+export interface PayloadPreference {
+  id: string
+  user: {
+    relationTo: 'users'
+    value: string | User
+  }
+  key?: string
+  value?:
+    | {
+        [k: string]: unknown
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null
+  updatedAt: string
+  createdAt: string
+}
+export interface PayloadMigration {
+  id: string
+  name?: string
+  batch?: number
+  updatedAt: string
+  createdAt: string
+}
+
+declare module 'payload' {
+  export interface GeneratedTypes {
+    collections: {
+      relation: Relation
+      audio: Audio
+      'gif-resize': GifResize
+      'no-image-sizes': NoImageSize
+      'crop-only': CropOnly
+      'focal-only': FocalOnly
+      media: Media
+      enlarge: Enlarge
+      reduce: Reduce
+      'media-trim': MediaTrim
+      'unstored-media': UnstoredMedia
+      'externally-served-media': ExternallyServedMedia
+      'uploads-1': Uploads1
+      'uploads-2': Uploads2
+      'admin-thumbnail': AdminThumbnail
+      'optional-file': OptionalFile
+      'required-file': RequiredFile
+      users: User
+      'payload-preferences': PayloadPreference
+      'payload-migrations': PayloadMigration
+    }
+  }
 }

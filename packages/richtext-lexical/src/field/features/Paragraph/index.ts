@@ -3,7 +3,7 @@ import { $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical'
 
 import type { FeatureProvider } from '../types'
 
-import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { TextIcon } from '../../lexical/ui/icons/Text'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 

@@ -1,6 +1,7 @@
 import type { Block, Data, Fields } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import isDeepEqual from 'deep-equal'
 import { $getNodeByKey } from 'lexical'
 import { Button, ErrorPill, Pill } from 'payload/components'
 import { Collapsible } from 'payload/components/elements'
@@ -70,14 +71,16 @@ export const BlockContent: React.FC<Props> = (props) => {
 
   const onFormChange = useCallback(
     ({ fields: formFields, formData }: { fields: Fields; formData: Data }) => {
-      editor.update(() => {
-        const node: BlockNode = $getNodeByKey(nodeKey)
-        if (node) {
-          node.setFields({
-            data: formData as any,
-          })
-        }
-      })
+      if (!isDeepEqual(fields.data, formData)) {
+        editor.update(() => {
+          const node: BlockNode = $getNodeByKey(nodeKey)
+          if (node) {
+            node.setFields({
+              data: formData as any,
+            })
+          }
+        })
+      }
 
       // update error count
       if (hasSubmitted) {

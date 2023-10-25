@@ -1,3 +1,4 @@
+'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
   $getNodeByKey,

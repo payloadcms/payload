@@ -21,6 +21,8 @@ import {
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
+  noApiViewCollection,
+  noApiViewGlobal,
   postsSlug,
   slugPluralLabel,
 } from './shared'
@@ -152,6 +154,32 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
       await page.goto(url.global('hidden-global'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('should not show API tab on collection when disabled in config', async () => {
+      await page.goto(url.collection(noApiViewCollection))
+      await page.locator('.collection-list .table a').click()
+      await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
+    })
+
+    test('should not enable API route on collection when disabled in config', async () => {
+      const collectionItems = await payload.find({
+        collection: noApiViewCollection,
+        limit: 1,
+      })
+      expect(collectionItems.docs.length).toBe(1)
+      await page.goto(`${url.collection(noApiViewCollection)}/${collectionItems.docs[0].id}/api`)
+      await expect(page.locator('.not-found')).toHaveCount(1)
+    })
+
+    test('should not show API tab on global when disabled in config', async () => {
+      await page.goto(url.global(noApiViewGlobal))
+      await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
+    })
+
+    test('should not enable API route on global when disabled in config', async () => {
+      await page.goto(`${url.global(noApiViewGlobal)}/api`)
+      await expect(page.locator('.not-found')).toHaveCount(1)
     })
   })
 
@@ -367,7 +395,7 @@ describe('admin', () => {
     test('should allow changing language', async () => {
       await page.goto(url.account)
 
-      const field = page.locator('.account__language .react-select')
+      const field = page.locator('.payload-settings__language .react-select')
 
       await field.click()
       const options = page.locator('.rs__option')
@@ -401,6 +429,18 @@ describe('admin', () => {
     })
 
     describe('filtering', () => {
+      test('should prefill search input from query param', async () => {
+        await createPost({ title: 'a' })
+        await createPost({ title: 'b' })
+
+        // prefill search with "a" from the query param
+        await page.goto(`${url.list}?search=a`)
+
+        // input should be filled out, list should filter
+        await expect(page.locator('.search-filter__input')).toHaveValue('a')
+        await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      })
+
       test('search by id', async () => {
         const { id } = await createPost()
         await page.locator('.search-filter__input').fill(id)
@@ -953,7 +993,7 @@ describe('admin', () => {
       test('should use fallback language on field titles', async () => {
         // change language German
         await page.goto(url.account)
-        await page.locator('.account__language .react-select').click()
+        await page.locator('.payload-settings__language .react-select').click()
         const languageSelect = page.locator('.rs__option')
         // text field does not have a 'de' label
         await languageSelect.locator('text=Deutsch').click()

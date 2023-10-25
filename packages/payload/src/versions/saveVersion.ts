@@ -3,6 +3,7 @@ import type { PayloadRequest } from '../express/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 
+import { deepCopyObject } from '../utilities/deepCopyObject'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields'
 import { enforceMaxVersions } from './enforceMaxVersions'
 
@@ -30,7 +31,7 @@ export const saveVersion = async ({
   let result
   let createNewVersion = true
   const now = new Date().toISOString()
-  const versionData = { ...doc }
+  const versionData = deepCopyObject(doc)
   if (draft) versionData._status = 'draft'
   if (versionData._id) delete versionData._id
 

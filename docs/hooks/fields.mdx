@@ -62,7 +62,7 @@ All field-level hooks are formatted to accept the same arguments, although some 
 Field Hooks receive one `args` argument that contains the following properties:
 
 | Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`data`**               | The data passed to update the document within `create` and `update` operations, and the full document itself in the `afterRead` hook.                                                                                 |
 | **`siblingData`**        | The sibling data passed to a field that the hook is running against.                                                                                                                                                  |
 | **`findMany`**           | Boolean to denote if this hook is running against finding one, or finding many within the `afterRead` hook.                                                                                                           |
@@ -73,6 +73,10 @@ Field Hooks receive one `args` argument that contains the following properties:
 | **`req`**                | The Express `request` object. It is mocked for Local API operations.                                                                                                                                                  |
 | **`value`**              | The value of the field.                                                                                                                                                                                               |
 | **`previousValue`**      | The previous value of the field, before changes were applied, only in `afterChange` hooks.                                                                                                                            |
+| **`context`**            | Context passed to this hook. More info can be found under [Context](/docs/hooks/context)                                                                                                                              |
+| **`field`**              | The field which the hook is running against.                                                                                                                                                                          |
+| **`collection`**         | The collection which the field belongs to. If the field belongs to a global, this will be null.                                                                                                                       |
+| **`global`**             | The global which the field belongs to. If the field belongs to a collection, this will be null.                                                                                                                       |
 
 #### Return value
 

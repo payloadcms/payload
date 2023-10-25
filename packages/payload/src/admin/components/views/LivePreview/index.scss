@@ -41,18 +41,6 @@
     }
   }
 
-  &__edit {
-    padding-top: calc(var(--base) * 1.5);
-    padding-bottom: base(4);
-    flex-grow: 1;
-    padding-right: calc(var(--base) * 2);
-
-    [dir='rtl'] & {
-      padding-right: 0;
-      padding-left: calc(var(--base) * 2);
-    }
-  }
-
   @include mid-break {
     flex-direction: column;
 
@@ -67,18 +55,6 @@
 
     &__form {
       display: block;
-    }
-
-    &__edit {
-      padding-top: var(--base);
-      padding-bottom: 0;
-      padding-right: var(--gutter-h);
-    }
-  }
-
-  @include small-break {
-    &__edit {
-      padding-top: calc(var(--base) / 2);
     }
   }
 }

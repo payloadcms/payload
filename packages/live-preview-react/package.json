@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "The official live preview React SDK for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",

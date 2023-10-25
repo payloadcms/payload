@@ -12,7 +12,17 @@ export type RichTextFieldProps<Value extends object, AdapterProps> = Omit<
 export type RichTextAdapter<Value extends object = object, AdapterProps = any> = {
   CellComponent: React.FC<CellComponentProps<RichTextField<Value, AdapterProps>>>
   FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps>>
-  afterReadPromise?: (data: {
+  afterReadPromise?: ({
+    field,
+    incomingEditorState,
+    siblingDoc,
+  }: {
+    field: RichTextField<Value, AdapterProps>
+    incomingEditorState: Value
+    siblingDoc: Record<string, unknown>
+  }) => Promise<void> | null
+
+  populationPromise?: (data: {
     currentDepth?: number
     depth: number
     field: RichTextField<Value, AdapterProps>

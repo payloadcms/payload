@@ -18,7 +18,7 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
   options: Options<T>,
 ): Promise<boolean> {
   const { collection: collectionSlug, req = {} as PayloadRequest, token } = options
-  setRequestContext(options.req)
+  setRequestContext(req)
 
   const collection = payload.collections[collectionSlug]
 

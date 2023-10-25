@@ -23,7 +23,9 @@ import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
+import fileExists from '../../uploads/fileExists'
 import { generateFileData } from '../../uploads/generateFileData'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -65,6 +67,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       args =
         (await hook({
           args,
+          collection: args.collection.config,
           context: args.req.context,
           operation: 'create',
         })) || args
@@ -139,10 +142,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     data = await beforeValidate({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: {},
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       overrideAccess,
       req,
@@ -158,6 +162,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
         data =
           (await hook({
+            collection: collectionConfig,
             context: req.context,
             data,
             operation: 'create',
@@ -184,6 +189,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       data =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           data,
           operation: 'create',
@@ -196,11 +202,12 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const resultWithLocales = await beforeChange<Record<string, unknown>>({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: {},
       docWithLocales: {},
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       req,
       skipValidation: shouldSaveDraft,
@@ -293,10 +300,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -311,6 +319,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -322,26 +331,15 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterChange({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       previousDoc: {},
       req,
     })
-
-    // Remove temp files if enabled, as express-fileupload does not do this automatically
-    if (config.upload?.useTempFiles && collectionConfig.upload) {
-      const { files } = req
-      const fileArray = Array.isArray(files) ? files : [files]
-      await mapAsync(fileArray, async ({ file }) => {
-        // Still need this check because this will not be populated if using local API
-        if (file.tempFilePath) {
-          await unlinkFile(file.tempFilePath)
-        }
-      })
-    }
 
     // /////////////////////////////////////
     // afterChange - Collection
@@ -353,6 +351,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
         result =
           (await hook({
+            collection: collectionConfig,
             context: req.context,
             doc: result,
             operation: 'create',
@@ -369,21 +368,12 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'create',
       result,
     })
 
-    // Remove temp files if enabled, as express-fileupload does not do this automatically
-    if (config.upload?.useTempFiles && collectionConfig.upload) {
-      const { files } = req
-      const fileArray = Array.isArray(files) ? files : [files]
-      await mapAsync(fileArray, async ({ file }) => {
-        // Still need this check because this will not be populated if using local API
-        if (file.tempFilePath) {
-          await unlinkFile(file.tempFilePath)
-        }
-      })
-    }
+    await unlinkTempFiles({ collectionConfig, config, req })
 
     // /////////////////////////////////////
     // Return results

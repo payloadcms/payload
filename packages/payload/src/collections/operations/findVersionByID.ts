@@ -93,6 +93,7 @@ async function findVersionByID<T extends TypeWithID = any>(
 
       result.version =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result.version,
           query: fullWhere,
@@ -105,11 +106,12 @@ async function findVersionByID<T extends TypeWithID = any>(
     // /////////////////////////////////////
 
     result.version = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       currentDepth,
       depth,
       doc: result.version,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -124,6 +126,7 @@ async function findVersionByID<T extends TypeWithID = any>(
 
       result.version =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result.version,
           query: fullWhere,

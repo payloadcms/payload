@@ -540,6 +540,48 @@ describe('Collections - Uploads', () => {
 
     expect(await fileExists(path.join(__dirname, doc.filename))).toBe(false)
   })
+
+  describe('filesRequiredOnCreate', () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
+      expect(
+        async () =>
+          await payload.create({
+            // @ts-ignore
+            collection: 'optional-file',
+            data: {},
+          }),
+      ).not.toThrow()
+    })
+
+    it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
+      await expect(async () =>
+        payload.create({
+          // @ts-ignore
+          collection: 'required-file',
+          data: {},
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({
+          name: 'MissingFile',
+          message: 'No files were uploaded.',
+        }),
+      )
+    })
+    it('should throw an error if no file and filesRequiredOnCreate is not defined', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: mediaSlug,
+          data: {},
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({
+          name: 'MissingFile',
+          message: 'No files were uploaded.',
+        }),
+      )
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {

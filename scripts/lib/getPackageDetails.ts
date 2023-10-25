@@ -8,17 +8,27 @@ const git = simpleGit()
 const packagesDir = path.resolve(__dirname, '../../packages')
 
 export type PackageDetails = {
+  commitMessage: string
   name: string
   newCommits: number
   shortName: string
   packagePath: string
+  prevGitTag: string
+  prevGitTagHash: string
   publishedVersion: string
   publishDate: string
   version: string
 }
 
-export const getPackageDetails = async (): Promise<PackageDetails[]> => {
-  const packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
+export const getPackageDetails = async (pkg?: string): Promise<PackageDetails[]> => {
+  let packageDirs: string[] = []
+  if (pkg) {
+    packageDirs = fse.readdirSync(packagesDir).filter((d) => d === pkg)
+  } else {
+    packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
+  }
+  console.log(packageDirs)
+
   const packageDetails = await Promise.all(
     packageDirs.map(async (dirName) => {
       const packageJson = await fse.readJson(`${packagesDir}/${dirName}/package.json`)
@@ -43,10 +53,13 @@ export const getPackageDetails = async (): Promise<PackageDetails[]> => {
       })
 
       return {
+        commitMessage: newCommits.latest?.message ?? '',
         name: packageJson.name as string,
         newCommits: newCommits.total,
         shortName: dirName,
         packagePath: `packages/${dirName}`,
+        prevGitTag,
+        prevGitTagHash,
         publishedVersion,
         publishDate,
         version: packageJson.version,
@@ -64,15 +77,20 @@ export const showPackageDetails = (details: PackageDetails[]) => {
 
 ${details
   .map((p) => {
-    const name = p?.newCommits ? chalk.bold.green(p?.shortName.padEnd(28)) : p?.shortName.padEnd(28)
-    const publishData = `${p?.publishedVersion} at ${p?.publishDate
-      .split(':')
-      .slice(0, 2)
-      .join(':')
-      .replace('T', ' ')}`
-    const newCommits = `${p?.newCommits ? `${chalk.bold.green(p?.newCommits)} new commits` : ''}`
+    const name = p?.newCommits
+      ? chalk.bold.green(p?.shortName.padEnd(28))
+      : chalk.dim(p?.shortName.padEnd(28))
+    const publishData = `${p?.publishedVersion.padEnd(8)}${p?.publishDate.split('T')[0]}`
+    const newCommits = p?.newCommits ? chalk.bold.green(`⇡${p?.newCommits}  `) : '    '
+    const commitMessage = p?.commitMessage
+      ? chalk.dim(
+          p.commitMessage.length < 57
+            ? p.commitMessage
+            : p.commitMessage.substring(0, 60).concat('...'),
+        )
+      : ''
 
-    return `  ${name}${publishData}    ${newCommits}`
+    return `  ${name}${newCommits}${publishData}    ${commitMessage}`
   })
   .join('\n')}
 

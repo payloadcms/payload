@@ -23,7 +23,7 @@ export const POST = `
           title
         }
         createdAt
-        publishedOn
+        publishedAt
         populatedAuthors {
           id
           name

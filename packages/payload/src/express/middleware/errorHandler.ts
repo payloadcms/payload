@@ -47,11 +47,17 @@ const errorHandler =
         err,
         response,
         req.context,
+        req.collection.config,
       )) || { response, status })
     }
 
     if (typeof config.hooks.afterError === 'function') {
-      ;({ response, status } = (await config.hooks.afterError(err, response, req.context)) || {
+      ;({ response, status } = (await config.hooks.afterError(
+        err,
+        response,
+        req.context,
+        req.collection.config,
+      )) || {
         response,
         status,
       })

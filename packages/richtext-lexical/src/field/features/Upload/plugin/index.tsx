@@ -1,3 +1,4 @@
+'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
 import { COMMAND_PRIORITY_EDITOR, type LexicalCommand, createCommand } from 'lexical'

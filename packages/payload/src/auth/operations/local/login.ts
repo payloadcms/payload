@@ -41,7 +41,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     res,
     showHiddenFields,
   } = options
-  setRequestContext(options.req)
+  setRequestContext(req)
 
   const collection = payload.collections[collectionSlug]
 

@@ -129,7 +129,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 // STYLE MIXINS
 //////////////////////////////
 
-@mixin blur-bg($color: var(--theme-bg)) {
+@mixin blur-bg($color: var(--theme-bg), $opacity: 0.75) {
   &:before,
   &:after {
     content: ' ';
@@ -142,12 +142,16 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
   &:before {
     background: $color;
-    opacity: 0.85;
+    opacity: $opacity;
   }
 
   &:after {
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
   }
+}
+
+@mixin blur-bg-light {
+  @include blur-bg(var(--theme-bg), 0.3);
 }
 
 @mixin formInput() {

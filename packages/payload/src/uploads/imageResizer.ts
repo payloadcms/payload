@@ -1,4 +1,5 @@
 import type { UploadedFile } from 'express-fileupload'
+import type { OutputInfo } from 'sharp'
 
 import { fromBuffer } from 'file-type'
 import fs from 'fs'
@@ -65,7 +66,7 @@ const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
  */
 const createImageName = (
   outputImageName: string,
-  { height, width }: sharp.OutputInfo,
+  { height, width }: OutputInfo,
   extension: string,
 ) => `${outputImageName}-${width}x${height}.${extension}`
 

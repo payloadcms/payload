@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 
 const baseClass = 'floating-select-toolbar-popup__dropdown'

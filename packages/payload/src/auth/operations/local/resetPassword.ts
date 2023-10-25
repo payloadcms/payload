@@ -24,7 +24,8 @@ async function localResetPassword<T extends keyof GeneratedTypes['collections']>
   options: Options<T>,
 ): Promise<Result> {
   const { collection: collectionSlug, data, overrideAccess, req = {} as PayloadRequest } = options
-  setRequestContext(options.req)
+
+  setRequestContext(req)
 
   const collection = payload.collections[collectionSlug]
 

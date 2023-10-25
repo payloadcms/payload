@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 
 import type { PluginConfig } from '../types'
+
 import formatBreadcrumb from './formatBreadcrumb'
 import getParents from './getParents'
 

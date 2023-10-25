@@ -25,10 +25,19 @@ export default buildConfigWithDefaults({
       },
     })
 
+    const blocksField = [
+      {
+        blockType: 'block',
+        localized: 'text',
+        text: 'text',
+      },
+    ]
+
     const { id: draftID } = await payload.create({
       collection: draftSlug,
       data: {
         id: 1,
+        blocksField,
         description: 'draft description',
         radio: 'test',
         title: 'draft title',
@@ -41,6 +50,7 @@ export default buildConfigWithDefaults({
       data: {
         id: 2,
         _status: 'published',
+        blocksField,
         description: 'published description',
         radio: 'test',
         title: 'published title',
@@ -51,6 +61,7 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: draftSlug,
       data: {
+        blocksField,
         description: 'published description',
         title: titleToDelete,
       },
