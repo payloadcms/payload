@@ -41,13 +41,13 @@ describe('configToJSONSchema', () => {
             additionalProperties: false,
             properties: {
               id: {
-                type: 'string',
+                type: ['string', 'null'],
               },
               someRequiredField: {
                 type: 'string',
               },
             },
-            required: ['someRequiredField', 'id'],
+            required: ['someRequiredField'],
             type: 'object',
           },
           type: ['array', 'null'],

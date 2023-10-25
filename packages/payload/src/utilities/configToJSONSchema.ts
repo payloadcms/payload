@@ -321,22 +321,13 @@ function fieldsToJSONSchema(
           }
 
           case 'array': {
-            const alteredFields = field.fields.map((subField) => {
-              if ('name' in subField && subField.name === 'id') {
-                return {
-                  ...subField,
-                  required: true,
-                }
-              }
-              return subField
-            })
             fieldSchema = {
               items: {
                 additionalProperties: false,
                 type: 'object',
                 ...fieldsToJSONSchema(
                   collectionIDFieldTypes,
-                  alteredFields,
+                  field.fields,
                   interfaceNameDefinitions,
                 ),
               },
