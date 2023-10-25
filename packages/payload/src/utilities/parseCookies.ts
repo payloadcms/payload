@@ -1,5 +1,7 @@
 import type { Request } from 'express'
 
+import { APIError } from '../errors'
+
 export default function parseCookies(req: Request): { [key: string]: string } {
   const list = {}
   const rc = req.headers.cookie
@@ -14,7 +16,7 @@ export default function parseCookies(req: Request): { [key: string]: string } {
         const decodedValue = decodeURI(encodedValue)
         list[key] = decodedValue
       } catch (e) {
-        console.error(`Error decoding cookie value for key ${key}: ${e}`)
+        throw new APIError(`Error decoding cookie value for key ${key}: ${e}`)
       }
     })
   }
