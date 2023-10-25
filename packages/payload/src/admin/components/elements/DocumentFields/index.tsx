@@ -19,6 +19,7 @@ export const DocumentFields: React.FC<{
   description?: Description
   fieldTypes: FieldTypes
   fields: FieldWithPath[]
+  forceSidebarWrap?: boolean
   hasSavePermission: boolean
   permissions: CollectionPermission | GlobalPermission
 }> = (props) => {
@@ -28,6 +29,7 @@ export const DocumentFields: React.FC<{
     description,
     fieldTypes,
     fields,
+    forceSidebarWrap,
     hasSavePermission,
     permissions,
   } = props
@@ -40,14 +42,15 @@ export const DocumentFields: React.FC<{
     readOnly: !hasSavePermission,
   })
 
-  const hasSidebar = sidebarFields && sidebarFields.length > 0
+  const hasSidebarFields = sidebarFields && sidebarFields.length > 0
 
   return (
     <React.Fragment>
       <div
         className={[
           baseClass,
-          hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+          hasSidebarFields ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+          forceSidebarWrap && `${baseClass}--force-sidebar-wrap`,
         ]
           .filter(Boolean)
           .join(' ')}
@@ -76,7 +79,7 @@ export const DocumentFields: React.FC<{
             {AfterFields || null}
           </Gutter>
         </div>
-        {hasSidebar && (
+        {hasSidebarFields && (
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-fields`}>
