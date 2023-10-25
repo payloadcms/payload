@@ -426,6 +426,20 @@ All Payload fields support the ability to swap in your own React components. So,
 | **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More](#cell-component) |
 | **`Field`**  | Swap out the field itself within all `Edit` views. [More](#field-component)                                                 |
 
+There are fields that support **`Label`** and **`Error`** that are swappable likewise. The main idea of these properties is to extend existing fields without reimplementing them. The only fields that **DON'T** support are [Array](/docs/fields/array), [Blocks](/docs/fields/blocks), [Collapsible](/docs/fields/collapsible), [Group](/docs/fields/group), [Rich Text](/docs/fields/rich-text), [Row](/docs/fields/row), [Tabs](/docs/fields/tabs), and [UI](/docs/fields/ui) Fields.
+
+| Component   | Description                                        |
+| ----------- | -------------------------------------------------- |
+| **`Label`** | Override the default Label in the Field Component. |
+| **`Error`** | Override the default Label in the Field Component. |
+
+Also, there are fields that support BeforeInput and AfterInput. Supported by [Checkbox](/docs/fields/checkbox), [Email](/docs/fields/email), [Number](/docs/fields/number), [Point](/docs/fields/point), [Text](/docs/fields/text), and [Textarea](/docs/fields/textarea) fields.
+
+| Property          | Description                                                                 |
+| ----------------- | --------------------------------------------------------------------------- |
+| **`BeforeInput`** | An array of elements that will be added before `input`/`textarea` elements. |
+| **`AfterInput`**  | An array of elements that will be added after `input`/`textarea` elements.  |
+
 ## Cell Component
 
 These are the props that will be passed to your custom Cell to use in your own components.

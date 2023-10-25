@@ -57,23 +57,6 @@ Set this property to a string that will be used for browser autocomplete.
 
 Override the default text direction of the Admin panel for this field. Set to `true` to force right-to-left text direction.
 
-**`components`**
-
-In addition to the default [field admin components](/docs/admin/components#fields), the Text field type allows for more components swapping. For more information, [click here](#custom-components).
-
-#### Custom components
-
-The text field supports the ability to swap in your own React components. In order to highly customize your fields, you can replace parts of the text field component.
-
-**Text field support the following custom components:**
-
-| Component          | Description                                                                                                                                                                 |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Label`**        | Override the default Label component.                                                                                                                                       |
-| **`Error`**        | Override the default Error component.                                                                                                                                       |
-| **`BeforeInput`**  | Insert a component before the input tag. It's very useful when you want to add an additional component to the input using absolute position (eg: a button for clear input). |
-| **`AfterInput`**   | Insert a component after the input tag.                                                                                                                                     |
-
 ### Example
 
 `collections/ExampleCollection.ts`
