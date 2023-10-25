@@ -28,7 +28,7 @@ const fieldIsRequired = (field: Field) => {
   return false
 }
 
-function returnOptionEnums(options: Option[]): string[] {
+function buildOptionEnums(options: Option[]): string[] {
   return options.map((option) => {
     if (typeof option === 'object' && 'value' in option) {
       return option.value
@@ -134,7 +134,7 @@ function fieldsToJSONSchema(
 
           case 'radio': {
             fieldSchema = {
-              enum: returnOptionEnums(field.options),
+              enum: buildOptionEnums(field.options),
               type: withNullableType('string', isRequired),
             }
 
@@ -142,7 +142,7 @@ function fieldsToJSONSchema(
           }
 
           case 'select': {
-            const optionEnums = returnOptionEnums(field.options)
+            const optionEnums = buildOptionEnums(field.options)
 
             if (field.hasMany) {
               fieldSchema = {
