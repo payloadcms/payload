@@ -1,1 +1,1 @@
-export const s3Adapter = () => ({})
+export const s3Adapter = () => {}
