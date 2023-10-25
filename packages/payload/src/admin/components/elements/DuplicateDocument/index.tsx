@@ -60,14 +60,6 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         if ('createdAt' in data) delete data.createdAt
         if ('updatedAt' in data) delete data.updatedAt
 
-        if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
-          data = await collection.admin.hooks.beforeDuplicate({
-            collection,
-            data,
-            locale,
-          })
-        }
-
         const result = await requests.post(`${serverURL}${api}/${slug}`, {
           body: JSON.stringify(data),
           headers: {
@@ -112,7 +104,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
             }
 
             if (!duplicateID) {
-              duplicateID = await create(localization.defaultLocale)
+              duplicateID = await create(locale)
             } else {
               const patchResult = await requests.patch(
                 `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`,
