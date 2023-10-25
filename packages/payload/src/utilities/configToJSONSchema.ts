@@ -63,10 +63,11 @@ function generateEntitySchemas(
 function withNullableType(
   fieldType: JSONSchema4TypeName,
   isRequired: boolean,
-): JSONSchema4TypeName[] {
+): JSONSchema4TypeName | JSONSchema4TypeName[] {
   const fieldTypes = [fieldType]
-  if (isRequired) return fieldTypes
-  return fieldTypes.includes('null') ? fieldTypes : [...fieldTypes, 'null']
+  if (isRequired) return fieldType
+  fieldTypes.push('null')
+  return fieldTypes
 }
 
 function fieldsToJSONSchema(
@@ -86,6 +87,7 @@ function fieldsToJSONSchema(
       fields.reduce((fieldSchemas, field) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
         if (isRequired) requiredFieldNames.add(field.name)
+
         let fieldSchema: JSONSchema4
         switch (field.type) {
           case 'text':
@@ -319,13 +321,22 @@ function fieldsToJSONSchema(
           }
 
           case 'array': {
+            const alteredFields = field.fields.map((subField) => {
+              if ('name' in subField && subField.name === 'id') {
+                return {
+                  ...subField,
+                  required: true,
+                }
+              }
+              return subField
+            })
             fieldSchema = {
               items: {
                 additionalProperties: false,
                 type: 'object',
                 ...fieldsToJSONSchema(
                   collectionIDFieldTypes,
-                  field.fields,
+                  alteredFields,
                   interfaceNameDefinitions,
                 ),
               },
