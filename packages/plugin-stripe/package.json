@@ -10,8 +10,8 @@
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
     "test": "echo 'No tests available.'",
-    "clean": "rimraf dist",
     "prepublishOnly": "yarn clean && yarn build"
   },
   "keywords": [
