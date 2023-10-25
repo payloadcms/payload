@@ -29,7 +29,7 @@ describe('configToJSONSchema', () => {
 
     const sanitizedConfig = sanitizeConfig(config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
-    console.log(JSON.stringify(schema?.definitions?.test))
+
     expect(schema?.definitions?.test).toStrictEqual({
       additionalProperties: false,
       properties: {
