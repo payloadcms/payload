@@ -6,13 +6,12 @@
   "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "test": "jest",
-    "build:watch": "tsc -w",
-    "lint": "eslint src",
-    "lint:fix": "eslint --fix --ext .ts,.tsx src",
-    "clean": "rimraf dist && rimraf dev/yarn.lock",
-    "prepublishOnly": "yarn clean && yarn build && yarn test"
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo} && rimraf dev/yarn.lock",
+    "prepublishOnly": "pnpm clean && pnpm build && pnpm test",
+    "test": "jest"
   },
   "peerDependencies": {
     "payload": "^1.8.2 || ^2.0.0"
