@@ -88,36 +88,32 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       let abort = false
 
       if (localization) {
-        duplicateID = await create(localization.defaultLocale)
-        if (!duplicateID) {
-          return
-        }
+        await localization.localeCodes.reduce(async (priorLocalePatch, locale) => {
+          await priorLocalePatch
 
-        await localization.localeCodes
-          .filter((locale) => locale !== localization.defaultLocale)
-          .reduce(async (priorLocalePatch, locale) => {
-            await priorLocalePatch
+          if (!abort) {
+            const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              params: {
+                depth: 0,
+                locale,
+              },
+            })
+            let localizedDoc = await res.json()
 
-            if (!abort) {
-              const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-                headers: {
-                  'Accept-Language': i18n.language,
-                },
-                params: {
-                  depth: 0,
-                  locale,
-                },
+            if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
+              localizedDoc = await collection.admin.hooks.beforeDuplicate({
+                collection,
+                data: localizedDoc,
+                locale,
               })
-              let localizedDoc = await res.json()
+            }
 
-              if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
-                localizedDoc = await collection.admin.hooks.beforeDuplicate({
-                  collection,
-                  data: localizedDoc,
-                  locale,
-                })
-              }
-
+            if (!duplicateID) {
+              duplicateID = await create(localization.defaultLocale)
+            } else {
               const patchResult = await requests.patch(
                 `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`,
                 {
@@ -134,7 +130,8 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
                 json.errors.forEach((error) => toast.error(error.message))
               }
             }
-          }, Promise.resolve())
+          }
+        }, Promise.resolve())
 
         if (abort && duplicateID) {
           // delete the duplicate doc to prevent incomplete
