@@ -1,4 +1,4 @@
-import type { JSONSchema4 } from 'json-schema'
+import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
 import { singular } from 'pluralize'
 
@@ -11,17 +11,17 @@ import { fieldAffectsData, tabHasName } from '../fields/config/types'
 import { deepCopyObject } from './deepCopyObject'
 import { toWords } from './formatLabels'
 
-const propertyIsRequired = (field: Field) => {
+const fieldIsRequired = (field: Field) => {
   if (fieldAffectsData(field) && 'required' in field && field.required === true) return true
 
   if ('fields' in field && field.type !== 'array') {
     if (field.admin?.condition || field.access?.read) return false
-    return field.fields.find((subField) => propertyIsRequired(subField))
+    return field.fields.find((subField) => fieldIsRequired(subField))
   }
 
   if (field.type === 'tabs') {
     return field.tabs.some(
-      (tab) => 'name' in tab && tab.fields.find((subField) => propertyIsRequired(subField)),
+      (tab) => 'name' in tab && tab.fields.find((subField) => fieldIsRequired(subField)),
     )
   }
 
@@ -60,6 +60,15 @@ function generateEntitySchemas(
   }
 }
 
+function withNullableType(
+  fieldType: JSONSchema4TypeName,
+  isRequired: boolean,
+): JSONSchema4TypeName[] {
+  const fieldTypes = [fieldType]
+  if (isRequired) return fieldTypes
+  return fieldTypes.includes('null') ? fieldTypes : [...fieldTypes, 'null']
+}
+
 function fieldsToJSONSchema(
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
   fields: Field[],
@@ -70,14 +79,13 @@ function fieldsToJSONSchema(
   }
   required: string[]
 } {
-  // required fields for a schema (could be for a nested schema)
-  const requiredFields = new Set<string>(
-    fields.filter(propertyIsRequired).map((field) => (fieldAffectsData(field) ? field.name : '')),
-  )
+  const requiredFieldNames = new Set<string>()
 
   return {
     properties: Object.fromEntries(
       fields.reduce((fieldSchemas, field) => {
+        const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
+        if (isRequired) requiredFieldNames.add(field.name)
         let fieldSchema: JSONSchema4
         switch (field.type) {
           case 'text':
@@ -85,35 +93,30 @@ function fieldsToJSONSchema(
           case 'code':
           case 'email':
           case 'date': {
-            fieldSchema = { type: 'string' }
+            fieldSchema = { type: withNullableType('string', isRequired) }
             break
           }
 
           case 'number': {
             if (field.hasMany === true) {
-              fieldSchema = { items: { type: 'number' }, type: 'array' }
+              fieldSchema = {
+                items: { type: 'number' },
+                type: withNullableType('array', isRequired),
+              }
             } else {
-              fieldSchema = { type: 'number' }
+              fieldSchema = { type: withNullableType('number', isRequired) }
             }
             break
           }
 
           case 'checkbox': {
-            fieldSchema = { type: 'boolean' }
+            fieldSchema = { type: withNullableType('boolean', isRequired) }
             break
           }
 
           case 'json': {
-            // https://www.rfc-editor.org/rfc/rfc7159#section-3
             fieldSchema = {
-              oneOf: [
-                { type: 'object' },
-                { type: 'array' },
-                { type: 'string' },
-                { type: 'number' },
-                { type: 'boolean' },
-                { type: 'null' },
-              ],
+              type: ['object', 'array', 'string', 'number', 'boolean', 'null'],
             }
             break
           }
@@ -123,7 +126,7 @@ function fieldsToJSONSchema(
               items: {
                 type: 'object',
               },
-              type: 'array',
+              type: withNullableType('array', isRequired),
             }
 
             break
@@ -132,25 +135,28 @@ function fieldsToJSONSchema(
           case 'radio': {
             fieldSchema = {
               enum: returnOptionEnums(field.options),
-              type: 'string',
+              type: withNullableType('string', isRequired),
             }
 
             break
           }
 
           case 'select': {
-            const selectType: JSONSchema4 = {
-              enum: returnOptionEnums(field.options),
-              type: 'string',
-            }
+            const optionEnums = returnOptionEnums(field.options)
 
             if (field.hasMany) {
               fieldSchema = {
-                items: selectType,
-                type: 'array',
+                items: {
+                  enum: optionEnums,
+                  type: 'string',
+                },
+                type: withNullableType('array', isRequired),
               }
             } else {
-              fieldSchema = selectType
+              fieldSchema = {
+                enum: optionEnums,
+                type: withNullableType('string', isRequired),
+              }
             }
 
             break
@@ -168,7 +174,7 @@ function fieldsToJSONSchema(
               ],
               maxItems: 2,
               minItems: 2,
-              type: 'array',
+              type: withNullableType('array', isRequired),
             }
             break
           }
@@ -177,48 +183,31 @@ function fieldsToJSONSchema(
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
                 fieldSchema = {
-                  oneOf: [
-                    {
-                      items: {
-                        oneOf: field.relationTo.map((relation) => {
-                          return {
-                            additionalProperties: false,
-                            properties: {
-                              relationTo: {
-                                const: relation,
-                              },
-                              value: {
+                  items: {
+                    oneOf: field.relationTo.map((relation) => {
+                      return {
+                        additionalProperties: false,
+                        properties: {
+                          relationTo: {
+                            const: relation,
+                          },
+                          value: {
+                            oneOf: [
+                              {
                                 type: collectionIDFieldTypes[relation],
                               },
-                            },
-                            required: ['value', 'relationTo'],
-                            type: 'object',
-                          }
-                        }),
-                      },
-                      type: 'array',
-                    },
-                    {
-                      items: {
-                        oneOf: field.relationTo.map((relation) => {
-                          return {
-                            additionalProperties: false,
-                            properties: {
-                              relationTo: {
-                                const: relation,
-                              },
-                              value: {
+                              {
                                 $ref: `#/definitions/${relation}`,
                               },
-                            },
-                            required: ['value', 'relationTo'],
-                            type: 'object',
-                          }
-                        }),
-                      },
-                      type: 'array',
-                    },
-                  ],
+                            ],
+                          },
+                        },
+                        required: ['value', 'relationTo'],
+                        type: 'object',
+                      }
+                    }),
+                  },
+                  type: withNullableType('array', isRequired),
                 }
               } else {
                 fieldSchema = {
@@ -241,33 +230,30 @@ function fieldsToJSONSchema(
                         },
                       },
                       required: ['value', 'relationTo'],
-                      type: 'object',
+                      type: withNullableType('object', isRequired),
                     }
                   }),
                 }
               }
             } else if (field.hasMany) {
               fieldSchema = {
-                oneOf: [
-                  {
-                    items: {
+                items: {
+                  oneOf: [
+                    {
                       type: collectionIDFieldTypes[field.relationTo],
                     },
-                    type: 'array',
-                  },
-                  {
-                    items: {
+                    {
                       $ref: `#/definitions/${field.relationTo}`,
                     },
-                    type: 'array',
-                  },
-                ],
+                  ],
+                },
+                type: withNullableType('array', isRequired),
               }
             } else {
               fieldSchema = {
                 oneOf: [
                   {
-                    type: collectionIDFieldTypes[field.relationTo],
+                    type: withNullableType(collectionIDFieldTypes[field.relationTo], isRequired),
                   },
                   {
                     $ref: `#/definitions/${field.relationTo}`,
@@ -290,6 +276,7 @@ function fieldsToJSONSchema(
                 },
               ],
             }
+            if (!isRequired) fieldSchema.oneOf.push({ type: 'null' })
             break
           }
 
@@ -326,7 +313,7 @@ function fieldsToJSONSchema(
                   return blockSchema
                 }),
               },
-              type: 'array',
+              type: withNullableType('array', isRequired),
             }
             break
           }
@@ -342,7 +329,7 @@ function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                 ),
               },
-              type: 'array',
+              type: withNullableType('array', isRequired),
             }
 
             if (field.interfaceName) {
@@ -366,7 +353,7 @@ function fieldsToJSONSchema(
               fieldSchemas.set(propName, propSchema)
             })
             childSchema.required.forEach((propName) => {
-              requiredFields.add(propName)
+              requiredFieldNames.add(propName)
             })
             break
           }
@@ -385,13 +372,13 @@ function fieldsToJSONSchema(
                   type: 'object',
                   ...childSchema,
                 })
-                requiredFields.add(tab.name)
+                requiredFieldNames.add(tab.name)
               } else {
                 Object.entries(childSchema.properties).forEach(([propName, propSchema]) => {
                   fieldSchemas.set(propName, propSchema)
                 })
                 childSchema.required.forEach((propName) => {
-                  requiredFields.add(propName)
+                  requiredFieldNames.add(propName)
                 })
               }
             })
@@ -427,7 +414,7 @@ function fieldsToJSONSchema(
         return fieldSchemas
       }, new Map<string, JSONSchema4>()),
     ),
-    required: Array.from(requiredFields),
+    required: Array.from(requiredFieldNames),
   }
 }
 

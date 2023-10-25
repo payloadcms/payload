@@ -194,7 +194,7 @@ const TabsField: React.FC<Props> = (props) => {
                   key={String(activeTabConfig.label)}
                   margins="small"
                   permissions={
-                    tabHasName(activeTabConfig)
+                    tabHasName(activeTabConfig) && permissions?.[activeTabConfig.name]
                       ? permissions[activeTabConfig.name].fields
                       : permissions
                   }
