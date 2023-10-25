@@ -1,9 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field } from 'payload/types'
-
 import { relations } from 'drizzle-orm'
+import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
 import {
   index,
   integer,
@@ -12,8 +10,10 @@ import {
   serial,
   timestamp,
   unique,
+  uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
+import type { Field } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
@@ -81,7 +81,10 @@ export const buildTable = ({
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
   let idColType = 'integer'
 
-  if (idField) {
+  if (adapter.idType === 'uuid') {
+    idColType = 'uuid'
+    columns.id = uuid('id').defaultRandom().primaryKey()
+  } else if (idField) {
     if (idField.type === 'number') {
       idColType = 'numeric'
       columns.id = numeric('id').primaryKey()
@@ -246,7 +249,7 @@ export const buildTable = ({
 
       relationships.forEach((relationTo) => {
         const formattedRelationTo = toSnakeCase(relationTo)
-        let colType = 'integer'
+        let colType = adapter.idType === 'uuid' ? 'uuid' : 'integer'
         const relatedCollectionCustomID = adapter.payload.collections[
           relationTo
         ].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id')

@@ -1,11 +1,10 @@
 /* eslint-disable no-param-reassign */
 import type { SQL } from 'drizzle-orm'
-import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
-
 import { and, eq, sql } from 'drizzle-orm'
+import type { Field, FieldAffectingData, NumberField, TabAsField, TextField } from 'payload/types'
+import { fieldAffectsData, tabHasName } from 'payload/types'
 import { alias } from 'drizzle-orm/pg-core'
 import { APIError } from 'payload/errors'
-import { fieldAffectsData, tabHasName } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'
 import toSnakeCase from 'to-snake-case'
 import { v4 as uuid } from 'uuid'
@@ -83,8 +82,8 @@ export const getTableColumnFromPath = ({
       constraints,
       field: {
         name: 'id',
-        type: 'number',
-      },
+        type: adapter.idType === 'uuid' ? 'text' : 'number',
+      } as TextField | NumberField,
       table: adapter.tables[newTableName],
     }
   }

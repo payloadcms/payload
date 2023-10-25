@@ -15,6 +15,7 @@ export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
   migrationDir?: string
+  idType?: 'serial' | 'uuid'
   pool: PoolConfig
   push?: boolean
 }
@@ -49,6 +50,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
   pool: Pool
+  idType: Args['idType']
   poolOptions: Args['pool']
   push: boolean
   relations: Record<string, GenericRelation>

@@ -60,6 +60,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       schema: {},
       sessions: {},
       tables: {},
+      idType: args.idType || 'serial',
 
       // DatabaseAdapter
       beginTransaction,
@@ -70,7 +71,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       createGlobalVersion,
       createMigration,
       createVersion,
-      defaultIDType: 'number',
+      defaultIDType: args.idType === 'serial' ? 'number' : 'text',
       deleteMany,
       deleteOne,
       deleteVersions,
