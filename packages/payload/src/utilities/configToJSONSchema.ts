@@ -12,17 +12,25 @@ import { deepCopyObject } from './deepCopyObject'
 import { toWords } from './formatLabels'
 
 const fieldIsRequired = (field: Field) => {
-  if (fieldAffectsData(field) && 'required' in field && field.required === true) return true
+  const isConditional = Boolean(field?.admin && field?.admin?.condition)
+  if (isConditional) return false
 
+  const isMarkedRequired = 'required' in field && field.required === true
+  if (fieldAffectsData(field) && isMarkedRequired) return true
+
+  // if any group subfields are required, this field is then required
   if ('fields' in field && field.type !== 'array') {
-    if (field.admin?.condition || field.access?.read) return false
-    return field.fields.find((subField) => fieldIsRequired(subField))
+    return field.fields.some((subField) => fieldIsRequired(subField))
   }
 
+  // if any tab subfields have required fields, this field is then required
   if (field.type === 'tabs') {
-    return field.tabs.some(
-      (tab) => 'name' in tab && tab.fields.find((subField) => fieldIsRequired(subField)),
-    )
+    return field.tabs.some((tab) => {
+      if ('name' in tab) {
+        return tab.fields.some((subField) => fieldIsRequired(subField))
+      }
+      return false
+    })
   }
 
   return false
