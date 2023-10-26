@@ -53,7 +53,7 @@ const DateTime: React.FC<Props> = (props) => {
 
   const onChange = (incomingDate: Date) => {
     const newDate = incomingDate
-    if (['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
+    if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
       const tzOffset = incomingDate.getTimezoneOffset() / 60
       newDate.setHours(12 - tzOffset, 0)
     }
@@ -103,7 +103,6 @@ const DateTime: React.FC<Props> = (props) => {
           adjustDateOnChange
           dropdownMode="select"
           locale={locale}
-          onChange={(val) => onChange(val)}
           popperModifiers={[
             {
               name: 'preventOverflow',
