@@ -1,1 +1,1 @@
-export const gcsAdapter = () => ({})
+export const gcsAdapter = () => {}
