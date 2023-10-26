@@ -18,12 +18,12 @@ const fieldIsRequired = (field: Field) => {
   const isMarkedRequired = 'required' in field && field.required === true
   if (fieldAffectsData(field) && isMarkedRequired) return true
 
-  // if any group subfields are required, this field is then required
+  // if any subfields are required, this field is required
   if ('fields' in field && field.type !== 'array') {
     return field.fields.some((subField) => fieldIsRequired(subField))
   }
 
-  // if any tab subfields have required fields, this field is then required
+  // if any tab subfields have required fields, this field is required
   if (field.type === 'tabs') {
     return field.tabs.some((tab) => {
       if ('name' in tab) {
