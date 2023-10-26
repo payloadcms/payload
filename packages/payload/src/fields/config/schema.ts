@@ -459,6 +459,8 @@ export const date = baseField.keys({
     components: baseAdminComponentFields.keys({
       Label: componentSchema,
       Error: componentSchema,
+      BeforeInput: joi.array().items(componentSchema),
+      AfterInput: joi.array().items(componentSchema),
     }),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),

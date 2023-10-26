@@ -28,7 +28,7 @@ const DateTime: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
-      components: { Error, Label } = {},
+      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     label,
     path: pathFromProps,
@@ -77,6 +77,7 @@ const DateTime: React.FC<Props> = (props) => {
       </div>
       <LabelComp htmlFor={path} label={label} required={required} />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
+        {BeforeInput}
         <DatePicker
           {...date}
           onChange={(incomingDate) => {
@@ -86,6 +87,7 @@ const DateTime: React.FC<Props> = (props) => {
           readOnly={readOnly}
           value={value as Date}
         />
+        {AfterInput}
       </div>
       <FieldDescription description={description} value={value} />
     </div>

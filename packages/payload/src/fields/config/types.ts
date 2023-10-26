@@ -258,6 +258,8 @@ export type DateField = FieldBase & {
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
+      BeforeInput?: React.ReactElement<any>[]
+      AfterInput?: React.ReactElement<any>[]
     }
   }
   type: 'date'
