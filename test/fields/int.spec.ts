@@ -29,7 +29,7 @@ import {
   namedTabText,
   tabsSlug,
 } from './collections/Tabs/constants'
-import { defaultText } from './collections/Text'
+import { defaultText } from './collections/Text/shared'
 
 let client
 let graphQLClient: GraphQLClient
