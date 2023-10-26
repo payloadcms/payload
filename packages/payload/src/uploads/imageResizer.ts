@@ -205,7 +205,12 @@ export default async function resizeAndTransformImageSizes({
         const originalAspectRatio = dimensions.width / dimensions.height
         const targetAspectRatio = imageResizeConfig.width / imageResizeConfig.height
 
-        if (originalAspectRatio !== targetAspectRatio) {
+        if (originalAspectRatio === targetAspectRatio) {
+          resized = resized.resize({
+            height,
+            width,
+          })
+        } else {
           const prioritizeHeight = originalAspectRatio > targetAspectRatio
 
           const { info } = await resized
