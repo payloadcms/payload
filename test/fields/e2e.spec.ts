@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-
 import { expect, test } from '@playwright/test'
 import path from 'path'
 
@@ -137,6 +136,59 @@ describe('fields', () => {
       await page.keyboard.press('Enter')
       await saveDocAndAssert(page)
       await expect(field.locator('.rs__value-container')).toContainText(String(input))
+    })
+  })
+
+  describe('indexed', () => {
+    let url: AdminUrlUtil
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'indexed-fields')
+    })
+
+    test('should display unique constraint error in ui', async () => {
+      const uniqueText = 'uniqueText'
+      await payload.create({
+        collection: 'indexed-fields',
+        data: {
+          text: 'text',
+          uniqueText,
+          group: {
+            unique: uniqueText,
+          },
+        },
+      })
+      await page.goto(url.create)
+
+      await page.locator('#field-text').fill('test')
+      await page.locator('#field-uniqueText').fill(uniqueText)
+
+      // attempt to save
+      await page.locator('#action-save').click()
+
+      // toast error
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: uniqueText',
+      )
+
+      // field specific error
+      await expect(page.locator('.field-type.text.error #field-uniqueText')).toBeVisible()
+
+      // reset first unique field
+      await page.locator('#field-uniqueText').clear()
+
+      // nested in a group error
+      await page.locator('#field-group__unique').fill(uniqueText)
+
+      // attempt to save
+      await page.locator('#action-save').click()
+
+      // toast error
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: group.unique',
+      )
+
+      // field specific error inside group
+      await expect(page.locator('.field-type.text.error #field-group__unique')).toBeVisible()
     })
   })
 

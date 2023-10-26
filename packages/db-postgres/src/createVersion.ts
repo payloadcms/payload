@@ -36,6 +36,7 @@ export async function createVersion<T extends TypeWithID>(
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
     tableName,
+    req,
   })
 
   const table = this.tables[tableName]
@@ -50,7 +51,7 @@ export async function createVersion<T extends TypeWithID>(
         AND ${relationshipsTable.path} = ${'parent'}
         AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
         AND ${table.id} != ${result.id};
-  `)
+    `)
   }
 
   return result
