@@ -45,6 +45,10 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     isMergeableObject: isPlainObject,
   }) as Config
 
+  if (!configWithDefaults.serverURL) {
+    configWithDefaults.serverURL = ''
+  }
+
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
   if (config.localization && config.localization.locales?.length > 0) {
@@ -90,10 +94,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   if (config.globals.length > 0) {
     config.globals = sanitizeGlobals(config as SanitizedConfig)
-  }
-
-  if (typeof config.serverURL === 'undefined') {
-    config.serverURL = ''
   }
 
   if (config.serverURL !== '') {
