@@ -83,6 +83,11 @@ export default buildConfigWithDefaults({
           name: 'description',
           type: 'text',
         },
+        {
+          name: 'localizedCheckbox',
+          type: 'checkbox',
+          localized: true,
+        },
       ],
     },
     ArrayCollection,
