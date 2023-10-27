@@ -2,21 +2,10 @@ import type { Field } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
 
 export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[] => {
-  const globalFields: Field[] = [
-    ...global.fields,
-    {
-      name: 'globalType',
-      admin: {
-        disabled: true,
-      },
-      type: 'text',
-    },
-  ]
-
   const fields: Field[] = [
     {
       name: 'version',
-      fields: globalFields,
+      fields: global.fields,
       type: 'group',
     },
     {

@@ -192,6 +192,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     if (globalConfig.versions) {
+      const { globalType } = result
       result = await saveVersion({
         autosave,
         docWithLocales: {
@@ -204,6 +205,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
         payload,
         req,
       })
+      result.globalType = globalType
     }
 
     // /////////////////////////////////////
