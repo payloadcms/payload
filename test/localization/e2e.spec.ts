@@ -166,6 +166,7 @@ describe('Localization', () => {
     })
 
     test('should duplicate localized checkbox correctly', async () => {
+      await changeLocale(page, defaultLocale)
       await page.goto(url.create)
       await fillValues({ title: englishTitle, description })
       await page.locator('#field-localizedCheckbox').click()

@@ -180,12 +180,10 @@ describe('versions', () => {
     })
 
     test('should restore localized docs correctly', async () => {
-      const locale = 'en'
       const spanishLocale = 'es'
       const spanishTitle = 'spanish title'
       const englishTitle = 'english title'
 
-      await changeLocale(page, locale)
       await page.goto(url.create)
 
       // fill out doc in english
