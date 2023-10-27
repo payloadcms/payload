@@ -100,7 +100,6 @@ const DateTime: React.FC<Props> = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...dateTimePickerProps}
-          adjustDateOnChange
           dropdownMode="select"
           locale={locale}
           popperModifiers={[
