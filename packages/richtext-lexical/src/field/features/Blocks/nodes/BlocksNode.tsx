@@ -1,4 +1,3 @@
-'use client'
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
 import type {
   DOMConversionMap,

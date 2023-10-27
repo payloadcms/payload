@@ -115,6 +115,16 @@ describe('Versions', () => {
         expect(collectionLocalVersionID).toBeDefined()
       })
 
+      it('should properly paginate versions', async () => {
+        const versions = await payload.findVersions({
+          collection,
+          limit: 1,
+        })
+
+        expect(versions.docs).toHaveLength(1)
+        expect(versions.page).toBe(1)
+      })
+
       it('should allow saving multiple versions of models with unique fields', async () => {
         const autosavePost = await payload.create({
           collection,

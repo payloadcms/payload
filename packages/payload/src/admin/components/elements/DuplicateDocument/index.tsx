@@ -85,10 +85,13 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       }
 
       let duplicateID
+      let abort = false
 
       if (localization) {
         duplicateID = await create(localization.defaultLocale)
-        let abort = false
+        if (!duplicateID) {
+          return
+        }
 
         await localization.localeCodes
           .filter((locale) => locale !== localization.defaultLocale)
@@ -133,9 +136,9 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
             }
           }, Promise.resolve())
 
-        if (abort) {
+        if (abort && duplicateID) {
           // delete the duplicate doc to prevent incomplete
-          await requests.delete(`${serverURL}${api}/${slug}/${id}`, {
+          await requests.delete(`${serverURL}${api}/${slug}/${duplicateID}`, {
             headers: {
               'Accept-Language': i18n.language,
             },
@@ -143,6 +146,10 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         }
       } else {
         duplicateID = await create()
+      }
+
+      if (!duplicateID) {
+        return
       }
 
       toast.success(

@@ -1,16 +1,17 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { LivePreviewConfig } from '../../../../exports/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
+import type { Field } from '../../../../fields/config/types'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
+import type { FieldTypes } from '../../forms/field-types'
 import type { EditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
+import { DocumentFields } from '../../elements/DocumentFields'
 import { Gutter } from '../../elements/Gutter'
-import RenderFields from '../../forms/RenderFields'
-import { filterFields } from '../../forms/RenderFields/filterFields'
-import { fieldTypes } from '../../forms/field-types'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -25,11 +26,15 @@ import { usePopupWindow } from './usePopupWindow'
 
 const baseClass = 'live-preview'
 
-const PreviewView: React.FC<EditViewProps> = (props) => {
+const PreviewView: React.FC<
+  EditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { i18n, t } = useTranslation('general')
   const { previewWindowType } = useLivePreviewContext()
 
-  const { apiURL, data, permissions } = props
+  const { apiURL, data, fieldTypes, permissions } = props
 
   let collection: SanitizedCollectionConfig
   let global: SanitizedGlobalConfig
@@ -38,6 +43,9 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
   let hasSavePermission: boolean
   let isEditing: boolean
   let id: string
+  let fields: Field[] = []
+  let label: SanitizedGlobalConfig['label']
+  let description: SanitizedGlobalConfig['admin']['description']
 
   if ('collection' in props) {
     collection = props?.collection
@@ -46,24 +54,39 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
     hasSavePermission = props?.hasSavePermission
     isEditing = props?.isEditing
     id = props?.id
+    fields = props?.collection?.fields
   }
 
   if ('global' in props) {
     global = props?.global
+    fields = props?.global?.fields
+    label = props?.global?.label
+    description = props?.global?.admin?.description
+    hasSavePermission = permissions?.update?.permission
   }
-
-  const { fields } = collection
-
-  const sidebarFields = filterFields({
-    fieldSchema: fields,
-    fieldTypes,
-    filter: (field) => field?.admin?.position === 'sidebar',
-    permissions: permissions.fields,
-    readOnly: !hasSavePermission,
-  })
 
   return (
     <Fragment>
+      {collection && (
+        <Meta
+          description={t('editing')}
+          keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
+          title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+            collection.labels.singular,
+            i18n,
+          )}`}
+        />
+      )}
+      {global && (
+        <Meta
+          description={getTranslation(label, i18n)}
+          keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
+          title={getTranslation(label, i18n)}
+        />
+      )}
+      {((collection && !(collection.versions?.drafts && collection.versions?.drafts?.autosave)) ||
+        (global && !(global.versions?.drafts && global.versions?.drafts?.autosave))) &&
+        !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
       <SetStepNav
         collection={collection}
         global={global}
@@ -95,28 +118,14 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
             .filter(Boolean)
             .join(' ')}
         >
-          <Meta
-            description={t('editing')}
-            keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-            title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-              collection.labels.singular,
-              i18n,
-            )}`}
+          <DocumentFields
+            description={description}
+            fieldTypes={fieldTypes}
+            fields={fields}
+            forceSidebarWrap
+            hasSavePermission={hasSavePermission}
+            permissions={permissions}
           />
-          {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
-            !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <Gutter className={`${baseClass}__edit`}>
-            <RenderFields
-              fieldSchema={fields}
-              fieldTypes={fieldTypes}
-              filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
-              permissions={permissions.fields}
-              readOnly={!hasSavePermission}
-            />
-            {sidebarFields && sidebarFields.length > 0 && (
-              <RenderFields fieldTypes={fieldTypes} fields={sidebarFields} />
-            )}
-          </Gutter>
         </div>
         <LivePreview {...props} />
       </div>
@@ -124,7 +133,11 @@ const PreviewView: React.FC<EditViewProps> = (props) => {
   )
 }
 
-export const LivePreviewView: React.FC<EditViewProps> = (props) => {
+export const LivePreviewView: React.FC<
+  EditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const config = useConfig()
   const documentInfo = useDocumentInfo()
   const locale = useLocale()

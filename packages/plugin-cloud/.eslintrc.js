@@ -28,6 +28,13 @@ module.exports = {
         'perfectionist/sort-vue-attributes': 'off',
       },
     },
+    {
+      files: ['**/*.spec.ts'],
+      rules: {
+        'jest/prefer-strict-equal': 'off',
+        'no-console': 'off',
+      },
+    },
   ],
   parserOptions: {
     project: ['./tsconfig.json'],

@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
+import type { FieldTypes } from '../../../forms/field-types'
 import type { GlobalEditViewProps } from '../../types'
 
 import { useAuth } from '../../../utilities/Auth'
@@ -13,7 +14,11 @@ import { globalCustomRoutes } from './custom'
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Unauthorized = lazy(() => import('../../Unauthorized'))
 
-export const GlobalRoutes: React.FC<GlobalEditViewProps> = (props) => {
+export const GlobalRoutes: React.FC<
+  GlobalEditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { global, permissions } = props
 
   const match = useRouteMatch()

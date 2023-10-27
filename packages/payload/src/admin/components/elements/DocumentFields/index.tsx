@@ -3,10 +3,10 @@ import React from 'react'
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
 import type { FieldWithPath } from '../../../../fields/config/types'
 import type { Description } from '../../forms/FieldDescription/types'
+import type { FieldTypes } from '../../forms/field-types'
 
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
-import { fieldTypes } from '../../forms/field-types'
 import { Gutter } from '../Gutter'
 import ViewDescription from '../ViewDescription'
 import './index.scss'
@@ -14,14 +14,25 @@ import './index.scss'
 const baseClass = 'document-fields'
 
 export const DocumentFields: React.FC<{
-  AfterFields?: React.FC
-  BeforeFields?: React.FC
+  AfterFields?: React.ReactNode
+  BeforeFields?: React.ReactNode
   description?: Description
+  fieldTypes: FieldTypes
   fields: FieldWithPath[]
+  forceSidebarWrap?: boolean
   hasSavePermission: boolean
   permissions: CollectionPermission | GlobalPermission
 }> = (props) => {
-  const { AfterFields, BeforeFields, description, fields, hasSavePermission, permissions } = props
+  const {
+    AfterFields,
+    BeforeFields,
+    description,
+    fieldTypes,
+    fields,
+    forceSidebarWrap,
+    hasSavePermission,
+    permissions,
+  } = props
 
   const sidebarFields = filterFields({
     fieldSchema: fields,
@@ -31,14 +42,15 @@ export const DocumentFields: React.FC<{
     readOnly: !hasSavePermission,
   })
 
-  const hasSidebar = sidebarFields && sidebarFields.length > 0
+  const hasSidebarFields = sidebarFields && sidebarFields.length > 0
 
   return (
     <React.Fragment>
       <div
         className={[
           baseClass,
-          hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+          hasSidebarFields ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+          forceSidebarWrap && `${baseClass}--force-sidebar-wrap`,
         ]
           .filter(Boolean)
           .join(' ')}
@@ -52,7 +64,7 @@ export const DocumentFields: React.FC<{
                 </div>
               )}
             </header>
-            {BeforeFields && <BeforeFields />}
+            {BeforeFields || null}
             <RenderFields
               className={`${baseClass}__fields`}
               fieldSchema={fields}
@@ -64,10 +76,10 @@ export const DocumentFields: React.FC<{
               permissions={permissions.fields}
               readOnly={!hasSavePermission}
             />
-            {AfterFields && <AfterFields />}
+            {AfterFields || null}
           </Gutter>
         </div>
-        {hasSidebar && (
+        {hasSidebarFields && (
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-fields`}>

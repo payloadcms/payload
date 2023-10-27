@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../../forms/field-types'
 import type { GlobalEditViewProps } from '../../types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
@@ -10,8 +11,12 @@ import { LeaveWithoutSaving } from '../../../modals/LeaveWithoutSaving'
 import Meta from '../../../utilities/Meta'
 import { SetStepNav } from '../../collections/Edit/SetStepNav'
 
-export const DefaultGlobalEdit: React.FC<GlobalEditViewProps> = (props) => {
-  const { apiURL, data, global, permissions } = props
+export const DefaultGlobalEdit: React.FC<
+  GlobalEditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
+  const { apiURL, data, fieldTypes, global, permissions } = props
   const { i18n } = useTranslation()
 
   const { admin: { description } = {}, fields, label } = global
@@ -37,6 +42,7 @@ export const DefaultGlobalEdit: React.FC<GlobalEditViewProps> = (props) => {
       />
       <DocumentFields
         description={description}
+        fieldTypes={fieldTypes}
         fields={fields}
         hasSavePermission={hasSavePermission}
         permissions={permissions}

@@ -1,6 +1,6 @@
 import type { Config } from 'payload/config'
 
-import { defaults } from 'payload/dist/config/defaults'
+import { defaults } from 'payload/config'
 
 import { payloadCloudEmail } from './email'
 
@@ -11,6 +11,7 @@ describe('email', () => {
   })
 
   beforeEach(() => {
+    // @ts-expect-error No need for db or editor
     defaultConfig = { ...defaults }
   })
 

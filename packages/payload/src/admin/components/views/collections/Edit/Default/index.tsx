@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../../types'
 
 import { getTranslation } from '../../../../../../utilities/getTranslation'
@@ -15,7 +16,11 @@ import './index.scss'
 
 const baseClass = 'collection-default-edit'
 
-export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) => {
+export const DefaultCollectionEdit: React.FC<
+  CollectionEditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { i18n, t } = useTranslation('general')
 
   const {
@@ -25,6 +30,7 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
     data,
     disableActions,
     disableLeaveWithoutSaving,
+    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,
@@ -62,7 +68,7 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
         permissions={permissions}
       />
       <DocumentFields
-        BeforeFields={() => (
+        BeforeFields={
           <Fragment>
             {auth && (
               <Auth
@@ -78,7 +84,8 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
             )}
             {upload && <Upload collection={collection} internalState={internalState} />}
           </Fragment>
-        )}
+        }
+        fieldTypes={fieldTypes}
         fields={fields}
         hasSavePermission={hasSavePermission}
         permissions={permissions}

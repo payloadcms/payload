@@ -1,0 +1,63 @@
+{
+  "name": "@payloadcms/plugin-cloud-storage",
+  "description": "The official cloud storage plugin for Payload CMS",
+  "version": "1.1.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test": "echo \"No tests available.\""
+  },
+  "peerDependencies": {
+    "@aws-sdk/client-s3": "^3.142.0",
+    "@aws-sdk/lib-storage": "^3.267.0",
+    "@azure/storage-blob": "^12.11.0",
+    "@azure/abort-controller": "^1.0.0",
+    "@google-cloud/storage": "^6.4.1",
+    "payload": "^1.7.2 || ^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@aws-sdk/client-s3": {
+      "optional": true
+    },
+    "@aws-sdk/lib-storage": {
+      "optional": true
+    },
+    "@azure/abort-controller": {
+      "optional": true
+    },
+    "@azure/storage-blob": {
+      "optional": true
+    },
+    "@google-cloud/storage": {
+      "optional": true
+    }
+  },
+  "files": [
+    "dist",
+    "*.js",
+    "*.d.ts"
+  ],
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.142.0",
+    "@aws-sdk/lib-storage": "^3.267.0",
+    "@azure/storage-blob": "^12.11.0",
+    "@google-cloud/storage": "^6.4.1",
+    "@types/express": "^4.17.9",
+    "cross-env": "^7.0.3",
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.6",
+    "payload": "workspace:*",
+    "rimraf": "^4.1.2",
+    "ts-node": "^9.1.1",
+    "webpack": "^5.78.0"
+  },
+  "dependencies": {
+    "range-parser": "^1.2.1"
+  }
+}

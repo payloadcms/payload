@@ -1445,7 +1445,7 @@ describe('fields', () => {
       await expect(idHeadings).toHaveCount(1)
     })
 
-    test('should render row fields inline', async () => {
+    test('should render row fields inline and with explicit widths', async () => {
       await page.goto(url.create)
       const fieldA = page.locator('input#field-field_with_width_a')
       await expect(fieldA).toBeVisible()
@@ -1453,9 +1453,38 @@ describe('fields', () => {
       await expect(fieldB).toBeVisible()
       const fieldABox = await fieldA.boundingBox()
       const fieldBBox = await fieldB.boundingBox()
-      // give it some wiggle room of like 2px to account for differences in rendering
+
+      // Check that the top value of the fields are the same
+      // Give it some wiggle room of like 2px to account for differences in rendering
+      const tolerance = 2
+      expect(fieldABox.y).toBeLessThanOrEqual(fieldBBox.y + tolerance)
+
+      // Check that the widths of the fields are the same
       const difference = Math.abs(fieldABox.width - fieldBBox.width)
-      expect(difference).toBeLessThanOrEqual(2)
+      expect(difference).toBeLessThanOrEqual(tolerance)
+    })
+
+    test('should render nested row fields in the correct position ', async () => {
+      await page.goto(url.create)
+
+      // These fields are not given explicit `width` values
+      await page.goto(url.create)
+      const fieldA = page.locator('input#field-field_within_collapsible_a')
+      await expect(fieldA).toBeVisible()
+      const fieldB = page.locator('input#field-field_within_collapsible_b')
+      await expect(fieldB).toBeVisible()
+      const fieldABox = await fieldA.boundingBox()
+      const fieldBBox = await fieldB.boundingBox()
+
+      // Check that the top value of the fields are the same
+      // Give it some wiggle room of like 2px to account for differences in rendering
+      const tolerance = 2
+      expect(fieldABox.y).toBeLessThanOrEqual(fieldBBox.y + tolerance)
+
+      // Check that the widths of the fields are the same
+      const collapsibleDifference = Math.abs(fieldABox.width - fieldBBox.width)
+
+      expect(collapsibleDifference).toBeLessThanOrEqual(tolerance)
     })
   })
 
