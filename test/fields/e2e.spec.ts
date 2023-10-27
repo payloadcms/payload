@@ -9,6 +9,7 @@ import wait from '../../packages/payload/src/utilities/wait'
 import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import { RESTClient } from '../helpers/rest'
 import { collapsibleFieldsSlug } from './collections/Collapsible/shared'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
@@ -19,6 +20,7 @@ import { textDoc, textFieldsSlug } from './collections/Text'
 
 const { afterEach, beforeAll, describe } = test
 
+let client: RESTClient
 let page: Page
 let serverURL
 
@@ -26,6 +28,8 @@ describe('fields', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
+    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1062,6 +1066,100 @@ describe('fields', () => {
       await expect(clearButton).toBeVisible()
       await clearButton.click()
       await expect(dateField).toHaveValue('')
+    })
+
+    describe('localized dates', async () => {
+      describe('EST', () => {
+        test.use({
+          geolocation: {
+            longitude: -83.0458,
+            latitude: 42.3314,
+          },
+          timezoneId: 'America/Detroit',
+        })
+        test('create EST day only date', async () => {
+          await page.goto(url.create)
+          const dateField = page.locator('#field-default input')
+
+          // enter date in default date field
+          await dateField.fill('02/07/2023')
+          await page.locator('#action-save').click()
+
+          // wait for navigation to update route
+          await wait(500)
+
+          // get the ID of the doc
+          const routeSegments = page.url().split('/')
+          const id = routeSegments.pop()
+
+          // fetch the doc (need the date string from the DB)
+          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        })
+      })
+
+      describe('PST', () => {
+        test.use({
+          geolocation: {
+            longitude: -122.419416,
+            latitude: 37.774929,
+          },
+          timezoneId: 'America/Los_Angeles',
+        })
+
+        test('create PDT day only date', async () => {
+          await page.goto(url.create)
+          const dateField = page.locator('#field-default input')
+
+          // enter date in default date field
+          await dateField.fill('02/07/2023')
+          await page.locator('#action-save').click()
+
+          // wait for navigation to update route
+          await wait(500)
+
+          // get the ID of the doc
+          const routeSegments = page.url().split('/')
+          const id = routeSegments.pop()
+
+          // fetch the doc (need the date string from the DB)
+          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        })
+      })
+
+      describe('ST', () => {
+        test.use({
+          geolocation: {
+            longitude: -171.857,
+            latitude: -14.5994,
+          },
+          timezoneId: 'Pacific/Apia',
+        })
+
+        test('create ST day only date', async () => {
+          await page.goto(url.create)
+          const dateField = page.locator('#field-default input')
+
+          // enter date in default date field
+          await dateField.fill('02/07/2023')
+          await page.locator('#action-save').click()
+
+          // wait for navigation to update route
+          await wait(500)
+
+          // get the ID of the doc
+          const routeSegments = page.url().split('/')
+          const id = routeSegments.pop()
+
+          // fetch the doc (need the date string from the DB)
+          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        })
+      })
     })
   })
 
