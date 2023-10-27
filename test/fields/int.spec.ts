@@ -775,6 +775,23 @@ describe('Fields', () => {
 
       expect(blockFieldsFail.docs).toHaveLength(0)
     })
+
+    it('should create when existing block ids are used', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        limit: 1,
+      })
+      const [doc] = blockFields.docs
+
+      const result = await payload.create({
+        collection: 'block-fields',
+        data: {
+          ...doc,
+        },
+      })
+
+      expect(result.id).toBeDefined()
+    })
   })
 
   describe('json', () => {
