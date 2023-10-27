@@ -108,6 +108,7 @@ const CompareVersion: React.FC<Props> = (props) => {
       </div>
       {!errorLoading && (
         <ReactSelect
+          isClearable={false}
           isSearchable={false}
           placeholder={t('selectVersionToCompare')}
           onChange={onChange}

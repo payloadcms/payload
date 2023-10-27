@@ -201,7 +201,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
               baseURL={compareBaseURL}
               parentID={parentID}
               value={compareValue}
-              onChange={(selectedOption) => setCompareValue(selectedOption || mostRecentVersionOption)}
+              onChange={setCompareValue}
             />
             {localization && (
               <SelectLocales
