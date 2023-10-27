@@ -60,6 +60,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       schema: {},
       sessions: {},
       tables: {},
+      fieldConstraints: {},
 
       // DatabaseAdapter
       beginTransaction,
