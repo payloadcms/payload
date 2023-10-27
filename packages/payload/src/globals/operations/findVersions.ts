@@ -85,20 +85,26 @@ async function findVersions<T extends TypeWithVersion<T>>(
     let result = {
       ...paginatedDocs,
       docs: await Promise.all(
-        paginatedDocs.docs.map(async (data) => ({
-          ...data,
-          version: await afterRead({
-            collection: null,
-            context: req.context,
-            depth,
-            doc: data.version,
-            findMany: true,
-            global: globalConfig,
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }),
-        })),
+        paginatedDocs.docs.map(async (data) => {
+          return {
+            ...data,
+            version: await afterRead({
+              collection: null,
+              context: req.context,
+              depth,
+              doc: {
+                ...data.version,
+                // Patch globalType onto version doc
+                globalType: globalConfig.slug,
+              },
+              findMany: true,
+              global: globalConfig,
+              overrideAccess,
+              req,
+              showHiddenFields,
+            }),
+          }
+        }),
       ),
     } as PaginatedDocs<T>
 

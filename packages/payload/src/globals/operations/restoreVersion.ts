@@ -57,6 +57,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
     const rawVersion = versionDocs[0]
 
+    // Patch globalType onto version doc
+    rawVersion.version.globalType = globalConfig.slug
+
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
