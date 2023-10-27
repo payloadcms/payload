@@ -116,6 +116,9 @@ const DefaultNav: React.FC = () => {
           })}
           {Array.isArray(afterNavLinks) &&
             afterNavLinks.map((Component, i) => <Component key={i} />)}
+          <NavLink activeClassName="active" className={`${baseClass}__link`} to={`${admin}/export`}>
+            Export Data
+          </NavLink>
           <div className={`${baseClass}__controls`}>
             <Logout />
           </div>

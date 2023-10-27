@@ -15,6 +15,7 @@ import Unauthorized from '../Unauthorized'
 import { collectionRoutes } from './collections'
 import { customRoutes } from './custom'
 import { globalRoutes } from './globals'
+import Export from '../Export'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Dashboard = lazy(() => import('../Dashboard'))
@@ -172,6 +173,10 @@ export const Routes: React.FC = () => {
                               permissions,
                               user,
                             })}
+                            {/* Export Data Route */}
+                            <Route path={`${match.url}/export`}>
+                              <Export data={collections} />
+                            </Route>
                             <Route path={`${match.url}*`}>
                               <NotFound />
                             </Route>
