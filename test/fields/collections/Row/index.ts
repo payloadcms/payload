@@ -47,6 +47,33 @@ const RowFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          label: 'Collapsible within a row',
+          type: 'collapsible',
+          fields: [
+            {
+              name: 'field_within_collapsible_a',
+              label: 'Field within collapsible',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'Collapsible within a row',
+          type: 'collapsible',
+          fields: [
+            {
+              name: 'field_within_collapsible_b',
+              label: 'Field within collapsible',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

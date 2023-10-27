@@ -31,6 +31,10 @@ const generateLabelFromValue = (
   let relatedDoc: RelationshipValue
   let valueToReturn = '' as any
 
+  if (value === null || typeof value === 'undefined') {
+    return String(value)
+  }
+
   if (Array.isArray(field.relationTo)) {
     if (typeof value === 'object') {
       relation = value.relationTo
@@ -115,8 +119,6 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({
       />
     </div>
   )
-
-  return null
 }
 
 export default Relationship

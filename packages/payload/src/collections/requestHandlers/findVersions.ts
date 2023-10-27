@@ -16,7 +16,7 @@ export default async function findVersionsHandler<T extends TypeWithID = any>(
   next: NextFunction,
 ): Promise<Response<PaginatedDocs<T>> | void> {
   try {
-    let page
+    let page: number | undefined
 
     if (typeof req.query.page === 'string') {
       const parsedPage = parseInt(req.query.page, 10)

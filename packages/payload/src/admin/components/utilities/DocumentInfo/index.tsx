@@ -12,6 +12,7 @@ import type { ContextType, DocumentPermissions, Props, Version } from './types'
 
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
+import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
 
 const Context = createContext({} as ContextType)
@@ -35,6 +36,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const { getPreference, setPreference } = usePreferences()
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
+  const { code } = useLocale()
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null)
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null)
@@ -76,8 +78,9 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       },
     }
 
-    const publishedVersionParams: { depth: number; where: Where } = {
+    const publishedVersionParams: { depth: number; locale: string; where: Where } = {
       depth: 0,
+      locale: code || undefined,
       where: {
         and: [
           {
@@ -192,7 +195,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, global, collection, id, baseURL])
+  }, [i18n, global, collection, id, baseURL, code])
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
@@ -227,16 +230,20 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       const allPreferences = await getDocPreferences()
 
       if (preferencesKey) {
-        setPreference(preferencesKey, {
-          ...allPreferences,
-          fields: {
-            ...(allPreferences?.fields || {}),
-            [path]: {
-              ...allPreferences?.fields?.[path],
-              ...fieldPreferences,
+        try {
+          await setPreference(preferencesKey, {
+            ...allPreferences,
+            fields: {
+              ...(allPreferences?.fields || {}),
+              [path]: {
+                ...allPreferences?.fields?.[path],
+                ...fieldPreferences,
+              },
             },
-          },
-        })
+          })
+        } catch (e) {
+          console.error(e)
+        }
       }
     },
     [setPreference, preferencesKey, getDocPreferences],

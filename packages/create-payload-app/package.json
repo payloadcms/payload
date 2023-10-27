@@ -8,7 +8,7 @@
   "scripts": {
     "build": "pnpm build:swc",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "clean": "rimraf dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
     "test": "jest",
     "prepublishOnly": "pnpm test && pnpm clean && pnpm build"
   },

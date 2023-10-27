@@ -11,7 +11,7 @@ type RecurseRichTextArgs = {
   children: unknown[]
   currentDepth: number
   depth: number
-  field: RichTextField<any[], AdapterArguments>
+  field: RichTextField<any[], AdapterArguments, AdapterArguments>
   overrideAccess: boolean
   promises: Promise<void>[]
   req: PayloadRequest

@@ -122,22 +122,12 @@ export const TableColumnsProvider: React.FC<{
 
   useEffect(() => {
     if (!hasInitialized.current) return
+    const columns = tableColumns.map((c) => ({
+      accessor: c.accessor,
+      active: c.active,
+    }))
 
-    const sync = async () => {
-      const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
-
-      const newPreferences = {
-        ...currentPreferences,
-        columns: tableColumns.map((c) => ({
-          accessor: c.accessor,
-          active: c.active,
-        })),
-      }
-
-      setPreference(preferenceKey, newPreferences)
-    }
-
-    sync()
+    void setPreference(preferenceKey, { columns }, true)
   }, [tableColumns, preferenceKey, setPreference, getPreference])
 
   const setActiveColumns = useCallback(

@@ -9,7 +9,7 @@ import { MediaBlock } from '../../blocks/MediaBlock'
 import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
-import { populatePublishedDate } from '../../hooks/populatePublishedDate'
+import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidatePost } from './hooks/revalidatePost'
 
@@ -25,7 +25,7 @@ export const Posts: CollectionConfig = {
     },
   },
   hooks: {
-    beforeChange: [populatePublishedDate],
+    beforeChange: [populatePublishedAt],
     afterChange: [revalidatePost],
     afterRead: [populateArchiveBlock, populateAuthors],
   },
@@ -54,7 +54,7 @@ export const Posts: CollectionConfig = {
       },
     },
     {
-      name: 'publishedOn',
+      name: 'publishedAt',
       type: 'date',
       admin: {
         position: 'sidebar',
