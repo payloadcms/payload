@@ -56,7 +56,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
           params: {
             depth: 0,
             draft: true,
-            'fallback-locale': locale,
+            'fallback-locale': 'none',
             locale,
           },
         })
@@ -76,7 +76,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         }
 
         const result = await requests[duplicateID ? 'patch' : 'post'](
-          `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}&fallback-locale=${locale}`,
+          `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}&fallback-locale=none`,
           {
             body: JSON.stringify(data),
             headers: {
