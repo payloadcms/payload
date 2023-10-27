@@ -26,10 +26,5 @@ export const findGlobal: FindGlobal = async function findGlobal(
     where,
   })
 
-  if (doc) {
-    doc.globalType = slug
-    return doc
-  }
-
-  return {}
+  return doc || {}
 }
