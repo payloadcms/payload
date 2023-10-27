@@ -1,7 +1,7 @@
 import type { PluginConfig } from '../../../types'
 
 const createCharge = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
-  const { operation, data } = beforeChangeData
+  const { data, operation } = beforeChangeData
 
   let dataWithPaymentDetails = data
 

@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import type { TextField } from 'payload/dist/fields/config/types'
+
 import { Select, useForm } from 'payload/components/forms'
-import { TextField } from 'payload/dist/fields/config/types'
+import React, { useEffect, useState } from 'react'
 
-import { SelectFieldOption } from '../../types'
+import type { SelectFieldOption } from '../../types'
 
-export const DynamicFieldSelector: React.FC<TextField> = props => {
+export const DynamicFieldSelector: React.FC<TextField> = (props) => {
   const { fields, getDataByPath } = useForm()
 
   const [options, setOptions] = useState<SelectFieldOption[]>([])
@@ -18,7 +19,7 @@ export const DynamicFieldSelector: React.FC<TextField> = props => {
     if (fields) {
       const allNonPaymentFields = fields
         .map((block): SelectFieldOption | null => {
-          const { name, label, blockType } = block
+          const { name, blockType, label } = block
 
           if (blockType !== 'payment') {
             return {
@@ -29,7 +30,7 @@ export const DynamicFieldSelector: React.FC<TextField> = props => {
 
           return null
         })
-        .filter(Boolean) as SelectFieldOption[]
+        .filter(Boolean)
       setOptions(allNonPaymentFields)
     }
   }, [fields, getDataByPath])

@@ -1,8 +1,9 @@
 import type { Config } from 'payload/config'
 
-import { generateFormCollection } from './collections/Forms'
-import { generateSubmissionCollection } from './collections/FormSubmissions'
 import type { PluginConfig } from './types'
+
+import { generateSubmissionCollection } from './collections/FormSubmissions'
+import { generateFormCollection } from './collections/Forms'
 
 export { fields } from './collections/Forms/fields'
 export { getPaymentTotal } from './utilities/getPaymentTotal'
@@ -13,16 +14,16 @@ const FormBuilder =
     const formConfig: PluginConfig = {
       ...incomingFormConfig,
       fields: {
+        checkbox: true,
+        country: true,
+        email: true,
+        message: true,
+        number: true,
+        payment: false,
+        select: true,
+        state: true,
         text: true,
         textarea: true,
-        select: true,
-        email: true,
-        state: true,
-        country: true,
-        number: true,
-        checkbox: true,
-        message: true,
-        payment: false,
         ...incomingFormConfig.fields,
       },
     }

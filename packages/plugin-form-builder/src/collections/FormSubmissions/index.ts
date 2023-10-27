@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 
 import type { PluginConfig } from '../../types'
+
 import createCharge from './hooks/createCharge'
 import sendEmail from './hooks/sendEmail'
 
@@ -8,51 +9,41 @@ import sendEmail from './hooks/sendEmail'
 export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
   const newConfig: CollectionConfig = {
     ...(formConfig?.formSubmissionOverrides || {}),
-    slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
     access: {
       create: () => true,
-      update: () => false,
       read: ({ req: { user } }) => !!user, // logged-in users,
+      update: () => false,
       ...(formConfig?.formSubmissionOverrides?.access || {}),
     },
     admin: {
       ...(formConfig?.formSubmissionOverrides?.admin || {}),
       enableRichTextRelationship: false,
     },
-    hooks: {
-      beforeChange: [
-        data => createCharge(data, formConfig),
-        data => sendEmail(data, formConfig),
-        ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
-      ],
-      ...(formConfig?.formSubmissionOverrides?.hooks || {}),
-    },
     fields: [
       {
         name: 'form',
-        type: 'relationship',
-        relationTo: formConfig?.formOverrides?.slug || 'forms',
-        required: true,
         admin: {
           readOnly: true,
         },
+        relationTo: formConfig?.formOverrides?.slug || 'forms',
+        required: true,
+        type: 'relationship',
       },
       {
         name: 'submissionData',
-        type: 'array',
         admin: {
           readOnly: true,
         },
         fields: [
           {
             name: 'field',
-            type: 'text',
             required: true,
+            type: 'text',
           },
           {
             name: 'value',
-            type: 'text',
             required: true,
+            type: 'text',
             validate: (value: unknown) => {
               // TODO:
               // create a validation function that dynamically
@@ -72,9 +63,19 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
             },
           },
         ],
+        type: 'array',
       },
       ...(formConfig?.formSubmissionOverrides?.fields || []),
     ],
+    hooks: {
+      beforeChange: [
+        (data) => createCharge(data, formConfig),
+        (data) => sendEmail(data, formConfig),
+        ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
+      ],
+      ...(formConfig?.formSubmissionOverrides?.hooks || {}),
+    },
+    slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
   }
 
   const paymentFieldConfig = formConfig?.fields?.payment
@@ -82,7 +83,6 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
   if (paymentFieldConfig) {
     newConfig.fields.push({
       name: 'payment',
-      type: 'group',
       admin: {
         readOnly: true,
       },
@@ -99,10 +99,10 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
         },
         {
           name: 'amount',
-          type: 'number',
           admin: {
             description: 'Amount in cents',
           },
+          type: 'number',
         },
         {
           name: 'paymentProcessor',
@@ -110,8 +110,6 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
         },
         {
           name: 'creditCard',
-          label: 'Credit Card',
-          type: 'group',
           fields: [
             {
               name: 'token',
@@ -129,8 +127,11 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
               type: 'text',
             },
           ],
+          label: 'Credit Card',
+          type: 'group',
         },
       ],
+      type: 'group',
     })
   }
 

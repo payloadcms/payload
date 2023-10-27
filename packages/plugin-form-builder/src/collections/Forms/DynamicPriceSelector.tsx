@@ -1,20 +1,21 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import type { Data } from 'payload/dist/admin/components/forms/Form/types'
+import type { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types'
+
 import { Text, useWatchForm } from 'payload/components/forms'
 import { useLocale } from 'payload/components/utilities'
-import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types'
-import { Data } from 'payload/dist/admin/components/forms/Form/types'
+import React, { useEffect, useState } from 'react'
 
 type FieldWithID = {
   id: string
   name: string
 }
 
-export const DynamicPriceSelector: React.FC<TextFieldType> = props => {
-  const { path, label } = props
+export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
+  const { label, path } = props
 
-  const { fields, getDataByPath, getData } = useWatchForm()
+  const { fields, getData, getDataByPath } = useWatchForm()
 
   const locale = useLocale()
 

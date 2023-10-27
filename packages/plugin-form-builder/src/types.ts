@@ -14,7 +14,7 @@ export function isValidBlockConfig(blockConfig: BlockConfig | string): blockConf
 }
 
 export interface FieldValues {
-  [key: string]: string | number | boolean | null | undefined
+  [key: string]: boolean | null | number | string | undefined
 }
 
 export type PaymentFieldConfig = Partial<Field> & {
@@ -24,49 +24,49 @@ export type PaymentFieldConfig = Partial<Field> & {
 export type FieldConfig = Partial<Field> | PaymentFieldConfig
 
 export interface FieldsConfig {
-  select?: boolean | FieldConfig
-  text?: boolean | FieldConfig
-  textarea?: boolean | FieldConfig
-  email?: boolean | FieldConfig
-  state?: boolean | FieldConfig
-  country?: boolean | FieldConfig
-  checkbox?: boolean | FieldConfig
-  number?: boolean | FieldConfig
-  message?: boolean | FieldConfig
-  payment?: boolean | FieldConfig
-  [key: string]: boolean | FieldConfig | undefined
+  [key: string]: FieldConfig | boolean | undefined
+  checkbox?: FieldConfig | boolean
+  country?: FieldConfig | boolean
+  email?: FieldConfig | boolean
+  message?: FieldConfig | boolean
+  number?: FieldConfig | boolean
+  payment?: FieldConfig | boolean
+  select?: FieldConfig | boolean
+  state?: FieldConfig | boolean
+  text?: FieldConfig | boolean
+  textarea?: FieldConfig | boolean
 }
 
 export type BeforeEmail = (emails: FormattedEmail[]) => FormattedEmail[] | Promise<FormattedEmail[]>
 export type HandlePayment = (data: any) => void
 
 export interface PluginConfig {
-  fields?: FieldsConfig
-  formSubmissionOverrides?: Partial<CollectionConfig>
-  formOverrides?: Partial<CollectionConfig>
   beforeEmail?: BeforeEmail
+  fields?: FieldsConfig
+  formOverrides?: Partial<CollectionConfig>
+  formSubmissionOverrides?: Partial<CollectionConfig>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
 }
 
 export interface TextField {
-  blockType: 'text'
   blockName?: string
-  width?: number
-  name: string
-  label?: string
+  blockType: 'text'
   defaultValue?: string
+  label?: string
+  name: string
   required?: boolean
+  width?: number
 }
 
 export interface TextAreaField {
-  blockType: 'textarea'
   blockName?: string
-  width?: number
-  name: string
-  label?: string
+  blockType: 'textarea'
   defaultValue?: string
+  label?: string
+  name: string
   required?: boolean
+  width?: number
 }
 
 export interface SelectFieldOption {
@@ -75,133 +75,133 @@ export interface SelectFieldOption {
 }
 
 export interface SelectField {
-  blockType: 'select'
   blockName?: string
-  width?: number
-  name: string
-  label?: string
+  blockType: 'select'
   defaultValue?: string
-  required?: boolean
+  label?: string
+  name: string
   options: SelectFieldOption[]
+  required?: boolean
+  width?: number
 }
 
 export interface PriceCondition {
+  condition: 'equals' | 'hasValue' | 'notEquals'
   fieldToUse: string
-  condition: 'equals' | 'notEquals' | 'hasValue'
+  operator: 'add' | 'divide' | 'multiply' | 'subtract'
   valueForCondition: string
-  operator: 'add' | 'subtract' | 'multiply' | 'divide'
+  valueForOperator: number | string // TODO: make this a number, see ./collections/Forms/DynamicPriceSelector.tsx
   valueType: 'static' | 'valueOfField'
-  valueForOperator: string | number // TODO: make this a number, see ./collections/Forms/DynamicPriceSelector.tsx
 }
 
 export interface PaymentField {
-  blockType: 'payment'
-  blockName?: string
-  width?: number
-  name: string
-  label?: string
-  defaultValue?: string
-  required?: boolean
-  paymentProcessor: string
   basePrice: number
+  blockName?: string
+  blockType: 'payment'
+  defaultValue?: string
+  label?: string
+  name: string
+  paymentProcessor: string
   priceConditions: PriceCondition[]
+  required?: boolean
+  width?: number
 }
 
 export interface EmailField {
-  blockType: 'email'
   blockName?: string
-  width?: number
-  name: string
-  label?: string
+  blockType: 'email'
   defaultValue?: string
+  label?: string
+  name: string
   required?: boolean
+  width?: number
 }
 
 export interface StateField {
-  blockType: 'state'
   blockName?: string
-  width?: number
-  name: string
-  label?: string
+  blockType: 'state'
   defaultValue?: string
+  label?: string
+  name: string
   required?: boolean
+  width?: number
 }
 
 export interface CountryField {
-  blockType: 'country'
   blockName?: string
-  width?: number
-  name: string
-  label?: string
+  blockType: 'country'
   defaultValue?: string
+  label?: string
+  name: string
   required?: boolean
+  width?: number
 }
 
 export interface CheckboxField {
-  blockType: 'checkbox'
   blockName?: string
-  width?: number
-  name: string
-  label?: string
+  blockType: 'checkbox'
   defaultValue?: boolean
+  label?: string
+  name: string
   required?: boolean
+  width?: number
 }
 
 export interface MessageField {
-  blockType: 'message'
   blockName?: string
+  blockType: 'message'
   message: unknown
 }
 
 export type FormFieldBlock =
-  | TextField
-  | TextAreaField
-  | SelectField
-  | EmailField
-  | StateField
-  | CountryField
   | CheckboxField
+  | CountryField
+  | EmailField
   | MessageField
   | PaymentField
+  | SelectField
+  | StateField
+  | TextAreaField
+  | TextField
 
 export interface Email {
-  emailTo: string
-  emailFrom: string
-  cc?: string
   bcc?: string
+  cc?: string
+  emailFrom: string
+  emailTo: string
+  message?: any // TODO: configure rich text type
   replyTo?: string
   subject: string
-  message?: any // TODO: configure rich text type
 }
 
 export interface FormattedEmail {
-  to: string
-  cc?: string
   bcc?: string
+  cc?: string
   from: string
-  subject: string
   html: string
   replyTo: string
+  subject: string
+  to: string
 }
 
 export interface Redirect {
-  type: 'reference' | 'custom'
   reference?: {
     relationTo: string
     value: string | unknown
   }
+  type: 'custom' | 'reference'
   url: string
 }
 
 export interface Form {
-  id: string
-  title: string
-  fields: FormFieldBlock[]
-  submitButtonLabel?: string
-  confirmationType: 'message' | 'redirect'
   confirmationMessage?: any // TODO: configure rich text type
-  redirect?: Redirect
+  confirmationType: 'message' | 'redirect'
   emails: Email[]
+  fields: FormFieldBlock[]
+  id: string
+  redirect?: Redirect
+  submitButtonLabel?: string
+  title: string
 }
 
 export interface SubmissionValue {
@@ -210,6 +210,6 @@ export interface SubmissionValue {
 }
 
 export interface FormSubmission {
-  form: string | Form
+  form: Form | string
   submissionData: SubmissionValue[]
 }

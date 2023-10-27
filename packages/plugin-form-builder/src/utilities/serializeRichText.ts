@@ -5,11 +5,11 @@ import { replaceDoubleCurlys } from './replaceDoubleCurlys'
 
 interface Node {
   bold?: boolean
+  children?: Node[]
   code?: boolean
   italic?: boolean
   type?: string
   url?: string
-  children?: Node[]
 }
 
 export const serialize = (children?: Node[], submissionData?: any): string | undefined =>

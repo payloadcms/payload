@@ -1,14 +1,15 @@
 import type { Email, FormattedEmail, PluginConfig } from '../../../types'
+
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys'
 import { serialize } from '../../../utilities/serializeRichText'
 
 const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
-  const { operation, data } = beforeChangeData
+  const { data, operation } = beforeChangeData
 
   if (operation === 'create') {
     const {
       data: { id: formSubmissionID },
-      req: { payload, locale },
+      req: { locale, payload },
     } = beforeChangeData
 
     const { form: formID, submissionData } = data || {}
@@ -28,13 +29,13 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
         const formattedEmails: FormattedEmail[] = emails.map(
           (email: Email): FormattedEmail | null => {
             const {
-              message,
-              subject,
-              emailTo,
-              cc: emailCC,
               bcc: emailBCC,
+              cc: emailCC,
               emailFrom,
+              emailTo,
+              message,
               replyTo: emailReplyTo,
+              subject,
             } = email
 
             const to = replaceDoubleCurlys(emailTo, submissionData)
@@ -44,13 +45,13 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
             const replyTo = replaceDoubleCurlys(emailReplyTo || emailFrom, submissionData)
 
             return {
-              to,
-              from,
-              cc,
               bcc,
+              cc,
+              from,
+              html: `<div>${serialize(message, submissionData)}</div>`,
               replyTo,
               subject: replaceDoubleCurlys(subject, submissionData),
-              html: `<div>${serialize(message, submissionData)}</div>`,
+              to,
             }
           },
         )
@@ -64,7 +65,7 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
         // const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
 
         await Promise.all(
-          emailsToSend.map(async email => {
+          emailsToSend.map(async (email) => {
             const { to } = email
             try {
               const emailPromise = await payload.sendEmail(email)

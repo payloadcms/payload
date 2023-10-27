@@ -5,13 +5,13 @@ export const getPaymentTotal = (
     fieldValues: FieldValues
   },
 ): number => {
-  const { basePrice = 0, priceConditions, fieldValues } = args
+  const { basePrice = 0, fieldValues, priceConditions } = args
 
   let total = basePrice
 
   if (Array.isArray(priceConditions) && priceConditions.length > 0) {
     priceConditions.forEach((priceCondition: PriceCondition) => {
-      const { condition, valueForCondition, fieldToUse, operator, valueType, valueForOperator } =
+      const { condition, fieldToUse, operator, valueForCondition, valueForOperator, valueType } =
         priceCondition
 
       const valueOfField = fieldValues?.[fieldToUse]
