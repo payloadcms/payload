@@ -6,6 +6,7 @@ import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 
 import { Forbidden } from '../../errors'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -88,7 +89,7 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
       token,
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return {
       message: 'Registered and logged in successfully. Welcome!',
