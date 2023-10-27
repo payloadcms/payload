@@ -10,6 +10,16 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run dev plugin-cloud-storage",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev - plugin-cloud-storage",
+      "request": "launch",
+      "type": "node-terminal",
+      "env": {
+        "PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER": "s3"
+      }
+    },
+    {
       "command": "pnpm run dev fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",

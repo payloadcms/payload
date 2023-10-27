@@ -1,1 +1,1 @@
-export const azureBlobStorageAdapter = () => ({})
+export const azureBlobStorageAdapter = () => {}

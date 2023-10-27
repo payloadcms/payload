@@ -21,6 +21,7 @@ export async function createGlobal<T extends TypeWithID>(
     fields: globalConfig.fields,
     operation: 'create',
     tableName: toSnakeCase(slug),
+    req,
   })
 
   return result

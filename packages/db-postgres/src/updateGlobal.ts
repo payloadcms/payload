@@ -24,6 +24,7 @@ export async function updateGlobal<T extends TypeWithID>(
     db,
     fields: globalConfig.fields,
     tableName,
+    req,
   })
 
   return result
