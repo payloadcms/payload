@@ -675,7 +675,7 @@ describe('Versions', () => {
       expect(findResults.docs[0].title).toStrictEqual(originalTitle)
     })
 
-    it('should show `totalDocs` when it exceeds the `limit`', async () => {
+    it('should return more than 10 `totalDocs`', async () => {
       const { id } = await payload.create({
         collection: 'draft-posts',
         data: {
@@ -684,8 +684,8 @@ describe('Versions', () => {
         },
       })
 
-      const make10 = async () => {
-        for (let i = 0; i < 10; i++) {
+      const createVersions = async (int: number = 1) => {
+        for (let i = 0; i < int; i++) {
           await payload.update({
             id,
             collection: 'draft-posts',
@@ -696,7 +696,7 @@ describe('Versions', () => {
         }
       }
 
-      await make10()
+      await createVersions(10)
 
       const findResults = await payload.findVersions({
         collection: 'draft-posts',
