@@ -167,6 +167,20 @@ describe('versions', () => {
       expect(href).toBe(`${pathname}/versions`)
     })
 
+    test('collection - displays proper versions pagination', async () => {
+      await page.goto(url.create)
+
+      // save a version and check count
+      await page.locator('#field-title').fill('title')
+      await page.locator('#field-description').fill('description')
+      await saveDocAndAssert(page)
+
+      await page.goto(`${page.url()}/versions`)
+
+      const paginationItems = page.locator('.versions__page-info')
+      await expect(paginationItems).toHaveText('1-1 of 1')
+    })
+
     test('collection - tab displays proper number of versions', async () => {
       await page.goto(url.create)
 
