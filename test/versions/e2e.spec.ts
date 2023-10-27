@@ -169,6 +169,7 @@ describe('versions', () => {
 
     test('collection - tab displays proper number of versions', async () => {
       await page.goto(url.create)
+      console.log(url.create)
 
       // save a version and check count
       await page.locator('#field-title').fill('title')
@@ -183,13 +184,26 @@ describe('versions', () => {
       expect(versionCount).toBe('1')
 
       // save another version and check count again
-      await page.locator('#field-title').fill('title 2')
-      await page.locator('#field-description').fill('description 2')
+      await page.locator('#field-title').fill('title edit')
       await saveDocAndAssert(page)
 
       await wait(100) // wait for save and rerender
       const versionCount2 = await versionsTab.locator('.doc-tab__count').first().textContent()
       expect(versionCount2).toBe('2')
+
+      const make10More = async () => {
+        for (let i = 0; i < 9; i++) {
+          await wait(50) // wait for save and rerender
+          await page.locator('#field-title').fill(`title ${i + 1}`)
+          await saveDocAndAssert(page)
+        }
+      }
+
+      await make10More()
+      await wait(50) // wait for save and rerender
+
+      const versionCount3 = await versionsTab.locator('.doc-tab__count').first().textContent()
+      expect(versionCount3).toBe('11')
     })
 
     test('collection - has versions route', async () => {

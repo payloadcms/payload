@@ -665,6 +665,41 @@ describe('Versions', () => {
       expect(findResults.docs[0].title).toStrictEqual(originalTitle)
     })
 
+    it('should show `totalDocs` when it exceeds the `limit`', async () => {
+      const { id } = await payload.create({
+        collection: 'draft-posts',
+        data: {
+          title: 'Title',
+          description: 'Description',
+        },
+      })
+
+      const make10 = async () => {
+        for (let i = 0; i < 10; i++) {
+          await payload.update({
+            id,
+            collection: 'draft-posts',
+            data: {
+              title: `Title ${i}`,
+            },
+          })
+        }
+      }
+
+      await make10()
+
+      const findResults = await payload.findVersions({
+        collection: 'draft-posts',
+        where: {
+          parent: {
+            equals: id,
+          },
+        },
+      })
+
+      expect(findResults.totalDocs).toBe(11)
+    })
+
     it('should not be able to query an old draft version with draft=true', async () => {
       const draftFindResults = await payload.find({
         collection: 'draft-posts',

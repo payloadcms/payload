@@ -19,6 +19,7 @@ export type Arguments = {
   limit?: number
   overrideAccess?: boolean
   page?: number
+  pagination?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: string
@@ -34,6 +35,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     limit,
     overrideAccess,
     page,
+    pagination = true,
     req: { locale, payload },
     req,
     showHiddenFields,
@@ -75,6 +77,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       limit: limit ?? 10,
       locale,
       page: page || 1,
+      pagination,
       req,
       sort,
       where: fullWhere,
