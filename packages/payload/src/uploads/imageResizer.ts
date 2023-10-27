@@ -182,10 +182,11 @@ export default async function resizeAndTransformImageSizes({
       if (!needsResize(imageResizeConfig, dimensions)) {
         return createResult(imageResizeConfig.name)
       }
-
       let resized = sharpBase.clone()
 
-      if (req.query && imageResizeConfig.width && imageResizeConfig.height) {
+      const hasEdited = req.query?.uploadEdits
+
+      if (hasEdited && imageResizeConfig.width && imageResizeConfig.height) {
         const { height, width } = imageResizeConfig
 
         const focalPoint = {
