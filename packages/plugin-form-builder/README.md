@@ -28,20 +28,20 @@ Core features:
 In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```js
-import { buildConfig } from "payload/config";
-import formBuilder from "@payloadcms/plugin-form-builder";
+import { buildConfig } from 'payload/config'
+import formBuilder from '@payloadcms/plugin-form-builder'
 
 const config = buildConfig({
   collections: [
     {
-      slug: "pages",
+      slug: 'pages',
       fields: [],
     },
   ],
   plugins: [formBuilder()],
-});
+})
 
-export default config;
+export default config
 ```
 
 ### Options
@@ -70,7 +70,7 @@ export default config;
   An array of collection slugs that, when enabled, are populated as options in form redirect fields.
 
   ```js
-  redirectRelationships: ["pages"];
+  redirectRelationships: ['pages']
   ```
 
 - `handlePayment`
@@ -102,8 +102,8 @@ export default config;
     return emails.map((email) => ({
       ...email,
       html: email.html, // transform the html in any way you'd like (maybe wrap it in an html template?)
-    }));
-  };
+    }))
+  }
   ```
 
 - `formOverrides`
@@ -196,6 +196,7 @@ Each field represents a form input. To override default settings pass either a b
 - `message`
   - `message`: richText
 - `payment`
+
   - `name`: string
   - `label`: string
   - `defaultValue`: number
@@ -214,7 +215,7 @@ Each field represents a form input. To override default settings pass either a b
   You can also provide your own custom field definitions by passing a new [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) object into `fields`. You can override or extend any existing fields by first importing the `fields` from the plugin:
 
   ```ts
-  import { fields } from "@payloadcms/plugin-form-builder";
+  import { fields } from '@payloadcms/plugin-form-builder'
   ```
 
   Then merging it into your own custom field:
@@ -283,7 +284,7 @@ To actively develop or debug this plugin you can either work directly within the
    You might also need to alias these modules in your Webpack config. To do this, open your project's Payload config and add the following:
 
    ```ts
-   import { buildConfig } from "payload/config";
+   import { buildConfig } from 'payload/config'
 
    export default buildConfig({
      admin: {
@@ -293,18 +294,18 @@ To actively develop or debug this plugin you can either work directly within the
            ...config.resolve,
            alias: {
              ...config.resolve.alias,
-             react: path.join(__dirname, "../node_modules/react"),
-             "react-dom": path.join(__dirname, "../node_modules/react-dom"),
-             payload: path.join(__dirname, "../node_modules/payload"),
-             "@payloadcms/plugin-form-builder": path.join(
+             react: path.join(__dirname, '../node_modules/react'),
+             'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+             payload: path.join(__dirname, '../node_modules/payload'),
+             '@payloadcms/plugin-form-builder': path.join(
                __dirname,
-               "../../payload/plugin-form-builder/src"
+               '../../payload/plugin-form-builder/src',
              ),
            },
          },
        }),
      },
-   });
+   })
    ```
 
 ## Troubleshooting

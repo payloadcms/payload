@@ -7,199 +7,199 @@
 
 export interface Config {
   collections: {
-    users: User;
-    pages: Page;
-    forms: Form;
-    'form-submissions': FormSubmission;
-  };
-  globals: {};
+    users: User
+    pages: Page
+    forms: Form
+    'form-submissions': FormSubmission
+  }
+  globals: {}
 }
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }
 export interface Page {
-  id: string;
-  title: string;
-  form?: string | Form;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title: string
+  form?: string | Form
+  updatedAt: string
+  createdAt: string
 }
 export interface Form {
-  id: string;
-  title: string;
+  id: string
+  title: string
   fields?: (
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: string;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'text';
+        name: string
+        label?: string
+        width?: number
+        defaultValue?: string
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'text'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: string;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'textarea';
+        name: string
+        label?: string
+        width?: number
+        defaultValue?: string
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'textarea'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: string;
+        name: string
+        label?: string
+        width?: number
+        defaultValue?: string
         options: {
-          label: string;
-          value: string;
-          id?: string;
-        }[];
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'select';
+          label: string
+          value: string
+          id?: string
+        }[]
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'select'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'email';
+        name: string
+        label?: string
+        width?: number
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'email'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'state';
+        name: string
+        label?: string
+        width?: number
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'state'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'country';
+        name: string
+        label?: string
+        width?: number
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'country'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
+        name: string
+        label?: string
+        width?: number
+        defaultValue?: number
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'number'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        defaultValue?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'checkbox';
+        name: string
+        label?: string
+        width?: number
+        required?: boolean
+        defaultValue?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'checkbox'
       }
     | {
         message?: {
-          [k: string]: unknown;
-        }[];
-        id?: string;
-        blockName?: string;
-        blockType: 'message';
+          [k: string]: unknown
+        }[]
+        id?: string
+        blockName?: string
+        blockType: 'message'
       }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        basePrice?: number;
+        name: string
+        label?: string
+        width?: number
+        basePrice?: number
         priceConditions?: {
-          fieldToUse?: string;
-          condition?: 'hasValue' | 'equals' | 'notEquals';
-          valueForCondition?: string;
-          operator?: 'add' | 'subtract' | 'multiply' | 'divide';
-          valueType?: 'static' | 'valueOfField';
-          valueForOperator?: string;
-          id?: string;
-        }[];
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'payment';
+          fieldToUse?: string
+          condition?: 'hasValue' | 'equals' | 'notEquals'
+          valueForCondition?: string
+          operator?: 'add' | 'subtract' | 'multiply' | 'divide'
+          valueType?: 'static' | 'valueOfField'
+          valueForOperator?: string
+          id?: string
+        }[]
+        required?: boolean
+        id?: string
+        blockName?: string
+        blockType: 'payment'
       }
     | {
-        value?: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'color';
+        value?: string
+        id?: string
+        blockName?: string
+        blockType: 'color'
       }
-  )[];
-  submitButtonLabel?: string;
-  confirmationType?: 'message' | 'redirect';
+  )[]
+  submitButtonLabel?: string
+  confirmationType?: 'message' | 'redirect'
   confirmationMessage: {
-    [k: string]: unknown;
-  }[];
+    [k: string]: unknown
+  }[]
   redirect?: {
-    type?: 'reference' | 'custom';
+    type?: 'reference' | 'custom'
     reference: {
-      value: string | Page;
-      relationTo: 'pages';
-    };
-    url: string;
-  };
+      value: string | Page
+      relationTo: 'pages'
+    }
+    url: string
+  }
   emails: {
-    emailTo?: string;
-    cc?: string;
-    bcc?: string;
-    replyTo?: string;
-    emailFrom?: string;
-    subject: string;
+    emailTo?: string
+    cc?: string
+    bcc?: string
+    replyTo?: string
+    emailFrom?: string
+    subject: string
     message?: {
-      [k: string]: unknown;
-    }[];
-    id?: string;
-  }[];
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+      [k: string]: unknown
+    }[]
+    id?: string
+  }[]
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface FormSubmission {
-  id: string;
-  form: string | Form;
+  id: string
+  form: string | Form
   submissionData: {
-    field: string;
-    value: string;
-    id?: string;
-  }[];
+    field: string
+    value: string
+    id?: string
+  }[]
   payment?: {
-    field?: string;
-    status?: string;
-    amount?: number;
-    paymentProcessor?: string;
+    field?: string
+    status?: string
+    amount?: number
+    paymentProcessor?: string
     creditCard?: {
-      token?: string;
-      brand?: string;
-      number?: string;
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
+      token?: string
+      brand?: string
+      number?: string
+    }
+  }
+  updatedAt: string
+  createdAt: string
 }

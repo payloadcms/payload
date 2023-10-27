@@ -30,7 +30,7 @@ export default buildConfig({
   },
   admin: {
     user: Users.slug,
-    webpack: config => {
+    webpack: (config) => {
       const newConfig = {
         ...config,
         resolve: {
