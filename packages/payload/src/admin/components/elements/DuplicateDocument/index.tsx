@@ -46,8 +46,8 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
 
       const saveDocument = async ({
         id,
-        locale = '',
         duplicateID = '',
+        locale = '',
       }): Promise<null | string> => {
         const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
           headers: {
@@ -56,6 +56,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
           params: {
             depth: 0,
             draft: true,
+            'fallback-locale': 'none',
             locale,
           },
         })
@@ -75,7 +76,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         }
 
         const result = await requests[duplicateID ? 'patch' : 'post'](
-          `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`,
+          `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}&fallback-locale=none`,
           {
             body: JSON.stringify(data),
             headers: {
@@ -100,7 +101,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         await localization.localeCodes.reduce(async (priorLocalePatch, locale) => {
           await priorLocalePatch
           if (abort) return
-          duplicateID = await saveDocument({ locale, id, duplicateID })
+          duplicateID = await saveDocument({ id, duplicateID, locale })
           if (!duplicateID) {
             abort = true
           }
