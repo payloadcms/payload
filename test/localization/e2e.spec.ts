@@ -166,8 +166,8 @@ describe('Localization', () => {
     })
 
     test('should duplicate localized checkbox correctly', async () => {
-      await changeLocale(page, defaultLocale)
       await page.goto(url.create)
+      await changeLocale(page, defaultLocale)
       await fillValues({ title: englishTitle, description })
       await page.locator('#field-localizedCheckbox').click()
 
@@ -184,9 +184,11 @@ describe('Localization', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
 
-      await changeLocale(page, spanishLocale)
+      // wait for navigation to update route
+      await wait(500)
 
-      // click checkbox manually
+      // finally change locale to spanish
+      await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
   })
