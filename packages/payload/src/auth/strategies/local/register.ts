@@ -56,7 +56,7 @@ export const registerLocalStrategy = async ({
     ) {
       error = new ValidationError(
         [
-          { field: 'email', message: 'A user with the given email is already registered' },
+          { field: 'email', message: req.t('error:userWithEmailAlreadyExists') },
           ...error.data.slice(1),
         ],
         req.t,
