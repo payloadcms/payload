@@ -217,6 +217,7 @@ describe('Versions', () => {
           draft: true,
           sort: 'title',
         })
+
         const draftsDescending = await payload.find({
           collection: draftSlug,
           draft: true,
@@ -230,16 +231,19 @@ describe('Versions', () => {
         )
       })
 
-      it('should findVersions with sort', async () => {
+      it('should `findVersions` with sort', async () => {
         const draftsAscending = await payload.findVersions({
           collection: draftSlug,
           draft: true,
           sort: 'createdAt',
+          limit: 100,
         })
+
         const draftsDescending = await payload.findVersions({
           collection: draftSlug,
           draft: true,
-          sort: '-updatedAt',
+          sort: '-createdAt',
+          limit: 100,
         })
 
         expect(draftsAscending).toBeDefined()
@@ -251,7 +255,7 @@ describe('Versions', () => {
     })
 
     describe('Restore', () => {
-      it('should return findVersions in correct order', async () => {
+      it('should return `findVersions` in correct order', async () => {
         const somePost = await payload.create({
           collection: draftSlug,
           data: {
