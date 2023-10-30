@@ -185,8 +185,8 @@ describe('versions', () => {
       await page.goto(url.create)
 
       // save a version and check count
-      await page.locator('#field-title').fill('title')
-      await page.locator('#field-description').fill('description')
+      await page.locator('#field-title').fill('Title')
+      await page.locator('#field-description').fill('Description')
       await saveDocAndAssert(page)
 
       const versionsTab = page.locator('.doc-tab', {
@@ -197,8 +197,7 @@ describe('versions', () => {
       expect(versionCount).toBe('1')
 
       // save another version and check count again
-      await page.locator('#field-title').fill('title 2')
-      await page.locator('#field-description').fill('description 2')
+      await page.locator('#field-title').fill('Title 2')
       await saveDocAndAssert(page)
 
       await wait(100) // wait for save and rerender
