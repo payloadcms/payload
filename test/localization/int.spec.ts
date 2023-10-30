@@ -775,14 +775,25 @@ describe('Localization', () => {
         collection,
         id: post1.id,
         data: {
-          children: post1.id,
+          children: [post1.id],
           group: {
             children: 'some content',
           },
         },
       })
 
-      const { result } = await client.find({
+      const { result: relationshipRes } = await client.find({
+        auth: true,
+        query: {
+          children: {
+            contains: post1.id,
+          },
+        },
+      })
+
+      expect(relationshipRes.docs.map(({ id }) => id)).toContain(post1.id)
+
+      const { result: nestedFieldRes } = await client.find({
         auth: true,
         query: {
           'group.children': {
@@ -791,7 +802,7 @@ describe('Localization', () => {
         },
       })
 
-      expect(result.docs.map(({ id }) => id)).toContain(post1.id)
+      expect(nestedFieldRes.docs.map(({ id }) => id)).toContain(post1.id)
     })
   })
 })

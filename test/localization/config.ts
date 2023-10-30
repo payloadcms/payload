@@ -89,6 +89,12 @@ export default buildConfigWithDefaults({
           localized: true,
         },
         {
+          name: 'children',
+          type: 'relationship',
+          relationTo: localizedPostsSlug,
+          hasMany: true,
+        },
+        {
           type: 'group',
           name: 'group',
           fields: [
