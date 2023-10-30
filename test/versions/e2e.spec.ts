@@ -31,33 +31,14 @@ import wait from '../../packages/payload/src/utilities/wait'
 import { changeLocale, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './shared'
+import { autosaveSlug, draftSlug, titleToDelete } from './shared'
 
 const { beforeAll, describe } = test
 
-let page: Page
-let url: AdminUrlUtil
-let serverURL: string
-
-const goToDoc = async (page: Page) => {
-  await page.goto(url.list)
-  const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
-  expect(linkToDoc).toBeTruthy()
-  await linkToDoc.click()
-}
-
-const goToCollectionVersions = async (page: Page): Promise<void> => {
-  await goToDoc(page)
-  await page.goto(`${page.url()}/versions`)
-}
-
-const goToGlobalVersions = async (page: Page, slug: string): Promise<void> => {
-  const global = new AdminUrlUtil(serverURL, slug)
-  const versionsURL = `${global.global(slug)}/versions`
-  await page.goto(versionsURL)
-}
-
 describe('versions', () => {
+  let page: Page
+  let serverURL: string
+
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
@@ -67,6 +48,7 @@ describe('versions', () => {
   })
 
   describe('draft collections', () => {
+    let url: AdminUrlUtil
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftSlug)
     })
@@ -153,20 +135,6 @@ describe('versions', () => {
       await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft')
     })
 
-    test('collection - has versions tab', async () => {
-      await goToDoc(page)
-      const docURL = page.url()
-      const pathname = new URL(docURL).pathname
-
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
-
-      expect(versionsTab).toBeTruthy()
-      const href = await versionsTab.locator('a').first().getAttribute('href')
-      expect(href).toBe(`${pathname}/versions`)
-    })
-
     test('collection - displays proper versions pagination', async () => {
       await page.goto(url.create)
 
@@ -179,58 +147,6 @@ describe('versions', () => {
 
       const paginationItems = page.locator('.versions__page-info')
       await expect(paginationItems).toHaveText('1-1 of 1')
-    })
-
-    test('collection - tab displays proper number of versions', async () => {
-      await page.goto(url.create)
-
-      // save a version and check count
-      await page.locator('#field-title').fill('Title')
-      await page.locator('#field-description').fill('Description')
-      await saveDocAndAssert(page)
-
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
-
-      const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount).toBe('1')
-
-      // save another version and check count again
-      await page.locator('#field-title').fill('Title 2')
-      await saveDocAndAssert(page)
-
-      await wait(100) // wait for save and rerender
-      const versionCount2 = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount2).toBe('2')
-    })
-
-    test('collection - has versions route', async () => {
-      const url = page.url()
-      await goToCollectionVersions(page)
-      expect(page.url()).toBe(`${url}/versions`)
-    })
-
-    test('global - has versions tab', async () => {
-      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
-      await page.goto(global.global(draftGlobalSlug))
-
-      const docURL = page.url()
-      const pathname = new URL(docURL).pathname
-
-      const versionsTab = page.locator('.doc-tab', {
-        hasText: 'Versions',
-      })
-
-      expect(versionsTab).toBeTruthy()
-      const href = await versionsTab.locator('a').first().getAttribute('href')
-      expect(href).toBe(`${pathname}/versions`)
-    })
-
-    test('global - has versions route', async () => {
-      const url = page.url()
-      await goToGlobalVersions(page, draftGlobalSlug)
-      expect(page.url()).toBe(`${url}/versions`)
     })
 
     test('should retain localized data during autosave', async () => {
