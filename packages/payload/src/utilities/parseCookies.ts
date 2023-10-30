@@ -16,13 +16,7 @@ export default function parseCookies(req: Request): { [key: string]: string } {
         const decodedValue = decodeURI(encodedValue)
         list[key] = decodedValue
       } catch (e) {
-        let message = 'Unknown error'
-        if ('message' in e && typeof e.message === 'string') {
-          message = e.message
-        } else if (typeof e === 'string') {
-          message = e
-        }
-        throw new APIError(`Error decoding cookie value for key ${key}: ${message}`)
+        throw new APIError(`Error decoding cookie value for key ${key}: ${e.message}`)
       }
     })
   }
