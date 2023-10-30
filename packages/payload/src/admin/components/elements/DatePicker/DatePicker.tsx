@@ -22,6 +22,7 @@ const DateTime: React.FC<Props> = (props) => {
     minTime,
     monthsToShow = 1,
     onChange: onChangeFromProps,
+    overrides,
     pickerAppearance = 'default',
     placeholder: placeholderText,
     readOnly,
@@ -77,6 +78,7 @@ const DateTime: React.FC<Props> = (props) => {
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
+    ...overrides,
   }
 
   const classes = [baseClass, `${baseClass}__appearance--${pickerAppearance}`]
