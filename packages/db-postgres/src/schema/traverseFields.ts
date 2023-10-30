@@ -1,24 +1,23 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field, TabAsField } from 'payload/types'
-
 import { relations } from 'drizzle-orm'
+import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
 import {
-  PgNumericBuilder,
-  PgVarcharBuilder,
   boolean,
   index,
   integer,
   jsonb,
   numeric,
   pgEnum,
+  PgNumericBuilder,
+  PgVarcharBuilder,
   text,
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core'
-import { InvalidConfiguration } from 'payload/errors'
+import type { Field, TabAsField } from 'payload/types'
 import { fieldAffectsData, optionIsObject } from 'payload/types'
+import { InvalidConfiguration } from 'payload/errors'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, PostgresAdapter } from '../types'
@@ -101,7 +100,7 @@ export const traverseFields = ({
       columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
         field.name,
       )}`
-      fieldName = `${fieldPrefix || ''}${field.name}`
+      fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
       // If field is localized,
       // add the column to the locale table instead of main table
@@ -116,10 +115,18 @@ export const traverseFields = ({
         !['array', 'blocks', 'group', 'point', 'relationship', 'upload'].includes(field.type) &&
         !(field.type === 'number' && field.hasMany === true)
       ) {
+        const unique = disableUnique !== true && field.unique
+        if (unique) {
+          const constraintValue = `${fieldPrefix || ''}${field.name}`
+          if (!adapter.fieldConstraints?.[rootTableName]) {
+            adapter.fieldConstraints[rootTableName] = {}
+          }
+          adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
+        }
         targetIndexes[`${field.name}Idx`] = createIndex({
           name: fieldName,
           columnName,
-          unique: disableUnique !== true && field.unique,
+          unique,
         })
       }
     }
@@ -447,7 +454,7 @@ export const traverseFields = ({
           columns,
           disableNotNull: disableNotNullFromHere,
           disableUnique,
-          fieldPrefix: `${fieldName}_`,
+          fieldPrefix: `${fieldName}.`,
           fields: field.fields,
           forceLocalized: field.localized,
           indexes,

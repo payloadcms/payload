@@ -55,6 +55,11 @@ const IndexedFields: CollectionConfig = {
           unique: true,
         },
         {
+          name: 'unique',
+          type: 'text',
+          unique: true,
+        },
+        {
           name: 'point',
           type: 'point',
         },

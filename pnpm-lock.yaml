@@ -1123,6 +1123,46 @@ importers:
         specifier: ^5.78.0
         version: 5.88.2(@swc/core@1.3.76)(webpack-cli@4.10.0)
 
+  packages/plugin-form-builder:
+    dependencies:
+      deepmerge:
+        specifier: ^4.2.2
+        version: 4.3.1
+      escape-html:
+        specifier: ^1.0.3
+        version: 1.0.3
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      '@types/escape-html':
+        specifier: ^1.0.1
+        version: 1.0.3
+      '@types/express':
+        specifier: ^4.17.9
+        version: 4.17.17
+      '@types/react':
+        specifier: 18.0.21
+        version: 18.0.21
+      copyfiles:
+        specifier: ^2.4.1
+        version: 2.4.1
+      cross-env:
+        specifier: ^7.0.3
+        version: 7.0.3
+      nodemon:
+        specifier: ^2.0.6
+        version: 2.0.22
+      payload:
+        specifier: ^1.3.0
+        version: 1.15.8(@types/react@18.0.21)(typescript@5.2.2)
+      react:
+        specifier: ^18.0.0
+        version: 18.2.0
+      ts-node:
+        specifier: ^9.1.1
+        version: 9.1.1(typescript@5.2.2)
+
   packages/plugin-nested-docs:
     devDependencies:
       '@payloadcms/eslint-config':
@@ -1182,8 +1222,8 @@ importers:
         specifier: ^9.0.0
         version: 9.0.6
       payload:
-        specifier: workspace:*
-        version: link:../payload
+        specifier: ^1.8.2
+        version: 1.15.8(@types/react@18.0.21)(typescript@5.2.2)
       prettier:
         specifier: ^2.7.1
         version: 2.8.8
@@ -1192,29 +1232,14 @@ importers:
         version: 18.2.0
       webpack:
         specifier: ^5.78.0
-        version: 5.88.2(@swc/core@1.3.76)(webpack-cli@4.10.0)
+        version: 5.88.2(@swc/core@1.3.78)(webpack-cli@4.10.0)
 
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
         specifier: 2.0.1
         version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
-      '@lexical/clipboard':
-        specifier: 0.12.2
-        version: 0.12.2(lexical@0.12.2)
-      '@lexical/code':
-        specifier: 0.12.2
-        version: 0.12.2(lexical@0.12.2)
-      '@lexical/file':
-        specifier: 0.12.2
-        version: 0.12.2(lexical@0.12.2)
-      '@lexical/hashtag':
-        specifier: 0.12.2
-        version: 0.12.2(lexical@0.12.2)
       '@lexical/headless':
-        specifier: 0.12.2
-        version: 0.12.2(lexical@0.12.2)
-      '@lexical/html':
         specifier: 0.12.2
         version: 0.12.2(lexical@0.12.2)
       '@lexical/link':
@@ -1229,12 +1254,6 @@ importers:
       '@lexical/markdown':
         specifier: 0.12.2
         version: 0.12.2(@lexical/clipboard@0.12.2)(@lexical/selection@0.12.2)(lexical@0.12.2)
-      '@lexical/overflow':
-        specifier: 0.12.2
-        version: 0.12.2(lexical@0.12.2)
-      '@lexical/plain-text':
-        specifier: 0.12.2
-        version: 0.12.2(@lexical/clipboard@0.12.2)(@lexical/selection@0.12.2)(@lexical/utils@0.12.2)(lexical@0.12.2)
       '@lexical/react':
         specifier: 0.12.2
         version: 0.12.2(lexical@0.12.2)(react-dom@18.2.0)(react@18.2.0)(yjs@13.6.8)
@@ -1242,9 +1261,6 @@ importers:
         specifier: 0.12.2
         version: 0.12.2(@lexical/clipboard@0.12.2)(@lexical/selection@0.12.2)(@lexical/utils@0.12.2)(lexical@0.12.2)
       '@lexical/selection':
-        specifier: 0.12.2
-        version: 0.12.2(lexical@0.12.2)
-      '@lexical/table':
         specifier: 0.12.2
         version: 0.12.2(lexical@0.12.2)
       '@lexical/utils':
@@ -1262,18 +1278,12 @@ importers:
       i18next:
         specifier: 22.5.1
         version: 22.5.1
-      katex:
-        specifier: 0.16.8
-        version: 0.16.8
       lexical:
         specifier: 0.12.2
         version: 0.12.2
       lodash:
         specifier: 4.17.21
         version: 4.17.21
-      openai:
-        specifier: 4.7.1
-        version: 4.7.1
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -3928,14 +3938,6 @@ packages:
       lexical: 0.12.2
     dev: false
 
-  /@lexical/file@0.12.2(lexical@0.12.2):
-    resolution: {integrity: sha512-jkhaGhj+lj/Edc1YGxdw1RzOIt04yy7KRsgSDHSPo38nqyhOh2oKqUQhnBcFIHCrB0TPCmIT0IbviYY/8TBvJw==}
-    peerDependencies:
-      lexical: 0.12.2
-    dependencies:
-      lexical: 0.12.2
-    dev: false
-
   /@lexical/hashtag@0.12.2(lexical@0.12.2):
     resolution: {integrity: sha512-2vYzIu5Ldf+eYdUrNA2m80c3N3MF3vJ0fIJzpl5QyX8OdViggEWl1bh+lKtw1Ju0H0CUyDIXdDLZ2apW3WDkTA==}
     peerDependencies:
@@ -5665,6 +5667,10 @@ packages:
     resolution: {integrity: sha512-E9ZPeZwh81/gDPVH4XpvcS4ewH/Ub4XJeM5xYAUP0BexGORIyCRYzSivlGOuGbVc4MH3//+z3h4CbrnMZMeUdA==}
     dev: true
 
+  /@types/escape-html@1.0.3:
+    resolution: {integrity: sha512-QbNxKa2IX2y/9eGiy4w8rrwk//ERHXA6zwYVRA3+ayA/D3pkz+/bLL4b5uSLA0L0kPuNX1Jbv9HyPzv9T4zbJQ==}
+    dev: true
+
   /@types/eslint-scope@3.7.4:
     resolution: {integrity: sha512-9K4zoImiZc3HlIp6AVUDE4CWYx22a+lhSZMYNpbjW04+YF0KWj4pJXnEMjdnFTiQibFFmElcsasJXDbdI/EPhA==}
     dependencies:
@@ -5935,10 +5941,6 @@ packages:
 
   /@types/node@16.18.58:
     resolution: {integrity: sha512-YGncyA25/MaVtQkjWW9r0EFBukZ+JulsLcVZBlGUfIb96OBMjkoRWwQo5IEWJ8Fj06Go3GHw+bjYDitv6BaGsA==}
-
-  /@types/node@18.17.17:
-    resolution: {integrity: sha512-cOxcXsQ2sxiwkykdJqvyFS+MLQPLvIdwh5l6gNg8qF6s+C7XSkEWOZjK+XhUZd+mYvHV/180g2cnCcIl4l06Pw==}
-    dev: false
 
   /@types/node@20.5.7:
     resolution: {integrity: sha512-dP7f3LdZIysZnmvP3ANJYTSwg+wLLl8p7RqniVlV7j+oXSXAbt9h0WIBFmJy5inWZoX9wZN6eXx+YXd9Rh3RBA==}
@@ -6756,13 +6758,6 @@ packages:
       - supports-color
     dev: true
 
-  /agentkeepalive@4.5.0:
-    resolution: {integrity: sha512-5GG/5IbQQpC9FpkRGsSvZI5QYeSCzlJHdpBQntCsuTOxhKD8lqKhrleg2Yi7yvMIf82Ycmmqln9U8V9qwEiJew==}
-    engines: {node: '>= 8.0.0'}
-    dependencies:
-      humanize-ms: 1.2.1
-    dev: false
-
   /ajv-formats@2.1.1(ajv@8.12.0):
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
     peerDependencies:
@@ -7179,10 +7174,6 @@ packages:
 
   /balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
-
-  /base-64@0.1.0:
-    resolution: {integrity: sha512-Y5gU45svrR5tI2Vt/X9GPd3L0HNIKzGu202EjxrXMpuc2V2CiKgemAbUUsqYmZJvPtCXoUKjNZwBJzsNScUbXA==}
-    dev: false
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
@@ -8787,13 +8778,6 @@ packages:
       heap: 0.2.7
     dev: false
 
-  /digest-fetch@1.3.0:
-    resolution: {integrity: sha512-CGJuv6iKNM7QyZlM2T3sPAdZWd/p9zQiRNS9G+9COUCwzWFTs0Xp8NF5iePx7wtvhDykReiRRrSeNb4oMmB8lA==}
-    dependencies:
-      base-64: 0.1.0
-      md5: 2.3.0
-    dev: false
-
   /dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
@@ -10167,10 +10151,6 @@ packages:
     dependencies:
       is-callable: 1.2.7
 
-  /form-data-encoder@1.7.2:
-    resolution: {integrity: sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==}
-    dev: false
-
   /form-data-encoder@2.1.4:
     resolution: {integrity: sha512-yDYSgNMraqvnxiEXO4hi88+YZxaHC6QKzb5N84iRCTDeRO7ZALpir/lVmf/uXUhnwUr2O4HU8s/n6x+yNjQkHw==}
     engines: {node: '>= 14.17'}
@@ -10191,14 +10171,6 @@ packages:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
-
-  /formdata-node@4.4.1:
-    resolution: {integrity: sha512-0iirZp3uVDjVGt9p49aTaqjk84TrglENEDuqfdlZQ1roC9CWlPk6Avf8EEnZNcAqPonwkG35x4n3ww/1THYAeQ==}
-    engines: {node: '>= 12.20'}
-    dependencies:
-      node-domexception: 1.0.0
-      web-streams-polyfill: 4.0.0-beta.3
-    dev: false
 
   /formdata-polyfill@4.0.10:
     resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
@@ -11031,12 +11003,6 @@ packages:
     resolution: {integrity: sha512-nZXjEF2nbo7lIw3mgYjItAfgQXog3OjJogSbKa2CQIIvSGWcKgeJnQlNXip6NglNzYH45nSRiEVimMvYL8DDqQ==}
     engines: {node: '>=14.18.0'}
     dev: true
-
-  /humanize-ms@1.2.1:
-    resolution: {integrity: sha512-Fl70vYtsAFb/C06PTS9dZBo7ihau+Tu/DNCk/OyHhea07S+aeMWpFFkUaXRa8fI+ScZbEI8dfSxwY7gxZ9SAVQ==}
-    dependencies:
-      ms: 2.1.3
-    dev: false
 
   /husky@8.0.3:
     resolution: {integrity: sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==}
@@ -12460,13 +12426,6 @@ packages:
     resolution: {integrity: sha512-7jFxRVm+jD+rkq3kY0iZDJfsO2/t4BBPeEb2qKn2lR/9KhuksYk5hxzfRYWMPV8P/x2d0kHD306YyWLzjjH+uA==}
     engines: {node: '>=12.0.0'}
 
-  /katex@0.16.8:
-    resolution: {integrity: sha512-ftuDnJbcbOckGY11OO+zg3OofESlbR5DRl2cmN8HeWeeFIV7wTXvAOx8kEjZjobhA+9wh2fbKeO6cdcA9Mnovg==}
-    hasBin: true
-    dependencies:
-      commander: 8.3.0
-    dev: false
-
   /keyv@4.5.3:
     resolution: {integrity: sha512-QCiSav9WaX1PgETJ+SpNnx2PRRapJ/oRSXM4VO5OGYGSjrxbKPVFVhB3l2OCbLCk329N8qyAtsJjSjvVBWzEug==}
     dependencies:
@@ -13635,22 +13594,6 @@ packages:
       is-inside-container: 1.0.0
       is-wsl: 2.2.0
     dev: true
-
-  /openai@4.7.1:
-    resolution: {integrity: sha512-4Um9A4aLGzZxyENyway0zVgi69BOxaqXmjOCKp3PUteOvSn9TeVf6IjkaNY8k/LXYG5l2e7PpacOl2sxsrTc/w==}
-    hasBin: true
-    dependencies:
-      '@types/node': 18.17.17
-      '@types/node-fetch': 2.6.4
-      abort-controller: 3.0.0
-      agentkeepalive: 4.5.0
-      digest-fetch: 1.3.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.6.12
-    transitivePeerDependencies:
-      - encoding
-    dev: false
 
   /opener@1.5.2:
     resolution: {integrity: sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==}
@@ -17852,11 +17795,6 @@ packages:
   /web-streams-polyfill@3.2.1:
     resolution: {integrity: sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==}
     engines: {node: '>= 8'}
-
-  /web-streams-polyfill@4.0.0-beta.3:
-    resolution: {integrity: sha512-QW95TCTaHmsYfHDybGMwO5IJIM93I/6vTRk+daHTWFPhwh+C8Cg7j7XyKrwrj8Ib6vYXe0ocYNrmzY4xAAN6ug==}
-    engines: {node: '>= 14'}
-    dev: false
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
