@@ -88,6 +88,16 @@ export default buildConfigWithDefaults({
           type: 'checkbox',
           localized: true,
         },
+        {
+          type: 'group',
+          name: 'group',
+          fields: [
+            {
+              name: 'children',
+              type: 'text',
+            },
+          ],
+        },
       ],
     },
     ArrayCollection,

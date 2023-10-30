@@ -5,7 +5,9 @@ import type { Where } from '../../packages/payload/src/types'
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
+import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
 import configPromise from './config'
 import {
@@ -25,6 +27,7 @@ import {
 
 const collection = localizedPostsSlug
 let config: Config
+let client: RESTClient
 
 let serverURL
 
@@ -34,6 +37,15 @@ describe('Localization', () => {
 
   beforeAll(async () => {
     ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
+    client = new RESTClient(config, { serverURL, defaultSlug: collection })
+    await client.create({
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+    await client.login()
+
     config = await configPromise
 
     // @ts-expect-error Force typing
@@ -68,7 +80,7 @@ describe('Localization', () => {
     }
   })
 
-  describe('localized text', () => {
+  describe('Localized text', () => {
     it('create english', async () => {
       const allDocs = await payload.find({
         collection,
@@ -754,6 +766,32 @@ describe('Localization', () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       expect(updatedSpanishDoc.items[0].text).toStrictEqual(englishTitle)
+    })
+  })
+
+  describe('Localized - Field Paths', () => {
+    it('should allow querying by non-localized field names ending in a locale', async () => {
+      await payload.update({
+        collection,
+        id: post1.id,
+        data: {
+          children: post1.id,
+          group: {
+            children: 'some content',
+          },
+        },
+      })
+
+      const { result } = await client.find({
+        auth: true,
+        query: {
+          'group.children': {
+            contains: 'some',
+          },
+        },
+      })
+
+      expect(result.docs.map(({ id }) => id)).toContain(post1.id)
     })
   })
 })
