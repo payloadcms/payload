@@ -27,7 +27,11 @@ export type LexicalEditorProps = {
   lexical?: LexicalEditorConfig
 }
 
-export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps> & {
+export type LexicalRichTextAdapter = RichTextAdapter<
+  SerializedEditorState,
+  AdapterProps,
+  AdapterProps
+> & {
   editorConfig: SanitizedEditorConfig
 }
 
@@ -68,13 +72,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         if (finalSanitizedEditorConfig?.features?.hooks?.afterReadPromises?.length) {
           for (const afterReadPromise of finalSanitizedEditorConfig.features.hooks
             .afterReadPromises) {
-            promises.push(
-              afterReadPromise({
-                field,
-                incomingEditorState,
-                siblingDoc,
-              }),
-            )
+            const promise = afterReadPromise({
+              field,
+              incomingEditorState,
+              siblingDoc,
+            })
+            if (promise) {
+              promises.push(promise)
+            }
           }
         }
 

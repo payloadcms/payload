@@ -478,7 +478,6 @@ function buildObjectType({
             tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true))
 
           if (!payload.types.tabTypes[interfaceName]) {
-            // eslint-disable-next-line no-param-reassign
             payload.types.tabTypes[interfaceName] = buildObjectType({
               name: interfaceName,
               fields: tab.fields,

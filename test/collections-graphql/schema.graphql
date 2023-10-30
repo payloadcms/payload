@@ -1,22 +1,33 @@
 type Query {
   User(id: String!, draft: Boolean): User
-  Users(where: User_where, draft: Boolean, page: Int, limit: Int, sort: String): Users
+  Users(draft: Boolean, where: User_where, limit: Int, page: Int, sort: String): Users
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
+  Point(id: String!, draft: Boolean): Point
+  Points(draft: Boolean, where: Point_where, limit: Int, page: Int, sort: String): Points
+  docAccessPoint(id: String!): pointDocAccess
   Post(id: String!, draft: Boolean): Post
-  Posts(where: Post_where, draft: Boolean, page: Int, limit: Int, sort: String): Posts
+  Posts(draft: Boolean, where: Post_where, limit: Int, page: Int, sort: String): Posts
   docAccessPost(id: String!): postsDocAccess
   CustomId(id: Int!, draft: Boolean): CustomId
-  CustomIds(where: CustomId_where, draft: Boolean, page: Int, limit: Int, sort: String): CustomIds
+  CustomIds(draft: Boolean, where: CustomId_where, limit: Int, page: Int, sort: String): CustomIds
   docAccessCustomId(id: Int!): custom_idsDocAccess
   Relation(id: String!, draft: Boolean): Relation
-  Relations(where: Relation_where, draft: Boolean, page: Int, limit: Int, sort: String): Relations
+  Relations(draft: Boolean, where: Relation_where, limit: Int, page: Int, sort: String): Relations
   docAccessRelation(id: String!): relationDocAccess
   Dummy(id: String!, draft: Boolean): Dummy
-  Dummies(where: Dummy_where, draft: Boolean, page: Int, limit: Int, sort: String): Dummies
+  Dummies(draft: Boolean, where: Dummy_where, limit: Int, page: Int, sort: String): Dummies
   docAccessDummy(id: String!): dummyDocAccess
-  Preference(key: String): Preference
+  PayloadApiTestOne(id: String!, draft: Boolean): PayloadApiTestOne
+  PayloadApiTestOnes(draft: Boolean, where: PayloadApiTestOne_where, limit: Int, page: Int, sort: String): PayloadApiTestOnes
+  docAccessPayloadApiTestOne(id: String!): payload_api_test_onesDocAccess
+  PayloadApiTestTwo(id: String!, draft: Boolean): PayloadApiTestTwo
+  PayloadApiTestTwos(draft: Boolean, where: PayloadApiTestTwo_where, limit: Int, page: Int, sort: String): PayloadApiTestTwos
+  docAccessPayloadApiTestTwo(id: String!): payload_api_test_twosDocAccess
+  PayloadPreference(id: String!, draft: Boolean): PayloadPreference
+  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
+  docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
   QueryWithInternalError: QueryWithInternalError
 }
@@ -25,9 +36,11 @@ type User {
   id: String
   updatedAt: DateTime
   createdAt: DateTime
-  email: EmailAddress
+  email: EmailAddress!
   resetPasswordToken: String
   resetPasswordExpiration: DateTime
+  salt: String
+  hash: String
   loginAttempts: Float
   lockUntil: DateTime
   password: String!
@@ -41,21 +54,20 @@ scalar DateTime
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress
-  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
   docs: [User]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input User_where {
@@ -63,8 +75,8 @@ input User_where {
   createdAt: User_createdAt_operator
   email: User_email_operator
   id: User_id_operator
-  OR: [User_where_or]
   AND: [User_where_and]
+  OR: [User_where_or]
 }
 
 input User_updatedAt_operator {
@@ -97,7 +109,6 @@ input User_email_operator {
   in: [EmailAddress]
   not_in: [EmailAddress]
   all: [EmailAddress]
-  exists: Boolean
 }
 
 input User_id_operator {
@@ -111,18 +122,22 @@ input User_id_operator {
   exists: Boolean
 }
 
-input User_where_or {
-  updatedAt: User_updatedAt_operator
-  createdAt: User_createdAt_operator
-  email: User_email_operator
-  id: User_id_operator
-}
-
 input User_where_and {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
   id: User_id_operator
+  AND: [User_where_and]
+  OR: [User_where_or]
+}
+
+input User_where_or {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+  AND: [User_where_and]
+  OR: [User_where_or]
 }
 
 type usersDocAccess {
@@ -264,10 +279,217 @@ type UsersUnlockDocAccess {
 }
 
 type usersMe {
+  collection: String
+  exp: Int
   token: String
   user: User
-  exp: Int
-  collection: String
+}
+
+type Point {
+  id: String
+  point: [Float!]
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type Points {
+  docs: [Point]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input Point_where {
+  point: Point_point_operator
+  updatedAt: Point_updatedAt_operator
+  createdAt: Point_createdAt_operator
+  id: Point_id_operator
+  AND: [Point_where_and]
+  OR: [Point_where_or]
+}
+
+input Point_point_operator {
+  equals: [Float]
+  not_equals: [Float]
+  greater_than_equal: [Float]
+  greater_than: [Float]
+  less_than_equal: [Float]
+  less_than: [Float]
+  near: [Float]
+  within: GeoJSONObject
+  intersects: GeoJSONObject
+  exists: Boolean
+}
+
+input GeoJSONObject {
+  coordinates: JSON
+  type: String
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+input Point_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Point_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Point_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Point_where_and {
+  point: Point_point_operator
+  updatedAt: Point_updatedAt_operator
+  createdAt: Point_createdAt_operator
+  id: Point_id_operator
+  AND: [Point_where_and]
+  OR: [Point_where_or]
+}
+
+input Point_where_or {
+  point: Point_point_operator
+  updatedAt: Point_updatedAt_operator
+  createdAt: Point_createdAt_operator
+  id: Point_id_operator
+  AND: [Point_where_and]
+  OR: [Point_where_or]
+}
+
+type pointDocAccess {
+  fields: PointDocAccessFields
+  create: PointCreateDocAccess
+  read: PointReadDocAccess
+  update: PointUpdateDocAccess
+  delete: PointDeleteDocAccess
+}
+
+type PointDocAccessFields {
+  point: PointDocAccessFields_point
+  updatedAt: PointDocAccessFields_updatedAt
+  createdAt: PointDocAccessFields_createdAt
+}
+
+type PointDocAccessFields_point {
+  create: PointDocAccessFields_point_Create
+  read: PointDocAccessFields_point_Read
+  update: PointDocAccessFields_point_Update
+  delete: PointDocAccessFields_point_Delete
+}
+
+type PointDocAccessFields_point_Create {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_point_Read {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_point_Update {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_point_Delete {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_updatedAt {
+  create: PointDocAccessFields_updatedAt_Create
+  read: PointDocAccessFields_updatedAt_Read
+  update: PointDocAccessFields_updatedAt_Update
+  delete: PointDocAccessFields_updatedAt_Delete
+}
+
+type PointDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_createdAt {
+  create: PointDocAccessFields_createdAt_Create
+  read: PointDocAccessFields_createdAt_Read
+  update: PointDocAccessFields_createdAt_Update
+  delete: PointDocAccessFields_createdAt_Delete
+}
+
+type PointDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PointDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PointCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PointReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PointUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PointDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
 }
 
 type Post {
@@ -297,7 +519,7 @@ type Relation {
 }
 
 type CustomId {
-  id: Float
+  id: Int
   title: String
   updatedAt: DateTime
   createdAt: DateTime
@@ -365,16 +587,16 @@ type Post_D1_D2_D3 {
 
 type Posts {
   docs: [Post]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input Post_where {
@@ -395,8 +617,8 @@ input Post_where {
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
   id: Post_id_operator
-  OR: [Post_where_or]
   AND: [Post_where_and]
+  OR: [Post_where_or]
 }
 
 input Post_title_operator {
@@ -442,35 +664,35 @@ input Post_min_operator {
 }
 
 input Post_relationField_operator {
-  equals: String
-  not_equals: String
-  in: [String]
-  not_in: [String]
-  all: [String]
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
   exists: Boolean
 }
 
 input Post_relationToCustomID_operator {
-  equals: String
-  not_equals: String
-  in: [String]
-  not_in: [String]
-  all: [String]
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
   exists: Boolean
 }
 
 input Post_relationHasManyField_operator {
-  equals: String
-  not_equals: String
-  in: [String]
-  not_in: [String]
-  all: [String]
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
   exists: Boolean
 }
 
 input Post_relationMultiRelationTo_Relation {
   relationTo: Post_relationMultiRelationTo_Relation_RelationTo
-  value: String
+  value: JSON
 }
 
 enum Post_relationMultiRelationTo_Relation_RelationTo {
@@ -480,7 +702,7 @@ enum Post_relationMultiRelationTo_Relation_RelationTo {
 
 input Post_relationMultiRelationToHasMany_Relation {
   relationTo: Post_relationMultiRelationToHasMany_Relation_RelationTo
-  value: String
+  value: JSON
 }
 
 enum Post_relationMultiRelationToHasMany_Relation_RelationTo {
@@ -576,26 +798,6 @@ input Post_id_operator {
   exists: Boolean
 }
 
-input Post_where_or {
-  title: Post_title_operator
-  description: Post_description_operator
-  number: Post_number_operator
-  min: Post_min_operator
-  relationField: Post_relationField_operator
-  relationToCustomID: Post_relationToCustomID_operator
-  relationHasManyField: Post_relationHasManyField_operator
-  relationMultiRelationTo: Post_relationMultiRelationTo_Relation
-  relationMultiRelationToHasMany: Post_relationMultiRelationToHasMany_Relation
-  A1__A2: Post_A1__A2_operator
-  B1__B2: Post_B1__B2_operator
-  C1__C2Text: Post_C1__C2Text_operator
-  C1__C2__C3: Post_C1__C2__C3_operator
-  D1__D2__D3__D4: Post_D1__D2__D3__D4_operator
-  updatedAt: Post_updatedAt_operator
-  createdAt: Post_createdAt_operator
-  id: Post_id_operator
-}
-
 input Post_where_and {
   title: Post_title_operator
   description: Post_description_operator
@@ -614,6 +816,30 @@ input Post_where_and {
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
   id: Post_id_operator
+  AND: [Post_where_and]
+  OR: [Post_where_or]
+}
+
+input Post_where_or {
+  title: Post_title_operator
+  description: Post_description_operator
+  number: Post_number_operator
+  min: Post_min_operator
+  relationField: Post_relationField_operator
+  relationToCustomID: Post_relationToCustomID_operator
+  relationHasManyField: Post_relationHasManyField_operator
+  relationMultiRelationTo: Post_relationMultiRelationTo_Relation
+  relationMultiRelationToHasMany: Post_relationMultiRelationToHasMany_Relation
+  A1__A2: Post_A1__A2_operator
+  B1__B2: Post_B1__B2_operator
+  C1__C2Text: Post_C1__C2Text_operator
+  C1__C2__C3: Post_C1__C2__C3_operator
+  D1__D2__D3__D4: Post_D1__D2__D3__D4_operator
+  updatedAt: Post_updatedAt_operator
+  createdAt: Post_createdAt_operator
+  id: Post_id_operator
+  AND: [Post_where_and]
+  OR: [Post_where_or]
 }
 
 type postsDocAccess {
@@ -1201,16 +1427,16 @@ type PostsDeleteDocAccess {
 
 type CustomIds {
   docs: [CustomId]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input CustomId_where {
@@ -1218,17 +1444,17 @@ input CustomId_where {
   title: CustomId_title_operator
   updatedAt: CustomId_updatedAt_operator
   createdAt: CustomId_createdAt_operator
-  OR: [CustomId_where_or]
   AND: [CustomId_where_and]
+  OR: [CustomId_where_or]
 }
 
 input CustomId_id_operator {
-  equals: Float
-  not_equals: Float
-  greater_than_equal: Float
-  greater_than: Float
-  less_than_equal: Float
-  less_than: Float
+  equals: Int
+  not_equals: Int
+  greater_than_equal: Int
+  greater_than: Int
+  less_than_equal: Int
+  less_than: Int
   exists: Boolean
 }
 
@@ -1265,18 +1491,22 @@ input CustomId_createdAt_operator {
   exists: Boolean
 }
 
-input CustomId_where_or {
-  id: CustomId_id_operator
-  title: CustomId_title_operator
-  updatedAt: CustomId_updatedAt_operator
-  createdAt: CustomId_createdAt_operator
-}
-
 input CustomId_where_and {
   id: CustomId_id_operator
   title: CustomId_title_operator
   updatedAt: CustomId_updatedAt_operator
   createdAt: CustomId_createdAt_operator
+  AND: [CustomId_where_and]
+  OR: [CustomId_where_or]
+}
+
+input CustomId_where_or {
+  id: CustomId_id_operator
+  title: CustomId_title_operator
+  updatedAt: CustomId_updatedAt_operator
+  createdAt: CustomId_createdAt_operator
+  AND: [CustomId_where_and]
+  OR: [CustomId_where_or]
 }
 
 type custom_idsDocAccess {
@@ -1408,16 +1638,16 @@ type CustomIdsDeleteDocAccess {
 
 type Relations {
   docs: [Relation]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input Relation_where {
@@ -1425,8 +1655,8 @@ input Relation_where {
   updatedAt: Relation_updatedAt_operator
   createdAt: Relation_createdAt_operator
   id: Relation_id_operator
-  OR: [Relation_where_or]
   AND: [Relation_where_and]
+  OR: [Relation_where_or]
 }
 
 input Relation_name_operator {
@@ -1473,18 +1703,22 @@ input Relation_id_operator {
   exists: Boolean
 }
 
-input Relation_where_or {
-  name: Relation_name_operator
-  updatedAt: Relation_updatedAt_operator
-  createdAt: Relation_createdAt_operator
-  id: Relation_id_operator
-}
-
 input Relation_where_and {
   name: Relation_name_operator
   updatedAt: Relation_updatedAt_operator
   createdAt: Relation_createdAt_operator
   id: Relation_id_operator
+  AND: [Relation_where_and]
+  OR: [Relation_where_or]
+}
+
+input Relation_where_or {
+  name: Relation_name_operator
+  updatedAt: Relation_updatedAt_operator
+  createdAt: Relation_createdAt_operator
+  id: Relation_id_operator
+  AND: [Relation_where_and]
+  OR: [Relation_where_or]
 }
 
 type relationDocAccess {
@@ -1592,16 +1826,16 @@ type RelationDeleteDocAccess {
 
 type Dummies {
   docs: [Dummy]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input Dummy_where {
@@ -1609,8 +1843,8 @@ input Dummy_where {
   updatedAt: Dummy_updatedAt_operator
   createdAt: Dummy_createdAt_operator
   id: Dummy_id_operator
-  OR: [Dummy_where_or]
   AND: [Dummy_where_and]
+  OR: [Dummy_where_or]
 }
 
 input Dummy_name_operator {
@@ -1657,18 +1891,22 @@ input Dummy_id_operator {
   exists: Boolean
 }
 
-input Dummy_where_or {
-  name: Dummy_name_operator
-  updatedAt: Dummy_updatedAt_operator
-  createdAt: Dummy_createdAt_operator
-  id: Dummy_id_operator
-}
-
 input Dummy_where_and {
   name: Dummy_name_operator
   updatedAt: Dummy_updatedAt_operator
   createdAt: Dummy_createdAt_operator
   id: Dummy_id_operator
+  AND: [Dummy_where_and]
+  OR: [Dummy_where_or]
+}
+
+input Dummy_where_or {
+  name: Dummy_name_operator
+  updatedAt: Dummy_updatedAt_operator
+  createdAt: Dummy_createdAt_operator
+  id: Dummy_id_operator
+  AND: [Dummy_where_and]
+  OR: [Dummy_where_or]
 }
 
 type dummyDocAccess {
@@ -1774,25 +2012,725 @@ type DummyDeleteDocAccess {
   where: JSONObject
 }
 
-type Preference {
-  key: String!
-  value: JSON
-  createdAt: DateTime!
-  updatedAt: DateTime!
+type PayloadApiTestOne {
+  id: String
+  payloadAPI: String
+  updatedAt: DateTime
+  createdAt: DateTime
 }
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON
+type PayloadApiTestOnes {
+  docs: [PayloadApiTestOne]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input PayloadApiTestOne_where {
+  payloadAPI: PayloadApiTestOne_payloadAPI_operator
+  updatedAt: PayloadApiTestOne_updatedAt_operator
+  createdAt: PayloadApiTestOne_createdAt_operator
+  id: PayloadApiTestOne_id_operator
+  AND: [PayloadApiTestOne_where_and]
+  OR: [PayloadApiTestOne_where_or]
+}
+
+input PayloadApiTestOne_payloadAPI_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadApiTestOne_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadApiTestOne_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadApiTestOne_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadApiTestOne_where_and {
+  payloadAPI: PayloadApiTestOne_payloadAPI_operator
+  updatedAt: PayloadApiTestOne_updatedAt_operator
+  createdAt: PayloadApiTestOne_createdAt_operator
+  id: PayloadApiTestOne_id_operator
+  AND: [PayloadApiTestOne_where_and]
+  OR: [PayloadApiTestOne_where_or]
+}
+
+input PayloadApiTestOne_where_or {
+  payloadAPI: PayloadApiTestOne_payloadAPI_operator
+  updatedAt: PayloadApiTestOne_updatedAt_operator
+  createdAt: PayloadApiTestOne_createdAt_operator
+  id: PayloadApiTestOne_id_operator
+  AND: [PayloadApiTestOne_where_and]
+  OR: [PayloadApiTestOne_where_or]
+}
+
+type payload_api_test_onesDocAccess {
+  fields: PayloadApiTestOnesDocAccessFields
+  create: PayloadApiTestOnesCreateDocAccess
+  read: PayloadApiTestOnesReadDocAccess
+  update: PayloadApiTestOnesUpdateDocAccess
+  delete: PayloadApiTestOnesDeleteDocAccess
+}
+
+type PayloadApiTestOnesDocAccessFields {
+  payloadAPI: PayloadApiTestOnesDocAccessFields_payloadAPI
+  updatedAt: PayloadApiTestOnesDocAccessFields_updatedAt
+  createdAt: PayloadApiTestOnesDocAccessFields_createdAt
+}
+
+type PayloadApiTestOnesDocAccessFields_payloadAPI {
+  create: PayloadApiTestOnesDocAccessFields_payloadAPI_Create
+  read: PayloadApiTestOnesDocAccessFields_payloadAPI_Read
+  update: PayloadApiTestOnesDocAccessFields_payloadAPI_Update
+  delete: PayloadApiTestOnesDocAccessFields_payloadAPI_Delete
+}
+
+type PayloadApiTestOnesDocAccessFields_payloadAPI_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_payloadAPI_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_payloadAPI_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_payloadAPI_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_updatedAt {
+  create: PayloadApiTestOnesDocAccessFields_updatedAt_Create
+  read: PayloadApiTestOnesDocAccessFields_updatedAt_Read
+  update: PayloadApiTestOnesDocAccessFields_updatedAt_Update
+  delete: PayloadApiTestOnesDocAccessFields_updatedAt_Delete
+}
+
+type PayloadApiTestOnesDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_createdAt {
+  create: PayloadApiTestOnesDocAccessFields_createdAt_Create
+  read: PayloadApiTestOnesDocAccessFields_createdAt_Read
+  update: PayloadApiTestOnesDocAccessFields_createdAt_Update
+  delete: PayloadApiTestOnesDocAccessFields_createdAt_Delete
+}
+
+type PayloadApiTestOnesDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestOnesReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestOnesUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestOnesDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestTwo {
+  id: String
+  payloadAPI: String
+  relation: PayloadApiTestOne
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type PayloadApiTestTwos {
+  docs: [PayloadApiTestTwo]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input PayloadApiTestTwo_where {
+  payloadAPI: PayloadApiTestTwo_payloadAPI_operator
+  relation: PayloadApiTestTwo_relation_operator
+  updatedAt: PayloadApiTestTwo_updatedAt_operator
+  createdAt: PayloadApiTestTwo_createdAt_operator
+  id: PayloadApiTestTwo_id_operator
+  AND: [PayloadApiTestTwo_where_and]
+  OR: [PayloadApiTestTwo_where_or]
+}
+
+input PayloadApiTestTwo_payloadAPI_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadApiTestTwo_relation_operator {
+  equals: JSON
+  not_equals: JSON
+  in: [JSON]
+  not_in: [JSON]
+  all: [JSON]
+  exists: Boolean
+}
+
+input PayloadApiTestTwo_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadApiTestTwo_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadApiTestTwo_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadApiTestTwo_where_and {
+  payloadAPI: PayloadApiTestTwo_payloadAPI_operator
+  relation: PayloadApiTestTwo_relation_operator
+  updatedAt: PayloadApiTestTwo_updatedAt_operator
+  createdAt: PayloadApiTestTwo_createdAt_operator
+  id: PayloadApiTestTwo_id_operator
+  AND: [PayloadApiTestTwo_where_and]
+  OR: [PayloadApiTestTwo_where_or]
+}
+
+input PayloadApiTestTwo_where_or {
+  payloadAPI: PayloadApiTestTwo_payloadAPI_operator
+  relation: PayloadApiTestTwo_relation_operator
+  updatedAt: PayloadApiTestTwo_updatedAt_operator
+  createdAt: PayloadApiTestTwo_createdAt_operator
+  id: PayloadApiTestTwo_id_operator
+  AND: [PayloadApiTestTwo_where_and]
+  OR: [PayloadApiTestTwo_where_or]
+}
+
+type payload_api_test_twosDocAccess {
+  fields: PayloadApiTestTwosDocAccessFields
+  create: PayloadApiTestTwosCreateDocAccess
+  read: PayloadApiTestTwosReadDocAccess
+  update: PayloadApiTestTwosUpdateDocAccess
+  delete: PayloadApiTestTwosDeleteDocAccess
+}
+
+type PayloadApiTestTwosDocAccessFields {
+  payloadAPI: PayloadApiTestTwosDocAccessFields_payloadAPI
+  relation: PayloadApiTestTwosDocAccessFields_relation
+  updatedAt: PayloadApiTestTwosDocAccessFields_updatedAt
+  createdAt: PayloadApiTestTwosDocAccessFields_createdAt
+}
+
+type PayloadApiTestTwosDocAccessFields_payloadAPI {
+  create: PayloadApiTestTwosDocAccessFields_payloadAPI_Create
+  read: PayloadApiTestTwosDocAccessFields_payloadAPI_Read
+  update: PayloadApiTestTwosDocAccessFields_payloadAPI_Update
+  delete: PayloadApiTestTwosDocAccessFields_payloadAPI_Delete
+}
+
+type PayloadApiTestTwosDocAccessFields_payloadAPI_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_payloadAPI_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_payloadAPI_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_payloadAPI_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_relation {
+  create: PayloadApiTestTwosDocAccessFields_relation_Create
+  read: PayloadApiTestTwosDocAccessFields_relation_Read
+  update: PayloadApiTestTwosDocAccessFields_relation_Update
+  delete: PayloadApiTestTwosDocAccessFields_relation_Delete
+}
+
+type PayloadApiTestTwosDocAccessFields_relation_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_relation_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_relation_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_relation_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_updatedAt {
+  create: PayloadApiTestTwosDocAccessFields_updatedAt_Create
+  read: PayloadApiTestTwosDocAccessFields_updatedAt_Read
+  update: PayloadApiTestTwosDocAccessFields_updatedAt_Update
+  delete: PayloadApiTestTwosDocAccessFields_updatedAt_Delete
+}
+
+type PayloadApiTestTwosDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_createdAt {
+  create: PayloadApiTestTwosDocAccessFields_createdAt_Create
+  read: PayloadApiTestTwosDocAccessFields_createdAt_Read
+  update: PayloadApiTestTwosDocAccessFields_createdAt_Update
+  delete: PayloadApiTestTwosDocAccessFields_createdAt_Delete
+}
+
+type PayloadApiTestTwosDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestTwosReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestTwosUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestTwosDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreference {
+  id: String
+  user: PayloadPreference_User_Relationship!
+  key: String
+  value: JSON
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type PayloadPreference_User_Relationship {
+  relationTo: PayloadPreference_User_RelationTo
+  value: PayloadPreference_User
+}
+
+enum PayloadPreference_User_RelationTo {
+  users
+}
+
+union PayloadPreference_User = User
+
+type PayloadPreferences {
+  docs: [PayloadPreference]
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  limit: Int
+  nextPage: Int
+  offset: Int
+  page: Int
+  pagingCounter: Int
+  prevPage: Int
+  totalDocs: Int
+  totalPages: Int
+}
+
+input PayloadPreference_where {
+  user: PayloadPreference_user_Relation
+  key: PayloadPreference_key_operator
+  value: PayloadPreference_value_operator
+  updatedAt: PayloadPreference_updatedAt_operator
+  createdAt: PayloadPreference_createdAt_operator
+  id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
+}
+
+input PayloadPreference_user_Relation {
+  relationTo: PayloadPreference_user_Relation_RelationTo
+  value: JSON
+}
+
+enum PayloadPreference_user_Relation_RelationTo {
+  users
+}
+
+input PayloadPreference_key_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadPreference_value_operator {
+  equals: JSON
+  not_equals: JSON
+  like: JSON
+  contains: JSON
+  within: JSON
+  intersects: JSON
+  exists: Boolean
+}
+
+input PayloadPreference_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadPreference_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input PayloadPreference_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input PayloadPreference_where_and {
+  user: PayloadPreference_user_Relation
+  key: PayloadPreference_key_operator
+  value: PayloadPreference_value_operator
+  updatedAt: PayloadPreference_updatedAt_operator
+  createdAt: PayloadPreference_createdAt_operator
+  id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
+}
+
+input PayloadPreference_where_or {
+  user: PayloadPreference_user_Relation
+  key: PayloadPreference_key_operator
+  value: PayloadPreference_value_operator
+  updatedAt: PayloadPreference_updatedAt_operator
+  createdAt: PayloadPreference_createdAt_operator
+  id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
+}
+
+type payload_preferencesDocAccess {
+  fields: PayloadPreferencesDocAccessFields
+  create: PayloadPreferencesCreateDocAccess
+  read: PayloadPreferencesReadDocAccess
+  update: PayloadPreferencesUpdateDocAccess
+  delete: PayloadPreferencesDeleteDocAccess
+}
+
+type PayloadPreferencesDocAccessFields {
+  user: PayloadPreferencesDocAccessFields_user
+  key: PayloadPreferencesDocAccessFields_key
+  value: PayloadPreferencesDocAccessFields_value
+  updatedAt: PayloadPreferencesDocAccessFields_updatedAt
+  createdAt: PayloadPreferencesDocAccessFields_createdAt
+}
+
+type PayloadPreferencesDocAccessFields_user {
+  create: PayloadPreferencesDocAccessFields_user_Create
+  read: PayloadPreferencesDocAccessFields_user_Read
+  update: PayloadPreferencesDocAccessFields_user_Update
+  delete: PayloadPreferencesDocAccessFields_user_Delete
+}
+
+type PayloadPreferencesDocAccessFields_user_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_user_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_user_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_user_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key {
+  create: PayloadPreferencesDocAccessFields_key_Create
+  read: PayloadPreferencesDocAccessFields_key_Read
+  update: PayloadPreferencesDocAccessFields_key_Update
+  delete: PayloadPreferencesDocAccessFields_key_Delete
+}
+
+type PayloadPreferencesDocAccessFields_key_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_key_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value {
+  create: PayloadPreferencesDocAccessFields_value_Create
+  read: PayloadPreferencesDocAccessFields_value_Read
+  update: PayloadPreferencesDocAccessFields_value_Update
+  delete: PayloadPreferencesDocAccessFields_value_Delete
+}
+
+type PayloadPreferencesDocAccessFields_value_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_value_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt {
+  create: PayloadPreferencesDocAccessFields_updatedAt_Create
+  read: PayloadPreferencesDocAccessFields_updatedAt_Read
+  update: PayloadPreferencesDocAccessFields_updatedAt_Update
+  delete: PayloadPreferencesDocAccessFields_updatedAt_Delete
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt {
+  create: PayloadPreferencesDocAccessFields_createdAt_Create
+  read: PayloadPreferencesDocAccessFields_createdAt_Read
+  update: PayloadPreferencesDocAccessFields_createdAt_Update
+  delete: PayloadPreferencesDocAccessFields_createdAt_Delete
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
 
 type Access {
   canAccessAdmin: Boolean!
   users: usersAccess
+  point: pointAccess
   posts: postsAccess
   custom_ids: custom_idsAccess
   relation: relationAccess
   dummy: dummyAccess
+  payload_api_test_ones: payload_api_test_onesAccess
+  payload_api_test_twos: payload_api_test_twosAccess
+  payload_preferences: payload_preferencesAccess
 }
 
 type usersAccess {
@@ -1924,6 +2862,109 @@ type UsersDeleteAccess {
 }
 
 type UsersUnlockAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type pointAccess {
+  fields: PointFields
+  create: PointCreateAccess
+  read: PointReadAccess
+  update: PointUpdateAccess
+  delete: PointDeleteAccess
+}
+
+type PointFields {
+  point: PointFields_point
+  updatedAt: PointFields_updatedAt
+  createdAt: PointFields_createdAt
+}
+
+type PointFields_point {
+  create: PointFields_point_Create
+  read: PointFields_point_Read
+  update: PointFields_point_Update
+  delete: PointFields_point_Delete
+}
+
+type PointFields_point_Create {
+  permission: Boolean!
+}
+
+type PointFields_point_Read {
+  permission: Boolean!
+}
+
+type PointFields_point_Update {
+  permission: Boolean!
+}
+
+type PointFields_point_Delete {
+  permission: Boolean!
+}
+
+type PointFields_updatedAt {
+  create: PointFields_updatedAt_Create
+  read: PointFields_updatedAt_Read
+  update: PointFields_updatedAt_Update
+  delete: PointFields_updatedAt_Delete
+}
+
+type PointFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PointFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PointFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PointFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PointFields_createdAt {
+  create: PointFields_createdAt_Create
+  read: PointFields_createdAt_Read
+  update: PointFields_createdAt_Update
+  delete: PointFields_createdAt_Delete
+}
+
+type PointFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PointFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PointFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PointFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PointCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PointReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PointUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PointDeleteAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -2844,58 +3885,436 @@ type DummyDeleteAccess {
   where: JSONObject
 }
 
+type payload_api_test_onesAccess {
+  fields: PayloadApiTestOnesFields
+  create: PayloadApiTestOnesCreateAccess
+  read: PayloadApiTestOnesReadAccess
+  update: PayloadApiTestOnesUpdateAccess
+  delete: PayloadApiTestOnesDeleteAccess
+}
+
+type PayloadApiTestOnesFields {
+  payloadAPI: PayloadApiTestOnesFields_payloadAPI
+  updatedAt: PayloadApiTestOnesFields_updatedAt
+  createdAt: PayloadApiTestOnesFields_createdAt
+}
+
+type PayloadApiTestOnesFields_payloadAPI {
+  create: PayloadApiTestOnesFields_payloadAPI_Create
+  read: PayloadApiTestOnesFields_payloadAPI_Read
+  update: PayloadApiTestOnesFields_payloadAPI_Update
+  delete: PayloadApiTestOnesFields_payloadAPI_Delete
+}
+
+type PayloadApiTestOnesFields_payloadAPI_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_payloadAPI_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_payloadAPI_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_payloadAPI_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_updatedAt {
+  create: PayloadApiTestOnesFields_updatedAt_Create
+  read: PayloadApiTestOnesFields_updatedAt_Read
+  update: PayloadApiTestOnesFields_updatedAt_Update
+  delete: PayloadApiTestOnesFields_updatedAt_Delete
+}
+
+type PayloadApiTestOnesFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_createdAt {
+  create: PayloadApiTestOnesFields_createdAt_Create
+  read: PayloadApiTestOnesFields_createdAt_Read
+  update: PayloadApiTestOnesFields_createdAt_Update
+  delete: PayloadApiTestOnesFields_createdAt_Delete
+}
+
+type PayloadApiTestOnesFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestOnesCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestOnesReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestOnesUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestOnesDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type payload_api_test_twosAccess {
+  fields: PayloadApiTestTwosFields
+  create: PayloadApiTestTwosCreateAccess
+  read: PayloadApiTestTwosReadAccess
+  update: PayloadApiTestTwosUpdateAccess
+  delete: PayloadApiTestTwosDeleteAccess
+}
+
+type PayloadApiTestTwosFields {
+  payloadAPI: PayloadApiTestTwosFields_payloadAPI
+  relation: PayloadApiTestTwosFields_relation
+  updatedAt: PayloadApiTestTwosFields_updatedAt
+  createdAt: PayloadApiTestTwosFields_createdAt
+}
+
+type PayloadApiTestTwosFields_payloadAPI {
+  create: PayloadApiTestTwosFields_payloadAPI_Create
+  read: PayloadApiTestTwosFields_payloadAPI_Read
+  update: PayloadApiTestTwosFields_payloadAPI_Update
+  delete: PayloadApiTestTwosFields_payloadAPI_Delete
+}
+
+type PayloadApiTestTwosFields_payloadAPI_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_payloadAPI_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_payloadAPI_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_payloadAPI_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_relation {
+  create: PayloadApiTestTwosFields_relation_Create
+  read: PayloadApiTestTwosFields_relation_Read
+  update: PayloadApiTestTwosFields_relation_Update
+  delete: PayloadApiTestTwosFields_relation_Delete
+}
+
+type PayloadApiTestTwosFields_relation_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_relation_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_relation_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_relation_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_updatedAt {
+  create: PayloadApiTestTwosFields_updatedAt_Create
+  read: PayloadApiTestTwosFields_updatedAt_Read
+  update: PayloadApiTestTwosFields_updatedAt_Update
+  delete: PayloadApiTestTwosFields_updatedAt_Delete
+}
+
+type PayloadApiTestTwosFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_createdAt {
+  create: PayloadApiTestTwosFields_createdAt_Create
+  read: PayloadApiTestTwosFields_createdAt_Read
+  update: PayloadApiTestTwosFields_createdAt_Update
+  delete: PayloadApiTestTwosFields_createdAt_Delete
+}
+
+type PayloadApiTestTwosFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadApiTestTwosCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestTwosReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestTwosUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadApiTestTwosDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type payload_preferencesAccess {
+  fields: PayloadPreferencesFields
+  create: PayloadPreferencesCreateAccess
+  read: PayloadPreferencesReadAccess
+  update: PayloadPreferencesUpdateAccess
+  delete: PayloadPreferencesDeleteAccess
+}
+
+type PayloadPreferencesFields {
+  user: PayloadPreferencesFields_user
+  key: PayloadPreferencesFields_key
+  value: PayloadPreferencesFields_value
+  updatedAt: PayloadPreferencesFields_updatedAt
+  createdAt: PayloadPreferencesFields_createdAt
+}
+
+type PayloadPreferencesFields_user {
+  create: PayloadPreferencesFields_user_Create
+  read: PayloadPreferencesFields_user_Read
+  update: PayloadPreferencesFields_user_Update
+  delete: PayloadPreferencesFields_user_Delete
+}
+
+type PayloadPreferencesFields_user_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_user_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_user_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_user_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key {
+  create: PayloadPreferencesFields_key_Create
+  read: PayloadPreferencesFields_key_Read
+  update: PayloadPreferencesFields_key_Update
+  delete: PayloadPreferencesFields_key_Delete
+}
+
+type PayloadPreferencesFields_key_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_key_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value {
+  create: PayloadPreferencesFields_value_Create
+  read: PayloadPreferencesFields_value_Read
+  update: PayloadPreferencesFields_value_Update
+  delete: PayloadPreferencesFields_value_Delete
+}
+
+type PayloadPreferencesFields_value_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_value_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt {
+  create: PayloadPreferencesFields_updatedAt_Create
+  read: PayloadPreferencesFields_updatedAt_Read
+  update: PayloadPreferencesFields_updatedAt_Update
+  delete: PayloadPreferencesFields_updatedAt_Delete
+}
+
+type PayloadPreferencesFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt {
+  create: PayloadPreferencesFields_createdAt_Create
+  read: PayloadPreferencesFields_createdAt_Read
+  update: PayloadPreferencesFields_createdAt_Update
+  delete: PayloadPreferencesFields_createdAt_Delete
+}
+
+type PayloadPreferencesFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PayloadPreferencesFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PayloadPreferencesCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PayloadPreferencesDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type QueryWithInternalError {
   text: String
 }
 
 type Mutation {
   createUser(data: mutationUserInput!, draft: Boolean): User
-  updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
   deleteUser(id: String!): User
   refreshTokenUser(token: String): usersRefreshedUser
   logoutUser: String
   unlockUser(email: String!): Boolean!
   loginUser(email: String, password: String): usersLoginResult
-  forgotPasswordUser(email: String!, disableEmail: Boolean, expiration: Int): Boolean!
-  resetPasswordUser(token: String, password: String): usersResetPassword
+  forgotPasswordUser(disableEmail: Boolean, email: String!, expiration: Int): Boolean!
+  resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
+  createPoint(data: mutationPointInput!, draft: Boolean): Point
+  updatePoint(id: String!, autosave: Boolean, data: mutationPointUpdateInput!, draft: Boolean): Point
+  deletePoint(id: String!): Point
   createPost(data: mutationPostInput!, draft: Boolean): Post
-  updatePost(id: String!, data: mutationPostUpdateInput!, draft: Boolean, autosave: Boolean): Post
+  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean): Post
   deletePost(id: String!): Post
   createCustomId(data: mutationCustomIdInput!, draft: Boolean): CustomId
-  updateCustomId(
-    id: Int!
-    data: mutationCustomIdUpdateInput!
-    draft: Boolean
-    autosave: Boolean
-  ): CustomId
+  updateCustomId(id: Int!, autosave: Boolean, data: mutationCustomIdUpdateInput!, draft: Boolean): CustomId
   deleteCustomId(id: Int!): CustomId
   createRelation(data: mutationRelationInput!, draft: Boolean): Relation
-  updateRelation(
-    id: String!
-    data: mutationRelationUpdateInput!
-    draft: Boolean
-    autosave: Boolean
-  ): Relation
+  updateRelation(id: String!, autosave: Boolean, data: mutationRelationUpdateInput!, draft: Boolean): Relation
   deleteRelation(id: String!): Relation
   createDummy(data: mutationDummyInput!, draft: Boolean): Dummy
-  updateDummy(
-    id: String!
-    data: mutationDummyUpdateInput!
-    draft: Boolean
-    autosave: Boolean
-  ): Dummy
+  updateDummy(id: String!, autosave: Boolean, data: mutationDummyUpdateInput!, draft: Boolean): Dummy
   deleteDummy(id: String!): Dummy
-  updatePreference(key: String!, value: JSON): Preference
-  deletePreference(key: String!): Preference
+  createPayloadApiTestOne(data: mutationPayloadApiTestOneInput!, draft: Boolean): PayloadApiTestOne
+  updatePayloadApiTestOne(id: String!, autosave: Boolean, data: mutationPayloadApiTestOneUpdateInput!, draft: Boolean): PayloadApiTestOne
+  deletePayloadApiTestOne(id: String!): PayloadApiTestOne
+  createPayloadApiTestTwo(data: mutationPayloadApiTestTwoInput!, draft: Boolean): PayloadApiTestTwo
+  updatePayloadApiTestTwo(id: String!, autosave: Boolean, data: mutationPayloadApiTestTwoUpdateInput!, draft: Boolean): PayloadApiTestTwo
+  deletePayloadApiTestTwo(id: String!): PayloadApiTestTwo
+  createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
+  deletePayloadPreference(id: String!): PayloadPreference
 }
 
 input mutationUserInput {
   updatedAt: String
   createdAt: String
-  email: String
+  email: String!
   resetPasswordToken: String
   resetPasswordExpiration: String
+  salt: String
+  hash: String
   loginAttempts: Float
   lockUntil: String
   password: String!
@@ -2907,15 +4326,17 @@ input mutationUserUpdateInput {
   email: String
   resetPasswordToken: String
   resetPasswordExpiration: String
+  salt: String
+  hash: String
   loginAttempts: Float
   lockUntil: String
   password: String
 }
 
 type usersRefreshedUser {
-  user: usersJWT
-  refreshedToken: String
   exp: Int
+  refreshedToken: String
+  user: usersJWT
 }
 
 type usersJWT {
@@ -2924,14 +4345,26 @@ type usersJWT {
 }
 
 type usersLoginResult {
+  exp: Int
   token: String
   user: User
-  exp: Int
 }
 
 type usersResetPassword {
   token: String
   user: User
+}
+
+input mutationPointInput {
+  point: [Float]
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationPointUpdateInput {
+  point: [Float]
+  updatedAt: String
+  createdAt: String
 }
 
 input mutationPostInput {
@@ -3103,4 +4536,64 @@ input mutationDummyUpdateInput {
   name: String
   updatedAt: String
   createdAt: String
+}
+
+input mutationPayloadApiTestOneInput {
+  payloadAPI: String
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationPayloadApiTestOneUpdateInput {
+  payloadAPI: String
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationPayloadApiTestTwoInput {
+  payloadAPI: String
+  relation: String
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationPayloadApiTestTwoUpdateInput {
+  payloadAPI: String
+  relation: String
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationPayloadPreferenceInput {
+  user: PayloadPreference_UserRelationshipInput
+  key: String
+  value: JSON
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadPreference_UserRelationshipInput {
+  relationTo: PayloadPreference_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadPreference_UserRelationshipInputRelationTo {
+  users
+}
+
+input mutationPayloadPreferenceUpdateInput {
+  user: PayloadPreferenceUpdate_UserRelationshipInput
+  key: String
+  value: JSON
+  updatedAt: String
+  createdAt: String
+}
+
+input PayloadPreferenceUpdate_UserRelationshipInput {
+  relationTo: PayloadPreferenceUpdate_UserRelationshipInputRelationTo
+  value: JSON
+}
+
+enum PayloadPreferenceUpdate_UserRelationshipInputRelationTo {
+  users
 }

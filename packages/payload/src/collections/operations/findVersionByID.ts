@@ -9,6 +9,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { APIError, Forbidden, NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -138,7 +139,7 @@ async function findVersionByID<T extends TypeWithID = any>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

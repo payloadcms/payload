@@ -1,5 +1,4 @@
-import type { TypeWithVersion } from 'payload/database'
-import type { UpdateGlobalVersionArgs } from 'payload/database'
+import type { TypeWithVersion, UpdateGlobalVersionArgs } from 'payload/database'
 import type { PayloadRequest, SanitizedGlobalConfig, TypeWithID } from 'payload/types'
 
 import { buildVersionGlobalFields } from 'payload/versions'
@@ -46,6 +45,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     operation: 'update',
     tableName,
     where,
+    req,
   })
 
   return result

@@ -182,35 +182,33 @@ export default async function resizeAndTransformImageSizes({
       if (!needsResize(imageResizeConfig, dimensions)) {
         return createResult(imageResizeConfig.name)
       }
-
       let resized = sharpBase.clone()
 
-      if (req.query && imageResizeConfig.width && imageResizeConfig.height) {
+      const hasEdits = req.query?.uploadEdits
+
+      if (hasEdits && imageResizeConfig.width && imageResizeConfig.height) {
         const { height, width } = imageResizeConfig
 
-        const focalPoint = {
-          x: 0.5,
-          y: 0.5,
-        }
-
-        if (req.query?.uploadEdits?.focalPoint) {
-          if (isNumber(req.query.uploadEdits.focalPoint?.x)) {
-            focalPoint.x = req.query.uploadEdits.focalPoint.x
-          }
-          if (isNumber(req.query.uploadEdits.focalPoint?.y)) {
-            focalPoint.y = req.query.uploadEdits.focalPoint.y
-          }
-        }
-
+        const targetAspectRatio = width / height
         const originalAspectRatio = dimensions.width / dimensions.height
-        const targetAspectRatio = imageResizeConfig.width / imageResizeConfig.height
 
         if (originalAspectRatio === targetAspectRatio) {
-          resized = resized.resize({
-            height,
-            width,
-          })
+          resized = resized.resize(imageResizeConfig)
         } else {
+          const focalPoint = {
+            x: 0.5,
+            y: 0.5,
+          }
+
+          if (req.query.uploadEdits?.focalPoint) {
+            if (isNumber(req.query.uploadEdits.focalPoint?.x)) {
+              focalPoint.x = req.query.uploadEdits.focalPoint.x
+            }
+            if (isNumber(req.query.uploadEdits.focalPoint?.y)) {
+              focalPoint.y = req.query.uploadEdits.focalPoint.y
+            }
+          }
+
           const prioritizeHeight = originalAspectRatio > targetAspectRatio
 
           const { info } = await resized
