@@ -47,13 +47,8 @@ You can also override Lexical settings on a field-by-field basis as follows:
 ```ts
 import { CollectionConfig } from 'payload/types'
 import {
-  BlocksFeature,
-  LinkFeature,
-  UploadFeature,
   lexicalEditor
 } from '@payloadcms/richtext-lexical'
-import { Banner } from '../blocks/Banner'
-import { CallToAction } from '../blocks/CallToAction'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -62,55 +57,139 @@ export const Pages: CollectionConfig = {
       name: 'content',
       type: 'richText',
       // Pass the Lexical editor here and override base settings as necessary
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          LinkFeature({
-            // Example showing how to customize the built-in fields
-            // of the Link feature
-            fields: [
-              {
-                name: 'rel',
-                label: 'Rel Attribute',
-                type: 'select',
-                hasMany: true,
-                options: ['noopener', 'noreferrer', 'nofollow'],
-                admin: {
-                  description:
-                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-                },
-              },
-            ],
-          }),
-          UploadFeature({
-            collections: {
-              uploads: {
-                // Example showing how to customize the built-in fields
-                // of the Upload feature
-                fields: [
-                  {
-                    name: 'caption',
-                    type: 'richText',
-                    editor: lexicalEditor(),
-                  },
-                ],
-              },
-            },
-          }),
-          // This is incredibly powerful. You can re-use your Payload blocks
-          // directly in the Lexical editor as follows:
-          BlocksFeature({
-            blocks: [
-              Banner,
-              CallToAction,
-            ],
-          }),
-        ]
-      })
+      editor: lexicalEditor({})
     }
   ]
 }
 ```
+
+## Extending the lexical editor with Features
+
+Lexical is built to be extended. It's easy to add new features to the editor, and it's easy to override or remove existing features. Simply pass in a features prop inside of lexicalEditor({}). Here's an example:
+
+```ts
+import {
+  BlocksFeature,
+  LinkFeature,
+  UploadFeature,
+  lexicalEditor
+} from '@payloadcms/richtext-lexical'
+import { Banner } from '../blocks/Banner'
+import { CallToAction } from '../blocks/CallToAction'
+
+{
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      LinkFeature({
+        // Example showing how to customize the built-in fields
+        // of the Link feature
+        fields: [
+          {
+            name: 'rel',
+            label: 'Rel Attribute',
+            type: 'select',
+            hasMany: true,
+            options: ['noopener', 'noreferrer', 'nofollow'],
+            admin: {
+              description:
+                'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+            },
+          },
+        ],
+      }),
+      UploadFeature({
+        collections: {
+          uploads: {
+            // Example showing how to customize the built-in fields
+            // of the Upload feature
+            fields: [
+              {
+                name: 'caption',
+                type: 'richText',
+                editor: lexicalEditor(),
+              },
+            ],
+          },
+        },
+      }),
+      // This is incredibly powerful. You can re-use your Payload blocks
+      // directly in the Lexical editor as follows:
+      BlocksFeature({
+        blocks: [
+          Banner,
+          CallToAction,
+        ],
+      }),
+    ]
+  })
+}
+```
+
+## Generating HTML
+
+The lexical editor saves content in JSON format. However, if you wish to generate HTML, you have two main methods:
+
+1. Generate HTML in the Collection: Add a sibling field in your collection. This field will derive HTML from the JSON content saved. As this makes payload generate and output the HTML, you can directly utilize it in your frontend.
+2. Generate HTML in the Frontend: You can convert the JSON to HTML directly within your frontend.
+
+The editor comes with built-in HTML serializers, simplifying the process of converting JSON to HTML.
+
+### Outputting HTML in the Collection:
+
+To add HTML generation directly within the collection, follow the example below:
+
+```ts
+import { CollectionConfig } from 'payload/types'
+
+import {
+  HTMLConverterFeature,
+  lexicalEditor,
+  lexicalHTML
+} from '@payloadcms/richtext-lexical'
+
+const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'nameOfYourRichTextField',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          // The HTMLConverter Feature is the feature which manages the HTML serializers. If you do not pass any arguments to it, it will use the default serializers.
+          HTMLConverterFeature({}),
+        ],
+      }),
+    },
+    lexicalHTML('nameOfYourRichTextField', { name: 'nameOfYourRichTextField_html' }),
+  ],
+}
+```
+
+lexicalHTML() creates a new field in your collection, which automatically converts the referenced lexical richText field into HTML through an afterRead hook.
+
+### Generating HTML in the Frontend:
+If you prefer converting the JSON to HTML on the frontend, here's a snippet to guide you:
+
+```ts
+import type { SerializedEditorState } from 'lexical'
+import {
+  convertLexicalToHTML,
+  defaultHTMLConverters
+} from '@payloadcms/richtext-lexical'
+
+async function lexicalToHTML(editorData: SerializedEditorState){
+  await convertLexicalToHTML({
+    converters: defaultHTMLConverters,
+    data: editorData,
+  })
+}
+```
+
+In this method, we utilize the `convertLexicalToHTML` which is included in `@payloadcms/richtext-lexical` which takes in the serialized editor state and converts it to HTML.
+
+## Coming Soon
 
 Lots more documentation will be coming soon, which will show in detail how to create your own custom features within Lexical.
 
