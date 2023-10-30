@@ -89,26 +89,36 @@ const buildWhereInputType = ({
 
   const fieldName = formatName(name)
 
+  const recursiveFields = {
+    AND: {
+      type: new GraphQLList(
+        new GraphQLInputObjectType({
+          name: `${fieldName}_where_and`,
+          fields: () => ({
+            ...fieldTypes,
+            ...recursiveFields,
+          }),
+        }),
+      ),
+    },
+    OR: {
+      type: new GraphQLList(
+        new GraphQLInputObjectType({
+          name: `${fieldName}_where_or`,
+          fields: () => ({
+            ...fieldTypes,
+            ...recursiveFields,
+          }),
+        }),
+      ),
+    },
+  }
+
   return new GraphQLInputObjectType({
     name: `${fieldName}_where`,
     fields: {
       ...fieldTypes,
-      AND: {
-        type: new GraphQLList(
-          new GraphQLInputObjectType({
-            name: `${fieldName}_where_and`,
-            fields: fieldTypes,
-          }),
-        ),
-      },
-      OR: {
-        type: new GraphQLList(
-          new GraphQLInputObjectType({
-            name: `${fieldName}_where_or`,
-            fields: fieldTypes,
-          }),
-        ),
-      },
+      ...recursiveFields,
     },
   })
 }
