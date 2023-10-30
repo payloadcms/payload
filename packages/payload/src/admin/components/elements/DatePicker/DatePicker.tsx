@@ -21,7 +21,7 @@ const DateTime: React.FC<Props> = (props) => {
     minDate,
     minTime,
     monthsToShow = 1,
-    onChange: onChangeFromProps,
+    onChange,
     pickerAppearance = 'default',
     placeholder: placeholderText,
     readOnly,
@@ -49,15 +49,6 @@ const DateTime: React.FC<Props> = (props) => {
     else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a'
     else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd'
     else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM'
-  }
-
-  const onChange = (incomingDate: Date) => {
-    const newDate = incomingDate
-    if (newDate instanceof Date && ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)) {
-      const tzOffset = incomingDate.getTimezoneOffset() / 60
-      newDate.setHours(12 - tzOffset, 0)
-    }
-    if (typeof onChangeFromProps === 'function') onChangeFromProps(newDate)
   }
 
   const dateTimePickerProps = {
@@ -102,6 +93,7 @@ const DateTime: React.FC<Props> = (props) => {
           {...dateTimePickerProps}
           dropdownMode="select"
           locale={locale}
+          onChange={(val) => onChange(val)}
           popperModifiers={[
             {
               name: 'preventOverflow',
