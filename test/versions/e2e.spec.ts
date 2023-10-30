@@ -28,7 +28,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
 import wait from '../../packages/payload/src/utilities/wait'
-import { changeLocale, exactText } from '../helpers'
+import { changeLocale, exactText, selectRow } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './shared'
@@ -59,13 +59,6 @@ const goToGlobalVersions = async (page: Page, slug: string): Promise<void> => {
   const global = new AdminUrlUtil(serverURL, slug)
   const versionsURL = `${global.global(slug)}/versions`
   await page.goto(versionsURL)
-}
-
-const selectRow = async (page: Page, title: string): Promise<void> => {
-  const row = page.locator('tbody tr', {
-    hasText: exactText(title),
-  })
-  await row.locator('.checkbox-input input').check()
 }
 
 describe('versions', () => {

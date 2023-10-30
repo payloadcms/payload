@@ -85,3 +85,23 @@ export async function changeLocale(page: Page, newLocale: string) {
 export function exactText(text: string) {
   return new RegExp(`^${text}$`)
 }
+
+export const selectRow = async (page: Page, title: string): Promise<void> => {
+  const foundTitle = page
+    .locator('tbody tr .cell-title a', {
+      hasText: exactText(title),
+    })
+    .first()
+
+  expect(foundTitle).toBeTruthy()
+
+  const rowCheckbox = page
+    .locator('tbody tr', {
+      has: foundTitle,
+    })
+    .locator('input[type=checkbox]')
+
+  expect(rowCheckbox).toBeTruthy()
+
+  await rowCheckbox.check()
+}
