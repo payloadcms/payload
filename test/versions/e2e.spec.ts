@@ -27,11 +27,12 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
+import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { changeLocale, saveDocAndAssert } from '../helpers'
+import { changeLocale, exactText } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './shared'
+import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete, versionSlug } from './shared'
 
 const { beforeAll, describe } = test
 
@@ -39,9 +40,13 @@ let page: Page
 let url: AdminUrlUtil
 let serverURL: string
 
-const goToDoc = async (page: Page) => {
+const goToDoc = async (page: Page, title?: string) => {
   await page.goto(url.list)
-  const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
+  const linkToDoc = page
+    .locator('tbody tr:first-child .cell-title a', {
+      hasText: title ? exactText(title) : undefined,
+    })
+    .first()
   expect(linkToDoc).toBeTruthy()
   await linkToDoc.click()
 }
@@ -61,6 +66,24 @@ describe('versions', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
+
+    const { id } = await payload.create({
+      collection: versionSlug,
+      data: {
+        title: 'Version Title 1',
+        description: 'Version Description 1',
+      },
+    })
+
+    for (let i = 0; i < 10; i++) {
+      await payload.update({
+        id: id.toString(),
+        collection: versionSlug,
+        data: {
+          title: `Version Title ${i + 2}`,
+        },
+      })
+    }
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -168,42 +191,23 @@ describe('versions', () => {
     })
 
     test('collection - tab displays proper number of versions', async () => {
-      await page.goto(url.create)
-      console.log(url.create)
+      await page.goto(url.list)
 
-      // save a version and check count
-      await page.locator('#field-title').fill('title')
-      await page.locator('#field-description').fill('description')
-      await saveDocAndAssert(page)
+      const linkToDoc = page
+        .locator('tbody tr:first-child .cell-title a', {
+          hasText: exactText('Version Title 11'),
+        })
+        .first()
+
+      expect(linkToDoc).toBeTruthy()
+      await linkToDoc.click()
 
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
 
       const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount).toBe('1')
-
-      // save another version and check count again
-      await page.locator('#field-title').fill('title edit')
-      await saveDocAndAssert(page)
-
-      await wait(100) // wait for save and rerender
-      const versionCount2 = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount2).toBe('2')
-
-      const make10More = async () => {
-        for (let i = 0; i < 9; i++) {
-          await wait(50) // wait for save and rerender
-          await page.locator('#field-title').fill(`title ${i + 1}`)
-          await saveDocAndAssert(page)
-        }
-      }
-
-      await make10More()
-      await wait(50) // wait for save and rerender
-
-      const versionCount3 = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount3).toBe('11')
+      expect(versionCount).toBe('11')
     })
 
     test('collection - has versions route', async () => {

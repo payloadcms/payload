@@ -55,21 +55,14 @@ export const seed: Config['onInit'] = async (payload) => {
     draft: true,
   })
 
-  await payload.update({
-    id: draftID,
-    collection: draftSlug,
-    data: {
-      title: 'draft title 2',
-    },
-    draft: true,
-  })
-
-  await payload.update({
-    id: draftID,
-    collection: draftSlug,
-    data: {
-      title: 'draft title 3',
-    },
-    draft: true,
-  })
+  for (let i = 0; i < 10; i++) {
+    await payload.update({
+      id: draftID,
+      collection: draftSlug,
+      data: {
+        title: `draft title ${i + 2}`,
+      },
+      draft: true,
+    })
+  }
 }
