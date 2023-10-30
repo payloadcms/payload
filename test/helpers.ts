@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
@@ -86,22 +86,25 @@ export function exactText(text: string) {
   return new RegExp(`^${text}$`)
 }
 
-export const selectRow = async (page: Page, title: string): Promise<void> => {
-  const foundTitle = page
-    .locator('tbody tr .cell-title a', {
-      hasText: exactText(title),
-    })
-    .first()
+export const selectTableRow = async (page: Page, title: string): Promise<void> => {
+  const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
+  await page.locator(selector).check()
+  expect(await page.locator(selector).isChecked()).toBe(true)
+}
 
-  expect(foundTitle).toBeTruthy()
+export const findTableCell = async (
+  page: Page,
+  fieldName: string,
+  rowTitle?: string,
+): Promise<Locator> => {
+  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
+  const cell = parentEl.locator(`td.cell-${fieldName}`)
+  expect(cell).toBeTruthy()
+  return cell
+}
 
-  const rowCheckbox = page
-    .locator('tbody tr', {
-      has: foundTitle,
-    })
-    .locator('input[type=checkbox]')
-
-  expect(rowCheckbox).toBeTruthy()
-
-  await rowCheckbox.check()
+export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
+  const row = page.locator(`tbody tr:has-text("${title}")`)
+  expect(row).toBeTruthy()
+  return row
 }

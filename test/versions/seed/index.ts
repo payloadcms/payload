@@ -24,7 +24,7 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: draftSlug,
     data: {
       blocksField,
-      description: 'Draft Description',
+      description: 'Description',
       radio: 'test',
       title: 'Draft Title',
     },
@@ -35,14 +35,14 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: draftSlug,
     data: {
       blocksField,
-      description: 'Draft Description',
+      description: 'Description',
       radio: 'test',
       title: 'Title With Many Versions',
     },
     draft: true,
   })
 
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 10; i++) {
     await payload.update({
       id: manyDraftsID,
       collection: draftSlug,
@@ -57,7 +57,7 @@ export const seed: Config['onInit'] = async (payload) => {
     data: {
       _status: 'published',
       blocksField,
-      description: 'published description',
+      description: 'Description',
       radio: 'test',
       title: 'Published Title',
     },
@@ -68,7 +68,7 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: draftSlug,
     data: {
       blocksField,
-      description: 'published description',
+      description: 'Description',
       title: titleToDelete,
     },
     draft: true,
