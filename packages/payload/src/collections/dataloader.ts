@@ -86,7 +86,7 @@ const batchAndLoadDocs =
       return batches
     }, {})
 
-    // Run find requests in parallel
+    // Run find requests one after another, so as to not hang transactions
 
     await Object.entries(batchByFindArgs).reduce(async (priorFind, [batchKey, ids]) => {
       await priorFind
