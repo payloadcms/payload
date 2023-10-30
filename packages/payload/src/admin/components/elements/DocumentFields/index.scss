@@ -7,6 +7,10 @@
 
   &--has-sidebar {
     .document-fields {
+      &__main {
+        width: 66.66%;
+      }
+
       &__edit {
         [dir='ltr'] & {
           top: 0;
@@ -52,6 +56,7 @@
     width: 33.33%;
     height: calc(100vh - var(--doc-controls-height));
     min-width: var(--doc-sidebar-width);
+    flex-shrink: 0;
   }
 
   &__sidebar {
@@ -75,6 +80,35 @@
 
   &__label {
     color: var(--theme-elevation-400);
+  }
+
+  &--force-sidebar-wrap {
+    display: block;
+
+    .document-fields {
+      &__main {
+        width: 100%;
+        min-height: initial;
+      }
+
+      &__sidebar-wrap {
+        position: static;
+        width: 100%;
+        height: initial;
+        border-left: 0;
+      }
+
+      &__sidebar {
+        padding-bottom: base(3.5);
+        overflow: visible;
+      }
+
+      &__sidebar-fields {
+        padding-top: 0;
+        padding-left: var(--gutter-h);
+        padding-bottom: 0;
+      }
+    }
   }
 
   @include mid-break {

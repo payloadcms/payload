@@ -10,6 +10,7 @@ import { Forbidden, NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions'
@@ -208,7 +209,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // 8. Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

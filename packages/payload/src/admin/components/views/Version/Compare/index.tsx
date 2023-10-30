@@ -8,10 +8,10 @@ import type { Props } from './types'
 
 import { formatDate } from '../../../../utilities/formatDate'
 import ReactSelect from '../../../elements/ReactSelect'
+import { fieldBaseClass } from '../../../forms/field-types/shared'
 import { useConfig } from '../../../utilities/Config'
 import { mostRecentVersionOption, publishedVersionOption } from '../shared'
 import './index.scss'
-import { fieldBaseClass } from '../../../forms/field-types/shared'
 
 const baseClass = 'compare-version'
 
@@ -104,6 +104,7 @@ const CompareVersion: React.FC<Props> = (props) => {
       <div className={`${baseClass}__label`}>{t('compareVersion')}</div>
       {!errorLoading && (
         <ReactSelect
+          isClearable={false}
           isSearchable={false}
           onChange={onChange}
           onMenuScrollToBottom={() => {

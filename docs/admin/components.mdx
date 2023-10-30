@@ -163,8 +163,8 @@ import {
   CustomPreviewButtonProps,
 } from 'payload/types'
 
-export const CustomSaveButton: CustomSaveButtonProps = ({ DefaultButton, label }) => {
-  return <DefaultButton label={label} />
+export const CustomSaveButton: CustomSaveButtonProps = ({ DefaultButton, label, save }) => {
+  return <DefaultButton label={label} save={save} />
 }
 
 export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
@@ -442,7 +442,9 @@ These are the props that will be passed to your custom Cell to use in your own c
 
 ```tsx
 import React from 'react'
+import type { Props } from 'payload/components/views/Cell'
 import './index.scss'
+
 const baseClass = 'custom-cell'
 
 const CustomCell: React.FC<Props> = (props) => {

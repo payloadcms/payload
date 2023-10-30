@@ -1,35 +1,17 @@
 type Query {
   Collection1(id: String!, draft: Boolean): Collection1
-  Collection1s(
-    where: Collection1_where
-    draft: Boolean
-    page: Int
-    limit: Int
-    sort: String
-  ): Collection1s
+  Collection1s(draft: Boolean, where: Collection1_where, limit: Int, page: Int, sort: String): Collection1s
   docAccessCollection1(id: String!): collection1DocAccess
   Collection2(id: String!, draft: Boolean): Collection2
-  Collection2s(
-    where: Collection2_where
-    draft: Boolean
-    page: Int
-    limit: Int
-    sort: String
-  ): Collection2s
+  Collection2s(draft: Boolean, where: Collection2_where, limit: Int, page: Int, sort: String): Collection2s
   docAccessCollection2(id: String!): collection2DocAccess
   User(id: String!, draft: Boolean): User
-  Users(where: User_where, draft: Boolean, page: Int, limit: Int, sort: String): Users
+  Users(draft: Boolean, where: User_where, limit: Int, page: Int, sort: String): Users
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
   PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(
-    where: PayloadPreference_where
-    draft: Boolean
-    page: Int
-    limit: Int
-    sort: String
-  ): PayloadPreferences
+  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, sort: String): PayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
@@ -75,16 +57,16 @@ scalar DateTime
 
 type Collection1s {
   docs: [Collection1]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input Collection1_where {
@@ -96,8 +78,8 @@ input Collection1_where {
   updatedAt: Collection1_updatedAt_operator
   createdAt: Collection1_createdAt_operator
   id: Collection1_id_operator
-  OR: [Collection1_where_or]
   AND: [Collection1_where_and]
+  OR: [Collection1_where_or]
 }
 
 input Collection1_testing_operator {
@@ -186,17 +168,6 @@ input Collection1_id_operator {
   exists: Boolean
 }
 
-input Collection1_where_or {
-  testing: Collection1_testing_operator
-  title: Collection1_title_operator
-  meta__title: Collection1_meta__title_operator
-  meta__description: Collection1_meta__description_operator
-  meta__id: Collection1_meta__id_operator
-  updatedAt: Collection1_updatedAt_operator
-  createdAt: Collection1_createdAt_operator
-  id: Collection1_id_operator
-}
-
 input Collection1_where_and {
   testing: Collection1_testing_operator
   title: Collection1_title_operator
@@ -206,6 +177,21 @@ input Collection1_where_and {
   updatedAt: Collection1_updatedAt_operator
   createdAt: Collection1_createdAt_operator
   id: Collection1_id_operator
+  AND: [Collection1_where_and]
+  OR: [Collection1_where_or]
+}
+
+input Collection1_where_or {
+  testing: Collection1_testing_operator
+  title: Collection1_title_operator
+  meta__title: Collection1_meta__title_operator
+  meta__description: Collection1_meta__description_operator
+  meta__id: Collection1_meta__id_operator
+  updatedAt: Collection1_updatedAt_operator
+  createdAt: Collection1_createdAt_operator
+  id: Collection1_id_operator
+  AND: [Collection1_where_and]
+  OR: [Collection1_where_or]
 }
 
 type collection1DocAccess {
@@ -483,16 +469,16 @@ type Collection2_NestedGroup {
 
 type Collection2s {
   docs: [Collection2]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input Collection2_where {
@@ -504,8 +490,8 @@ input Collection2_where {
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
-  OR: [Collection2_where_or]
   AND: [Collection2_where_and]
+  OR: [Collection2_where_or]
 }
 
 input Collection2_meta__title_operator {
@@ -596,17 +582,6 @@ input Collection2_id_operator {
   exists: Boolean
 }
 
-input Collection2_where_or {
-  meta__title: Collection2_meta__title_operator
-  meta__description: Collection2_meta__description_operator
-  meta__id: Collection2_meta__id_operator
-  nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
-  nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
-  updatedAt: Collection2_updatedAt_operator
-  createdAt: Collection2_createdAt_operator
-  id: Collection2_id_operator
-}
-
 input Collection2_where_and {
   meta__title: Collection2_meta__title_operator
   meta__description: Collection2_meta__description_operator
@@ -616,6 +591,21 @@ input Collection2_where_and {
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
+  AND: [Collection2_where_and]
+  OR: [Collection2_where_or]
+}
+
+input Collection2_where_or {
+  meta__title: Collection2_meta__title_operator
+  meta__description: Collection2_meta__description_operator
+  meta__id: Collection2_meta__id_operator
+  nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
+  nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
+  updatedAt: Collection2_updatedAt_operator
+  createdAt: Collection2_createdAt_operator
+  id: Collection2_id_operator
+  AND: [Collection2_where_and]
+  OR: [Collection2_where_or]
 }
 
 type collection2DocAccess {
@@ -894,21 +884,20 @@ type User {
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress
-  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
   docs: [User]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input User_where {
@@ -916,8 +905,8 @@ input User_where {
   createdAt: User_createdAt_operator
   email: User_email_operator
   id: User_id_operator
-  OR: [User_where_or]
   AND: [User_where_and]
+  OR: [User_where_or]
 }
 
 input User_updatedAt_operator {
@@ -963,18 +952,22 @@ input User_id_operator {
   exists: Boolean
 }
 
-input User_where_or {
-  updatedAt: User_updatedAt_operator
-  createdAt: User_createdAt_operator
-  email: User_email_operator
-  id: User_id_operator
-}
-
 input User_where_and {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
   id: User_id_operator
+  AND: [User_where_and]
+  OR: [User_where_or]
+}
+
+input User_where_or {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+  AND: [User_where_and]
+  OR: [User_where_or]
 }
 
 type usersDocAccess {
@@ -1111,10 +1104,10 @@ type UsersUnlockDocAccess {
 }
 
 type usersMe {
+  collection: String
+  exp: Int
   token: String
   user: User
-  exp: Int
-  collection: String
 }
 
 type PayloadPreference {
@@ -1144,16 +1137,16 @@ scalar JSON
 
 type PayloadPreferences {
   docs: [PayloadPreference]
-  totalDocs: Int
-  offset: Int
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
   limit: Int
-  totalPages: Int
+  nextPage: Int
+  offset: Int
   page: Int
   pagingCounter: Int
-  hasPrevPage: Boolean
-  hasNextPage: Boolean
   prevPage: Int
-  nextPage: Int
+  totalDocs: Int
+  totalPages: Int
 }
 
 input PayloadPreference_where {
@@ -1163,13 +1156,13 @@ input PayloadPreference_where {
   updatedAt: PayloadPreference_updatedAt_operator
   createdAt: PayloadPreference_createdAt_operator
   id: PayloadPreference_id_operator
-  OR: [PayloadPreference_where_or]
   AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
 }
 
 input PayloadPreference_user_Relation {
   relationTo: PayloadPreference_user_Relation_RelationTo
-  value: String
+  value: JSON
 }
 
 enum PayloadPreference_user_Relation_RelationTo {
@@ -1192,6 +1185,8 @@ input PayloadPreference_value_operator {
   not_equals: JSON
   like: JSON
   contains: JSON
+  within: JSON
+  intersects: JSON
   exists: Boolean
 }
 
@@ -1228,15 +1223,6 @@ input PayloadPreference_id_operator {
   exists: Boolean
 }
 
-input PayloadPreference_where_or {
-  user: PayloadPreference_user_Relation
-  key: PayloadPreference_key_operator
-  value: PayloadPreference_value_operator
-  updatedAt: PayloadPreference_updatedAt_operator
-  createdAt: PayloadPreference_createdAt_operator
-  id: PayloadPreference_id_operator
-}
-
 input PayloadPreference_where_and {
   user: PayloadPreference_user_Relation
   key: PayloadPreference_key_operator
@@ -1244,6 +1230,19 @@ input PayloadPreference_where_and {
   updatedAt: PayloadPreference_updatedAt_operator
   createdAt: PayloadPreference_createdAt_operator
   id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
+}
+
+input PayloadPreference_where_or {
+  user: PayloadPreference_user_Relation
+  key: PayloadPreference_key_operator
+  value: PayloadPreference_value_operator
+  updatedAt: PayloadPreference_updatedAt_operator
+  createdAt: PayloadPreference_createdAt_operator
+  id: PayloadPreference_id_operator
+  AND: [PayloadPreference_where_and]
+  OR: [PayloadPreference_where_or]
 }
 
 type payload_preferencesDocAccess {
@@ -2201,38 +2200,23 @@ type PayloadPreferencesDeleteAccess {
 
 type Mutation {
   createCollection1(data: mutationCollection1Input!, draft: Boolean): Collection1
-  updateCollection1(
-    id: String!
-    data: mutationCollection1UpdateInput!
-    draft: Boolean
-    autosave: Boolean
-  ): Collection1
+  updateCollection1(id: String!, autosave: Boolean, data: mutationCollection1UpdateInput!, draft: Boolean): Collection1
   deleteCollection1(id: String!): Collection1
   createCollection2(data: mutationCollection2Input!, draft: Boolean): Collection2
-  updateCollection2(
-    id: String!
-    data: mutationCollection2UpdateInput!
-    draft: Boolean
-    autosave: Boolean
-  ): Collection2
+  updateCollection2(id: String!, autosave: Boolean, data: mutationCollection2UpdateInput!, draft: Boolean): Collection2
   deleteCollection2(id: String!): Collection2
   createUser(data: mutationUserInput!, draft: Boolean): User
-  updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
   deleteUser(id: String!): User
   refreshTokenUser(token: String): usersRefreshedUser
   logoutUser: String
   unlockUser(email: String!): Boolean!
   loginUser(email: String, password: String): usersLoginResult
-  forgotPasswordUser(email: String!, disableEmail: Boolean, expiration: Int): Boolean!
-  resetPasswordUser(token: String, password: String): usersResetPassword
+  forgotPasswordUser(disableEmail: Boolean, email: String!, expiration: Int): Boolean!
+  resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(
-    id: String!
-    data: mutationPayloadPreferenceUpdateInput!
-    draft: Boolean
-    autosave: Boolean
-  ): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
 }
 
@@ -2335,9 +2319,9 @@ input mutationUserUpdateInput {
 }
 
 type usersRefreshedUser {
-  user: usersJWT
-  refreshedToken: String
   exp: Int
+  refreshedToken: String
+  user: usersJWT
 }
 
 type usersJWT {
@@ -2346,9 +2330,9 @@ type usersJWT {
 }
 
 type usersLoginResult {
+  exp: Int
   token: String
   user: User
-  exp: Int
 }
 
 type usersResetPassword {

@@ -2,6 +2,7 @@ import type { UploadedFile } from 'express-fileupload'
 import type { Sharp, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
+import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import sanitize from 'sanitize-filename'
@@ -193,6 +194,17 @@ export const generateFileData = async <T>({
         buffer: fileBuffer?.data || file.data,
         path: `${staticPath}/${fsSafeName}`,
       })
+
+      if (file.tempFilePath) {
+        await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data) // write fileBuffer to the temp path
+      } else {
+        // Assign the _possibly modified_ file to the request object
+        req.files.file = {
+          ...file,
+          data: fileBuffer?.data || file.data,
+          size: fileBuffer?.info.size,
+        }
+      }
     }
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {

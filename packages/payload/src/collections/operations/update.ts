@@ -21,6 +21,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
 import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
@@ -400,7 +401,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       result,
     })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

@@ -13,6 +13,16 @@ const TabsFields: CollectionConfig = {
   versions: true,
   fields: [
     {
+      name: 'sidebarField',
+      type: 'text',
+      label: 'Sidebar Field',
+      admin: {
+        position: 'sidebar',
+        description:
+          'This should not collapse despite there being many tabs pushing the main fields open.',
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
         {

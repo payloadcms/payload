@@ -12,6 +12,7 @@ import { baseClass } from '.'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import { fieldTypes } from '../../forms/field-types'
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
 import X from '../../icons/X'
 import { useAuth } from '../../utilities/Auth'
@@ -165,6 +166,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         disableActions: true,
         disableLeaveWithoutSaving: true,
         disableRoutes: true,
+        fieldTypes,
         hasSavePermission,
         internalState,
         isEditing,

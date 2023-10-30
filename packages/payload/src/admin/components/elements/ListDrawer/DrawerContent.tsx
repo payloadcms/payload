@@ -192,7 +192,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       sort,
     }
 
-    setPreference(preferenceKey, newPreferences)
+    setPreference(preferenceKey, newPreferences, true)
   }, [sort, limit, setPreference, preferenceKey])
 
   const onCreateNew = useCallback(

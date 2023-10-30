@@ -350,6 +350,95 @@ describe('Auth', () => {
         expect(afterToken).toBeNull()
       })
 
+      describe('User Preferences', () => {
+        const key = 'test'
+        const property = 'store'
+        let data
+
+        beforeAll(async () => {
+          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property },
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'post',
+          })
+          data = await response.json()
+        })
+
+        it('should create', async () => {
+          expect(data.doc.key).toStrictEqual(key)
+          expect(data.doc.value.property).toStrictEqual(property)
+        })
+
+        it('should read', async () => {
+          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+            headers: {
+              Authorization: `JWT ${token}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'get',
+          })
+          data = await response.json()
+          expect(data.key).toStrictEqual(key)
+          expect(data.value.property).toStrictEqual(property)
+        })
+
+        it('should update', async () => {
+          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+            body: JSON.stringify({
+              value: { property: 'updated', property2: 'test' },
+            }),
+            headers: {
+              Authorization: `JWT ${token}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'post',
+          })
+
+          data = await response.json()
+
+          const result = await payload.find({
+            collection: 'payload-preferences',
+            depth: 0,
+            where: {
+              key: { equals: key },
+            },
+          })
+
+          expect(data.doc.key).toStrictEqual(key)
+          expect(data.doc.value.property).toStrictEqual('updated')
+          expect(data.doc.value.property2).toStrictEqual('test')
+
+          expect(result.docs).toHaveLength(1)
+        })
+
+        it('should delete', async () => {
+          const response = await fetch(`${apiUrl}/payload-preferences/${key}`, {
+            headers: {
+              Authorization: `JWT ${token}`,
+              'Content-Type': 'application/json',
+            },
+            method: 'delete',
+          })
+
+          data = await response.json()
+
+          const result = await payload.find({
+            collection: 'payload-preferences',
+            depth: 0,
+            where: {
+              key: { equals: key },
+            },
+          })
+
+          expect(result.docs).toHaveLength(0)
+        })
+      })
+
       describe('Account Locking', () => {
         const userEmail = 'lock@me.com'
 

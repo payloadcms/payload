@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 
+import type { CollectionPermission } from '../../../../auth'
 import type { Fields } from '../../forms/Form/types'
+import type { DefaultAccountViewProps } from './Default'
 
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { useStepNav } from '../../elements/StepNav'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import { fieldTypes } from '../../forms/field-types'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -125,23 +128,29 @@ const AccountView: React.FC = () => {
 
   const isLoading = !internalState || !docPermissions || isLoadingData
 
+  const componentProps: DefaultAccountViewProps = {
+    id: id.toString(),
+    action,
+    apiURL,
+    collection,
+    data,
+    fieldTypes,
+    hasSavePermission,
+    initialState: internalState,
+    isLoading,
+    onSave,
+    permissions: docPermissions as CollectionPermission,
+    updatedAt: data?.updatedAt,
+    user,
+  }
+
   return (
     <RenderCustomComponent
       CustomComponent={
         typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
       }
       DefaultComponent={DefaultAccount}
-      componentProps={{
-        action,
-        apiURL,
-        collection,
-        data,
-        hasSavePermission,
-        initialState: internalState,
-        isLoading,
-        onSave,
-        permissions: docPermissions,
-      }}
+      componentProps={componentProps}
     />
   )
 }

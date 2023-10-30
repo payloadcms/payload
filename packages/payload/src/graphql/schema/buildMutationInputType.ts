@@ -39,7 +39,7 @@ import type {
 } from '../../fields/config/types'
 import type { Payload } from '../../payload'
 
-import { fieldAffectsData, tabHasName } from '../../fields/config/types'
+import { fieldAffectsData, optionIsObject, tabHasName } from '../../fields/config/types'
 import { toWords } from '../../utilities/formatLabels'
 import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield'
 import combineParentName from '../utilities/combineParentName'
@@ -208,7 +208,7 @@ function buildMutationInputType(
       let type: GraphQLType = new GraphQLEnumType({
         name: formattedName,
         values: field.options.reduce((values, option) => {
-          if (typeof option === 'object' && option.value) {
+          if (optionIsObject(option)) {
             return {
               ...values,
               [formatName(option.value)]: {
@@ -217,16 +217,12 @@ function buildMutationInputType(
             }
           }
 
-          if (typeof option === 'string') {
-            return {
-              ...values,
-              [option]: {
-                value: option,
-              },
-            }
+          return {
+            ...values,
+            [formatName(option)]: {
+              value: option,
+            },
           }
-
-          return values
         }, {}),
       })
 
@@ -247,7 +243,7 @@ function buildMutationInputType(
           if (requiresAtLeastOneField) type = new GraphQLNonNull(type)
 
           return {
-            ...inputObjectTypeConfig,
+            ...acc,
             [tab.name]: { type },
           }
         }

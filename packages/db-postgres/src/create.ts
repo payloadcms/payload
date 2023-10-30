@@ -20,6 +20,7 @@ export const create: Create = async function create(
     fields: collection.fields,
     operation: 'create',
     tableName: toSnakeCase(collectionSlug),
+    req,
   })
 
   return result

@@ -4,8 +4,9 @@ import { useRouteMatch } from 'react-router-dom'
 
 import type { FieldPermissions } from '../../../../auth'
 import type { Field, FieldAffectingData } from '../../../../fields/config/types'
+import type { Option } from '../../elements/ReactSelect/types'
 import type { StepNavItem } from '../../elements/StepNav/types'
-import type { CompareOption, LocaleOption, Props } from './types'
+import type { CompareOption, Props } from './types'
 
 import { fieldAffectsData } from '../../../../fields/config/types'
 import { getTranslation } from '../../../../utilities/getTranslation'
@@ -43,8 +44,16 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   } = useRouteMatch<{ id?: string; versionID: string }>()
 
   const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption)
-  const [localeOptions] = useState<LocaleOption[]>(() => (localization ? localization.locales : []))
-  const [locales, setLocales] = useState<LocaleOption[]>(localeOptions)
+  const [localeOptions] = useState<Option[]>(() => {
+    if (localization && localization?.locales) {
+      return localization.locales.map(({ code, label }) => ({
+        label: label,
+        value: code,
+      }))
+    }
+    return []
+  })
+  const [locales, setLocales] = useState<Option[]>(localeOptions)
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation('version')
@@ -241,7 +250,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
             fieldComponents={fieldComponents}
             fieldPermissions={fieldPermissions}
             fields={fields}
-            locales={locales ? locales.map(({ code }) => code) : []}
+            locales={
+              locales
+                ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
+                : []
+            }
             version={doc?.version}
           />
         )}

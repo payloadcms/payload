@@ -33,9 +33,11 @@ export { fieldTypes } from '../../admin/components/forms/field-types'
 export { default as Checkbox } from '../../admin/components/forms/field-types/Checkbox'
 
 export { default as Collapsible } from '../../admin/components/forms/field-types/Collapsible'
+export { default as Date } from '../../admin/components/forms/field-types/DateTime'
+export { DateTimeInput } from '../../admin/components/forms/field-types/DateTime/Input'
+
 export { default as Group } from '../../admin/components/forms/field-types/Group'
 export { default as HiddenInput } from '../../admin/components/forms/field-types/HiddenInput'
-
 export { default as Select } from '../../admin/components/forms/field-types/Select'
 export { default as SelectInput } from '../../admin/components/forms/field-types/Select/Input'
 export { default as Text } from '../../admin/components/forms/field-types/Text'
