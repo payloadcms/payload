@@ -27,12 +27,11 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import { changeLocale, exactText } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete, versionSlug } from './shared'
+import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './shared'
 
 const { beforeAll, describe } = test
 
@@ -62,29 +61,17 @@ const goToGlobalVersions = async (page: Page, slug: string): Promise<void> => {
   await page.goto(versionsURL)
 }
 
+const selectRow = async (page: Page, title: string): Promise<void> => {
+  const row = page.locator('tbody tr', {
+    hasText: exactText(title),
+  })
+  await row.locator('.checkbox-input input').check()
+}
+
 describe('versions', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
-
-    const { id } = await payload.create({
-      collection: versionSlug,
-      data: {
-        title: 'Version Title 1',
-        description: 'Version Description 1',
-      },
-    })
-
-    for (let i = 0; i < 10; i++) {
-      await payload.update({
-        id: id.toString(),
-        collection: versionSlug,
-        data: {
-          title: `Version Title ${i + 2}`,
-        },
-      })
-    }
-
     const context = await browser.newContext()
     page = await context.newPage()
   })
@@ -141,7 +128,8 @@ describe('versions', () => {
     test('should publish while editing many', async () => {
       const description = 'published document'
       await page.goto(url.list)
-      await page.locator('.checkbox-input:has(#select-all) input').check()
+      await selectRow(page, 'Published Title')
+      await selectRow(page, 'Draft Title')
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
       const options = page.locator('.rs__option')
@@ -160,7 +148,8 @@ describe('versions', () => {
     test('should save as draft while editing many', async () => {
       const description = 'draft document'
       await page.goto(url.list)
-      await page.locator('.checkbox-input:has(#select-all) input').check()
+      await selectRow(page, 'Published Title')
+      await selectRow(page, 'Draft Title')
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
       const options = page.locator('.rs__option')
@@ -194,8 +183,8 @@ describe('versions', () => {
       await page.goto(url.list)
 
       const linkToDoc = page
-        .locator('tbody tr:first-child .cell-title a', {
-          hasText: exactText('Version Title 11'),
+        .locator('tbody tr .cell-title a', {
+          hasText: exactText('Title With Many Versions 11'),
         })
         .first()
 

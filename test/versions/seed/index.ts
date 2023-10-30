@@ -20,27 +20,46 @@ export const seed: Config['onInit'] = async (payload) => {
     },
   ]
 
-  const { id: draftID } = await payload.create({
+  await payload.create({
     collection: draftSlug,
     data: {
-      id: 1,
       blocksField,
-      description: 'draft description',
+      description: 'Draft Description',
       radio: 'test',
-      title: 'draft title',
+      title: 'Draft Title',
     },
     draft: true,
   })
 
+  const { id: manyDraftsID } = await payload.create({
+    collection: draftSlug,
+    data: {
+      blocksField,
+      description: 'Draft Description',
+      radio: 'test',
+      title: 'Title With Many Versions',
+    },
+    draft: true,
+  })
+
+  for (let i = 0; i < 9; i++) {
+    await payload.update({
+      id: manyDraftsID,
+      collection: draftSlug,
+      data: {
+        title: `Title With Many Versions ${i + 2}`,
+      },
+    })
+  }
+
   await payload.create({
     collection: draftSlug,
     data: {
-      id: 2,
       _status: 'published',
       blocksField,
       description: 'published description',
       radio: 'test',
-      title: 'published title',
+      title: 'Published Title',
     },
     draft: false,
   })
@@ -54,15 +73,4 @@ export const seed: Config['onInit'] = async (payload) => {
     },
     draft: true,
   })
-
-  for (let i = 0; i < 10; i++) {
-    await payload.update({
-      id: draftID,
-      collection: draftSlug,
-      data: {
-        title: `draft title ${i + 2}`,
-      },
-      draft: true,
-    })
-  }
 }
