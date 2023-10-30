@@ -62,7 +62,7 @@ const PreviewSizes: React.FC<{
         <div className={`${baseClass}__list`}>
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
-            const previewSrc = generateImageUrl(val.filename)
+            const previewSrc = val.filename ? generateImageUrl(val.filename) : ''
 
             if (previewSrc) {
               return (
