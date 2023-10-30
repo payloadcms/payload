@@ -180,7 +180,7 @@
     "deselectAllRows": "Odznacz wszystkie wiersze",
     "duplicate": "Zduplikuj",
     "duplicateWithoutSaving": "Zduplikuj bez zapisywania zmian",
-    "edit": "Edytować",
+    "edit": "Edytuj",
     "editLabel": "Edytuj {{label}}",
     "editing": "Edycja",
     "editingLabel_many": "Edytowanie {{count}} {{label}}",
@@ -274,7 +274,7 @@
     "near": "blisko"
   },
   "upload": {
-    "crop": "Uprawa",
+    "crop": "Przytnij",
     "cropToolDescription": "Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.",
     "dragAndDrop": "Przeciągnij i upuść plik",
     "dragAndDropHere": "lub złap i upuść plik tutaj",
@@ -339,7 +339,7 @@
     "noRowsFound": "Nie znaleziono {{label}}",
     "preview": "Podgląd",
     "problemRestoringVersion": "Wystąpił problem podczas przywracania tej wersji",
-    "publish": "Publikować",
+    "publish": "Publikuj",
     "publishChanges": "Opublikuj zmiany",
     "published": "Opublikowano",
     "restoreThisVersion": "Przywróć tę wersję",
