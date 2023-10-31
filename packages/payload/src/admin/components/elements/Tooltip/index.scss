@@ -55,17 +55,23 @@
     }
   }
 
-  &--position-stretch-bottom {
-    top: 100%;
-    transform: translate3d(-50%, var(--caret-size), 0);
+  &--position-stretch-top {
+    bottom: 100%;
+    transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
 
     &::after {
-      bottom: calc(100% + var(--caret-size) - 1px);
-      border-top: none;
-      border-left: var(--caret-size) solid transparent;
-      border-bottom: var(--caret-size) solid var(--theme-elevation-800);
+      bottom: 1px;
+      border-top: var(--caret-size) solid var(--theme-elevation-800);
       border-right: var(--caret-size) solid transparent;
+      border-bottom: none;
+      border-left: var(--caret-size) solid transparent;
     }
+  }
+
+  .tooltip-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
   }
 
   @include mid-break {

@@ -15,6 +15,9 @@ const Tooltip: React.FC<Props> = (props) => {
   const isLongMessage = (content) => content.length > messageThreshold
   const messageIsLong = isLongMessage(children)
 
+  const getTitleAttribute = (content) =>
+    typeof content === 'string' && isLongMessage(content) ? content : ''
+
   const [ref, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,
     rootMargin: '-145px 0px 0px 100px',
@@ -49,13 +52,14 @@ const Tooltip: React.FC<Props> = (props) => {
         className={[
           'tooltip',
           className,
-          messageIsLong ? 'tooltip--position-stretch-bottom' : 'tooltip--position-top',
+          messageIsLong ? 'tooltip--position-stretch-top' : 'tooltip--position-top',
         ]
           .filter(Boolean)
           .join(' ')}
         ref={ref}
+        title={getTitleAttribute(children)}
       >
-        {children}
+        <div className="tooltip-content">{children}</div>
       </aside>
 
       <aside
@@ -63,12 +67,13 @@ const Tooltip: React.FC<Props> = (props) => {
           'tooltip',
           className,
           show && 'tooltip--show',
-          messageIsLong ? 'tooltip--position-stretch-bottom' : `tooltip--position-${position}`,
+          messageIsLong ? 'tooltip--position-stretch-top' : `tooltip--position-${position}`,
         ]
           .filter(Boolean)
           .join(' ')}
+        title={getTitleAttribute(children)}
       >
-        {children}
+        <div className="tooltip-content">{children}</div>
       </aside>
     </React.Fragment>
   )

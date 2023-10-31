@@ -14,15 +14,15 @@
   }
 }
 
-.field-error.tooltip--position-stretch-bottom {
-  top: calc(100% + base(0.15));
-  left: 0;
-  right: unset;
-  width: 100%;
-  white-space: unset;
+.field-error.tooltip--position-stretch-top {
+  top: 0;
+  right: 0;
+  width: 75%;
+  background-color: var(--theme-error-500);
 
   &::after {
-    border-top-color: transparent;
-    border-bottom-color: var(--theme-error-500);
+    left: 75%;
+    border-top-color: var(--theme-error-500);
+    border-bottom-color: transparent;
   }
 }
