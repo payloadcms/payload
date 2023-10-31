@@ -1,6 +1,8 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
+import { AddCustomBlocks } from './components/AddCustomBlocks'
+
 export const getBlocksFieldSeedData = (prefix?: string): any => [
   {
     blockName: 'First block',
@@ -242,6 +244,39 @@ const BlockFields: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'customBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block-1',
+          fields: [
+            {
+              name: 'block1Title',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'block-2',
+          fields: [
+            {
+              name: 'block2Title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'ui',
+      name: 'ui',
+      admin: {
+        components: {
+          Field: AddCustomBlocks,
+        },
+      },
     },
   ],
 }
