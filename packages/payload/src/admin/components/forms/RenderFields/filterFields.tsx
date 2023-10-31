@@ -49,6 +49,10 @@ export const filterFields = (args: {
 
         const isFieldAffectingData = fieldAffectsData(field)
 
+        if (isFieldAffectingData && permissions?.[field?.name]?.read?.permission === false) {
+          return acc
+        }
+
         const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : permissions
 
         let readOnly = field.admin && 'readOnly' in field.admin ? field.admin.readOnly : undefined

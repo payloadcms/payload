@@ -44,6 +44,7 @@ describe('access control', () => {
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)
     readOnlyUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
+    restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -122,6 +123,14 @@ describe('access control', () => {
     test('should not have access to existing doc', async () => {
       await page.goto(restrictedUrl.edit(existingDoc.id))
       await expect(page.locator('.unauthorized')).toBeVisible()
+    })
+  })
+
+  describe('restricted fields', () => {
+    test('should not show field without permission', async () => {
+      await page.goto(url.account)
+      await wait(500)
+      await expect(page.locator('#field-roles')).toBeVisible()
     })
   })
 
