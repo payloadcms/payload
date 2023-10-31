@@ -92,7 +92,11 @@ async function findVersions<T extends TypeWithVersion<T>>(
             collection: null,
             context: req.context,
             depth,
-            doc: data.version,
+            doc: {
+              ...data.version,
+              // Patch globalType onto version doc
+              globalType: globalConfig.slug,
+            },
             findMany: true,
             global: globalConfig,
             overrideAccess,

@@ -86,6 +86,11 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   draft = JSON.parse(JSON.stringify(draft))
   draft = sanitizeInternalFields(draft)
 
+  // Patch globalType onto version doc
+  if (entityType === 'global' && 'globalType' in doc) {
+    draft.version.globalType = doc.globalType
+  }
+
   // Disregard all other draft content at this point,
   // Only interested in the version itself.
   // Operations will handle firing hooks, etc.
