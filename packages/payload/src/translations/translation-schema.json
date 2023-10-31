@@ -754,6 +754,9 @@
         "locales": {
           "type": "string"
         },
+        "menu": {
+          "type": "string"
+        },
         "moveDown": {
           "type": "string"
         },
