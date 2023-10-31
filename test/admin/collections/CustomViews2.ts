@@ -1,7 +1,6 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
 import CustomTabComponent from '../components/CustomTabComponent'
-import CustomDefaultEditView from '../components/views/CustomDefaultEdit'
 import CustomVersionsView from '../components/views/CustomVersions'
 import CustomView from '../components/views/CustomView'
 
@@ -13,7 +12,11 @@ export const CustomViews2: CollectionConfig = {
       views: {
         Edit: {
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
-          Default: CustomDefaultEditView,
+          Default: {
+            Tab: {
+              label: 'Custom',
+            },
+          },
           Versions: CustomVersionsView,
           MyCustomView: {
             path: '/custom-tab-view',

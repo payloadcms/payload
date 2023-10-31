@@ -11,7 +11,11 @@ import type { DeepRequired } from 'ts-essentials'
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
-import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
+import type {
+  DocumentTab,
+  DocumentTabComponent,
+  DocumentTabConfig,
+} from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
 import type { User } from '../auth/types'
@@ -26,8 +30,6 @@ import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
-
-import { collectionViewType } from '../admin/components/views/collections/Edit/Routes/CustomComponent'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -251,19 +253,34 @@ export type AdminViewComponent = React.ComponentType<AdminViewProps>
 
 export type AdminView = AdminViewComponent | AdminViewConfig
 
-export type EditViewConfig = {
-  /**
-   * Add a new view to the admin panel
-   * Or override a specific properties of existing ones
-   * i.e. render a component with a route but no tab
-   * i.e. add a tab to an existing view with no new route
-   */
-  Component?: AdminViewComponent
-  Tab?: DocumentTab
-  path?: string
-}
+export type EditViewConfig =
+  | {
+      /**
+       * Add a new Edit view to the admin panel
+       * i.e. you can render a custom view that has no tab, if desired
+       * Or override a specific properties of an existing one
+       * i.e. you can customize the `Default` view tab label, if desired
+       */
+      Tab?: DocumentTab
+    }
+  | {
+      Component: AdminViewComponent
+      path: string
+    }
 
-export type EditView = AdminViewComponent | EditViewConfig
+/**
+ * Override existing views
+ * i.e. Dashboard, Account, API, LivePreview, etc.
+ * Path is not available here
+ * All Tab properties become optional
+ * i.e. you can change just the label, if desired
+ */
+export type EditView =
+  | {
+      Component?: AdminViewComponent
+      Tab?: DocumentTabComponent | Partial<DocumentTabConfig>
+    }
+  | AdminViewComponent
 
 export type Locale = {
   /**
