@@ -59,16 +59,8 @@ export const filterFields = (args: {
 
         if (readOnlyOverride && readOnly !== false) readOnly = true
 
-        if (
-          (isFieldAffectingData && permissions?.[field?.name]?.read?.permission !== false) ||
-          !isFieldAffectingData
-        ) {
-          if (
-            isFieldAffectingData &&
-            permissions?.[field?.name]?.[operation]?.permission === false
-          ) {
-            readOnly = true
-          }
+        if (isFieldAffectingData && permissions?.[field?.name]?.[operation]?.permission === false) {
+          readOnly = true
         }
 
         if (FieldComponent) {
