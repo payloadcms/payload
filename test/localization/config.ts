@@ -88,6 +88,22 @@ export default buildConfigWithDefaults({
           type: 'checkbox',
           localized: true,
         },
+        {
+          name: 'children',
+          type: 'relationship',
+          relationTo: localizedPostsSlug,
+          hasMany: true,
+        },
+        {
+          type: 'group',
+          name: 'group',
+          fields: [
+            {
+              name: 'children',
+              type: 'text',
+            },
+          ],
+        },
       ],
     },
     ArrayCollection,

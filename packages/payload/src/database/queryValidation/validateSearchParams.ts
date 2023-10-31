@@ -104,7 +104,7 @@ export async function validateSearchParam({
         let fieldAccess
         let fieldPath = path
         // remove locale from end of path
-        if (path.endsWith(req.locale)) {
+        if (path.endsWith(`.${req.locale}`)) {
           fieldPath = path.slice(0, -(req.locale.length + 1))
         }
         // remove ".value" from ends of polymorphic relationship paths
