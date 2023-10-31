@@ -775,9 +775,9 @@ describe('Localization', () => {
         collection,
         id: post1.id,
         data: {
-          children: [post1.id],
+          children: post1.id,
           group: {
-            children: 'some content',
+            children: 'something',
           },
         },
       })
@@ -786,7 +786,7 @@ describe('Localization', () => {
         auth: true,
         query: {
           children: {
-            contains: post1.id,
+            in: post1.id,
           },
         },
       })
