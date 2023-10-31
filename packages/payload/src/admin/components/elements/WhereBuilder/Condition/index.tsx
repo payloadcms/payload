@@ -43,8 +43,22 @@ const Condition: React.FC<Props> = (props) => {
 
     if (newActiveField) {
       setActiveField(newActiveField)
+
+      // If the field has changed, reset the value.
+      setInternalValue('')
     }
   }, [fieldValue, fields])
+
+  useEffect(() => {
+    if (internalValue === '') {
+      dispatch({
+        andIndex,
+        orIndex,
+        type: 'update',
+        value: internalValue,
+      })
+    }
+  }, [internalValue, dispatch, orIndex, andIndex])
 
   useEffect(() => {
     dispatch({
