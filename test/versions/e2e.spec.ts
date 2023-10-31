@@ -28,7 +28,8 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
 import wait from '../../packages/payload/src/utilities/wait'
-import { changeLocale, saveDocAndAssert } from '../helpers'
+import { globalSlug } from '../admin/shared'
+import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './shared'
@@ -39,29 +40,10 @@ let page: Page
 let url: AdminUrlUtil
 let serverURL: string
 
-const goToDoc = async (page: Page) => {
-  await page.goto(url.list)
-  const linkToDoc = page.locator('tbody tr:first-child .cell-title a').first()
-  expect(linkToDoc).toBeTruthy()
-  await linkToDoc.click()
-}
-
-const goToCollectionVersions = async (page: Page): Promise<void> => {
-  await goToDoc(page)
-  await page.goto(`${page.url()}/versions`)
-}
-
-const goToGlobalVersions = async (page: Page, slug: string): Promise<void> => {
-  const global = new AdminUrlUtil(serverURL, slug)
-  const versionsURL = `${global.global(slug)}/versions`
-  await page.goto(versionsURL)
-}
-
 describe('versions', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
-
     const context = await browser.newContext()
     page = await context.newPage()
   })
@@ -89,40 +71,54 @@ describe('versions', () => {
       await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
     })
 
-    test('should bulk publish', async () => {
+    test('bulk update - should publish many', async () => {
       await page.goto(url.list)
 
-      await page.locator('.checkbox-input:has(#select-all) input').check()
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
 
+      // Bulk edit the selected rows
       await page.locator('.publish-many__toggle').click()
-
       await page.locator('#confirm-publish').click()
 
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Published')
+      // Check that the statuses for each row has been updated to `published`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText(
+        'Published',
+      )
+
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
     })
 
-    test('should bulk unpublish', async () => {
+    test('bulk update - should unpublish many', async () => {
       await page.goto(url.list)
 
-      await page.locator('.checkbox-input:has(#select-all) input').check()
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
 
+      // Bulk edit the selected rows
       await page.locator('.unpublish-many__toggle').click()
-
       await page.locator('#confirm-unpublish').click()
 
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft')
+      // Check that the statuses for each row has been updated to `draft`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
-    test('should publish while editing many', async () => {
+    test('bulk update - should publish changes', async () => {
       const description = 'published document'
       await page.goto(url.list)
-      await page.locator('.checkbox-input:has(#select-all) input').check()
+
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
+
+      // Bulk edit the selected rows to `published` status
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
       const options = page.locator('.rs__option')
-      const field = options.locator('text=description')
+      const field = options.locator('text=Description')
       await field.click()
       await page.locator('#field-description').fill(description)
       await page.locator('.form-submit .edit-many__publish').click()
@@ -130,18 +126,28 @@ describe('versions', () => {
       await expect(page.locator('.Toastify__toast--success')).toContainText(
         'Draft Posts successfully.',
       )
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published')
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Published')
+
+      // Check that the statuses for each row has been updated to `published`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText(
+        'Published',
+      )
+
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
     })
 
-    test('should save as draft while editing many', async () => {
+    test('bulk update - should draft changes', async () => {
       const description = 'draft document'
       await page.goto(url.list)
-      await page.locator('.checkbox-input:has(#select-all) input').check()
+
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
+
+      // Bulk edit the selected rows to `draft` status
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
       const options = page.locator('.rs__option')
-      const field = options.locator('text=description')
+      const field = options.locator('text=Description')
       await field.click()
       await page.locator('#field-description').fill(description)
       await page.locator('.form-submit .edit-many__draft').click()
@@ -149,12 +155,15 @@ describe('versions', () => {
       await expect(page.locator('.Toastify__toast--success')).toContainText(
         'Draft Posts successfully.',
       )
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft')
+
+      // Check that the statuses for each row has been updated to `draft`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
     test('collection - has versions tab', async () => {
-      await goToDoc(page)
+      await page.goto(url.list)
+      await page.locator('tbody tr .cell-title a').first().click()
       const docURL = page.url()
       const pathname = new URL(docURL).pathname
 
@@ -167,48 +176,31 @@ describe('versions', () => {
       expect(href).toBe(`${pathname}/versions`)
     })
 
-    test('collection - displays proper versions pagination', async () => {
-      await page.goto(url.create)
-
-      // save a version and check count
-      await page.locator('#field-title').fill('title')
-      await page.locator('#field-description').fill('description')
-      await saveDocAndAssert(page)
-
-      await page.goto(`${page.url()}/versions`)
-
-      const paginationItems = page.locator('.versions__page-info')
-      await expect(paginationItems).toHaveText('1-1 of 1')
-    })
-
     test('collection - tab displays proper number of versions', async () => {
-      await page.goto(url.create)
+      await page.goto(url.list)
 
-      // save a version and check count
-      await page.locator('#field-title').fill('Title')
-      await page.locator('#field-description').fill('Description')
-      await saveDocAndAssert(page)
+      const linkToDoc = page
+        .locator('tbody tr .cell-title a', {
+          hasText: exactText('Title With Many Versions 11'),
+        })
+        .first()
+
+      expect(linkToDoc).toBeTruthy()
+      await linkToDoc.click()
 
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
 
       const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount).toBe('1')
-
-      // save another version and check count again
-      await page.locator('#field-title').fill('Title 2')
-      await saveDocAndAssert(page)
-
-      await wait(100) // wait for save and rerender
-      const versionCount2 = await versionsTab.locator('.doc-tab__count').first().textContent()
-      expect(versionCount2).toBe('2')
+      expect(versionCount).toBe('11')
     })
 
     test('collection - has versions route', async () => {
-      const url = page.url()
-      await goToCollectionVersions(page)
-      expect(page.url()).toBe(`${url}/versions`)
+      await page.goto(url.list)
+      await page.locator('tbody tr .cell-title a').first().click()
+      await page.goto(`${page.url()}/versions`)
+      expect(page.url()).toMatch(/\/versions$/)
     })
 
     test('global - has versions tab', async () => {
@@ -228,9 +220,10 @@ describe('versions', () => {
     })
 
     test('global - has versions route', async () => {
-      const url = page.url()
-      await goToGlobalVersions(page, draftGlobalSlug)
-      expect(page.url()).toBe(`${url}/versions`)
+      const global = new AdminUrlUtil(serverURL, globalSlug)
+      const versionsURL = `${global.global(globalSlug)}/versions`
+      await page.goto(versionsURL)
+      expect(page.url()).toMatch(/\/versions$/)
     })
 
     test('should retain localized data during autosave', async () => {

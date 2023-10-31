@@ -217,6 +217,7 @@ describe('Versions', () => {
           draft: true,
           sort: 'title',
         })
+
         const draftsDescending = await payload.find({
           collection: draftSlug,
           draft: true,
@@ -230,16 +231,19 @@ describe('Versions', () => {
         )
       })
 
-      it('should findVersions with sort', async () => {
+      it('should `findVersions` with sort', async () => {
         const draftsAscending = await payload.findVersions({
           collection: draftSlug,
           draft: true,
           sort: 'createdAt',
+          limit: 100,
         })
+
         const draftsDescending = await payload.findVersions({
           collection: draftSlug,
           draft: true,
-          sort: '-updatedAt',
+          sort: '-createdAt',
+          limit: 100,
         })
 
         expect(draftsAscending).toBeDefined()
@@ -251,7 +255,7 @@ describe('Versions', () => {
     })
 
     describe('Restore', () => {
-      it('should return findVersions in correct order', async () => {
+      it('should return `findVersions` in correct order', async () => {
         const somePost = await payload.create({
           collection: draftSlug,
           data: {
@@ -673,6 +677,41 @@ describe('Versions', () => {
       })
 
       expect(findResults.docs[0].title).toStrictEqual(originalTitle)
+    })
+
+    it('should return more than 10 `totalDocs`', async () => {
+      const { id } = await payload.create({
+        collection: 'draft-posts',
+        data: {
+          title: 'Title',
+          description: 'Description',
+        },
+      })
+
+      const createVersions = async (int: number = 1) => {
+        for (let i = 0; i < int; i++) {
+          await payload.update({
+            id,
+            collection: 'draft-posts',
+            data: {
+              title: `Title ${i}`,
+            },
+          })
+        }
+      }
+
+      await createVersions(10)
+
+      const findResults = await payload.findVersions({
+        collection: 'draft-posts',
+        where: {
+          parent: {
+            equals: id,
+          },
+        },
+      })
+
+      expect(findResults.totalDocs).toBe(11)
     })
 
     it('should not be able to query an old draft version with draft=true', async () => {
