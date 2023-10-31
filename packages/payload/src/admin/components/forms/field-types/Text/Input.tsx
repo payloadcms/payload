@@ -90,9 +90,9 @@ const TextInput: React.FC<TextInputProps> = (props) => {
             onMouseLeave={() => setIsHoveringIcon(false)}
           >
             <Exclamation />
-            <Error message={errorMessage} showError={isHoveringIcon} />
           </div>
         )}
+        {showError && isLongError && <Error message={errorMessage} showError={isHoveringIcon} />}
       </div>
 
       <FieldDescription

@@ -49,7 +49,7 @@ const Tooltip: React.FC<Props> = (props) => {
         className={[
           'tooltip',
           className,
-          messageIsLong ? 'tooltip--position-right' : 'tooltip--position-top',
+          messageIsLong ? 'tooltip--position-stretch-bottom' : 'tooltip--position-top',
         ]
           .filter(Boolean)
           .join(' ')}
@@ -63,7 +63,7 @@ const Tooltip: React.FC<Props> = (props) => {
           'tooltip',
           className,
           show && 'tooltip--show',
-          messageIsLong ? 'tooltip--position-right' : `tooltip--position-${position}`,
+          messageIsLong ? 'tooltip--position-stretch-bottom' : `tooltip--position-${position}`,
         ]
           .filter(Boolean)
           .join(' ')}

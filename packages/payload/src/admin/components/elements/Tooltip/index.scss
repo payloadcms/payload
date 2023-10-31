@@ -55,16 +55,16 @@
     }
   }
 
-  &--position-right {
-    &::after {
-      left: calc(-1 * var(--caret-size));
-      top: 10%;
-      transform: translateY(-50%);
+  &--position-stretch-bottom {
+    top: 100%;
+    transform: translate3d(-50%, var(--caret-size), 0);
 
-      border-top: var(--caret-size) solid transparent;
-      border-bottom: var(--caret-size) solid transparent;
-      border-left: none;
-      border-right: var(--caret-size) solid var(--theme-elevation-800);
+    &::after {
+      bottom: calc(100% + var(--caret-size) - 1px);
+      border-top: none;
+      border-left: var(--caret-size) solid transparent;
+      border-bottom: var(--caret-size) solid var(--theme-elevation-800);
+      border-right: var(--caret-size) solid transparent;
     }
   }
 
