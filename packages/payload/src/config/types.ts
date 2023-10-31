@@ -27,6 +27,8 @@ import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/type
 import type { Payload } from '../payload'
 import type { Where } from '../types'
 
+import { collectionViewType } from '../admin/components/views/collections/Edit/Routes/CustomComponent'
+
 type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
@@ -251,12 +253,14 @@ export type AdminView = AdminViewComponent | AdminViewConfig
 
 export type EditViewConfig = {
   /**
-   * The component to render for this view
-   * + Replaces the default component
+   * Add a new view to the admin panel
+   * Or override a specific properties of existing ones
+   * i.e. render a component with a route but no tab
+   * i.e. add a tab to an existing view with no new route
    */
-  Component: AdminViewComponent
-  Tab: DocumentTab
-  path: string
+  Component?: AdminViewComponent
+  Tab?: DocumentTab
+  path?: string
 }
 
 export type EditView = AdminViewComponent | EditViewConfig
