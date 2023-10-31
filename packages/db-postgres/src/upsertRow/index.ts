@@ -2,6 +2,8 @@
 import type { TypeWithID } from 'payload/types'
 
 import { eq } from 'drizzle-orm'
+import { ValidationError } from 'payload/errors'
+import { i18nInit } from 'payload/utilities'
 
 import type { BlockRowToInsert } from '../transform/write/types'
 import type { Args } from './types'
@@ -12,8 +14,6 @@ import { transformForWrite } from '../transform/write'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath'
 import { insertArrays } from './insertArrays'
-import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
 
 export const upsertRow = async <T extends TypeWithID>({
   id,
@@ -188,18 +188,15 @@ export const upsertRow = async <T extends TypeWithID>({
 
     const insertedBlockRows: Record<string, Record<string, unknown>[]> = {}
 
-    for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
-      if (operation === 'update') {
-        await deleteExistingRowsByPath({
-          adapter,
-          db,
-          parentID: insertedRow.id,
-          pathColumnName: '_path',
-          rows: blockRows.map(({ row }) => row),
-          tableName: `${tableName}_blocks_${blockName}`,
-        })
+    if (operation === 'update') {
+      for (const blockName of rowToInsert.blocksToDelete) {
+        const blockTableName = `${tableName}_blocks_${blockName}`
+        const blockTable = adapter.tables[blockTableName]
+        await db.delete(blockTable).where(eq(blockTable._parentID, insertedRow.id))
       }
+    }
 
+    for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
       insertedBlockRows[blockName] = await db
         .insert(adapter.tables[`${tableName}_blocks_${blockName}`])
         .values(blockRows.map(({ row }) => row))
