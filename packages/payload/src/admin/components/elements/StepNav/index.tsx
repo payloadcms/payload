@@ -51,16 +51,25 @@ const StepNav: React.FC<{
           </Link>
           <span>/</span>
           {stepNav.map((item, i) => {
-            const StepLabel = <span key={i}>{getTranslation(item.label, i18n)}</span>
-            const Step =
-              stepNav.length === i + 1 ? (
-                StepLabel
-              ) : (
-                <Fragment key={i}>
-                  {item.url ? <Link to={item.url}>{StepLabel}</Link> : StepLabel}
-                  <span>/</span>
-                </Fragment>
-              )
+            const StepLabel = getTranslation(item.label, i18n)
+            const isLast = stepNav.length === i + 1
+
+            const Step = isLast ? (
+              <span className={`${baseClass}__last`} key={i}>
+                {StepLabel}
+              </span>
+            ) : (
+              <Fragment key={i}>
+                {item.url ? (
+                  <Link to={item.url}>
+                    <span key={i}>{StepLabel}</span>
+                  </Link>
+                ) : (
+                  <span key={i}>{StepLabel}</span>
+                )}
+                <span>/</span>
+              </Fragment>
+            )
 
             return Step
           })}

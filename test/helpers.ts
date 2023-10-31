@@ -85,3 +85,11 @@ export async function changeLocale(page: Page, newLocale: string) {
 export function exactText(text: string) {
   return new RegExp(`^${text}$`)
 }
+
+export const checkPageTitle = async (page: Page, title: string) =>
+  expect(await page.locator('.doc-header__title.render-title')?.first()?.innerText()).toBe(title)
+
+export const checkBreadcrumb = async (page: Page, text: string) =>
+  expect(await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText()).toBe(
+    text,
+  )

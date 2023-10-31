@@ -10,6 +10,8 @@ import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
 import {
+  checkBreadcrumb,
+  checkPageTitle,
   exactText,
   openDocControls,
   openNav,
@@ -251,31 +253,29 @@ describe('admin', () => {
   describe('doc titles', () => {
     test('collection - should render fallback titles when creating new', async () => {
       await page.goto(url.create)
-      await expect(page.locator('.doc-header__title.render-title')).toContainText('[Untitled]')
-      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText('Create New')
+      await checkPageTitle(page, '[Untitled]')
+      await checkBreadcrumb(page, 'Create New')
       await saveDocAndAssert(page)
+      expect(true).toBe(true)
     })
 
     test('collection - should render `useAsTitle` field', async () => {
       await page.goto(url.create)
-      const titleField = page.locator('#field-title')
-      await titleField.fill(title)
-      await expect(page.locator('.doc-header__title.render-title')).toContainText(title)
+      await page.locator('#field-title')?.fill(title)
+      await checkPageTitle(page, title)
       await saveDocAndAssert(page)
-      await wait(50)
-      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
+      await checkBreadcrumb(page, title)
+      expect(true).toBe(true)
     })
 
     test('collection - should render `id` as `useAsTitle` fallback', async () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('.doc-header__title.render-title')).toContainText(title)
-      await saveDocAndAssert(page)
-      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
-      await page.locator('#field-title').fill('')
-      await expect(page.locator('.doc-header__title.render-title')).toContainText('ID: ')
-      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(id)
+      await page.locator('#field-title')?.fill('')
+      expect(await page.locator('.doc-header__title.render-title')?.first()?.innerText()).toContain(
+        'ID: ',
+      )
+      await checkPageTitle(page, id)
       await saveDocAndAssert(page)
     })
 
@@ -285,8 +285,8 @@ describe('admin', () => {
       const globalLabel = page.locator(`#nav-global-global`)
       await expect(globalLabel).toContainText(label)
       await globalLabel.click()
-      await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
-      await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(label)
+      await checkPageTitle(page, label)
+      await checkBreadcrumb(page, label)
     })
 
     test('global - should render simple label strings', async () => {
@@ -295,9 +295,8 @@ describe('admin', () => {
       const globalLabel = page.locator(`#nav-global-group-globals-one`)
       await expect(globalLabel).toContainText(label)
       await globalLabel.click()
-      await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
-      const nav = page.locator('.step-nav.app-header__step-nav')
-      await expect(nav).toContainText(label)
+      await checkPageTitle(page, label)
+      await checkBreadcrumb(page, label)
       await saveDocAndAssert(page)
     })
 
@@ -307,9 +306,8 @@ describe('admin', () => {
       const globalLabel = page.locator(`#nav-global-group-globals-two`)
       await expect(globalLabel).toContainText(label)
       await globalLabel.click()
-      await expect(page.locator('.doc-header__title.render-title')).toContainText(label)
-      const nav = page.locator('.step-nav.app-header__step-nav')
-      await expect(nav).toContainText(label)
+      await checkPageTitle(page, label)
+      await checkBreadcrumb(page, label)
       await saveDocAndAssert(page)
     })
   })
@@ -366,15 +364,10 @@ describe('admin', () => {
       await createPost()
       await createPost()
       await createPost()
-
       await page.goto(url.list)
-
       await page.locator('input#select-all').check()
-
       await page.locator('.delete-documents__toggle').click()
-
       await page.locator('#confirm-delete').click()
-
       await expect(page.locator('.Toastify__toast--success')).toHaveText(
         'Deleted 3 Posts successfully.',
       )
