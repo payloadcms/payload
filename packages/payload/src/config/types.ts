@@ -276,12 +276,7 @@ export type EditViewConfig =
  * All Tab properties become optional
  * i.e. you can change just the label, if desired
  */
-export type EditView =
-  | {
-      Component?: AdminViewComponent
-      Tab?: DocumentTabComponent | Partial<DocumentTabConfig>
-    }
-  | AdminViewComponent
+export type EditView = AdminViewComponent | EditViewConfig
 
 export type Locale = {
   /**
