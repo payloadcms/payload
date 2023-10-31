@@ -1,3 +1,33 @@
+## [2.0.14](https://github.com/payloadcms/payload/compare/v2.0.13...v2.0.14) (2023-10-30)
+
+
+### Bug Fixes
+
+* adds null to non-required field unions ([#3870](https://github.com/payloadcms/payload/issues/3870)) ([7e919aa](https://github.com/payloadcms/payload/commit/7e919aa87c0116c41bf41d75dcd91ff96576a46f))
+* checks for user before accessing properties in preferences update operation([#3844](https://github.com/payloadcms/payload/issues/3844)) ([24eab3a](https://github.com/payloadcms/payload/commit/24eab3af1da3b08debe0580cce8ece08a86039a4))
+* **db-mongodb:** improve find query performance ([#3836](https://github.com/payloadcms/payload/issues/3836)) ([56e58e9](https://github.com/payloadcms/payload/commit/56e58e9ec732f8365f53f214a9e950fbc2a7d8b9)), closes [#3904](https://github.com/payloadcms/payload/issues/3904)
+* **db-mongodb:** versions pagination ([#3875](https://github.com/payloadcms/payload/issues/3875)) ([4f2b080](https://github.com/payloadcms/payload/commit/4f2b080d1cb5f9d4ab80aa106650307c11e8811b))
+* disable webpack hot reload on production ([#3891](https://github.com/payloadcms/payload/issues/3891)) ([422c803](https://github.com/payloadcms/payload/commit/422c803da67982a063a028508c44009b9577646e))
+* duplicate document copying to incorrect locale ([#3874](https://github.com/payloadcms/payload/issues/3874)) ([89f273b](https://github.com/payloadcms/payload/commit/89f273bf894512b69e8647be4cf4496bff37c99b))
+* enables nested AND/OR queries ([#3834](https://github.com/payloadcms/payload/issues/3834)) ([237eebd](https://github.com/payloadcms/payload/commit/237eebdf87b7d33baa9baaa54946f4ebb4276bfb))
+* ensure serverURL has string value for getBaseUploadFields function ([#3900](https://github.com/payloadcms/payload/issues/3900)) ([c564a83](https://github.com/payloadcms/payload/commit/c564a83ab61b672d9a2bcc875ab890b0fede5462))
+* ensures compare-version select field cannot be cleared ([#3901](https://github.com/payloadcms/payload/issues/3901)) ([42d8d11](https://github.com/payloadcms/payload/commit/42d8d11fd7e5792b119f69f17dc1100c85cfa491))
+* error handling when duplicating documents fails ([#3873](https://github.com/payloadcms/payload/issues/3873)) ([435eb62](https://github.com/payloadcms/payload/commit/435eb6204e550e898a81033f794fcf568e3b017c))
+* generate new block ids on create ([#3871](https://github.com/payloadcms/payload/issues/3871)) ([3404bab](https://github.com/payloadcms/payload/commit/3404bab83f1112713675eb504870a4a1786c3822))
+* global permissions for live preview ([#3854](https://github.com/payloadcms/payload/issues/3854)) ([3032e0b](https://github.com/payloadcms/payload/commit/3032e0b5a239db0762abd120b2db95f30ed5ca65))
+* handles null & undefined relationship field values in versions view ([#3609](https://github.com/payloadcms/payload/issues/3609)) ([115e592](https://github.com/payloadcms/payload/commit/115e592b54d9174f316daa3cff31bcc801eaf92f))
+* incorrect duplication of data in admin ui ([#3907](https://github.com/payloadcms/payload/issues/3907)) ([46fc41c](https://github.com/payloadcms/payload/commit/46fc41cbd9615c58248b4d2c44d24905dd676171))
+* only apply focal manipulation when necessary ([#3902](https://github.com/payloadcms/payload/issues/3902)) ([a4f36aa](https://github.com/payloadcms/payload/commit/a4f36aa8a009e9c0156924320bbcf1d04b697223))
+* graphql query errors transaction race condition ([#3795](https://github.com/payloadcms/payload/issues/3795)) ([dc13b10](https://github.com/payloadcms/payload/commit/dc13b101f7351f7bae60a4a4bbc25907ed82210f))
+* removes conditional return of formattedEmails in sendEmail hook [#26](https://github.com/payloadcms/payload/issues/26) ([#28](https://github.com/payloadcms/payload/issues/28)) ([e8458f8](https://github.com/payloadcms/payload/commit/e8458f84bcd5bad74b189479931fbb7faea74900))
+* resize image if no aspect ratio change ([#3859](https://github.com/payloadcms/payload/issues/3859)) ([f53b713](https://github.com/payloadcms/payload/commit/f53b7131548dbe9071c65ba110f7f0d206bb33b5))
+* **richtext-*:** type issues with typescript strict mode enabled ([dac9514](https://github.com/payloadcms/payload/commit/dac9514eb00b99a3caeb9f217695b2b89368f7c9))
+* **richtext-lexical:** Blocks node incorrectly marked as client module ([35f00fa](https://github.com/payloadcms/payload/commit/35f00fa83d2a90967e0707ca0fd960c5608a3bf3))
+* **richtext-lexical:** remove unnecessary dependencies (fixes [#3889](https://github.com/payloadcms/payload/issues/3889)) ([760565f](https://github.com/payloadcms/payload/commit/760565f1e96e4cb1f6bce8663ad3fa8a16a2601c))
+* set date to 12UTC for default, dayOnly and monthOnly fields ([#3887](https://github.com/payloadcms/payload/issues/3887)) ([d393225](https://github.com/payloadcms/payload/commit/d3932252891bb8721a5abc97e204dbb6a7f3fda2))
+* store resized image on req or tempFilePath ([#3883](https://github.com/payloadcms/payload/issues/3883)) ([6c5d525](https://github.com/payloadcms/payload/commit/6c5d525d8e1267eebdffeb9f31b2ef3a4df1132d))
+* unique field error handling ([#3888](https://github.com/payloadcms/payload/issues/3888)) ([4d8d4c2](https://github.com/payloadcms/payload/commit/4d8d4c214ab12571e9dc71e406117c4b19f63c6b))
+
 ## [2.0.13](https://github.com/payloadcms/payload/compare/v2.0.12...v2.0.13) (2023-10-24)
 
 ### Bug Fixes
