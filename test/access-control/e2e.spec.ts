@@ -130,7 +130,7 @@ describe('access control', () => {
     test('should not show field without permission', async () => {
       await page.goto(url.account)
       await wait(500)
-      await expect(page.locator('#field-roles')).toBeVisible()
+      await expect(page.locator('#field-roles')).toBeHidden()
     })
   })
 
