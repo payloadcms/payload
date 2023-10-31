@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import type { DocumentTabProps } from './types'
 
@@ -20,21 +20,29 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {Object.entries(defaultViews)?.map(([name, Tab], index) => {
-              const viewConfig = getViewConfig({ name, collection, global })
-              const tabOverrides = viewConfig && 'Tab' in viewConfig ? viewConfig.Tab : undefined
+            {Object.entries(defaultViews)
+              // sort tabs based on `order` property
+              // TODO: expose this to the config and merge with `customViews`
+              ?.sort(([, a], [, b]) => {
+                if (a?.order || 0 < b?.order || 0) return -1
+                if (a?.order || 0 > b?.order || 0) return 1
+                return 0
+              })
+              ?.map(([name, Tab], index) => {
+                const viewConfig = getViewConfig({ name, collection, global })
+                const tabOverrides = viewConfig && 'Tab' in viewConfig ? viewConfig.Tab : undefined
 
-              return (
-                <DocumentTab
-                  {...{
-                    ...props,
-                    ...(Tab || {}),
-                    ...(tabOverrides || {}),
-                  }}
-                  key={`tab-${index}`}
-                />
-              )
-            })}
+                return (
+                  <DocumentTab
+                    {...{
+                      ...props,
+                      ...(Tab || {}),
+                      ...(tabOverrides || {}),
+                    }}
+                    key={`tab-${index}`}
+                  />
+                )
+              })}
             {customViews?.map((CustomView, index) => {
               if ('Tab' in CustomView) {
                 const { Tab, path } = CustomView
