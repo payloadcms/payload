@@ -481,7 +481,7 @@ describe('fields', () => {
     test('should add different blocks with similar field configs', async () => {
       await page.goto(url.create)
 
-      async function addBlock(name: 'Block 1' | 'Block 2') {
+      async function addBlock(name: 'Block A' | 'Block B') {
         await page
           .locator('#field-blocksWithSimilarConfigs')
           .getByRole('button', { name: 'Add Blocks With Similar Config' })
@@ -489,7 +489,7 @@ describe('fields', () => {
         await page.getByRole('button', { name }).click()
       }
 
-      await addBlock('Block 1')
+      await addBlock('Block A')
 
       await page
         .locator('#blocksWithSimilarConfigs-row-0')
@@ -503,7 +503,7 @@ describe('fields', () => {
         page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]'),
       ).toHaveValue('items>0>title')
 
-      await addBlock('Block 2')
+      await addBlock('Block B')
 
       await page
         .locator('#blocksWithSimilarConfigs-row-1')

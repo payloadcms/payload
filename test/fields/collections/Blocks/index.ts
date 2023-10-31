@@ -212,7 +212,7 @@ const BlockFields: CollectionConfig = {
       name: 'blocksWithSimilarConfigs',
       blocks: [
         {
-          slug: 'block-1',
+          slug: 'block-a',
           fields: [
             {
               type: 'array',
@@ -228,7 +228,7 @@ const BlockFields: CollectionConfig = {
           ],
         },
         {
-          slug: 'block-2',
+          slug: 'block-b',
           fields: [
             {
               type: 'array',
