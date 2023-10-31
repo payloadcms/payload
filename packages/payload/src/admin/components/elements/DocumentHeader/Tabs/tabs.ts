@@ -1,15 +1,20 @@
+import type { collectionViewType } from '../../../views/collections/Edit/Routes/CustomComponent'
 import type { DocumentTabConfig } from './types'
 
-export const tabs: DocumentTabConfig[] = [
-  // Default
-  {
+export const tabs: Record<collectionViewType, DocumentTabConfig> = {
+  API: {
+    condition: ({ collection, global }) =>
+      (collection && !collection?.admin?.hideAPIURL) || (global && !global?.admin?.hideAPIURL),
+    href: '/api',
+    label: 'API',
+  },
+  Default: {
     href: '',
     isActive: ({ href, location }) =>
       location.pathname === href || location.pathname === `${href}/create`,
     label: ({ t }) => t('edit'),
   },
-  // Live Preview
-  {
+  LivePreview: {
     condition: ({ collection, config, global }) => {
       if (collection) {
         return Boolean(
@@ -30,8 +35,16 @@ export const tabs: DocumentTabConfig[] = [
     isActive: ({ href, location }) => location.pathname === href,
     label: ({ t }) => t('livePreview'),
   },
-  // Versions
-  {
+  References: {
+    condition: () => false,
+  },
+  Relationships: {
+    condition: () => false,
+  },
+  Version: {
+    condition: () => false,
+  },
+  Versions: {
     condition: ({ collection, global }) => Boolean(collection?.versions || global?.versions),
     href: '/versions',
     label: ({ t }) => t('version:versions'),
@@ -40,11 +53,4 @@ export const tabs: DocumentTabConfig[] = [
         ? versions?.totalDocs.toString()
         : '',
   },
-  // API
-  {
-    condition: ({ collection, global }) =>
-      (collection && !collection?.admin?.hideAPIURL) || (global && !global?.admin?.hideAPIURL),
-    href: '/api',
-    label: 'API',
-  },
-]
+}

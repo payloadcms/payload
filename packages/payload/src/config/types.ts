@@ -262,6 +262,7 @@ export type EditViewConfig =
        * i.e. you can customize the `Default` view tab label, if desired
        */
       Tab?: DocumentTab
+      path?: string
     }
   | {
       Component: AdminViewComponent

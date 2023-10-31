@@ -4,8 +4,9 @@ import type { DocumentTabProps } from './types'
 
 import { DocumentTab } from './Tab'
 import { getCustomViews } from './getCustomViews'
+import { getViewConfig } from './getViewConfig'
 import './index.scss'
-import { tabs } from './tabs'
+import { tabs as defaultViews } from './tabs'
 
 const baseClass = 'doc-tabs'
 
@@ -19,17 +20,40 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {tabs?.map((Tab, index) => {
-              return <DocumentTab {...props} {...Tab} key={`tab-${index}`} />
+            {Object.entries(defaultViews)?.map(([name, Tab], index) => {
+              const viewConfig = getViewConfig({ name, collection, global })
+              const tabOverrides = viewConfig && 'Tab' in viewConfig ? viewConfig.Tab : undefined
+
+              return (
+                <DocumentTab
+                  {...{
+                    ...props,
+                    ...(Tab || {}),
+                    ...(tabOverrides || {}),
+                  }}
+                  key={`tab-${index}`}
+                />
+              )
             })}
             {customViews?.map((CustomView, index) => {
-              const { Tab, path } = CustomView
+              if ('Tab' in CustomView) {
+                const { Tab, path } = CustomView
 
-              if (typeof Tab === 'function') {
-                return <Tab path={path} {...props} key={`tab-custom-${index}`} />
+                if (typeof Tab === 'function') {
+                  return <Tab path={path} {...props} key={`tab-custom-${index}`} />
+                }
+
+                return (
+                  <DocumentTab
+                    {...{
+                      ...props,
+                      ...Tab,
+                    }}
+                    key={`tab-custom-${index}`}
+                  />
+                )
               }
-
-              return <DocumentTab {...props} {...Tab} key={`tab-custom-${index}`} />
+              return null
             })}
           </ul>
         </div>

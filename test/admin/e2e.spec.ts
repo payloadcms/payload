@@ -18,6 +18,7 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import { customEditLabel, customTabLabel, customViews2Slug } from './collections/CustomViews2'
 import {
   globalSlug,
   group1Collection1Slug,
@@ -30,8 +31,8 @@ import {
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
-const title = 'title'
-const description = 'description'
+const title = 'Title'
+const description = 'Description'
 
 let url: AdminUrlUtil
 let serverURL: string
@@ -158,13 +159,43 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
-    test('should not show API tab on collection when disabled in config', async () => {
+    test('collection - should render custom tab label', async () => {
+      url = new AdminUrlUtil(serverURL, customViews2Slug)
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
+
+      const editTab = page
+        .locator('.doc-tab', {
+          has: page.locator(`a[href="${pathname}"]`),
+        })
+        ?.first()
+
+      await expect(editTab).toContainText(customEditLabel)
+    })
+
+    test('collection - should render custom tab component', async () => {
+      url = new AdminUrlUtil(serverURL, customViews2Slug)
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+
+      const editTab = page.locator(`.doc-tab`, {
+        hasText: exactText(customTabLabel),
+      })
+
+      await expect(editTab).toBeVisible()
+    })
+
+    test('collection - should not show API tab when disabled in config', async () => {
       await page.goto(url.collection(noApiViewCollection))
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
-    test('should not enable API route on collection when disabled in config', async () => {
+    test('collection - should not enable API route when disabled in config', async () => {
       const collectionItems = await payload.find({
         collection: noApiViewCollection,
         limit: 1,
@@ -174,12 +205,12 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
-    test('should not show API tab on global when disabled in config', async () => {
+    test('global - should not show API tab when disabled in config', async () => {
       await page.goto(url.global(noApiViewGlobal))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
-    test('should not enable API route on global when disabled in config', async () => {
+    test('global - should not enable API route when disabled in config', async () => {
       await page.goto(`${url.global(noApiViewGlobal)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
@@ -231,6 +262,7 @@ describe('admin', () => {
       await titleField.fill(title)
       await expect(page.locator('.doc-header__title.render-title')).toContainText(title)
       await saveDocAndAssert(page)
+      await wait(50)
       await expect(page.locator('.step-nav.app-header__step-nav')).toContainText(title)
     })
 

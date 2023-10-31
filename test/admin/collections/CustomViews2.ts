@@ -4,8 +4,12 @@ import CustomTabComponent from '../components/CustomTabComponent'
 import CustomVersionsView from '../components/views/CustomVersions'
 import CustomView from '../components/views/CustomView'
 
+export const customViews2Slug = 'custom-views-two'
+export const customEditLabel = 'Custom Edit Label'
+export const customTabLabel = 'Custom Tab Component'
+
 export const CustomViews2: CollectionConfig = {
-  slug: 'custom-views-two',
+  slug: customViews2Slug,
   versions: true,
   admin: {
     components: {
@@ -14,7 +18,7 @@ export const CustomViews2: CollectionConfig = {
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
           Default: {
             Tab: {
-              label: 'Custom',
+              label: customEditLabel,
             },
           },
           Versions: CustomVersionsView,
@@ -22,7 +26,7 @@ export const CustomViews2: CollectionConfig = {
             path: '/custom-tab-view',
             Component: CustomView,
             Tab: {
-              label: 'Custom',
+              label: customTabLabel,
               href: '/custom-tab-view',
             },
           },
