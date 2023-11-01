@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import type { DocumentTabProps } from './types'
 
@@ -21,12 +21,14 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
             {Object.entries(defaultViews)
-              // sort tabs based on `order` property
-              // TODO: expose this to the config and merge with `customViews`
+              // sort `defaultViews` based on `order` property from smallest to largest
+              // if no `order`, append the view to the end
+              // TODO: open `order` to the config and merge `defaultViews` with `customViews`
               ?.sort(([, a], [, b]) => {
-                if (a?.order || 0 < b?.order || 0) return -1
-                if (a?.order || 0 > b?.order || 0) return 1
-                return 0
+                if (a.order === undefined && b.order === undefined) return 0
+                else if (a.order === undefined) return 1
+                else if (b.order === undefined) return -1
+                return a.order - b.order
               })
               ?.map(([name, Tab], index) => {
                 const viewConfig = getViewConfig({ name, collection, global })
