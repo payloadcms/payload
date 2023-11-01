@@ -47,7 +47,7 @@ export type ImageUploadFormatOptions = {
  */
 export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
 
-export type ImageSize = ResizeOptions & {
+export type ImageSize = Omit<ResizeOptions, 'withoutEnlargement'> & {
   /**
    * @deprecated prefer position
    */
@@ -55,6 +55,16 @@ export type ImageSize = ResizeOptions & {
   formatOptions?: ImageUploadFormatOptions
   name: string
   trimOptions?: ImageUploadTrimOptions
+  /**
+   * When an uploaded image is smaller than the defined image size, we have 3 options:
+   *
+   * `undefined | false | true`
+   *
+   * 1. `undefined` [default]: uploading images with smaller width AND height than the image size will return null
+   * 2. `false`: always enlarge images to the image size
+   * 3. `true`: if the image is smaller than the image size, return the original image
+   */
+  withoutEnlargement?: ResizeOptions['withoutEnlargement']
 }
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
