@@ -2,8 +2,10 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 
 import CustomEditView from '../components/views/CustomEdit'
 
+export const customViews1Slug = 'custom-views-one'
+
 export const CustomViews1: CollectionConfig = {
-  slug: 'custom-views-one',
+  slug: customViews1Slug,
   versions: true,
   admin: {
     components: {
