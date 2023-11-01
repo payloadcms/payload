@@ -20,9 +20,9 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { customNestedPath } from './collections/CustomViews2'
 import {
   customEditLabel,
+  customNestedPath,
   customTabLabel,
   customViews2Slug,
   globalSlug,

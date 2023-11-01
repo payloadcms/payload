@@ -4,14 +4,7 @@ import CustomTabComponent from '../components/CustomTabComponent'
 import CustomNestedView from '../components/views/CustomNestedView'
 import CustomVersionsView from '../components/views/CustomVersions'
 import CustomView from '../components/views/CustomView'
-
-export const customViews2Slug = 'custom-views-two'
-
-export const customEditLabel = 'Custom Edit Label'
-
-export const customTabLabel = 'Custom Tab Label'
-
-export const customNestedPath = '/custom-tab-component/nested-view'
+import { customEditLabel, customNestedPath, customTabLabel, customViews2Slug } from '../shared'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2Slug,
