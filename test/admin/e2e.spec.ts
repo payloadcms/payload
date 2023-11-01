@@ -169,8 +169,7 @@ describe('admin', () => {
     })
 
     test('collection - should render custom view', async () => {
-      url = new AdminUrlUtil(serverURL, customViews2Slug)
-      await page.goto(url.create)
+      await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
       const pageURL = page.url()
@@ -183,8 +182,7 @@ describe('admin', () => {
     })
 
     test('collection - should render custom nested view', async () => {
-      url = new AdminUrlUtil(serverURL, customViews2Slug)
-      await page.goto(url.create)
+      await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
       const pageURL = page.url()
