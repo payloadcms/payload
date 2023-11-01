@@ -20,8 +20,10 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { customEditLabel, customTabLabel, customViews2Slug } from './collections/CustomViews2'
 import {
+  customEditLabel,
+  customTabLabel,
+  customViews2Slug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
@@ -162,7 +164,7 @@ describe('admin', () => {
     })
 
     test('collection - should render custom tab label', async () => {
-      url = new AdminUrlUtil(serverURL, customViews2Slug)
+      const url = new AdminUrlUtil(serverURL, customViews2Slug)
       await page.goto(url.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -179,7 +181,7 @@ describe('admin', () => {
     })
 
     test('collection - should render custom tab component', async () => {
-      url = new AdminUrlUtil(serverURL, customViews2Slug)
+      const url = new AdminUrlUtil(serverURL, customViews2Slug)
       await page.goto(url.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)

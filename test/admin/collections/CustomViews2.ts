@@ -3,10 +3,7 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 import CustomTabComponent from '../components/CustomTabComponent'
 import CustomVersionsView from '../components/views/CustomVersions'
 import CustomView from '../components/views/CustomView'
-
-export const customViews2Slug = 'custom-views-two'
-export const customEditLabel = 'Custom Edit Label'
-export const customTabLabel = 'Custom Tab Component'
+import { customEditLabel, customTabLabel, customViews2Slug } from '../shared'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2Slug,
