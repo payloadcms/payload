@@ -65,7 +65,14 @@ export const Pages: CollectionConfig = {
 
 ## Extending the lexical editor with Features
 
-Lexical is built to be extended. It's easy to add new features to the editor, and it's easy to override or remove existing features. Simply pass in a features prop inside of lexicalEditor({}). Here's an example:
+Lexical has been designed with extensibility in mind. Whether you're aiming to introduce new functionalities or tweak the existing ones, Lexical makes it seamless for you to bring those changes to life.
+
+### Features: The Building Blocks
+At the heart of Lexical's customization potential are "features." A feature could be anything from a button on a toolbar, an item in a dropdown menu, or even an entirely new node type. While Lexical ships with a set of default features we believe are essential for most use cases, the true power lies in your ability to redefine, expand, or prune these as needed.
+
+### Integrating New Features
+
+To weave in your custom features, utilize the features prop when initializing the Lexical Editor. Here's a basic example of how this is done:
 
 ```ts
 import {
@@ -167,7 +174,7 @@ const Pages: CollectionConfig = {
 }
 ```
 
-lexicalHTML() creates a new field in your collection, which automatically converts the referenced lexical richText field into HTML through an afterRead hook.
+`lexicalHTML()` creates a new field in your collection, which automatically converts the referenced lexical richText field into HTML through an afterRead hook.
 
 ### Generating HTML in the Frontend:
 If you prefer converting the JSON to HTML on the frontend, here's a snippet to guide you:
@@ -175,19 +182,82 @@ If you prefer converting the JSON to HTML on the frontend, here's a snippet to g
 ```ts
 import type { SerializedEditorState } from 'lexical'
 import {
+  type SanitizedEditorConfig,
   convertLexicalToHTML,
-  defaultHTMLConverters
+  consolidateHTMLConverters,
 } from '@payloadcms/richtext-lexical'
 
-async function lexicalToHTML(editorData: SerializedEditorState){
-  await convertLexicalToHTML({
-    converters: defaultHTMLConverters,
+async function lexicalToHTML(editorData: SerializedEditorState, editorConfig: SanitizedEditorConfig) {
+  return await convertLexicalToHTML({
+    converters: consolidateHTMLConverters({ editorConfig }),
     data: editorData,
   })
 }
 ```
 
 In this method, we utilize the `convertLexicalToHTML` which is included in `@payloadcms/richtext-lexical` which takes in the serialized editor state and converts it to HTML.
+
+Because every `Feature` is able to provide html converters, and because the `htmlFeature` can modify those or provide their own, we need to consolidate them with the default html Converters using the `consolidateHTMLConverters` function.
+
+### Creating your own HTML Converter
+
+HTML Converters are typed as `HTMLConverter`, which accepts the node type it should handle, and a function that accepts the serialized node from the lexical editor, and outputs the HTML string. Here's the HTML Converter of the Upload node as an example:
+
+```ts
+import type { HTMLConverter } from '@payloadcms/richtext-lexical'
+import payload from 'payload'
+
+const UploadHTMLConverter: HTMLConverter<SerializedUploadNode> = {
+  converter: async ({ node }) => {
+    const uploadDocument = await payload.findByID({
+      id: node.value.id,
+      collection: node.relationTo,
+    })
+    const url = (payload?.config?.serverURL || '') + uploadDocument?.url
+
+    if (!(uploadDocument?.mimeType as string)?.startsWith('image')) {
+      // Only images can be serialized as HTML
+      return ``
+    }
+
+    return `<img src="${url}" alt="${uploadDocument?.filename}" width="${uploadDocument?.width}"  height="${uploadDocument?.height}"/>`
+  },
+  nodeTypes: [UploadNode.getType()], // This is the type of the lexical node that this converter can handle. Instead of hardcoding 'upload' we can get the node type directly from the UploadNode, since it's static.
+}
+```
+
+As you can see, we have access to all the information saved in the node (for the Upload node, this is `value`and `relationTo`) and we can use that to generate the HTML.
+
+The `convertLexicalToHTML` is part of @payloadcms/richtext-lexical automatically handles traversing the editor state and calling the correct converter for each node.
+
+### Adding the HTML Converter to your Feature
+
+If you wrote your own, custom `Feature` for the editor, you don't have to manually pass in the HTML Converter to the serialize function or the `htmlConverter` feature. Instead, it's possible to define the HTML converter directly inside of your `Feature` - it will then be automatically used by the `consolidateHTMLConverters` function. Here's the Upload Feature as an example:
+
+```ts
+export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
+  return {
+    feature: () => {
+      return {
+        nodes: [
+          {
+            converters: {
+              html: yourHTMLConverter, // <= This is where you define your HTML Converter
+            },
+            node: UploadNode,
+            type: UploadNode.getType(),
+            //...
+          },
+        ],
+        plugins: [/*...*/],
+        props: props,
+        slashMenu: {/*...*/},
+      }
+    },
+    key: 'upload',
+  }
+}
+```
 
 ## Coming Soon
 
