@@ -68,11 +68,14 @@ export const Pages: CollectionConfig = {
 Lexical has been designed with extensibility in mind. Whether you're aiming to introduce new functionalities or tweak the existing ones, Lexical makes it seamless for you to bring those changes to life.
 
 ### Features: The Building Blocks
-At the heart of Lexical's customization potential are "features". A feature could be anything from a button on a toolbar, an item in a dropdown menu, or even an entirely new node type. While Lexical ships with a set of default features we believe are essential for most use cases, the true power lies in your ability to redefine, expand, or prune these as needed.
+
+At the heart of Lexical's customization potential are "features". While Lexical ships with a set of default features we believe are essential for most use cases, the true power lies in your ability to redefine, expand, or prune these as needed.
+
+If you remove all the default features, you're left with a blank editor. You can then add in only the features you need, or you can build your own custom features from scratch.
 
 ### Integrating New Features
 
-To weave in your custom features, utilize the features prop when initializing the Lexical Editor. Here's a basic example of how this is done:
+To weave in your custom features, utilize the `features` prop when initializing the Lexical Editor. Here's a basic example of how this is done:
 
 ```ts
 import {
@@ -135,9 +138,7 @@ import { CallToAction } from '../blocks/CallToAction'
 
 ## Features overview
 
-Here's an overview of all the features included:
-
-// Table with 3 columns: Feature name, included by default, description
+Here's an overview of all the included features:
 
 | Feature Name                   | Included by default | Description                                                                                                                                                                            |
 |--------------------------------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -172,10 +173,10 @@ Next, take a look at the [features we've already built](https://github.com/paylo
 
 ### Lexical => HTML
 
-The lexical editor saves data in JSON. However, you can also generate its HTML representation. There are two primary methods for this:
+Lexical saves data in JSON, but can also generate its HTML representation via two main methods:
 
-1. **Outputting HTML from the Collection:** This involves adding a new field in your collection to derive HTML from the saved JSON content. As this makes payload generate and output the HTML, you can directly utilize it in your frontend.
-2. **Generating HTML on the Frontend:** : This involves converting JSON to HTML ad-hoc - whether it's your frontend or somewhere else
+1. **Outputting HTML from the Collection:** Create a new field in your collection to convert saved JSON content to HTML. Payload generates and outputs the HTML for use in your frontend.
+2. **Generating HTML on the Frontend:** Convert JSON to HTML on-demand, either in your frontend or elsewhere.
 
 The editor comes with built-in HTML serializers, simplifying the process of converting JSON to HTML.
 
@@ -237,7 +238,7 @@ Because every `Feature` is able to provide html converters, and because the `htm
 
 #### Creating your own HTML Converter
 
-HTML Converters are typed as `HTMLConverter`, which accepts the node type it should handle, and a function that accepts the serialized node from the lexical editor, and outputs the HTML string. Here's the HTML Converter of the Upload node as an example:
+HTML Converters are typed as `HTMLConverter`, which contains the node type it should handle, and a function that accepts the serialized node from the lexical editor, and outputs the HTML string. Here's the HTML Converter of the Upload node as an example:
 
 ```ts
 import type { HTMLConverter } from '@payloadcms/richtext-lexical'
@@ -266,9 +267,9 @@ As you can see, we have access to all the information saved in the node (for the
 
 The `convertLexicalToHTML` is part of `@payloadcms/richtext-lexical` automatically handles traversing the editor state and calling the correct converter for each node.
 
-#### Incorporating the HTML Converter in your Feature
+#### Embedding the HTML Converter in your Feature
 
-If you've created a custom editor Feature, you can embed your HTML Converter directly within - without having to manually pass in the HTML Converter to the serialize function or the `htmlConverter` feature. It will then be automatically used by the `consolidateHTMLConverters` function. Here's the Upload Feature as an example:
+You can embed your HTML Converter directly within your custom `Feature`, allowing it to be handled automatically by the `consolidateHTMLConverters` function. Here is an example:
 
 ```ts
 export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
@@ -302,7 +303,7 @@ Lexical provides a seamless way to perform conversions between various other for
 - Markdown to Lexical (or, importing Markdown into the lexical editor)
 - Lexical to Markdown
 
-To perform any conversions outside of the main editor instance, for instance in your frontend, it's necessary to initiate a headless editor. Here's an example:
+A headless editor can perform such conversions outside of the main editor instance. Follow this method to initiate a headless editor:
 
 ```ts
 import { createHeadlessEditor } from '@lexical/headless' // <= make sure this package is installed
@@ -422,7 +423,6 @@ import type { CollectionConfig } from 'payload/types'
 import {
   SlateToLexicalFeature,
   lexicalEditor,
-  lexicalHTML
 } from '@payloadcms/richtext-lexical'
 
 const Pages: CollectionConfig = {
@@ -438,7 +438,6 @@ const Pages: CollectionConfig = {
         ],
       }),
     },
-    lexicalHTML('nameOfYourRichTextField', { name: 'nameOfYourRichTextField_html' }),
   ],
 }
 ```
@@ -513,11 +512,13 @@ export async function convertAll(payload: Payload, collectionName: string, field
 }
 ```
 
-The `convertSlateToLexical` is the same method used in the `SlateToLexicalFeature` - it handles traversing the Slate JSON for you. Do note that the migration script will have to be adjusted for the specific shape of your document. Especially if you have nested richText fields, or localization enabled, this will have to be adjusted.
+The `convertSlateToLexical` is the same method used in the `SlateToLexicalFeature` - it handles traversing the Slate JSON for you.
+
+Do note that this script might require adjustment depending on your document structure, especially if you have nested richText fields or localization enabled.
 
 ### Converting custom Slate nodes
 
-If you have custom Slate nodes, you will have to create a custom converter for them. Here's an example converter (which is already included as part of the default converters):
+If you have custom Slate nodes, create a custom converter for them. Here's the Upload converter as an example:
 
 ```ts
 import type { SerializedUploadNode } from '../uploadNode.'
@@ -554,7 +555,6 @@ import type { CollectionConfig } from 'payload/types'
 import {
   SlateToLexicalFeature,
   lexicalEditor,
-  lexicalHTML,
   defaultSlateConverters
 } from '@payloadcms/richtext-lexical'
 
@@ -578,7 +578,6 @@ const Pages: CollectionConfig = {
         ],
       }),
     },
-    lexicalHTML('nameOfYourRichTextField', { name: 'nameOfYourRichTextField_html' }),
   ],
 }
 ```
