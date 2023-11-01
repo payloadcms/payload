@@ -20,6 +20,6 @@ export const customViews2Slug = 'custom-views-two'
 
 export const customEditLabel = 'Custom Edit Label'
 
-export const customTabLabel = 'Custom Tab Component'
+export const customTabLabel = 'Custom Tab Label'
 
 export const customNestedPath = '/custom-tab-component/nested-view'

@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 
 import CustomTabComponent from '../components/CustomTabComponent'
 import CustomNestedView from '../components/views/CustomNestedView'
+import CustomTabView from '../components/views/CustomTabView'
 import CustomVersionsView from '../components/views/CustomVersions'
 import CustomView from '../components/views/CustomView'
 import { customEditLabel, customNestedPath, customTabLabel, customViews2Slug } from '../shared'
@@ -30,7 +31,7 @@ export const CustomViews2: CollectionConfig = {
           },
           MyCustomViewWithCustomTab: {
             path: '/custom-tab-component',
-            Component: CustomView,
+            Component: CustomTabView,
             Tab: CustomTabComponent,
           },
           MyCustomViewWithNestedPath: {
