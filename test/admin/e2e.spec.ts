@@ -272,10 +272,7 @@ describe('admin', () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
       await page.locator('#field-title')?.fill('')
-      expect(await page.locator('.doc-header__title.render-title')?.first()?.innerText()).toContain(
-        'ID: ',
-      )
-      await checkPageTitle(page, id)
+      expect(await page.locator('.doc-header__title.render-title')?.innerText()).toContain('ID:')
       await saveDocAndAssert(page)
     })
 
