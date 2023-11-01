@@ -182,6 +182,7 @@ export { ParagraphHTMLConverter } from './field/features/converters/html/convert
 export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text'
 export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
 export type { HTMLConverter } from './field/features/converters/html/converter/types'
+export { consolidateHTMLConverters } from './field/features/converters/html/field'
 export { lexicalHTML } from './field/features/converters/html/field'
 
 export { TreeviewFeature } from './field/features/debug/TreeView'
