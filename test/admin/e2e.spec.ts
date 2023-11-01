@@ -20,6 +20,7 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import { customNestedPath } from './collections/CustomViews2'
 import {
   customEditLabel,
   customTabLabel,
@@ -190,6 +191,16 @@ describe('admin', () => {
       })
 
       await expect(editTab).toBeVisible()
+    })
+
+    test('collection - should render custom nested route', async () => {
+      url = new AdminUrlUtil(serverURL, customViews2Slug)
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      await page.goto(`${pageURL}${customNestedPath}`)
+      await expect(page.locator('.doc-tab')).toContainText(customTabLabel)
     })
 
     test('collection - should not show API tab when disabled in config', async () => {
