@@ -11,7 +11,7 @@ import type { User } from '../../auth/types'
 import type {
   Access,
   AdminViewComponent,
-  EditView,
+  EditViewConfig,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
@@ -105,28 +105,32 @@ export type GlobalAdminOptions = {
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?:
-        | {
-            [name: string]: EditView
-            API?: EditView
-            /**
-             * Replace or modify individual nested routes, or add new ones:
-             * + `Default` - `/admin/globals/:slug`
-             * + `API` - `/admin/globals/:id/api`
-             * + `LivePreview` - `/admin/globals/:id/preview`
-             * + `References` - `/admin/globals/:id/references`
-             * + `Relationships` - `/admin/globals/:id/relationships`
-             * + `Versions` - `/admin/globals/:id/versions`
-             * + `Version` - `/admin/globals/:id/versions/:version`
-             * + `:path` - `/admin/globals/:id/:path`
-             */
-            Default?: EditView
-            LivePreview?: EditView
-            Version?: EditView
-            Versions?: EditView
-            // TODO: uncomment these as they are built
-            // References?: EditView
-            // Relationships?: EditView
-          }
+        | (
+            | {
+                /**
+                 * Replace or modify individual nested routes, or add new ones:
+                 * + `Default` - `/admin/globals/:slug`
+                 * + `API` - `/admin/globals/:id/api`
+                 * + `LivePreview` - `/admin/globals/:id/preview`
+                 * + `References` - `/admin/globals/:id/references`
+                 * + `Relationships` - `/admin/globals/:id/relationships`
+                 * + `Versions` - `/admin/globals/:id/versions`
+                 * + `Version` - `/admin/globals/:id/versions/:version`
+                 * + `CustomView` - `/admin/globals/:id/:path`
+                 */
+                API?: AdminViewComponent | Partial<EditViewConfig>
+                Default?: AdminViewComponent | Partial<EditViewConfig>
+                LivePreview?: AdminViewComponent | Partial<EditViewConfig>
+                Version?: AdminViewComponent | Partial<EditViewConfig>
+                Versions?: AdminViewComponent | Partial<EditViewConfig>
+                // TODO: uncomment these as they are built
+                // References?: EditView
+                // Relationships?: EditView
+              }
+            | {
+                [name: string]: EditViewConfig
+              }
+          )
         | AdminViewComponent
     }
   }
