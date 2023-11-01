@@ -6,7 +6,6 @@ import shelljs from 'shelljs'
 import { v4 as uuid } from 'uuid'
 
 import type { Payload } from '../../packages/payload/src'
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
 import payload from '../../packages/payload/src'
@@ -69,11 +68,4 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   }
 
   return { serverURL: `http://localhost:${port}`, payload }
-}
-
-export const openAccess: CollectionConfig['access'] = {
-  read: () => true,
-  create: () => true,
-  delete: () => true,
-  update: () => true,
 }
