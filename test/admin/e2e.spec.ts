@@ -264,8 +264,8 @@ describe('admin', () => {
     test('collection - should render `useAsTitle` field', async () => {
       await page.goto(url.create)
       await page.locator('#field-title')?.fill(title)
-      await checkPageTitle(page, title)
       await saveDocAndAssert(page)
+      await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
       expect(true).toBe(true)
     })
