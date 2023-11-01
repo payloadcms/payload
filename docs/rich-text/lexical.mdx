@@ -259,6 +259,111 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
 }
 ```
 
+## Headless Editor
+
+Lexical additionally allows you to do a bunch of other conversions natively:
+- HTML to Lexical (or, importing HTML into the lexical editor)
+- Markdown to Lexical (or, importing Markdown into the lexical editor)
+- Lexical to Markdown
+
+Since that usually happens when you do NOT have access to the editor instance (e.g. outside of payload, in your own frontend) you need to initialize a new headless editor instance. Here's an example:
+
+```ts
+import { createHeadlessEditor } from '@lexical/headless' // <= make sure this package is installed
+import {
+  getEnabledNodes,
+  sanitizeEditorConfig,
+} from '@payloadcms/richtext-lexical'
+
+const yourEditorConfig; // <= your editor config here
+
+const headlessEditor = await createHeadlessEditor({
+  nodes: getEnabledNodes({
+    editorConfig: sanitizeEditorConfig(yourEditorConfig),
+  }),
+})
+```
+
+## HTML => Lexical
+
+Once you have your headless editor instance, you can use it to convert HTML to Lexical:
+
+```ts
+import { $generateNodesFromDOM } from '@lexical/html'
+import { $getRoot,$getSelection } from 'lexical'
+
+headlessEditor.update(() => {
+  // In a headless environment you can use a package such as JSDom to parse the HTML string.
+  const dom = new JSDOM(htmlString)
+
+  // Once you have the DOM instance it's easy to generate LexicalNodes.
+  const nodes = $generateNodesFromDOM(editor, dom.window.document)
+
+  // Select the root
+  $getRoot().select()
+
+  // Insert them at a selection.
+  const selection = $getSelection()
+  selection.insertNodes(nodes)
+}, { discrete: true })
+
+// Do this if you then want to get the editor JSON
+const editorJSON = headlessEditor.getEditorState().toJSON()
+```
+
+This has been taken from the [lexical serialization & deserialization docs](https://lexical.dev/docs/concepts/serialization#html---lexical).
+
+### The discrete flag
+
+The `discrete: true` option makes sure that the editor update is immediately committed, so that you immediately have access to read the updated editor state. If you don't need that, it's best to remove the `discrete` flag.
+
+## Markdown to Lexical
+
+This is how you can import markdown into the lexical editor:
+
+```ts
+import { $convertFromMarkdownString } from '@lexical/markdown'
+import { sanitizeEditorConfig } from '@payloadcms/richtext-lexical'
+
+const yourSanitizedEditorConfig = sanitizeEditorConfig(yourEditorConfig) // <= your editor config here
+
+const markdown = `# Hello World`
+headlessEditor.update(() => { $convertFromMarkdownString(markdown, yourSanitizedEditorConfig.features.markdownTransformers }, { discrete: true })
+
+// Do this if you then want to get the editor JSON
+const editorJSON = headlessEditor.getEditorState().toJSON()
+```
+
+## Lexical to Markdown
+
+This is how you can export your lexical editor into markdown:
+
+```ts
+import { $convertToMarkdownString } from '@lexical/markdown'
+import { sanitizeEditorConfig } from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from "lexical"
+
+const yourSanitizedEditorConfig = sanitizeEditorConfig(yourEditorConfig) // <= your editor config here
+const yourEditorState: SerializedEditorState // <= your current editor state here
+
+// Import editor state into your headless editor
+try {
+  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
+} catch (e) {
+  logger.error({ err: e }, 'ERROR parsing editor state')
+  return ''
+}
+
+// Export to markdown
+let markdown: string
+headlessEditor.getEditorState().read(() => {
+  markdown = $convertToMarkdownString(yourSanitizedEditorConfig?.features?.markdownTransformers)
+})
+```
+
+The `.setEditorState()` function commits your editor state update immediately, so no `discrete: true` flag is required here to be able to read the editor state directly afterwards.
+
+
 ## Coming Soon
 
 Lots more documentation will be coming soon, which will show in detail how to create your own custom features within Lexical.
