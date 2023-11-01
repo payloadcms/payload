@@ -91,14 +91,34 @@ This way when your bundler goes to import a file that contains server-only modul
 
 To remove files that contain server-only modules from your bundle, you can use an `alias`.
 
-First create new file that exports an empty object:
-```js
-// mocks/emptyObject.js
+Let's say we have a file that imports a server-only code, we will need to remove that file from our bundle:
 
-export default {}
+```ts
+// ProductsCollection.ts
+
+import hook from '../hooks/syncStripeCustomer' // <-- contains server-only code
 ```
 
-Then, in your Payload config, you can alias the file containing the server-only module to the mock module. For example, here's how you'd do this in Webpack:
+By default the browser bundle will include that file that can only run on the server. This will break the browser bundle.
+
+To fix this, we can alias the `syncStripeCustomer` file to a different file so the browser bundle includes a browser-safe file.
+
+First, we will create a mock file to replace the server-only file when bundling:
+```js
+// mocks/modules.js
+
+export default {}
+
+/**
+ * NOTE: if you are destructuring an import
+ * the mock file will need to export matching
+ * variables as the destructured object.
+ *
+ * export const namedExport = {}
+ */
+```
+
+Aliasing with [Webpack](/docs/admin/webpack) can be done by:
 
 ```ts
 // payload.config.ts
@@ -121,6 +141,39 @@ export default buildConfig({
           alias: {
             ...config.resolve.alias,
             [pathToFileWithServerOnlyModule]: mockModulePath,
+          },
+          // highlight-end
+        },
+      }
+    },
+  },
+})
+```
+
+Aliasing with [Vite](/docs/admin/vite) can be done by:
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { viteBundler } from '@payloadcms/bundler-vite'
+
+const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
+
+export default buildConfig({
+  admin: {
+    bundler: viteBundler(),
+    vite: (config) => {
+      return {
+        ...config,
+        resolve: {
+          ...config.resolve,
+          // highlight-start
+          alias: {
+            ...config.resolve.alias,
+            // remember, vite aliases are exact-match only
+            '../hooks/syncStripeCustomer': mockModulePath,
+            '../../hooks/syncStripeCustomer': mockModulePath,
           },
           // highlight-end
         },
