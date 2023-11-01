@@ -16,10 +16,10 @@ import { slug } from './shared'
  */
 
 const { beforeAll, describe } = test
-let url: AdminUrlUtil
 
 describe('auth', () => {
   let page: Page
+  let url: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadE2E(__dirname)
