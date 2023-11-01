@@ -148,13 +148,19 @@ All auto-resized images are exposed to be re-used in hooks and similar via an ob
 
 The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
 
-##### Image Size Returns Null
+##### Handling Image Enlargement
 
-By default, if you upload an image that has a smaller width **and** height than the defined image size, the resized image will not be generated.
+When uploading an image that has a smaller width **and** height than the defined image size, you have the following options:
 
-To allow the image to be enlarged to the defined image size, add `withoutEnlargement: false` to the image size config.
+1. To not enlarge the image and return null (default behavior)
+2. To enlarge the image to the defined size (add `withoutEnlargement: false`)
+3. To not enlarge and return the original image (add `withoutEnlargement: true`)
 
-If you do not want the image to be enlarged and **instead** want to return the original image size, add `withoutEnlargement: true`.
+<Banner type="error">
+  <strong>Note:</strong>
+  <br />
+  The image size will return NULL when the uploaded image is smaller than the defined image size.
+</Banner>
 
 ### Crop and Focal Point Selector
 
