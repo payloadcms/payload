@@ -290,11 +290,7 @@ export default async function resizeAndTransformImageSizes({
     }),
   )
 
-  const filteredResults = results.filter((result) => {
-    if (result.sizesToSave.length > 0) return result
-  })
-
-  return filteredResults.reduce(
+  return results.reduce(
     (acc, result) => {
       Object.assign(acc.sizeData, result.sizeData)
       acc.sizesToSave.push(...result.sizesToSave)

@@ -38,7 +38,7 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
   </strong> on that collection.
 </Banner>
 
-#### Collection Upload Options
+### Collection Upload Options
 
 | Option                      | Description                                                                                                                                                                             |
 | -------------------------   | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -47,14 +47,14 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 | **`adminThumbnail`**        | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                 |
 | **`crop`**                  | Set to `false` to disable the cropping tool in the Admin panel. Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                      |
 | **`disableLocalStorage`**   | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                             |
-| **`focalPoint`**            | Set to `false` to disable the focal point selection tool in the Admin panel. The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector)                                |
+| **`focalPoint`**            | Set to `false` to disable the focal point selection tool in the Admin panel. The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
 | **`formatOptions`**         | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                 |
 | **`handlers`**              | Array of Express request handlers to execute before the built-in Payload static middleware executes.                                                                                    |
 | **`imageSizes`**            | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                      |
 | **`mimeTypes`**             | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                |
-| **`staticOptions`**         | Set options for `express.static` to use while serving your static files. [More](http://expressjs.com/en/resources/middleware/serve-static.html)  format)                                |
-| **`resizeOptions`**         | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                |
-| **`filesRequiredOnCreate`** | Mandate file data on creation, default is true.                                                                                                               |
+| **`staticOptions`**         | Set options for `express.static` to use while serving your static files. [More](http://expressjs.com/en/resources/middleware/serve-static.html)                                         |
+| **`resizeOptions`**         | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                         |
+| **`filesRequiredOnCreate`** | Mandate file data on creation, default is true.                                                                                                                                         |
 
 _An asterisk denotes that a property above is required._
 
@@ -147,6 +147,14 @@ Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/a
 All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
 
 The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
+
+##### Image Size Returns Null
+
+By default, if you upload an image that has a smaller width **and** height than the defined image size, the resized image will not be generated.
+
+To allow the image to be enlarged to the defined image size, add `withoutEnlargement: false` to the image size config.
+
+If you do not want the image to be enlarged and **instead** want to return the original image size, add `withoutEnlargement: true`.
 
 ### Crop and Focal Point Selector
 
