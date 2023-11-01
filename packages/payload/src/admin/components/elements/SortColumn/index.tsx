@@ -50,6 +50,7 @@ const SortColumn: React.FC<Props> = (props) => {
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
+            type='button'
             aria-label={t('sortByLabelDirection', {
               direction: t('ascending'),
               label: getTranslation(label, i18n),
@@ -60,6 +61,7 @@ const SortColumn: React.FC<Props> = (props) => {
             <Chevron direction="up" />
           </button>
           <button
+            type='button'
             aria-label={t('sortByLabelDirection', {
               direction: t('descending'),
               label: getTranslation(label, i18n),
