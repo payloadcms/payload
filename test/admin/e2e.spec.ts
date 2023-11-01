@@ -22,8 +22,11 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
   customEditLabel,
-  customNestedPath,
+  customNestedViewPath,
+  customNestedViewTitle,
   customTabLabel,
+  customViewWithTabPath,
+  customViewWithTabTitle,
   customViews2Slug,
   globalSlug,
   group1Collection1Slug,
@@ -165,6 +168,32 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
+    test('collection - should render custom view', async () => {
+      url = new AdminUrlUtil(serverURL, customViews2Slug)
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customViewURL = `${pageURL}${customViewWithTabPath}`
+      await page.goto(customViewURL)
+      expect(page.url()).toEqual(customViewURL)
+      await expect(page.locator('h1#custom-view-with-tab-title')).toContainText(
+        customViewWithTabTitle,
+      )
+    })
+
+    test('collection - should render custom nested view', async () => {
+      url = new AdminUrlUtil(serverURL, customViews2Slug)
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customNestedViewURL = `${pageURL}${customNestedViewPath}`
+      await page.goto(customNestedViewURL)
+      expect(page.url()).toEqual(customNestedViewURL)
+      await expect(page.locator('h1#nested-view-title')).toContainText(customNestedViewTitle)
+    })
+
     test('collection - should render custom tab label', async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
@@ -191,16 +220,6 @@ describe('admin', () => {
       })
 
       await expect(editTab).toBeVisible()
-    })
-
-    test('collection - should render custom nested route', async () => {
-      url = new AdminUrlUtil(serverURL, customViews2Slug)
-      await page.goto(url.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
-      const pageURL = page.url()
-      await page.goto(`${pageURL}${customNestedPath}`)
-      await expect(page.locator('.doc-tab')).toContainText(customTabLabel)
     })
 
     test('collection - should not show API tab when disabled in config', async () => {

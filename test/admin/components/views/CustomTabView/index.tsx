@@ -2,6 +2,7 @@ import React, { Fragment, useEffect } from 'react'
 
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { customViewWithTabTitle } from '../../../shared'
 
 const CustomTabView: AdminViewComponent = () => {
   const { setStepNav } = useStepNav()
@@ -26,7 +27,7 @@ const CustomTabView: AdminViewComponent = () => {
           paddingRight: 'var(--gutter-h)',
         }}
       >
-        <h1>Custom View With Tab Component</h1>
+        <h1 id="custom-view-with-tab-title">{customViewWithTabTitle}</h1>
         <p>This custom view was added through the Payload config:</p>
         <ul>
           <li>

@@ -5,7 +5,13 @@ import CustomNestedView from '../components/views/CustomNestedView'
 import CustomTabView from '../components/views/CustomTabView'
 import CustomVersionsView from '../components/views/CustomVersions'
 import CustomView from '../components/views/CustomView'
-import { customEditLabel, customNestedPath, customTabLabel, customViews2Slug } from '../shared'
+import {
+  customEditLabel,
+  customNestedViewPath,
+  customTabLabel,
+  customViewWithTabPath,
+  customViews2Slug,
+} from '../shared'
 
 export const CustomViews2: CollectionConfig = {
   slug: customViews2Slug,
@@ -30,12 +36,12 @@ export const CustomViews2: CollectionConfig = {
             },
           },
           MyCustomViewWithCustomTab: {
-            path: '/custom-tab-component',
+            path: customViewWithTabPath,
             Component: CustomTabView,
             Tab: CustomTabComponent,
           },
           MyCustomViewWithNestedPath: {
-            path: customNestedPath,
+            path: customNestedViewPath,
             Component: CustomNestedView,
           },
         },

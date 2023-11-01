@@ -22,4 +22,10 @@ export const customEditLabel = 'Custom Edit Label'
 
 export const customTabLabel = 'Custom Tab Label'
 
-export const customNestedPath = '/custom-tab-component/nested-view'
+export const customViewWithTabPath = '/custom-tab-component'
+
+export const customViewWithTabTitle = 'Custom View With Tab Component'
+
+export const customNestedViewPath = `${customViewWithTabPath}/nested-view`
+
+export const customNestedViewTitle = 'Custom Nested View'

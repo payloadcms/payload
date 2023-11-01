@@ -2,6 +2,7 @@ import React, { Fragment, useEffect } from 'react'
 
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+import { customNestedViewTitle } from '../../../shared'
 
 const CustomNestedView: AdminViewComponent = () => {
   const { setStepNav } = useStepNav()
@@ -26,7 +27,7 @@ const CustomNestedView: AdminViewComponent = () => {
           paddingRight: 'var(--gutter-h)',
         }}
       >
-        <h1>Custom Nested View</h1>
+        <h1 id="nested-view-title">{customNestedViewTitle}</h1>
         <p>This custom view was added through the Payload config:</p>
         <ul>
           <li>
