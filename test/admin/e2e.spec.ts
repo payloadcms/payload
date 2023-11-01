@@ -38,16 +38,17 @@ const { afterEach, beforeAll, beforeEach, describe } = test
 const title = 'Title'
 const description = 'Description'
 
-let url: AdminUrlUtil
-let serverURL: string
-
 describe('admin', () => {
   let page: Page
+  let url: AdminUrlUtil
+  let customViewsURL: AdminUrlUtil
+  let serverURL: string
 
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
     await clearDocs() // Clear any seeded data from onInit
     url = new AdminUrlUtil(serverURL, postsSlug)
+    customViewsURL = new AdminUrlUtil(serverURL, customViews2Slug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -164,8 +165,7 @@ describe('admin', () => {
     })
 
     test('collection - should render custom tab label', async () => {
-      const url = new AdminUrlUtil(serverURL, customViews2Slug)
-      await page.goto(url.create)
+      await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
       const docURL = page.url()
@@ -181,8 +181,7 @@ describe('admin', () => {
     })
 
     test('collection - should render custom tab component', async () => {
-      const url = new AdminUrlUtil(serverURL, customViews2Slug)
-      await page.goto(url.create)
+      await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
 
