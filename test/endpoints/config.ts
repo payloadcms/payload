@@ -22,7 +22,7 @@ export default buildConfigWithDefaults({
         delete: () => true,
         update: () => true,
       },
-      endpoints: collectionEndpoints,
+      endpoints: [...(collectionEndpoints || [])],
       fields: [
         {
           name: 'title',
@@ -45,7 +45,7 @@ export default buildConfigWithDefaults({
   globals: [
     {
       slug: globalSlug,
-      endpoints: globalEndpoints,
+      endpoints: [...(globalEndpoints || [])],
       fields: [],
     },
     {
@@ -60,7 +60,7 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
-  endpoints,
+  endpoints: [...(endpoints || [])],
   admin: {
     webpack: (config) => {
       return {
