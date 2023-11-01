@@ -44,7 +44,6 @@ describe('access control', () => {
     restrictedUrl = new AdminUrlUtil(serverURL, restrictedSlug)
     readOnlyUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
-    restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
