@@ -48,18 +48,23 @@ export const filterFields = (args: {
         }
 
         const isFieldAffectingData = fieldAffectsData(field)
+        const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : permissions
 
-        if (isFieldAffectingData && permissions?.[field?.name]?.read?.permission === false) {
+        // if the user cannot read the field, then filter it out
+        if (fieldPermissions?.read?.permission === false) {
           return acc
         }
 
-        const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : permissions
-
+        // readOnly from field config
         let readOnly = field.admin && 'readOnly' in field.admin ? field.admin.readOnly : undefined
 
+        // if parent field is readOnly
+        // but this field is `readOnly: false`
+        // the field should be editable
         if (readOnlyOverride && readOnly !== false) readOnly = true
 
-        if (isFieldAffectingData && permissions?.[field?.name]?.[operation]?.permission === false) {
+        // unless the user does not pass access control
+        if (fieldPermissions?.[operation]?.permission === false) {
           readOnly = true
         }
 
