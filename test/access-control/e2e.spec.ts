@@ -125,6 +125,14 @@ describe('access control', () => {
     })
   })
 
+  describe('restricted fields', () => {
+    test('should not show field without permission', async () => {
+      await page.goto(url.account)
+      await wait(500)
+      await expect(page.locator('#field-roles')).toBeHidden()
+    })
+  })
+
   describe('read-only collection', () => {
     let existingDoc: ReadOnlyCollection
 

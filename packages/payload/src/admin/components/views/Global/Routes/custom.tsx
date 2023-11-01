@@ -54,9 +54,9 @@ export const globalCustomRoutes = (props: {
     if (typeof ViewComponent === 'function') {
       routesToReturn.push(<ViewComponent key={ViewComponent.name} user={user} />)
     } else {
-      const { Component, path } = ViewComponent
+      if (global && 'Component' in ViewComponent) {
+        const { Component, path } = ViewComponent
 
-      if (global) {
         routesToReturn.push(
           <Route exact key={`${global.slug}-${path}`} path={`${match.url}${path}`}>
             {permissions?.read?.permission ? <Component user={user} /> : <Unauthorized />}
