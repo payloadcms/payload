@@ -3,11 +3,11 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 import CustomTabComponent from '../components/CustomTabComponent'
 import CustomTabView from '../components/views/CustomTab'
 import CustomTabView2 from '../components/views/CustomTab2'
-import CustomTabViewNested from '../components/views/CustomTabNested'
+import CustomNestedTabView from '../components/views/CustomTabNested'
 import CustomVersionsView from '../components/views/CustomVersions'
 import {
   customEditLabel,
-  customNestedViewPath,
+  customNestedTabViewPath,
   customTabLabel,
   customTabViewPath,
   customViews2Slug,
@@ -41,8 +41,8 @@ export const CustomViews2: CollectionConfig = {
             Tab: CustomTabComponent,
           },
           MyCustomViewWithNestedPath: {
-            path: customNestedViewPath,
-            Component: CustomTabViewNested,
+            path: customNestedTabViewPath,
+            Component: CustomNestedTabView,
           },
         },
       },
