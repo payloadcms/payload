@@ -267,3 +267,34 @@ Relationship fields with `hasMany` set to more than one kind of collections save
 Querying is done in the same way as the earlier Polymorphic example:
 
 `?where[owners.value][equals]=6031ac9e1289176380734024`.
+
+
+#### Querying and Filtering Polymorphic Relationships
+
+Polymorphic and non-polymorphic relationships must be queried differently because they return different data shapes.
+
+For a polymorphic relationship, the response will always be an array of objects. Each object will contain the `relationTo` and `value` properties.
+
+The data can be queried by the related document ID:
+
+`?where[field.value][equals]=6031ac9e1289176380734024`.
+
+Or by the related document Collection slug:
+
+`?where[field.relationTo][equals]=your-collection-name`.
+
+However, you **cannot** query on any field values within the related document.
+Since we are referencing multiple collections, the field you are querying on may not exist and break the query.
+
+<Banner type="error">
+  <strong>Note:</strong>
+  <br />
+  You <strong>cannot</strong> query on a field within a polymorphic relationship as you would with a non-polymorphic relationship.
+</Banner>
+
+
+##### Filtering from the Collection View
+
+Currently, the Filters in the Collection view do not support filtering by a polymorphic relationship field.
+
+This is due to the dynamic nature of the field and the complexities of querying varied data shapes. We can reassess this feature when a robust solution is found.
