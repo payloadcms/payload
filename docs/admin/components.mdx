@@ -135,7 +135,7 @@ For help on how to build your own custom view components, see [building a custom
 
 ### Collections
 
-You can override components on a collection-by-collection basis via their `admin` property.
+You can override components on a collection-by-collection basis via the `admin.components` property.
 
 | Path                       | Description                                                                                                            |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -259,15 +259,15 @@ You can also add _new_ tabs to the `Edit` view by adding another key to the `com
 
 ### Globals
 
-As with Collections, you can override components on a global-by-global basis via their `admin` property.
+As with Collections, you can override components on a global-by-global basis via the `admin.components` property.
 
-| Path                       | Description                                                                                                            |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **`edit.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
-| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
-| **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
-| **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
-| **`views`**                | Override or create new views within the Payload Admin UI. [More](#global-views)                                        |
+| Path                           | Description                                                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
+| **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
+| **`views`**                    | Override or create new views within the Payload Admin UI. [More](#global-views)                                        |
 
 #### Global views
 

@@ -3,7 +3,7 @@ import path from 'path'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
-import { CustomViews1 } from './collections/CustomViews1'
+import { CustomViews1, customViews1Slug } from './collections/CustomViews1'
 import { CustomViews2 } from './collections/CustomViews2'
 import { Geo } from './collections/Geo'
 import { CollectionGroup1A } from './collections/Group1A'
@@ -27,7 +27,7 @@ import { GlobalGroup1A } from './globals/Group1A'
 import { GlobalGroup1B } from './globals/Group1B'
 import { GlobalHidden } from './globals/Hidden'
 import { GlobalNoApiView } from './globals/NoApiView'
-import { noApiViewCollection, postsSlug } from './shared'
+import { customViews2Slug, noApiViewCollection, postsSlug } from './shared'
 
 export interface Post {
   createdAt: Date
@@ -110,23 +110,23 @@ export default buildConfigWithDefaults({
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'title',
-          description: 'description',
+          title: 'Title',
+          description: 'Description',
         },
       })
     })
 
     await payload.create({
-      collection: 'custom-views-one',
+      collection: customViews1Slug,
       data: {
-        title: 'title',
+        title: 'Custom View',
       },
     })
 
     await payload.create({
-      collection: 'custom-views-two',
+      collection: customViews2Slug,
       data: {
-        title: 'title',
+        title: 'Custom View',
       },
     })
 

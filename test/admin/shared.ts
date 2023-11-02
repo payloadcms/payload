@@ -15,3 +15,9 @@ export const group1GlobalSlug = 'group-globals-one'
 export const noApiViewCollection = 'collection-no-api-view'
 
 export const noApiViewGlobal = 'global-no-api-view'
+
+export const customViews2Slug = 'custom-views-two'
+
+export const customEditLabel = 'Custom Edit Label'
+
+export const customTabLabel = 'Custom Tab Component'
