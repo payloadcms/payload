@@ -17,7 +17,7 @@ function refreshResolver(collection: Collection) {
     const options = {
       collection,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       res: context.res,
       token,
     }

@@ -18,7 +18,7 @@ const formatConfigNames = (results, configs) => {
 function accessResolver(payload: Payload) {
   async function resolver(_, args, context) {
     const options = {
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const accessResults = await access(options)

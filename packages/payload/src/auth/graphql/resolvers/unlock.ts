@@ -7,12 +7,13 @@ function unlockResolver(collection: Collection) {
     const options = {
       collection,
       data: { email: args.email },
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const result = await unlock(options)
     return result
   }
+
   return resolver
 }
 

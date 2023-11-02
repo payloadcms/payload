@@ -7,10 +7,11 @@ function meResolver(collection: Collection): any {
     const options = {
       collection,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
     return me(options)
   }
+
   return resolver
 }
 

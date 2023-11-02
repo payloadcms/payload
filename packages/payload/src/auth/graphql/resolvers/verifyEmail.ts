@@ -11,7 +11,7 @@ function verifyEmailResolver(collection: Collection) {
     const options = {
       api: 'GraphQL',
       collection,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       res: context.res,
       token: args.token,
     }

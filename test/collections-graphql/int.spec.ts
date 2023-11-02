@@ -67,11 +67,31 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = await client.request(query, { title })
+      const response = (await client.request(query, { title })) as any
       const doc: Post = response.createPost
 
       expect(doc).toMatchObject({ title })
       expect(doc.id).toBeDefined()
+    })
+
+    it('should read using multiple queries', async () => {
+      const query = `query {
+          postIDs: Posts {
+            docs {
+              id
+            }
+          }
+          posts: Posts {
+            docs {
+              id
+              title
+            }
+          }
+      }`
+      const response = await client.request(query)
+      const { postIDs, posts } = response
+      expect(postIDs.docs).toBeDefined()
+      expect(posts.docs).toBeDefined()
     })
 
     it('should read', async () => {
@@ -685,11 +705,11 @@ describe('collections-graphql', () => {
 
       // language=graphQL
       const query = `query {
-        Posts(where: { title: { exists: true }}) {
-          docs {
-            badFieldName
+          Posts(where: { title: { exists: true }}) {
+              docs {
+                  badFieldName
+              }
           }
-        }
       }`
       await client.request(query).catch((err) => {
         error = err
@@ -702,12 +722,12 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation {
-        createPost(data: {min: 1}) {
-          id
-          min
-          createdAt
-          updatedAt
-        }
+          createPost(data: {min: 1}) {
+              id
+              min
+              createdAt
+              updatedAt
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -722,21 +742,21 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation createTest {
-        test1:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test1:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test2:createUser(data: { email: "test2@test.com", password: "" }) {
-          email
-        }
+          test2:createUser(data: { email: "test2@test.com", password: "" }) {
+              email
+          }
 
-        test3:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test3:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test4:createUser(data: { email: "", password: "test" }) {
-          email
-        }
+          test4:createUser(data: { email: "", password: "test" }) {
+              email
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -775,9 +795,9 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `query {
-        QueryWithInternalError {
-            text
-        }
+          QueryWithInternalError {
+              text
+          }
       }`
 
       await client.request(query).catch((err) => {

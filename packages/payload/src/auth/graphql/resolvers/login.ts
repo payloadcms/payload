@@ -11,7 +11,7 @@ function loginResolver(collection: Collection) {
         password: args.password,
       },
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       res: context.res,
     }
 

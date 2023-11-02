@@ -11,7 +11,7 @@ function forgotPasswordResolver(collection: Collection): any {
       },
       disableEmail: args.disableEmail,
       expiration: args.expiration,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     await forgotPassword(options)

@@ -16,7 +16,7 @@ export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Do
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       slug,
     }
 

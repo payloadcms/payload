@@ -13,7 +13,7 @@ function resetPasswordResolver(collection: Collection) {
       collection,
       data: args,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       res: context.res,
     }
 
