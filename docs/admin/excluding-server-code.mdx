@@ -91,14 +91,34 @@ This way when your bundler goes to import a file that contains server-only modul
 
 To remove files that contain server-only modules from your bundle, you can use an `alias`.
 
-First create new file that exports an empty object:
-```js
-// mocks/emptyObject.js
+In the Subscriptions config file above, we are importing the hook like so:
 
-export default {}
+```ts
+// collections/Subscriptions/index.ts
+
+import createStripeSubscription from './hooks/createStripeSubscription'
 ```
 
-Then, in your Payload config, you can alias the file containing the server-only module to the mock module. For example, here's how you'd do this in Webpack:
+By default the browser bundle will now include all the code from that file and any files down the tree. We know that the file imports `stripe`.
+
+To fix this, we need to alias the `createStripeSubscription` file to a different file that can safely be included in the browser bundle.
+
+First, we will create a mock file to replace the server-only file when bundling:
+```js
+// mocks/modules.js
+
+export default {}
+
+/**
+ * NOTE: if you are destructuring an import
+ * the mock file will need to export matching
+ * variables as the destructured object.
+ *
+ * export const namedExport = {}
+ */
+```
+
+Aliasing with [Webpack](/docs/admin/webpack) can be done by:
 
 ```ts
 // payload.config.ts
@@ -106,10 +126,16 @@ Then, in your Payload config, you can alias the file containing the server-only 
 import { buildConfig } from 'payload/config'
 import { webpackBundler } from '@payloadcms/bundler-webpack'
 
+import { Subscriptions } from './collections/Subscriptions'
+
 const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
-const pathToFileWithServerOnlyModule = path.resolve(__dirname, 'hooks/syncStripeCustomer.ts')
+const fullFilePath = path.resolve(
+  __dirname,
+  'collections/Subscriptions/hooks/createStripeSubscription'
+)
 
 export default buildConfig({
+  collections: [Subscriptions],
   admin: {
     bundler: webpackBundler(),
     webpack: (config) => {
@@ -120,7 +146,42 @@ export default buildConfig({
           // highlight-start
           alias: {
             ...config.resolve.alias,
-            [pathToFileWithServerOnlyModule]: mockModulePath,
+            [fullFilePath]: mockModulePath,
+          },
+          // highlight-end
+        },
+      }
+    },
+  },
+})
+```
+
+Aliasing with [Vite](/docs/admin/vite) can be done by:
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { viteBundler } from '@payloadcms/bundler-vite'
+
+import { Subscriptions } from './collections/Subscriptions'
+
+const mockModulePath = path.resolve(__dirname, 'mocks/emptyObject.js')
+
+export default buildConfig({
+  collections: [Subscriptions],
+  admin: {
+    bundler: viteBundler(),
+    vite: (config) => {
+      return {
+        ...config,
+        resolve: {
+          ...config.resolve,
+          // highlight-start
+          alias: {
+            ...config.resolve.alias,
+            // remember, vite aliases are exact-match only
+            './hooks/createStripeSubscription': mockModulePath,
           },
           // highlight-end
         },

@@ -36,11 +36,11 @@ import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './share
 
 const { beforeAll, describe } = test
 
-let page: Page
-let url: AdminUrlUtil
-let serverURL: string
-
 describe('versions', () => {
+  let page: Page
+  let url: AdminUrlUtil
+  let serverURL: string
+
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL

@@ -9,29 +9,29 @@ import { mobileBreakpoint } from './config'
 import { startLivePreviewDemo } from './startLivePreviewDemo'
 
 const { beforeAll, describe } = test
-let url: AdminUrlUtil
-let serverURL: string
-
-const goToDoc = async (page: Page) => {
-  await page.goto(url.list)
-  const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
-  expect(linkToDoc).toBeTruthy()
-  await linkToDoc.click()
-}
-
-const goToCollectionPreview = async (page: Page): Promise<void> => {
-  await goToDoc(page)
-  await page.goto(`${page.url()}/preview`)
-}
-
-const goToGlobalPreview = async (page: Page, slug: string): Promise<void> => {
-  const global = new AdminUrlUtil(serverURL, slug)
-  const previewURL = `${global.global(slug)}/preview`
-  await page.goto(previewURL)
-}
 
 describe('Live Preview', () => {
   let page: Page
+  let serverURL: string
+  let url: AdminUrlUtil
+
+  const goToDoc = async (page: Page) => {
+    await page.goto(url.list)
+    const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
+    expect(linkToDoc).toBeTruthy()
+    await linkToDoc.click()
+  }
+
+  const goToCollectionPreview = async (page: Page): Promise<void> => {
+    await goToDoc(page)
+    await page.goto(`${page.url()}/preview`)
+  }
+
+  const goToGlobalPreview = async (page: Page, slug: string): Promise<void> => {
+    const global = new AdminUrlUtil(serverURL, slug)
+    const previewURL = `${global.global(slug)}/preview`
+    await page.goto(previewURL)
+  }
 
   beforeAll(async ({ browser }) => {
     const { serverURL: incomingServerURL, payload } = await initPayloadE2E(__dirname)

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+
 import { expect, test } from '@playwright/test'
 import path from 'path'
 
@@ -480,7 +481,7 @@ describe('fields', () => {
     test('should add different blocks with similar field configs', async () => {
       await page.goto(url.create)
 
-      async function addBlock(name: 'Block 1' | 'Block 2') {
+      async function addBlock(name: 'Block A' | 'Block B') {
         await page
           .locator('#field-blocksWithSimilarConfigs')
           .getByRole('button', { name: 'Add Blocks With Similar Config' })
@@ -488,7 +489,7 @@ describe('fields', () => {
         await page.getByRole('button', { name }).click()
       }
 
-      await addBlock('Block 1')
+      await addBlock('Block A')
 
       await page
         .locator('#blocksWithSimilarConfigs-row-0')
@@ -502,7 +503,7 @@ describe('fields', () => {
         page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]'),
       ).toHaveValue('items>0>title')
 
-      await addBlock('Block 2')
+      await addBlock('Block B')
 
       await page
         .locator('#blocksWithSimilarConfigs-row-1')
@@ -515,6 +516,38 @@ describe('fields', () => {
       await expect(
         page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]'),
       ).toHaveValue('items>1>title')
+    })
+
+    describe('row manipulation', () => {
+      describe('react hooks', () => {
+        test('should add 2 new block rows', async () => {
+          await page.goto(url.create)
+
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Add Block 1' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
+          ).toHaveValue('Block 1: Prefilled Title')
+
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Add Block 2' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
+          ).toHaveValue('Block 2: Prefilled Title')
+
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Replace Block 2' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
+          ).toHaveValue('REPLACED BLOCK')
+        })
+      })
     })
   })
 
@@ -642,36 +675,6 @@ describe('fields', () => {
         await expect(
           page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow'),
         ).toHaveValue(`${assertGroupText3} duplicate`)
-      })
-
-      describe('react hooks', () => {
-        test('should add 2 new block rows', async () => {
-          await page.goto(url.create)
-
-          await page
-            .locator('.custom-blocks-field-management')
-            .getByRole('button', { name: 'Add Block 1' })
-            .click()
-          await expect(
-            page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
-          ).toHaveValue('Block 1: Prefilled Title')
-
-          await page
-            .locator('.custom-blocks-field-management')
-            .getByRole('button', { name: 'Add Block 2' })
-            .click()
-          await expect(
-            page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
-          ).toHaveValue('Block 2: Prefilled Title')
-
-          await page
-            .locator('.custom-blocks-field-management')
-            .getByRole('button', { name: 'Replace Block 2' })
-            .click()
-          await expect(
-            page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
-          ).toHaveValue('REPLACED BLOCK')
-        })
       })
     })
   })
