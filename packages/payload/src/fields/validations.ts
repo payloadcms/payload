@@ -187,11 +187,9 @@ export const checkbox: Validate<unknown, unknown, CheckboxField> = (
   value: boolean,
   { required, t },
 ) => {
-  if (value && typeof value !== 'boolean') {
+  if ((value && typeof value !== 'boolean') || (required && typeof value !== 'boolean')) {
     return t('validation:trueOrFalse')
   }
-
-  if (required && !value) return t('validation:required')
 
   return true
 }
