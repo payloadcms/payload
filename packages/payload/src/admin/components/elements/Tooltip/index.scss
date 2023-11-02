@@ -48,7 +48,6 @@
 
   &--caret-right {
     &::after {
-      left: unset;
       right: calc(var(--base) * 0.5);
     }
   }
