@@ -5,24 +5,12 @@
   top: 0;
   bottom: auto;
   left: auto;
-  right: base(0.5);
+  max-width: 75%;
+  right: calc(var(--base) * 0.5);
   transform: none;
   background-color: var(--theme-error-500);
 
   &::after {
     border-top-color: var(--theme-error-500);
-  }
-}
-
-.field-error.tooltip--position-stretch-top {
-  top: 0;
-  right: 0;
-  width: 75%;
-  background-color: var(--theme-error-500);
-
-  &::after {
-    left: 75%;
-    border-top-color: var(--theme-error-500);
-    border-bottom-color: transparent;
   }
 }

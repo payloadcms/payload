@@ -63,7 +63,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      {showError && <Error message={errorMessage} showError={showError} />}
+      <Error message={errorMessage} showError={showError} />
       <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <input
         data-rtl={rtl}
