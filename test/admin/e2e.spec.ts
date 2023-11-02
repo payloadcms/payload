@@ -22,11 +22,15 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
   customEditLabel,
+  customNestedTabViewPath,
+  customNestedTabViewTitle,
   customNestedViewPath,
   customNestedViewTitle,
   customTabLabel,
-  customViewWithTabPath,
-  customViewWithTabTitle,
+  customTabViewPath,
+  customTabViewTitle,
+  customViewPath,
+  customViewTitle,
   customViews2Slug,
   globalSlug,
   group1Collection1Slug,
@@ -168,28 +172,42 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
-    test('collection - should render custom view', async () => {
-      await page.goto(customViewsURL.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
+    test('should render custom view', async () => {
+      await page.goto(`${serverURL}/admin${customViewPath}`)
       const pageURL = page.url()
-      const customViewURL = `${pageURL}${customViewWithTabPath}`
-      await page.goto(customViewURL)
-      expect(page.url()).toEqual(customViewURL)
-      await expect(page.locator('h1#custom-view-with-tab-title')).toContainText(
-        customViewWithTabTitle,
-      )
+      const pathname = new URL(pageURL).pathname
+      expect(pathname).toEqual(`/admin${customViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('collection - should render custom nested view', async () => {
+    test('should render custom nested view', async () => {
+      await page.goto(`${serverURL}/admin${customNestedViewPath}`)
+      const pageURL = page.url()
+      const pathname = new URL(pageURL).pathname
+      expect(pathname).toEqual(`/admin${customNestedViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
+    })
+
+    test('collection - should render custom tab view', async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
       const pageURL = page.url()
-      const customNestedViewURL = `${pageURL}${customNestedViewPath}`
-      await page.goto(customNestedViewURL)
-      expect(page.url()).toEqual(customNestedViewURL)
-      await expect(page.locator('h1#nested-view-title')).toContainText(customNestedViewTitle)
+      const customViewURL = `${pageURL}${customTabViewPath}`
+      await page.goto(customViewURL)
+      expect(page.url()).toEqual(customViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
+    })
+
+    test('collection - should render custom nested tab view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customNestedTabViewURL = `${pageURL}${customNestedTabViewPath}`
+      await page.goto(customNestedTabViewURL)
+      expect(page.url()).toEqual(customNestedTabViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
     })
 
     test('collection - should render custom tab label', async () => {

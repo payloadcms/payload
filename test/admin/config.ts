@@ -1,9 +1,7 @@
 import path from 'path'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import { CustomViews1, customViews1Slug } from './collections/CustomViews1'
+import { CustomViews1 } from './collections/CustomViews1'
 import { CustomViews2 } from './collections/CustomViews2'
 import { Geo } from './collections/Geo'
 import { CollectionGroup1A } from './collections/Group1A'
@@ -20,6 +18,8 @@ import BeforeLogin from './components/BeforeLogin'
 import Logout from './components/Logout'
 import CustomDefaultView from './components/views/CustomDefault'
 import CustomMinimalRoute from './components/views/CustomMinimal'
+import CustomView from './components/views/CustomView'
+import CustomNestedView from './components/views/CustomViewNested'
 import { CustomGlobalViews1 } from './globals/CustomViews1'
 import { CustomGlobalViews2 } from './globals/CustomViews2'
 import { Global } from './globals/Global'
@@ -27,7 +27,8 @@ import { GlobalGroup1A } from './globals/Group1A'
 import { GlobalGroup1B } from './globals/Group1B'
 import { GlobalHidden } from './globals/Hidden'
 import { GlobalNoApiView } from './globals/NoApiView'
-import { customViews2Slug, noApiViewCollection, postsSlug } from './shared'
+import { seed } from './seed'
+import { customNestedViewPath, customViewPath } from './shared'
 
 export interface Post {
   createdAt: Date
@@ -51,13 +52,22 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
-        CustomMinimalRoute: {
+        CustomMinimalView: {
           path: '/custom-minimal-view',
           Component: CustomMinimalRoute,
         },
-        CustomDefaultRoute: {
+        CustomDefaultView: {
           path: '/custom-default-view',
           Component: CustomDefaultView,
+        },
+        CustomView: {
+          path: customViewPath,
+          exact: true,
+          Component: CustomView,
+        },
+        CustomNestedView: {
+          path: customNestedViewPath,
+          Component: CustomNestedView,
         },
       },
     },
@@ -97,56 +107,5 @@ export default buildConfigWithDefaults({
     GlobalGroup1A,
     GlobalGroup1B,
   ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await mapAsync([...Array(11)], async () => {
-      await payload.create({
-        collection: postsSlug,
-        data: {
-          title: 'Title',
-          description: 'Description',
-        },
-      })
-    })
-
-    await payload.create({
-      collection: customViews1Slug,
-      data: {
-        title: 'Custom View',
-      },
-    })
-
-    await payload.create({
-      collection: customViews2Slug,
-      data: {
-        title: 'Custom View',
-      },
-    })
-
-    await payload.create({
-      collection: 'geo',
-      data: {
-        point: [7, -7],
-      },
-    })
-
-    await payload.create({
-      collection: 'geo',
-      data: {
-        point: [5, -5],
-      },
-    })
-
-    await payload.create({
-      collection: noApiViewCollection,
-      data: {},
-    })
-  },
+  onInit: seed,
 })

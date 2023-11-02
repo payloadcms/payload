@@ -2,9 +2,9 @@ import React, { Fragment, useEffect } from 'react'
 
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
-import { customNestedViewTitle } from '../../../shared'
+import { customTabViewTitle } from '../../../shared'
 
-const CustomNestedView: AdminViewComponent = () => {
+const CustomTabView2: AdminViewComponent = () => {
   const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us
@@ -13,7 +13,7 @@ const CustomNestedView: AdminViewComponent = () => {
   useEffect(() => {
     setStepNav([
       {
-        label: 'Custom Nested View',
+        label: 'Custom Tab View',
       },
     ])
   }, [setStepNav])
@@ -27,7 +27,7 @@ const CustomNestedView: AdminViewComponent = () => {
           paddingRight: 'var(--gutter-h)',
         }}
       >
-        <h1 id="nested-view-title">{customNestedViewTitle}</h1>
+        <h1 id="custom-view-title">{customTabViewTitle}</h1>
         <p>This custom view was added through the Payload config:</p>
         <ul>
           <li>
@@ -39,4 +39,4 @@ const CustomNestedView: AdminViewComponent = () => {
   )
 }
 
-export default CustomNestedView
+export default CustomTabView2

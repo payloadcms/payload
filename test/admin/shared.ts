@@ -16,16 +16,24 @@ export const noApiViewCollection = 'collection-no-api-view'
 
 export const noApiViewGlobal = 'global-no-api-view'
 
+export const customViewPath = '/custom-view'
+
+export const customViewTitle = 'Custom View'
+
+export const customNestedViewPath = `${customViewPath}/nested-view`
+
+export const customNestedViewTitle = 'Custom Nested View'
+
 export const customViews2Slug = 'custom-views-two'
 
 export const customEditLabel = 'Custom Edit Label'
 
 export const customTabLabel = 'Custom Tab Label'
 
-export const customViewWithTabPath = '/custom-tab-component'
+export const customTabViewPath = '/custom-tab-component'
 
-export const customViewWithTabTitle = 'Custom View With Tab Component'
+export const customTabViewTitle = 'Custom View With Tab Component'
 
-export const customNestedViewPath = `${customViewWithTabPath}/nested-view`
+export const customNestedTabViewPath = `${customTabViewPath}/nested-view`
 
-export const customNestedViewTitle = 'Custom Nested View'
+export const customNestedTabViewTitle = 'Custom Nested Tab View'
