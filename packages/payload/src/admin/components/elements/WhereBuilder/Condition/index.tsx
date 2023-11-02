@@ -27,10 +27,14 @@ const baseClass = 'condition'
 const Condition: React.FC<Props> = (props) => {
   const { andIndex, dispatch, fields, orIndex, value } = props
   const fieldValue = Object.keys(value)[0]
-  const operatorAndValue = value?.[fieldValue] ? Object.entries(value[fieldValue])[0] : undefined
+
+  const operatorAndValueArray = value?.[fieldValue] ? Object.entries(value[fieldValue]) : []
+  const operatorAndValue = operatorAndValueArray[operatorAndValueArray.length - 1]
 
   const operatorValue = operatorAndValue?.[0]
   const queryValue = operatorAndValue?.[1]
+
+  const [selectedOperator, setSelectedOperator] = useState<string | undefined>(operatorValue)
 
   const [activeField, setActiveField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldValue === field.value),
@@ -38,36 +42,46 @@ const Condition: React.FC<Props> = (props) => {
   const [internalValue, setInternalValue] = useState(queryValue)
   const debouncedValue = useDebounce(internalValue, 300)
 
+  // Update selectedOperator when operatorValue changes
+  useEffect(() => {
+    setSelectedOperator(operatorValue)
+  }, [operatorValue])
+
+  // Reset operator when field changes
+  useEffect(() => {
+    if (fieldValue !== activeField.value) {
+      setSelectedOperator(undefined)
+    }
+  }, [fieldValue, activeField])
+
   useEffect(() => {
     const newActiveField = fields.find((field) => fieldValue === field.value)
 
-    if (newActiveField) {
+    if (newActiveField && newActiveField !== activeField) {
       setActiveField(newActiveField)
 
-      // If the field has changed, reset the value.
       setInternalValue('')
-    }
-  }, [fieldValue, fields])
 
-  useEffect(() => {
-    if (internalValue === '') {
       dispatch({
         andIndex,
+        field: fieldValue,
         orIndex,
         type: 'update',
-        value: internalValue,
       })
     }
-  }, [internalValue, dispatch, orIndex, andIndex])
+  }, [fieldValue, fields, dispatch, andIndex, orIndex, activeField])
 
   useEffect(() => {
-    dispatch({
-      andIndex,
-      orIndex,
-      type: 'update',
-      value: debouncedValue || '',
-    })
-  }, [debouncedValue, dispatch, orIndex, andIndex])
+    if (operatorValue) {
+      dispatch({
+        andIndex,
+        operator: operatorValue,
+        orIndex,
+        type: 'update',
+        value: debouncedValue || '',
+      })
+    }
+  }, [debouncedValue, dispatch, orIndex, andIndex, operatorValue])
 
   const booleanSelect = ['exists'].includes(operatorValue) || activeField.props.type === 'checkbox'
   const ValueComponent = booleanSelect
@@ -102,7 +116,9 @@ const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__operator`}>
             <ReactSelect
               disabled={!fieldValue}
+              isClearable={false}
               onChange={(operator) => {
+                setSelectedOperator(operator.value)
                 dispatch({
                   andIndex,
                   operator: operator.value,
@@ -111,7 +127,11 @@ const Condition: React.FC<Props> = (props) => {
                 })
               }}
               options={activeField.operators}
-              value={activeField.operators.find((operator) => operatorValue === operator.value)}
+              value={
+                selectedOperator != null
+                  ? activeField.operators.find((o) => selectedOperator === o.value) || null
+                  : null
+              }
             />
           </div>
           <div className={`${baseClass}__value`}>
