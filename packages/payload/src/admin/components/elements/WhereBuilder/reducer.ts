@@ -41,39 +41,29 @@ const reducer = (state: Where[], action: Action): Where[] => {
       const { field, operator, value } = action
 
       if (typeof newState[orIndex].and[andIndex] === 'object') {
-        newState[orIndex].and[andIndex] = {
-          ...newState[orIndex].and[andIndex],
-        }
+        const existingFieldName = Object.keys(newState[orIndex].and[andIndex])[0]
+        const existingCondition = newState[orIndex].and[andIndex][existingFieldName]
 
-        const [existingFieldName, existingCondition] = Object.entries(
-          newState[orIndex].and[andIndex],
-        )[0] || [undefined, undefined]
-
-        if (operator) {
+        // Reset the condition if a new field is selected
+        if (field && field !== existingFieldName) {
           newState[orIndex].and[andIndex] = {
-            [existingFieldName]: {
-              [operator]: Object.values(existingCondition)[0],
-            },
+            [field]: {}, // Reset operator and value when field changes
           }
-        }
-
-        if (field) {
-          newState[orIndex].and[andIndex] = {
-            [field]: {
-              [Object.keys(existingCondition)[0]]: Object.values(existingCondition)[0],
-            },
-          }
-        }
-
-        if (value !== undefined) {
-          newState[orIndex].and[andIndex] = {
-            [existingFieldName]: {
-              [Object.keys(existingCondition)[0]]: value,
-            },
+        } else {
+          // Update existing condition
+          if (operator) {
+            newState[orIndex].and[andIndex][existingFieldName] = {
+              ...existingCondition,
+              [operator]: value ?? Object.values(existingCondition)[0],
+            }
+          } else if (value !== undefined) {
+            const existingOperator = Object.keys(existingCondition)[0]
+            newState[orIndex].and[andIndex][existingFieldName] = {
+              [existingOperator]: value,
+            }
           }
         }
       }
-
       return newState
     }
 
