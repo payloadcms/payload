@@ -9,15 +9,7 @@ import { Users } from './collections/Users'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { seed } from './seed'
-
-export const pagesSlug = 'pages'
-
-export const mobileBreakpoint = {
-  label: 'Mobile',
-  name: 'mobile',
-  width: 375,
-  height: 667,
-}
+import { mobileBreakpoint } from './shared'
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
 

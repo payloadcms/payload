@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
 import type { PayloadRequest } from '../../packages/payload/src/express/types'
-import type { Post } from './config'
+import type { Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
@@ -22,7 +22,15 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
   customEditLabel,
+  customNestedTabViewPath,
+  customNestedTabViewTitle,
+  customNestedViewPath,
+  customNestedViewTitle,
   customTabLabel,
+  customTabViewPath,
+  customTabViewTitle,
+  customViewPath,
+  customViewTitle,
   customViews2Slug,
   globalSlug,
   group1Collection1Slug,
@@ -164,6 +172,44 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
+    test('should render custom view', async () => {
+      await page.goto(`${serverURL}/admin${customViewPath}`)
+      const pageURL = page.url()
+      const pathname = new URL(pageURL).pathname
+      expect(pathname).toEqual(`/admin${customViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
+    })
+
+    test('should render custom nested view', async () => {
+      await page.goto(`${serverURL}/admin${customNestedViewPath}`)
+      const pageURL = page.url()
+      const pathname = new URL(pageURL).pathname
+      expect(pathname).toEqual(`/admin${customNestedViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
+    })
+
+    test('collection - should render custom tab view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customViewURL = `${pageURL}${customTabViewPath}`
+      await page.goto(customViewURL)
+      expect(page.url()).toEqual(customViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
+    })
+
+    test('collection - should render custom nested tab view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customNestedTabViewURL = `${pageURL}${customNestedTabViewPath}`
+      await page.goto(customNestedTabViewURL)
+      expect(page.url()).toEqual(customNestedTabViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
+    })
+
     test('collection - should render custom tab label', async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
@@ -264,6 +310,7 @@ describe('admin', () => {
       await page.goto(url.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
+      await wait(500)
       await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
       expect(true).toBe(true)
@@ -455,14 +502,14 @@ describe('admin', () => {
 
     describe('filtering', () => {
       test('should prefill search input from query param', async () => {
-        await createPost({ title: 'a' })
-        await createPost({ title: 'b' })
+        await createPost({ title: 'dennis' })
+        await createPost({ title: 'charlie' })
 
         // prefill search with "a" from the query param
-        await page.goto(`${url.list}?search=a`)
+        await page.goto(`${url.list}?search=dennis`)
 
         // input should be filled out, list should filter
-        await expect(page.locator('.search-filter__input')).toHaveValue('a')
+        await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
@@ -951,30 +998,27 @@ describe('admin', () => {
     })
 
     // TODO: Troubleshoot flaky suite
-    describe.skip('sorting', () => {
+    describe('sorting', () => {
       beforeAll(async () => {
-        await createPost()
-        await createPost()
+        await createPost({
+          number: 1,
+        })
+        await createPost({
+          number: 2,
+        })
       })
 
       test('should sort', async () => {
-        const upChevron = page.locator('#heading-id .sort-column__asc')
-        const downChevron = page.locator('#heading-id .sort-column__desc')
+        const upChevron = page.locator('#heading-number .sort-column__asc')
+        const downChevron = page.locator('#heading-number .sort-column__desc')
 
-        const firstId = await page.locator('.row-1 .cell-id').innerText()
-        const secondId = await page.locator('.row-2 .cell-id').innerText()
+        await upChevron.click()
+        await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
+        await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-        await upChevron.click({ delay: 200 })
-
-        // Order should have swapped
-        await expect(page.locator('.row-1 .cell-id')).toHaveText(secondId)
-        await expect(page.locator('.row-2 .cell-id')).toHaveText(firstId)
-
-        await downChevron.click({ delay: 200 })
-
-        // Swap back
-        await expect(page.locator('.row-1 .cell-id')).toHaveText(firstId)
-        await expect(page.locator('.row-2 .cell-id')).toHaveText(secondId)
+        await downChevron.click()
+        await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
+        await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
       })
     })
 

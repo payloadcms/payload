@@ -10,6 +10,7 @@ const baseClass = 'checkbox-input'
 type CheckboxInputProps = {
   'aria-label'?: string
   checked?: boolean
+  className?: string
   id?: string
   inputRef?: React.MutableRefObject<HTMLInputElement>
   label?: string
@@ -18,7 +19,6 @@ type CheckboxInputProps = {
   partialChecked?: boolean
   readOnly?: boolean
   required?: boolean
-  className?: string
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
@@ -27,13 +27,13 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     name,
     'aria-label': ariaLabel,
     checked,
+    className,
     inputRef,
     label,
     onToggle,
     partialChecked,
     readOnly,
     required,
-    className,
   } = props
 
   return (
