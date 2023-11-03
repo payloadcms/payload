@@ -32,7 +32,13 @@ import { globalSlug } from '../admin/shared'
 import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './shared'
+import {
+  autoSaveGlobalSlug,
+  autosaveSlug,
+  draftGlobalSlug,
+  draftSlug,
+  titleToDelete,
+} from './shared'
 
 const { beforeAll, describe } = test
 
@@ -226,6 +232,18 @@ describe('versions', () => {
       const versionsURL = `${global.global(globalSlug)}/versions`
       await page.goto(versionsURL)
       expect(page.url()).toMatch(/\/versions$/)
+    })
+
+    test('global - should autosave', async () => {
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      // fill out global title and wait for autosave
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await page.locator('#field-title').fill('global title')
+      await wait(1000)
+
+      // refresh the page and ensure value autosaved
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await expect(page.locator('#field-title')).toHaveValue('global title')
     })
 
     test('should retain localized data during autosave', async () => {
