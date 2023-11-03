@@ -59,11 +59,7 @@ const reducer = (state: Where[], action: Action): Where[] => {
 
         if (field) {
           newState[orIndex].and[andIndex] = {
-            [field]: Object.keys(existingCondition)[0]
-              ? {
-                  [Object.keys(existingCondition)[0]]: Object.values(existingCondition)[0],
-                }
-              : {},
+            [field]: operator ? { [operator]: value } : {},
           }
         }
 

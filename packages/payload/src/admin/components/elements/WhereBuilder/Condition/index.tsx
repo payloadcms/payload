@@ -27,15 +27,17 @@ const baseClass = 'condition'
 const Condition: React.FC<Props> = (props) => {
   const { andIndex, dispatch, fields, orIndex, value } = props
   const fieldName = Object.keys(value)[0]
-  const operatorAndValue = value?.[fieldName] ? Object.entries(value[fieldName])[0] : undefined
-
-  const operatorValue = operatorAndValue?.[0]
-  const queryValue = operatorAndValue?.[1]
-
   const [activeField, setActiveField] = useState<FieldCondition>(() =>
     fields.find((field) => fieldName === field.value),
   )
+
+  const operatorAndValue = value?.[fieldName] ? Object.entries(value[fieldName])[0] : undefined
+  const queryValue = operatorAndValue?.[1]
+  const operatorValue = operatorAndValue?.[0]
+
   const [internalValue, setInternalValue] = useState(queryValue)
+  const [internalOperatorField, setInternalOperatorField] = useState(operatorValue)
+
   const debouncedValue = useDebounce(internalValue, 300)
 
   useEffect(() => {
@@ -43,21 +45,10 @@ const Condition: React.FC<Props> = (props) => {
 
     if (newActiveField) {
       setActiveField(newActiveField)
+      setInternalOperatorField(null)
       setInternalValue('')
     }
-  }, [fieldName, fields, dispatch])
-
-  useEffect(() => {
-    const invalidOperator = !activeField.operators.some(({ value }) => operatorValue === value)
-    if (operatorValue && invalidOperator) {
-      dispatch({
-        andIndex,
-        operator: activeField.operators[0].value,
-        orIndex,
-        type: 'update',
-      })
-    }
-  }, [andIndex, orIndex, operatorValue, activeField?.operators, dispatch])
+  }, [fieldName, fields])
 
   useEffect(() => {
     dispatch({
@@ -87,15 +78,14 @@ const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__field`}>
             <ReactSelect
               isClearable={false}
-              onChange={(field) =>
+              onChange={(field) => {
                 dispatch({
-                  andIndex,
-                  field: field?.value || undefined,
-                  operator: undefined,
-                  orIndex,
+                  andIndex: andIndex,
+                  field: field?.value,
+                  orIndex: orIndex,
                   type: 'update',
                 })
-              }
+              }}
               options={fields}
               value={fields.find((field) => fieldName === field.value)}
             />
@@ -111,11 +101,13 @@ const Condition: React.FC<Props> = (props) => {
                   orIndex,
                   type: 'update',
                 })
+                setInternalOperatorField(operator.value)
               }}
               options={activeField.operators}
               value={
-                activeField.operators.find((operator) => operatorValue === operator.value) ||
-                activeField.operators[0]
+                activeField.operators.find(
+                  (operator) => internalOperatorField === operator.value,
+                ) || null
               }
             />
           </div>
