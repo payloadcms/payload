@@ -104,6 +104,8 @@ const RecursivelyRenderObjectData = ({
               type = 'object'
             } else if (typeof value === 'number') {
               type = 'number'
+            } else if (typeof value === 'boolean') {
+              type = 'boolean'
             } else {
               type = 'string'
             }
@@ -121,7 +123,7 @@ const RecursivelyRenderObjectData = ({
               )
             }
 
-            if (type === 'date' || type === 'string' || type === 'null' || type === 'number') {
+            if (type === 'date' || type === 'string' || type === 'null' || type === 'number' || type === 'boolean') {
               const parentHasKey = Boolean(parentType === 'object' && key)
 
               const rowClasses = [
@@ -136,11 +138,7 @@ const RecursivelyRenderObjectData = ({
                 <li className={rowClasses} key={`${key}-${keyIndex}`}>
                   {parentHasKey ? <span>{`"${key}": `}</span> : null}
 
-                  {type === 'string' ? (
-                    <span className={`${baseClass}__value`}>{`"${value}"`}</span>
-                  ) : (
-                    <span className={`${baseClass}__value`}>{value}</span>
-                  )}
+                  <span className={`${baseClass}__value`}>{JSON.stringify(value)}</span>
                   {isLastKey ? '' : ','}
                 </li>
               )
