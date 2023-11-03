@@ -71,7 +71,7 @@ export const findVersions: FindVersions = async function findVersions(
     useEstimatedCount,
   }
 
-  if (!useEstimatedCount) {
+  if (!useEstimatedCount && this.hintPaginationCountIndex) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding a hint.
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
