@@ -26,62 +26,47 @@ const baseClass = 'condition'
 
 const Condition: React.FC<Props> = (props) => {
   const { andIndex, dispatch, fields, orIndex, value } = props
-  const fieldValue = Object.keys(value)[0]
-
-  const operatorAndValueArray = value?.[fieldValue] ? Object.entries(value[fieldValue]) : []
-  const operatorAndValue = operatorAndValueArray[operatorAndValueArray.length - 1]
+  const fieldName = Object.keys(value)[0]
+  const operatorAndValue = value?.[fieldName] ? Object.entries(value[fieldName])[0] : undefined
 
   const operatorValue = operatorAndValue?.[0]
   const queryValue = operatorAndValue?.[1]
 
-  const [selectedOperator, setSelectedOperator] = useState<string | undefined>(operatorValue)
-
   const [activeField, setActiveField] = useState<FieldCondition>(() =>
-    fields.find((field) => fieldValue === field.value),
+    fields.find((field) => fieldName === field.value),
   )
   const [internalValue, setInternalValue] = useState(queryValue)
   const debouncedValue = useDebounce(internalValue, 300)
 
-  // Update selectedOperator when operatorValue changes
   useEffect(() => {
-    setSelectedOperator(operatorValue)
-  }, [operatorValue])
+    const newActiveField = fields.find(({ value: name }) => name === fieldName)
 
-  // Reset operator when field changes
-  useEffect(() => {
-    if (fieldValue !== activeField.value) {
-      setSelectedOperator(undefined)
-    }
-  }, [fieldValue, activeField])
-
-  useEffect(() => {
-    const newActiveField = fields.find((field) => fieldValue === field.value)
-
-    if (newActiveField && newActiveField !== activeField) {
+    if (newActiveField) {
       setActiveField(newActiveField)
-
       setInternalValue('')
-
-      dispatch({
-        andIndex,
-        field: fieldValue,
-        orIndex,
-        type: 'update',
-      })
     }
-  }, [fieldValue, fields, dispatch, andIndex, orIndex, activeField])
+  }, [fieldName, fields, dispatch])
 
   useEffect(() => {
-    if (operatorValue) {
+    const invalidOperator = !activeField.operators.some(({ value }) => operatorValue === value)
+    if (operatorValue && invalidOperator) {
       dispatch({
         andIndex,
-        operator: operatorValue,
+        operator: activeField.operators[0].value,
         orIndex,
         type: 'update',
-        value: debouncedValue || '',
       })
     }
-  }, [debouncedValue, dispatch, orIndex, andIndex, operatorValue])
+  }, [andIndex, orIndex, operatorValue, activeField?.operators, dispatch])
+
+  useEffect(() => {
+    dispatch({
+      andIndex,
+      orIndex,
+      type: 'update',
+      value: debouncedValue || '',
+    })
+  }, [debouncedValue, dispatch, orIndex, andIndex])
 
   const booleanSelect = ['exists'].includes(operatorValue) || activeField.props.type === 'checkbox'
   const ValueComponent = booleanSelect
@@ -101,24 +86,25 @@ const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
+              isClearable={false}
               onChange={(field) =>
                 dispatch({
                   andIndex,
                   field: field?.value || undefined,
+                  operator: undefined,
                   orIndex,
                   type: 'update',
                 })
               }
               options={fields}
-              value={fields.find((field) => fieldValue === field.value)}
+              value={fields.find((field) => fieldName === field.value)}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!fieldValue}
+              disabled={!fieldName}
               isClearable={false}
               onChange={(operator) => {
-                setSelectedOperator(operator.value)
                 dispatch({
                   andIndex,
                   operator: operator.value,
@@ -128,9 +114,8 @@ const Condition: React.FC<Props> = (props) => {
               }}
               options={activeField.operators}
               value={
-                selectedOperator != null
-                  ? activeField.operators.find((o) => selectedOperator === o.value) || null
-                  : null
+                activeField.operators.find((operator) => operatorValue === operator.value) ||
+                activeField.operators[0]
               }
             />
           </div>
