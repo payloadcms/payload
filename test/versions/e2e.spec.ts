@@ -40,6 +40,7 @@ describe('versions', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
+  let autosaveURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
@@ -51,6 +52,7 @@ describe('versions', () => {
   describe('draft collections', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveSlug)
     })
 
     // This test has to run before bulk updates that will rename the title
@@ -227,7 +229,6 @@ describe('versions', () => {
     })
 
     test('should retain localized data during autosave', async () => {
-      const autosaveURL = new AdminUrlUtil(serverURL, autosaveSlug)
       const locale = 'en'
       const spanishLocale = 'es'
       const title = 'english title'
@@ -285,6 +286,31 @@ describe('versions', () => {
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+    })
+
+    test('collection - autosave should only update the current document', async () => {
+      // create and save first doc
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('first post title')
+      await page.locator('#field-description').fill('first post description')
+      await page.locator('#action-save').click()
+
+      // create and save second doc
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('second post title')
+      await page.locator('#field-description').fill('second post description')
+      await page.locator('#action-save').click()
+
+      // update second doc and wait for autosave
+      await page.locator('#field-title').fill('updated second post title')
+      await page.locator('#field-description').fill('updated second post description')
+      await wait(1000)
+
+      // verify that the first doc is unchanged
+      await page.goto(autosaveURL.list)
+      await page.locator('tbody tr .cell-title a').nth(1).click()
+      await expect(page.locator('#field-title')).toHaveValue('first post title')
+      await expect(page.locator('#field-description')).toHaveValue('first post description')
     })
   })
 })
