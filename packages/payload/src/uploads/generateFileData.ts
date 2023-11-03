@@ -1,5 +1,5 @@
 import type { UploadedFile } from 'express-fileupload'
-import type { Sharp, SharpOptions } from 'sharp'
+import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
 import fs from 'fs'
@@ -96,10 +96,12 @@ export const generateFileData = async <T>({
     let fsSafeName: string
     let sharpFile: Sharp | undefined
     let dimensions: ProbedImageSize | undefined
-    let fileBuffer
+    let fileBuffer: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
-    const isSharpRequired = fileSupportsResize && (resizeOptions || formatOptions || trimOptions)
+    const isSharpRequired =
+      fileSupportsResize &&
+      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
     const sharpOptions: SharpOptions = {}
 
@@ -195,14 +197,17 @@ export const generateFileData = async <T>({
         path: `${staticPath}/${fsSafeName}`,
       })
 
-      if (file.tempFilePath) {
-        await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data) // write fileBuffer to the temp path
-      } else {
-        // Assign the _possibly modified_ file to the request object
-        req.files.file = {
-          ...file,
-          data: fileBuffer?.data || file.data,
-          size: fileBuffer?.info.size,
+      // If using temp files and the image is being resized, write the file to the temp path
+      if (fileBuffer?.data || file.data.length > 0) {
+        if (file.tempFilePath) {
+          await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+        } else {
+          // Assign the _possibly modified_ file to the request object
+          req.files.file = {
+            ...file,
+            data: fileBuffer?.data || file.data,
+            size: fileBuffer?.info.size,
+          }
         }
       }
     }
