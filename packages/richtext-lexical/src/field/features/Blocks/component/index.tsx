@@ -35,7 +35,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { children, className, fields, format, nodeKey } = props
   const payloadConfig = useConfig()
   const submitted = useFormSubmitted()
-  const editorConfigContext = useEditorConfigContext()
 
   const { editorConfig, field } = useEditorConfigContext()
 
