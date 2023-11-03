@@ -37,12 +37,14 @@ describe('auth', () => {
   describe('authenticated users', () => {
     test('should allow change password', async () => {
       await page.goto(url.account)
-
+      const emailBeforeSave = await page.locator('#field-email').inputValue()
       await page.locator('#change-password').click()
       await page.locator('#field-password').fill('password')
       await page.locator('#field-confirm-password').fill('password')
 
       await saveDocAndAssert(page)
+
+      await expect(page.locator('#field-email')).toHaveValue(emailBeforeSave)
     })
 
     test('should have up-to-date user in `useAuth` hook', async () => {

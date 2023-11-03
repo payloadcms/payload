@@ -30,14 +30,6 @@ import { GlobalNoApiView } from './globals/NoApiView'
 import { seed } from './seed'
 import { customNestedViewPath, customViewPath } from './shared'
 
-export interface Post {
-  createdAt: Date
-  description: string
-  id: string
-  title: string
-  updatedAt: Date
-}
-
 export default buildConfigWithDefaults({
   admin: {
     css: path.resolve(__dirname, 'styles.scss'),
