@@ -51,7 +51,7 @@ Create a cloud account, connect your GitHub, and [deploy in minutes](https://pay
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
 
 ```text
-npx create-payload-app
+npx create-payload-app@latest
 ```
 
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
