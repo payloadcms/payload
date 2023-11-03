@@ -1,9 +1,9 @@
 import React from 'react'
 
 import { type AdminViewComponent } from '../../../../../packages/payload/src/config/types'
-import { customViewTitle } from '../../../shared'
+import { customNestedViewTitle } from '../../../shared'
 
-const CustomView: AdminViewComponent = () => {
+const CustomNestedView: AdminViewComponent = () => {
   return (
     <div
       style={{
@@ -12,7 +12,7 @@ const CustomView: AdminViewComponent = () => {
         paddingRight: 'var(--gutter-h)',
       }}
     >
-      <h1 id="custom-view-title">{customViewTitle}</h1>
+      <h1 id="custom-view-title">{customNestedViewTitle}</h1>
       <p>This custom view was added through the Payload config:</p>
       <ul>
         <li>
@@ -23,4 +23,4 @@ const CustomView: AdminViewComponent = () => {
   )
 }
 
-export default CustomView
+export default CustomNestedView

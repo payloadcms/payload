@@ -96,7 +96,7 @@ To swap out any of these views, simply pass in your custom component to the `adm
 }
 ```
 
-For more granular control, pass a configuration object instead. Payload exposes all of the properties of `<Route />` component in [React Router v5](https://v5.reactrouter.com):
+For more granular control, pass a configuration object instead. Each view corresponds to its own `<Route />` component in [React Router v5](https://v5.reactrouter.com). Payload exposes all of the properties of React Router:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -128,6 +128,12 @@ To add a _new_ view to the Admin Panel, simply add another key to the `views` ob
   },
 }
 ```
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  Routes are cascading. This means that unless explicitly given the `exact` property, they will match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all routes in your application. Alternatively, you could define your nested route _before_ your parent route.
+</Banner>
 
 _For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/main/test/admin/components)._
 

@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 import { exactText, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { mobileBreakpoint } from './config'
+import { mobileBreakpoint } from './shared'
 import { startLivePreviewDemo } from './startLivePreviewDemo'
 
 const { beforeAll, describe } = test

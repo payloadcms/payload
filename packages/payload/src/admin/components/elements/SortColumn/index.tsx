@@ -50,24 +50,24 @@ const SortColumn: React.FC<Props> = (props) => {
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
-            type='button'
             aria-label={t('sortByLabelDirection', {
               direction: t('ascending'),
               label: getTranslation(label, i18n),
             })}
-            className={[ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+            className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => setSort(asc)}
+            type="button"
           >
             <Chevron direction="up" />
           </button>
           <button
-            type='button'
             aria-label={t('sortByLabelDirection', {
               direction: t('descending'),
               label: getTranslation(label, i18n),
             })}
-            className={[descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+            className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => setSort(desc)}
+            type="button"
           >
             <Chevron />
           </button>

@@ -1,17 +1,47 @@
 import type { SerializedEditorState } from 'lexical'
 import type { RichTextField, TextField } from 'payload/types'
 
-import type { LexicalRichTextAdapter } from '../../../../../index'
+import type { LexicalRichTextAdapter, SanitizedEditorConfig } from '../../../../../index'
 import type { AdapterProps } from '../../../../../types'
 import type { HTMLConverter } from '../converter/types'
 import type { HTMLConverterFeatureProps } from '../index'
 
-import { cloneDeep } from '../../../../../index'
 import { convertLexicalToHTML } from '../converter'
 import { defaultHTMLConverters } from '../converter/defaultConverters'
 
 type Props = {
   name: string
+}
+
+/**
+ * Combines the default HTML converters with HTML converters found in the features, and with HTML converters configured in the htmlConverter feature.
+ *
+ * @param editorConfig
+ */
+export const consolidateHTMLConverters = ({
+  editorConfig,
+}: {
+  editorConfig: SanitizedEditorConfig
+}) => {
+  const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
+  const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature?.props
+
+  const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
+
+  for (const converter of editorConfig.features.converters.html) {
+    defaultConvertersWithConvertersFromFeatures.push(converter)
+  }
+
+  const finalConverters =
+    htmlConverterFeatureProps?.converters &&
+    typeof htmlConverterFeatureProps?.converters === 'function'
+      ? htmlConverterFeatureProps.converters({
+          defaultConverters: defaultConvertersWithConvertersFromFeatures,
+        })
+      : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
+        defaultConvertersWithConvertersFromFeatures
+
+  return finalConverters
 }
 
 export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField = (
@@ -57,23 +87,10 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
               'You cannot use the lexicalHTML field because the htmlConverter feature was not found',
             )
           }
-          const htmlConverterFeature = config.resolvedFeatureMap.get('htmlConverter')
-          const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature.props
 
-          const defaultConvertersWithConvertersFromFeatures = cloneDeep(defaultHTMLConverters)
-
-          for (const converter of config.features.converters.html) {
-            defaultConvertersWithConvertersFromFeatures.push(converter)
-          }
-
-          const finalConverters =
-            htmlConverterFeatureProps?.converters &&
-            typeof htmlConverterFeatureProps?.converters === 'function'
-              ? htmlConverterFeatureProps.converters({
-                  defaultConverters: defaultConvertersWithConvertersFromFeatures,
-                })
-              : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
-                defaultConvertersWithConvertersFromFeatures
+          const finalConverters = consolidateHTMLConverters({
+            editorConfig: config,
+          })
 
           return await convertLexicalToHTML({
             converters: finalConverters,

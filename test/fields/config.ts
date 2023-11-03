@@ -7,6 +7,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import ArrayFields, { arrayDoc } from './collections/Array'
 import BlockFields, { blocksDoc } from './collections/Blocks'
+import CheckboxFields from './collections/Checkbox'
 import CodeFields, { codeDoc } from './collections/Code'
 import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible'
 import ConditionalLogic, { conditionalLogicDoc } from './collections/ConditionalLogic'
@@ -59,6 +60,7 @@ export default buildConfigWithDefaults({
     },
     ArrayFields,
     BlockFields,
+    CheckboxFields,
     CodeFields,
     CollapsibleFields,
     ConditionalLogic,

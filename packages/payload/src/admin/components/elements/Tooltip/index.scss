@@ -20,7 +20,6 @@
     content: ' ';
     display: block;
     position: absolute;
-    left: 50%;
     transform: translate3d(-50%, 100%, 0);
     width: 0;
     height: 0;
@@ -33,6 +32,24 @@
     opacity: 1;
     transition: opacity 0.2s ease-in-out;
     cursor: default;
+  }
+
+  &--caret-center {
+    &::after {
+      left: 50%;
+    }
+  }
+
+  &--caret-left {
+    &::after {
+      left: calc(var(--base) * 0.5);
+    }
+  }
+
+  &--caret-right {
+    &::after {
+      right: calc(var(--base) * 0.5);
+    }
   }
 
   &--position-top {
@@ -53,6 +70,12 @@
       bottom: calc(100% + var(--caret-size) - 1px);
       border-bottom: var(--caret-size) solid var(--theme-elevation-800);
     }
+  }
+
+  .tooltip-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
   }
 
   @include mid-break {
