@@ -310,6 +310,7 @@ describe('admin', () => {
       await page.goto(url.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
+      await wait(500)
       await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
       expect(true).toBe(true)
