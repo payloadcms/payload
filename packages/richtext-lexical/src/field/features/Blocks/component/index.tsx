@@ -35,12 +35,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { children, className, fields, format, nodeKey } = props
   const payloadConfig = useConfig()
   const submitted = useFormSubmitted()
+  const editorConfigContext = useEditorConfigContext()
 
   const { editorConfig, field } = useEditorConfigContext()
 
   const block = (
     editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps
   )?.blocks?.find((block) => block.slug === fields?.data?.blockType)
+
+  const blockFieldWrapperName = block.slug + '-' + fields.data.id
 
   // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
   const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
@@ -58,17 +61,52 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { getDocPreferences } = useDocumentInfo()
 
   // initialState State
-
   const [initialState, setInitialState] = React.useState<Data>(null)
 
   useEffect(() => {
     async function buildInitialState() {
       const preferences = await getDocPreferences()
 
+      const fieldDataWithoutBlockFields = { ...fields.data }
+      delete fieldDataWithoutBlockFields['id']
+      delete fieldDataWithoutBlockFields['blockName']
+      delete fieldDataWithoutBlockFields['blockType']
+
+      // Wrap all fields inside blockFieldWrapperName.
+      // This is necessary, because blockFieldWrapperName is set as the 'base' path for all fields in the block (in the RenderFields component).
+      // Thus, in order for the data to be read, it has to be wrapped in this blockFieldWrapperName, as it's expected to be there.
+
+      // Why are we doing this? Because that way, all rendered fields of the blocks have different paths and names, and thus don't conflict with each other.
+      // They have different paths and names, because they are wrapped in the blockFieldWrapperName, which has a name that is unique for each block.
+      fields.data = {
+        id: fields.data.id,
+        [blockFieldWrapperName]: fieldDataWithoutBlockFields,
+        blockName: fields.data.blockName,
+        blockType: fields.data.blockType,
+      }
+
+      // Add a group in the field schema, which represents all values saved in the blockFieldWrapperName
+      const wrappedFieldSchema = [
+        ...block.fields.filter(
+          (field) => 'name' in field && ['blockName', 'blockType', 'id'].includes(field.name),
+        ),
+        {
+          name: blockFieldWrapperName,
+          admin: {
+            hideGutter: true,
+          },
+          fields: block.fields.filter(
+            (field) => !('name' in field) || !['blockName', 'blockType', 'id'].includes(field.name),
+          ),
+          label: '',
+          type: 'group',
+        },
+      ]
+
       const stateFromSchema = await buildStateFromSchema({
         config,
         data: fields.data,
-        fieldSchema: block.fields,
+        fieldSchema: wrappedFieldSchema as any,
         locale,
         operation: 'update',
         preferences,
@@ -96,6 +134,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           <BlockContent
             baseClass={baseClass}
             block={block}
+            blockFieldWrapperName={blockFieldWrapperName}
             field={field}
             fields={fields}
             nodeKey={nodeKey}

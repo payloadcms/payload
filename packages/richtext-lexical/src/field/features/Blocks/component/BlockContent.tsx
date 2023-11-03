@@ -20,6 +20,7 @@ import { FormSavePlugin } from './FormSavePlugin'
 type Props = {
   baseClass: string
   block: Block
+  blockFieldWrapperName: string
   field: FieldProps
   fields: BlockFields
   nodeKey: string
@@ -31,7 +32,7 @@ type Props = {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, block, field, fields, nodeKey } = props
+  const { baseClass, block, blockFieldWrapperName, field, fields, nodeKey } = props
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
   // Used for saving collapsed to preferences (and gettin' it from there again)
@@ -74,6 +75,15 @@ export const BlockContent: React.FC<Props> = (props) => {
       if (!isDeepEqual(fields.data, formData)) {
         editor.update(() => {
           const node: BlockNode = $getNodeByKey(nodeKey)
+
+          // Unwrap all fields inside of blockFieldWrapperName - they should be saved cleanly at the top level
+          // When we are loading them in, they will be wrapped inside of blockFieldWrapperName again
+          formData = {
+            ...formData,
+            ...formData[blockFieldWrapperName],
+          }
+          delete formData[blockFieldWrapperName]
+
           if (node) {
             node.setFields({
               data: formData as any,
@@ -163,7 +173,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           className={`${baseClass}__fields`}
           fieldSchema={block.fields.map((field) => ({
             ...field,
-            path: createNestedFieldPath(null, field),
+            path: createNestedFieldPath(blockFieldWrapperName, field),
           }))}
           fieldTypes={field.fieldTypes}
           forceRender
@@ -176,7 +186,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       <FormSavePlugin
         fieldSchema={block.fields.map((field) => ({
           ...field,
-          path: createNestedFieldPath(null, field),
+          path: createNestedFieldPath(blockFieldWrapperName, field),
         }))}
         onChange={onFormChange}
       />
