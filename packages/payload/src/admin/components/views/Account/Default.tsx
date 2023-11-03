@@ -42,12 +42,15 @@ const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
   const { refreshCookieAsync } = useAuth()
   const { t } = useTranslation('authentication')
 
-  const onSave = useCallback(async () => {
-    await refreshCookieAsync()
-    if (typeof onSaveFromProps === 'function') {
-      onSaveFromProps({})
-    }
-  }, [onSaveFromProps, refreshCookieAsync])
+  const onSave = useCallback(
+    async (json) => {
+      await refreshCookieAsync()
+      if (typeof onSaveFromProps === 'function') {
+        onSaveFromProps(json)
+      }
+    },
+    [onSaveFromProps, refreshCookieAsync],
+  )
 
   return (
     <React.Fragment>
