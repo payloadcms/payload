@@ -491,6 +491,43 @@ describe('admin', () => {
         'Home',
       )
     })
+
+    test('should allow custom translation of locale labels', async () => {
+      const selectOptionClass = '.localizer .popup-button-list__button'
+      const localizorButton = page.locator('.localizer .popup-button')
+      const secondLocale = page.locator(selectOptionClass).nth(1)
+
+      async function checkLocalLabels(firstLabel: string, secondLabel: string) {
+        await localizorButton.click()
+        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
+        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
+      }
+
+      await checkLocalLabels('English (en)', 'Spanish (es)')
+
+      // Change locale to Spanish
+      await localizorButton.click()
+      await expect(secondLocale).toContainText('Spanish (es)')
+      await secondLocale.click()
+
+      // Go to account page
+      await page.goto(url.account)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+      const options = page.locator('.rs__option')
+
+      // Change language to Spanish
+      await languageField.click()
+      await options.locator('text=Español').click()
+
+      await checkLocalLabels('Inglés (en)', 'Español (es)')
+
+      // Change locale and language back to English
+      await languageField.click()
+      await options.locator('text=English').click()
+      await localizorButton.click()
+      await expect(secondLocale).toContainText('Spanish (es)')
+    })
   })
 
   describe('list view', () => {
