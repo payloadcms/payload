@@ -1,7 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { radioFieldsSlug } from '../../collectionSlugs'
+
 const RadioFields: CollectionConfig = {
-  slug: 'radio-fields',
+  slug: radioFieldsSlug,
   fields: [
     {
       name: 'radio',

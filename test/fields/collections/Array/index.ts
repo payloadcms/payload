@@ -1,10 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { arrayFieldsSlug } from '../../collectionSlugs'
 import { ArrayRowLabel } from './LabelComponent'
 
 export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
-
-export const arrayFieldsSlug = 'array-fields'
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,

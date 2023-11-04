@@ -1,5 +1,7 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { jsonFieldsSlug } from '../../collectionSlugs'
+
 type JSONField = {
   createdAt: string
   id: string
@@ -17,7 +19,7 @@ const JSON: CollectionConfig = {
       type: 'json',
     },
   ],
-  slug: 'json-fields',
+  slug: jsonFieldsSlug,
   versions: {
     maxPerDoc: 1,
   },

@@ -1,7 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { conditionalLogicSlug } from '../../collectionSlugs'
+
 const ConditionalLogic: CollectionConfig = {
-  slug: 'conditional-logic',
+  slug: conditionalLogicSlug,
   admin: {
     useAsTitle: 'text',
   },

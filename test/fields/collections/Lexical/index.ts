@@ -10,6 +10,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
+import { lexicalFieldsSlug } from '../../collectionSlugs'
 import {
   RelationshipBlock,
   RichTextBlock,
@@ -22,7 +23,7 @@ import { generateLexicalRichText } from './generateLexicalRichText'
 import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
 
 export const LexicalFields: CollectionConfig = {
-  slug: 'lexical-fields',
+  slug: lexicalFieldsSlug,
   admin: {
     useAsTitle: 'title',
     listSearchableFields: ['title', 'richTextLexicalCustomFields'],
@@ -148,10 +149,4 @@ export const LexicalFields: CollectionConfig = {
       }),
     },
   ],
-}
-
-export const LexicalRichTextDoc = {
-  title: 'Rich Text',
-  richTextLexicalCustomFields: generateLexicalRichText(),
-  richTextLexicalWithLexicalPluginData: payloadPluginLexicalData,
 }

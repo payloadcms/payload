@@ -10,19 +10,24 @@ import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
-import { collapsibleFieldsSlug } from './collections/Collapsible/shared'
+import {
+  collapsibleFieldsSlug,
+  pointFieldsSlug,
+  relationshipFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './collectionSlugs'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
-import { pointFieldsSlug } from './collections/Point'
-import { relationshipFieldsSlug } from './collections/Relationship'
-import { tabsSlug } from './collections/Tabs/constants'
-import { textDoc, textFieldsSlug } from './collections/Text'
+import { textDoc } from './collections/Text'
+import { lexicalE2E } from './lexicalE2E'
+import { clearAndSeedEverything } from './seed'
 
-const { afterEach, beforeAll, describe } = test
+const { afterEach, beforeAll, describe, beforeEach } = test
 
 let client: RESTClient
 let page: Page
-let serverURL
+let serverURL: string
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
@@ -34,7 +39,9 @@ describe('fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
   })
-
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+  })
   describe('text', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
@@ -682,7 +689,7 @@ describe('fields', () => {
   describe('tabs', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, tabsSlug)
+      url = new AdminUrlUtil(serverURL, tabsFieldsSlug)
     })
 
     test('should fill and retain a new value within a tab while switching tabs', async () => {
@@ -750,7 +757,7 @@ describe('fields', () => {
       )
     })
   })
-
+  describe('lexical', lexicalE2E(client, page, serverURL))
   describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')

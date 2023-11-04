@@ -1,6 +1,8 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { CodeField } from '../../payload-types'
 
+import { codeFieldsSlug } from '../../collectionSlugs'
+
 const Code: CollectionConfig = {
   fields: [
     {
@@ -39,7 +41,7 @@ const Code: CollectionConfig = {
       type: 'code',
     },
   ],
-  slug: 'code-fields',
+  slug: codeFieldsSlug,
 }
 
 export const codeDoc: Partial<CodeField> = {

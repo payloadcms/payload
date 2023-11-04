@@ -1,7 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { selectFieldsSlug } from '../../collectionSlugs'
+
 const SelectFields: CollectionConfig = {
-  slug: 'select-fields',
+  slug: selectFieldsSlug,
   fields: [
     {
       name: 'select',
