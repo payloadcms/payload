@@ -64,9 +64,9 @@ export async function clearAndSeedEverything(_payload: Payload) {
 
   await Promise.all([
     ...collectionSlugs.map(async (collectionSlug) =>
-      _payload.db.deleteMany({
+      _payload.delete({
         collection: collectionSlug,
-        req: {} as PayloadRequest,
+        //req: {} as PayloadRequest,
         where: {},
       }),
     ),

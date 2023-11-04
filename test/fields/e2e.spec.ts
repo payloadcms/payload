@@ -28,19 +28,32 @@ const { afterEach, beforeAll, describe, beforeEach } = test
 let client: RESTClient
 let page: Page
 let serverURL: string
+//test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
+    console.log('Using serverURL', serverURL)
     client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
     await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
   })
-  beforeEach(async () => {
+  beforeEach(async ({ browser }) => {
     await clearAndSeedEverything(payload)
+    await client.logout()
+    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    await client.login()
+
+    for (const context of browser.contexts()) {
+      await context.close()
+    }
+    const context = await browser.newContext()
+    page = await context.newPage()
+
+    await page.reload()
   })
   describe('text', () => {
     let url: AdminUrlUtil
@@ -153,7 +166,7 @@ describe('fields', () => {
 
   describe('indexed', () => {
     let url: AdminUrlUtil
-    beforeAll(() => {
+    beforeEach(() => {
       url = new AdminUrlUtil(serverURL, 'indexed-fields')
     })
 
@@ -276,7 +289,7 @@ describe('fields', () => {
     let url: AdminUrlUtil
     let filledGroupPoint
     let emptyGroupPoint
-    beforeAll(async () => {
+    beforeEach(async () => {
       url = new AdminUrlUtil(serverURL, pointFieldsSlug)
       filledGroupPoint = await payload.create({
         collection: pointFieldsSlug,
@@ -1480,7 +1493,7 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'uploads')
     })
 
-    test('should upload files', async () => {
+    async function uploadImage() {
       await page.goto(url.create)
 
       // create a jpg upload
@@ -1491,10 +1504,15 @@ describe('fields', () => {
       await page.locator('#action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
+    }
+
+    test('should upload files', async () => {
+      await uploadImage()
     })
 
     // test that the image renders
     test('should render uploaded image', async () => {
+      await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
         '/uploads/payload-1.jpg',
@@ -1502,6 +1520,7 @@ describe('fields', () => {
     })
 
     test('should upload using the document drawer', async () => {
+      await uploadImage()
       // Open the media drawer and create a png upload
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
@@ -1528,10 +1547,20 @@ describe('fields', () => {
     })
 
     test('should clear selected upload', async () => {
+      await uploadImage()
+      await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
+      await page
+        .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+        .setInputFiles(path.resolve(__dirname, './uploads/payload.png'))
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+      await wait(200)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('.field-type.upload .file-details__remove').click()
     })
 
     test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
+      await uploadImage()
+
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click()
       await wait(200)
       const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
