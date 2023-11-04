@@ -10,7 +10,7 @@ export const TreeviewFeature = (): FeatureProvider => {
         plugins: [
           {
             Component: TreeViewPlugin,
-            position: 'normal',
+            position: 'bottom',
           },
         ],
         props: null,
