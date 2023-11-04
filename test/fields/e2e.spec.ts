@@ -46,14 +46,13 @@ describe('fields', () => {
     await client.logout()
     client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
     await client.login()
-
-    for (const context of browser.contexts()) {
+    /*for (const context of browser.contexts()) {
       await context.close()
     }
     const context = await browser.newContext()
     page = await context.newPage()
 
-    await page.reload()
+    await page.reload()*/
   })
   describe('text', () => {
     let url: AdminUrlUtil

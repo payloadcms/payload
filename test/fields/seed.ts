@@ -1,8 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 
-import type { PayloadRequest } from '../../packages/payload/src/express/types'
-
 import { type Payload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { devUser } from '../credentials'
@@ -44,6 +42,38 @@ import { selectsDoc } from './collections/Select'
 import { tabsDoc } from './collections/Tabs'
 import { textDoc } from './collections/Text'
 import { uploadsDoc } from './collections/Upload'
+
+let dbSnapshot = {}
+
+async function createSnapshot(collectionsObj) {
+  console.log('Creating snapshot')
+  const snapshot = {}
+
+  // Assuming `collectionsObj` is an object where keys are names and values are collection references
+  for (const collectionName of Object.keys(collectionsObj)) {
+    const collection = collectionsObj[collectionName]
+    const documents = await collection.find({}).toArray() // Get all documents
+    snapshot[collectionName] = documents
+  }
+
+  dbSnapshot = snapshot // Save the snapshot in memory
+}
+
+async function restoreFromSnapshot(collectionsObj) {
+  if (!dbSnapshot) {
+    throw new Error('No snapshot found to restore from.')
+  }
+
+  // Assuming `collectionsObj` is an object where keys are names and values are collection references
+  for (const [name, documents] of Object.entries(dbSnapshot)) {
+    const collection = collectionsObj[name]
+    // You would typically clear the collection here, but as per your requirement, you do it manually
+    if ((documents as any[]).length > 0) {
+      await collection.insertMany(documents)
+    }
+  }
+}
+
 export async function clearAndSeedEverything(_payload: Payload) {
   // Reset DB
   const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads')
@@ -62,24 +92,22 @@ export async function clearAndSeedEverything(_payload: Payload) {
       return
     })
 
+  //const dbName = _payload.db.collections[collectionSlugs[0]].db.collections['']
+
   await Promise.all([
-    /*...collectionSlugs.map(async (collectionSlug) => {
- await _payload.db.collections[collectionSlug].db.dropDatabase()
-await _payload.delete({
-   collection: collectionSlug,
-   //req: {} as PayloadRequest,
-   where: {},
- })
-}),
-_payload.db.deleteMany({
- collection: 'payload-preferences',
- req: {} as PayloadRequest,
- where: {},
-}),*/
     _payload.db.collections[collectionSlugs[0]].db.dropDatabase(),
 
     clearUploadsDirPromise,
   ])
+
+  let restored = false
+  if (dbSnapshot && Object.keys(dbSnapshot).length) {
+    //console.log('Restoring')
+    const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
+    await restoreFromSnapshot(mongooseCollections)
+    //console.log('Snapshot restored')
+    restored = true
+  }
 
   // .db.dropDatabase() breaks indexes, so we need to recreate them
   await Promise.all([
@@ -87,6 +115,10 @@ _payload.db.deleteMany({
       await _payload.db.collections[collectionSlug].createIndexes()
     }),
   ])
+
+  if (restored) {
+    return
+  }
 
   // SEED
   const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg')
@@ -182,4 +214,9 @@ _payload.db.deleteMany({
     _payload.create({ collection: numberFieldsSlug, data: { number: 3 } }),
     _payload.create({ collection: numberFieldsSlug, data: numberDoc }),
   ])
+
+  const mongooseCollections2 = _payload.db.collections[collectionSlugs[0]].db.collections
+
+  await createSnapshot(mongooseCollections2)
+  //console.log('snapshot created')
 }
