@@ -63,19 +63,29 @@ export async function clearAndSeedEverything(_payload: Payload) {
     })
 
   await Promise.all([
-    ...collectionSlugs.map(async (collectionSlug) =>
-      _payload.delete({
-        collection: collectionSlug,
-        //req: {} as PayloadRequest,
-        where: {},
-      }),
-    ),
-    _payload.db.deleteMany({
-      collection: 'payload-preferences',
-      req: {} as PayloadRequest,
-      where: {},
-    }),
+    /*...collectionSlugs.map(async (collectionSlug) => {
+ await _payload.db.collections[collectionSlug].db.dropDatabase()
+await _payload.delete({
+   collection: collectionSlug,
+   //req: {} as PayloadRequest,
+   where: {},
+ })
+}),
+_payload.db.deleteMany({
+ collection: 'payload-preferences',
+ req: {} as PayloadRequest,
+ where: {},
+}),*/
+    _payload.db.collections[collectionSlugs[0]].db.dropDatabase(),
+
     clearUploadsDirPromise,
+  ])
+
+  // .db.dropDatabase() breaks indexes, so we need to recreate them
+  await Promise.all([
+    ...collectionSlugs.map(async (collectionSlug) => {
+      await _payload.db.collections[collectionSlug].createIndexes()
+    }),
   ])
 
   // SEED

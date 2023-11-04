@@ -34,7 +34,7 @@ describe('fields', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
-    console.log('Using serverURL', serverURL)
+    //console.log('Using serverURL', serverURL)
     client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
     await client.login()
 
@@ -182,13 +182,14 @@ describe('fields', () => {
           },
         },
       })
+
       await page.goto(url.create)
 
       await page.locator('#field-text').fill('test')
       await page.locator('#field-uniqueText').fill(uniqueText)
 
       // attempt to save
-      await page.locator('#action-save').click()
+      await page.click('#action-save', { delay: 100 })
 
       // toast error
       await expect(page.locator('.Toastify')).toContainText(
