@@ -5,6 +5,7 @@ import {
   HTMLConverterFeature,
   LexicalPluginToLexicalFeature,
   LinkFeature,
+  TestRecorderFeature,
   TreeviewFeature,
   UploadFeature,
   lexicalEditor,
@@ -36,12 +37,34 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'richTextLexicalSimple',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          TestRecorderFeature(),
+          TreeviewFeature(),
+          BlocksFeature({
+            blocks: [
+              RichTextBlock,
+              TextBlock,
+              UploadAndRichTextBlock,
+              SelectFieldBlock,
+              RelationshipBlock,
+              SubBlockBlock,
+            ],
+          }),
+        ],
+      }),
+    },
+    {
       name: 'richTextLexicalCustomFields',
       type: 'richText',
       required: true,
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          TestRecorderFeature(),
           TreeviewFeature(),
           HTMLConverterFeature(),
           LinkFeature({
