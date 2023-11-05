@@ -28,7 +28,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
 import wait from '../../packages/payload/src/utilities/wait'
-import { globalSlug } from '../admin/shared'
+import { globalSlug } from '../admin/slugs'
 import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
