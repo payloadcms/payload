@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { CodeField } from '../../payload-types'
 
-import { codeFieldsSlug } from '../../collectionSlugs'
+import { codeFieldsSlug } from '../../slugs'
 
 const Code: CollectionConfig = {
   fields: [

@@ -3,7 +3,6 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
-import type { PayloadRequest } from '../../packages/payload/src/express/types'
 import type { Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
@@ -20,6 +19,7 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import { clearAndSeedEverything } from './seed'
 import {
   customEditLabel,
   customNestedTabViewPath,
@@ -31,17 +31,19 @@ import {
   customTabViewTitle,
   customViewPath,
   customViewTitle,
-  customViews2Slug,
+  slugPluralLabel,
+} from './shared'
+import {
+  customViews2CollectionSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
-  noApiViewCollection,
-  noApiViewGlobal,
-  postsSlug,
-  slugPluralLabel,
-} from './shared'
+  noApiViewCollectionSlug,
+  noApiViewGlobalSlug,
+  postsCollectionSlug,
+} from './slugs'
 
-const { afterEach, beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 const title = 'Title'
 const description = 'Description'
@@ -54,29 +56,21 @@ describe('admin', () => {
 
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
-    await clearDocs() // Clear any seeded data from onInit
-    url = new AdminUrlUtil(serverURL, postsSlug)
-    customViewsURL = new AdminUrlUtil(serverURL, customViews2Slug)
+    url = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
   })
-
-  afterEach(async () => {
-    await clearDocs()
-    // clear preferences
-    await payload.db.deleteMany({
-      collection: 'payload-preferences',
-      req: {} as PayloadRequest,
-      where: {},
-    })
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
   })
 
   describe('Nav', () => {
     test('should nav to collection - nav', async () => {
       await page.goto(url.admin)
       await openNav(page)
-      await page.locator(`#nav-${postsSlug}`).click()
+      await page.locator(`#nav-${postsCollectionSlug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
@@ -90,7 +84,7 @@ describe('admin', () => {
     test('should navigate to collection - card', async () => {
       await page.goto(url.admin)
       await wait(200)
-      await page.locator(`#card-${postsSlug}`).click()
+      await page.locator(`#card-${postsCollectionSlug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
@@ -147,7 +141,7 @@ describe('admin', () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
       const collectionBreadcrumb = page.locator(
-        `.step-nav a[href="/admin/collections/${postsSlug}"]`,
+        `.step-nav a[href="/admin/collections/${postsCollectionSlug}"]`,
       )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
@@ -239,35 +233,35 @@ describe('admin', () => {
     })
 
     test('collection - should not show API tab when disabled in config', async () => {
-      await page.goto(url.collection(noApiViewCollection))
+      await page.goto(url.collection(noApiViewCollectionSlug))
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
     test('collection - should not enable API route when disabled in config', async () => {
       const collectionItems = await payload.find({
-        collection: noApiViewCollection,
+        collection: noApiViewCollectionSlug,
         limit: 1,
       })
       expect(collectionItems.docs.length).toBe(1)
-      await page.goto(`${url.collection(noApiViewCollection)}/${collectionItems.docs[0].id}/api`)
+      await page.goto(`${url.collection(noApiViewGlobalSlug)}/${collectionItems.docs[0].id}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
     test('global - should not show API tab when disabled in config', async () => {
-      await page.goto(url.global(noApiViewGlobal))
+      await page.goto(url.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
     test('global - should not enable API route when disabled in config', async () => {
-      await page.goto(`${url.global(noApiViewGlobal)}/api`)
+      await page.goto(`${url.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
   })
 
   describe('ui', () => {
     test('collection - should render preview button when `admin.preview` is set', async () => {
-      const collectionWithPreview = new AdminUrlUtil(serverURL, postsSlug)
+      const collectionWithPreview = new AdminUrlUtil(serverURL, postsCollectionSlug)
       await page.goto(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
@@ -406,9 +400,11 @@ describe('admin', () => {
     })
 
     test('should bulk delete', async () => {
-      await createPost()
-      await createPost()
-      await createPost()
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+
+      await Promise.all([createPost(), createPost(), createPost()])
+
       await page.goto(url.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
@@ -420,9 +416,10 @@ describe('admin', () => {
     })
 
     test('should bulk update', async () => {
-      await createPost()
-      await createPost()
-      await createPost()
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+
+      await Promise.all([createPost(), createPost(), createPost()])
 
       const bulkTitle = 'Bulk update title'
       await page.goto(url.list)
@@ -514,6 +511,9 @@ describe('admin', () => {
       })
 
       test('search by id', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         const { id } = await createPost()
         await page.locator('.search-filter__input').fill(id)
         const tableItems = page.locator(tableRowLocator)
@@ -534,6 +534,9 @@ describe('admin', () => {
       })
 
       test('toggle columns', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
 
@@ -592,6 +595,9 @@ describe('admin', () => {
       })
 
       test('filter rows', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         const { id } = await createPost({ title: 'post1' })
         await createPost({ title: 'post2' })
 
@@ -923,6 +929,9 @@ describe('admin', () => {
 
     describe('multi-select', () => {
       beforeEach(async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         await mapAsync([...Array(3)], async () => {
           await createPost()
         })
@@ -962,12 +971,6 @@ describe('admin', () => {
     })
 
     describe('pagination', () => {
-      beforeAll(async () => {
-        await mapAsync([...Array(11)], async () => {
-          await createPost()
-        })
-      })
-
       test('should paginate', async () => {
         const pageInfo = page.locator('.collection-list__page-info')
         const perPage = page.locator('.per-page')
@@ -999,13 +1002,18 @@ describe('admin', () => {
 
     // TODO: Troubleshoot flaky suite
     describe('sorting', () => {
-      beforeAll(async () => {
-        await createPost({
-          number: 1,
-        })
-        await createPost({
-          number: 2,
-        })
+      beforeEach(async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
+        await Promise.all([
+          createPost({
+            number: 1,
+          }),
+          createPost({
+            number: 2,
+          }),
+        ])
       })
 
       test('should sort', async () => {
@@ -1082,18 +1090,26 @@ describe('admin', () => {
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
-    collection: postsSlug,
+    collection: postsCollectionSlug,
     data: {
       description,
       title,
       ...overrides,
     },
-  })
+  }) as unknown as Promise<Post>
 }
 
-async function clearDocs(): Promise<void> {
-  await payload.delete({
-    collection: postsSlug,
-    where: { id: { exists: true } },
+async function deleteAllPosts() {
+  const posts = await payload.find({
+    collection: postsCollectionSlug,
+    limit: 100,
   })
+  await Promise.all([
+    ...posts.docs.map((post) => {
+      return payload.delete({
+        collection: postsCollectionSlug,
+        id: post.id,
+      })
+    }),
+  ])
 }

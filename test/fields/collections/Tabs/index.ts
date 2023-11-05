@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { tabsFieldsSlug } from '../../collectionSlugs'
+import { tabsFieldsSlug } from '../../slugs'
 import { getBlocksField, getBlocksFieldSeedData } from '../Blocks'
 import { UIField } from './UIField'
 import { localizedTextValue, namedTabDefaultValue, namedTabText } from './constants'

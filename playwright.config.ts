@@ -11,7 +11,7 @@ const config: PlaywrightTestConfig = {
     video: 'retain-on-failure',
   },
   expect: {
-    timeout: 20000,
+    timeout: 10000,
   },
   workers: 16,
 }

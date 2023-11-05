@@ -7,7 +7,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
-import { lexicalMigrateFieldsSlug } from '../../collectionSlugs'
+import { lexicalMigrateFieldsSlug } from '../../slugs'
 import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
 
 export const LexicalMigrateFields: CollectionConfig = {

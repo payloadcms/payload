@@ -10,7 +10,7 @@ import {
 } from '../../../../packages/richtext-lexical/src'
 import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/features/converters/html/field'
 import { slateEditor } from '../../../../packages/richtext-slate/src'
-import { richTextFieldsSlug } from '../../collectionSlugs'
+import { richTextFieldsSlug } from '../../slugs'
 import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
 import { generateLexicalRichText } from './generateLexicalRichText'
 import { generateSlateRichText } from './generateSlateRichText'

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { conditionalLogicSlug } from '../../collectionSlugs'
+import { conditionalLogicSlug } from '../../slugs'
 
 const ConditionalLogic: CollectionConfig = {
   slug: conditionalLogicSlug,

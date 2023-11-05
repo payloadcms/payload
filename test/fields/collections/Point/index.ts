@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { pointFieldsSlug } from '../../collectionSlugs'
+import { pointFieldsSlug } from '../../slugs'
 
 const PointFields: CollectionConfig = {
   slug: pointFieldsSlug,

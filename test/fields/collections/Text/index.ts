@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { textFieldsSlug } from '../../collectionSlugs'
+import { textFieldsSlug } from '../../slugs'
 
 export const defaultText = 'default-text'
 

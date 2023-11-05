@@ -10,7 +10,7 @@ import {
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
-import { lexicalFieldsSlug } from '../../collectionSlugs'
+import { lexicalFieldsSlug } from '../../slugs'
 import {
   RelationshipBlock,
   RichTextBlock,

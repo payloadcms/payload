@@ -5,7 +5,6 @@ import { sql } from 'drizzle-orm'
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
 import type { Payload } from '../../packages/payload/src'
 
-import { collectionSlugs } from '../fields/collectionSlugs'
 import { isMongoose } from './isMongoose'
 
 export const dbSnapshot = {}
@@ -88,7 +87,11 @@ async function restoreFromDrizzleSnapshot(db: PostgresAdapter, snapshotKey: stri
   })
 }
 
-export async function createSnapshot(_payload: Payload, snapshotKey: string) {
+export async function createSnapshot(
+  _payload: Payload,
+  snapshotKey: string,
+  collectionSlugs: string[],
+) {
   if (isMongoose(_payload)) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
 
@@ -103,7 +106,11 @@ export async function createSnapshot(_payload: Payload, snapshotKey: string) {
  * Make sure to delete the db before calling this function
  * @param _payload
  */
-export async function restoreFromSnapshot(_payload: Payload, snapshotKey: string) {
+export async function restoreFromSnapshot(
+  _payload: Payload,
+  snapshotKey: string,
+  collectionSlugs: string[],
+) {
   if (isMongoose(_payload)) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
     await restoreFromMongooseSnapshot(mongooseCollections, snapshotKey)

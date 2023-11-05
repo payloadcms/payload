@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { relationshipFieldsSlug } from '../../collectionSlugs'
+import { relationshipFieldsSlug } from '../../slugs'
 
 const RelationshipFields: CollectionConfig = {
   fields: [

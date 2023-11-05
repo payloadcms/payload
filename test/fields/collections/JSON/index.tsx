@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { jsonFieldsSlug } from '../../collectionSlugs'
+import { jsonFieldsSlug } from '../../slugs'
 
 type JSONField = {
   createdAt: string

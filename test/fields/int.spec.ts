@@ -11,12 +11,6 @@ import { initPayloadTest } from '../helpers/configHelpers'
 import { isMongoose } from '../helpers/isMongoose'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
-import {
-  arrayFieldsSlug,
-  groupFieldsSlug,
-  relationshipFieldsSlug,
-  tabsFieldsSlug,
-} from './collectionSlugs'
 import { arrayDefaultValue } from './collections/Array'
 import { blocksDoc } from './collections/Blocks'
 import { dateDoc } from './collections/Date'
@@ -31,6 +25,7 @@ import {
 } from './collections/Tabs/constants'
 import { defaultText } from './collections/Text'
 import { clearAndSeedEverything } from './seed'
+import { arrayFieldsSlug, groupFieldsSlug, relationshipFieldsSlug, tabsFieldsSlug } from './slugs'
 
 let client
 let graphQLClient: GraphQLClient

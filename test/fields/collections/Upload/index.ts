@@ -2,7 +2,7 @@ import path from 'path'
 
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { uploadsSlug } from '../../collectionSlugs'
+import { uploadsSlug } from '../../slugs'
 
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,

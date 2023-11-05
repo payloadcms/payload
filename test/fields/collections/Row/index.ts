@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { rowFieldsSlug } from '../../collectionSlugs'
+import { rowFieldsSlug } from '../../slugs'
 
 const RowFields: CollectionConfig = {
   slug: rowFieldsSlug,

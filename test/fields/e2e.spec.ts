@@ -10,18 +10,18 @@ import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
+import { jsonDoc } from './collections/JSON'
+import { numberDoc } from './collections/Number'
+import { textDoc } from './collections/Text'
+import { lexicalE2E } from './lexicalE2E'
+import { clearAndSeedEverything } from './seed'
 import {
   collapsibleFieldsSlug,
   pointFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
-} from './collectionSlugs'
-import { jsonDoc } from './collections/JSON'
-import { numberDoc } from './collections/Number'
-import { textDoc } from './collections/Text'
-import { lexicalE2E } from './lexicalE2E'
-import { clearAndSeedEverything } from './seed'
+} from './slugs'
 
 const { afterEach, beforeAll, describe, beforeEach } = test
 

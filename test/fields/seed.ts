@@ -4,6 +4,23 @@ import { type Payload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { devUser } from '../credentials'
 import { seedDB } from '../helpers/seed'
+import { arrayDoc } from './collections/Array'
+import { blocksDoc } from './collections/Blocks'
+import { codeDoc } from './collections/Code'
+import { collapsibleDoc } from './collections/Collapsible'
+import { conditionalLogicDoc } from './collections/ConditionalLogic'
+import { dateDoc } from './collections/Date'
+import { groupDoc } from './collections/Group'
+import { jsonDoc } from './collections/JSON'
+import { lexicalRichTextDoc } from './collections/Lexical/data'
+import { numberDoc } from './collections/Number'
+import { pointDoc } from './collections/Point'
+import { radiosDoc } from './collections/Radio'
+import { richTextBulletsDoc, richTextDoc } from './collections/RichText/data'
+import { selectsDoc } from './collections/Select'
+import { tabsDoc } from './collections/Tabs'
+import { textDoc } from './collections/Text'
+import { uploadsDoc } from './collections/Upload'
 import {
   blockFieldsSlug,
   codeFieldsSlug,
@@ -24,24 +41,7 @@ import {
   textFieldsSlug,
   uploadsSlug,
   usersSlug,
-} from './collectionSlugs'
-import { arrayDoc } from './collections/Array'
-import { blocksDoc } from './collections/Blocks'
-import { codeDoc } from './collections/Code'
-import { collapsibleDoc } from './collections/Collapsible'
-import { conditionalLogicDoc } from './collections/ConditionalLogic'
-import { dateDoc } from './collections/Date'
-import { groupDoc } from './collections/Group'
-import { jsonDoc } from './collections/JSON'
-import { lexicalRichTextDoc } from './collections/Lexical/data'
-import { numberDoc } from './collections/Number'
-import { pointDoc } from './collections/Point'
-import { radiosDoc } from './collections/Radio'
-import { richTextBulletsDoc, richTextDoc } from './collections/RichText/data'
-import { selectsDoc } from './collections/Select'
-import { tabsDoc } from './collections/Tabs'
-import { textDoc } from './collections/Text'
-import { uploadsDoc } from './collections/Upload'
+} from './slugs'
 
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({

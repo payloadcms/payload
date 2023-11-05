@@ -11,10 +11,10 @@ type SeedFunction = (_payload: Payload) => Promise<void>
 export async function seedDB({
   shouldResetDB,
   _payload,
-  collectionSlugs,
   snapshotKey,
   seedFunction,
   uploadsDir,
+  collectionSlugs,
 }: {
   _payload: Payload
   collectionSlugs: string[]
@@ -49,7 +49,7 @@ export async function seedDB({
         })
     }
 
-    await Promise.all([resetDB(_payload), clearUploadsDirPromise])
+    await Promise.all([resetDB(_payload, collectionSlugs), clearUploadsDirPromise])
   }
 
   /**
@@ -61,7 +61,7 @@ export async function seedDB({
     Object.keys(dbSnapshot[snapshotKey]).length &&
     isMongoose(_payload)
   ) {
-    await restoreFromSnapshot(_payload, snapshotKey)
+    await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
     restored = true
   }
 
@@ -98,7 +98,7 @@ export async function seedDB({
     !isMongoose(_payload)
   ) {
     //console.log('Restoring')
-    await restoreFromSnapshot(_payload, snapshotKey)
+    await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
     //console.log('Snapshot restored')
     restored = true
   }
@@ -115,5 +115,5 @@ export async function seedDB({
    **/
   await seedFunction(_payload)
 
-  await createSnapshot(_payload, snapshotKey)
+  await createSnapshot(_payload, snapshotKey, collectionSlugs)
 }
