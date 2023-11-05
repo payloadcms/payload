@@ -4,6 +4,9 @@ import path from 'path'
 import { type Payload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { devUser } from '../credentials'
+import { isMongoose } from '../helpers/isMongoose'
+import { resetDB } from '../helpers/reset'
+import { createSnapshot, dbSnapshot, restoreFromSnapshot } from '../helpers/snapshot'
 import {
   blockFieldsSlug,
   codeFieldsSlug,
@@ -43,41 +46,11 @@ import { tabsDoc } from './collections/Tabs'
 import { textDoc } from './collections/Text'
 import { uploadsDoc } from './collections/Upload'
 
-let dbSnapshot = {}
-
-async function createSnapshot(collectionsObj) {
-  console.log('Creating snapshot')
-  const snapshot = {}
-
-  // Assuming `collectionsObj` is an object where keys are names and values are collection references
-  for (const collectionName of Object.keys(collectionsObj)) {
-    const collection = collectionsObj[collectionName]
-    const documents = await collection.find({}).toArray() // Get all documents
-    snapshot[collectionName] = documents
-  }
-
-  dbSnapshot = snapshot // Save the snapshot in memory
-}
-
-async function restoreFromSnapshot(collectionsObj) {
-  if (!dbSnapshot) {
-    throw new Error('No snapshot found to restore from.')
-  }
-
-  // Assuming `collectionsObj` is an object where keys are names and values are collection references
-  for (const [name, documents] of Object.entries(dbSnapshot)) {
-    const collection = collectionsObj[name]
-    // You would typically clear the collection here, but as per your requirement, you do it manually
-    if ((documents as any[]).length > 0) {
-      await collection.insertMany(documents)
-    }
-  }
-}
-
 export async function clearAndSeedEverything(_payload: Payload) {
-  // Reset DB
+  /**
+   * Reset database and delete uploads directory
+   */
   const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads')
-  // Prepare the filesystem operation as a promise
   const clearUploadsDirPromise = fs.promises
     .access(uploadsDir)
     .then(() => fs.promises.readdir(uploadsDir))
@@ -91,36 +64,59 @@ export async function clearAndSeedEverything(_payload: Payload) {
       // If the directory does not exist, resolve the promise (nothing to clear)
       return
     })
+  await Promise.all([resetDB(_payload), clearUploadsDirPromise])
 
-  //const dbName = _payload.db.collections[collectionSlugs[0]].db.collections['']
-
-  await Promise.all([
-    _payload.db.collections[collectionSlugs[0]].db.dropDatabase(),
-
-    clearUploadsDirPromise,
-  ])
-
+  /**
+   * Mongoose-Only: Restore snapshot of old data if available
+   */
   let restored = false
-  if (dbSnapshot && Object.keys(dbSnapshot).length) {
+  if (dbSnapshot && Object.keys(dbSnapshot).length && isMongoose(_payload)) {
+    await restoreFromSnapshot(_payload)
+    restored = true
+  }
+
+  /**
+   *  Mongoose: Re-create indexes
+   *  Postgres: Re-Init the db to create all tables and indexes
+   */
+  // dropping the db breaks indexes (on mongoose - did not test on postgres yet), so we recreate them here
+  if (isMongoose(_payload)) {
+    await Promise.all([
+      ...collectionSlugs.map(async (collectionSlug) => {
+        await _payload.db.collections[collectionSlug].createIndexes()
+      }),
+    ])
+  } else {
+    // Run the db adapter's init method. For postgres, this seems to also create the indexes
+    if (_payload?.db) {
+      //await _payload.db.init(_payload) // TODO: Maybe we can do this for mongoose as well, rather than running createIndexes() manually?
+      //process.env.PAYLOAD_DROP_DATABASE = 'false'
+      //await _payload.db.connect(_payload)
+    }
+  }
+
+  /**
+   * Postgres: Restore snapshot of old data if available. For postgres, this needs to happen AFTER the tables were created
+   *
+   * This does not work if I run payload.db.init or payload.db.connect anywhere. Thus, when resetting the database, we are not dropping the schema, but are instead only deleting the table values
+   */
+  if (true && dbSnapshot && Object.keys(dbSnapshot).length && !isMongoose(_payload)) {
     //console.log('Restoring')
-    const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
-    await restoreFromSnapshot(mongooseCollections)
+    await restoreFromSnapshot(_payload)
     //console.log('Snapshot restored')
     restored = true
   }
 
-  // .db.dropDatabase() breaks indexes, so we need to recreate them
-  await Promise.all([
-    ...collectionSlugs.map(async (collectionSlug) => {
-      await _payload.db.collections[collectionSlug].createIndexes()
-    }),
-  ])
-
+  /**
+   * If a snapshot was restored, we don't need to seed the database
+   */
   if (restored) {
     return
   }
 
-  // SEED
+  /**
+   * Seed the database with data and save it to a snapshot
+   **/
   const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg')
   const pngPath = path.resolve(__dirname, './uploads/payload.png')
 
@@ -168,9 +164,7 @@ export async function clearAndSeedEverything(_payload: Payload) {
 
   const blocksDocWithRichText = { ...blocksDoc }
 
-  // @ts-ignore
   blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
-  // @ts-ignore
   blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
 
   const lexicalRichTextDocWithRelId = JSON.parse(
@@ -215,8 +209,5 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload.create({ collection: numberFieldsSlug, data: numberDoc }),
   ])
 
-  const mongooseCollections2 = _payload.db.collections[collectionSlugs[0]].db.collections
-
-  await createSnapshot(mongooseCollections2)
-  //console.log('snapshot created')
+  await createSnapshot(_payload)
 }

@@ -41,7 +41,7 @@ describe('fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
   })
-  beforeEach(async ({ browser }) => {
+  beforeEach(async () => {
     await clearAndSeedEverything(payload)
     await client.logout()
     client = new RESTClient(null, { serverURL, defaultSlug: 'users' })

@@ -8,28 +8,29 @@ import type { RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
+import { isMongoose } from '../helpers/isMongoose'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
-import { arrayDefaultValue, arrayFieldsSlug } from './collections/Array'
+import {
+  arrayFieldsSlug,
+  groupFieldsSlug,
+  relationshipFieldsSlug,
+  tabsFieldsSlug,
+} from './collectionSlugs'
+import { arrayDefaultValue } from './collections/Array'
 import { blocksDoc } from './collections/Blocks'
 import { dateDoc } from './collections/Date'
-import {
-  groupDefaultChild,
-  groupDefaultValue,
-  groupDoc,
-  groupFieldsSlug,
-} from './collections/Group'
+import { groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group'
 import { defaultNumber, numberDoc } from './collections/Number'
 import { pointDoc } from './collections/Point'
-import { relationshipFieldsSlug } from './collections/Relationship'
 import { tabsDoc } from './collections/Tabs'
 import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
-  tabsSlug,
 } from './collections/Tabs/constants'
 import { defaultText } from './collections/Text'
+import { clearAndSeedEverything } from './seed'
 
 let client
 let graphQLClient: GraphQLClient
@@ -48,10 +49,16 @@ describe('Fields', () => {
     token = await client.login()
   })
 
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
+    await client.login()
+  })
+
   describe('text', () => {
     let doc
     const text = 'text field'
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'text-fields',
         data: { text },
@@ -86,7 +93,7 @@ describe('Fields', () => {
     const otherTextDocText = 'alt text'
     const relationshipText = 'relationship text'
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       textDoc = await payload.create({
         collection: 'text-fields',
         data: {
@@ -193,7 +200,7 @@ describe('Fields', () => {
   describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
     let doc
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'date-fields',
         data: dateDoc,
@@ -231,7 +238,7 @@ describe('Fields', () => {
 
   describe('select', () => {
     let doc
-    beforeAll(async () => {
+    beforeEach(async () => {
       const { id } = await payload.create({
         collection: 'select-fields',
         data: {
@@ -273,7 +280,7 @@ describe('Fields', () => {
 
   describe('number', () => {
     let doc
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'number-fields',
         data: numberDoc,
@@ -375,13 +382,13 @@ describe('Fields', () => {
     })
   })
 
-  if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+  if (isMongoose(payload)) {
     describe('indexes', () => {
       let indexes
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeAll(() => {
+      beforeEach(() => {
         indexes = (payload.db as MongooseAdapter).collections[
           'indexed-fields'
         ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
@@ -434,7 +441,7 @@ describe('Fields', () => {
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeAll(() => {
+      beforeEach(() => {
         indexes = (payload.db as MongooseAdapter).versions['indexed-fields'].schema.indexes() as [
           Record<string, IndexDirection>,
           IndexOptions,
@@ -458,7 +465,7 @@ describe('Fields', () => {
       const localized = [5, -2]
       const group = { point: [1, 9] }
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         const findDoc = await payload.find({
           collection: 'point-fields',
           pagination: false,
@@ -546,7 +553,7 @@ describe('Fields', () => {
     let doc
     const collection = arrayFieldsSlug
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection,
         data: {},
@@ -611,7 +618,7 @@ describe('Fields', () => {
   describe('group', () => {
     let document
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
@@ -627,9 +634,9 @@ describe('Fields', () => {
   describe('tabs', () => {
     let document
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       document = await payload.create({
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         data: tabsDoc,
       })
     })
@@ -649,7 +656,7 @@ describe('Fields', () => {
     it('should create with localized text inside a named tab', async () => {
       document = await payload.findByID({
         id: document.id,
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         locale: 'all',
       })
       expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue)
@@ -658,7 +665,7 @@ describe('Fields', () => {
     it('should allow access control on a named tab', async () => {
       document = await payload.findByID({
         id: document.id,
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         overrideAccess: false,
       })
       expect(document.accessControlTab).toBeUndefined()
@@ -666,7 +673,7 @@ describe('Fields', () => {
 
     it('should allow hooks on a named tab', async () => {
       const newDocument = await payload.create({
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         data: tabsDoc,
       })
       expect(newDocument.hooksTab.beforeValidate).toBe(true)
