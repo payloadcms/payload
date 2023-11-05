@@ -80,8 +80,6 @@ export default buildConfigWithDefaults({
         alias: {
           ...config?.resolve?.alias,
           fs: path.resolve(__dirname, './mocks/emptyModule.js'),
-          // alias ./seed.ts
-          //[path.resolve(__dirname, './seed.ts')]: path.resolve(__dirname, './mocks/emptyModule.js'),
         },
       },
     }),

@@ -11,8 +11,7 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
   } else {
     const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
 
-    /*await db.drizzle.execute(sql`drop schema public cascade;
-      create schema public;`)*/
+    // Alternative to: await db.drizzle.execute(sql`drop schema public cascade; create schema public;`)
 
     // Deleting the schema causes issues when restoring the database from a snapshot later on. That's why we only delete the table data here,
     // To avoid having to re-create any table schemas / indexes / whatever

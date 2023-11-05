@@ -28,13 +28,12 @@ const { afterEach, beforeAll, describe, beforeEach } = test
 let client: RESTClient
 let page: Page
 let serverURL: string
-//test.describe.configure({ mode: 'parallel' })
+// If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
-    //console.log('Using serverURL', serverURL)
     client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
     await client.login()
 
@@ -46,13 +45,6 @@ describe('fields', () => {
     await client.logout()
     client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
     await client.login()
-    /*for (const context of browser.contexts()) {
-      await context.close()
-    }
-    const context = await browser.newContext()
-    page = await context.newPage()
-
-    await page.reload()*/
   })
   describe('text', () => {
     let url: AdminUrlUtil

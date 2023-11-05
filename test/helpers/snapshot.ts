@@ -10,7 +10,6 @@ import { isMongoose } from './isMongoose'
 export const dbSnapshot = {}
 
 async function createMongooseSnapshot(collectionsObj, snapshotKey: string) {
-  //console.log('Creating snapshot')
   const snapshot = {}
 
   // Assuming `collectionsObj` is an object where keys are names and values are collection references
@@ -24,8 +23,6 @@ async function createMongooseSnapshot(collectionsObj, snapshotKey: string) {
 }
 
 async function restoreFromMongooseSnapshot(collectionsObj, snapshotKey: string) {
-  //console.log('Restoring snapshot')
-
   if (!dbSnapshot[snapshotKey]) {
     throw new Error('No snapshot found to restore from.')
   }
@@ -71,7 +68,7 @@ async function restoreFromDrizzleSnapshot(db: PostgresAdapter, snapshotKey: stri
     try {
       for (const tableName in dbSnapshot[snapshotKey]) {
         const table = db.drizzle.query[tableName]['fullSchema'][tableName]
-        await trx.delete(table).execute() // This deletes all records from the table // shouldn't be necessary, as I'm deleting the table before restoring anyways
+        await trx.delete(table).execute() // This deletes all records from the table. Probably not necessary, as I'm deleting the table before restoring anyways
 
         const records = dbSnapshot[snapshotKey][tableName]
         if (records.length > 0) {

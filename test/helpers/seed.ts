@@ -77,13 +77,6 @@ export async function seedDB({
           await _payload.db.collections[collectionSlug].createIndexes()
         }),
       ])
-    } else {
-      // Run the db adapter's init method. For postgres, this seems to also create the indexes
-      if (_payload?.db) {
-        //await _payload.db.init(_payload) // Maybe we can do this for mongoose as well, rather than running createIndexes() manually?
-        //process.env.PAYLOAD_DROP_DATABASE = 'false'
-        //await _payload.db.connect(_payload)
-      }
     }
   }
 
@@ -97,9 +90,7 @@ export async function seedDB({
     Object.keys(dbSnapshot[snapshotKey]).length &&
     !isMongoose(_payload)
   ) {
-    //console.log('Restoring')
     await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
-    //console.log('Snapshot restored')
     restored = true
   }
 
