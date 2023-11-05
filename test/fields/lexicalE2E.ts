@@ -6,8 +6,6 @@ import type { RESTClient } from '../helpers/rest'
 
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 
-//import { clearAndSeedEverything } from './seed'
-
 const { describe } = test
 
 export const lexicalE2E = (client: RESTClient, page: Page, serverURL: string) => {
@@ -19,10 +17,10 @@ export const lexicalE2E = (client: RESTClient, page: Page, serverURL: string) =>
 
   return () => {
     describe('todo', () => {
-      test.skip('should run url validation', async () => {
+      test.skip('todo', async () => {
         await navigateToRichTextFields()
 
-        await page.locator('').first().click()
+        await page.locator('todo').first().click()
       })
     })
   }
