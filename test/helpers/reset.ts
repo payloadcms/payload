@@ -15,6 +15,8 @@ export async function resetDB(_payload: Payload) {
     /*await db.drizzle.execute(sql`drop schema public cascade;
       create schema public;`)*/
 
+    // Deleting the schema causes issues when restoring the database from a snapshot later on. That's why we only delete the table data here,
+    // To avoid having to re-create any table schemas / indexes / whatever
     const schema = db.drizzle._.schema
     if (!schema) {
       return

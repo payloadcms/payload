@@ -8,9 +8,9 @@ import type { Payload } from '../../packages/payload/src'
 import { collectionSlugs } from '../fields/collectionSlugs'
 import { isMongoose } from './isMongoose'
 
-export let dbSnapshot = {}
+export const dbSnapshot = {}
 
-async function createMongooseSnapshot(collectionsObj) {
+async function createMongooseSnapshot(collectionsObj, snapshotKey: string) {
   //console.log('Creating snapshot')
   const snapshot = {}
 
@@ -21,18 +21,18 @@ async function createMongooseSnapshot(collectionsObj) {
     snapshot[collectionName] = documents
   }
 
-  dbSnapshot = snapshot // Save the snapshot in memory
+  dbSnapshot[snapshotKey] = snapshot // Save the snapshot in memory
 }
 
-async function restoreFromMongooseSnapshot(collectionsObj) {
+async function restoreFromMongooseSnapshot(collectionsObj, snapshotKey: string) {
   //console.log('Restoring snapshot')
 
-  if (!dbSnapshot) {
+  if (!dbSnapshot[snapshotKey]) {
     throw new Error('No snapshot found to restore from.')
   }
 
   // Assuming `collectionsObj` is an object where keys are names and values are collection references
-  for (const [name, documents] of Object.entries(dbSnapshot)) {
+  for (const [name, documents] of Object.entries(dbSnapshot[snapshotKey])) {
     const collection = collectionsObj[name]
     // You would typically clear the collection here, but as per your requirement, you do it manually
     if ((documents as any[]).length > 0) {
@@ -41,7 +41,7 @@ async function restoreFromMongooseSnapshot(collectionsObj) {
   }
 }
 
-async function createDrizzleSnapshot(db: PostgresAdapter) {
+async function createDrizzleSnapshot(db: PostgresAdapter, snapshotKey: string) {
   const snapshot = {}
 
   const schema: Record<string, PgTable> = db.drizzle._.schema
@@ -55,11 +55,11 @@ async function createDrizzleSnapshot(db: PostgresAdapter) {
     snapshot[tableName] = records
   }
 
-  dbSnapshot = snapshot
+  dbSnapshot[snapshotKey] = snapshot
 }
 
-async function restoreFromDrizzleSnapshot(db: PostgresAdapter) {
-  if (!dbSnapshot) {
+async function restoreFromDrizzleSnapshot(db: PostgresAdapter, snapshotKey: string) {
+  if (!dbSnapshot[snapshotKey]) {
     throw new Error('No snapshot found to restore from.')
   }
 
@@ -70,11 +70,11 @@ async function restoreFromDrizzleSnapshot(db: PostgresAdapter) {
     // Temporarily disable foreign key constraint checks
     await trx.execute(disableFKConstraintChecksQuery)
     try {
-      for (const tableName in dbSnapshot) {
+      for (const tableName in dbSnapshot[snapshotKey]) {
         const table = db.drizzle.query[tableName]['fullSchema'][tableName]
         await trx.delete(table).execute() // This deletes all records from the table // shouldn't be necessary, as I'm deleting the table before restoring anyways
 
-        const records = dbSnapshot[tableName]
+        const records = dbSnapshot[snapshotKey][tableName]
         if (records.length > 0) {
           await trx.insert(table).values(records).execute()
         }
@@ -88,14 +88,14 @@ async function restoreFromDrizzleSnapshot(db: PostgresAdapter) {
   })
 }
 
-export async function createSnapshot(_payload: Payload) {
+export async function createSnapshot(_payload: Payload, snapshotKey: string) {
   if (isMongoose(_payload)) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
 
-    await createMongooseSnapshot(mongooseCollections)
+    await createMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {
     const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
-    await createDrizzleSnapshot(db)
+    await createDrizzleSnapshot(db, snapshotKey)
   }
 }
 
@@ -103,12 +103,12 @@ export async function createSnapshot(_payload: Payload) {
  * Make sure to delete the db before calling this function
  * @param _payload
  */
-export async function restoreFromSnapshot(_payload: Payload) {
+export async function restoreFromSnapshot(_payload: Payload, snapshotKey: string) {
   if (isMongoose(_payload)) {
     const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
-    await restoreFromMongooseSnapshot(mongooseCollections)
+    await restoreFromMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {
     const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
-    await restoreFromDrizzleSnapshot(db)
+    await restoreFromDrizzleSnapshot(db, snapshotKey)
   }
 }

@@ -1,12 +1,9 @@
-import fs from 'fs'
 import path from 'path'
 
 import { type Payload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { devUser } from '../credentials'
-import { isMongoose } from '../helpers/isMongoose'
-import { resetDB } from '../helpers/reset'
-import { createSnapshot, dbSnapshot, restoreFromSnapshot } from '../helpers/snapshot'
+import { seedDB } from '../helpers/seed'
 import {
   blockFieldsSlug,
   codeFieldsSlug,
@@ -47,167 +44,104 @@ import { textDoc } from './collections/Text'
 import { uploadsDoc } from './collections/Upload'
 
 export async function clearAndSeedEverything(_payload: Payload) {
-  /**
-   * Reset database and delete uploads directory
-   */
-  const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads')
-  const clearUploadsDirPromise = fs.promises
-    .access(uploadsDir)
-    .then(() => fs.promises.readdir(uploadsDir))
-    .then((files) => Promise.all(files.map((file) => fs.promises.rm(path.join(uploadsDir, file)))))
-    .catch((error) => {
-      if (error.code !== 'ENOENT') {
-        // If the error is not because the directory doesn't exist
-        console.error('Error clearing the uploads directory:', error)
-        throw error
-      }
-      // If the directory does not exist, resolve the promise (nothing to clear)
-      return
-    })
-  await Promise.all([resetDB(_payload), clearUploadsDirPromise])
+  return await seedDB({
+    snapshotKey: 'fieldsTest',
+    shouldResetDB: true,
+    collectionSlugs,
+    _payload,
+    uploadsDir: path.resolve(__dirname, './collections/Upload/uploads'),
+    seedFunction: async (_payload) => {
+      const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg')
+      const pngPath = path.resolve(__dirname, './uploads/payload.png')
 
-  /**
-   * Mongoose-Only: Restore snapshot of old data if available
-   */
-  let restored = false
-  if (dbSnapshot && Object.keys(dbSnapshot).length && isMongoose(_payload)) {
-    await restoreFromSnapshot(_payload)
-    restored = true
-  }
+      // Get both files in parallel
+      const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
 
-  /**
-   *  Mongoose: Re-create indexes
-   *  Postgres: Re-Init the db to create all tables and indexes
-   */
-  // dropping the db breaks indexes (on mongoose - did not test on postgres yet), so we recreate them here
-  if (isMongoose(_payload)) {
-    await Promise.all([
-      ...collectionSlugs.map(async (collectionSlug) => {
-        await _payload.db.collections[collectionSlug].createIndexes()
-      }),
-    ])
-  } else {
-    // Run the db adapter's init method. For postgres, this seems to also create the indexes
-    if (_payload?.db) {
-      //await _payload.db.init(_payload) // TODO: Maybe we can do this for mongoose as well, rather than running createIndexes() manually?
-      //process.env.PAYLOAD_DROP_DATABASE = 'false'
-      //await _payload.db.connect(_payload)
-    }
-  }
+      const [createdArrayDoc, createdTextDoc, createdPNGDoc] = await Promise.all([
+        _payload.create({ collection: 'array-fields', data: arrayDoc }),
+        _payload.create({ collection: textFieldsSlug, data: textDoc }),
+        _payload.create({ collection: uploadsSlug, data: {}, file: pngFile }),
+      ])
 
-  /**
-   * Postgres: Restore snapshot of old data if available. For postgres, this needs to happen AFTER the tables were created
-   *
-   * This does not work if I run payload.db.init or payload.db.connect anywhere. Thus, when resetting the database, we are not dropping the schema, but are instead only deleting the table values
-   */
-  if (true && dbSnapshot && Object.keys(dbSnapshot).length && !isMongoose(_payload)) {
-    //console.log('Restoring')
-    await restoreFromSnapshot(_payload)
-    //console.log('Snapshot restored')
-    restored = true
-  }
+      const createdJPGDoc = await _payload.create({
+        collection: uploadsSlug,
+        data: {
+          ...uploadsDoc,
+          media: createdPNGDoc.id,
+        },
+        file: jpgFile,
+      })
 
-  /**
-   * If a snapshot was restored, we don't need to seed the database
-   */
-  if (restored) {
-    return
-  }
+      const formattedID =
+        _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
 
-  /**
-   * Seed the database with data and save it to a snapshot
-   **/
-  const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg')
-  const pngPath = path.resolve(__dirname, './uploads/payload.png')
+      const formattedJPGID =
+        _payload.db.defaultIDType === 'number' ? createdJPGDoc.id : `"${createdJPGDoc.id}"`
 
-  // Get both files in parallel
-  const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
+      const formattedTextID =
+        _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
 
-  const [createdArrayDoc, createdTextDoc, createdPNGDoc] = await Promise.all([
-    _payload.create({ collection: 'array-fields', data: arrayDoc }),
-    _payload.create({ collection: textFieldsSlug, data: textDoc }),
-    _payload.create({ collection: uploadsSlug, data: {}, file: pngFile }),
-  ])
+      const richTextDocWithRelId = JSON.parse(
+        JSON.stringify(richTextDoc)
+          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+      )
+      const richTextBulletsDocWithRelId = JSON.parse(
+        JSON.stringify(richTextBulletsDoc)
+          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+      )
 
-  const createdJPGDoc = await _payload.create({
-    collection: uploadsSlug,
-    data: {
-      ...uploadsDoc,
-      media: createdPNGDoc.id,
+      const richTextDocWithRelationship = { ...richTextDocWithRelId }
+
+      const blocksDocWithRichText = { ...blocksDoc }
+
+      blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
+      blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
+
+      const lexicalRichTextDocWithRelId = JSON.parse(
+        JSON.stringify(lexicalRichTextDoc)
+          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+      )
+
+      await Promise.all([
+        _payload.create({
+          collection: usersSlug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        }),
+        _payload.create({ collection: collapsibleFieldsSlug, data: collapsibleDoc }),
+        _payload.create({ collection: conditionalLogicSlug, data: conditionalLogicDoc }),
+        _payload.create({ collection: groupFieldsSlug, data: groupDoc }),
+        _payload.create({ collection: selectFieldsSlug, data: selectsDoc }),
+        _payload.create({ collection: radioFieldsSlug, data: radiosDoc }),
+        _payload.create({ collection: tabsFieldsSlug, data: tabsDoc }),
+        _payload.create({ collection: pointFieldsSlug, data: pointDoc }),
+        _payload.create({ collection: dateFieldsSlug, data: dateDoc }),
+        _payload.create({ collection: codeFieldsSlug, data: codeDoc }),
+        _payload.create({ collection: jsonFieldsSlug, data: jsonDoc }),
+
+        _payload.create({ collection: blockFieldsSlug, data: blocksDocWithRichText }),
+
+        _payload.create({ collection: lexicalFieldsSlug, data: lexicalRichTextDocWithRelId }),
+        _payload.create({
+          collection: lexicalMigrateFieldsSlug,
+          data: lexicalRichTextDocWithRelId,
+        }),
+
+        _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId }),
+        _payload.create({ collection: richTextFieldsSlug, data: richTextDocWithRelationship }),
+
+        _payload.create({ collection: numberFieldsSlug, data: { number: 2 } }),
+        _payload.create({ collection: numberFieldsSlug, data: { number: 3 } }),
+        _payload.create({ collection: numberFieldsSlug, data: numberDoc }),
+      ])
     },
-    file: jpgFile,
   })
-
-  const formattedID =
-    _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
-
-  const formattedJPGID =
-    _payload.db.defaultIDType === 'number' ? createdJPGDoc.id : `"${createdJPGDoc.id}"`
-
-  const formattedTextID =
-    _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
-
-  const richTextDocWithRelId = JSON.parse(
-    JSON.stringify(richTextDoc)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
-  const richTextBulletsDocWithRelId = JSON.parse(
-    JSON.stringify(richTextBulletsDoc)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
-
-  const richTextDocWithRelationship = { ...richTextDocWithRelId }
-
-  const blocksDocWithRichText = { ...blocksDoc }
-
-  blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
-  blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
-
-  const lexicalRichTextDocWithRelId = JSON.parse(
-    JSON.stringify(lexicalRichTextDoc)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
-
-  await Promise.all([
-    _payload.create({
-      collection: usersSlug,
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    }),
-    _payload.create({ collection: collapsibleFieldsSlug, data: collapsibleDoc }),
-    _payload.create({ collection: conditionalLogicSlug, data: conditionalLogicDoc }),
-    _payload.create({ collection: groupFieldsSlug, data: groupDoc }),
-    _payload.create({ collection: selectFieldsSlug, data: selectsDoc }),
-    _payload.create({ collection: radioFieldsSlug, data: radiosDoc }),
-    _payload.create({ collection: tabsFieldsSlug, data: tabsDoc }),
-    _payload.create({ collection: pointFieldsSlug, data: pointDoc }),
-    _payload.create({ collection: dateFieldsSlug, data: dateDoc }),
-    _payload.create({ collection: codeFieldsSlug, data: codeDoc }),
-    _payload.create({ collection: jsonFieldsSlug, data: jsonDoc }),
-
-    _payload.create({ collection: blockFieldsSlug, data: blocksDocWithRichText }),
-
-    _payload.create({ collection: lexicalFieldsSlug, data: lexicalRichTextDocWithRelId }),
-    _payload.create({
-      collection: lexicalMigrateFieldsSlug,
-      data: lexicalRichTextDocWithRelId,
-    }),
-
-    _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId }),
-    _payload.create({ collection: richTextFieldsSlug, data: richTextDocWithRelationship }),
-
-    _payload.create({ collection: numberFieldsSlug, data: { number: 2 } }),
-    _payload.create({ collection: numberFieldsSlug, data: { number: 3 } }),
-    _payload.create({ collection: numberFieldsSlug, data: numberDoc }),
-  ])
-
-  await createSnapshot(_payload)
 }
