@@ -497,6 +497,17 @@ describe('Fields', () => {
       })
 
       it('should not create duplicate point when unique', async () => {
+        // first create the point field
+        doc = await payload.create({
+          collection: 'point-fields',
+          data: {
+            group,
+            localized,
+            point,
+          },
+        })
+
+        // Now make sure we can't create a duplicate (since 'localized' is a unique field)
         await expect(() =>
           payload.create({
             collection: 'point-fields',
