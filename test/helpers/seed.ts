@@ -53,23 +53,22 @@ export async function seedDB({
   }
 
   /**
-   * Mongoose-Only: Restore snapshot of old data if available
+   * Mongoose & Postgres: Restore snapshot of old data if available
+   *
+   * Note for postgres: For postgres, this needs to happen AFTER the tables were created.
+   * This does not work if I run payload.db.init or payload.db.connect anywhere. Thus, when resetting the database, we are not dropping the schema, but are instead only deleting the table values
    */
   let restored = false
-  if (
-    dbSnapshot[snapshotKey] &&
-    Object.keys(dbSnapshot[snapshotKey]).length &&
-    isMongoose(_payload)
-  ) {
+  if (dbSnapshot[snapshotKey] && Object.keys(dbSnapshot[snapshotKey]).length) {
     await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
     restored = true
   }
 
   /**
    *  Mongoose: Re-create indexes
-   *  Postgres: Re-Init the db to create all tables and indexes
+   *  Postgres: No need for any action here, since we only delete the table data and no schemas
    */
-  // Dropping the db breaks indexes (on mongoose - did not test on postgres yet), so we recreate them here
+  // Dropping the db breaks indexes (on mongoose - did not test extensively on postgres yet), so we recreate them here
   if (shouldResetDB) {
     if (isMongoose(_payload)) {
       await Promise.all([
@@ -78,20 +77,6 @@ export async function seedDB({
         }),
       ])
     }
-  }
-
-  /**
-   * Postgres: Restore snapshot of old data if available. For postgres, this needs to happen AFTER the tables were created
-   *
-   * This does not work if I run payload.db.init or payload.db.connect anywhere. Thus, when resetting the database, we are not dropping the schema, but are instead only deleting the table values
-   */
-  if (
-    dbSnapshot[snapshotKey] &&
-    Object.keys(dbSnapshot[snapshotKey]).length &&
-    !isMongoose(_payload)
-  ) {
-    await restoreFromSnapshot(_payload, snapshotKey, collectionSlugs)
-    restored = true
   }
 
   /**
