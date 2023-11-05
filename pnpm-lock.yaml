@@ -838,8 +838,8 @@ importers:
         specifier: 1.4.1
         version: 1.4.1(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)
       uuid:
-        specifier: 8.3.2
-        version: 8.3.2
+        specifier: 9.0.1
+        version: 9.0.1
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -13065,7 +13065,7 @@ packages:
       semver: 7.5.4
       tar-stream: 2.2.0
       tslib: 2.6.2
-      uuid: 9.0.0
+      uuid: 9.0.1
       yauzl: 2.10.0
     transitivePeerDependencies:
       - aws-crt
@@ -13088,7 +13088,7 @@ packages:
       semver: 7.5.4
       tar-stream: 2.2.0
       tslib: 2.6.2
-      uuid: 9.0.0
+      uuid: 9.0.1
       yauzl: 2.10.0
     transitivePeerDependencies:
       - aws-crt
@@ -16916,7 +16916,7 @@ packages:
       https-proxy-agent: 5.0.1
       node-fetch: 2.6.12
       stream-events: 1.0.5
-      uuid: 9.0.0
+      uuid: 9.0.1
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -17687,6 +17687,10 @@ packages:
 
   /uuid@9.0.0:
     resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
+
+  /uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
     hasBin: true
 
   /v8-compile-cache-lib@3.0.1:
