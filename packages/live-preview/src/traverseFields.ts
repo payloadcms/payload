@@ -105,31 +105,40 @@ export const traverseFields = <T>({
 
         case 'upload':
         case 'relationship':
+          // Handle `hasMany` relationships
           if (fieldJSON.hasMany && Array.isArray(incomingData[fieldName])) {
-            const existingValue = Array.isArray(result[fieldName]) ? [...result[fieldName]] : []
+            const oldValue = result[fieldName]
+
+            // slice the array down to the new length
+            // this is for when an item is removed from the array
+            // we'll build up the array again with new values
             result[fieldName] = Array.isArray(result[fieldName])
               ? [...result[fieldName]].slice(0, incomingData[fieldName].length)
               : []
 
-            incomingData[fieldName].forEach((relation, i) => {
+            incomingData[fieldName].forEach((incomingRelation, i) => {
               // Handle `hasMany` polymorphic
               if (Array.isArray(fieldJSON.relationTo)) {
-                const existingID = existingValue[i]?.value?.id
+                const oldID = oldValue[i]?.value?.id
+                const oldRelation = oldValue[i]?.relationTo
+                const newID = incomingRelation.value
+                const newRelation = incomingRelation.relationTo
 
-                if (
-                  existingID !== relation.value ||
-                  existingValue[i]?.relationTo !== relation.relationTo
-                ) {
-                  result[fieldName][i] = {
-                    relationTo: relation.relationTo,
+                if (oldID !== newID || oldRelation !== newRelation) {
+                  // if the field doesn't exist on the result, create it
+                  // the value will be populated later
+                  if (!result[fieldName][i]) {
+                    result[fieldName][i] = {
+                      relationTo: newRelation,
+                    }
                   }
 
                   populationPromises.push(
                     promise({
-                      id: relation.value,
+                      id: incomingRelation.value,
                       accessor: 'value',
                       apiRoute,
-                      collection: relation.relationTo,
+                      collection: newRelation,
                       depth,
                       ref: result[fieldName][i],
                       serverURL,
@@ -138,12 +147,12 @@ export const traverseFields = <T>({
                 }
               } else {
                 // Handle `hasMany` monomorphic
-                const existingID = existingValue[i]?.id
+                const oldID = oldValue[i]?.id
 
-                if (existingID !== relation) {
+                if (oldID !== incomingRelation) {
                   populationPromises.push(
                     promise({
-                      id: relation,
+                      id: incomingRelation,
                       accessor: i,
                       apiRoute,
                       collection: String(fieldJSON.relationTo),
@@ -159,18 +168,39 @@ export const traverseFields = <T>({
             // Handle `hasOne` polymorphic
             if (Array.isArray(fieldJSON.relationTo)) {
               const hasNewValue =
-                typeof incomingData[fieldName] === 'object' && incomingData[fieldName] !== null
-              const hasOldValue =
-                typeof result[fieldName] === 'object' && result[fieldName] !== null
+                incomingData[fieldName] &&
+                typeof incomingData[fieldName] === 'object' &&
+                incomingData[fieldName] !== null
 
-              const newValue = hasNewValue ? incomingData[fieldName].value : ''
+              const hasOldValue =
+                typeof result[fieldName] &&
+                typeof result[fieldName] === 'object' &&
+                result[fieldName] !== null
+
+              const newID = hasNewValue
+                ? typeof incomingData[fieldName].value === 'object'
+                  ? incomingData[fieldName].value.id
+                  : incomingData[fieldName].value
+                : ''
+
+              const oldID = hasOldValue
+                ? typeof result[fieldName].value === 'object'
+                  ? result[fieldName].value.id
+                  : result[fieldName].value
+                : ''
+
               const newRelation = hasNewValue ? incomingData[fieldName].relationTo : ''
 
-              const oldValue = hasOldValue ? result[fieldName].value : ''
               const oldRelation = hasOldValue ? result[fieldName].relationTo : ''
 
-              if (newValue !== oldValue || newRelation !== oldRelation) {
-                if (newValue) {
+              // if the new value/relation is different from the old value/relation
+              // populate the new value, otherwise leave it alone
+              if (newID !== oldID || newRelation !== oldRelation) {
+                // if the new value is not empty, populate it
+                // otherwise set the value to null
+                if (newID) {
+                  // if the field doesn't exist on the result, create it
+                  // the value will be populated later
                   if (!result[fieldName]) {
                     result[fieldName] = {
                       relationTo: newRelation,
@@ -179,7 +209,7 @@ export const traverseFields = <T>({
 
                   populationPromises.push(
                     promise({
-                      id: newValue,
+                      id: newID,
                       accessor: 'value',
                       apiRoute,
                       collection: newRelation,
@@ -188,9 +218,9 @@ export const traverseFields = <T>({
                       serverURL,
                     }),
                   )
+                } else {
+                  result[fieldName] = null
                 }
-              } else {
-                result[fieldName] = null
               }
             } else {
               // Handle `hasOne` monomorphic
@@ -208,7 +238,11 @@ export const traverseFields = <T>({
                   result[fieldName].id) ||
                 ''
 
+              // if the new value is different from the old value
+              // populate the new value, otherwise leave it alone
               if (newID !== oldID) {
+                // if the new value is not empty, populate it
+                // otherwise set the value to null
                 if (newID) {
                   populationPromises.push(
                     promise({
