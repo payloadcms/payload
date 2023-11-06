@@ -29,6 +29,8 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
 
   const alias = [
     { find: '@payloadcms/bundler-vite', replacement: path.resolve(__dirname, '../mock.js') },
+    { find: '@payloadcms/db-mongodb', replacement: path.resolve(__dirname, '../mock.js') },
+    { find: '@payloadcms/db-postgres', replacement: path.resolve(__dirname, '../mock.js') },
     { find: 'path', replacement: require.resolve('path-browserify') },
     { find: 'payload-config', replacement: payloadConfig.paths.rawConfig },
     { find: /payload$/, replacement: mockModulePath },
