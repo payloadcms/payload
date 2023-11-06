@@ -15,17 +15,17 @@ type Args<T> = {
 export const traverseFields = <T>({
   apiRoute,
   depth,
-  fieldSchema,
+  fieldSchema: fieldSchemas,
   incomingData,
   populationPromises,
   result,
   serverURL,
 }: Args<T>): void => {
-  fieldSchema.forEach((fieldJSON) => {
-    if ('name' in fieldJSON && typeof fieldJSON.name === 'string') {
-      const fieldName = fieldJSON.name
+  fieldSchemas.forEach((fieldSchema) => {
+    if ('name' in fieldSchema && typeof fieldSchema.name === 'string') {
+      const fieldName = fieldSchema.name
 
-      switch (fieldJSON.type) {
+      switch (fieldSchema.type) {
         case 'array':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((row, i) => {
@@ -39,7 +39,7 @@ export const traverseFields = <T>({
               traverseFields({
                 apiRoute,
                 depth,
-                fieldSchema: fieldJSON.fields,
+                fieldSchema: fieldSchema.fields,
                 incomingData: row,
                 populationPromises,
                 result: newRow,
@@ -54,7 +54,7 @@ export const traverseFields = <T>({
         case 'blocks':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingBlock, i) => {
-              const incomingBlockJSON = fieldJSON.blocks[incomingBlock.blockType]
+              const incomingBlockJSON = fieldSchema.blocks[incomingBlock.blockType]
 
               // Compare the index and id to determine if this block already exists in the result
               // If so, we want to use the existing block as the base, otherwise take the incoming block
@@ -94,7 +94,7 @@ export const traverseFields = <T>({
           traverseFields({
             apiRoute,
             depth,
-            fieldSchema: fieldJSON.fields,
+            fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
             populationPromises,
             result: result[fieldName],
@@ -106,7 +106,7 @@ export const traverseFields = <T>({
         case 'upload':
         case 'relationship':
           // Handle `hasMany` relationships
-          if (fieldJSON.hasMany && Array.isArray(incomingData[fieldName])) {
+          if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {
             const oldValue = Array.isArray(result[fieldName]) ? [...result[fieldName]] : []
 
             // slice the array down to the new length
@@ -118,7 +118,7 @@ export const traverseFields = <T>({
 
             incomingData[fieldName].forEach((incomingRelation, i) => {
               // Handle `hasMany` polymorphic
-              if (Array.isArray(fieldJSON.relationTo)) {
+              if (Array.isArray(fieldSchema.relationTo)) {
                 const oldID = oldValue[i]?.value?.id
                 const oldRelation = oldValue[i]?.relationTo
                 const newID = incomingRelation.value
@@ -155,7 +155,7 @@ export const traverseFields = <T>({
                       id: incomingRelation,
                       accessor: i,
                       apiRoute,
-                      collection: String(fieldJSON.relationTo),
+                      collection: String(fieldSchema.relationTo),
                       depth,
                       ref: result[fieldName],
                       serverURL,
@@ -166,7 +166,7 @@ export const traverseFields = <T>({
             })
           } else {
             // Handle `hasOne` polymorphic
-            if (Array.isArray(fieldJSON.relationTo)) {
+            if (Array.isArray(fieldSchema.relationTo)) {
               const hasNewValue =
                 incomingData[fieldName] &&
                 typeof incomingData[fieldName] === 'object' &&
@@ -249,7 +249,7 @@ export const traverseFields = <T>({
                       id: newID,
                       accessor: fieldName,
                       apiRoute,
-                      collection: String(fieldJSON.relationTo),
+                      collection: String(fieldSchema.relationTo),
                       depth,
                       ref: result as Record<string, unknown>,
                       serverURL,

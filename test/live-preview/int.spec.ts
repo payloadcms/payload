@@ -1,6 +1,6 @@
 import path from 'path'
 
-import type { Media, Page } from './payload-types'
+import type { Media, Page, Post } from './payload-types'
 
 import { handleMessage } from '../../packages/live-preview/src/handleMessage'
 import { mergeData } from '../../packages/live-preview/src/mergeData'
@@ -10,20 +10,22 @@ import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSch
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { Pages } from './collections/Pages'
+import { postsSlug } from './collections/Posts'
 import configPromise from './config'
 import { pagesSlug } from './shared'
 
 require('isomorphic-fetch')
 
-let client
-let serverURL
-
-let page: Page
-let media: Media
-
 const schemaJSON = fieldSchemaToJSON(Pages.fields)
 
 describe('Collections - Live Preview', () => {
+  let client
+  let serverURL
+
+  let testPage: Page
+  let testPost: Post
+  let media: Media
+
   beforeAll(async () => {
     const { serverURL: incomingServerURL } = await initPayloadTest({
       __dirname,
@@ -35,11 +37,19 @@ describe('Collections - Live Preview', () => {
     client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
     await client.login()
 
-    page = await payload.create({
+    testPage = await payload.create({
       collection: pagesSlug,
       data: {
         slug: 'home',
         title: 'Test Page',
+      },
+    })
+
+    testPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        slug: 'post-1',
+        title: 'Test Post',
       },
     })
 
@@ -70,7 +80,7 @@ describe('Collections - Live Preview', () => {
         }),
         origin: serverURL,
       } as MessageEvent,
-      initialData: page,
+      initialData: testPage,
       serverURL,
     })
 
@@ -89,7 +99,7 @@ describe('Collections - Live Preview', () => {
         }),
         origin: serverURL,
       } as MessageEvent,
-      initialData: page,
+      initialData: testPage,
       serverURL,
     })
 
@@ -97,17 +107,17 @@ describe('Collections - Live Preview', () => {
   })
 
   it('merges data', async () => {
-    expect(page?.id).toBeDefined()
+    expect(testPage?.id).toBeDefined()
 
     const mergedData = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
-      incomingData: page,
-      initialData: page,
+      incomingData: testPage,
+      initialData: testPage,
       serverURL,
     })
 
-    expect(mergedData.id).toEqual(page.id)
+    expect(mergedData.id).toEqual(testPage.id)
   })
 
   it('merges strings', async () => {
@@ -115,10 +125,10 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...page,
+        ...testPage,
         title: 'Test Page (Change 3)',
       },
-      initialData: page,
+      initialData: testPage,
       serverURL,
     })
 
@@ -134,13 +144,13 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...page,
+        ...testPage,
         hero: {
           type: 'highImpact',
           media: media.id,
         },
       },
-      initialData: page,
+      initialData: testPage,
       serverURL,
     })
 
@@ -164,13 +174,49 @@ describe('Collections - Live Preview', () => {
     expect(mergedDataWithoutUpload.hero.media).toEqual(null)
   })
 
-  it('add, reorder, and remove blocks', async () => {
+  it('merges relationships', async () => {
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        relationshipMonoHasOne: testPost.id,
+        relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+      },
+      initialData: testPage,
+      serverURL,
+    })
+
+    expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
+    expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
+    expect(merge1.relationshipPolyHasMany).toMatchObject([
+      { value: testPost, relationTo: postsSlug },
+    ])
+
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        relationshipMonoHasOne: null,
+        relationshipMonoHasMany: [],
+        relationshipPolyHasMany: [],
+      },
+      initialData: merge1,
+      serverURL,
+    })
+
+    expect(merge2.relationshipMonoHasOne).toEqual(null)
+    expect(merge2.relationshipMonoHasMany).toEqual([])
+    expect(merge2.relationshipPolyHasMany).toEqual([])
+  })
+
+  it('adds, reorders, and removes blocks', async () => {
     // Add new blocks
     const merge1 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...page,
+        ...testPage,
         layout: [
           {
             blockType: 'cta',
@@ -194,7 +240,7 @@ describe('Collections - Live Preview', () => {
           },
         ],
       },
-      initialData: page,
+      initialData: testPage,
       serverURL,
     })
 

@@ -53,6 +53,23 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'relationshipPolyHasMany',
+      type: 'relationship',
+      relationTo: ['posts'],
+      hasMany: true,
+    },
+    {
+      name: 'relationshipMonoHasMany',
+      type: 'relationship',
+      relationTo: 'posts',
+      hasMany: true,
+    },
+    {
+      name: 'relationshipMonoHasOne',
+      type: 'relationship',
+      relationTo: 'posts',
+    },
+    {
       name: 'meta',
       type: 'group',
       fields: [
