@@ -22,7 +22,6 @@ export const mergeData = async <T>({
   const result = { ...initialData }
 
   const populationPromises: Promise<void>[] = []
-  debugger
   traverseFields({
     apiRoute,
     depth,
