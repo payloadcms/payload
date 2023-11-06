@@ -1,9 +1,10 @@
 import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
 
 import CustomEditView from '../components/views/CustomEdit'
+import { customGlobalViews1GlobalSlug } from '../slugs'
 
 export const CustomGlobalViews1: GlobalConfig = {
-  slug: 'custom-global-views-one',
+  slug: customGlobalViews1GlobalSlug,
   versions: true,
   admin: {
     components: {

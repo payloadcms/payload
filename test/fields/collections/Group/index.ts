@@ -1,8 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { groupFieldsSlug } from '../../slugs'
+
 export const groupDefaultValue = 'set from parent'
 export const groupDefaultChild = 'child takes priority'
-export const groupFieldsSlug = 'group-fields'
 
 const GroupFields: CollectionConfig = {
   slug: groupFieldsSlug,

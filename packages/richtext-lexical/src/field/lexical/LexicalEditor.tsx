@@ -111,6 +111,11 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
           return <plugin.Component key={plugin.key} />
         }
       })}
+      {editorConfig.features.plugins.map((plugin) => {
+        if (plugin.position === 'bottom') {
+          return <plugin.Component key={plugin.key} />
+        }
+      })}
     </React.Fragment>
   )
 }

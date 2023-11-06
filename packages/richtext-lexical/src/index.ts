@@ -185,6 +185,7 @@ export type { HTMLConverter } from './field/features/converters/html/converter/t
 export { consolidateHTMLConverters } from './field/features/converters/html/field'
 export { lexicalHTML } from './field/features/converters/html/field'
 
+export { TestRecorderFeature } from './field/features/debug/TestRecorder'
 export { TreeviewFeature } from './field/features/debug/TreeView'
 
 export { BoldTextFeature } from './field/features/format/Bold'

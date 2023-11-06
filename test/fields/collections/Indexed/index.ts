@@ -4,6 +4,8 @@ import type {
 } from '../../../../packages/payload/src/collections/config/types'
 import type { IndexedField } from '../../payload-types'
 
+import { indexedFieldsSlug } from '../../slugs'
+
 const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
   return {
     ...data,
@@ -22,7 +24,7 @@ const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
 }
 
 const IndexedFields: CollectionConfig = {
-  slug: 'indexed-fields',
+  slug: indexedFieldsSlug,
   // used to assert that versions also get indexes
   admin: {
     hooks: {

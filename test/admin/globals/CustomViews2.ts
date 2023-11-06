@@ -4,9 +4,10 @@ import CustomTabComponent from '../components/CustomTabComponent'
 import CustomDefaultEditView from '../components/views/CustomEditDefault'
 import CustomView from '../components/views/CustomTab'
 import CustomVersionsView from '../components/views/CustomVersions'
+import { customGlobalViews2GlobalSlug } from '../slugs'
 
 export const CustomGlobalViews2: GlobalConfig = {
-  slug: 'custom-global-views-two',
+  slug: customGlobalViews2GlobalSlug,
   versions: true,
   admin: {
     components: {

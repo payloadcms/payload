@@ -27,20 +27,22 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
+import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { globalSlug } from '../admin/shared'
+import { globalSlug } from '../admin/slugs'
 import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import { clearAndSeedEverything } from './seed'
+import { titleToDelete } from './shared'
 import {
   autoSaveGlobalSlug,
-  autosaveSlug,
+  autosaveCollectionSlug,
+  draftCollectionSlug,
   draftGlobalSlug,
-  draftSlug,
-  titleToDelete,
-} from './shared'
+} from './slugs'
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 describe('versions', () => {
   let page: Page
@@ -55,10 +57,14 @@ describe('versions', () => {
     page = await context.newPage()
   })
 
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+  })
+
   describe('draft collections', () => {
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, draftSlug)
-      autosaveURL = new AdminUrlUtil(serverURL, autosaveSlug)
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
     // This test has to run before bulk updates that will rename the title

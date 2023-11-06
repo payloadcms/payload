@@ -1,0 +1,31 @@
+# Order matters. The last matching pattern takes precedence.
+
+### Catch-all ###
+* @denolfe @jmikrut @DanRibbens
+.* @denolfe @jmikrut @DanRibbens
+
+### Core ###
+/packages/payload/ @denolfe @jmikrut @DanRibbens
+/packages/payload/src/uploads/ @denolfe
+
+### Adapters ###
+/packages/bundler-*/ @denolfe @jmikrut @DanRibbens @JarrodMFlesch
+/packages/db-*/ @denolfe @jmikrut @DanRibbens
+/packages/richtext-*/ @denolfe @jmikrut @DanRibbens @AlessioGr
+
+### Plugins ###
+/packages/plugin-*/ @denolfe @jmikrut @DanRibbens @jacobsfletch @JarrodMFlesch @AlessioGr
+/packages/plugin-cloud/ @denolfe
+/packages/plugin-cloud-storage/ @denolfe
+/packages/live-preview*/ @denolfe @jmikrut @DanRibbens @jacobsfletch
+/packages/live-preview*/ @denolfe @jmikrut @DanRibbens @jacobsfletch
+
+### Misc ###
+/packages/create-payload-app/ @denolfe
+/packages/eslint-config-payload/ @denolfe
+
+### Root ###
+/package.json @denolfe
+/scripts/ @denolfe
+/.github/ @denolfe
+/.github/CODEOWNERS @denolfe

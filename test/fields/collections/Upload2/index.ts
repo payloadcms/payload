@@ -2,8 +2,10 @@ import path from 'path'
 
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { uploads2Slug } from '../../slugs'
+
 const Uploads2: CollectionConfig = {
-  slug: 'uploads2',
+  slug: uploads2Slug,
   upload: {
     staticDir: path.resolve(__dirname, './uploads2'),
   },
@@ -19,7 +21,7 @@ const Uploads2: CollectionConfig = {
     {
       type: 'upload',
       name: 'media',
-      relationTo: 'uploads2',
+      relationTo: uploads2Slug,
     },
   ],
 }

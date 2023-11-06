@@ -1,3 +1,25 @@
+## [2.0.15](https://github.com/payloadcms/payload/compare/v2.0.14...v2.0.15) (2023-11-03)
+
+
+### Bug Fixes
+
+* autosave updating data in unrelated docs ([b722f20](https://github.com/payloadcms/payload/commit/b722f202af39a1429298b700cac686ecbbd4b46b))
+* better error handling within parseCookies ([#3720](https://github.com/payloadcms/payload/issues/3720)) ([6b1b4ff](https://github.com/payloadcms/payload/commit/6b1b4ffd27cc9a84e22ef2f3a8e389e5b72d41bc))
+* block row removal w/ db-postgres adapter ([#3951](https://github.com/payloadcms/payload/issues/3951)) ([5ea88bb](https://github.com/payloadcms/payload/commit/5ea88bb47d9ed6457331ceab7d7c82b0face8311))
+* deeply merges view configs ([#3954](https://github.com/payloadcms/payload/issues/3954)) ([a5b2333](https://github.com/payloadcms/payload/commit/a5b2333140447b12dbafd68592108ac342af4ea7))
+* do not display field if read permission is false - admin panel ui ([#3949](https://github.com/payloadcms/payload/issues/3949)) ([cdc10be](https://github.com/payloadcms/payload/commit/cdc10be1a241c6a9ac09feab77bcd58d23ff3dd9))
+* ensures dataloader does not run requests in parallel ([4607dbf](https://github.com/payloadcms/payload/commit/4607dbf97694bc899e597e9c7df50b6c878874f5))
+* exclude files from dev bundle if aliased ([#3957](https://github.com/payloadcms/payload/issues/3957)) ([7966692](https://github.com/payloadcms/payload/commit/796669279afb8fe23723ce36e6e47a44b7088b09))
+* field paths being mutated if they ended with the req.locale ([#3936](https://github.com/payloadcms/payload/issues/3936)) ([36576f1](https://github.com/payloadcms/payload/commit/36576f152ace41edd8b353703db2598d04deae44))
+* findVersions pagination ([#3906](https://github.com/payloadcms/payload/issues/3906)) ([1f8f173](https://github.com/payloadcms/payload/commit/1f8f173741fd524c7c2f11cc104672854f625da9))
+* global autosave and relevant e2e test ([a9d96b1](https://github.com/payloadcms/payload/commit/a9d96b10376fe1a4731b2ddb4d26ce38e333d5cb))
+* **i18n:** polish translations ([#3934](https://github.com/payloadcms/payload/issues/3934)) ([e4881bb](https://github.com/payloadcms/payload/commit/e4881bb02f7c1e8f96d5b405c57e0fdc01a2e7fe))
+* passes correct data to buildStateFromSchema on account page ([#3984](https://github.com/payloadcms/payload/issues/3984)) ([c7a315a](https://github.com/payloadcms/payload/commit/c7a315a7d1075361a7ee432a449769397c12185e))
+* prevent sort from saving a new version in version list view ([#3944](https://github.com/payloadcms/payload/issues/3944)) ([900a9ea](https://github.com/payloadcms/payload/commit/900a9eafeb51b1e5130518d4f71034a2bf9e4c5b))
+* properly load temp files into buffer ([#3996](https://github.com/payloadcms/payload/issues/3996)) ([d1a0822](https://github.com/payloadcms/payload/commit/d1a0822f8044a3f65416f4fe608e91a4ceea6b56))
+* sort document tabs by order ([#3968](https://github.com/payloadcms/payload/issues/3968)) ([06cd52b](https://github.com/payloadcms/payload/commit/06cd52b622723503896af6262907d31b258d0a5e))
+* vertical alignment in step nav when using larger logos ([#3955](https://github.com/payloadcms/payload/issues/3955)) ([b6d9a20](https://github.com/payloadcms/payload/commit/b6d9a2021fafea594353329fd304553bf7f2d091))
+
 ## [2.0.14](https://github.com/payloadcms/payload/compare/v2.0.13...v2.0.14) (2023-10-30)
 
 
