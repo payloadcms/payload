@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
 import { CustomPublishButton } from '../elements/CustomSaveButton'
-import { draftSlug } from '../shared'
+import { draftCollectionSlug } from '../slugs'
 
 const DraftPosts: CollectionConfig = {
   access: {
@@ -98,7 +98,7 @@ const DraftPosts: CollectionConfig = {
       type: 'blocks',
     },
   ],
-  slug: draftSlug,
+  slug: draftCollectionSlug,
   versions: {
     drafts: true,
     maxPerDoc: 35,
