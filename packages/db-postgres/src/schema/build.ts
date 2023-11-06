@@ -1,14 +1,20 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
+import type {
+  IndexBuilder,
+  PgColumnBuilder,
+  PgTableFn,
+  UniqueConstraintBuilder,
+} from 'drizzle-orm/pg-core'
 import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
+  pgTable as _pgTable,
   index,
   integer,
   numeric,
-  pgTable,
+  pgSchema,
   serial,
   timestamp,
   unique,
@@ -59,6 +65,9 @@ export const buildTable = ({
 }: Args): Result => {
   const columns: Record<string, PgColumnBuilder> = baseColumns
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
+  const pgTable = (
+    adapter.schemaName ? pgSchema(adapter.schemaName).table : _pgTable
+  ) as PgTableFn<undefined>
 
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
