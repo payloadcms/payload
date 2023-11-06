@@ -132,13 +132,23 @@ function fieldsToJSONSchema(
           }
 
           case 'richText': {
-            fieldSchema = {
-              items: {
-                type: 'object',
-              },
-              type: withNullableType('array', isRequired),
+            if ((field.editor as any)?.editorConfig?.lexical) {
+              fieldSchema = {
+                properties: {
+                  root: {
+                    type: 'object',
+                  },
+                },
+                type: withNullableType('object', isRequired),
+              }
+            } else {
+              fieldSchema = {
+                items: {
+                  type: 'object',
+                },
+                type: withNullableType('array', isRequired),
+              }
             }
-
             break
           }
 
