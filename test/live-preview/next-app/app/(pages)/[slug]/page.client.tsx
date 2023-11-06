@@ -16,17 +16,9 @@ export const PageClient: React.FC<{
     depth: 2,
   })
 
-  console.log('data', data)
-
   return (
     <React.Fragment>
       <Hero {...data?.hero} />
-      <p>Poly Has Many:</p>
-      {JSON.stringify(data?.relationshipPolyHasMany)}
-      <p>Poly Has One:</p>
-      {JSON.stringify(data?.relationshipMonoHasMany)}
-      <p>Mono Has One:</p>
-      {JSON.stringify(data?.relationshipMonoHasOne)}
       <Blocks
         blocks={data?.layout}
         disableTopPadding={

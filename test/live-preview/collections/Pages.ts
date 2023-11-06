@@ -57,17 +57,26 @@ export const Pages: CollectionConfig = {
       type: 'relationship',
       relationTo: ['posts'],
       hasMany: true,
+      admin: {
+        hidden: true,
+      },
     },
     {
       name: 'relationshipMonoHasMany',
       type: 'relationship',
       relationTo: 'posts',
       hasMany: true,
+      admin: {
+        hidden: true,
+      },
     },
     {
       name: 'relationshipMonoHasOne',
       type: 'relationship',
       relationTo: 'posts',
+      admin: {
+        hidden: true,
+      },
     },
     {
       name: 'meta',
