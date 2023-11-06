@@ -1,6 +1,5 @@
 import merge from 'deepmerge'
 import { isPlainObject } from 'is-plain-object'
-import path from 'path'
 
 import type {
   Config,
@@ -99,48 +98,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)
-  }
-
-  if (typeof config?.admin?.webpack === 'function') {
-    config.admin.webpack = (webpackConfig) => {
-      const existingWebpackConfig =
-        typeof config?.admin?.webpack === 'function'
-          ? config.admin.webpack(webpackConfig)
-          : webpackConfig
-      const mongodbAlias = path.resolve(__dirname, '../bundlers/mocks/db-mongodb.js')
-      const postgresAlias = path.resolve(__dirname, '../bundlers/mocks/db-postgres.js')
-
-      return {
-        ...existingWebpackConfig,
-        resolve: {
-          ...existingWebpackConfig.resolve,
-          alias: {
-            ...existingWebpackConfig.resolve?.alias,
-            '@payloadcms/db-mongodb': mongodbAlias,
-            '@payloadcms/db-postgres': postgresAlias,
-          },
-        },
-      }
-    }
-  }
-
-  if (typeof config?.admin?.vite === 'function') {
-    config.admin.vite = (viteConfig) => {
-      const existingViteConfig =
-        typeof config?.admin?.vite === 'function' ? config.admin.vite(viteConfig) : viteConfig
-
-      return {
-        ...existingViteConfig,
-        optimizeDeps: {
-          ...viteConfig.optimizeDeps,
-          exclude: [
-            ...viteConfig.optimizeDeps.exclude,
-            '@payloadcms/db-mongodb',
-            '@payloadcms/db-postgres',
-          ],
-        },
-      }
-    }
   }
 
   return config as SanitizedConfig

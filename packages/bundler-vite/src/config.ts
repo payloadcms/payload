@@ -91,6 +91,8 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         // Dependencies that need aliases should be excluded
         // from pre-bundling
         '@payloadcms/bundler-vite',
+        '@payloadcms/db-mongodb',
+        '@payloadcms/db-postgres',
         ...(Object.keys(absoluteAliases) || []),
       ],
       include: ['payload/components/root', 'react-dom/client'],
