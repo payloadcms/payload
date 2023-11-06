@@ -15,8 +15,6 @@ import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { destroy } from './destroy'
-import { extendViteConfig } from './extendViteConfig'
-import { extendWebpackConfig } from './extendWebpackConfig'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -44,15 +42,13 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = args.migrationDir || path.resolve(process.cwd(), 'src/migrations')
 
-    extendWebpackConfig(payload.config)
-    extendViteConfig(payload.config)
-
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
 
       // Postgres-specific
       drizzle: undefined,
       enums: {},
+      fieldConstraints: {},
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,
@@ -60,7 +56,6 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       schema: {},
       sessions: {},
       tables: {},
-      fieldConstraints: {},
 
       // DatabaseAdapter
       beginTransaction,
