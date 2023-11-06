@@ -107,7 +107,7 @@ export const traverseFields = <T>({
         case 'relationship':
           // Handle `hasMany` relationships
           if (fieldJSON.hasMany && Array.isArray(incomingData[fieldName])) {
-            const oldValue = result[fieldName]
+            const oldValue = Array.isArray(result[fieldName]) ? [...result[fieldName]] : []
 
             // slice the array down to the new length
             // this is for when an item is removed from the array
