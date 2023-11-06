@@ -5,9 +5,10 @@ export const rollbackTransaction: RollbackTransaction = async function rollbackT
 ) {
   if (!this.sessions[id]?.inTransaction()) {
     this.payload.logger.warn('rollbackTransaction called when no transaction exists')
+    delete this.sessions[id]
     return
   }
-  await this.sessions[id].abortTransaction()
-  await this.sessions[id].endSession()
+  await this.sessions[id]?.abortTransaction()
+  await this.sessions[id]?.endSession()
   delete this.sessions[id]
 }

@@ -74,26 +74,6 @@ describe('collections-graphql', () => {
       expect(doc.id).toBeDefined()
     })
 
-    it('should read using multiple queries', async () => {
-      const query = `query {
-          postIDs: Posts {
-            docs {
-              id
-            }
-          }
-          posts: Posts {
-            docs {
-              id
-              title
-            }
-          }
-      }`
-      const response = await client.request(query)
-      const { postIDs, posts } = response
-      expect(postIDs.docs).toBeDefined()
-      expect(posts.docs).toBeDefined()
-    })
-
     it('should read', async () => {
       const query = `query {
         Post(id: ${existingDocGraphQLID}) {
@@ -122,6 +102,26 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
+    it('should read using multiple queries', async () => {
+      const query = `query {
+          postIDs: Posts {
+            docs {
+              id
+            }
+          }
+          posts: Posts {
+            docs {
+              id
+              title
+            }
+          }
+      }`
+      const response = await client.request(query)
+      const { postIDs, posts } = response
+      expect(postIDs.docs).toBeDefined()
+      expect(posts.docs).toBeDefined()
+    })
+
     it('should commit or rollback multiple mutations independently', async () => {
       const firstTitle = 'first title'
       const secondTitle = 'second title'
@@ -135,7 +135,7 @@ describe('collections-graphql', () => {
       const second = await payload.create({
         collection: errorOnHookSlug,
         data: {
-          errorBeforeChange: false,
+          errorBeforeChange: true,
           title: secondTitle,
         },
       })
@@ -166,40 +166,26 @@ describe('collections-graphql', () => {
       const response = await client.request(query)
       client.requestConfig.errorPolicy = 'none'
 
-      const firstResult = await payload.findByID({
+      const createdResult = await payload.findByID({
+        id: response.createPost.id,
+        collection: slug,
+      })
+      const updateFirstResult = await payload.findByID({
         id: first.id,
         collection: errorOnHookSlug,
       })
-      const secondResult = await payload.findByID({
+      const updateSecondResult = await payload.findByID({
         id: second.id,
         collection: errorOnHookSlug,
       })
 
+      expect(response?.createPost.id).toBeDefined()
       expect(response?.updateFirst).toBeNull()
-      expect(response?.updateSecond).toMatchObject({ title: updated })
+      expect(response?.updateSecond).toBeNull()
 
-      expect(firstResult).toMatchObject(first)
-      expect(secondResult.title).toStrictEqual(updated)
-    })
-
-    it('should read using multiple queries', async () => {
-      const query = `query {
-          postIDs: Posts {
-            docs {
-              id
-            }
-          }
-          posts: Posts {
-            docs {
-              id
-              title
-            }
-          }
-      }`
-      const response = await client.request(query)
-      const { postIDs, posts } = response
-      expect(postIDs.docs).toBeDefined()
-      expect(posts.docs).toBeDefined()
+      expect(createdResult).toMatchObject(response.createPost)
+      expect(updateFirstResult).toMatchObject(first)
+      expect(updateSecondResult).toStrictEqual(second)
     })
 
     it('should retain payload api', async () => {
