@@ -1,4 +1,5 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import me from '../../operations/me'
 

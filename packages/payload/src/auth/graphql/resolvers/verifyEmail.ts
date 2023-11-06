@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import verifyEmail from '../../operations/verifyEmail'
 

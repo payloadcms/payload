@@ -1,3 +1,4 @@
+import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 
 import formatName from '../../../graphql/utilities/formatName'

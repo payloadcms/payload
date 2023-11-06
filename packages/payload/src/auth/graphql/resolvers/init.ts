@@ -1,3 +1,5 @@
+import type { PayloadRequest } from '../../../express/types'
+
 import init from '../../operations/init'
 
 function initResolver(collection: string) {

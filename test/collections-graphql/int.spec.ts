@@ -5,7 +5,8 @@ import type { Post } from './payload-types'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
-import configPromise, { pointSlug, slug } from './config'
+import { idToString } from '../helpers/idToString'
+import configPromise, { errorOnHookSlug, pointSlug, slug } from './config'
 
 const title = 'title'
 
@@ -42,8 +43,7 @@ describe('collections-graphql', () => {
 
     beforeEach(async () => {
       existingDoc = await createPost()
-      existingDocGraphQLID =
-        payload.db.defaultIDType === 'number' ? existingDoc.id : `"${existingDoc.id}"`
+      existingDocGraphQLID = idToString(existingDoc.id, payload)
     })
 
     it('should create', async () => {
@@ -120,6 +120,86 @@ describe('collections-graphql', () => {
       const { docs } = response.Posts
 
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
+    })
+
+    it('should commit or rollback multiple mutations independently', async () => {
+      const firstTitle = 'first title'
+      const secondTitle = 'second title'
+      const first = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          errorBeforeChange: true,
+          title: firstTitle,
+        },
+      })
+      const second = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          errorBeforeChange: false,
+          title: secondTitle,
+        },
+      })
+
+      const updated = 'updated title'
+
+      const query = `mutation {
+          createPost(data: {title: "${title}"}) {
+              id
+              title
+            }
+          updateFirst: updateErrorOnHook(id: ${idToString(
+            first.id,
+            payload,
+          )}, data: {title: "${updated}"}) {
+            title
+          }
+          updateSecond: updateErrorOnHook(id: ${idToString(
+            second.id,
+            payload,
+          )}, data: {title: "${updated}"}) {
+            id
+            title
+          }
+      }`
+
+      client.requestConfig.errorPolicy = 'all'
+      const response = await client.request(query)
+      client.requestConfig.errorPolicy = 'none'
+
+      const firstResult = await payload.findByID({
+        id: first.id,
+        collection: errorOnHookSlug,
+      })
+      const secondResult = await payload.findByID({
+        id: second.id,
+        collection: errorOnHookSlug,
+      })
+
+      expect(response?.updateFirst).toBeNull()
+      expect(response?.updateSecond).toMatchObject({ title: updated })
+
+      expect(firstResult).toMatchObject(first)
+      expect(secondResult.title).toStrictEqual(updated)
+    })
+
+    it('should read using multiple queries', async () => {
+      const query = `query {
+          postIDs: Posts {
+            docs {
+              id
+            }
+          }
+          posts: Posts {
+            docs {
+              id
+              title
+            }
+          }
+      }`
+      const response = await client.request(query)
+      const { postIDs, posts } = response
+      expect(postIDs.docs).toBeDefined()
+      expect(posts.docs).toBeDefined()
     })
 
     it('should retain payload api', async () => {

@@ -1,4 +1,5 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import forgotPassword from '../../operations/forgotPassword'
 

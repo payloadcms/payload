@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import type { Document } from '../../../types'
+import type { Document, PayloadRequest } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import findOne from '../../operations/findOne'
