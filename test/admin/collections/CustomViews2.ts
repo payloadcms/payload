@@ -10,11 +10,11 @@ import {
   customNestedTabViewPath,
   customTabLabel,
   customTabViewPath,
-  customViews2Slug,
 } from '../shared'
+import { customViews2CollectionSlug } from '../slugs'
 
 export const CustomViews2: CollectionConfig = {
-  slug: customViews2Slug,
+  slug: customViews2CollectionSlug,
   versions: true,
   admin: {
     components: {

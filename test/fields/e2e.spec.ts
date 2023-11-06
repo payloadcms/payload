@@ -10,19 +10,25 @@ import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
-import { collapsibleFieldsSlug } from './collections/Collapsible/shared'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
-import { pointFieldsSlug } from './collections/Point'
-import { relationshipFieldsSlug } from './collections/Relationship'
-import { tabsSlug } from './collections/Tabs/constants'
-import { textDoc, textFieldsSlug } from './collections/Text'
+import { textDoc } from './collections/Text'
+import { lexicalE2E } from './lexicalE2E'
+import { clearAndSeedEverything } from './seed'
+import {
+  collapsibleFieldsSlug,
+  pointFieldsSlug,
+  relationshipFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './slugs'
 
-const { afterEach, beforeAll, describe } = test
+const { afterEach, beforeAll, describe, beforeEach } = test
 
 let client: RESTClient
 let page: Page
-let serverURL
+let serverURL: string
+// If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
@@ -34,7 +40,12 @@ describe('fields', () => {
     const context = await browser.newContext()
     page = await context.newPage()
   })
-
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+    await client.logout()
+    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    await client.login()
+  })
   describe('text', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
@@ -146,7 +157,7 @@ describe('fields', () => {
 
   describe('indexed', () => {
     let url: AdminUrlUtil
-    beforeAll(() => {
+    beforeEach(() => {
       url = new AdminUrlUtil(serverURL, 'indexed-fields')
     })
 
@@ -162,13 +173,14 @@ describe('fields', () => {
           },
         },
       })
+
       await page.goto(url.create)
 
       await page.locator('#field-text').fill('test')
       await page.locator('#field-uniqueText').fill(uniqueText)
 
       // attempt to save
-      await page.locator('#action-save').click()
+      await page.click('#action-save', { delay: 100 })
 
       // toast error
       await expect(page.locator('.Toastify')).toContainText(
@@ -269,7 +281,7 @@ describe('fields', () => {
     let url: AdminUrlUtil
     let filledGroupPoint
     let emptyGroupPoint
-    beforeAll(async () => {
+    beforeEach(async () => {
       url = new AdminUrlUtil(serverURL, pointFieldsSlug)
       filledGroupPoint = await payload.create({
         collection: pointFieldsSlug,
@@ -682,7 +694,7 @@ describe('fields', () => {
   describe('tabs', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, tabsSlug)
+      url = new AdminUrlUtil(serverURL, tabsFieldsSlug)
     })
 
     test('should fill and retain a new value within a tab while switching tabs', async () => {
@@ -750,7 +762,7 @@ describe('fields', () => {
       )
     })
   })
-
+  describe('lexical', lexicalE2E(client, page, serverURL))
   describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
@@ -1473,7 +1485,7 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'uploads')
     })
 
-    test('should upload files', async () => {
+    async function uploadImage() {
       await page.goto(url.create)
 
       // create a jpg upload
@@ -1484,10 +1496,15 @@ describe('fields', () => {
       await page.locator('#action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
+    }
+
+    test('should upload files', async () => {
+      await uploadImage()
     })
 
     // test that the image renders
     test('should render uploaded image', async () => {
+      await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
         '/uploads/payload-1.jpg',
@@ -1495,6 +1512,7 @@ describe('fields', () => {
     })
 
     test('should upload using the document drawer', async () => {
+      await uploadImage()
       // Open the media drawer and create a png upload
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
@@ -1521,10 +1539,20 @@ describe('fields', () => {
     })
 
     test('should clear selected upload', async () => {
+      await uploadImage()
+      await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
+      await page
+        .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+        .setInputFiles(path.resolve(__dirname, './uploads/payload.png'))
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+      await wait(200)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('.field-type.upload .file-details__remove').click()
     })
 
     test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
+      await uploadImage()
+
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click()
       await wait(200)
       const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')

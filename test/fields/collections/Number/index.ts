@@ -1,9 +1,11 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { numberFieldsSlug } from '../../slugs'
+
 export const defaultNumber = 5
 
 const NumberFields: CollectionConfig = {
-  slug: 'number-fields',
+  slug: numberFieldsSlug,
   admin: {
     useAsTitle: 'number',
   },
