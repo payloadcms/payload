@@ -43,12 +43,12 @@ const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     const newActiveField = fields.find(({ value: name }) => name === fieldName)
 
-    if (newActiveField) {
+    if (newActiveField && newActiveField !== activeField) {
       setActiveField(newActiveField)
       setInternalOperatorField(null)
       setInternalValue('')
     }
-  }, [fieldName, fields])
+  }, [fieldName, fields, activeField])
 
   useEffect(() => {
     dispatch({
@@ -117,6 +117,7 @@ const Condition: React.FC<Props> = (props) => {
               DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField?.props,
+                disabled: !operatorValue,
                 onChange: setInternalValue,
                 operator: operatorValue,
                 options: valueOptions,

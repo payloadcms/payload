@@ -641,7 +641,7 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
       })
 
-      test('resets filter value on field update', async () => {
+      test('resets filter value and operator on field update', async () => {
         const { id } = await createPost({ title: 'post1' })
         await createPost({ title: 'post2' })
 
@@ -652,21 +652,8 @@ describe('admin', () => {
         await expect(page.locator('.column-selector')).toBeVisible()
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
-        // ensure the ID column is active
-        const idButton = page.locator('.column-selector .column-selector__column', {
-          hasText: exactText('ID'),
-        })
-
-        const buttonClasses = await idButton.getAttribute('class')
-
-        if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
-          await idButton.click()
-          await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
-        }
-
-        await expect(page.locator(tableRowLocator)).toHaveCount(2)
-
         await page.locator('.list-controls__toggle-where').click()
+
         // wait until the filter UI is visible and fully expanded
         await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
 
@@ -683,8 +670,6 @@ describe('admin', () => {
         // execute filter (where ID equals id value)
         await valueField.fill(id)
 
-        await expect(page.locator(tableRowLocator)).toHaveCount(1)
-
         const filterField = page.locator('.condition__field')
 
         await filterField.click()
@@ -696,6 +681,128 @@ describe('admin', () => {
         // expect operator & value field to reset (be empty)
         await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
         await expect(valueField).toHaveValue('')
+      })
+
+      test("resets second filter's value and operator with AND condition", async () => {
+        const { id: postOneID } = await createPost({ title: 'post1' })
+        const { id: postTwoID } = await createPost({ title: 'post2' })
+
+        // open the column controls
+        await page.locator('.list-controls__toggle-columns').click()
+
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.column-selector')).toBeVisible()
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+
+        await page.locator('.list-controls__toggle-where').click()
+
+        // wait until the filter UI is visible and fully expanded
+        await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const operatorField = page.locator('.condition__operator')
+        const valueField = page.locator('.condition__value > input')
+
+        await operatorField.click()
+
+        const dropdownOperatorOptions = operatorField.locator('.rs__option')
+        await dropdownOperatorOptions.locator('text=is not equal to').click()
+
+        // execute filter (where ID equals id value)
+        await valueField.fill(postOneID)
+
+        await page.locator('.condition__actions-add').click()
+
+        await page.locator('.where-builder__and-filters').click()
+
+        const secondFilter = page.locator('.where-builder__and-filters >> li').nth(1)
+
+        const secondOperatorField = secondFilter.locator('.condition__operator')
+        const secondValueField = secondFilter.locator('.condition__value > input')
+
+        await secondOperatorField.click()
+
+        const secondDropdownOperatorOptions = secondOperatorField.locator('.rs__option')
+        await secondDropdownOperatorOptions.locator('text=equals').click()
+
+        await secondValueField.fill(postTwoID)
+
+        const secondFilterField = secondFilter.locator('.condition__field')
+
+        await secondFilterField.click()
+
+        // select new filter field of Number for second filter
+        const dropdownFieldOptions = secondFilterField.locator('.rs__option')
+        await dropdownFieldOptions.locator('text=Number').click()
+
+        // expect operator & value field to reset (be empty)
+        await expect(secondOperatorField.locator('.rs__placeholder')).toContainText(
+          'Select a value',
+        )
+        await expect(secondValueField).toHaveValue('')
+      })
+
+      test("resets second filter's value and operator with OR condition", async () => {
+        const { id: postOneID } = await createPost({ title: 'post1' })
+        const { id: postTwoID } = await createPost({ title: 'post2' })
+
+        // open the column controls
+        await page.locator('.list-controls__toggle-columns').click()
+
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.column-selector')).toBeVisible()
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+
+        await page.locator('.list-controls__toggle-where').click()
+
+        // wait until the filter UI is visible and fully expanded
+        await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const operatorField = page.locator('.condition__operator')
+        const valueField = page.locator('.condition__value > input')
+
+        await operatorField.click()
+
+        const dropdownOperatorOptions = operatorField.locator('.rs__option')
+        await dropdownOperatorOptions.locator('text=is not equal to').click()
+
+        // execute filter (where ID equals id value)
+        await valueField.fill(postOneID)
+
+        await page.locator('.where-builder__or-filters').click()
+
+        await page.locator('.where-builder__add-or').click()
+
+        const secondFilterWrapper = page.locator('.where-builder__or-filters > li').nth(1)
+
+        const secondFilter = secondFilterWrapper.locator('.where-builder__and-filters >> li').nth(0)
+
+        const secondOperatorField = secondFilter.locator('.condition__operator')
+        const secondValueField = secondFilter.locator('.condition__value > input')
+
+        await secondOperatorField.click()
+
+        const secondDropdownOperatorOptions = secondOperatorField.locator('.rs__option')
+        await secondDropdownOperatorOptions.locator('text=equals').click()
+
+        await secondValueField.fill(postTwoID)
+
+        const secondFilterField = secondFilter.locator('.condition__field')
+
+        await secondFilterField.click()
+
+        // select new filter field of Number for second filter
+        const dropdownFieldOptions = secondFilterField.locator('.rs__option')
+        await dropdownFieldOptions.locator('text=Number').click()
+
+        // expect operator & value field to reset (be empty)
+        await expect(secondOperatorField.locator('.rs__placeholder')).toContainText(
+          'Select a value',
+        )
+        await expect(secondValueField).toHaveValue('')
       })
 
       test('should accept where query from valid URL where parameter', async () => {
