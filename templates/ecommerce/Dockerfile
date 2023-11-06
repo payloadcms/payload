@@ -19,6 +19,11 @@ COPY package*.json  ./
 COPY yarn.lock ./
 
 RUN yarn install --production
+
+# Docker does not provide a mechanism for failing gracefully if a directory does not exist
+# Create the .next directory to avoid errors
+RUN mkdir -p ./.next
+COPY --from=builder /home/node/app/.next ./.next
 COPY --from=builder /home/node/app/dist ./dist
 COPY --from=builder /home/node/app/build ./build
 

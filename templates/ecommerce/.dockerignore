@@ -1,0 +1,6 @@
+.vscode
+.next
+node_modules
+.env.example
+build
+dist
