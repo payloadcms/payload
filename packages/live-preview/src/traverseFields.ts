@@ -173,7 +173,7 @@ export const traverseFields = <T>({
                 incomingData[fieldName] !== null
 
               const hasOldValue =
-                typeof result[fieldName] &&
+                result[fieldName] &&
                 typeof result[fieldName] === 'object' &&
                 result[fieldName] !== null
 
