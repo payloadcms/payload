@@ -308,58 +308,43 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— relationships - populates within blocks', async () => {
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-      layout: [
+    const block1 = (shallow?: boolean): Extract<Page['layout'][0], { blockType: 'cta' }> => ({
+      blockType: 'cta',
+      id: '123',
+      links: [
         {
-          blockType: 'cta',
-          id: '123',
-          links: [
+          link: {
+            label: 'Link 1',
+            type: 'reference',
+            reference: {
+              relationTo: 'posts',
+              value: shallow ? testPost?.id : testPost,
+            },
+          },
+        },
+      ],
+    })
+
+    const block2: Extract<Page['layout'][0], { blockType: 'content' }> = {
+      blockType: 'content',
+      id: '456',
+      columns: [
+        {
+          id: '789',
+          richText: [
             {
-              link: {
-                label: 'Link 1',
-                type: 'reference',
-                reference: {
-                  relationTo: 'posts',
-                  value: testPost, // full object
-                },
-              },
+              type: 'paragraph',
+              text: 'Column 1',
             },
           ],
         },
       ],
     }
 
-    const merge1 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...initialData,
-        layout: [
-          {
-            blockType: 'cta',
-            id: '123',
-            links: [
-              {
-                link: {
-                  label: 'Link 1',
-                  type: 'reference',
-                  reference: {
-                    relationTo: 'posts',
-                    value: testPost.id, // only ID
-                  },
-                },
-              },
-            ],
-          },
-        ],
-      },
-      initialData,
-      serverURL,
-    })
-
-    // Check that the relationship has been populated
-    expect(merge1.layout[0].links[0].link.reference.value).toMatchObject(testPost)
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      layout: [block1(), block2],
+    }
 
     // Add a new block before the populated one
     // Then check to see that the relationship is still populated
@@ -367,30 +352,8 @@ describe('Collections - Live Preview', () => {
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...merge1,
-        layout: [
-          {
-            blockType: 'cta',
-            id: '456',
-            links: [],
-          },
-          {
-            blockType: 'cta',
-            id: '123',
-            links: [
-              {
-                link: {
-                  label: 'Link 1',
-                  type: 'reference',
-                  reference: {
-                    relationTo: 'posts',
-                    value: testPost.id,
-                  },
-                },
-              },
-            ],
-          },
-        ],
+        ...initialData,
+        layout: [block2, block1(true)],
       },
       initialData,
       serverURL,
@@ -398,137 +361,87 @@ describe('Collections - Live Preview', () => {
 
     // Check that the relationship on the first has been removed
     // And that the relationship on the second has been populated
-    expect(merge2.layout[0].links).toMatchObject([])
+    expect(merge2.layout[0].links).toBeUndefined()
     expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
   })
 
   it('— blocks - adds, reorders, and removes blocks', async () => {
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
+    const block1: Extract<Page['layout'][0], { blockType: 'cta' }> = {
+      blockType: 'cta',
+      id: '123',
+      richText: [
+        {
+          type: 'paragraph',
+          text: 'Block 1 (Position 1)',
+        },
+      ],
     }
 
+    const block2: Extract<Page['layout'][0], { blockType: 'cta' }> = {
+      blockType: 'cta',
+      id: '456',
+      richText: [
+        {
+          type: 'paragraph',
+          text: 'Block 2 (Position 2)',
+        },
+      ],
+    }
+
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      layout: [block1, block2],
+    }
+
+    // Reorder the blocks
     const merge1 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
-        layout: [
-          {
-            blockType: 'cta',
-            id: '123',
-            richText: [
-              {
-                type: 'paragraph',
-                text: 'Block 1 (Position 1)',
-              },
-            ],
-          },
-          {
-            blockType: 'cta',
-            id: '456',
-            richText: [
-              {
-                type: 'paragraph',
-                text: 'Block 2 (Position 2)',
-              },
-            ],
-          },
-        ],
+        layout: [block2, block1],
       },
       initialData,
       serverURL,
     })
 
-    // Check that the blocks have been merged and are in the correct order
+    // Check that the blocks have been reordered
     expect(merge1.layout).toHaveLength(2)
-    const block1 = merge1.layout[0]
-    expect(block1.id).toEqual('123')
-    expect(block1.richText[0].text).toEqual('Block 1 (Position 1)')
-    const block2 = merge1.layout[1]
-    expect(block2.id).toEqual('456')
-    expect(block2.richText[0].text).toEqual('Block 2 (Position 2)')
+    expect(merge1.layout[0].id).toEqual(block2.id)
+    expect(merge1.layout[1].id).toEqual(block1.id)
+    expect(merge1.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
+    expect(merge1.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
 
-    // Reorder the blocks
+    // Remove a block
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...merge1,
-        layout: [
-          {
-            blockType: 'cta',
-            id: block2.id,
-            richText: [
-              {
-                type: 'paragraph',
-                text: 'Block 2 (Position 1)',
-              },
-            ],
-          },
-          {
-            blockType: 'cta',
-            id: block1.id,
-            richText: [
-              {
-                type: 'paragraph',
-                text: 'Block 1 (Position 2)',
-              },
-            ],
-          },
-        ],
+        ...initialData,
+        layout: [block2],
       },
-      initialData: merge1,
+      initialData,
       serverURL,
     })
 
-    // Check that the blocks have been reordered
-    expect(merge2.layout).toHaveLength(2)
+    // Check that the block has been removed
+    expect(merge2.layout).toHaveLength(1)
     expect(merge2.layout[0].id).toEqual(block2.id)
-    expect(merge2.layout[1].id).toEqual(block1.id)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
-    expect(merge2.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
 
-    // Remove a block
+    // Remove the last block to ensure that all blocks can be cleared
     const merge3 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...merge2,
-        layout: [
-          {
-            id: block2.id,
-            blockType: 'cta',
-            richText: [
-              {
-                type: 'paragraph',
-                text: 'Block 2 (Position 1)',
-              },
-            ],
-          },
-        ],
-      },
-      initialData: merge2,
-      serverURL,
-    })
-
-    // Check that the block has been removed
-    expect(merge3.layout).toHaveLength(1)
-    expect(merge3.layout[0].id).toEqual(block2.id)
-    expect(merge3.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
-
-    // Remove the last block to ensure that all blocks can be cleared
-    const merge4 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...merge3,
+        ...initialData,
         layout: [],
       },
-      initialData: merge3,
+      initialData,
       serverURL,
     })
 
     // Check that the block has been removed
-    expect(merge4.layout).toHaveLength(0)
+    expect(merge3.layout).toHaveLength(0)
   })
 })

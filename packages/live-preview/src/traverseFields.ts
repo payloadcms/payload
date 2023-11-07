@@ -61,10 +61,8 @@ export const traverseFields = <T>({
                 result[fieldName] = []
               }
 
-              if (!result[fieldName][i]) {
-                result[fieldName][i] = {
-                  blockType: incomingBlock.blockType,
-                }
+              result[fieldName][i] = {
+                blockType: incomingBlock.blockType,
               }
 
               traverseFields({
@@ -146,6 +144,7 @@ export const traverseFields = <T>({
                 // Do not set an initial value here
                 // This will achieve parity with the REST API
                 // The value should simply not come through the result
+                // i.e.:
                 // if (!result[fieldName][i]) {
                 //   result[fieldName][i] = {}
                 // }
@@ -226,6 +225,7 @@ export const traverseFields = <T>({
               // Do not set an initial value here
               // This will achieve parity with the REST API
               // The value should simply not come through the result
+              // i.e.:
               // if (!result[fieldName]) {
               //   result[fieldName] = {}
               // }
