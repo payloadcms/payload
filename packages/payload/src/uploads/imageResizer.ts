@@ -173,6 +173,26 @@ const applyPayloadAdjustments = (
 }
 
 /**
+ * Sanitize the resize config. If the resize config has the `withoutReduction`
+ * property set to true, the `fit` and `position` properties will be set to `contain`
+ * and `top left` respectively.
+ *
+ * @param resizeConfig - the resize config
+ * @returns a sanitized resize config
+ */
+const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
+  if (resizeConfig.withoutReduction) {
+    return {
+      ...resizeConfig,
+      // Why fit `contain` should also be set to https://github.com/lovell/sharp/issues/3595
+      fit: resizeConfig?.fit || 'contain',
+      position: resizeConfig?.position || 'top left',
+    }
+  }
+  return resizeConfig
+}
+
+/**
  * For the provided image sizes, handle the resizing and the transforms
  * (format, trim, etc.) of each requested image size and return the result object.
  * This only handles the image sizes. The transforms of the original image
@@ -217,16 +237,6 @@ export default async function resizeAndTransformImageSizes({
         req.query?.uploadEdits?.focalPoint &&
         applyPayloadAdjustments(imageResizeConfig, dimensions)
       ) {
-        const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
-          if (resizeConfig.withoutReduction) {
-            return {
-              ...resizeConfig,
-              // Why fit `contain` should also be set to https://github.com/lovell/sharp/issues/3595
-              fit: resizeConfig?.fit || 'contain',
-              position: resizeConfig?.position || 'top left',
-            }
-          }
-        }
         imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
         const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
         const resizeAspectRatio = resizeWidth / resizeHeight
