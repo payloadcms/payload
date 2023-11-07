@@ -1,3 +1,4 @@
+import { defaultRichTextValue } from '../../../../packages/richtext-lexical/src'
 import { generateLexicalRichText } from './generateLexicalRichText'
 import { generateSlateRichText } from './generateSlateRichText'
 
@@ -26,13 +27,13 @@ export const richTextDoc = {
   richText: generateSlateRichText(),
   richTextReadOnly: generateSlateRichText(),
   richTextCustomFields: generateSlateRichText(),
-  richTextLexicalCustomFields: generateLexicalRichText(),
+  lexicalCustomFields: generateLexicalRichText(),
   blocks: richTextBlocks,
 }
 
 export const richTextBulletsDoc = {
   title: 'Bullets and Indentation',
-  richTextLexicalCustomFields: generateLexicalRichText(),
+  lexicalCustomFields: generateLexicalRichText(),
   richText: [
     {
       type: 'ul',

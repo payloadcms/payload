@@ -3,6 +3,7 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import { GraphQLClient } from 'graphql-request'
 
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
+import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
 
@@ -27,11 +28,11 @@ import { defaultText } from './collections/Text'
 import { clearAndSeedEverything } from './seed'
 import { arrayFieldsSlug, groupFieldsSlug, relationshipFieldsSlug, tabsFieldsSlug } from './slugs'
 
-let client
+let client: RESTClient
 let graphQLClient: GraphQLClient
-let serverURL
-let config
-let token
+let serverURL: string
+let config: SanitizedConfig
+let token: string
 
 describe('Fields', () => {
   beforeAll(async () => {

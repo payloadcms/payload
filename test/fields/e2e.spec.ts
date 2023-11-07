@@ -13,7 +13,6 @@ import { RESTClient } from '../helpers/rest'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
 import { textDoc } from './collections/Text'
-import { lexicalE2E } from './lexicalE2E'
 import { clearAndSeedEverything } from './seed'
 import {
   collapsibleFieldsSlug,
@@ -762,7 +761,6 @@ describe('fields', () => {
       )
     })
   })
-  describe('lexical', lexicalE2E(client, page, serverURL))
   describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')

@@ -22,6 +22,7 @@ import { tabsDoc } from './collections/Tabs'
 import { textDoc } from './collections/Text'
 import { uploadsDoc } from './collections/Upload'
 import {
+  arrayFieldsSlug,
   blockFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
@@ -58,7 +59,7 @@ export async function clearAndSeedEverything(_payload: Payload) {
       const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
 
       const [createdArrayDoc, createdTextDoc, createdPNGDoc] = await Promise.all([
-        _payload.create({ collection: 'array-fields', data: arrayDoc }),
+        _payload.create({ collection: arrayFieldsSlug, data: arrayDoc }),
         _payload.create({ collection: textFieldsSlug, data: textDoc }),
         _payload.create({ collection: uploadsSlug, data: {}, file: pngFile }),
       ])
