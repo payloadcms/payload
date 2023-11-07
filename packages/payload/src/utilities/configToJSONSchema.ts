@@ -46,9 +46,6 @@ function buildOptionEnums(options: Option[]): string[] {
   })
 }
 
-/**
- * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
- */
 function generateEntitySchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
 ): JSONSchema4 {
@@ -132,12 +129,10 @@ function fieldsToJSONSchema(
           }
 
           case 'richText': {
-            fieldSchema = {
-              items: {
-                type: 'object',
-              },
-              type: withNullableType('array', isRequired),
-            }
+            fieldSchema = field.editor.outputSchema({
+              field,
+              isRequired,
+            })
 
             break
           }
@@ -497,6 +492,9 @@ export function entityToJSONSchema(
   }
 }
 
+/**
+ * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
+ */
 export function configToJSONSchema(
   config: SanitizedConfig,
   defaultIDType?: 'number' | 'text',

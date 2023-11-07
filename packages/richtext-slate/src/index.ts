@@ -1,3 +1,4 @@
+import type { JSONSchema4TypeName } from 'json-schema'
 import type { RichTextAdapter } from 'payload/types'
 
 import { withMergedProps } from 'payload/utilities'
@@ -21,6 +22,14 @@ export function slateEditor(
       Component: RichTextField,
       toMergeIntoProps: args,
     }),
+    outputSchema: ({ isRequired }) => {
+      return {
+        items: {
+          type: 'object',
+        },
+        type: withNullableType('array', isRequired),
+      }
+    },
     populationPromise({
       currentDepth,
       depth,
@@ -50,6 +59,16 @@ export function slateEditor(
     },
     validate: richTextValidate,
   }
+}
+
+function withNullableType(
+  fieldType: JSONSchema4TypeName,
+  isRequired: boolean,
+): JSONSchema4TypeName | JSONSchema4TypeName[] {
+  const fieldTypes = [fieldType]
+  if (isRequired) return fieldType
+  fieldTypes.push('null')
+  return fieldTypes
 }
 
 export { default as ElementButton } from './field/elements/Button'

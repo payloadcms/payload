@@ -1,3 +1,4 @@
+import type { JSONSchema4TypeName } from 'json-schema'
 import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
@@ -89,6 +90,64 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       })
     },
     editorConfig: finalSanitizedEditorConfig,
+    outputSchema: ({ isRequired }) => {
+      return {
+        // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
+        // In the future, we should
+        // 1) allow recursive children
+        // 2) Pass in all the different types for every node added to the editorconfig. This can be done with refs in the schema.
+        properties: {
+          root: {
+            additionalProperties: false,
+            properties: {
+              children: {
+                items: {
+                  additionalProperties: true,
+                  properties: {
+                    type: {
+                      type: 'string',
+                    },
+                    version: {
+                      type: 'integer',
+                    },
+                  },
+                  required: ['type', 'version'],
+                  type: 'object',
+                },
+                type: 'array',
+              },
+              direction: {
+                oneOf: [
+                  {
+                    enum: ['ltr', 'rtl'],
+                  },
+                  {
+                    type: 'null',
+                  },
+                ],
+              },
+              format: {
+                enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''], // ElementFormatType, since the root node is an element
+                type: 'string',
+              },
+              indent: {
+                type: 'integer',
+              },
+              type: {
+                type: 'string',
+              },
+              version: {
+                type: 'integer',
+              },
+            },
+            required: ['children', 'direction', 'format', 'indent', 'type', 'version'],
+            type: 'object',
+          },
+        },
+        required: ['root'],
+        type: withNullableType('object', isRequired),
+      }
+    },
     populationPromise({
       currentDepth,
       depth,
@@ -118,6 +177,16 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       editorConfig: finalSanitizedEditorConfig,
     }),
   }
+}
+
+function withNullableType(
+  fieldType: JSONSchema4TypeName,
+  isRequired: boolean,
+): JSONSchema4TypeName | JSONSchema4TypeName[] {
+  const fieldTypes = [fieldType]
+  if (isRequired) return fieldType
+  fieldTypes.push('null')
+  return fieldTypes
 }
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
