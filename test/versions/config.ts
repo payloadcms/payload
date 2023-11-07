@@ -1,3 +1,5 @@
+import path from 'path'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import AutosavePosts from './collections/Autosave'
 import DraftPosts from './collections/Drafts'
@@ -5,7 +7,7 @@ import Posts from './collections/Posts'
 import VersionPosts from './collections/Versions'
 import AutosaveGlobal from './globals/Autosave'
 import DraftGlobal from './globals/Draft'
-import { seed } from './seed'
+import { clearAndSeedEverything } from './seed'
 
 export default buildConfigWithDefaults({
   collections: [Posts, AutosavePosts, DraftPosts, VersionPosts],
@@ -15,5 +17,19 @@ export default buildConfigWithDefaults({
     defaultLocale: 'en',
     locales: ['en', 'es'],
   },
-  onInit: seed,
+  admin: {
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config?.resolve?.alias,
+          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+        },
+      },
+    }),
+  },
+  onInit: async (payload) => {
+    await clearAndSeedEverything(payload)
+  },
 })

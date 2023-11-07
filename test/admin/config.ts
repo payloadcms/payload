@@ -27,7 +27,7 @@ import { GlobalGroup1A } from './globals/Group1A'
 import { GlobalGroup1B } from './globals/Group1B'
 import { GlobalHidden } from './globals/Hidden'
 import { GlobalNoApiView } from './globals/NoApiView'
-import { seed } from './seed'
+import { clearAndSeedEverything } from './seed'
 import { customNestedViewPath, customViewPath } from './shared'
 
 export default buildConfigWithDefaults({
@@ -63,6 +63,16 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config?.resolve?.alias,
+          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+        },
+      },
+    }),
   },
   i18n: {
     resources: {
@@ -99,5 +109,7 @@ export default buildConfigWithDefaults({
     GlobalGroup1A,
     GlobalGroup1B,
   ],
-  onInit: seed,
+  onInit: async (payload) => {
+    await clearAndSeedEverything(payload)
+  },
 })

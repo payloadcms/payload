@@ -1,12 +1,13 @@
 /* eslint-disable no-param-reassign */
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { tabsFieldsSlug } from '../../slugs'
 import { getBlocksField, getBlocksFieldSeedData } from '../Blocks'
 import { UIField } from './UIField'
-import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsSlug } from './constants'
+import { localizedTextValue, namedTabDefaultValue, namedTabText } from './constants'
 
 const TabsFields: CollectionConfig = {
-  slug: tabsSlug,
+  slug: tabsFieldsSlug,
   access: {
     read: () => true,
   },

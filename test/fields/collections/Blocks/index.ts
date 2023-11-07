@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
+import { blockFieldsSlug } from '../../slugs'
 import { AddCustomBlocks } from './components/AddCustomBlocks'
 
 export const getBlocksFieldSeedData = (prefix?: string): any => [
@@ -149,7 +150,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
 })
 
 const BlockFields: CollectionConfig = {
-  slug: 'block-fields',
+  slug: blockFieldsSlug,
   fields: [
     getBlocksField(),
     {
