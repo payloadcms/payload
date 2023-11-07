@@ -253,6 +253,7 @@ jobs:
           - plugin-form-builder
           - plugin-nested-docs
           - plugin-search
+          - plugin-sentry
 
     steps:
       - name: Use Node.js 18
