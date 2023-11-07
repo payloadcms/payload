@@ -48,6 +48,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run dev uploads",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Uploads",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "PAYLOAD_BUNDLER=vite pnpm run dev fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields (Vite)",
