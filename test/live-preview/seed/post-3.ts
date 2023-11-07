@@ -1,6 +1,6 @@
 import type { Post } from '../payload-types'
 
-export const post3: Partial<Post> = {
+export const post3: Omit<Post, 'createdAt' | 'id' | 'updatedAt'> = {
   title: 'Post 3',
   slug: 'post-3',
   meta: {

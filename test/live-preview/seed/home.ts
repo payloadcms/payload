@@ -1,11 +1,8 @@
 import type { Page } from '../payload-types'
 
-export const home: Page = {
+export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   slug: 'home',
   title: 'Home',
-  id: '',
-  updatedAt: '',
-  createdAt: '',
   meta: {
     description: 'This is an example of live preview on a page.',
   },
