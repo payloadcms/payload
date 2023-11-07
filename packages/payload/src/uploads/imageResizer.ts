@@ -186,7 +186,7 @@ const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
       ...resizeConfig,
       // Why fit `contain` should also be set to https://github.com/lovell/sharp/issues/3595
       fit: resizeConfig?.fit || 'contain',
-      position: resizeConfig?.position || 'top left',
+      position: resizeConfig?.position || 'left top',
     }
   }
   return resizeConfig
@@ -223,6 +223,8 @@ export default async function resizeAndTransformImageSizes({
 
   const results: ImageSizesResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
+      imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
+
       // This checks if a resize should happen. If not, the resized image will be
       // skipped COMPLETELY and thus will not be included in the resulting images.
       // All further format/trim options will thus be skipped as well.
@@ -237,7 +239,6 @@ export default async function resizeAndTransformImageSizes({
         req.query?.uploadEdits?.focalPoint &&
         applyPayloadAdjustments(imageResizeConfig, dimensions)
       ) {
-        imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
         const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
         const resizeAspectRatio = resizeWidth / resizeHeight
         const originalAspectRatio = dimensions.width / dimensions.height
