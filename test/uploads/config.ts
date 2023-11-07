@@ -330,7 +330,6 @@ export default buildConfigWithDefaults({
             height: 80,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
             withoutReduction: true,
-            fit: 'contain',
           },
           {
             name: 'resizedLarger',
@@ -341,9 +340,7 @@ export default buildConfigWithDefaults({
             name: 'resizedSmaller',
             width: 180,
             height: 50,
-            // Why fit `contain` should also be set to https://github.com/lovell/sharp/issues/3595
             withoutReduction: true,
-            fit: 'contain',
           },
         ],
       },
