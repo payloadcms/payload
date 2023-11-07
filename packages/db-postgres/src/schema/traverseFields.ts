@@ -1,23 +1,24 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import { relations } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
+import type { Field, TabAsField } from 'payload/types'
+
+import { relations } from 'drizzle-orm'
 import {
+  PgNumericBuilder,
+  PgVarcharBuilder,
   boolean,
   index,
   integer,
   jsonb,
   numeric,
   pgEnum,
-  PgNumericBuilder,
-  PgVarcharBuilder,
   text,
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core'
-import type { Field, TabAsField } from 'payload/types'
-import { fieldAffectsData, optionIsObject } from 'payload/types'
 import { InvalidConfiguration } from 'payload/errors'
+import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, PostgresAdapter } from '../types'
@@ -31,6 +32,7 @@ import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdent
 
 type Args = {
   adapter: PostgresAdapter
+  buildNumbers: boolean
   buildRelationships: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
@@ -60,6 +62,7 @@ type Result = {
 
 export const traverseFields = ({
   adapter,
+  buildNumbers,
   buildRelationships,
   columnPrefix,
   columns,
@@ -283,19 +286,25 @@ export const traverseFields = ({
           baseExtraConfig._localeIdx = (cols) => index('_locale_idx').on(cols._locale)
         }
 
-        const { relationsToBuild: subRelationsToBuild } = buildTable({
-          adapter,
-          baseColumns,
-          baseExtraConfig,
-          disableNotNull: disableNotNullFromHere,
-          disableUnique,
-          fields: disableUnique ? idToUUID(field.fields) : field.fields,
-          rootRelationsToBuild,
-          rootRelationships: relationships,
-          rootTableIDColType,
-          rootTableName,
-          tableName: arrayTableName,
-        })
+        const { hasManyNumberField: subHasManyNumberField, relationsToBuild: subRelationsToBuild } =
+          buildTable({
+            adapter,
+            baseColumns,
+            baseExtraConfig,
+            disableNotNull: disableNotNullFromHere,
+            disableUnique,
+            fields: disableUnique ? idToUUID(field.fields) : field.fields,
+            rootRelationsToBuild,
+            rootRelationships: relationships,
+            rootTableIDColType,
+            rootTableName,
+            tableName: arrayTableName,
+          })
+
+        if (subHasManyNumberField) {
+          if (!hasManyNumberField || subHasManyNumberField === 'index')
+            hasManyNumberField = subHasManyNumberField
+        }
 
         relationsToBuild.set(fieldName, arrayTableName)
 
@@ -351,7 +360,10 @@ export const traverseFields = ({
               baseExtraConfig._localeIdx = (cols) => index('locale_idx').on(cols._locale)
             }
 
-            const { relationsToBuild: subRelationsToBuild } = buildTable({
+            const {
+              hasManyNumberField: subHasManyNumberField,
+              relationsToBuild: subRelationsToBuild,
+            } = buildTable({
               adapter,
               baseColumns,
               baseExtraConfig,
@@ -364,6 +376,11 @@ export const traverseFields = ({
               rootTableName,
               tableName: blockTableName,
             })
+
+            if (subHasManyNumberField) {
+              if (!hasManyNumberField || subHasManyNumberField === 'index')
+                hasManyNumberField = subHasManyNumberField
+            }
 
             const blockTableRelations = relations(
               adapter.tables[blockTableName],
@@ -413,6 +430,7 @@ export const traverseFields = ({
             hasManyNumberField: groupHasManyNumberField,
           } = traverseFields({
             adapter,
+            buildNumbers,
             buildRelationships,
             columnPrefix,
             columns,
@@ -449,6 +467,7 @@ export const traverseFields = ({
           hasManyNumberField: groupHasManyNumberField,
         } = traverseFields({
           adapter,
+          buildNumbers,
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
@@ -486,6 +505,7 @@ export const traverseFields = ({
           hasManyNumberField: tabHasManyNumberField,
         } = traverseFields({
           adapter,
+          buildNumbers,
           buildRelationships,
           columnPrefix,
           columns,
@@ -524,6 +544,7 @@ export const traverseFields = ({
           hasManyNumberField: rowHasManyNumberField,
         } = traverseFields({
           adapter,
+          buildNumbers,
           buildRelationships,
           columnPrefix,
           columns,
