@@ -1,6 +1,6 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-const Posts: CollectionConfig = {
+export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
     create: () => false,
@@ -13,5 +13,3 @@ const Posts: CollectionConfig = {
     },
   ],
 }
-
-export default Posts
