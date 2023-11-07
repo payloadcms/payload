@@ -58,6 +58,13 @@
       }
     },
     {
+      "command": "pnpm run test:int live-preview",
+      "cwd": "${workspaceFolder}",
+      "name": "Live Preview Integration",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "ts-node ./packages/payload/src/bin/index.ts build",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/fields/config.ts",

@@ -37,14 +37,6 @@ export interface User {
 export interface Page {
   id: string
   slug: string
-  relationshipPolyHasMany?:
-    | {
-        relationTo: 'posts'
-        value: string | Post
-      }[]
-    | null
-  relationshipMonoHasMany?: (string | Post)[] | null
-  relationshipMonoHasOne?: (string | null) | Post
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
@@ -155,6 +147,43 @@ export interface Page {
     description?: string | null
     image?: string | Media | null
   }
+  relationshipPolyHasMany?:
+    | {
+        relationTo: 'posts'
+        value: string | Post
+      }[]
+    | null
+  relationshipMonoHasMany?: (string | Post)[] | null
+  relationshipMonoHasOne?: (string | null) | Post
+  arrayOfRelationships?:
+    | {
+        relationshipWithinArray?: (string | null) | Post
+        id?: string | null
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+export interface Media {
+  id: string
+  alt: string
+  caption?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+}
+export interface Category {
+  id: string
+  title?: string | null
   updatedAt: string
   createdAt: string
 }
@@ -272,29 +301,6 @@ export interface Post {
     description?: string | null
     image?: string | Media | null
   }
-  updatedAt: string
-  createdAt: string
-}
-export interface Media {
-  id: string
-  alt: string
-  caption?:
-    | {
-        [k: string]: unknown
-      }[]
-    | null
-  updatedAt: string
-  createdAt: string
-  url?: string | null
-  filename?: string | null
-  mimeType?: string | null
-  filesize?: number | null
-  width?: number | null
-  height?: number | null
-}
-export interface Category {
-  id: string
-  title?: string | null
   updatedAt: string
   createdAt: string
 }

@@ -17,9 +17,20 @@ export const promise = async ({
   ref,
   serverURL,
 }: Args): Promise<void> => {
-  const res: any = await fetch(
-    `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`,
-  ).then((res) => res.json())
+  const url = `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`
+
+  let res: any = null
+
+  try {
+    res = await fetch(url, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((res) => res.json())
+  } catch (err) {
+    console.error(err) // eslint-disable-line no-console
+  }
 
   ref[accessor] = res
 }

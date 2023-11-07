@@ -4,6 +4,8 @@ export const home: Page = {
   slug: 'home',
   title: 'Home',
   id: '',
+  updatedAt: '',
+  createdAt: '',
   meta: {
     description: 'This is an example of live preview on a page.',
   },
@@ -92,6 +94,14 @@ export const home: Page = {
           },
         },
       ],
+    },
+  ],
+  relationshipMonoHasMany: ['{{POST_1_ID}}'],
+  relationshipMonoHasOne: '{{POST_1_ID}}',
+  relationshipPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],
+  arrayOfRelationships: [
+    {
+      relationshipWithinArray: '{{POST_1_ID}}',
     },
   ],
 }

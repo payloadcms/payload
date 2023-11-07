@@ -37,14 +37,6 @@ export interface User {
 export interface Page {
   id: string
   slug: string
-  relationshipPolyHasMany?:
-    | {
-        relationTo: 'posts'
-        value: string | Post
-      }[]
-    | null
-  relationshipMonoHasMany?: (string | Post)[] | null
-  relationshipMonoHasOne?: (string | null) | Post
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
@@ -69,10 +61,15 @@ export interface Page {
                   link: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('primary' | 'secondary') | null
@@ -98,10 +95,15 @@ export interface Page {
                   link?: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('default' | 'primary' | 'secondary') | null
@@ -155,8 +157,39 @@ export interface Page {
     description?: string | null
     image?: string | Media | null
   }
+  relationshipPolyHasMany?:
+    | {
+        relationTo: 'posts'
+        value: string | Post
+      }[]
+    | null
+  relationshipMonoHasMany?: (string | Post)[] | null
+  relationshipMonoHasOne?: (string | null) | Post
+  arrayOfRelationships?:
+    | {
+        relationshipWithinArray?: (string | null) | Post
+        id?: string | null
+      }[]
+    | null
   updatedAt: string
   createdAt: string
+}
+export interface Media {
+  id: string
+  alt: string
+  caption?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
 }
 export interface Post {
   id: string
@@ -185,10 +218,15 @@ export interface Post {
                   link: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('primary' | 'secondary') | null
@@ -214,10 +252,15 @@ export interface Post {
                   link?: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('default' | 'primary' | 'secondary') | null
@@ -275,23 +318,6 @@ export interface Post {
   updatedAt: string
   createdAt: string
 }
-export interface Media {
-  id: string
-  alt: string
-  caption?:
-    | {
-        [k: string]: unknown
-      }[]
-    | null
-  updatedAt: string
-  createdAt: string
-  url?: string | null
-  filename?: string | null
-  mimeType?: string | null
-  filesize?: number | null
-  width?: number | null
-  height?: number | null
-}
 export interface Category {
   id: string
   title?: string | null
@@ -331,10 +357,15 @@ export interface Header {
         link: {
           type?: ('reference' | 'custom') | null
           newTab?: boolean | null
-          reference?: {
-            relationTo: 'pages'
-            value: string | Page
-          } | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
           url?: string | null
           label: string
           appearance?: ('default' | 'primary' | 'secondary') | null
@@ -352,10 +383,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null
           newTab?: boolean | null
-          reference?: {
-            relationTo: 'pages'
-            value: string | Page
-          } | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
           url?: string | null
           label: string
           appearance?: ('default' | 'primary' | 'secondary') | null

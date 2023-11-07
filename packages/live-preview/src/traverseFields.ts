@@ -28,25 +28,26 @@ export const traverseFields = <T>({
       switch (fieldSchema.type) {
         case 'array':
           if (Array.isArray(incomingData[fieldName])) {
-            result[fieldName] = incomingData[fieldName].map((row, i) => {
-              const hasExistingRow =
-                Array.isArray(result[fieldName]) &&
-                typeof result[fieldName][i] === 'object' &&
-                result[fieldName][i] !== null
+            result[fieldName] = incomingData[fieldName].map((incomingRow, i) => {
+              if (!result[fieldName]) {
+                result[fieldName] = []
+              }
 
-              const newRow = hasExistingRow ? { ...result[fieldName][i] } : {}
+              if (!result[fieldName][i]) {
+                result[fieldName][i] = {}
+              }
 
               traverseFields({
                 apiRoute,
                 depth,
                 fieldSchema: fieldSchema.fields,
-                incomingData: row,
+                incomingData: incomingRow,
                 populationPromises,
-                result: newRow,
+                result: result[fieldName][i],
                 serverURL,
               })
 
-              return newRow
+              return result[fieldName][i]
             })
           }
           break
@@ -56,16 +57,15 @@ export const traverseFields = <T>({
             result[fieldName] = incomingData[fieldName].map((incomingBlock, i) => {
               const incomingBlockJSON = fieldSchema.blocks[incomingBlock.blockType]
 
-              // Compare the index and id to determine if this block already exists in the result
-              // If so, we want to use the existing block as the base, otherwise take the incoming block
-              // Either way, we will traverse the fields of the block to populate relationships
-              const isExistingBlock =
-                Array.isArray(result[fieldName]) &&
-                typeof result[fieldName][i] === 'object' &&
-                result[fieldName][i] !== null &&
-                result[fieldName][i].id === incomingBlock.id
+              if (!result[fieldName]) {
+                result[fieldName] = []
+              }
 
-              const block = isExistingBlock ? result[fieldName][i] : incomingBlock
+              if (!result[fieldName][i]) {
+                result[fieldName][i] = {
+                  blockType: incomingBlock.blockType,
+                }
+              }
 
               traverseFields({
                 apiRoute,
@@ -73,11 +73,11 @@ export const traverseFields = <T>({
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
                 populationPromises,
-                result: block,
+                result: result[fieldName][i],
                 serverURL,
               })
 
-              return block
+              return result[fieldName][i]
             })
           } else {
             result[fieldName] = []
@@ -107,32 +107,27 @@ export const traverseFields = <T>({
         case 'relationship':
           // Handle `hasMany` relationships
           if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {
-            const oldValue = Array.isArray(result[fieldName]) ? [...result[fieldName]] : []
-
-            // slice the array down to the new length
-            // this is for when an item is removed from the array
-            // we'll build up the array again with new values
-            result[fieldName] = Array.isArray(result[fieldName])
-              ? [...result[fieldName]].slice(0, incomingData[fieldName].length)
-              : []
+            if (!result[fieldName]) {
+              result[fieldName] = []
+            }
 
             incomingData[fieldName].forEach((incomingRelation, i) => {
               // Handle `hasMany` polymorphic
               if (Array.isArray(fieldSchema.relationTo)) {
-                const oldID = oldValue[i]?.value?.id
-                const oldRelation = oldValue[i]?.relationTo
+                // if the field doesn't exist on the result, create it
+                // the value will be populated later
+                if (!result[fieldName][i]) {
+                  result[fieldName][i] = {
+                    relationTo: incomingRelation.relationTo,
+                  }
+                }
+
+                const oldID = result[fieldName][i]?.value?.id
+                const oldRelation = result[fieldName][i]?.relationTo
                 const newID = incomingRelation.value
                 const newRelation = incomingRelation.relationTo
 
                 if (oldID !== newID || oldRelation !== newRelation) {
-                  // if the field doesn't exist on the result, create it
-                  // the value will be populated later
-                  if (!result[fieldName][i]) {
-                    result[fieldName][i] = {
-                      relationTo: newRelation,
-                    }
-                  }
-
                   populationPromises.push(
                     promise({
                       id: incomingRelation.value,
@@ -147,9 +142,11 @@ export const traverseFields = <T>({
                 }
               } else {
                 // Handle `hasMany` monomorphic
-                const oldID = oldValue[i]?.id
+                if (!result[fieldName][i]) {
+                  result[fieldName][i] = {}
+                }
 
-                if (oldID !== incomingRelation) {
+                if (result[fieldName][i]?.id !== incomingRelation) {
                   populationPromises.push(
                     promise({
                       id: incomingRelation,
@@ -167,6 +164,14 @@ export const traverseFields = <T>({
           } else {
             // Handle `hasOne` polymorphic
             if (Array.isArray(fieldSchema.relationTo)) {
+              // if the field doesn't exist on the result, create it
+              // the value will be populated later
+              if (!result[fieldName]) {
+                result[fieldName] = {
+                  relationTo: incomingData[fieldName]?.relationTo,
+                }
+              }
+
               const hasNewValue =
                 incomingData[fieldName] &&
                 typeof incomingData[fieldName] === 'object' &&
@@ -190,7 +195,6 @@ export const traverseFields = <T>({
                 : ''
 
               const newRelation = hasNewValue ? incomingData[fieldName].relationTo : ''
-
               const oldRelation = hasOldValue ? result[fieldName].relationTo : ''
 
               // if the new value/relation is different from the old value/relation
@@ -199,14 +203,6 @@ export const traverseFields = <T>({
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  // if the field doesn't exist on the result, create it
-                  // the value will be populated later
-                  if (!result[fieldName]) {
-                    result[fieldName] = {
-                      relationTo: newRelation,
-                    }
-                  }
-
                   populationPromises.push(
                     promise({
                       id: newID,
@@ -223,6 +219,10 @@ export const traverseFields = <T>({
                 }
               }
             } else {
+              if (!result[fieldName]) {
+                result[fieldName] = {}
+              }
+
               // Handle `hasOne` monomorphic
               const newID: string =
                 (typeof incomingData[fieldName] === 'string' && incomingData[fieldName]) ||

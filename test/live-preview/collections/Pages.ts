@@ -53,6 +53,26 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'meta',
+      type: 'group',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+        },
+      ],
+    },
+    // Hidden fields for testing purposes
+    {
       name: 'relationshipPolyHasMany',
       type: 'relationship',
       relationTo: ['posts'],
@@ -79,21 +99,16 @@ export const Pages: CollectionConfig = {
       },
     },
     {
-      name: 'meta',
-      type: 'group',
+      name: 'arrayOfRelationships',
+      type: 'array',
+      admin: {
+        hidden: true,
+      },
       fields: [
         {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'description',
-          type: 'textarea',
-        },
-        {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
+          name: 'relationshipWithinArray',
+          type: 'relationship',
+          relationTo: 'posts',
         },
       ],
     },

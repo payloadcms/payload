@@ -22,7 +22,6 @@ describe('Collections - Live Preview', () => {
   let client
   let serverURL
 
-  let testPage: Page
   let testPost: Post
   let media: Media
 
@@ -36,14 +35,6 @@ describe('Collections - Live Preview', () => {
     const config = await configPromise
     client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
     await client.login()
-
-    testPage = await payload.create({
-      collection: pagesSlug,
-      data: {
-        slug: 'home',
-        title: 'Test Page',
-      },
-    })
 
     testPost = await payload.create({
       collection: postsSlug,
@@ -73,18 +64,20 @@ describe('Collections - Live Preview', () => {
       event: {
         data: JSON.stringify({
           data: {
-            title: 'Test Page (Change 1)',
+            title: 'Test Page (Changed)',
           },
           fieldSchemaJSON: schemaJSON,
           type: 'payload-live-preview',
         }),
         origin: serverURL,
       } as MessageEvent,
-      initialData: testPage,
+      initialData: {
+        title: 'Test Page',
+      } as Page,
       serverURL,
     })
 
-    expect(handledMessage.title).toEqual('Test Page (Change 1)')
+    expect(handledMessage.title).toEqual('Test Page (Changed)')
   })
 
   it('caches `fieldSchemaJSON`', async () => {
@@ -93,64 +86,79 @@ describe('Collections - Live Preview', () => {
       event: {
         data: JSON.stringify({
           data: {
-            title: 'Test Page (Change 2)',
+            title: 'Test Page (Changed)',
           },
           type: 'payload-live-preview',
         }),
         origin: serverURL,
       } as MessageEvent,
-      initialData: testPage,
+      initialData: {
+        title: 'Test Page',
+      } as Page,
       serverURL,
     })
 
-    expect(handledMessage.title).toEqual('Test Page (Change 2)')
+    expect(handledMessage.title).toEqual('Test Page (Changed)')
   })
 
   it('merges data', async () => {
-    expect(testPage?.id).toBeDefined()
+    const initialData: Partial<Page> = {
+      id: '123',
+      title: 'Test Page',
+    }
 
-    const mergedData = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: testPage,
-      initialData: testPage,
-      serverURL,
-    })
-
-    expect(mergedData.id).toEqual(testPage.id)
-  })
-
-  it('merges strings', async () => {
     const mergedData = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...testPage,
-        title: 'Test Page (Change 3)',
+        title: 'Test Page (Merged)',
       },
-      initialData: testPage,
+      initialData,
       serverURL,
     })
 
-    expect(mergedData.title).toEqual('Test Page (Change 3)')
+    expect(mergedData.id).toEqual(initialData.id)
+  })
+
+  it('— strings - merges data', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const mergedData = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        title: 'Test Page (Changed)',
+      },
+      initialData,
+      serverURL,
+    })
+
+    expect(mergedData.title).toEqual('Test Page (Changed)')
   })
 
   // TODO: this test is not working in Postgres
   // This is because of how relationships are handled in `mergeData`
   // This test passes in MongoDB, though
-  it.skip('adds and removes uploads', async () => {
+  it.skip('— uploads - adds and removes media', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
     // Add upload
     const mergedData = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...testPage,
+        ...initialData,
         hero: {
           type: 'highImpact',
           media: media.id,
         },
       },
-      initialData: testPage,
+      initialData,
       serverURL,
     })
 
@@ -174,16 +182,21 @@ describe('Collections - Live Preview', () => {
     expect(mergedDataWithoutUpload.hero.media).toEqual(null)
   })
 
-  it('merges relationships', async () => {
+  it('— relationships - populates all types', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
     const merge1 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...initialData,
         relationshipMonoHasOne: testPost.id,
         relationshipMonoHasMany: [testPost.id],
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
-      initialData: testPage,
+      initialData,
       serverURL,
     })
 
@@ -193,34 +206,184 @@ describe('Collections - Live Preview', () => {
       { value: testPost, relationTo: postsSlug },
     ])
 
+    // Clear relationships
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
+        ...merge1,
         relationshipMonoHasOne: null,
         relationshipMonoHasMany: [],
         relationshipPolyHasMany: [],
       },
-      initialData: merge1,
+      initialData,
       serverURL,
     })
 
-    expect(merge2.relationshipMonoHasOne).toEqual(null)
+    expect(merge2.relationshipMonoHasOne).toEqual({})
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasMany).toEqual([])
+
+    // Now populate the relationships again
+    const merge3 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge2,
+        relationshipMonoHasOne: testPost.id,
+        relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+      },
+      initialData,
+      serverURL,
+    })
+
+    expect(merge3.relationshipMonoHasOne).toMatchObject(testPost)
+    expect(merge3.relationshipMonoHasMany).toMatchObject([testPost])
+    expect(merge3.relationshipPolyHasMany).toMatchObject([
+      { value: testPost, relationTo: postsSlug },
+    ])
   })
 
-  it('adds, reorders, and removes blocks', async () => {
-    // Add new blocks
+  it('— relationships - populates within arrays', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
     const merge1 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...testPage,
+        ...initialData,
+        arrayOfRelationships: [
+          {
+            relationshipWithinArray: testPost.id,
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+    })
+
+    expect(merge1.arrayOfRelationships).toHaveLength(1)
+    expect(merge1.arrayOfRelationships).toMatchObject([
+      {
+        relationshipWithinArray: testPost,
+      },
+    ])
+
+    // Add a new block before the populated one, then check to see that the relationship is still populated
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        arrayOfRelationships: [
+          {},
+          {
+            relationshipWithinArray: testPost.id,
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+    })
+
+    expect(merge2.arrayOfRelationships).toHaveLength(2)
+    expect(merge2.arrayOfRelationships).toMatchObject([
+      {},
+      {
+        relationshipWithinArray: testPost,
+      },
+    ])
+  })
+
+  it('— relationships - populates within blocks', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
         layout: [
           {
             blockType: 'cta',
-            id: 'block-1', // use fake ID, this is a new block that is only assigned an ID on the client
+            links: [
+              {
+                link: {
+                  label: 'Link 1',
+                  type: 'reference',
+                  reference: {
+                    relationTo: 'posts',
+                    value: testPost.id,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+    })
+
+    // Check that the relationship has been populated
+    expect(merge1.layout[0].links[0].link.reference.value).toMatchObject(testPost)
+
+    // Add a new block before the populated one
+    // Then check to see that the relationship is still populated
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        layout: [
+          {
+            blockType: 'cta',
+          },
+          {
+            blockType: 'cta',
+            links: [
+              {
+                link: {
+                  label: 'Link 1',
+                  type: 'reference',
+                  reference: {
+                    relationTo: 'posts',
+                    value: testPost.id,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+    })
+
+    // Check that the relationship on the first has been removed
+    // And that the relationship on the second has been populated
+    expect(merge2.layout[0].links).toBeFalsy()
+    expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
+  })
+
+  it('— blocks - adds, reorders, and removes blocks', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        layout: [
+          {
+            blockType: 'cta',
             richText: [
               {
                 type: 'paragraph',
@@ -230,7 +393,6 @@ describe('Collections - Live Preview', () => {
           },
           {
             blockType: 'cta',
-            id: 'block-2', // use fake ID, this is a new block that is only assigned an ID on the client
             richText: [
               {
                 type: 'paragraph',
@@ -240,20 +402,18 @@ describe('Collections - Live Preview', () => {
           },
         ],
       },
-      initialData: testPage,
+      initialData,
       serverURL,
     })
 
     // Check that the blocks have been merged and are in the correct order
     expect(merge1.layout).toHaveLength(2)
     const block1 = merge1.layout[0]
-    expect(block1.id).toEqual('block-1')
     expect(block1.richText[0].text).toEqual('Block 1 (Position 1)')
     const block2 = merge1.layout[1]
-    expect(block2.id).toEqual('block-2')
     expect(block2.richText[0].text).toEqual('Block 2 (Position 2)')
 
-    // Reorder the blocks using the same IDs from the previous merge
+    // Reorder the blocks
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
@@ -261,8 +421,7 @@ describe('Collections - Live Preview', () => {
         ...merge1,
         layout: [
           {
-            id: block2.id,
-            blockType: 'content',
+            blockType: 'cta',
             richText: [
               {
                 type: 'paragraph',
@@ -271,8 +430,7 @@ describe('Collections - Live Preview', () => {
             ],
           },
           {
-            id: block1.id,
-            blockType: 'content',
+            blockType: 'cta',
             richText: [
               {
                 type: 'paragraph',
@@ -288,8 +446,6 @@ describe('Collections - Live Preview', () => {
 
     // Check that the blocks have been reordered
     expect(merge2.layout).toHaveLength(2)
-    expect(merge2.layout[0].id).toEqual(block2.id)
-    expect(merge2.layout[1].id).toEqual(block1.id)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge2.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
 
@@ -302,7 +458,7 @@ describe('Collections - Live Preview', () => {
         layout: [
           {
             id: block2.id,
-            blockType: 'content',
+            blockType: 'cta',
             richText: [
               {
                 type: 'paragraph',
