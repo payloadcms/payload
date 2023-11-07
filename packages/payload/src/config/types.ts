@@ -27,6 +27,7 @@ import type {
 } from '../collections/config/types'
 import type { BaseDatabaseAdapter } from '../database/types'
 import type { PayloadRequest } from '../express/types'
+import type { ClientConfigField, Field } from '../fields/config/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
@@ -118,8 +119,7 @@ export type InitOptions = {
    * The passed config should match the config file, and if it doesn't, there could be mismatches between the admin UI
    * and the backend functionality
    */
-  config?: Promise<SanitizedConfig>
-
+  config: Promise<SanitizedConfig>
   /**
    * Disable connect to the database on init
    */
@@ -149,20 +149,17 @@ export type InitOptions = {
   local?: boolean
 
   loggerDestination?: DestinationStream
+
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
    *
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
-
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
   onInit?: (payload: Payload) => Promise<void> | void
-
-  /** Secure string that Payload will use for any encryption workflows */
-  secret: string
 }
 
 /**
@@ -509,12 +506,12 @@ export type Config = {
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | string[]
-
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+
   /** Pass in a database adapter for use on this project. */
   db: (args: { payload: Payload }) => BaseDatabaseAdapter
   /** Enable to expose more detailed error information. */
@@ -666,6 +663,8 @@ export type Config = {
     /** @default "/playground" */
     graphQLPlayground?: string
   }
+  /** Secure string that Payload will use for any encryption workflows */
+  secret: string
   /**
    * Define the absolute URL of your app including the protocol, for example `https://example.org`.
    * No paths allowed, only protocol, domain and (optionally) port.
@@ -701,6 +700,15 @@ export type SanitizedConfig = Omit<
     configDir: string
     rawConfig: string
   }
+}
+
+export type ClientConfig = Omit<SanitizedConfig, 'db' | 'endpoints' | 'webpack'> & {
+  collections: (Omit<SanitizedCollectionConfig, 'access' | 'endpoints' | 'fields' | 'hooks'> & {
+    fields: ClientConfigField[]
+  })[]
+  globals: (Omit<SanitizedGlobalConfig, 'access' | 'endpoints' | 'fields' | 'hooks'> & {
+    fields: ClientConfigField[]
+  })[]
 }
 
 export type EntityDescription =

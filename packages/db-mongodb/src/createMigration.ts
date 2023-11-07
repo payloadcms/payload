@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { CreateMigration } from 'payload/database'
+// import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
 import path from 'path'
@@ -18,11 +18,7 @@ ${downSQL ?? `  // Migration code`}
 };
 `
 
-export const createMigration: CreateMigration = async function createMigration({
-  file,
-  migrationName,
-  payload,
-}) {
+export const createMigration = async function createMigration({ file, migrationName, payload }) {
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
@@ -38,8 +34,8 @@ export const createMigration: CreateMigration = async function createMigration({
 
     // Check if predefined migration exists
     if (fs.existsSync(cleanPath)) {
-      const { down, up } = require(cleanPath)
-      migrationFileContent = migrationTemplate(up, down)
+      // const { down, up } = require(cleanPath)
+      // migrationFileContent = migrationTemplate(up, down)
     } else {
       payload.logger.error({
         msg: `Canned migration ${predefinedMigrationName} not found.`,

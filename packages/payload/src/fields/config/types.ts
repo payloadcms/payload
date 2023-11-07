@@ -503,6 +503,8 @@ export type Field =
   | UIField
   | UploadField
 
+export type ClientConfigField = Omit<Field, 'access' | 'defaultValue' | 'hooks' | 'validate'>
+
 export type FieldAffectingData =
   | ArrayField
   | BlockField

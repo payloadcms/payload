@@ -1,4 +1,4 @@
-export {
+export type {
   BaseDatabaseAdapter,
   BeginTransaction,
   CommitTransaction,
@@ -78,7 +78,7 @@ export { migrationsCollection } from '../database/migrations/migrationsCollectio
 
 export { readMigrationFiles } from '../database/migrations/readMigrationFiles'
 
-export { EntityPolicies, PathToQuery } from '../database/queryValidation/types'
+export type { EntityPolicies, PathToQuery } from '../database/queryValidation/types'
 
 export { validateQueryPaths } from '../database/queryValidation/validateQueryPaths'
 

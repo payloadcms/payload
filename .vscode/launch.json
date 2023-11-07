@@ -27,7 +27,7 @@
       "type": "node-terminal"
     },
     {
-      "command": "pnpm run dev:postgres fields",
+      "command": "pnpm run dev:postgres versions",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",

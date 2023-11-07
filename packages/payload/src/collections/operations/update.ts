@@ -17,10 +17,10 @@ import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
-import { generateFileData } from '../../uploads/generateFileData'
+// import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+// import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
-import { uploadFiles } from '../../uploads/uploadFiles'
+// import { uploadFiles } from '../../uploads/uploadFiles'
 import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -151,21 +151,20 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    const { data: newFileData, files: filesToUpload } = await generateFileData({
-      collection,
-      config,
-      data: bulkUpdateData,
-      overwriteExistingFiles,
-      req,
-      throwOnMissingFile: false,
-    })
+    // const { data: newFileData, files: filesToUpload } = await generateFileData({
+    //   collection,
+    //   config,
+    //   data: bulkUpdateData,
+    //   overwriteExistingFiles,
+    //   req,
+    //   throwOnMissingFile: false,
+    // })
 
     const errors = []
 
     const promises = docs.map(async (doc) => {
       const { id } = doc
       let data = {
-        ...newFileData,
         ...bulkUpdateData,
       }
 
@@ -181,14 +180,14 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           showHiddenFields: true,
         })
 
-        await deleteAssociatedFiles({
-          collectionConfig,
-          config,
-          doc,
-          files: filesToUpload,
-          overrideDelete: false,
-          t,
-        })
+        // await deleteAssociatedFiles({
+        //   collectionConfig,
+        //   config,
+        //   doc,
+        //   // files: filesToUpload,
+        //   overrideDelete: false,
+        //   t,
+        // })
 
         // /////////////////////////////////////
         // beforeValidate - Fields
@@ -228,9 +227,9 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // Write files to local storage
         // /////////////////////////////////////
 
-        if (!collectionConfig.upload.disableLocalStorage) {
-          await uploadFiles(payload, filesToUpload, t)
-        }
+        // if (!collectionConfig.upload.disableLocalStorage) {
+        //   await uploadFiles(payload, filesToUpload, t)
+        // }
 
         // /////////////////////////////////////
         // beforeChange - Collection
