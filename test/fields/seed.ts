@@ -12,11 +12,12 @@ import { conditionalLogicDoc } from './collections/ConditionalLogic'
 import { dateDoc } from './collections/Date'
 import { groupDoc } from './collections/Group'
 import { jsonDoc } from './collections/JSON'
-import { lexicalRichTextDoc } from './collections/Lexical/data'
+import { lexicalDocData } from './collections/Lexical/data'
+import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
 import { numberDoc } from './collections/Number'
 import { pointDoc } from './collections/Point'
 import { radiosDoc } from './collections/Radio'
-import { richTextBulletsDoc, richTextDoc } from './collections/RichText/data'
+import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data'
 import { selectsDoc } from './collections/Select'
 import { tabsDoc } from './collections/Tabs'
 import { textDoc } from './collections/Text'
@@ -83,13 +84,13 @@ export async function clearAndSeedEverything(_payload: Payload) {
         _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
 
       const richTextDocWithRelId = JSON.parse(
-        JSON.stringify(richTextDoc)
+        JSON.stringify(richTextDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
           .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
       )
       const richTextBulletsDocWithRelId = JSON.parse(
-        JSON.stringify(richTextBulletsDoc)
+        JSON.stringify(richTextBulletsDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
           .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
@@ -102,8 +103,15 @@ export async function clearAndSeedEverything(_payload: Payload) {
       blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
       blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
 
-      const lexicalRichTextDocWithRelId = JSON.parse(
-        JSON.stringify(lexicalRichTextDoc)
+      const lexicalDocWithRelId = JSON.parse(
+        JSON.stringify(lexicalDocData)
+          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+      )
+
+      const lexicalMigrateDocWithRelId = JSON.parse(
+        JSON.stringify(lexicalMigrateDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
           .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
@@ -130,10 +138,10 @@ export async function clearAndSeedEverything(_payload: Payload) {
 
         _payload.create({ collection: blockFieldsSlug, data: blocksDocWithRichText }),
 
-        _payload.create({ collection: lexicalFieldsSlug, data: lexicalRichTextDocWithRelId }),
+        _payload.create({ collection: lexicalFieldsSlug, data: lexicalDocWithRelId }),
         _payload.create({
           collection: lexicalMigrateFieldsSlug,
-          data: lexicalRichTextDocWithRelId,
+          data: lexicalMigrateDocWithRelId,
         }),
 
         _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId }),

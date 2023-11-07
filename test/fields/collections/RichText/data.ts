@@ -21,7 +21,7 @@ export const richTextBlocks = [
     ],
   },
 ]
-export const richTextDoc = {
+export const richTextDocData = {
   title: 'Rich Text',
   selectHasMany: ['one', 'five'],
   richText: generateSlateRichText(),
@@ -31,7 +31,7 @@ export const richTextDoc = {
   blocks: richTextBlocks,
 }
 
-export const richTextBulletsDoc = {
+export const richTextBulletsDocData = {
   title: 'Bullets and Indentation',
   lexicalCustomFields: generateLexicalRichText(),
   richText: [
