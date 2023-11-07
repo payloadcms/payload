@@ -30,7 +30,6 @@ export const number: Validate<unknown, unknown, NumberField> = (
   { hasMany, max, maxRows, min, minRows, required, t },
 ) => {
   const toValidate: number[] = Array.isArray(value) ? value : [value]
-  const hasValue = value && Array.isArray(value) && value.length > 0
 
   // eslint-disable-next-line no-restricted-syntax
   for (const valueToValidate of toValidate) {
@@ -60,7 +59,7 @@ export const number: Validate<unknown, unknown, NumberField> = (
     return t('validation:required')
   }
 
-  if (hasMany === true && hasValue) {
+  if (hasMany === true) {
     if (minRows && toValidate.length < minRows) {
       return t('validation:lessThanMin', {
         label: t('rows'),
@@ -339,13 +338,12 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
   options,
 ) => {
   const { config, maxRows, minRows, payload, relationTo, required, t } = options
-  const hasValue = value && Array.isArray(value) && value.length > 0
 
   if ((!value || (Array.isArray(value) && value.length === 0)) && required) {
     return t('validation:required')
   }
 
-  if (hasValue) {
+  if (Array.isArray(value)) {
     if (minRows && value.length < minRows) {
       return t('validation:lessThanMin', { label: t('rows'), min: minRows, value: value.length })
     }
@@ -403,20 +401,17 @@ export const array: Validate<unknown, unknown, ArrayField> = (
   value,
   { maxRows, minRows, required, t },
 ) => {
-  const hasValue = value && Array.isArray(value) && value.length > 0
   const arrayLength = Array.isArray(value) ? value.length : 0
 
-  if (hasValue) {
-    if (minRows && arrayLength < minRows) {
-      return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
-    }
-
-    if (maxRows && arrayLength > maxRows) {
-      return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
-    }
+  if (minRows && arrayLength < minRows) {
+    return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
   }
 
-  if (!hasValue && required) {
+  if (maxRows && arrayLength > maxRows) {
+    return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
+  }
+
+  if (!arrayLength && required) {
     return t('validation:requiresAtLeast', { count: 1, label: t('row') })
   }
 
@@ -475,20 +470,17 @@ export const blocks: Validate<unknown, unknown, BlockField> = (
   value,
   { maxRows, minRows, required, t },
 ) => {
-  const hasValue = value && Array.isArray(value) && value.length > 0
   const arrayLength = Array.isArray(value) ? value.length : 0
 
-  if (hasValue) {
-    if (minRows && arrayLength < minRows) {
-      return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
-    }
-
-    if (maxRows && arrayLength > maxRows) {
-      return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
-    }
+  if (minRows && arrayLength < minRows) {
+    return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
   }
 
-  if (hasValue && required) {
+  if (maxRows && arrayLength > maxRows) {
+    return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
+  }
+
+  if (!arrayLength && required) {
     return t('validation:requiresAtLeast', { count: 1, label: t('row') })
   }
 
