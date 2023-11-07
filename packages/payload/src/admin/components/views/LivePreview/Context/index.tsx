@@ -1,5 +1,5 @@
 import { DndContext } from '@dnd-kit/core'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { LivePreviewConfig } from '../../../../../exports/config'
 import type { Field } from '../../../../../fields/config/types'

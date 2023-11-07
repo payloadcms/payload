@@ -366,31 +366,33 @@ describe('Collections - Live Preview', () => {
   })
 
   it('— blocks - adds, reorders, and removes blocks', async () => {
-    const block1: Extract<Page['layout'][0], { blockType: 'cta' }> = {
-      blockType: 'cta',
-      id: '123',
-      richText: [
-        {
-          type: 'paragraph',
-          text: 'Block 1 (Position 1)',
-        },
-      ],
-    }
-
-    const block2: Extract<Page['layout'][0], { blockType: 'cta' }> = {
-      blockType: 'cta',
-      id: '456',
-      richText: [
-        {
-          type: 'paragraph',
-          text: 'Block 2 (Position 2)',
-        },
-      ],
-    }
+    const block1ID = '123'
+    const block2ID = '456'
 
     const initialData: Partial<Page> = {
       title: 'Test Page',
-      layout: [block1, block2],
+      layout: [
+        {
+          blockType: 'cta',
+          id: block1ID,
+          richText: [
+            {
+              type: 'paragraph',
+              text: 'Block 1 (Position 1)',
+            },
+          ],
+        },
+        {
+          blockType: 'cta',
+          id: block2ID,
+          richText: [
+            {
+              type: 'paragraph',
+              text: 'Block 2 (Position 2)',
+            },
+          ],
+        },
+      ],
     }
 
     // Reorder the blocks
@@ -399,7 +401,28 @@ describe('Collections - Live Preview', () => {
       fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
-        layout: [block2, block1],
+        layout: [
+          {
+            blockType: 'cta',
+            id: block2ID,
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 2 (Position 1)',
+              },
+            ],
+          },
+          {
+            blockType: 'cta',
+            id: block1ID,
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 1 (Position 2)',
+              },
+            ],
+          },
+        ],
       },
       initialData,
       serverURL,
@@ -407,8 +430,8 @@ describe('Collections - Live Preview', () => {
 
     // Check that the blocks have been reordered
     expect(merge1.layout).toHaveLength(2)
-    expect(merge1.layout[0].id).toEqual(block2.id)
-    expect(merge1.layout[1].id).toEqual(block1.id)
+    expect(merge1.layout[0].id).toEqual(block2ID)
+    expect(merge1.layout[1].id).toEqual(block1ID)
     expect(merge1.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge1.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
 
@@ -418,7 +441,18 @@ describe('Collections - Live Preview', () => {
       fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
-        layout: [block2],
+        layout: [
+          {
+            blockType: 'cta',
+            id: block2ID,
+            richText: [
+              {
+                type: 'paragraph',
+                text: 'Block 2 (Position 1)',
+              },
+            ],
+          },
+        ],
       },
       initialData,
       serverURL,
@@ -426,7 +460,7 @@ describe('Collections - Live Preview', () => {
 
     // Check that the block has been removed
     expect(merge2.layout).toHaveLength(1)
-    expect(merge2.layout[0].id).toEqual(block2.id)
+    expect(merge2.layout[0].id).toEqual(block2ID)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
 
     // Remove the last block to ensure that all blocks can be cleared
