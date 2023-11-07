@@ -470,6 +470,7 @@ export const blocks: Validate<unknown, unknown, BlockField> = (
   value,
   { maxRows, minRows, required, t },
 ) => {
+  const hasValue = value && Array.isArray(value) && value.length > 0
   const arrayLength = Array.isArray(value) ? value.length : 0
 
   if (minRows && arrayLength < minRows) {
@@ -480,7 +481,7 @@ export const blocks: Validate<unknown, unknown, BlockField> = (
     return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
   }
 
-  if (!arrayLength && required) {
+  if (hasValue && required) {
     return t('validation:requiresAtLeast', { count: 1, label: t('row') })
   }
 
