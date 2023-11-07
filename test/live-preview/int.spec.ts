@@ -220,7 +220,7 @@ describe('Collections - Live Preview', () => {
       serverURL,
     })
 
-    expect(merge2.relationshipMonoHasOne).toEqual({})
+    expect(merge2.relationshipMonoHasOne).toEqual(undefined)
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasMany).toEqual([])
 
@@ -257,6 +257,7 @@ describe('Collections - Live Preview', () => {
         ...initialData,
         arrayOfRelationships: [
           {
+            id: '123',
             relationshipWithinArray: testPost.id,
           },
         ],
@@ -268,6 +269,7 @@ describe('Collections - Live Preview', () => {
     expect(merge1.arrayOfRelationships).toHaveLength(1)
     expect(merge1.arrayOfRelationships).toMatchObject([
       {
+        id: '123',
         relationshipWithinArray: testPost,
       },
     ])
@@ -279,8 +281,12 @@ describe('Collections - Live Preview', () => {
       incomingData: {
         ...merge1,
         arrayOfRelationships: [
-          {},
           {
+            id: '456',
+            relationshipWithinArray: undefined,
+          },
+          {
+            id: '123',
             relationshipWithinArray: testPost.id,
           },
         ],
@@ -291,8 +297,11 @@ describe('Collections - Live Preview', () => {
 
     expect(merge2.arrayOfRelationships).toHaveLength(2)
     expect(merge2.arrayOfRelationships).toMatchObject([
-      {},
       {
+        id: '456',
+      },
+      {
+        id: '123',
         relationshipWithinArray: testPost,
       },
     ])
@@ -301,6 +310,24 @@ describe('Collections - Live Preview', () => {
   it('— relationships - populates within blocks', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
+      layout: [
+        {
+          blockType: 'cta',
+          id: '123',
+          links: [
+            {
+              link: {
+                label: 'Link 1',
+                type: 'reference',
+                reference: {
+                  relationTo: 'posts',
+                  value: testPost, // full object
+                },
+              },
+            },
+          ],
+        },
+      ],
     }
 
     const merge1 = await mergeData({
@@ -311,6 +338,7 @@ describe('Collections - Live Preview', () => {
         layout: [
           {
             blockType: 'cta',
+            id: '123',
             links: [
               {
                 link: {
@@ -318,7 +346,7 @@ describe('Collections - Live Preview', () => {
                   type: 'reference',
                   reference: {
                     relationTo: 'posts',
-                    value: testPost.id,
+                    value: testPost.id, // only ID
                   },
                 },
               },
@@ -343,9 +371,12 @@ describe('Collections - Live Preview', () => {
         layout: [
           {
             blockType: 'cta',
+            id: '456',
+            links: [],
           },
           {
             blockType: 'cta',
+            id: '123',
             links: [
               {
                 link: {
@@ -367,7 +398,7 @@ describe('Collections - Live Preview', () => {
 
     // Check that the relationship on the first has been removed
     // And that the relationship on the second has been populated
-    expect(merge2.layout[0].links).toBeFalsy()
+    expect(merge2.layout[0].links).toMatchObject([])
     expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
   })
 
@@ -384,6 +415,7 @@ describe('Collections - Live Preview', () => {
         layout: [
           {
             blockType: 'cta',
+            id: '123',
             richText: [
               {
                 type: 'paragraph',
@@ -393,6 +425,7 @@ describe('Collections - Live Preview', () => {
           },
           {
             blockType: 'cta',
+            id: '456',
             richText: [
               {
                 type: 'paragraph',
@@ -409,8 +442,10 @@ describe('Collections - Live Preview', () => {
     // Check that the blocks have been merged and are in the correct order
     expect(merge1.layout).toHaveLength(2)
     const block1 = merge1.layout[0]
+    expect(block1.id).toEqual('123')
     expect(block1.richText[0].text).toEqual('Block 1 (Position 1)')
     const block2 = merge1.layout[1]
+    expect(block2.id).toEqual('456')
     expect(block2.richText[0].text).toEqual('Block 2 (Position 2)')
 
     // Reorder the blocks
@@ -422,6 +457,7 @@ describe('Collections - Live Preview', () => {
         layout: [
           {
             blockType: 'cta',
+            id: block2.id,
             richText: [
               {
                 type: 'paragraph',
@@ -431,6 +467,7 @@ describe('Collections - Live Preview', () => {
           },
           {
             blockType: 'cta',
+            id: block1.id,
             richText: [
               {
                 type: 'paragraph',
@@ -446,6 +483,8 @@ describe('Collections - Live Preview', () => {
 
     // Check that the blocks have been reordered
     expect(merge2.layout).toHaveLength(2)
+    expect(merge2.layout[0].id).toEqual(block2.id)
+    expect(merge2.layout[1].id).toEqual(block1.id)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge2.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
 

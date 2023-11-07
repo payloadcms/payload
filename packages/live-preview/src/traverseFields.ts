@@ -142,9 +142,13 @@ export const traverseFields = <T>({
                 }
               } else {
                 // Handle `hasMany` monomorphic
-                if (!result[fieldName][i]) {
-                  result[fieldName][i] = {}
-                }
+
+                // Do not set an initial value here
+                // This will achieve parity with the REST API
+                // The value should simply not come through the result
+                // if (!result[fieldName][i]) {
+                //   result[fieldName][i] = {}
+                // }
 
                 if (result[fieldName][i]?.id !== incomingRelation) {
                   populationPromises.push(
@@ -219,9 +223,12 @@ export const traverseFields = <T>({
                 }
               }
             } else {
-              if (!result[fieldName]) {
-                result[fieldName] = {}
-              }
+              // Do not set an initial value here
+              // This will achieve parity with the REST API
+              // The value should simply not come through the result
+              // if (!result[fieldName]) {
+              //   result[fieldName] = {}
+              // }
 
               // Handle `hasOne` monomorphic
               const newID: string =
