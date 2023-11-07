@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
-import * as Sentry from '@sentry/node'
 import type { NextFunction, Request, Response } from 'express'
 import type express from 'express'
 import type { Payload } from 'payload/dist/payload'
+
+/* eslint-disable no-console */
+import * as Sentry from '@sentry/node'
 
 import type { PluginOptions } from './types'
 

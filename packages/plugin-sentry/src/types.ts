@@ -8,7 +8,7 @@ export interface PluginOptions {
    * Sentry automatically assigns a DSN when you create a project.
    * If you don't have a DSN yet, you can create a new project here: https://sentry.io
    */
-  dsn: string | null
+  dsn: null | string
   /**
    * Enable or disable Sentry plugin
    * @default false
@@ -20,6 +20,11 @@ export interface PluginOptions {
    */
   options?: {
     /**
+     * Sentry will only capture 500 errors by default.
+     * If you want to capture other errors, you can add them as an array here.
+     */
+    captureErrors?: number[]
+    /**
      * Passes any valid options to Sentry.init()
      */
     init?: Partial<ClientOptions>
@@ -27,10 +32,5 @@ export interface PluginOptions {
      * Passes any valid options to Sentry.Handlers.requestHandler()
      */
     requestHandler?: RequestHandlerOptions
-    /**
-     * Sentry will only capture 500 errors by default.
-     * If you want to capture other errors, you can add them as an array here.
-     */
-    captureErrors?: number[]
   }
 }

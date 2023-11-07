@@ -1,4 +1,4 @@
 module.exports = {
-  startSentry: () => {},
   captureException: () => {},
+  startSentry: () => {},
 }

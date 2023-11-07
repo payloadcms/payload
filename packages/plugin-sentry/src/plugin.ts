@@ -1,15 +1,16 @@
 /* eslint-disable no-console */
 import type { Config } from 'payload/config'
 
+import type { PluginOptions } from './types'
+
 import { captureException } from './captureException'
 import { startSentry } from './startSentry'
-import type { PluginOptions } from './types'
 import { extendWebpackConfig } from './webpack'
 
 export const sentry =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
-    let config = { ...incomingConfig }
+    const config = { ...incomingConfig }
     const webpack = extendWebpackConfig(incomingConfig)
 
     config.admin = {
@@ -29,7 +30,7 @@ export const sentry =
       },
     }
 
-    config.onInit = async payload => {
+    config.onInit = async (payload) => {
       if (incomingConfig.onInit) await incomingConfig.onInit(payload)
       startSentry(pluginOptions, payload)
     }
