@@ -15,12 +15,12 @@ This plugin seamlessly integrates [Sentry](https://sentry.io/) with [Payload](ht
 1. Import `sentry` from `'@payloadcms/plugin-sentry'`
 2. Add it to the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview)
 3. Pass in your Data Source Name (DSN)
-4. Pass [additional options](#additional-options) - *not required*
+4. Pass [additional options](#additional-options) - _not required_
 
 ```js
-import { buildConfig } from 'payload/config';
-import { sentry } from '@payloadcms/plugin-sentry';
-import { Pages, Media } from './collections';
+import { buildConfig } from 'payload/config'
+import { sentry } from '@payloadcms/plugin-sentry'
+import { Pages, Media } from './collections'
 
 const config = buildConfig({
   collections: [Pages, Media],
@@ -28,10 +28,10 @@ const config = buildConfig({
     sentry({
       dsn: 'https://61edebas777889984d323d777@o4505289711681536.ingest.sentry.io/4505357433352176',
     }),
-  ]
-});
+  ],
+})
 
-export default config;
+export default config
 ```
 
 ## Options
@@ -65,9 +65,9 @@ export default config;
 You can configure any of these options by passing them to the plugin under options:
 
 ```js
-import { buildConfig } from 'payload/config';
-import { sentry } from '@payloadcms/plugin-sentry';
-import { Pages, Media } from './collections';
+import { buildConfig } from 'payload/config'
+import { sentry } from '@payloadcms/plugin-sentry'
+import { Pages, Media } from './collections'
 
 const config = buildConfig({
   collections: [Pages, Media],
@@ -82,15 +82,15 @@ const config = buildConfig({
         },
         requestHandler: {
           serverName: false,
-          user: ["email"],
+          user: ['email'],
         },
         captureErrors: [400, 403, 404],
-      }
+      },
     }),
-  ]
-});
+  ],
+})
 
-export default config;
+export default config
 ```
 
 To learn more about these options and when to use them, visit the [Sentry Docs](https://docs.sentry.io/platforms/node/guides/express/configuration/options).
@@ -100,7 +100,7 @@ To learn more about these options and when to use them, visit the [Sentry Docs](
 All types can be directly imported:
 
 ```js
-import { PluginOptions } from '@payloadcms/plugin-sentry/types';
+import { PluginOptions } from '@payloadcms/plugin-sentry/types'
 ```
 
 ## Development
@@ -111,10 +111,10 @@ To actively develop or debug this plugin you can either work directly within the
 
 This repo includes a demo of Payload that installs the plugin directly from the source code. This is the easiest way to get started. To spin up this demo, follow these steps:
 
-   1. First clone the repo
-   2. Then, `cd plugin-sentry && yarn && cd dev && yarn && yarn dev`
-   3. Now open `http://localhost:3000/admin` in your browser
-   4. Create a new user and sign in
-   5. Use the buttons to throw test errors
+1.  First clone the repo
+2.  Then, `cd plugin-sentry && yarn && cd dev && yarn && yarn dev`
+3.  Now open `http://localhost:3000/admin` in your browser
+4.  Create a new user and sign in
+5.  Use the buttons to throw test errors
 
 That's it! Changes made in `./src` will be reflected in the demo.
