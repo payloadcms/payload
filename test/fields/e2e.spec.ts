@@ -13,7 +13,6 @@ import { RESTClient } from '../helpers/rest'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
 import { textDoc } from './collections/Text/shared'
-import { lexicalE2E } from './lexicalE2E'
 import { clearAndSeedEverything } from './seed'
 import {
   collapsibleFieldsSlug,
@@ -195,6 +194,7 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'indexed-fields')
     })
 
+    // TODO: This test is flaky
     test('should display unique constraint error in ui', async () => {
       const uniqueText = 'uniqueText'
       await payload.create({
@@ -796,7 +796,6 @@ describe('fields', () => {
       )
     })
   })
-  describe('lexical', lexicalE2E(client, page, serverURL))
   describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')

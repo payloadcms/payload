@@ -19,8 +19,6 @@ import {
   TextBlock,
   UploadAndRichTextBlock,
 } from './blocks'
-import { generateLexicalRichText } from './generateLexicalRichText'
-import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
 
 export const LexicalFields: CollectionConfig = {
   slug: lexicalFieldsSlug,
@@ -38,12 +36,12 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
-      name: 'richTextLexicalSimple',
+      name: 'lexicalSimple',
       type: 'richText',
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          TestRecorderFeature(),
+          //TestRecorderFeature(),
           TreeviewFeature(),
           BlocksFeature({
             blocks: [
@@ -59,15 +57,15 @@ export const LexicalFields: CollectionConfig = {
       }),
     },
     {
-      name: 'richTextLexicalCustomFields',
+      name: 'lexicalWithBlocks',
       type: 'richText',
       required: true,
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          TestRecorderFeature(),
+          //TestRecorderFeature(),
           TreeviewFeature(),
-          HTMLConverterFeature(),
+          //HTMLConverterFeature(),
           LinkFeature({
             fields: [
               {
@@ -105,45 +103,6 @@ export const LexicalFields: CollectionConfig = {
               RelationshipBlock,
               SubBlockBlock,
             ],
-          }),
-        ],
-      }),
-    },
-    {
-      name: 'richTextLexicalWithLexicalPluginData',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          LexicalPluginToLexicalFeature(),
-          TreeviewFeature(),
-          LinkFeature({
-            fields: [
-              {
-                name: 'rel',
-                label: 'Rel Attribute',
-                type: 'select',
-                hasMany: true,
-                options: ['noopener', 'noreferrer', 'nofollow'],
-                admin: {
-                  description:
-                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-                },
-              },
-            ],
-          }),
-          UploadFeature({
-            collections: {
-              uploads: {
-                fields: [
-                  {
-                    name: 'caption',
-                    type: 'richText',
-                    editor: lexicalEditor(),
-                  },
-                ],
-              },
-            },
           }),
         ],
       }),

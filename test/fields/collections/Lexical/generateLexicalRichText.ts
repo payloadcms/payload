@@ -104,9 +104,9 @@ export function generateLexicalRichText() {
                       format: '',
                       type: 'relationship',
                       version: 1,
-                      relationTo: 'text-fields',
+                      relationTo: 'rich-text-fields',
                       value: {
-                        id: '{{TEXT_DOC_ID}}',
+                        id: '{{RICH_TEXT_DOC_ID}}',
                       },
                     },
                   ],
