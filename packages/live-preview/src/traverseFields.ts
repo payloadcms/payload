@@ -33,8 +33,14 @@ export const traverseFields = <T>({
                 result[fieldName] = []
               }
 
-              if (!result[fieldName][i]) {
-                result[fieldName][i] = {}
+              if (
+                !result[fieldName][i] ||
+                result[fieldName][i].id !== incomingRow.id ||
+                result[fieldName][i].blockType !== incomingRow.blockType
+              ) {
+                result[fieldName][i] = {
+                  blockType: incomingRow.blockType,
+                }
               }
 
               traverseFields({
@@ -61,8 +67,10 @@ export const traverseFields = <T>({
                 result[fieldName] = []
               }
 
-              result[fieldName][i] = {
-                blockType: incomingBlock.blockType,
+              if (!result[fieldName][i]) {
+                result[fieldName][i] = {
+                  blockType: incomingBlock.blockType,
+                }
               }
 
               traverseFields({
@@ -140,15 +148,6 @@ export const traverseFields = <T>({
                 }
               } else {
                 // Handle `hasMany` monomorphic
-
-                // Do not set an initial value here
-                // This will achieve parity with the REST API
-                // The value should simply not come through the result
-                // i.e.:
-                // if (!result[fieldName][i]) {
-                //   result[fieldName][i] = {}
-                // }
-
                 if (result[fieldName][i]?.id !== incomingRelation) {
                   populationPromises.push(
                     promise({
@@ -222,14 +221,6 @@ export const traverseFields = <T>({
                 }
               }
             } else {
-              // Do not set an initial value here
-              // This will achieve parity with the REST API
-              // The value should simply not come through the result
-              // i.e.:
-              // if (!result[fieldName]) {
-              //   result[fieldName] = {}
-              // }
-
               // Handle `hasOne` monomorphic
               const newID: number | string | undefined =
                 (incomingData[fieldName] &&

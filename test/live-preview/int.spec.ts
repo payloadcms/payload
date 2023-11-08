@@ -115,9 +115,11 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
     expect(mergedData.id).toEqual(initialData.id)
+    expect(mergedData._numberOfRequests).toEqual(0)
   })
 
   it('— strings - merges data', async () => {
@@ -134,9 +136,11 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
     expect(mergedData.title).toEqual('Test Page (Changed)')
+    expect(mergedData._numberOfRequests).toEqual(0)
   })
 
   // TODO: this test is not working in Postgres
@@ -160,9 +164,11 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
     expect(mergedData.hero.media).toMatchObject(media)
+    expect(mergedData._numberOfRequests).toEqual(1)
 
     // Add upload
     const mergedDataWithoutUpload = await mergeData({
@@ -198,8 +204,10 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
+    expect(merge1._numberOfRequests).toEqual(3)
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
     expect(merge1.relationshipPolyHasMany).toMatchObject([
@@ -218,8 +226,10 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
+    expect(merge2._numberOfRequests).toEqual(0)
     expect(merge2.relationshipMonoHasOne).toBeFalsy()
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasMany).toEqual([])
@@ -236,8 +246,10 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
+    expect(merge3._numberOfRequests).toEqual(3)
     expect(merge3.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge3.relationshipMonoHasMany).toMatchObject([testPost])
     expect(merge3.relationshipPolyHasMany).toMatchObject([
@@ -264,8 +276,10 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
+    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.arrayOfRelationships).toHaveLength(1)
     expect(merge1.arrayOfRelationships).toMatchObject([
       {
@@ -293,8 +307,10 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
+    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.arrayOfRelationships).toHaveLength(2)
     expect(merge2.arrayOfRelationships).toMatchObject([
       {
@@ -357,12 +373,14 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
     // Check that the relationship on the first has been removed
     // And that the relationship on the second has been populated
     expect(merge2.layout[0].links).toBeUndefined()
     expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
+    expect(merge2._numberOfRequests).toEqual(1)
   })
 
   it('— blocks - adds, reorders, and removes blocks', async () => {
@@ -426,6 +444,7 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
     // Check that the blocks have been reordered
@@ -434,6 +453,7 @@ describe('Collections - Live Preview', () => {
     expect(merge1.layout[1].id).toEqual(block1ID)
     expect(merge1.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
     expect(merge1.layout[1].richText[0].text).toEqual('Block 1 (Position 2)')
+    expect(merge1._numberOfRequests).toEqual(0)
 
     // Remove a block
     const merge2 = await mergeData({
@@ -456,12 +476,14 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
     // Check that the block has been removed
     expect(merge2.layout).toHaveLength(1)
     expect(merge2.layout[0].id).toEqual(block2ID)
     expect(merge2.layout[0].richText[0].text).toEqual('Block 2 (Position 1)')
+    expect(merge2._numberOfRequests).toEqual(0)
 
     // Remove the last block to ensure that all blocks can be cleared
     const merge3 = await mergeData({
@@ -473,9 +495,11 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
       serverURL,
+      returnNumberOfRequests: true,
     })
 
     // Check that the block has been removed
     expect(merge3.layout).toHaveLength(0)
+    expect(merge3._numberOfRequests).toEqual(0)
   })
 })
