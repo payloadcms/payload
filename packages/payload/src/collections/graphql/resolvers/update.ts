@@ -36,7 +36,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const result = await updateByID<TSlug>(options)
