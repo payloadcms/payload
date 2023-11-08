@@ -15,9 +15,9 @@ import { useDocumentDrawer } from '../../../elements/DocumentDrawer'
 import FileDetails from '../../../elements/FileDetails'
 import { useListDrawer } from '../../../elements/ListDrawer'
 import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
@@ -41,6 +41,8 @@ export type UploadInputProps = Omit<UploadField, 'type'> & {
   style?: React.CSSProperties
   value?: string
   width?: string
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
 }
 
 const UploadInput: React.FC<UploadInputProps> = (props) => {
@@ -62,9 +64,14 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     style,
     value,
     width,
+    Error,
+    Label,
   } = props
 
   const { i18n, t } = useTranslation('fields')
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const [file, setFile] = useState(undefined)
   const [missingFile, setMissingFile] = useState(false)
@@ -149,8 +156,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           setFilterOptionsResult,
         }}
       />
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {collection?.upload && (
         <React.Fragment>
           {file && !missingFile && (

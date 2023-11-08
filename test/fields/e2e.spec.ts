@@ -12,7 +12,7 @@ import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
-import { textDoc } from './collections/Text'
+import { textDoc } from './collections/Text/shared'
 import { lexicalE2E } from './lexicalE2E'
 import { clearAndSeedEverything } from './seed'
 import {
@@ -23,7 +23,7 @@ import {
   textFieldsSlug,
 } from './slugs'
 
-const { afterEach, beforeAll, describe, beforeEach } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 let client: RESTClient
 let page: Page
@@ -34,7 +34,7 @@ describe('fields', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
-    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
     const context = await browser.newContext()
@@ -43,13 +43,13 @@ describe('fields', () => {
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
     await client.logout()
-    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
   })
   describe('text', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, 'text-fields')
+      url = new AdminUrlUtil(serverURL, textFieldsSlug)
     })
 
     test('should display field in list view', async () => {
@@ -79,6 +79,40 @@ describe('fields', () => {
       await page.goto(url.create)
       const description = page.locator('.field-description-i18nText')
       await expect(description).toHaveText('en description')
+    })
+
+    test('should render custom label', async () => {
+      await page.goto(url.create)
+      const label = page.locator('label.custom-label[for="field-customLabel"]')
+      await expect(label).toHaveText('#label')
+    })
+
+    test('should render custom error', async () => {
+      await page.goto(url.create)
+      const input = page.locator('input[id="field-customError"]')
+      await input.fill('ab')
+      await expect(input).toHaveValue('ab')
+      const error = page.locator('.custom-error:near(input[id="field-customError"])')
+      const submit = page.locator('button[type="button"][id="action-save"]')
+      await submit.click()
+      await expect(error).toHaveText('#custom-error')
+    })
+
+    test('should render BeforeInput and AfterInput', async () => {
+      await page.goto(url.create)
+      const input = page.locator('input[id="field-beforeAndAfterInput"]')
+
+      const prevSibling = await input.evaluateHandle((el) => {
+        return el.previousElementSibling
+      })
+      const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
+      await expect(prevSiblingText).toEqual('#before-input')
+
+      const nextSibling = await input.evaluateHandle((el) => {
+        return el.nextElementSibling
+      })
+      const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
+      await expect(nextSiblingText).toEqual('#after-input')
     })
   })
 
@@ -166,11 +200,11 @@ describe('fields', () => {
       await payload.create({
         collection: 'indexed-fields',
         data: {
-          text: 'text',
-          uniqueText,
           group: {
             unique: uniqueText,
           },
+          text: 'text',
+          uniqueText,
         },
       })
 
@@ -286,17 +320,17 @@ describe('fields', () => {
       filledGroupPoint = await payload.create({
         collection: pointFieldsSlug,
         data: {
-          point: [5, 5],
-          localized: [4, 2],
           group: { point: [4, 2] },
+          localized: [4, 2],
+          point: [5, 5],
         },
       })
       emptyGroupPoint = await payload.create({
         collection: pointFieldsSlug,
         data: {
-          point: [5, 5],
-          localized: [3, -2],
           group: {},
+          localized: [3, -2],
+          point: [5, 5],
         },
       })
     })
@@ -1139,8 +1173,8 @@ describe('fields', () => {
       describe('EST', () => {
         test.use({
           geolocation: {
-            longitude: -83.0458,
             latitude: 42.3314,
+            longitude: -83.0458,
           },
           timezoneId: 'America/Detroit',
         })
@@ -1160,7 +1194,7 @@ describe('fields', () => {
           const id = routeSegments.pop()
 
           // fetch the doc (need the date string from the DB)
-          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+          const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
@@ -1169,8 +1203,8 @@ describe('fields', () => {
       describe('PST', () => {
         test.use({
           geolocation: {
-            longitude: -122.419416,
             latitude: 37.774929,
+            longitude: -122.419416,
           },
           timezoneId: 'America/Los_Angeles',
         })
@@ -1191,7 +1225,7 @@ describe('fields', () => {
           const id = routeSegments.pop()
 
           // fetch the doc (need the date string from the DB)
-          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+          const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
@@ -1200,8 +1234,8 @@ describe('fields', () => {
       describe('ST', () => {
         test.use({
           geolocation: {
-            longitude: -171.857,
             latitude: -14.5994,
+            longitude: -171.857,
           },
           timezoneId: 'Pacific/Apia',
         })
@@ -1222,7 +1256,7 @@ describe('fields', () => {
           const id = routeSegments.pop()
 
           // fetch the doc (need the date string from the DB)
-          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+          const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
@@ -1245,7 +1279,7 @@ describe('fields', () => {
       })
       const relationshipIDs = allRelationshipDocs.docs.map((doc) => doc.id)
       await mapAsync(relationshipIDs, async (id) => {
-        await payload.delete({ collection: relationshipFieldsSlug, id })
+        await payload.delete({ id, collection: relationshipFieldsSlug })
       })
     })
 

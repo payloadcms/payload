@@ -23,7 +23,7 @@ import {
   namedTabDefaultValue,
   namedTabText,
 } from './collections/Tabs/constants'
-import { defaultText } from './collections/Text'
+import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
 import { arrayFieldsSlug, groupFieldsSlug, relationshipFieldsSlug, tabsFieldsSlug } from './slugs'
 
