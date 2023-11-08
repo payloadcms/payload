@@ -7,11 +7,12 @@ import './index.scss'
 
 const baseClass = 'condition-value-text'
 
-const Text: React.FC<Props> = ({ onChange, value }) => {
+const Text: React.FC<Props> = ({ disabled, onChange, value }) => {
   const { t } = useTranslation('general')
   return (
     <input
       className={baseClass}
+      disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
       placeholder={t('enterAValue')}
       type="text"

@@ -647,6 +647,38 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
       })
 
+      test('resets filter value and operator on field update', async () => {
+        const { id } = await createPost({ title: 'post1' })
+        await createPost({ title: 'post2' })
+
+        // open the column controls
+        await page.locator('.list-controls__toggle-columns').click()
+        await page.locator('.list-controls__toggle-where').click()
+        await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const operatorField = page.locator('.condition__operator')
+        await operatorField.click()
+
+        const dropdownOperatorOptions = operatorField.locator('.rs__option')
+        await dropdownOperatorOptions.locator('text=equals').click()
+
+        // execute filter (where ID equals id value)
+        const valueField = page.locator('.condition__value > input')
+        await valueField.fill(id)
+
+        const filterField = page.locator('.condition__field')
+        await filterField.click()
+
+        // select new filter field of Number
+        const dropdownFieldOptions = filterField.locator('.rs__option')
+        await dropdownFieldOptions.locator('text=Number').click()
+
+        // expect operator & value field to reset (be empty)
+        await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
+        await expect(valueField).toHaveValue('')
+      })
+
       test('should accept where query from valid URL where parameter', async () => {
         await createPost({ title: 'post1' })
         await createPost({ title: 'post2' })

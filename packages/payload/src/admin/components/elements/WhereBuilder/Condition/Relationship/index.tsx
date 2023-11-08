@@ -16,7 +16,7 @@ const baseClass = 'condition-value-relationship'
 const maxResultsPerRequest = 10
 
 const RelationshipField: React.FC<Props> = (props) => {
-  const { admin: { isSortable } = {}, hasMany, onChange, relationTo, value } = props
+  const { admin: { isSortable } = {}, disabled, hasMany, onChange, relationTo, value } = props
 
   const {
     collections,
@@ -261,6 +261,7 @@ const RelationshipField: React.FC<Props> = (props) => {
     <div className={classes}>
       {!errorLoading && (
         <ReactSelect
+          disabled={disabled}
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={(selected) => {
