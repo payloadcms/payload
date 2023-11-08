@@ -231,19 +231,17 @@ export const traverseFields = <T>({
               // }
 
               // Handle `hasOne` monomorphic
-              const newID: string =
-                (typeof incomingData[fieldName] === 'string' && incomingData[fieldName]) ||
-                (typeof incomingData[fieldName] === 'object' &&
-                  incomingData[fieldName] !== null &&
+              const newID: number | string | undefined =
+                (incomingData[fieldName] &&
+                  typeof incomingData[fieldName] === 'object' &&
                   incomingData[fieldName].id) ||
-                ''
+                incomingData[fieldName]
 
-              const oldID: string =
-                (typeof result[fieldName] === 'string' && result[fieldName]) ||
-                (typeof result[fieldName] === 'object' &&
-                  result[fieldName] !== null &&
+              const oldID: number | string | undefined =
+                (result[fieldName] &&
+                  typeof result[fieldName] === 'object' &&
                   result[fieldName].id) ||
-                ''
+                result[fieldName]
 
               // if the new value is different from the old value
               // populate the new value, otherwise leave it alone

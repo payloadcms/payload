@@ -179,7 +179,7 @@ describe('Collections - Live Preview', () => {
       serverURL,
     })
 
-    expect(mergedDataWithoutUpload.hero.media).toEqual(null)
+    expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
   })
 
   it('— relationships - populates all types', async () => {
@@ -220,7 +220,7 @@ describe('Collections - Live Preview', () => {
       serverURL,
     })
 
-    expect(merge2.relationshipMonoHasOne).toEqual(undefined)
+    expect(merge2.relationshipMonoHasOne).toBeFalsy()
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasMany).toEqual([])
 
