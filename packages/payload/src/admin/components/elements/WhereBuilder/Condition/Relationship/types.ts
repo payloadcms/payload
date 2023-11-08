@@ -5,6 +5,7 @@ import type { PaginatedDocs } from '../../../../../../database/types'
 import type { RelationshipField } from '../../../../../../fields/config/types'
 
 export type Props = {
+  disabled?: boolean
   onChange: (val: unknown) => void
   value: unknown
 } & RelationshipField

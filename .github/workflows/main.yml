@@ -23,6 +23,7 @@ jobs:
       with:
         filters: |
           needs_build:
+            - '.github/workflows/**'
             - 'packages/**'
             - 'test/**'
             - 'pnpm-lock.yaml'
@@ -131,6 +132,7 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int
         env:
+          NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
