@@ -85,7 +85,22 @@ export default buildConfigWithDefaults({
   },
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
+    locales: [
+      {
+        label: {
+          es: 'Español',
+          en: 'Spanish',
+        },
+        code: 'es',
+      },
+      {
+        label: {
+          es: 'Inglés',
+          en: 'English',
+        },
+        code: 'en',
+      },
+    ],
   },
   collections: [
     Posts,

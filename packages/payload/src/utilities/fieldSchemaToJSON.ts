@@ -17,12 +17,27 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
 
     switch (field.type) {
       case 'group':
-      case 'array':
         acc.push({
           name: field.name,
           fields: fieldSchemaToJSON(field.fields),
           type: field.type,
         })
+
+        break
+
+      case 'array':
+        acc.push({
+          name: field.name,
+          fields: fieldSchemaToJSON([
+            ...field.fields,
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ]),
+          type: field.type,
+        })
+
         break
 
       case 'blocks':
@@ -30,19 +45,25 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
           name: field.name,
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
-              fields: fieldSchemaToJSON(block.fields),
+              fields: fieldSchemaToJSON([
+                ...block.fields,
+                {
+                  name: 'id',
+                  type: 'text',
+                },
+              ]),
             }
 
             return acc
           }, {}),
           type: field.type,
         })
+
         break
 
       case 'row':
       case 'collapsible':
         result = result.concat(fieldSchemaToJSON(field.fields))
-
         break
 
       case 'tabs': {

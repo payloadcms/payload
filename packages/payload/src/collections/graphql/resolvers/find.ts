@@ -36,7 +36,7 @@ export default function findResolver(collection: Collection): Resolver {
       draft: args.draft,
       limit: args.limit,
       page: args.page,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       sort: args.sort,
       where: args.where,
     }

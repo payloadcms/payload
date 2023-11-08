@@ -11,7 +11,17 @@ import './index.scss'
 const DateTime: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, condition, date, description, placeholder, readOnly, style, width } = {},
+    admin: {
+      className,
+      components,
+      condition,
+      date,
+      description,
+      placeholder,
+      readOnly,
+      style,
+      width,
+    } = {},
     label,
     path: pathFromProps,
     required,
@@ -36,6 +46,7 @@ const DateTime: React.FC<Props> = (props) => {
   return (
     <DateTimeInput
       className={className}
+      components={components}
       datePickerProps={date}
       description={description}
       errorMessage={errorMessage}

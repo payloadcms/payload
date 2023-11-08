@@ -20,7 +20,7 @@ import { radiosDoc } from './collections/Radio'
 import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data'
 import { selectsDoc } from './collections/Select'
 import { tabsDoc } from './collections/Tabs'
-import { textDoc } from './collections/Text'
+import { textDoc } from './collections/Text/shared'
 import { uploadsDoc } from './collections/Upload'
 import {
   arrayFieldsSlug,
@@ -47,11 +47,8 @@ import {
 
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
-    snapshotKey: 'fieldsTest',
-    shouldResetDB: true,
-    collectionSlugs,
     _payload,
-    uploadsDir: path.resolve(__dirname, './collections/Upload/uploads'),
+    collectionSlugs,
     seedFunction: async (_payload) => {
       const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg')
       const pngPath = path.resolve(__dirname, './uploads/payload.png')
@@ -163,5 +160,8 @@ export async function clearAndSeedEverything(_payload: Payload) {
         _payload.create({ collection: numberFieldsSlug, data: numberDoc }),
       ])
     },
+    shouldResetDB: true,
+    snapshotKey: 'fieldsTest',
+    uploadsDir: path.resolve(__dirname, './collections/Upload/uploads'),
   })
 }

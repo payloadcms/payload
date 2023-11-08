@@ -288,7 +288,7 @@ export type Locale = {
    * label of supported locale
    * @example "English"
    */
-  label: string
+  label: string | Record<string, string>
   /**
    * if true, defaults textAligmnent on text fields to RTL
    */

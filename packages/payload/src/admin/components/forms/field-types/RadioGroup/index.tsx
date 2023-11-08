@@ -18,6 +18,7 @@ const RadioGroup: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      components: { Error, Label } = {},
     } = {},
     label,
     options,
@@ -57,6 +58,8 @@ const RadioGroup: React.FC<Props> = (props) => {
       style={style}
       value={value}
       width={width}
+      Error={Error}
+      Label={Label}
     />
   )
 }

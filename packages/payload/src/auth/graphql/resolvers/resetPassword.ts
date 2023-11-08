@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import resetPassword from '../../operations/resetPassword'
 
@@ -13,7 +14,7 @@ function resetPasswordResolver(collection: Collection) {
       collection,
       data: args,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       res: context.res,
     }
 

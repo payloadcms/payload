@@ -30,7 +30,7 @@ export default function getDeleteResolver<TSlug extends keyof GeneratedTypes['co
       id: args.id,
       collection,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const result = await deleteByID(options)

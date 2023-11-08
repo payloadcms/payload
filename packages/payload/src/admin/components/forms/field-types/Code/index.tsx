@@ -4,9 +4,9 @@ import type { Props } from './types'
 
 import { code } from '../../../../../fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
@@ -31,12 +31,16 @@ const Code: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      components: { Error, Label } = {},
     } = {},
     label,
     path: pathFromProps,
     required,
     validate = code,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const path = pathFromProps || name
 
@@ -69,8 +73,8 @@ const Code: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
       <CodeEditor
         defaultLanguage={prismToMonacoLanguageMap[language] || language}
         onChange={readOnly ? () => null : (val) => setValue(val)}
