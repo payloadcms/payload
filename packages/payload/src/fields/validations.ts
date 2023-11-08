@@ -59,7 +59,7 @@ export const number: Validate<unknown, unknown, NumberField> = (
     return t('validation:required')
   }
 
-  if (hasMany === true) {
+  if (hasMany === true && toValidate.length !== 0) {
     if (minRows && toValidate.length < minRows) {
       return t('validation:lessThanMin', {
         label: t('rows'),
@@ -343,7 +343,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     return t('validation:required')
   }
 
-  if (Array.isArray(value)) {
+  if (Array.isArray(value) && value.length > 0) {
     if (minRows && value.length < minRows) {
       return t('validation:lessThanMin', { label: t('rows'), min: minRows, value: value.length })
     }
@@ -402,6 +402,8 @@ export const array: Validate<unknown, unknown, ArrayField> = (
   { maxRows, minRows, required, t },
 ) => {
   const arrayLength = Array.isArray(value) ? value.length : 0
+
+  if (!required && arrayLength === 0) return true
 
   if (minRows && arrayLength < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
@@ -471,6 +473,8 @@ export const blocks: Validate<unknown, unknown, BlockField> = (
   { maxRows, minRows, required, t },
 ) => {
   const arrayLength = Array.isArray(value) ? value.length : 0
+
+  if (!required && arrayLength === 0) return true
 
   if (minRows && arrayLength < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
