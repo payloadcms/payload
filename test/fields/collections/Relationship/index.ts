@@ -18,7 +18,6 @@ const RelationshipFields: CollectionConfig = {
       name: 'relationHasManyPolymorphic',
       type: 'relationship',
       relationTo: ['text-fields', 'array-fields'],
-      required: true,
       hasMany: true,
     },
     {
