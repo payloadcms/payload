@@ -530,6 +530,38 @@ describe('fields', () => {
       ).toHaveValue('items>1>title')
     })
 
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      await page.goto(url.create)
+
+      await page
+        .locator('#field-blocksWithMinRows')
+        .getByRole('button', { name: 'Add Blocks With Min Row' })
+        .click()
+
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+      await expect(blocksDrawer).toBeVisible()
+
+      const firstBlockSelector = blocksDrawer
+        .locator('.blocks-drawer__blocks .blocks-drawer__block')
+        .first()
+
+      await firstBlockSelector.click()
+
+      const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
+      await expect(firstRow).toBeVisible()
+      await firstRow.fill('first row')
+      await expect(firstRow).toHaveValue('first row')
+
+      await page.click('#action-save', { delay: 100 })
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+    })
+
     describe('row manipulation', () => {
       describe('react hooks', () => {
         test('should add 2 new block rows', async () => {
@@ -603,6 +635,20 @@ describe('fields', () => {
         '#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")',
       )
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+    })
+
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
+
+      await page.click('#action-save', { delay: 100 })
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
     })
 
     describe('row manipulation', () => {
@@ -1476,6 +1522,34 @@ describe('fields', () => {
       expect(seededTextDocument.docs.length).toEqual(1)
       // but the relationship document should NOT exist, as the hotkey should have saved the drawer and not the parent page
       expect(relationshipDocuments.docs.length).toEqual(0)
+    })
+
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+      await page.locator('#field-relationship .value-container').click()
+      await page.getByText('Seeded text document', { exact: true }).click()
+
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      await page.goto(url.create)
+
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+      await page.locator('#field-relationship .value-container').click()
+      await page.getByText('Seeded text document', { exact: true }).click()
+
+      await page.locator('#field-relationshipWithMinRows .value-container').click()
+      await page
+        .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
+        .click()
+
+      await page.click('#action-save', { delay: 100 })
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
     })
   })
 

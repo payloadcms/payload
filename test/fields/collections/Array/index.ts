@@ -125,6 +125,17 @@ const ArrayFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'arrayWithMinRows',
+      type: 'array',
+      minRows: 2,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }
 
@@ -152,6 +163,14 @@ export const arrayDoc = {
   collapsedArray: [
     {
       text: 'initialize collapsed',
+    },
+  ],
+  arrayWithMinRows: [
+    {
+      text: 'first row',
+    },
+    {
+      text: 'second row',
     },
   ],
 }
