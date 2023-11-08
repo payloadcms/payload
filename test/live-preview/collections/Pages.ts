@@ -103,15 +103,13 @@ export const Pages: CollectionConfig = {
       type: 'array',
       admin: {
         hidden: true,
+        disabled: true,
       },
       fields: [
         {
           name: 'relationshipWithinArray',
           type: 'relationship',
           relationTo: 'posts',
-          admin: {
-            hidden: true,
-          },
         },
       ],
     },
