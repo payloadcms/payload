@@ -10,8 +10,15 @@ import { deepen } from '../utilities/deepen'
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
+type HookArgsWithCustomCollection = Omit<
+  Parameters<CollectionBeforeChangeHook>[0],
+  'collection'
+> & {
+  collection: CollectionConfig
+}
+
 export type CollectionBeforeChangeHookWithArgs = (
-  args: Parameters<CollectionBeforeChangeHook>[0] & {
+  args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
     stripeConfig?: StripeConfig
   },

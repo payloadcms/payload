@@ -3,9 +3,9 @@
   // Hover to view descriptions of existing attributes.
   "configurations": [
     {
-      "command": "pnpm run dev _community",
+      "command": "pnpm run dev access-control",
       "cwd": "${workspaceFolder}",
-      "name": "Run Dev Community",
+      "name": "Run Dev Access Control",
       "request": "launch",
       "type": "node-terminal"
     },

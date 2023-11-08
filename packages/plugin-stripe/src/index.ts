@@ -14,7 +14,7 @@ import { syncExistingWithStripe } from './hooks/syncExistingWithStripe'
 import { stripeREST } from './routes/rest'
 import { stripeWebhooks } from './routes/webhooks'
 
-export const stripePlugin =
+const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -124,3 +124,5 @@ export const stripePlugin =
       ],
     }
   }
+
+export default stripePlugin

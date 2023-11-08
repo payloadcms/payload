@@ -1,7 +1,11 @@
 import path from 'path'
 import { buildConfig } from 'payload/config'
+// import { viteBundler } from '@payloadcms/bundler-vite'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { stripePlugin } from '../../src'
+import stripePlugin from '../../src'
 import Customers from './collections/Customers'
 import Products from './collections/Products'
 import Users from './collections/Users'
@@ -13,6 +17,7 @@ export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
     user: Users.slug,
+    bundler: webpackBundler(),
     webpack: (config) => {
       const newConfig = {
         ...config,
@@ -35,12 +40,14 @@ export default buildConfig({
     },
   },
   collections: [Users, Customers, Products],
+  editor: lexicalEditor({}),
   localization: {
     locales: ['en', 'es', 'de'],
     defaultLocale: 'en',
     fallback: true,
   },
   plugins: [
+    // @ts-expect-error Conflicting types for relative package
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
@@ -98,4 +105,7 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
 })
