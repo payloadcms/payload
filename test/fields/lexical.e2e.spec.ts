@@ -42,10 +42,17 @@ describe('lexical', () => {
     await client.login()
   })
 
-  test.skip('should not prompt unsaved changes when navigating to lexical editor with blocks node, then leaving the page', async () => {
+  test('should not prompt unsaved changes when navigating to lexical editor with blocks node, then leaving the page', async () => {
     await navigateToLexicalFields()
 
-    await page.locator('todo').first().click()
-    // TODO: (This is currently a bug)
+    await expect(
+      page.locator('.rich-text-lexical').nth(1).locator('.lexical-block').first(),
+    ).toBeVisible()
+
+    // Navigate to some different page, away from the current document
+    await page.locator('.app-header__step-nav').first().locator('a').first().click()
+
+    // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
+    await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
   })
 })
