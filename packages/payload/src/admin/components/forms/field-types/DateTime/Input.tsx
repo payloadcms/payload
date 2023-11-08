@@ -39,7 +39,7 @@ export type DateTimeInputProps = Omit<DateField, 'admin' | 'name' | 'type'> & {
 export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
   const {
     className,
-    components: { AfterInput, BeforeInput, Error, Label },
+    components: { AfterInput, BeforeInput, Error, Label } = {},
     datePickerProps,
     description,
     errorMessage,
