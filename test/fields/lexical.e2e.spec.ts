@@ -42,7 +42,10 @@ describe('lexical', () => {
     await client.login()
   })
 
-  test('should not prompt unsaved changes when navigating to lexical editor with blocks node, then leaving the page', async () => {
+  test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page without actually changing anything', async () => {
+    // This used to be an issue in the past, due to the node.setFields function in the blocks node being called unnecessarily when it's initialized after opening the document
+    // Other than the annoying unsaved changed prompt, this can also cause unnecessary auto-saves, when drafts & autosave is enabled
+
     await navigateToLexicalFields()
 
     await expect(
