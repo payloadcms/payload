@@ -15,6 +15,13 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
+      name: 'relationHasManyPolymorphic',
+      type: 'relationship',
+      relationTo: ['text-fields', 'array-fields'],
+      required: true,
+      hasMany: true,
+    },
+    {
       name: 'relationToSelf',
       relationTo: relationshipFieldsSlug,
       type: 'relationship',
