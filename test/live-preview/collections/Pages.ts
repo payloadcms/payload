@@ -109,6 +109,9 @@ export const Pages: CollectionConfig = {
           name: 'relationshipWithinArray',
           type: 'relationship',
           relationTo: 'posts',
+          admin: {
+            hidden: true,
+          },
         },
       ],
     },
