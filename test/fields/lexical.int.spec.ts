@@ -36,10 +36,10 @@ let serverURL: string
 let config: SanitizedConfig
 let token: string
 
-let createdArrayDocID: string = null
-let createdJPGDocID: string = null
-let createdTextDocID: string = null
-let createdRichTextDocID: string = null
+let createdArrayDocID: number | string = null
+let createdJPGDocID: number | string = null
+let createdTextDocID: number | string = null
+let createdRichTextDocID: number | string = null
 
 describe('Lexical', () => {
   beforeAll(async () => {
@@ -57,7 +57,7 @@ describe('Lexical', () => {
     client = new RESTClient(config, { defaultSlug: richTextFieldsSlug, serverURL })
     await client.login()
 
-    const _createdArrayDocID = (
+    createdArrayDocID = (
       await payload.find({
         collection: arrayFieldsSlug,
         where: {
@@ -66,12 +66,9 @@ describe('Lexical', () => {
           },
         },
       })
-    ).docs[0].id as string
+    ).docs[0].id
 
-    createdArrayDocID =
-      payload.db.defaultIDType === 'number' ? _createdArrayDocID : `${_createdArrayDocID}`
-
-    const _createdJPGDocID = (
+    createdJPGDocID = (
       await payload.find({
         collection: uploadsSlug,
         where: {
@@ -80,12 +77,9 @@ describe('Lexical', () => {
           },
         },
       })
-    ).docs[0].id as string
+    ).docs[0].id
 
-    createdJPGDocID =
-      payload.db.defaultIDType === 'number' ? _createdJPGDocID : `${_createdJPGDocID}`
-
-    const _createdTextDocID = (
+    createdTextDocID = (
       await payload.find({
         collection: textFieldsSlug,
         where: {
@@ -94,12 +88,9 @@ describe('Lexical', () => {
           },
         },
       })
-    ).docs[0].id as string
+    ).docs[0].id
 
-    createdTextDocID =
-      payload.db.defaultIDType === 'number' ? _createdTextDocID : `${_createdTextDocID}`
-
-    const _createdRichTextDocID = (
+    createdRichTextDocID = (
       await payload.find({
         collection: richTextFieldsSlug,
         where: {
@@ -108,10 +99,7 @@ describe('Lexical', () => {
           },
         },
       })
-    ).docs[0].id as string
-
-    createdRichTextDocID =
-      payload.db.defaultIDType === 'number' ? _createdRichTextDocID : `${_createdRichTextDocID}`
+    ).docs[0].id
   })
 
   describe('basic', () => {
@@ -131,9 +119,22 @@ describe('Lexical', () => {
       expect(richTextDoc?.lexicalCustomFields).toStrictEqual(
         JSON.parse(
           JSON.stringify(generateLexicalRichText())
-            .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `"${createdArrayDocID}"`)
-            .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `"${createdJPGDocID}"`)
-            .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `"${createdTextDocID}"`),
+            .replace(
+              /"\{\{ARRAY_DOC_ID\}\}"/g,
+              payload.db.defaultIDType === 'number'
+                ? `${createdArrayDocID}`
+                : `"${createdArrayDocID}"`,
+            )
+            .replace(
+              /"\{\{UPLOAD_DOC_ID\}\}"/g,
+              payload.db.defaultIDType === 'number' ? `${createdJPGDocID}` : `"${createdJPGDocID}"`,
+            )
+            .replace(
+              /"\{\{TEXT_DOC_ID\}\}"/g,
+              payload.db.defaultIDType === 'number'
+                ? `${createdTextDocID}`
+                : `"${createdTextDocID}"`,
+            ),
         ),
       )
     })
@@ -153,9 +154,20 @@ describe('Lexical', () => {
 
       const seededDocument = JSON.parse(
         JSON.stringify(generateLexicalRichText())
-          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `"${createdArrayDocID}"`)
-          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `"${createdJPGDocID}"`)
-          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `"${createdTextDocID}"`),
+          .replace(
+            /"\{\{ARRAY_DOC_ID\}\}"/g,
+            payload.db.defaultIDType === 'number'
+              ? `${createdArrayDocID}`
+              : `"${createdArrayDocID}"`,
+          )
+          .replace(
+            /"\{\{UPLOAD_DOC_ID\}\}"/g,
+            payload.db.defaultIDType === 'number' ? `${createdJPGDocID}` : `"${createdJPGDocID}"`,
+          )
+          .replace(
+            /"\{\{TEXT_DOC_ID\}\}"/g,
+            payload.db.defaultIDType === 'number' ? `${createdTextDocID}` : `"${createdTextDocID}"`,
+          ),
       )
 
       expect(richTextDoc?.lexicalCustomFields).not.toStrictEqual(seededDocument) // The whole seededDocument should not match, as richTextDoc should now contain populated documents not present in the seeded document
@@ -182,8 +194,6 @@ describe('Lexical', () => {
 
       const relationshipNode: SerializedRelationshipNode =
         richTextDoc.lexicalCustomFields.root.children.find((node) => node.type === 'relationship')
-
-      console.log('relationshipNode:', relationshipNode)
 
       expect(relationshipNode.value.text).toStrictEqual(textDoc.text)
     })
@@ -328,7 +338,7 @@ describe('Lexical', () => {
       const populatedDocEditorRelationshipNode: SerializedRelationshipNode = populatedDocEditorState
         .root.children[2] as never
 
-      console.log('populatedDocEditorRelatonshipNode:', populatedDocEditorRelationshipNode)
+      //console.log('populatedDocEditorRelatonshipNode:', populatedDocEditorRelationshipNode)
 
       /**
        * Depth 2 population:
