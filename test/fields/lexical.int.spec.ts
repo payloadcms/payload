@@ -239,7 +239,7 @@ describe('Lexical', () => {
       expect(relationshipBlockNode.fields.data.rel).toStrictEqual(createdJPGDocID)
     })
 
-    it('should populate relationships in blocks with default depth', async () => {
+    it('should populate relationships in blocks with depth=1', async () => {
       const lexicalDoc: RichTextField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -248,6 +248,7 @@ describe('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          depth: 1,
         })
       ).docs[0] as never
 
@@ -291,7 +292,7 @@ describe('Lexical', () => {
       expect(Object.keys(subEditorRelationshipNode.value)).toHaveLength(1)
     })
 
-    it('should populate relationship nodes inside of a sub-editor from a blocks node with default depth', async () => {
+    it('should populate relationship nodes inside of a sub-editor from a blocks node with 1 depth', async () => {
       const lexicalDoc: RichTextField = (
         await payload.find({
           collection: lexicalFieldsSlug,
@@ -300,8 +301,9 @@ describe('Lexical', () => {
               equals: lexicalDocData.title,
             },
           },
+          depth: 1,
         })
-      ).docs[0] as never // default depth should be 1
+      ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks as never
 
@@ -333,7 +335,7 @@ describe('Lexical', () => {
        */
       expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
       // But the value should not be populated and only have the id field - that's because it would require a depth of 2
-      expect(Object.keys(subEditorRelationshipNode.value)).toHaveLength(1)
+      expect(Object.keys(populatedDocEditorRelationshipNode.value)).toHaveLength(1)
     })
 
     it('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async () => {
@@ -347,7 +349,7 @@ describe('Lexical', () => {
           },
           depth: 2,
         })
-      ).docs[0] as never // default depth should be 1
+      ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks as never
 
