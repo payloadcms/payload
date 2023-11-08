@@ -2,9 +2,10 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import type { CodeField } from '../../../../../../fields/config/types'
 import type { CellComponentProps, Props } from './types'
 
-import { CodeField, fieldAffectsData } from '../../../../../../fields/config/types'
+import { fieldAffectsData } from '../../../../../../fields/config/types'
 import { getTranslation } from '../../../../../../utilities/getTranslation'
 import { useConfig } from '../../../../utilities/Config'
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent'
@@ -60,8 +61,8 @@ const DefaultCell: React.FC<Props> = (props) => {
           collection={collection}
           data={`ID: ${cellData}`}
           field={field as CodeField}
-          rowData={rowData}
           nowrap
+          rowData={rowData}
         />
       </WrapElement>
     )
@@ -83,7 +84,9 @@ const DefaultCell: React.FC<Props> = (props) => {
                 i18n,
               ),
             })}
-          {typeof cellData === 'string' && cellData}
+          {typeof cellData === 'string' && cellData.length > 150
+            ? `${cellData.slice(0, 150)}...`
+            : cellData}
           {typeof cellData === 'number' && cellData}
           {typeof cellData === 'object' && JSON.stringify(cellData)}
         </WrapElement>
