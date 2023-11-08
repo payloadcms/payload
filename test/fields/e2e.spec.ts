@@ -6,7 +6,7 @@ import path from 'path'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import { exactText, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -1352,6 +1352,41 @@ describe('fields', () => {
       await page.locator('.rs__option:has-text("Seeded text document")').click()
       await field.locator('.clear-indicator').click()
       await expect(field.locator('.rs__placeholder')).toBeVisible()
+    })
+
+    test('should display `hasMany` polymorphic relationships', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-relationHasManyPolymorphic')
+      await field.click()
+
+      await page
+        .locator('.rs__option', {
+          hasText: exactText('Seeded text document'),
+        })
+        .click()
+
+      await expect(
+        page
+          .locator('#field-relationHasManyPolymorphic .relationship--multi-value-label__text', {
+            hasText: exactText('Seeded text document'),
+          })
+          .first(),
+      ).toBeVisible()
+
+      // await fill the required fields then save the document and check again
+      await page.locator('#field-relationship').click()
+      await page.locator('#field-relationship .rs__option:has-text("Seeded text document")').click()
+      await saveDocAndAssert(page)
+
+      const valueAfterSave = page.locator('#field-relationHasManyPolymorphic .multi-value').first()
+
+      await expect(
+        valueAfterSave
+          .locator('.relationship--multi-value-label__text', {
+            hasText: exactText('Seeded text document'),
+          })
+          .first(),
+      ).toBeVisible()
     })
 
     test('should populate relationship dynamic default value', async () => {
