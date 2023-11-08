@@ -1,54 +1,51 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+
 import { AfterInput } from './AfterInput'
 import { BeforeInput } from './BeforeInput'
 import CustomError from './CustomError'
 import CustomLabel from './CustomLabel'
 import { defaultText, textFieldsSlug } from './shared'
 
-import { textFieldsSlug } from '../../slugs'
-
 const TextFields: CollectionConfig = {
-  slug: textFieldsSlug,
   admin: {
     useAsTitle: 'text',
   },
   fields: [
     {
       name: 'text',
-      type: 'text',
       required: true,
+      type: 'text',
     },
     {
       name: 'localizedText',
-      type: 'text',
       localized: true,
+      type: 'text',
     },
     {
       name: 'i18nText',
-      type: 'text',
-      label: {
-        en: 'Text en',
-        es: 'Text es',
-      },
       admin: {
-        placeholder: {
-          en: 'en placeholder',
-          es: 'es placeholder',
-        },
         description: {
           en: 'en description',
           es: 'es description',
         },
+        placeholder: {
+          en: 'en placeholder',
+          es: 'es placeholder',
+        },
       },
+      label: {
+        en: 'Text en',
+        es: 'Text es',
+      },
+      type: 'text',
     },
     {
       name: 'defaultFunction',
-      type: 'text',
       defaultValue: () => defaultText,
+      type: 'text',
     },
     {
       name: 'defaultAsync',
-      type: 'text',
       defaultValue: async (): Promise<string> => {
         return new Promise((resolve) =>
           setTimeout(() => {
@@ -56,25 +53,25 @@ const TextFields: CollectionConfig = {
           }, 1),
         )
       },
+      type: 'text',
     },
     {
-      label: 'Override the 40k text length default',
       name: 'overrideLength',
-      type: 'text',
+      label: 'Override the 40k text length default',
       maxLength: 50000,
+      type: 'text',
     },
     {
       name: 'fieldWithDefaultValue',
-      type: 'text',
       defaultValue: async () => {
         const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1000))
 
         return defaultValue
       },
+      type: 'text',
     },
     {
       name: 'dependentOnFieldWithDefaultValue',
-      type: 'text',
       hooks: {
         beforeChange: [
           ({ data }) => {
@@ -82,37 +79,39 @@ const TextFields: CollectionConfig = {
           },
         ],
       },
+      type: 'text',
     },
     {
       name: 'customLabel',
-      type: 'text',
       admin: {
         components: {
           Label: CustomLabel,
         },
       },
+      type: 'text',
     },
     {
       name: 'customError',
-      type: 'text',
-      minLength: 3,
       admin: {
         components: {
           Error: CustomError,
         },
       },
+      minLength: 3,
+      type: 'text',
     },
     {
       name: 'beforeAndAfterInput',
-      type: 'text',
       admin: {
         components: {
-          BeforeInput: [BeforeInput],
           AfterInput: [AfterInput],
+          BeforeInput: [BeforeInput],
         },
       },
+      type: 'text',
     },
   ],
+  slug: textFieldsSlug,
 }
 
 export default TextFields
