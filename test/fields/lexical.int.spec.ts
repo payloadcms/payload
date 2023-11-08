@@ -20,7 +20,7 @@ import { arrayDoc } from './collections/Array'
 import { lexicalDocData } from './collections/Lexical/data'
 import { richTextDocData } from './collections/RichText/data'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText'
-import { textDoc } from './collections/Text'
+import { textDoc } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
 import {
   arrayFieldsSlug,
