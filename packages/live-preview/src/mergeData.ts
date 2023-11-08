@@ -8,6 +8,7 @@ export type MergeLiveDataArgs<T> = {
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
   initialData: T
+  returnNumberOfRequests?: boolean
   serverURL: string
 }
 
@@ -17,8 +18,13 @@ export const mergeData = async <T>({
   fieldSchema,
   incomingData,
   initialData,
+  returnNumberOfRequests,
   serverURL,
-}: MergeLiveDataArgs<T>): Promise<T> => {
+}: MergeLiveDataArgs<T>): Promise<
+  T & {
+    _numberOfRequests?: number
+  }
+> => {
   const result = { ...initialData }
 
   const populationPromises: Promise<void>[] = []
@@ -35,5 +41,8 @@ export const mergeData = async <T>({
 
   await Promise.all(populationPromises)
 
-  return result
+  return {
+    ...result,
+    ...(returnNumberOfRequests ? { _numberOfRequests: populationPromises.length } : {}),
+  }
 }
