@@ -3,11 +3,6 @@ import React, { useCallback } from 'react'
 import type { Props } from './types'
 
 import { date as dateValidation } from '../../../../../fields/validations'
-import { getTranslation } from '../../../../../utilities/getTranslation'
-import DatePicker from '../../../elements/DatePicker'
-import DefaultError from '../../Error'
-import FieldDescription from '../../FieldDescription'
-import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import { DateTimeInput } from './Input'
@@ -18,6 +13,7 @@ const DateTime: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components,
       condition,
       date,
       description,
@@ -25,18 +21,12 @@ const DateTime: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
-      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     label,
     path: pathFromProps,
     required,
     validate = dateValidation,
   } = props
-
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
-
-  const { i18n } = useTranslation()
 
   const path = pathFromProps || name
 
@@ -56,6 +46,7 @@ const DateTime: React.FC<Props> = (props) => {
   return (
     <DateTimeInput
       className={className}
+      components={components}
       datePickerProps={date}
       description={description}
       errorMessage={errorMessage}

@@ -6,9 +6,9 @@ import type { Description } from '../../FieldDescription/types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import DatePicker from '../../../elements/DatePicker'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
@@ -16,6 +16,12 @@ const baseClass = 'date-time-field'
 
 export type DateTimeInputProps = Omit<DateField, 'admin' | 'name' | 'type'> & {
   className?: string
+  components: {
+    AfterInput?: React.ReactElement<any>[]
+    BeforeInput?: React.ReactElement<any>[]
+    Error?: React.ComponentType<any>
+    Label?: React.ComponentType<any>
+  }
   datePickerProps?: DateField['admin']['date']
   description?: Description
   errorMessage?: string
@@ -33,6 +39,7 @@ export type DateTimeInputProps = Omit<DateField, 'admin' | 'name' | 'type'> & {
 export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
   const {
     className,
+    components: { AfterInput, BeforeInput, Error, Label },
     datePickerProps,
     description,
     errorMessage,
@@ -47,6 +54,9 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
     value,
     width,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const { i18n } = useTranslation()
 
@@ -67,10 +77,11 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <Error message={errorMessage} showError={showError} />
+        <ErrorComp message={errorMessage} showError={showError} />
       </div>
-      <Label htmlFor={path} label={label} required={required} />
+      <LabelComp htmlFor={path} label={label} required={required} />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
+        {BeforeInput}
         <DatePicker
           {...datePickerProps}
           onChange={onChange}
@@ -78,6 +89,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
           readOnly={readOnly}
           value={value}
         />
+        {AfterInput}
       </div>
       <FieldDescription description={description} value={value} />
     </div>

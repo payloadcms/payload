@@ -1,14 +1,18 @@
 import React from 'react'
 
+import type { Props as LabelProps } from '../../Label/types'
+
 import Check from '../../../icons/Check'
 import Line from '../../../icons/Line'
 import DefaultLabel from '../../Label'
-import type { Props as LabelProps } from '../../Label/types'
 import './index.scss'
 
 const baseClass = 'checkbox-input'
 
 type CheckboxInputProps = {
+  AfterInput?: React.ReactElement<any>[]
+  BeforeInput?: React.ReactElement<any>[]
+  Label?: React.ComponentType<LabelProps>
   'aria-label'?: string
   checked?: boolean
   className?: string
@@ -20,16 +24,15 @@ type CheckboxInputProps = {
   partialChecked?: boolean
   readOnly?: boolean
   required?: boolean
-  className?: string
-  Label?: React.ComponentType<LabelProps>
-  BeforeInput?: React.ReactElement<any>[]
-  AfterInput?: React.ReactElement<any>[]
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
   const {
     id,
     name,
+    AfterInput,
+    BeforeInput,
+    Label,
     'aria-label': ariaLabel,
     checked,
     className,
@@ -39,10 +42,6 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     partialChecked,
     readOnly,
     required,
-    className,
-    Label,
-    BeforeInput,
-    AfterInput,
   } = props
 
   const LabelComp = Label || DefaultLabel
