@@ -23,7 +23,7 @@ export default function restoreVersionResolver(collection: Collection): Resolver
       id: args.id,
       collection,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const result = await restoreVersion(options)

@@ -21,6 +21,7 @@ import { useFormProcessing } from '../../Form/context'
 import Label from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
 import { findOptionsByValue } from './findOptionsByValue'
@@ -28,7 +29,6 @@ import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
-import { fieldBaseClass } from '../shared'
 
 const maxResultsPerRequest = 10
 
@@ -391,6 +391,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [])
 
   const valueToRender = findOptionsByValue({ options, value })
+
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
 
   return (

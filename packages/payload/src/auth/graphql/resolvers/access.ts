@@ -1,3 +1,4 @@
+import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 
 import formatName from '../../../graphql/utilities/formatName'
@@ -18,7 +19,7 @@ const formatConfigNames = (results, configs) => {
 function accessResolver(payload: Payload) {
   async function resolver(_, args, context) {
     const options = {
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const accessResults = await access(options)
