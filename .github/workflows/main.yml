@@ -93,7 +93,7 @@ jobs:
 
     steps:
       - name: Restore build
-        uses: actions/restore-build-cache@v1
+        uses: ./.github/actions/restore-build-cache
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
@@ -132,7 +132,7 @@ jobs:
 
     steps:
       - name: Restore build
-        uses: actions/restore-build-cache@v1
+        uses: ./.github/actions/restore-build-cache
 
       - name: E2E Tests
         uses: nick-fields/retry@v2
@@ -155,7 +155,7 @@ jobs:
 
     steps:
       - name: Restore build
-        uses: actions/restore-build-cache@v1
+        uses: ./.github/actions/restore-build-cache
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -181,7 +181,7 @@ jobs:
 
     steps:
       - name: Restore build
-        uses: actions/restore-build-cache@v1
+        uses: ./.github/actions/restore-build-cache
 
       - name: Build ${{ matrix.pkg }}
         run: pnpm turbo run build --filter=${{ matrix.pkg }}
@@ -203,7 +203,7 @@ jobs:
 
     steps:
       - name: Restore build
-        uses: actions/restore-build-cache@v1
+        uses: ./.github/actions/restore-build-cache
 
       - name: Build ${{ matrix.pkg }}
         run: pnpm turbo run build --filter=${{ matrix.pkg }}
