@@ -194,6 +194,7 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'indexed-fields')
     })
 
+    // TODO: This test is flaky
     test('should display unique constraint error in ui', async () => {
       const uniqueText = 'uniqueText'
       await payload.create({
