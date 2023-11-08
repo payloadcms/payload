@@ -102,7 +102,9 @@ export const upsertRow = async <T extends TypeWithID>({
     if (Object.keys(rowToInsert.selects).length > 0) {
       Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
         selectRows.forEach((row) => {
-          row.parent = insertedRow.id
+          if (typeof row.parent === 'undefined') {
+            row.parent = insertedRow.id
+          }
           if (!selectsToInsert[selectTableName]) selectsToInsert[selectTableName] = []
           selectsToInsert[selectTableName].push(row)
         })
