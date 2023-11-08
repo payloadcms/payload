@@ -5,10 +5,11 @@ import { GraphQLClient } from 'graphql-request'
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type {
+  SerializedBlockNode,
   SerializedLinkNode,
-  SerializedRelationshipNode,
   SerializedUploadNode,
 } from '../../packages/richtext-lexical/src'
+import type { SerializedRelationshipNode } from '../../packages/richtext-lexical/src'
 import type { RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
@@ -16,7 +17,7 @@ import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
 import { arrayDoc } from './collections/Array'
-import { lexicalRichTextDocData } from './collections/Lexical/data'
+import { lexicalDocData } from './collections/Lexical/data'
 import { richTextDocData } from './collections/RichText/data'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText'
 import { textDoc } from './collections/Text'
@@ -38,6 +39,7 @@ let token: string
 let createdArrayDocID: string = null
 let createdJPGDocID: string = null
 let createdTextDocID: string = null
+let createdRichTextDocID: string = null
 
 describe('Lexical', () => {
   beforeAll(async () => {
@@ -67,7 +69,7 @@ describe('Lexical', () => {
     ).docs[0].id as string
 
     createdArrayDocID =
-      payload.db.defaultIDType === 'number' ? _createdArrayDocID : `"${_createdArrayDocID}"`
+      payload.db.defaultIDType === 'number' ? _createdArrayDocID : `${_createdArrayDocID}`
 
     const _createdJPGDocID = (
       await payload.find({
@@ -81,7 +83,7 @@ describe('Lexical', () => {
     ).docs[0].id as string
 
     createdJPGDocID =
-      payload.db.defaultIDType === 'number' ? _createdJPGDocID : `"${_createdJPGDocID}"`
+      payload.db.defaultIDType === 'number' ? _createdJPGDocID : `${_createdJPGDocID}`
 
     const _createdTextDocID = (
       await payload.find({
@@ -95,7 +97,21 @@ describe('Lexical', () => {
     ).docs[0].id as string
 
     createdTextDocID =
-      payload.db.defaultIDType === 'number' ? _createdTextDocID : `"${_createdTextDocID}"`
+      payload.db.defaultIDType === 'number' ? _createdTextDocID : `${_createdTextDocID}`
+
+    const _createdRichTextDocID = (
+      await payload.find({
+        collection: richTextFieldsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+    ).docs[0].id as string
+
+    createdRichTextDocID =
+      payload.db.defaultIDType === 'number' ? _createdRichTextDocID : `${_createdRichTextDocID}`
   })
 
   describe('basic', () => {
@@ -115,9 +131,9 @@ describe('Lexical', () => {
       expect(richTextDoc?.lexicalCustomFields).toStrictEqual(
         JSON.parse(
           JSON.stringify(generateLexicalRichText())
-            .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${createdArrayDocID}`)
-            .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${createdJPGDocID}`)
-            .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${createdTextDocID}`),
+            .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `"${createdArrayDocID}"`)
+            .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `"${createdJPGDocID}"`)
+            .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `"${createdTextDocID}"`),
         ),
       )
     })
@@ -137,9 +153,9 @@ describe('Lexical', () => {
 
       const seededDocument = JSON.parse(
         JSON.stringify(generateLexicalRichText())
-          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${createdArrayDocID}`)
-          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${createdJPGDocID}`)
-          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${createdTextDocID}`),
+          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `"${createdArrayDocID}"`)
+          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `"${createdJPGDocID}"`)
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `"${createdTextDocID}"`),
       )
 
       expect(richTextDoc?.lexicalCustomFields).not.toStrictEqual(seededDocument) // The whole seededDocument should not match, as richTextDoc should now contain populated documents not present in the seeded document
@@ -200,31 +216,168 @@ describe('Lexical', () => {
   })
 
   describe('advanced - blocks', () => {
-    it('should allow querying on lexical content with blocks field', async () => {
+    it('should not populate relationships in blocks if depth is 0', async () => {
       const lexicalDoc: RichTextField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
             title: {
-              equals: lexicalRichTextDocData.title,
+              equals: lexicalDocData.title,
             },
           },
           depth: 0,
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalCustomFields as never
+      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks as never
 
-      console.log('lexicalField:', lexicalField)
+      const relationshipBlockNode: SerializedBlockNode = lexicalField.root.children[2] as never
 
-      expect(richTextDoc?.lexicalCustomFields).toStrictEqual(
-        JSON.parse(
-          JSON.stringify(generateLexicalRichText())
-            .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${createdArrayDocID}`)
-            .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${createdJPGDocID}`)
-            .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${createdTextDocID}`),
-        ),
-      )
+      /**
+       * Depth 1 population:
+       */
+      expect(relationshipBlockNode.fields.data.rel).toStrictEqual(createdJPGDocID)
+    })
+
+    it('should populate relationships in blocks with default depth', async () => {
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks as never
+
+      const relationshipBlockNode: SerializedBlockNode = lexicalField.root.children[2] as never
+
+      /**
+       * Depth 1 population:
+       */
+      expect(relationshipBlockNode.fields.data.rel.filename).toStrictEqual('payload.jpg')
+    })
+
+    it('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async () => {
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks as never
+
+      const subEditorBlockNode: SerializedBlockNode = lexicalField.root.children[3] as never
+
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.data.richText
+
+      const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
+        .children[0] as never
+
+      /**
+       * Depth 1 population:
+       */
+      expect(subEditorRelationshipNode.value.id).toStrictEqual(createdRichTextDocID)
+      // But the value should not be populated and only have the id field:
+      expect(Object.keys(subEditorRelationshipNode.value)).toHaveLength(1)
+    })
+
+    it('should populate relationship nodes inside of a sub-editor from a blocks node with default depth', async () => {
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never // default depth should be 1
+
+      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks as never
+
+      const subEditorBlockNode: SerializedBlockNode = lexicalField.root.children[3] as never
+
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.data.richText
+
+      const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
+        .children[0] as never
+
+      /**
+       * Depth 1 population:
+       */
+      expect(subEditorRelationshipNode.value.id).toStrictEqual(createdRichTextDocID)
+      expect(subEditorRelationshipNode.value.title).toStrictEqual(richTextDocData.title)
+
+      // Make sure that the referenced, popular document is NOT populated (that would require depth > 2):
+
+      const populatedDocEditorState: SerializedEditorState = subEditorRelationshipNode.value
+        .lexicalCustomFields as never
+
+      const populatedDocEditorRelationshipNode: SerializedRelationshipNode = populatedDocEditorState
+        .root.children[2] as never
+
+      console.log('populatedDocEditorRelatonshipNode:', populatedDocEditorRelationshipNode)
+
+      /**
+       * Depth 2 population:
+       */
+      expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
+      // But the value should not be populated and only have the id field - that's because it would require a depth of 2
+      expect(Object.keys(subEditorRelationshipNode.value)).toHaveLength(1)
+    })
+
+    it('should populate relationship nodes inside of a sub-editor from a blocks node with depth 2', async () => {
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 2,
+        })
+      ).docs[0] as never // default depth should be 1
+
+      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks as never
+
+      const subEditorBlockNode: SerializedBlockNode = lexicalField.root.children[3] as never
+
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.data.richText
+
+      const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
+        .children[0] as never
+
+      /**
+       * Depth 1 population:
+       */
+      expect(subEditorRelationshipNode.value.id).toStrictEqual(createdRichTextDocID)
+      expect(subEditorRelationshipNode.value.title).toStrictEqual(richTextDocData.title)
+
+      // Make sure that the referenced, popular document is NOT populated (that would require depth > 2):
+
+      const populatedDocEditorState: SerializedEditorState = subEditorRelationshipNode.value
+        .lexicalCustomFields as never
+
+      const populatedDocEditorRelationshipNode: SerializedRelationshipNode = populatedDocEditorState
+        .root.children[2] as never
+
+      /**
+       * Depth 2 population:
+       */
+      expect(populatedDocEditorRelationshipNode.value.id).toStrictEqual(createdTextDocID)
+      // Should now be populated (length 12)
+      expect(populatedDocEditorRelationshipNode.value.text).toStrictEqual(textDoc.text)
     })
   })
 })

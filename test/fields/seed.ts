@@ -103,18 +103,32 @@ export async function clearAndSeedEverything(_payload: Payload) {
       blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
       blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
 
+      await _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId })
+
+      const createdRichTextDoc = await _payload.create({
+        collection: richTextFieldsSlug,
+        data: richTextDocWithRelationship,
+      })
+
+      const formattedRichTextDocID =
+        _payload.db.defaultIDType === 'number'
+          ? createdRichTextDoc.id
+          : `"${createdRichTextDoc.id}"`
+
       const lexicalDocWithRelId = JSON.parse(
         JSON.stringify(lexicalDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
+          .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
       )
 
       const lexicalMigrateDocWithRelId = JSON.parse(
         JSON.stringify(lexicalMigrateDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
+          .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
       )
 
       await Promise.all([
@@ -143,9 +157,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
           collection: lexicalMigrateFieldsSlug,
           data: lexicalMigrateDocWithRelId,
         }),
-
-        _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId }),
-        _payload.create({ collection: richTextFieldsSlug, data: richTextDocWithRelationship }),
 
         _payload.create({ collection: numberFieldsSlug, data: { number: 2 } }),
         _payload.create({ collection: numberFieldsSlug, data: { number: 3 } }),

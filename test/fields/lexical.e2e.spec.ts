@@ -19,6 +19,11 @@ async function navigateToRichTextFields() {
   await page.goto(url.list)
   await page.locator('.row-1 .cell-title a').click()
 }
+async function navigateToLexicalFields() {
+  const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'lexical-fields')
+  await page.goto(url.list)
+  await page.locator('.row-1 .cell-title a').click()
+}
 
 describe('lexical', () => {
   beforeAll(async ({ browser }) => {
@@ -37,9 +42,10 @@ describe('lexical', () => {
     await client.login()
   })
 
-  test.skip('todo', async () => {
-    await navigateToRichTextFields()
+  test.skip('should not prompt unsaved changes when navigating to lexical editor with blocks node, then leaving the page', async () => {
+    await navigateToLexicalFields()
 
     await page.locator('todo').first().click()
+    // TODO: (This is currently a bug)
   })
 })
