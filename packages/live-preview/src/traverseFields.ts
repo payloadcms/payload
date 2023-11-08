@@ -33,14 +33,8 @@ export const traverseFields = <T>({
                 result[fieldName] = []
               }
 
-              if (
-                !result[fieldName][i] ||
-                result[fieldName][i].id !== incomingRow.id ||
-                result[fieldName][i].blockType !== incomingRow.blockType
-              ) {
-                result[fieldName][i] = {
-                  blockType: incomingRow.blockType,
-                }
+              if (!result[fieldName][i]) {
+                result[fieldName][i] = {}
               }
 
               traverseFields({
@@ -67,7 +61,11 @@ export const traverseFields = <T>({
                 result[fieldName] = []
               }
 
-              if (!result[fieldName][i]) {
+              if (
+                !result[fieldName][i] ||
+                result[fieldName][i].id !== incomingBlock.id ||
+                result[fieldName][i].blockType !== incomingBlock.blockType
+              ) {
                 result[fieldName][i] = {
                   blockType: incomingBlock.blockType,
                 }
