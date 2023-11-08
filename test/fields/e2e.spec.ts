@@ -1356,14 +1356,18 @@ describe('fields', () => {
 
     test('should display `hasMany` polymorphic relationships', async () => {
       await page.goto(url.create)
-      const field = page.locator('#field-relationshipHasManyPolymorphic')
+      const field = page.locator('#field-relationHasManyPolymorphic')
       await field.click()
 
-      const value = page.locator('#field-relationHasManyPolymorphic .multi-value').first()
+      await page
+        .locator('.rs__option', {
+          hasText: exactText('Seeded text document'),
+        })
+        .click()
 
       await expect(
-        value
-          .locator('.relationship--multi-value-label__text', {
+        page
+          .locator('#field-relationHasManyPolymorphic .relationship--multi-value-label__text', {
             hasText: exactText('Seeded text document'),
           })
           .first(),
