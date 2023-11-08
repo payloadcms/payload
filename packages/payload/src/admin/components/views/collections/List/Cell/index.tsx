@@ -84,9 +84,7 @@ const DefaultCell: React.FC<Props> = (props) => {
                 i18n,
               ),
             })}
-          {typeof cellData === 'string' && cellData.length > 150
-            ? `${cellData.slice(0, 150)}...`
-            : cellData}
+          {typeof cellData === 'string' && cellData}
           {typeof cellData === 'number' && cellData}
           {typeof cellData === 'object' && JSON.stringify(cellData)}
         </WrapElement>

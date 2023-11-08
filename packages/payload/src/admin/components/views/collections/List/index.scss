@@ -43,6 +43,15 @@
       width: 100%;
       overflow: auto;
 
+      [class^="cell"] > p, [class^="cell"] > span {
+        line-clamp: 4;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
+        display: -webkit-box;
+        max-width: 100vw;
+      }
+
       #heading-_select,
       .cell-_select {
         min-width: unset;
