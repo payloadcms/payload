@@ -37,7 +37,7 @@ export const ArchiveBlock: React.FC<
         populatedDocsTotal={populatedDocsTotal}
         categories={categories}
         limit={limit}
-        sort="-publishedDate"
+        sort="-publishedAt"
       />
     </div>
   )

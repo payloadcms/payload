@@ -37,7 +37,7 @@ If you have not done so already, you need to have standalone copy of this repo o
 
   Use the `create-payload-app` CLI to clone this template directly to your machine:
 
-    npx create-payload-app my-project -t website
+    npx create-payload-app@latest my-project -t website
 
 #### Method 3
 

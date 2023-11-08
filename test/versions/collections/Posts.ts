@@ -1,19 +1,19 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { draftSlug, postSlug, versionSlug } from '../shared'
+import { draftCollectionSlug, postCollectionSlug, versionCollectionSlug } from '../slugs'
 
 const Posts: CollectionConfig = {
-  slug: postSlug,
+  slug: postCollectionSlug,
   fields: [
     {
       name: 'relationToVersions',
       type: 'relationship',
-      relationTo: versionSlug,
+      relationTo: versionCollectionSlug,
     },
     {
       name: 'relationToDrafts',
       type: 'relationship',
-      relationTo: draftSlug,
+      relationTo: draftCollectionSlug,
     },
   ],
 }

@@ -6,6 +6,7 @@ import executeAccess from '../../auth/executeAccess'
 import { NotFound } from '../../errors'
 import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -56,6 +57,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     }
 
     const rawVersion = versionDocs[0]
+
+    // Patch globalType onto version doc
+    rawVersion.version.globalType = globalConfig.slug
 
     // /////////////////////////////////////
     // fetch previousDoc
@@ -155,7 +159,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

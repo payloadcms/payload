@@ -468,13 +468,15 @@ export type RelationshipValue =
   | ValueWithRelation[]
   | (number | string)
 
-type IsAny<T> = 0 extends 1 & T ? true : false
-
-export type RichTextField<Value extends object = any, AdapterProps = any> = FieldBase & {
+export type RichTextField<
+  Value extends object = any,
+  AdapterProps = any,
+  ExtraProperties = {},
+> = FieldBase & {
   admin?: Admin
-  editor?: RichTextAdapter<Value, AdapterProps>
+  editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
-} & (IsAny<AdapterProps> extends true ? {} : AdapterProps)
+} & ExtraProperties
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {

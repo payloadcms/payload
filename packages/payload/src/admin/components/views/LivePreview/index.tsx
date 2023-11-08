@@ -10,9 +10,8 @@ import type { EditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
+import { DocumentFields } from '../../elements/DocumentFields'
 import { Gutter } from '../../elements/Gutter'
-import RenderFields from '../../forms/RenderFields'
-import { filterFields } from '../../forms/RenderFields/filterFields'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -46,6 +45,7 @@ const PreviewView: React.FC<
   let id: string
   let fields: Field[] = []
   let label: SanitizedGlobalConfig['label']
+  let description: SanitizedGlobalConfig['admin']['description']
 
   if ('collection' in props) {
     collection = props?.collection
@@ -61,15 +61,9 @@ const PreviewView: React.FC<
     global = props?.global
     fields = props?.global?.fields
     label = props?.global?.label
+    description = props?.global?.admin?.description
+    hasSavePermission = permissions?.update?.permission
   }
-
-  const sidebarFields = filterFields({
-    fieldSchema: fields,
-    fieldTypes,
-    filter: (field) => field?.admin?.position === 'sidebar',
-    permissions: permissions.fields,
-    readOnly: !hasSavePermission,
-  })
 
   return (
     <Fragment>
@@ -124,18 +118,14 @@ const PreviewView: React.FC<
             .filter(Boolean)
             .join(' ')}
         >
-          <Gutter className={`${baseClass}__edit`}>
-            <RenderFields
-              fieldSchema={fields}
-              fieldTypes={fieldTypes}
-              filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
-              permissions={permissions.fields}
-              readOnly={!hasSavePermission}
-            />
-            {sidebarFields && sidebarFields.length > 0 && (
-              <RenderFields fieldTypes={fieldTypes} fields={sidebarFields} />
-            )}
-          </Gutter>
+          <DocumentFields
+            description={description}
+            fieldTypes={fieldTypes}
+            fields={fields}
+            forceSidebarWrap
+            hasSavePermission={hasSavePermission}
+            permissions={permissions}
+          />
         </div>
         <LivePreview {...props} />
       </div>

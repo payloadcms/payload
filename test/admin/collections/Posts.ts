@@ -3,10 +3,11 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 import { slateEditor } from '../../../packages/richtext-slate/src'
 import DemoUIFieldCell from '../components/DemoUIField/Cell'
 import DemoUIFieldField from '../components/DemoUIField/Field'
-import { postsSlug, slugPluralLabel, slugSingularLabel } from '../shared'
+import { slugPluralLabel, slugSingularLabel } from '../shared'
+import { postsCollectionSlug } from '../slugs'
 
 export const Posts: CollectionConfig = {
-  slug: postsSlug,
+  slug: postsCollectionSlug,
   labels: {
     singular: slugSingularLabel,
     plural: slugPluralLabel,

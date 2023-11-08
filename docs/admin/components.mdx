@@ -96,7 +96,7 @@ To swap out any of these views, simply pass in your custom component to the `adm
 }
 ```
 
-For more granular control, pass a configuration object instead. Payload exposes all of the properties of `<Route />` component in [React Router v5](https://v5.reactrouter.com):
+For more granular control, pass a configuration object instead. Each view corresponds to its own `<Route />` component in [React Router v5](https://v5.reactrouter.com). Payload exposes all of the properties of React Router:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -129,13 +129,19 @@ To add a _new_ view to the Admin Panel, simply add another key to the `views` ob
 }
 ```
 
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  Routes are cascading. This means that unless explicitly given the `exact` property, they will match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all routes in your application. Alternatively, you could define your nested route _before_ your parent route.
+</Banner>
+
 _For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/main/test/admin/components)._
 
 For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component).
 
 ### Collections
 
-You can override components on a collection-by-collection basis via their `admin` property.
+You can override components on a collection-by-collection basis via the `admin.components` property.
 
 | Path                       | Description                                                                                                            |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -163,8 +169,8 @@ import {
   CustomPreviewButtonProps,
 } from 'payload/types'
 
-export const CustomSaveButton: CustomSaveButtonProps = ({ DefaultButton, label }) => {
-  return <DefaultButton label={label} />
+export const CustomSaveButton: CustomSaveButtonProps = ({ DefaultButton, label, save }) => {
+  return <DefaultButton label={label} save={save} />
 }
 
 export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
@@ -259,15 +265,15 @@ You can also add _new_ tabs to the `Edit` view by adding another key to the `com
 
 ### Globals
 
-As with Collections, you can override components on a global-by-global basis via their `admin` property.
+As with Collections, you can override components on a global-by-global basis via the `admin.components` property.
 
-| Path                       | Description                                                                                                            |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **`edit.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
-| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
-| **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
-| **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
-| **`views`**                | Override or create new views within the Payload Admin UI. [More](#global-views)                                        |
+| Path                           | Description                                                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
+| **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
+| **`views`**                    | Override or create new views within the Payload Admin UI. [More](#global-views)                                        |
 
 #### Global views
 
@@ -451,7 +457,9 @@ These are the props that will be passed to your custom Cell to use in your own c
 
 ```tsx
 import React from 'react'
+import type { Props } from 'payload/components/views/Cell'
 import './index.scss'
+
 const baseClass = 'custom-cell'
 
 const CustomCell: React.FC<Props> = (props) => {

@@ -1,4 +1,5 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import forgotPassword from '../../operations/forgotPassword'
 
@@ -11,7 +12,7 @@ function forgotPasswordResolver(collection: Collection): any {
       },
       disableEmail: args.disableEmail,
       expiration: args.expiration,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     await forgotPassword(options)

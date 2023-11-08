@@ -1,7 +1,8 @@
 import type { UploadedFile } from 'express-fileupload'
-import type { Sharp, SharpOptions } from 'sharp'
+import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
+import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import sanitize from 'sanitize-filename'
@@ -95,16 +96,18 @@ export const generateFileData = async <T>({
     let fsSafeName: string
     let sharpFile: Sharp | undefined
     let dimensions: ProbedImageSize | undefined
-    let fileBuffer
+    let fileBuffer: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
-    const isSharpRequired = fileSupportsResize && (resizeOptions || formatOptions || trimOptions)
+    const fileHasAdjustments =
+      fileSupportsResize &&
+      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
     const sharpOptions: SharpOptions = {}
 
     if (fileIsAnimated) sharpOptions.animated = true
 
-    if (isSharpRequired) {
+    if (fileHasAdjustments) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
@@ -171,7 +174,7 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
     let fileForResize = file
 
-    if (isSharpRequired && cropData) {
+    if (cropData) {
       const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
 
       filesToSave.push({
@@ -193,6 +196,20 @@ export const generateFileData = async <T>({
         buffer: fileBuffer?.data || file.data,
         path: `${staticPath}/${fsSafeName}`,
       })
+
+      // If using temp files and the image is being resized, write the file to the temp path
+      if (fileBuffer?.data || file.data.length > 0) {
+        if (file.tempFilePath) {
+          await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+        } else {
+          // Assign the _possibly modified_ file to the request object
+          req.files.file = {
+            ...file,
+            data: fileBuffer?.data || file.data,
+            size: fileBuffer?.info.size,
+          }
+        }
+      }
     }
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {

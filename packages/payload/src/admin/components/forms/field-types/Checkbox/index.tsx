@@ -9,9 +9,9 @@ import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { CheckboxInput } from './Input'
 import './index.scss'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'checkbox'
 
@@ -82,7 +82,7 @@ const Checkbox: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <ErrorComp message={errorMessage} showError={showError} />
+        <ErrorComp alignCaret="left" message={errorMessage} showError={showError} />
       </div>
       <CheckboxInput
         checked={Boolean(value)}
@@ -94,6 +94,7 @@ const Checkbox: React.FC<Props> = (props) => {
         Label={Label}
         BeforeInput={BeforeInput}
         AfterInput={AfterInput}
+        required={required}
       />
       <FieldDescription description={description} value={value} />
     </div>

@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import type { LocalizedPost } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import wait from '../../packages/payload/src/utilities/wait'
 import { changeLocale, openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadTest } from '../helpers/configHelpers'
@@ -131,7 +132,9 @@ describe('Localization', () => {
         collection: localizedPostsSlug,
         data: {
           title: englishTitle,
+          localizedCheckbox: true,
         },
+        locale: defaultLocale,
       })
 
       const id = localizedPost.id.toString()
@@ -147,11 +150,46 @@ describe('Localization', () => {
 
       await page.goto(url.edit(id))
       await openDocControls(page)
+
+      // duplicate document
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
+
+      // check fields
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+
+      // click checkbox manually
+      await page.locator('#field-localizedCheckbox').click()
+      await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
+    })
+
+    test('should duplicate localized checkbox correctly', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, defaultLocale)
+      await fillValues({ title: englishTitle, description })
+      await page.locator('#field-localizedCheckbox').click()
+
+      await page.locator('#action-save').click()
+      // wait for navigation to update route
+      await wait(500)
+
+      // ensure spanish is not checked
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
+
+      // duplicate doc
+      await changeLocale(page, defaultLocale)
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
+
+      // wait for navigation to update route
+      await wait(500)
+
+      // finally change locale to spanish
+      await changeLocale(page, spanishLocale)
+      await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
   })
 })

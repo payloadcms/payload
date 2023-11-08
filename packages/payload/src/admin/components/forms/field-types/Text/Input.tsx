@@ -10,8 +10,8 @@ import { getTranslation } from '../../../../../utilities/getTranslation'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 export type TextInputProps = Omit<TextField, 'type'> & {
   className?: string

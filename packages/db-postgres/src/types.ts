@@ -61,6 +61,11 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
     }
   }
   tables: Record<string, GenericTable>
+  /**
+   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
+   * Used for returning properly formed errors from unique fields
+   */
+  fieldConstraints: Record<string, Record<string, string>>
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
@@ -86,5 +91,6 @@ declare module 'payload' {
       }
     }
     tables: Record<string, GenericTable>
+    fieldConstraints: Record<string, Record<string, string>>
   }
 }

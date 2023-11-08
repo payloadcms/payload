@@ -5,6 +5,8 @@ import CustomError from './CustomError'
 import CustomLabel from './CustomLabel'
 import { defaultText, textFieldsSlug } from './shared'
 
+import { textFieldsSlug } from '../../slugs'
+
 const TextFields: CollectionConfig = {
   slug: textFieldsSlug,
   admin: {

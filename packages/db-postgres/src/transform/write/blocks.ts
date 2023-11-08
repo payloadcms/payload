@@ -14,6 +14,7 @@ type Args = {
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
+  blocksToDelete: Set<string>
   data: Record<string, unknown>[]
   field: BlockField
   locale?: string
@@ -29,6 +30,7 @@ export const transformBlocks = ({
   adapter,
   baseTableName,
   blocks,
+  blocksToDelete,
   data,
   field,
   locale,
@@ -76,6 +78,7 @@ export const transformBlocks = ({
       arrays: newRow.arrays,
       baseTableName,
       blocks,
+      blocksToDelete,
       columnPrefix: '',
       data: blockRow,
       fieldPrefix: '',

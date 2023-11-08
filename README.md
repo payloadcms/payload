@@ -27,7 +27,7 @@
 <hr/>
 
 > [!IMPORTANT]
-> 🎉 <strong>Payload 2.0 is now available!<strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
+> 🎉 <strong>Payload 2.0 is now available!</strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
 
 <h3>Benefits over a regular CMS</h3>
 <ul>
@@ -51,7 +51,7 @@ Create a cloud account, connect your GitHub, and [deploy in minutes](https://pay
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
 
 ```text
-npx create-payload-app
+npx create-payload-app@latest
 ```
 
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).

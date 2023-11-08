@@ -10,7 +10,8 @@ import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSch
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { Pages } from './collections/Pages'
-import configPromise, { pagesSlug } from './config'
+import configPromise from './config'
+import { pagesSlug } from './shared'
 
 require('isomorphic-fetch')
 

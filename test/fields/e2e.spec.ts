@@ -6,31 +6,50 @@ import path from 'path'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import { exactText, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { collapsibleFieldsSlug } from './collections/Collapsible/shared'
+import { RESTClient } from '../helpers/rest'
 import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
+import { textDoc } from './collections/Text'
+import { lexicalE2E } from './lexicalE2E'
 import { pointFieldsSlug } from './collections/Point'
 import { relationshipFieldsSlug } from './collections/Relationship'
 import { tabsSlug } from './collections/Tabs/constants'
 import { textDoc, textFieldsSlug } from './collections/Text/shared'
+import { clearAndSeedEverything } from './seed'
+import {
+  collapsibleFieldsSlug,
+  pointFieldsSlug,
+  relationshipFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './slugs'
 
-const { afterEach, beforeAll, describe } = test
+const { afterEach, beforeAll, describe, beforeEach } = test
 
+let client: RESTClient
 let page: Page
-let serverURL
+let serverURL: string
+// If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
+    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
   })
-
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+    await client.logout()
+    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    await client.login()
+  })
   describe('text', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
@@ -174,6 +193,60 @@ describe('fields', () => {
     })
   })
 
+  describe('indexed', () => {
+    let url: AdminUrlUtil
+    beforeEach(() => {
+      url = new AdminUrlUtil(serverURL, 'indexed-fields')
+    })
+
+    test('should display unique constraint error in ui', async () => {
+      const uniqueText = 'uniqueText'
+      await payload.create({
+        collection: 'indexed-fields',
+        data: {
+          text: 'text',
+          uniqueText,
+          group: {
+            unique: uniqueText,
+          },
+        },
+      })
+
+      await page.goto(url.create)
+
+      await page.locator('#field-text').fill('test')
+      await page.locator('#field-uniqueText').fill(uniqueText)
+
+      // attempt to save
+      await page.click('#action-save', { delay: 100 })
+
+      // toast error
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: uniqueText',
+      )
+
+      // field specific error
+      await expect(page.locator('.field-type.text.error #field-uniqueText')).toBeVisible()
+
+      // reset first unique field
+      await page.locator('#field-uniqueText').clear()
+
+      // nested in a group error
+      await page.locator('#field-group__unique').fill(uniqueText)
+
+      // attempt to save
+      await page.locator('#action-save').click()
+
+      // toast error
+      await expect(page.locator('.Toastify')).toContainText(
+        'The following field is invalid: group.unique',
+      )
+
+      // field specific error inside group
+      await expect(page.locator('.field-type.text.error #field-group__unique')).toBeVisible()
+    })
+  })
+
   describe('json', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
@@ -246,7 +319,7 @@ describe('fields', () => {
     let url: AdminUrlUtil
     let filledGroupPoint
     let emptyGroupPoint
-    beforeAll(async () => {
+    beforeEach(async () => {
       url = new AdminUrlUtil(serverURL, pointFieldsSlug)
       filledGroupPoint = await payload.create({
         collection: pointFieldsSlug,
@@ -458,7 +531,7 @@ describe('fields', () => {
     test('should add different blocks with similar field configs', async () => {
       await page.goto(url.create)
 
-      async function addBlock(name: 'Block 1' | 'Block 2') {
+      async function addBlock(name: 'Block A' | 'Block B') {
         await page
           .locator('#field-blocksWithSimilarConfigs')
           .getByRole('button', { name: 'Add Blocks With Similar Config' })
@@ -466,7 +539,7 @@ describe('fields', () => {
         await page.getByRole('button', { name }).click()
       }
 
-      await addBlock('Block 1')
+      await addBlock('Block A')
 
       await page
         .locator('#blocksWithSimilarConfigs-row-0')
@@ -480,7 +553,7 @@ describe('fields', () => {
         page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]'),
       ).toHaveValue('items>0>title')
 
-      await addBlock('Block 2')
+      await addBlock('Block B')
 
       await page
         .locator('#blocksWithSimilarConfigs-row-1')
@@ -493,6 +566,38 @@ describe('fields', () => {
       await expect(
         page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]'),
       ).toHaveValue('items>1>title')
+    })
+
+    describe('row manipulation', () => {
+      describe('react hooks', () => {
+        test('should add 2 new block rows', async () => {
+          await page.goto(url.create)
+
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Add Block 1' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
+          ).toHaveValue('Block 1: Prefilled Title')
+
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Add Block 2' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
+          ).toHaveValue('Block 2: Prefilled Title')
+
+          await page
+            .locator('.custom-blocks-field-management')
+            .getByRole('button', { name: 'Replace Block 2' })
+            .click()
+          await expect(
+            page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
+          ).toHaveValue('REPLACED BLOCK')
+        })
+      })
     })
   })
 
@@ -621,43 +726,13 @@ describe('fields', () => {
           page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow'),
         ).toHaveValue(`${assertGroupText3} duplicate`)
       })
-
-      describe('react hooks', () => {
-        test('should add 2 new block rows', async () => {
-          await page.goto(url.create)
-
-          await page
-            .locator('.custom-blocks-field-management')
-            .getByRole('button', { name: 'Add Block 1' })
-            .click()
-          await expect(
-            page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]'),
-          ).toHaveValue('Block 1: Prefilled Title')
-
-          await page
-            .locator('.custom-blocks-field-management')
-            .getByRole('button', { name: 'Add Block 2' })
-            .click()
-          await expect(
-            page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
-          ).toHaveValue('Block 2: Prefilled Title')
-
-          await page
-            .locator('.custom-blocks-field-management')
-            .getByRole('button', { name: 'Replace Block 2' })
-            .click()
-          await expect(
-            page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
-          ).toHaveValue('REPLACED BLOCK')
-        })
-      })
     })
   })
 
   describe('tabs', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, tabsSlug)
+      url = new AdminUrlUtil(serverURL, tabsFieldsSlug)
     })
 
     test('should fill and retain a new value within a tab while switching tabs', async () => {
@@ -725,7 +800,7 @@ describe('fields', () => {
       )
     })
   })
-
+  describe('lexical', lexicalE2E(client, page, serverURL))
   describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
@@ -1097,6 +1172,100 @@ describe('fields', () => {
       await clearButton.click()
       await expect(dateField).toHaveValue('')
     })
+
+    describe('localized dates', async () => {
+      describe('EST', () => {
+        test.use({
+          geolocation: {
+            longitude: -83.0458,
+            latitude: 42.3314,
+          },
+          timezoneId: 'America/Detroit',
+        })
+        test('create EST day only date', async () => {
+          await page.goto(url.create)
+          const dateField = page.locator('#field-default input')
+
+          // enter date in default date field
+          await dateField.fill('02/07/2023')
+          await page.locator('#action-save').click()
+
+          // wait for navigation to update route
+          await wait(500)
+
+          // get the ID of the doc
+          const routeSegments = page.url().split('/')
+          const id = routeSegments.pop()
+
+          // fetch the doc (need the date string from the DB)
+          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        })
+      })
+
+      describe('PST', () => {
+        test.use({
+          geolocation: {
+            longitude: -122.419416,
+            latitude: 37.774929,
+          },
+          timezoneId: 'America/Los_Angeles',
+        })
+
+        test('create PDT day only date', async () => {
+          await page.goto(url.create)
+          const dateField = page.locator('#field-default input')
+
+          // enter date in default date field
+          await dateField.fill('02/07/2023')
+          await page.locator('#action-save').click()
+
+          // wait for navigation to update route
+          await wait(500)
+
+          // get the ID of the doc
+          const routeSegments = page.url().split('/')
+          const id = routeSegments.pop()
+
+          // fetch the doc (need the date string from the DB)
+          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        })
+      })
+
+      describe('ST', () => {
+        test.use({
+          geolocation: {
+            longitude: -171.857,
+            latitude: -14.5994,
+          },
+          timezoneId: 'Pacific/Apia',
+        })
+
+        test('create ST day only date', async () => {
+          await page.goto(url.create)
+          const dateField = page.locator('#field-default input')
+
+          // enter date in default date field
+          await dateField.fill('02/07/2023')
+          await page.locator('#action-save').click()
+
+          // wait for navigation to update route
+          await wait(500)
+
+          // get the ID of the doc
+          const routeSegments = page.url().split('/')
+          const id = routeSegments.pop()
+
+          // fetch the doc (need the date string from the DB)
+          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        })
+      })
+    })
   })
 
   describe('relationship', () => {
@@ -1221,6 +1390,41 @@ describe('fields', () => {
       await page.locator('.rs__option:has-text("Seeded text document")').click()
       await field.locator('.clear-indicator').click()
       await expect(field.locator('.rs__placeholder')).toBeVisible()
+    })
+
+    test('should display `hasMany` polymorphic relationships', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-relationHasManyPolymorphic')
+      await field.click()
+
+      await page
+        .locator('.rs__option', {
+          hasText: exactText('Seeded text document'),
+        })
+        .click()
+
+      await expect(
+        page
+          .locator('#field-relationHasManyPolymorphic .relationship--multi-value-label__text', {
+            hasText: exactText('Seeded text document'),
+          })
+          .first(),
+      ).toBeVisible()
+
+      // await fill the required fields then save the document and check again
+      await page.locator('#field-relationship').click()
+      await page.locator('#field-relationship .rs__option:has-text("Seeded text document")').click()
+      await saveDocAndAssert(page)
+
+      const valueAfterSave = page.locator('#field-relationHasManyPolymorphic .multi-value').first()
+
+      await expect(
+        valueAfterSave
+          .locator('.relationship--multi-value-label__text', {
+            hasText: exactText('Seeded text document'),
+          })
+          .first(),
+      ).toBeVisible()
     })
 
     test('should populate relationship dynamic default value', async () => {
@@ -1354,7 +1558,7 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'uploads')
     })
 
-    test('should upload files', async () => {
+    async function uploadImage() {
       await page.goto(url.create)
 
       // create a jpg upload
@@ -1365,10 +1569,15 @@ describe('fields', () => {
       await page.locator('#action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
+    }
+
+    test('should upload files', async () => {
+      await uploadImage()
     })
 
     // test that the image renders
     test('should render uploaded image', async () => {
+      await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
         '/uploads/payload-1.jpg',
@@ -1376,6 +1585,7 @@ describe('fields', () => {
     })
 
     test('should upload using the document drawer', async () => {
+      await uploadImage()
       // Open the media drawer and create a png upload
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
@@ -1402,10 +1612,20 @@ describe('fields', () => {
     })
 
     test('should clear selected upload', async () => {
+      await uploadImage()
+      await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
+      await page
+        .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+        .setInputFiles(path.resolve(__dirname, './uploads/payload.png'))
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+      await wait(200)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('.field-type.upload .file-details__remove').click()
     })
 
     test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
+      await uploadImage()
+
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click()
       await wait(200)
       const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')

@@ -3,9 +3,8 @@ import type { UpdateOne } from 'payload/database'
 import toSnakeCase from 'to-snake-case'
 
 import type { ChainedMethods } from './find/chainMethods'
-import type { PostgresAdapter } from './types'
-
 import { chainMethods } from './find/chainMethods'
+import type { PostgresAdapter } from './types'
 import buildQuery from './queries/buildQuery'
 import { upsertRow } from './upsertRow'
 
@@ -72,6 +71,7 @@ export const updateOne: UpdateOne = async function updateOne(
     fields: collection.fields,
     operation: 'update',
     tableName: toSnakeCase(collectionSlug),
+    req,
   })
 
   return result

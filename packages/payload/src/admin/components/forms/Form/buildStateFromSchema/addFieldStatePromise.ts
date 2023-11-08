@@ -281,9 +281,9 @@ export const addFieldStatePromise = async ({
                   return {
                     relationTo: relationship.relationTo,
                     value:
-                      typeof relationship.value === 'string'
-                        ? relationship.value
-                        : relationship.value?.id,
+                      relationship.value && typeof relationship.value === 'object'
+                        ? relationship.value?.id
+                        : relationship.value,
                   }
                 }
                 if (typeof relationship === 'object' && relationship !== null) {

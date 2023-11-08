@@ -16,7 +16,7 @@ export function docAccessResolver(global: SanitizedGlobalConfig): Resolver {
   async function resolver(_, context) {
     return docAccess({
       globalConfig: global,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     })
   }
 

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-export const relationshipFieldsSlug = 'relationship-fields'
+import { relationshipFieldsSlug } from '../../slugs'
 
 const RelationshipFields: CollectionConfig = {
   fields: [
@@ -13,6 +13,12 @@ const RelationshipFields: CollectionConfig = {
       relationTo: ['text-fields', 'array-fields'],
       required: true,
       type: 'relationship',
+    },
+    {
+      name: 'relationHasManyPolymorphic',
+      type: 'relationship',
+      relationTo: ['text-fields', 'array-fields'],
+      hasMany: true,
     },
     {
       name: 'relationToSelf',

@@ -1,25 +1,26 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import fs from 'fs'
 import path from 'path'
 
-import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
+import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
-import ArrayFields, { arrayDoc } from './collections/Array'
-import BlockFields, { blocksDoc } from './collections/Blocks'
-import CodeFields, { codeDoc } from './collections/Code'
-import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible'
-import ConditionalLogic, { conditionalLogicDoc } from './collections/ConditionalLogic'
-import DateFields, { dateDoc } from './collections/Date'
-import GroupFields, { groupDoc } from './collections/Group'
+import ArrayFields from './collections/Array'
+import BlockFields from './collections/Blocks'
+import CheckboxFields from './collections/Checkbox'
+import CodeFields from './collections/Code'
+import CollapsibleFields from './collections/Collapsible'
+import ConditionalLogic from './collections/ConditionalLogic'
+import DateFields from './collections/Date'
+import GroupFields from './collections/Group'
 import IndexedFields from './collections/Indexed'
-import JSONFields, { jsonDoc } from './collections/JSON'
-import { LexicalFields, LexicalRichTextDoc } from './collections/Lexical'
-import NumberFields, { numberDoc } from './collections/Number'
-import PointFields, { pointDoc } from './collections/Point'
-import RadioFields, { radiosDoc } from './collections/Radio'
+import JSONFields from './collections/JSON'
+import { LexicalFields } from './collections/Lexical'
+import { LexicalMigrateFields } from './collections/LexicalMigrate'
+import NumberFields from './collections/Number'
+import PointFields from './collections/Point'
+import RadioFields from './collections/Radio'
 import RelationshipFields from './collections/Relationship'
-import RichTextFields, { richTextBulletsDoc, richTextDoc } from './collections/RichText'
+import RichTextFields from './collections/RichText'
 import RowFields from './collections/Row'
 import SelectFields, { selectsDoc } from './collections/Select'
 import TabsFields, { tabsDoc } from './collections/Tabs'
@@ -28,6 +29,48 @@ import { textDoc, textFieldsSlug } from './collections/Text/shared'
 import Uploads, { uploadsDoc } from './collections/Upload'
 import Uploads2 from './collections/Upload2'
 import Uploads3 from './collections/Uploads3'
+import { clearAndSeedEverything } from './seed'
+
+export const collectionSlugs: CollectionConfig[] = [
+  LexicalFields,
+  LexicalMigrateFields,
+  {
+    admin: {
+      useAsTitle: 'email',
+    },
+    auth: true,
+    fields: [
+      {
+        name: 'canViewConditionalField',
+        defaultValue: true,
+        type: 'checkbox',
+      },
+    ],
+    slug: 'users',
+  },
+  ArrayFields,
+  BlockFields,
+  CheckboxFields,
+  CodeFields,
+  CollapsibleFields,
+  ConditionalLogic,
+  DateFields,
+  RadioFields,
+  GroupFields,
+  RowFields,
+  IndexedFields,
+  JSONFields,
+  NumberFields,
+  PointFields,
+  RelationshipFields,
+  RichTextFields,
+  SelectFields,
+  TabsFields,
+  TextFields,
+  Uploads,
+  Uploads2,
+  Uploads3,
+]
 
 export default buildConfigWithDefaults({
   admin: {
@@ -42,138 +85,13 @@ export default buildConfigWithDefaults({
       },
     }),
   },
-  collections: [
-    LexicalFields,
-    {
-      admin: {
-        useAsTitle: 'email',
-      },
-      auth: true,
-      fields: [
-        {
-          name: 'canViewConditionalField',
-          defaultValue: true,
-          type: 'checkbox',
-        },
-      ],
-      slug: 'users',
-    },
-    ArrayFields,
-    BlockFields,
-    CodeFields,
-    CollapsibleFields,
-    ConditionalLogic,
-    DateFields,
-    RadioFields,
-    GroupFields,
-    RowFields,
-    IndexedFields,
-    JSONFields,
-    NumberFields,
-    PointFields,
-    RelationshipFields,
-    RichTextFields,
-    SelectFields,
-    TabsFields,
-    TextFields,
-    Uploads,
-    Uploads2,
-    Uploads3,
-  ],
+  collections: collectionSlugs,
   localization: {
     defaultLocale: 'en',
     fallback: true,
     locales: ['en', 'es'],
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    const createdArrayDoc = await payload.create({ collection: 'array-fields', data: arrayDoc })
-    await payload.create({ collection: 'collapsible-fields', data: collapsibleDoc })
-    await payload.create({ collection: 'conditional-logic', data: conditionalLogicDoc })
-    await payload.create({ collection: 'group-fields', data: groupDoc })
-    await payload.create({ collection: 'select-fields', data: selectsDoc })
-    await payload.create({ collection: 'radio-fields', data: radiosDoc })
-    await payload.create({ collection: 'tabs-fields', data: tabsDoc })
-    await payload.create({ collection: 'point-fields', data: pointDoc })
-    await payload.create({ collection: 'date-fields', data: dateDoc })
-    await payload.create({ collection: 'code-fields', data: codeDoc })
-    await payload.create({ collection: 'json-fields', data: jsonDoc })
-
-    const createdTextDoc = await payload.create({ collection: textFieldsSlug, data: textDoc })
-
-    const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads')
-
-    if (fs.existsSync(uploadsDir))
-      fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`))
-
-    const pngPath = path.resolve(__dirname, './uploads/payload.png')
-    const pngFile = await getFileByPath(pngPath)
-    const createdPNGDoc = await payload.create({ collection: 'uploads', data: {}, file: pngFile })
-
-    const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg')
-    const jpgFile = await getFileByPath(jpgPath)
-    const createdJPGDoc = await payload.create({
-      collection: 'uploads',
-      data: {
-        ...uploadsDoc,
-        media: createdPNGDoc.id,
-      },
-      file: jpgFile,
-    })
-
-    const formattedID =
-      payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
-
-    const formattedJPGID =
-      payload.db.defaultIDType === 'number' ? createdJPGDoc.id : `"${createdJPGDoc.id}"`
-
-    const formattedTextID =
-      payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
-
-    const richTextDocWithRelId = JSON.parse(
-      JSON.stringify(richTextDoc)
-        .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, formattedID)
-        .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, formattedJPGID)
-        .replace(/"\{\{TEXT_DOC_ID\}\}"/g, formattedTextID),
-    )
-    const richTextBulletsDocWithRelId = JSON.parse(
-      JSON.stringify(richTextBulletsDoc)
-        .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, formattedID)
-        .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, formattedJPGID)
-        .replace(/"\{\{TEXT_DOC_ID\}\}"/g, formattedTextID),
-    )
-
-    const lexicalRichTextDocWithRelId = JSON.parse(
-      JSON.stringify(LexicalRichTextDoc)
-        .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, formattedID)
-        .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, formattedJPGID)
-        .replace(/"\{\{TEXT_DOC_ID\}\}"/g, formattedTextID),
-    )
-    await payload.create({ collection: 'lexical-fields', data: lexicalRichTextDocWithRelId })
-
-    const richTextDocWithRelationship = { ...richTextDocWithRelId }
-
-    await payload.create({ collection: 'rich-text-fields', data: richTextBulletsDocWithRelId })
-    await payload.create({ collection: 'rich-text-fields', data: richTextDocWithRelationship })
-
-    await payload.create({ collection: 'number-fields', data: { number: 2 } })
-    await payload.create({ collection: 'number-fields', data: { number: 3 } })
-    await payload.create({ collection: 'number-fields', data: numberDoc })
-
-    const blocksDocWithRichText = { ...blocksDoc }
-
-    // @ts-ignore
-    blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
-    // @ts-ignore
-    blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
-
-    await payload.create({ collection: 'block-fields', data: blocksDocWithRichText })
+    await clearAndSeedEverything(payload)
   },
 })

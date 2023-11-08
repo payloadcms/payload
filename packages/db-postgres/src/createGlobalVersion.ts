@@ -1,8 +1,8 @@
 import type { TypeWithVersion } from 'payload/database'
+import { type CreateGlobalVersionArgs } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
-import { type CreateGlobalVersionArgs } from 'payload/database'
 import { buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
@@ -30,6 +30,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     fields: buildVersionGlobalFields(global),
     operation: 'create',
     tableName,
+    req,
   })
 
   const table = this.tables[tableName]

@@ -7,9 +7,10 @@ import { withSession } from './withSession'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, versionData, where },
+  { id, collection, locale, req = {} as PayloadRequest, versionData, where },
 ) {
   const VersionModel = this.versions[collection]
+  const whereToUse = where || { id: { equals: id } }
   const options = {
     ...withSession(this, req.transactionID),
     lean: true,
@@ -19,7 +20,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   const query = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
-    where,
+    where: whereToUse,
   })
 
   const doc = await VersionModel.findOneAndUpdate(query, versionData, options)

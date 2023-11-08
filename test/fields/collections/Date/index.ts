@@ -1,9 +1,11 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { dateFieldsSlug } from '../../slugs'
+
 export const defaultText = 'default-text'
 
 const DateFields: CollectionConfig = {
-  slug: 'date-fields',
+  slug: dateFieldsSlug,
   admin: {
     useAsTitle: 'default',
   },

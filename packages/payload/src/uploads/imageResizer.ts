@@ -113,36 +113,83 @@ const createResult = (
  *
  * @param resizeConfig - object containing the requested dimensions and resize options
  * @param original - the original image size
- * @returns true if the image needs to be resized, false otherwise
+ * @returns true if resizing is not needed, false otherwise
  */
-const needsResize = (
+const preventResize = (
   { height: desiredHeight, width: desiredWidth, withoutEnlargement, withoutReduction }: ImageSize,
   original: ProbedImageSize,
 ): boolean => {
-  // allow enlargement or prevent reduction (our default is to prevent
-  // enlargement and allow reduction)
-  if (withoutEnlargement !== undefined || withoutReduction !== undefined) {
-    return true // needs resize
+  // default is to allow reduction
+  if (withoutReduction !== undefined) {
+    return false // needs resize
+  }
+
+  // default is to prevent enlargement
+  if (withoutEnlargement !== undefined) {
+    return false // needs resize
   }
 
   const isWidthOrHeightNotDefined = !desiredHeight || !desiredWidth
-
   if (isWidthOrHeightNotDefined) {
     // If with and height are not defined, it means there is a format conversion
     // and the image needs to be "resized" (transformed).
-    return true // needs resize
+    return false // needs resize
   }
 
-  const hasInsufficientWidth = original.width < desiredWidth
-  const hasInsufficientHeight = original.height < desiredHeight
+  const hasInsufficientWidth = desiredWidth > original.width
+  const hasInsufficientHeight = desiredHeight > original.height
   if (hasInsufficientWidth && hasInsufficientHeight) {
     // doesn't need resize - prevent enlargement. This should only happen if both width and height are insufficient.
     // if only one dimension is insufficient and the other is sufficient, resizing needs to happen, as the image
     // should be resized to the sufficient dimension.
-    return false
+    return true // do not create a new size
   }
 
-  return true // needs resize
+  return false // needs resize
+}
+
+/**
+ * Check if the image should be passed directly to sharp without payload adjusting properties.
+ *
+ * @param resizeConfig - object containing the requested dimensions and resize options
+ * @param original - the original image size
+ * @returns true if the image should passed directly to sharp
+ */
+const applyPayloadAdjustments = (
+  { height, width, withoutEnlargement, withoutReduction }: ImageSize,
+  original: ProbedImageSize,
+) => {
+  if (!isNumber(height) && !isNumber(width)) return false
+
+  const targetAspectRatio = width / height
+  const originalAspectRatio = original.width / original.height
+  if (originalAspectRatio === targetAspectRatio) return false
+
+  const skipEnlargement = withoutEnlargement && (original.height < height || original.width < width)
+  const skipReduction = withoutReduction && (original.height > height || original.width > width)
+  if (skipEnlargement || skipReduction) return false
+
+  return true
+}
+
+/**
+ * Sanitize the resize config. If the resize config has the `withoutReduction`
+ * property set to true, the `fit` and `position` properties will be set to `contain`
+ * and `top left` respectively.
+ *
+ * @param resizeConfig - the resize config
+ * @returns a sanitized resize config
+ */
+const sanitizeResizeConfig = (resizeConfig: ImageSize): ImageSize => {
+  if (resizeConfig.withoutReduction) {
+    return {
+      ...resizeConfig,
+      // Why fit `contain` should also be set to https://github.com/lovell/sharp/issues/3595
+      fit: resizeConfig?.fit || 'contain',
+      position: resizeConfig?.position || 'left top',
+    }
+  }
+  return resizeConfig
 }
 
 /**
@@ -176,63 +223,65 @@ export default async function resizeAndTransformImageSizes({
 
   const results: ImageSizesResult[] = await Promise.all(
     imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
+      imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
+
       // This checks if a resize should happen. If not, the resized image will be
       // skipped COMPLETELY and thus will not be included in the resulting images.
       // All further format/trim options will thus be skipped as well.
-      if (!needsResize(imageResizeConfig, dimensions)) {
+      if (preventResize(imageResizeConfig, dimensions)) {
         return createResult(imageResizeConfig.name)
       }
 
-      let resized = sharpBase.clone()
+      const imageToResize = sharpBase.clone()
+      let resized = imageToResize.resize(imageResizeConfig)
 
-      if (req.query && imageResizeConfig.width && imageResizeConfig.height) {
-        const { height, width } = imageResizeConfig
-
-        const focalPoint = {
-          x: 0.5,
-          y: 0.5,
-        }
-
-        if (req.query?.uploadEdits?.focalPoint) {
-          if (isNumber(req.query.uploadEdits.focalPoint?.x)) {
-            focalPoint.x = req.query.uploadEdits.focalPoint.x
-          }
-          if (isNumber(req.query.uploadEdits.focalPoint?.y)) {
-            focalPoint.y = req.query.uploadEdits.focalPoint.y
-          }
-        }
-
+      if (
+        req.query?.uploadEdits?.focalPoint &&
+        applyPayloadAdjustments(imageResizeConfig, dimensions)
+      ) {
+        const { height: resizeHeight, width: resizeWidth } = imageResizeConfig
+        const resizeAspectRatio = resizeWidth / resizeHeight
         const originalAspectRatio = dimensions.width / dimensions.height
-        const targetAspectRatio = imageResizeConfig.width / imageResizeConfig.height
+        const prioritizeHeight = resizeAspectRatio < originalAspectRatio
 
-        if (originalAspectRatio !== targetAspectRatio) {
-          const prioritizeHeight = originalAspectRatio > targetAspectRatio
+        // Scale the image up or down to fit the resize dimensions
+        const scaledImage = imageToResize.resize({
+          height: prioritizeHeight ? resizeHeight : null,
+          width: prioritizeHeight ? null : resizeWidth,
+        })
+        const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
-          const { info } = await resized
-            .resize({
-              height: prioritizeHeight ? height : null,
-              width: prioritizeHeight ? null : width,
-            })
-            .toBuffer({ resolveWithObject: true })
-
-          const maxOffsetX = Math.max(info.width - width, 0)
-          const maxOffsetY = Math.max(info.height - height, 0)
-
-          const focalPointX = Math.floor((info.width / 100) * focalPoint.x)
-          const focalPointY = Math.floor((info.height / 100) * focalPoint.y)
-
-          const offsetX = Math.min(Math.max(focalPointX - width / 2, 0), maxOffsetX)
-          const offsetY = Math.min(Math.max(focalPointY - height / 2, 0), maxOffsetY)
-
-          resized = resized.extract({
-            height,
-            left: offsetX,
-            top: offsetY,
-            width,
-          })
+        // Focal point adjustments
+        const focalPoint = {
+          x: isNumber(req.query.uploadEdits.focalPoint?.x)
+            ? req.query.uploadEdits.focalPoint.x
+            : 50,
+          y: isNumber(req.query.uploadEdits.focalPoint?.y)
+            ? req.query.uploadEdits.focalPoint.y
+            : 50,
         }
-      } else {
-        resized = resized.resize(imageResizeConfig)
+
+        const safeResizeWidth = resizeWidth ?? scaledImageInfo.width
+        const maxOffsetX = scaledImageInfo.width - safeResizeWidth
+        const leftFocalEdge = Math.round(
+          scaledImageInfo.width * (focalPoint.x / 100) - safeResizeWidth / 2,
+        )
+        const safeOffsetX = Math.min(Math.max(0, leftFocalEdge), maxOffsetX)
+
+        const safeResizeHeight = resizeHeight ?? scaledImageInfo.height
+        const maxOffsetY = scaledImageInfo.height - safeResizeHeight
+        const topFocalEdge = Math.round(
+          scaledImageInfo.height * (focalPoint.y / 100) - safeResizeHeight / 2,
+        )
+        const safeOffsetY = Math.min(Math.max(0, topFocalEdge), maxOffsetY)
+
+        // extract the focal area from the scaled image
+        resized = scaledImage.extract({
+          height: safeResizeHeight,
+          left: safeOffsetX,
+          top: safeOffsetY,
+          width: safeResizeWidth,
+        })
       }
 
       if (imageResizeConfig.formatOptions) {

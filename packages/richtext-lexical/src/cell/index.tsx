@@ -11,7 +11,10 @@ import type { AdapterProps } from '../types'
 import { getEnabledNodes } from '../field/lexical/nodes'
 
 export const RichTextCell: React.FC<
-  CellComponentProps<RichTextField<SerializedEditorState, AdapterProps>, SerializedEditorState> &
+  CellComponentProps<
+    RichTextField<SerializedEditorState, AdapterProps, AdapterProps>,
+    SerializedEditorState
+  > &
     AdapterProps
 > = ({ data, editorConfig }) => {
   const [preview, setPreview] = React.useState('Loading...')

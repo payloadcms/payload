@@ -8,6 +8,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { Forbidden, NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -78,6 +79,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     // Clone the result - it may have come back memoized
     let result = JSON.parse(JSON.stringify(results[0]))
 
+    // Patch globalType onto version doc
+    result.version.globalType = globalConfig.slug
+
     // /////////////////////////////////////
     // beforeRead - Collection
     // /////////////////////////////////////
@@ -131,7 +135,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

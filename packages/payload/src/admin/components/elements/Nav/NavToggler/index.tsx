@@ -28,7 +28,7 @@ export const NavToggler: React.FC<{
 
   return (
     <button
-      aria-label={t('menu')}
+      aria-label={`${navOpen ? t('close') : t('open')} ${t('menu')}`}
       className={[baseClass, navOpen && `${baseClass}--is-open`, className]
         .filter(Boolean)
         .join(' ')}

@@ -10,6 +10,7 @@ import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion'
@@ -192,6 +193,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     if (globalConfig.versions) {
+      const { globalType } = result
       result = await saveVersion({
         autosave,
         docWithLocales: {
@@ -204,6 +206,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
         payload,
         req,
       })
+      result.globalType = globalType
     }
 
     // /////////////////////////////////////
@@ -273,7 +276,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

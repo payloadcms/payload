@@ -37,7 +37,7 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const result = await create(options)

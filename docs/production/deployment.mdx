@@ -158,6 +158,17 @@ DigitalOcean provides extremely helpful documentation that can walk you through 
 1. [Create a new MongoDB and user](https://medium.com/@mhagemann/how-to-add-a-new-user-to-a-mongodb-database-d896776b5362)
 1. [Set up Node for production](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-20-04)
 
+### Swap Space
+
+Swap refers to a section of storage on the hard drive that is reserved to temporarily store data that can no longer fit within RAM. This allows for the expansion of your server's working memory, with some limitations. Swap space comes into play when available RAM can no longer accommodate actively used application data, enabling the system to continue functioning.
+
+Insufficient space can lead to deployment errors and memory-related issues, resulting in application crashes, sluggish performance, or an unresponsive server.
+
+Common deployment error due to **space limitations** (as reported by users):
+- `Error: Command failed with exit code 1`
+
+To configure swap, we recommend following this tutorial on [How To Add Swap Space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-22-04).
+
 ## Docker
 
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.

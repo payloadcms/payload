@@ -10,6 +10,16 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run dev plugin-cloud-storage",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev - plugin-cloud-storage",
+      "request": "launch",
+      "type": "node-terminal",
+      "env": {
+        "PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER": "s3"
+      }
+    },
+    {
       "command": "pnpm run dev fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
@@ -27,6 +37,20 @@
       "command": "pnpm run dev versions",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Versions",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run dev localization",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Localization",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run dev uploads",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Uploads",
       "request": "launch",
       "type": "node-terminal"
     },

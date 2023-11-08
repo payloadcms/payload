@@ -11,6 +11,7 @@ import { combineQueries } from '../../database/combineQueries'
 import { APIError, Forbidden, NotFound } from '../../errors'
 import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion'
@@ -194,7 +195,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

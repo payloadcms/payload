@@ -1,6 +1,6 @@
 import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
 
-import { draftGlobalSlug } from '../shared'
+import { draftGlobalSlug } from '../slugs'
 
 const DraftGlobal: GlobalConfig = {
   slug: draftGlobalSlug,

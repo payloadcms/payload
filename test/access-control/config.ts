@@ -52,7 +52,22 @@ export default buildConfigWithDefaults({
             setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
           }),
       },
-      fields: [],
+      fields: [
+        {
+          name: 'roles',
+          type: 'select',
+          hasMany: true,
+          options: ['admin', 'user'],
+          defaultValue: ['user'],
+          access: {
+            create: ({ req }) => req.user?.roles?.includes('admin'),
+            read: () => false,
+            update: ({ req }) => {
+              return req.user?.roles?.includes('admin')
+            },
+          },
+        },
+      ],
     },
     {
       slug,

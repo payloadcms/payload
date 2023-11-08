@@ -5,10 +5,12 @@ import {
   HTMLConverterFeature,
   LexicalPluginToLexicalFeature,
   LinkFeature,
+  TestRecorderFeature,
   TreeviewFeature,
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
+import { lexicalFieldsSlug } from '../../slugs'
 import {
   RelationshipBlock,
   RichTextBlock,
@@ -21,7 +23,7 @@ import { generateLexicalRichText } from './generateLexicalRichText'
 import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
 
 export const LexicalFields: CollectionConfig = {
-  slug: 'lexical-fields',
+  slug: lexicalFieldsSlug,
   admin: {
     useAsTitle: 'title',
     listSearchableFields: ['title', 'richTextLexicalCustomFields'],
@@ -36,12 +38,34 @@ export const LexicalFields: CollectionConfig = {
       required: true,
     },
     {
+      name: 'richTextLexicalSimple',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          TestRecorderFeature(),
+          TreeviewFeature(),
+          BlocksFeature({
+            blocks: [
+              RichTextBlock,
+              TextBlock,
+              UploadAndRichTextBlock,
+              SelectFieldBlock,
+              RelationshipBlock,
+              SubBlockBlock,
+            ],
+          }),
+        ],
+      }),
+    },
+    {
       name: 'richTextLexicalCustomFields',
       type: 'richText',
       required: true,
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          TestRecorderFeature(),
           TreeviewFeature(),
           HTMLConverterFeature(),
           LinkFeature({
@@ -125,10 +149,4 @@ export const LexicalFields: CollectionConfig = {
       }),
     },
   ],
-}
-
-export const LexicalRichTextDoc = {
-  title: 'Rich Text',
-  richTextLexicalCustomFields: generateLexicalRichText(),
-  richTextLexicalWithLexicalPluginData: payloadPluginLexicalData,
 }

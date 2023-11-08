@@ -21,7 +21,7 @@ Collections and Globals both support the same options for configuring autosave. 
 
 | Drafts Autosave Options | Description                                                                                                                                                            |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `interval`              | Define an `interval` in milliseconds to automatically save progress while documents are edited. Document updates are "debounced" at this interval. Defaults to `2000`. |
+| `interval`              | Define an `interval` in milliseconds to automatically save progress while documents are edited. Document updates are "debounced" at this interval. Defaults to `800`. |
 
 **Example config with versions, drafts, and autosave enabled:**
 
@@ -66,7 +66,7 @@ When `autosave` is enabled, all `update` operations within Payload expose a new 
 
 #### How autosaves are stored
 
-If we created a new version for each autosave, you'd quickly find a ton of autosaves that clutter up your `_versions` collection within the database. That would be messy quick because `autosave` is typically set to save a document every ~2000ms or so.
+If we created a new version for each autosave, you'd quickly find a ton of autosaves that clutter up your `_versions` collection within the database. That would be messy quick because `autosave` is typically set to save a document at ~800ms intervals.
 
 <Banner type="success">
   Instead of creating a new version each time a document is autosaved, Payload smartly only creates{' '}

@@ -27,7 +27,11 @@ export type LexicalEditorProps = {
   lexical?: LexicalEditorConfig
 }
 
-export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps> & {
+export type LexicalRichTextAdapter = RichTextAdapter<
+  SerializedEditorState,
+  AdapterProps,
+  AdapterProps
+> & {
   editorConfig: SanitizedEditorConfig
 }
 
@@ -68,13 +72,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         if (finalSanitizedEditorConfig?.features?.hooks?.afterReadPromises?.length) {
           for (const afterReadPromise of finalSanitizedEditorConfig.features.hooks
             .afterReadPromises) {
-            promises.push(
-              afterReadPromise({
-                field,
-                incomingEditorState,
-                siblingDoc,
-              }),
-            )
+            const promise = afterReadPromise({
+              field,
+              incomingEditorState,
+              siblingDoc,
+            })
+            if (promise) {
+              promises.push(promise)
+            }
           }
         }
 
@@ -177,8 +182,10 @@ export { ParagraphHTMLConverter } from './field/features/converters/html/convert
 export { TextHTMLConverter } from './field/features/converters/html/converter/converters/text'
 export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
 export type { HTMLConverter } from './field/features/converters/html/converter/types'
+export { consolidateHTMLConverters } from './field/features/converters/html/field'
 export { lexicalHTML } from './field/features/converters/html/field'
 
+export { TestRecorderFeature } from './field/features/debug/TestRecorder'
 export { TreeviewFeature } from './field/features/debug/TreeView'
 
 export { BoldTextFeature } from './field/features/format/Bold'
