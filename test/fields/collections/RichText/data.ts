@@ -1,3 +1,4 @@
+import { defaultRichTextValue } from '../../../../packages/richtext-lexical/src'
 import { generateLexicalRichText } from './generateLexicalRichText'
 import { generateSlateRichText } from './generateSlateRichText'
 
@@ -20,19 +21,19 @@ export const richTextBlocks = [
     ],
   },
 ]
-export const richTextDoc = {
+export const richTextDocData = {
   title: 'Rich Text',
   selectHasMany: ['one', 'five'],
   richText: generateSlateRichText(),
   richTextReadOnly: generateSlateRichText(),
   richTextCustomFields: generateSlateRichText(),
-  richTextLexicalCustomFields: generateLexicalRichText(),
+  lexicalCustomFields: generateLexicalRichText(),
   blocks: richTextBlocks,
 }
 
-export const richTextBulletsDoc = {
+export const richTextBulletsDocData = {
   title: 'Bullets and Indentation',
-  richTextLexicalCustomFields: generateLexicalRichText(),
+  lexicalCustomFields: generateLexicalRichText(),
   richText: [
     {
       type: 'ul',

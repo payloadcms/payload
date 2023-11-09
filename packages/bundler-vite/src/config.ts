@@ -63,7 +63,6 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     'module.hot': 'undefined',
     'process.argv': '[]',
     'process.cwd': 'function () { return "/" }',
-    'process.env': '{}',
     'process?.cwd': 'function () { return "/" }',
   }
 

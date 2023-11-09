@@ -7,9 +7,9 @@ import type { TextareaField } from '../../../../../fields/config/types'
 import type { Description } from '../../FieldDescription/types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import './index.scss'
 import { fieldBaseClass } from '../shared'
 
@@ -28,6 +28,10 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   style?: React.CSSProperties
   value?: string
   width?: string
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
+  BeforeInput?: React.ReactElement<any>[]
+  AfterInput?: React.ReactElement<any>[]
 }
 
 const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
@@ -47,9 +51,16 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     style,
     value,
     width,
+    Error,
+    Label,
+    BeforeInput,
+    AfterInput,
   } = props
 
   const { i18n } = useTranslation()
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   return (
     <div
@@ -67,11 +78,12 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
           <div className="textarea-clone" data-value={value || placeholder || ''} />
+          {BeforeInput}
           <textarea
             className="textarea-element"
             data-rtl={rtl}
@@ -83,6 +95,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             rows={rows}
             value={value || ''}
           />
+          {AfterInput}
         </div>
       </label>
       <FieldDescription description={description} value={value} />

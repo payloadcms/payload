@@ -26,7 +26,7 @@ export const LexicalMigrateFields: CollectionConfig = {
       required: true,
     },
     {
-      name: 'richTextLexicalWithLexicalPluginData',
+      name: 'lexicalWithLexicalPluginData',
       type: 'richText',
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
@@ -69,5 +69,5 @@ export const LexicalMigrateFields: CollectionConfig = {
 
 export const LexicalRichTextDoc = {
   title: 'Rich Text',
-  richTextLexicalWithLexicalPluginData: payloadPluginLexicalData,
+  lexicalWithLexicalPluginData: payloadPluginLexicalData,
 }

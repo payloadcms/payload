@@ -31,7 +31,7 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
       collection,
       depth: 0,
       draft: args.draft,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const result = await findVersionByID(options)

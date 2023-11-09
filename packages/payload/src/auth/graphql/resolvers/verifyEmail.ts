@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import verifyEmail from '../../operations/verifyEmail'
 
@@ -11,7 +12,7 @@ function verifyEmailResolver(collection: Collection) {
     const options = {
       api: 'GraphQL',
       collection,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       res: context.res,
       token: args.token,
     }

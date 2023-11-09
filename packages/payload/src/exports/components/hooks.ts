@@ -1,4 +1,5 @@
 export { useStepNav } from '../../admin/components/elements/StepNav'
+export { useTableColumns } from '../../admin/components/elements/TableColumns'
 export { default as useDebounce } from '../../admin/hooks/useDebounce'
 export { useDebouncedCallback } from '../../admin/hooks/useDebouncedCallback'
 export { useDelay } from '../../admin/hooks/useDelay'

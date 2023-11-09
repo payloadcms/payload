@@ -134,7 +134,13 @@ export default joi.object({
         joi.array().items(
           joi.object().keys({
             code: joi.string(),
-            label: joi.string(),
+            label: joi
+              .alternatives()
+              .try(
+                joi.object().pattern(joi.string(), [joi.string()]),
+                joi.string(),
+                joi.valid(false),
+              ),
             rtl: joi.boolean(),
             toString: joi.func(),
           }),

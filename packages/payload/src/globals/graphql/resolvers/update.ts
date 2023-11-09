@@ -35,7 +35,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       slug,
     }
 
