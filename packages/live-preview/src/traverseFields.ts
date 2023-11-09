@@ -2,25 +2,25 @@ import type { fieldSchemaToJSON } from 'payload/utilities'
 
 import { promise } from './promise'
 
-type Args<T> = {
+export const traverseFields = <T>(args: {
   apiRoute?: string
-  depth: number
+  depth?: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
   populationPromises: Promise<void>[]
   result: T
   serverURL: string
-}
+}): void => {
+  const {
+    apiRoute,
+    depth,
+    fieldSchema: fieldSchemas,
+    incomingData,
+    populationPromises,
+    result,
+    serverURL,
+  } = args
 
-export const traverseFields = <T>({
-  apiRoute,
-  depth,
-  fieldSchema: fieldSchemas,
-  incomingData,
-  populationPromises,
-  result,
-  serverURL,
-}: Args<T>): void => {
   fieldSchemas.forEach((fieldSchema) => {
     if ('name' in fieldSchema && typeof fieldSchema.name === 'string') {
       const fieldName = fieldSchema.name
@@ -263,6 +263,4 @@ export const traverseFields = <T>({
       }
     }
   })
-
-  return null
 }

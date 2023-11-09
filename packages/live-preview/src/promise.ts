@@ -1,4 +1,4 @@
-type Args = {
+export const promise = async (args: {
   accessor: number | string
   apiRoute?: string
   collection: string
@@ -6,20 +6,12 @@ type Args = {
   id: number | string
   ref: Record<string, unknown>
   serverURL: string
-}
+}): Promise<void> => {
+  const { id, accessor, apiRoute, collection, depth, ref, serverURL } = args
 
-export const promise = async ({
-  id,
-  accessor,
-  apiRoute,
-  collection,
-  depth,
-  ref,
-  serverURL,
-}: Args): Promise<void> => {
   const url = `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`
 
-  let res: any = null
+  let res: Record<string, unknown> | null | undefined = null
 
   try {
     res = await fetch(url, {

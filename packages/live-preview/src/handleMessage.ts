@@ -7,12 +7,14 @@ import { mergeData } from '.'
 let payloadLivePreviewFieldSchema = undefined // TODO: type this from `fieldSchemaToJSON` return type
 
 export const handleMessage = async <T>(args: {
-  depth: number
+  apiRoute?: string
+  depth?: number
   event: MessageEvent
   initialData: T
   serverURL: string
 }): Promise<T> => {
-  const { depth, event, initialData, serverURL } = args
+  const { apiRoute, depth, event, initialData, serverURL } = args
+
   if (event.origin === serverURL && event.data) {
     const eventData = JSON.parse(event?.data)
 
@@ -31,6 +33,7 @@ export const handleMessage = async <T>(args: {
       }
 
       const mergedData = await mergeData<T>({
+        apiRoute,
         depth,
         fieldSchema: payloadLivePreviewFieldSchema,
         incomingData: eventData.data,
