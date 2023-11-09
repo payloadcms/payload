@@ -164,7 +164,15 @@ export const EditUpload: React.FC<{
                 />
               </ReactCrop>
             ) : (
-              <img alt={t('upload:setFocalPoint')} ref={imageRef} src={fileSrcToUse} />
+              <img
+                alt={t('upload:setFocalPoint')}
+                onLoad={(e) => {
+                  setOriginalHeight(e.currentTarget.naturalHeight)
+                  setOriginalWidth(e.currentTarget.naturalWidth)
+                }}
+                ref={imageRef}
+                src={fileSrcToUse}
+              />
             )}
             {showFocalPoint && (
               <DraggableElement
