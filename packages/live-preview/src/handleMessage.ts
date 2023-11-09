@@ -21,17 +21,24 @@ export const handleMessage = async <T>(args: {
         payloadLivePreviewFieldSchema = eventData.fieldSchemaJSON
       }
 
-      if (payloadLivePreviewFieldSchema) {
-        const mergedData = await mergeData<T>({
-          depth,
-          fieldSchema: payloadLivePreviewFieldSchema,
-          incomingData: eventData.data,
-          initialData,
-          serverURL,
-        })
+      if (!payloadLivePreviewFieldSchema) {
+        // eslint-disable-next-line no-console
+        console.error(
+          'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window.',
+        )
 
-        return mergedData
+        return initialData
       }
+
+      const mergedData = await mergeData<T>({
+        depth,
+        fieldSchema: payloadLivePreviewFieldSchema,
+        incomingData: eventData.data,
+        initialData,
+        serverURL,
+      })
+
+      return mergedData
     }
   }
 
