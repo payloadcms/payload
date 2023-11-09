@@ -123,7 +123,6 @@ export const Upload: React.FC<Props> = (props) => {
 
   const lastSubmittedTime = submitted ? new Date().toISOString() : null
 
-  console.log(value && isImage(value.type))
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <Error message={errorMessage} showError={showError} />
