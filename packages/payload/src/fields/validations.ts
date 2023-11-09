@@ -30,7 +30,7 @@ export const number: Validate<unknown, unknown, NumberField> = (
   value: number | number[],
   { hasMany, max, maxRows, min, minRows, required, t },
 ) => {
-  const hasNoValue = !isNumber(value) || (hasMany && !Array.isArray(value))
+  const hasNoValue = (!hasMany && !isNumber(value)) || (hasMany && !Array.isArray(value))
   if (hasNoValue && !required) return true
   if (hasNoValue && required) return t('validation:required')
 
