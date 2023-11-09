@@ -8,17 +8,10 @@ import { seed } from './seed'
 export default buildConfigWithDefaults({
   collections: [Pages, Users],
   localization: {
-    locales: ['en', 'es', 'de'],
     defaultLocale: 'en',
     fallback: true,
+    locales: ['en', 'es', 'de'],
   },
-  plugins: [
-    nestedDocs({
-      collections: ['pages'],
-      generateLabel: (_, doc) => doc.title as string,
-      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
-    }),
-  ],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -30,4 +23,11 @@ export default buildConfigWithDefaults({
 
     await seed(payload)
   },
+  plugins: [
+    nestedDocs({
+      collections: ['pages'],
+      generateLabel: (_, doc) => doc.title as string,
+      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
+    }),
+  ],
 })
