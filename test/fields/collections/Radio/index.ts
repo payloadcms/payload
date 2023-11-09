@@ -30,8 +30,4 @@ const RadioFields: CollectionConfig = {
   ],
 }
 
-export const radiosDoc = {
-  radio: 'one',
-}
-
 export default RadioFields
