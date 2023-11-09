@@ -17,8 +17,6 @@ const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
       ...(data.group || {}),
       localizedUnique: data.group?.localizedUnique ? `${data.group?.localizedUnique}-copy` : '',
     },
-    partOne: data.partOne ? `${data.partOne}-copy` : '',
-    partTwo: data.partTwo ? `${data.partTwo}-copy` : '',
     uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
   }
 }

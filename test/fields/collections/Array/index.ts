@@ -128,32 +128,4 @@ const ArrayFields: CollectionConfig = {
   ],
 }
 
-export const arrayDoc = {
-  items: [
-    {
-      text: 'first row',
-    },
-    {
-      text: 'second row',
-    },
-    {
-      text: 'third row',
-    },
-    {
-      text: 'fourth row',
-    },
-    {
-      text: 'fifth row',
-    },
-    {
-      text: 'sixth row',
-    },
-  ],
-  collapsedArray: [
-    {
-      text: 'initialize collapsed',
-    },
-  ],
-}
-
 export default ArrayFields

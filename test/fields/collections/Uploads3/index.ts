@@ -29,8 +29,4 @@ const Uploads3: CollectionConfig = {
   ],
 }
 
-export const uploadsDoc = {
-  text: 'An upload here',
-}
-
 export default Uploads3

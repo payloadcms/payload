@@ -76,17 +76,4 @@ const NumberFields: CollectionConfig = {
   ],
 }
 
-export const numberDoc = {
-  number: 5,
-  min: 15,
-  max: 5,
-  positiveNumber: 5,
-  negativeNumber: -5,
-  decimalMin: 1.25,
-  decimalMax: 0.25,
-  hasMany: [5, 10, 15],
-  validatesHasMany: [5],
-  localizedHasMany: [10],
-}
-
 export default NumberFields
