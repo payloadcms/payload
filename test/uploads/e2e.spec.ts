@@ -99,50 +99,50 @@ describe('uploads', () => {
 
     const maintainedAspectRatioItem = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(0)
+      .nth(1)
       .locator('.file-meta__size-type')
     await expect(maintainedAspectRatioItem).toContainText('1024x1024')
 
     const differentFormatFromMainImageMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(1)
+      .nth(2)
       .locator('.file-meta__size-type')
     await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg')
 
     const maintainedImageSizeMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(2)
+      .nth(3)
       .locator('.file-meta__size-type')
     await expect(maintainedImageSizeMeta).toContainText('1600x1600')
 
     const maintainedImageSizeWithNewFormatMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(3)
+      .nth(4)
       .locator('.file-meta__size-type')
     await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600')
     await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg')
 
     const sameSizeMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(4)
+      .nth(5)
       .locator('.file-meta__size-type')
     await expect(sameSizeMeta).toContainText('320x80')
 
     const tabletMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(5)
+      .nth(6)
       .locator('.file-meta__size-type')
     await expect(tabletMeta).toContainText('640x480')
 
     const mobileMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(6)
+      .nth(7)
       .locator('.file-meta__size-type')
     await expect(mobileMeta).toContainText('320x240')
 
     const iconMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(7)
+      .nth(8)
       .locator('.file-meta__size-type')
     await expect(iconMeta).toContainText('16x16')
   })
