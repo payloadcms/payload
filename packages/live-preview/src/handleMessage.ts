@@ -24,7 +24,7 @@ export const handleMessage = async <T>(args: {
       if (!payloadLivePreviewFieldSchema) {
         // eslint-disable-next-line no-console
         console.warn(
-          'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window.',
+          'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window. Unable to merge data.',
         )
 
         return initialData
