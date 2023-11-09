@@ -31,6 +31,11 @@ export const number: Validate<unknown, unknown, NumberField> = (
 ) => {
   const toValidate: number[] = Array.isArray(value) ? value : [value]
 
+  if (!value && !required) return true
+
+  if (!value && required) {
+    return t('validation:required')
+  }
   // eslint-disable-next-line no-restricted-syntax
   for (const valueToValidate of toValidate) {
     const floatValue = parseFloat(valueToValidate as unknown as string)
@@ -55,7 +60,7 @@ export const number: Validate<unknown, unknown, NumberField> = (
     }
   }
 
-  if (hasMany === true && value && toValidate.length > 0) {
+  if (hasMany === true) {
     if (minRows && toValidate.length < minRows) {
       return t('validation:lessThanMin', {
         label: t('rows'),
