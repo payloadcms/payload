@@ -8,9 +8,6 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "jsx": "react"
   },
-  "paths": {
-    "@payloadcms/live-preview/types": ["../live-preview/types"]
-  },
   "exclude": [
     "dist",
     "build",
