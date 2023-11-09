@@ -23,7 +23,7 @@ export const handleMessage = async <T>(args: {
 
       if (!payloadLivePreviewFieldSchema) {
         // eslint-disable-next-line no-console
-        console.error(
+        console.warn(
           'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window.',
         )
 
