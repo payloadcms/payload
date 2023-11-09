@@ -15,6 +15,7 @@ const Text: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components: { AfterInput, BeforeInput, Error, Label } = {},
       condition,
       description,
       placeholder,
@@ -22,7 +23,6 @@ const Text: React.FC<Props> = (props) => {
       rtl,
       style,
       width,
-      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     inputRef,
     label,
@@ -60,11 +60,15 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <TextInput
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
+      Error={Error}
+      Label={Label}
       className={className}
       description={description}
       errorMessage={errorMessage}
       inputRef={inputRef}
-      label={label}
+      label={label} // eslint-disable-line react/jsx-no-duplicate-props
       name={name}
       onChange={(e) => {
         setValue(e.target.value)
@@ -78,10 +82,6 @@ const Text: React.FC<Props> = (props) => {
       style={style}
       value={value}
       width={width}
-      Error={Error}
-      Label={Label}
-      BeforeInput={BeforeInput}
-      AfterInput={AfterInput}
     />
   )
 }
