@@ -29,17 +29,12 @@ export const number: Validate<unknown, unknown, NumberField> = (
   value: number | number[],
   { hasMany, max, maxRows, min, minRows, required, t },
 ) => {
-  if (!value) {
-    if (!required) {
-      return true
-    } else {
-      return t('validation:required')
-    }
-  }
+  const hasNoValue = typeof value !== 'number' || (hasMany && !Array.isArray(value))
+  if (hasNoValue && !required) return true
+  if (hasNoValue && required) return t('validation:required')
 
   const toValidate: number[] = Array.isArray(value) ? value : [value]
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const valueToValidate of toValidate) {
     const floatValue = parseFloat(valueToValidate as unknown as string)
     if (
