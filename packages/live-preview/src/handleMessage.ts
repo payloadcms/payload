@@ -8,7 +8,7 @@ let payloadLivePreviewFieldSchema = undefined // TODO: type this from `fieldSche
 
 export const handleMessage = async <T>(args: {
   apiRoute?: string
-  depth: number
+  depth?: number
   event: MessageEvent
   initialData: T
   serverURL: string
