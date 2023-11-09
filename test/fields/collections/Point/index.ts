@@ -35,10 +35,4 @@ const PointFields: CollectionConfig = {
   ],
 }
 
-export const pointDoc = {
-  point: [7, -7],
-  localized: [15, -12],
-  group: { point: [1, 9] },
-}
-
 export default PointFields

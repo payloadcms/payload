@@ -4,24 +4,24 @@ import { type Payload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { devUser } from '../credentials'
 import { seedDB } from '../helpers/seed'
-import { arrayDoc } from './collections/Array'
-import { blocksDoc } from './collections/Blocks'
-import { codeDoc } from './collections/Code'
-import { collapsibleDoc } from './collections/Collapsible'
-import { conditionalLogicDoc } from './collections/ConditionalLogic'
-import { dateDoc } from './collections/Date'
-import { groupDoc } from './collections/Group'
-import { jsonDoc } from './collections/JSON'
+import { arrayDoc } from './collections/Array/shared'
+import { blocksDoc } from './collections/Blocks/shared'
+import { codeDoc } from './collections/Code/shared'
+import { collapsibleDoc } from './collections/Collapsible/shared'
+import { conditionalLogicDoc } from './collections/ConditionalLogic/shared'
+import { dateDoc } from './collections/Date/shared'
+import { groupDoc } from './collections/Group/shared'
+import { jsonDoc } from './collections/JSON/shared'
 import { lexicalDocData } from './collections/Lexical/data'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
-import { numberDoc } from './collections/Number'
-import { pointDoc } from './collections/Point'
-import { radiosDoc } from './collections/Radio'
+import { numberDoc } from './collections/Number/shared'
+import { pointDoc } from './collections/Point/shared'
+import { radiosDoc } from './collections/Radio/shared'
 import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data'
-import { selectsDoc } from './collections/Select'
-import { tabsDoc } from './collections/Tabs'
+import { selectsDoc } from './collections/Select/shared'
+import { tabsDoc } from './collections/Tabs/shared'
 import { textDoc } from './collections/Text/shared'
-import { uploadsDoc } from './collections/Upload'
+import { uploadsDoc } from './collections/Upload/shared'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -95,7 +95,9 @@ export async function clearAndSeedEverything(_payload: Payload) {
 
       const richTextDocWithRelationship = { ...richTextDocWithRelId }
 
-      const blocksDocWithRichText = { ...blocksDoc }
+      const blocksDocWithRichText = {
+        ...(blocksDoc as any),
+      }
 
       blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
       blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText

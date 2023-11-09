@@ -25,14 +25,4 @@ const JSON: CollectionConfig = {
   },
 }
 
-export const jsonDoc: Partial<JSONField> = {
-  json: {
-    arr: ['val1', 'val2', 'val3'],
-    nested: {
-      value: 'nested value',
-    },
-    property: 'value',
-  },
-}
-
 export default JSON

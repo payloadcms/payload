@@ -169,18 +169,4 @@ const GroupFields: CollectionConfig = {
   ],
 }
 
-export const groupDoc = {
-  group: {
-    text: 'some text within a group',
-    subGroup: {
-      textWithinGroup: 'please',
-      arrayWithinGroup: [
-        {
-          textWithinArray: 'text in a group and array',
-        },
-      ],
-    },
-  },
-}
-
 export default GroupFields

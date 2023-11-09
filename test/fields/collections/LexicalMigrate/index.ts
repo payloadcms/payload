@@ -8,7 +8,6 @@ import {
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
 import { lexicalMigrateFieldsSlug } from '../../slugs'
-import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
 
 export const LexicalMigrateFields: CollectionConfig = {
   slug: lexicalMigrateFieldsSlug,
@@ -65,9 +64,4 @@ export const LexicalMigrateFields: CollectionConfig = {
       }),
     },
   ],
-}
-
-export const LexicalRichTextDoc = {
-  title: 'Rich Text',
-  lexicalWithLexicalPluginData: payloadPluginLexicalData,
 }
