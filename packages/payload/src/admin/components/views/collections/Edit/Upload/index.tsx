@@ -123,6 +123,7 @@ export const Upload: React.FC<Props> = (props) => {
 
   const lastSubmittedTime = submitted ? new Date().toISOString() : null
 
+  console.log(value && isImage(value.type))
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <Error message={errorMessage} showError={showError} />
@@ -161,7 +162,7 @@ export const Upload: React.FC<Props> = (props) => {
                   value={value.name}
                 />
 
-                {isImage(value.type) && (
+                {isImage(value.type) && value.type !== 'image/svg+xml' && (
                   <UploadActions
                     canEdit={showCrop || showFocalPoint}
                     showSizePreviews={hasImageSizes && doc.filename && !replacingFile}
