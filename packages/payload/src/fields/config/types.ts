@@ -107,6 +107,7 @@ export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
   id?: number | string
   operation?: Operation
   payload?: Payload
+  req?: PayloadRequest
   siblingData: Partial<TSiblingData>
   t: TFunction
   user?: Partial<User>
