@@ -14,6 +14,7 @@ export const handleMessage = async <T>(args: {
   serverURL: string
 }): Promise<T> => {
   const { apiRoute, depth, event, initialData, serverURL } = args
+
   if (event.origin === serverURL && event.data) {
     const eventData = JSON.parse(event?.data)
 

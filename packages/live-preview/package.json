@@ -36,8 +36,6 @@
     "types": "./dist/index.d.ts"
   },
   "files": [
-    "dist",
-    "types.js",
-    "types.d.ts"
+    "dist"
   ]
 }
