@@ -63,7 +63,11 @@ export type LivePreviewConfig = {
    Use the `useLivePreview` hook to get started in React applications.
    */
   url?:
-    | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
+    | ((args: {
+        data: Record<string, any>
+        documentInfo: ContextType
+        locale: Locale
+      }) => Promise<string>)
     | string
 }
 

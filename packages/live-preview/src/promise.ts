@@ -13,7 +13,7 @@ export const promise = async ({
   accessor,
   apiRoute,
   collection,
-  depth,
+  depth = 0,
   ref,
   serverURL,
 }: Args): Promise<void> => {

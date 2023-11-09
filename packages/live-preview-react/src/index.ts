@@ -1,5 +1,3 @@
-import type { MergeLiveDataArgs } from '@payloadcms/live-preview/types'
-
 import { ready, subscribe, unsubscribe } from '@payloadcms/live-preview'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -8,13 +6,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // To prevent the flicker of stale data while the post message is being sent,
 // you can conditionally render loading UI based on the `isLoading` state
 
-export const useLivePreview = <T extends any>(
-  props: Omit<MergeLiveDataArgs, 'fieldSchema' | 'incomingData' | 'returnNumberOfRequests'>,
-): {
+export const useLivePreview = <T extends any>(props: {
+  apiRoute?: string
+  depth?: number
+  initialData: T
+  serverURL: string
+}): {
   data: T
   isLoading: boolean
 } => {
-  const { depth = 0, initialData, serverURL } = props
+  const { apiRoute, depth, initialData, serverURL } = props
   const [data, setData] = useState<T>(initialData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const hasSentReadyMessage = useRef<boolean>(false)
@@ -26,6 +27,7 @@ export const useLivePreview = <T extends any>(
 
   useEffect(() => {
     const subscription = subscribe({
+      apiRoute,
       callback: onChange,
       depth,
       initialData,
@@ -43,7 +45,7 @@ export const useLivePreview = <T extends any>(
     return () => {
       unsubscribe(subscription)
     }
-  }, [serverURL, onChange, depth, initialData])
+  }, [serverURL, onChange, depth, initialData, apiRoute])
 
   return {
     data,

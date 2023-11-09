@@ -21,6 +21,8 @@ export const CollectionRoutes: React.FC<
 > = (props) => {
   const { collection, permissions } = props
 
+  console.log('CollectionRoutes', props)
+
   const match = useRouteMatch()
 
   const {
