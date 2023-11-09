@@ -51,37 +51,21 @@ export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (
 
 export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
   /**
-   * For Collection Create Operation: The full data passed to create the document.\
-   * For Collection Read Operation: undefined\
-   * For Collection Update Operation: The full data passed to update the document.\
-   * For Global Read: undefined\
-   * For Global Update: The data passed to update the global with.
+   * The full data passed to `create` or `update` the document. `data` is undefined during `read` operation.
    */
   data?: Partial<T>
   /**
-   * For Collection Create Operation: undefined\
-   * For Collection Read Operation: The full document data.\
-   * For Collection Update Operation: The full document data, before the update is applied.\
-   * For Global Read: undefined\
-   * For Global Update: undefined
+   * The full document data before `update` is applied. `doc` is undefined during `create` and `update` operation.
    */
   doc?: T
   /**
-   * For Collection Create Operation: undefined\
-   * For Collection Read Operation: `id` of the document being read\
-   * For Collection Update Operation: `id` of the document being updated\
-   * For Global Read: undefined\
-   * For Global Update: undefined\
+   * `id` of the document being `read` or `update`. `id` is undefined during `create` operation.
    */
   id?: number | string
   /** The `Express` request object containing the currently authenticated `user` */
   req: PayloadRequest<U>
   /**
-   * For Collection Create Operation: Immediately adjacent field data passed to create the document.\
-   * For Collection Read Operation: Immediately adjacent field data of the document being read.\
-   * For Collection Update Operation: Immediately adjacent field data passed to update the document with.\
-   * For Global Read: undefined\
-   * For Global Update: undefined
+   * Immediately adjacent field data passed to `create`, `read`, and `update` document with.
    */
   siblingData?: Partial<P>
 }) => Promise<boolean> | boolean
