@@ -55,11 +55,7 @@ export const number: Validate<unknown, unknown, NumberField> = (
     }
   }
 
-  if (required && toValidate.length === 0) {
-    return t('validation:required')
-  }
-
-  if (hasMany === true && toValidate.length !== 0) {
+  if (hasMany === true && value && toValidate.length > 0) {
     if (minRows && toValidate.length < minRows) {
       return t('validation:lessThanMin', {
         label: t('rows'),

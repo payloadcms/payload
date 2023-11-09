@@ -153,6 +153,25 @@ describe('fields', () => {
       await saveDocAndAssert(page)
       await expect(field.locator('.rs__value-container')).toContainText(String(input))
     })
+
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      const input = 5
+
+      await page.goto(url.create)
+      await page.locator('.field-withMinRows').click()
+
+      await page.keyboard.type(String(input))
+      await page.keyboard.press('Enter')
+      await page.click('#action-save', { delay: 100 })
+
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+    })
   })
 
   describe('indexed', () => {

@@ -73,6 +73,12 @@ const NumberFields: CollectionConfig = {
       hasMany: true,
       localized: true,
     },
+    {
+      name: 'withMinRows',
+      type: 'number',
+      hasMany: true,
+      minRows: 2,
+    },
   ],
 }
 
@@ -87,6 +93,7 @@ export const numberDoc = {
   hasMany: [5, 10, 15],
   validatesHasMany: [5],
   localizedHasMany: [10],
+  withMinRows: [5, 10],
 }
 
 export default NumberFields
