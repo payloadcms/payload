@@ -281,7 +281,7 @@ const DraggableElement = ({
 }) => {
   const [position, setPosition] = useState({ x: initialPosition.x, y: initialPosition.y })
   const [isDragging, setIsDragging] = useState(false)
-  const dragRef = useRef<HTMLDivElement | undefined>()
+  const dragRef = useRef<HTMLButtonElement | undefined>()
 
   const getCoordinates = React.useCallback(
     (mouseXArg?: number, mouseYArg?: number, recenter?: boolean) => {
@@ -327,7 +327,7 @@ const DraggableElement = ({
 
       return { x, y }
     },
-    [],
+    [boundsRef, containerRef],
   )
 
   const handleMouseDown = (event) => {
@@ -357,7 +357,7 @@ const DraggableElement = ({
       setCheckBounds(false)
       return
     }
-  }, [getCoordinates, isDragging, checkBounds, setCheckBounds, position.x, position.y])
+  }, [getCoordinates, isDragging, checkBounds, setCheckBounds, position.x, position.y, onDragEnd])
 
   React.useEffect(() => {
     setPosition({ x: initialPosition.x, y: initialPosition.y })
@@ -373,15 +373,16 @@ const DraggableElement = ({
         .join(' ')}
       onMouseMove={handleMouseMove}
     >
-      <div
+      <button
         className={[`${baseClass}__draggable`, className].filter(Boolean).join(' ')}
         onMouseDown={handleMouseDown}
         onMouseUp={onDrop}
         ref={dragRef}
         style={{ left: `${position.x}%`, position: 'absolute', top: `${position.y}%` }}
+        type="button"
       >
         {children}
-      </div>
+      </button>
       <div />
     </div>
   )
