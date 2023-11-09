@@ -1,4 +1,5 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import getExtractJWT from '../../getExtractJWT'
 import refresh from '../../operations/refresh'
@@ -17,7 +18,7 @@ function refreshResolver(collection: Collection) {
     const options = {
       collection,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       res: context.res,
       token,
     }

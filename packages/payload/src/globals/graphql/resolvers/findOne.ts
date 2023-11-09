@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import type { Document } from '../../../types'
+import type { Document, PayloadRequest } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import findOne from '../../operations/findOne'
@@ -16,7 +16,7 @@ export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Do
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       slug,
     }
 

@@ -12,16 +12,18 @@ import { conditionalLogicDoc } from './collections/ConditionalLogic'
 import { dateDoc } from './collections/Date'
 import { groupDoc } from './collections/Group'
 import { jsonDoc } from './collections/JSON'
-import { lexicalRichTextDoc } from './collections/Lexical/data'
+import { lexicalDocData } from './collections/Lexical/data'
+import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
 import { numberDoc } from './collections/Number'
 import { pointDoc } from './collections/Point'
 import { radiosDoc } from './collections/Radio'
-import { richTextBulletsDoc, richTextDoc } from './collections/RichText/data'
+import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data'
 import { selectsDoc } from './collections/Select'
 import { tabsDoc } from './collections/Tabs'
-import { textDoc } from './collections/Text'
+import { textDoc } from './collections/Text/shared'
 import { uploadsDoc } from './collections/Upload'
 import {
+  arrayFieldsSlug,
   blockFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
@@ -45,11 +47,8 @@ import {
 
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
-    snapshotKey: 'fieldsTest',
-    shouldResetDB: true,
-    collectionSlugs,
     _payload,
-    uploadsDir: path.resolve(__dirname, './collections/Upload/uploads'),
+    collectionSlugs,
     seedFunction: async (_payload) => {
       const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg')
       const pngPath = path.resolve(__dirname, './uploads/payload.png')
@@ -58,7 +57,7 @@ export async function clearAndSeedEverything(_payload: Payload) {
       const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
 
       const [createdArrayDoc, createdTextDoc, createdPNGDoc] = await Promise.all([
-        _payload.create({ collection: 'array-fields', data: arrayDoc }),
+        _payload.create({ collection: arrayFieldsSlug, data: arrayDoc }),
         _payload.create({ collection: textFieldsSlug, data: textDoc }),
         _payload.create({ collection: uploadsSlug, data: {}, file: pngFile }),
       ])
@@ -82,13 +81,13 @@ export async function clearAndSeedEverything(_payload: Payload) {
         _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
 
       const richTextDocWithRelId = JSON.parse(
-        JSON.stringify(richTextDoc)
+        JSON.stringify(richTextDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
           .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
       )
       const richTextBulletsDocWithRelId = JSON.parse(
-        JSON.stringify(richTextBulletsDoc)
+        JSON.stringify(richTextBulletsDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
           .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
@@ -101,11 +100,32 @@ export async function clearAndSeedEverything(_payload: Payload) {
       blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
       blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
 
-      const lexicalRichTextDocWithRelId = JSON.parse(
-        JSON.stringify(lexicalRichTextDoc)
+      await _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId })
+
+      const createdRichTextDoc = await _payload.create({
+        collection: richTextFieldsSlug,
+        data: richTextDocWithRelationship,
+      })
+
+      const formattedRichTextDocID =
+        _payload.db.defaultIDType === 'number'
+          ? createdRichTextDoc.id
+          : `"${createdRichTextDoc.id}"`
+
+      const lexicalDocWithRelId = JSON.parse(
+        JSON.stringify(lexicalDocData)
           .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
           .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
+          .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
+      )
+
+      const lexicalMigrateDocWithRelId = JSON.parse(
+        JSON.stringify(lexicalMigrateDocData)
+          .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+          .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+          .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
+          .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
       )
 
       await Promise.all([
@@ -129,19 +149,19 @@ export async function clearAndSeedEverything(_payload: Payload) {
 
         _payload.create({ collection: blockFieldsSlug, data: blocksDocWithRichText }),
 
-        _payload.create({ collection: lexicalFieldsSlug, data: lexicalRichTextDocWithRelId }),
+        _payload.create({ collection: lexicalFieldsSlug, data: lexicalDocWithRelId }),
         _payload.create({
           collection: lexicalMigrateFieldsSlug,
-          data: lexicalRichTextDocWithRelId,
+          data: lexicalMigrateDocWithRelId,
         }),
-
-        _payload.create({ collection: richTextFieldsSlug, data: richTextBulletsDocWithRelId }),
-        _payload.create({ collection: richTextFieldsSlug, data: richTextDocWithRelationship }),
 
         _payload.create({ collection: numberFieldsSlug, data: { number: 2 } }),
         _payload.create({ collection: numberFieldsSlug, data: { number: 3 } }),
         _payload.create({ collection: numberFieldsSlug, data: numberDoc }),
       ])
     },
+    shouldResetDB: true,
+    snapshotKey: 'fieldsTest',
+    uploadsDir: path.resolve(__dirname, './collections/Upload/uploads'),
   })
 }

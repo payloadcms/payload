@@ -58,7 +58,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     },
   } = args
 
-  if (typeof args.token !== 'string') throw new Forbidden(args.req.t)
+  if (typeof args.token !== 'string' || !args.req.user) throw new Forbidden(args.req.t)
 
   const parsedURL = url.parse(args.req.url)
   const isGraphQL = parsedURL.pathname === config.routes.graphQL

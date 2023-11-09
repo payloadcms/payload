@@ -83,7 +83,7 @@ export const EditUpload: React.FC<{
     setFormQueryParams({
       ...formQueryParams,
       uploadEdits: {
-        crop: crop ? crop : undefined,
+        crop: crop || undefined,
         focalPoint: pointPosition ? pointPosition : undefined,
       },
     })

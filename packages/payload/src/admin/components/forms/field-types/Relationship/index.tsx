@@ -15,12 +15,13 @@ import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
 import { useLocale } from '../../../utilities/Locale'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import { useFormProcessing } from '../../Form/context'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
 import { findOptionsByValue } from './findOptionsByValue'
@@ -28,7 +29,6 @@ import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
-import { fieldBaseClass } from '../shared'
 
 const maxResultsPerRequest = 10
 
@@ -46,6 +46,7 @@ const Relationship: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      components: { Error, Label } = {},
     } = {},
     filterOptions,
     hasMany,
@@ -55,6 +56,9 @@ const Relationship: React.FC<Props> = (props) => {
     required,
     validate = relationship,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const config = useConfig()
 
@@ -391,6 +395,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [])
 
   const valueToRender = findOptionsByValue({ options, value })
+
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
 
   return (
@@ -411,8 +416,8 @@ const Relationship: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={pathOrName} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={pathOrName} label={label} required={required} />
       <GetFilterOptions
         {...{
           filterOptions,

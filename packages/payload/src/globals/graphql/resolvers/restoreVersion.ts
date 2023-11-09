@@ -22,7 +22,7 @@ export default function restoreVersionResolver(globalConfig: SanitizedGlobalConf
       id: args.id,
       depth: 0,
       globalConfig,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
 
     const result = await restoreVersion(options)
