@@ -21,15 +21,17 @@ export const handleMessage = async <T>(args: {
         payloadLivePreviewFieldSchema = eventData.fieldSchemaJSON
       }
 
-      const mergedData = await mergeData<T>({
-        depth,
-        fieldSchema: payloadLivePreviewFieldSchema,
-        incomingData: eventData.data,
-        initialData,
-        serverURL,
-      })
+      if (payloadLivePreviewFieldSchema) {
+        const mergedData = await mergeData<T>({
+          depth,
+          fieldSchema: payloadLivePreviewFieldSchema,
+          incomingData: eventData.data,
+          initialData,
+          serverURL,
+        })
 
-      return mergedData
+        return mergedData
+      }
     }
   }
 
