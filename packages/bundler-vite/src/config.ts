@@ -69,6 +69,8 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
   Object.entries(process.env).forEach(([key, val]) => {
     if (key.indexOf('PAYLOAD_PUBLIC_') === 0) {
       define[`process.env.${key}`] = `'${val}'`
+    } else {
+      define[`process.env.${key}`] = `''`
     }
   })
 
