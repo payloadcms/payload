@@ -46,7 +46,7 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   }
-  /** Set to false to disable hinting to MongoDB to use 'id' as index when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to true */
+  /** Set to true to disable hinting to MongoDB to use 'id' as index when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disablePaginationCountIndexHint?: boolean
   migrationDir?: string
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
@@ -89,7 +89,7 @@ declare module 'payload' {
 export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
-  disablePaginationCountIndexHint = true,
+  disablePaginationCountIndexHint = false,
   migrationDir: migrationDirArg,
   url,
 }: Args): MongooseAdapterResult {

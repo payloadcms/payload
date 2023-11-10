@@ -58,7 +58,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     useEstimatedCount,
   }
 
-  if (!useEstimatedCount && this.disablePaginationCountIndexHint) {
+  if (!useEstimatedCount && this.disablePaginationCountIndexHint !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding a hint.
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
