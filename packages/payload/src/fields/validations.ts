@@ -214,14 +214,6 @@ export const number: Validate<unknown, unknown, NumberField> = (
 
     const numberValue = parseFloat(number as unknown as string)
 
-    if (
-      typeof numberValue !== 'number' ||
-      (required && Number.isNaN(numberValue)) ||
-      (value && Number.isNaN(numberValue))
-    ) {
-      return t('validation:enterNumber')
-    }
-
     if (typeof max === 'number' && numberValue > max) {
       return t('validation:greaterThanMax', { label: t('value'), max, value })
     }
