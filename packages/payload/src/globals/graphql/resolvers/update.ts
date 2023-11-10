@@ -5,6 +5,7 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import update from '../../operations/update'
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
@@ -35,7 +36,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: { ...context.req } as PayloadRequest,
+      req: isolateTransactionID(context.req),
       slug,
     }
 

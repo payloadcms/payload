@@ -103,7 +103,7 @@ describe('collections-graphql', () => {
     })
 
     it('should read using multiple queries', async () => {
-      const query = `query {
+      const query = `query($id: String!) {
           postIDs: Posts {
             docs {
               id
@@ -115,11 +115,16 @@ describe('collections-graphql', () => {
               title
             }
           }
+          singlePost: Post(id: $id) {
+            id
+            title
+          }
       }`
-      const response = await client.request(query)
-      const { postIDs, posts } = response
+      const response = await client.request(query, { id: existingDoc.id })
+      const { postIDs, posts, singlePost } = response
       expect(postIDs.docs).toBeDefined()
       expect(posts.docs).toBeDefined()
+      expect(singlePost.id).toBeDefined()
     })
 
     it('should commit or rollback multiple mutations independently', async () => {
@@ -206,6 +211,18 @@ describe('collections-graphql', () => {
       const res = response.PayloadApiTestTwos
 
       expect(res.docs[0].relation.payloadAPI).toStrictEqual('GraphQL')
+    })
+
+    it('should have access to headers in resolver', async () => {
+      const query = `query {
+        ContentTypes {
+          docs {
+            contentType
+          }
+        }
+      }`
+      const response = await client.request(query)
+      expect(response.ContentTypes?.docs[0]?.contentType).toEqual('application/json')
     })
 
     it('should update existing', async () => {

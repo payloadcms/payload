@@ -4,6 +4,7 @@ import type { Response } from 'express'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import restoreVersion from '../../operations/restoreVersion'
 
 export type Resolver = (
@@ -23,7 +24,7 @@ export default function restoreVersionResolver(collection: Collection): Resolver
       id: args.id,
       collection,
       depth: 0,
-      req: { ...context.req } as PayloadRequest,
+      req: isolateTransactionID(context.req),
     }
 
     const result = await restoreVersion(options)

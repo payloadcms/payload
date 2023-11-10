@@ -320,6 +320,21 @@ export default buildConfigWithDefaults({
       ],
       slug: 'payload-api-test-twos',
     },
+    {
+      slug: 'content-type',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'contentType',
+          type: 'text',
+          hooks: {
+            afterRead: [({ req }) => req.headers?.['content-type']],
+          },
+        },
+      ],
+    },
   ],
   graphQL: {
     queries: (GraphQL) => {
@@ -480,6 +495,11 @@ export default buildConfigWithDefaults({
       data: {
         point: [10, 20],
       },
+    })
+
+    await payload.create({
+      collection: 'content-type',
+      data: {},
     })
   },
 })
