@@ -13,10 +13,6 @@
     &:focus {
       outline: none;
     }
-
-    option {
-      background-color: var(--theme-bg);
-    }
   }
 
   &__device-size {
@@ -44,10 +40,6 @@
     &:focus {
       outline: none;
     }
-
-    option {
-      background-color: var(--theme-bg);
-    }
   }
 
   &__external {
@@ -58,5 +50,10 @@
     align-items: center;
     justify-content: center;
     padding: 6px 0;
+  }
+
+  .popup-button {
+    display: flex;
+    align-items: center;
   }
 }
