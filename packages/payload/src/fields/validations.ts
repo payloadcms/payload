@@ -222,7 +222,7 @@ export const richText: Validate<object, unknown, RichTextField, RichTextField> =
 
 const validateFilterOptions: Validate = async (
   value,
-  { id, data, filterOptions, payload, relationTo, siblingData, t, user },
+  { id, data, filterOptions, payload, relationTo, siblingData, t, user, req },
 ) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -269,6 +269,7 @@ const validateFilterOptions: Validate = async (
             depth: 0,
             limit: 0,
             pagination: false,
+            req,
             where: findWhere,
           })
 
