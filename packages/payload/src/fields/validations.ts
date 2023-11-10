@@ -53,7 +53,7 @@ export const text: Validate<unknown, unknown, TextField> = (
 
 export const password: Validate<unknown, unknown, TextField> = (
   value: string,
-  { config, maxLength: fieldMaxLength, minLength, required, t },
+  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
 ) => {
   let maxLength: number
 
@@ -85,7 +85,7 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
 
 export const textarea: Validate<unknown, unknown, TextareaField> = (
   value: string,
-  { config, maxLength: fieldMaxLength, minLength, required, t },
+  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
 ) => {
   let maxLength: number
 
@@ -166,7 +166,7 @@ export const richText: Validate<object, unknown, RichTextField, RichTextField> =
   return await editor.validate(value, options)
 }
 
-const validateArrayLength: Validate = (
+const validateArrayLength: any = (
   value,
   options: {
     maxRows?: number
@@ -176,7 +176,9 @@ const validateArrayLength: Validate = (
   },
 ) => {
   const { maxRows, minRows, required, t } = options
-
+  if (value?.length === 3) {
+    console.log(value)
+  }
   const arrayLength = Array.isArray(value) ? value.length : 0
 
   if (!required && arrayLength === 0) return true
@@ -189,7 +191,7 @@ const validateArrayLength: Validate = (
     return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
   }
 
-  if (!arrayLength && required) {
+  if (required && !arrayLength) {
     return t('validation:requiresAtLeast', { count: 1, label: t('row') })
   }
 
@@ -203,9 +205,10 @@ export const number: Validate<unknown, unknown, NumberField> = (
   if (hasMany === true) {
     const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
     if (typeof lengthValidationResult === 'string') return lengthValidationResult
-  } else if (!value && required) {
-    return t('validation:required')
-  } else if (!value && !required) return true
+  }
+
+  if (!value && required) return t('validation:required')
+  if (!value && !required) return true
 
   const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
 
