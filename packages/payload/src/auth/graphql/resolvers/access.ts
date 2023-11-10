@@ -1,7 +1,7 @@
-import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 
 import formatName from '../../../graphql/utilities/formatName'
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import access from '../../operations/access'
 
 const formatConfigNames = (results, configs) => {
@@ -19,7 +19,7 @@ const formatConfigNames = (results, configs) => {
 function accessResolver(payload: Payload) {
   async function resolver(_, args, context) {
     const options = {
-      req: { ...context.req } as PayloadRequest,
+      req: isolateTransactionID(context.req),
     }
 
     const accessResults = await access(options)
