@@ -451,6 +451,7 @@ export const date = baseField.keys({
       minDate: joi.date(),
       minTime: joi.date(),
       monthsToShow: joi.number(),
+      overrides: joi.object().unknown(),
       pickerAppearance: joi.string(),
       timeFormat: joi.string(),
       timeIntervals: joi.number(),
