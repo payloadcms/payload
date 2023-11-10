@@ -47,7 +47,7 @@ export interface Args {
     useFacet?: boolean
   }
   /** Set to false to disable hinting to MongoDB to use 'id' as index when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to true */
-  hintPaginationCountIndex?: boolean
+  disablePaginationCountIndexHint?: boolean
   migrationDir?: string
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -89,7 +89,7 @@ declare module 'payload' {
 export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
-  hintPaginationCountIndex = true,
+  disablePaginationCountIndexHint = true,
   migrationDir: migrationDirArg,
   url,
 }: Args): MongooseAdapterResult {
@@ -108,8 +108,8 @@ export function mongooseAdapter({
       collections: {},
       connectOptions: connectOptions || {},
       connection: undefined,
+      disablePaginationCountIndexHint,
       globals: undefined,
-      hintPaginationCountIndex,
       mongoMemoryServer: undefined,
       sessions: {},
       url,
