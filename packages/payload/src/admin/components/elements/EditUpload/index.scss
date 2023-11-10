@@ -70,11 +70,6 @@ $header-height: base(5);
     }
   }
 
-  &__draggable {
-    position: absolute;
-    @include btn-reset;
-  }
-
   &__focalPoint {
     position: absolute;
     top: 50%;
