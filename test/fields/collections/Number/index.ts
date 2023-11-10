@@ -73,6 +73,12 @@ const NumberFields: CollectionConfig = {
       hasMany: true,
       localized: true,
     },
+    {
+      name: 'withMinRows',
+      type: 'number',
+      hasMany: true,
+      minRows: 2,
+    },
   ],
 }
 

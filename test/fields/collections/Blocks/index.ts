@@ -209,6 +209,22 @@ const BlockFields: CollectionConfig = {
       ],
     },
     {
+      name: 'blocksWithMinRows',
+      type: 'blocks',
+      minRows: 2,
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'blockTitle',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'customBlocks',
       type: 'blocks',
       blocks: [

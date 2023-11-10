@@ -125,6 +125,17 @@ const ArrayFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'arrayWithMinRows',
+      type: 'array',
+      minRows: 2,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }
 

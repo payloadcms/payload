@@ -82,6 +82,13 @@ const RelationshipFields: CollectionConfig = {
       ],
       type: 'array',
     },
+    {
+      name: 'relationshipWithMinRows',
+      relationTo: ['text-fields'],
+      hasMany: true,
+      minRows: 2,
+      type: 'relationship',
+    },
   ],
   slug: relationshipFieldsSlug,
 }
