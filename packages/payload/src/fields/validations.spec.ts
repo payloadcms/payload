@@ -461,12 +461,12 @@ describe('Field Validations', () => {
     it('should validate an array of numbers using minRows', async () => {
       const val = [1.25, 2.5]
       const result = number(val, { ...numberOptions, hasMany: true, minRows: 4 })
-      expect(result).toBe('validation:lessThanMin')
+      expect(result).toBe('validation:requiresAtLeast')
     })
     it('should validate an array of numbers using maxRows', async () => {
       const val = [1.25, 2.5, 3.5]
       const result = number(val, { ...numberOptions, hasMany: true, maxRows: 2 })
-      expect(result).toBe('validation:greaterThanMax')
+      expect(result).toBe('validation:requiresNoMoreThan')
     })
   })
 })
