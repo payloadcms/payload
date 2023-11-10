@@ -378,7 +378,7 @@ const DraggableElement = ({
         onMouseDown={handleMouseDown}
         onMouseUp={onDrop}
         ref={dragRef}
-        style={{ left: `${position.x}%`, position: 'absolute', top: `${position.y}%` }}
+        style={{ left: `${position.x}%`, top: `${position.y}%` }}
         type="button"
       >
         {children}
