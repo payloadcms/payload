@@ -6,38 +6,38 @@ import populateBreadcrumbs from '../utilities/populateBreadcrumbs'
 
 const resaveChildren =
   (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
-  ({ req: { payload, locale }, req, doc }) => {
+  async ({ doc, req: { locale, payload }, req }) => {
     const resaveChildrenAsync = async (): Promise<void> => {
       const children = await payload.find({
-        req,
         collection: collection.slug,
+        depth: 0,
+        locale,
+        req,
         where: {
           parent: {
             equals: doc.id,
           },
         },
-        depth: 0,
-        locale,
       })
 
       try {
-        children.docs.forEach((child: any) => {
+        children.docs.forEach(async (child: any) => {
           const updateAsDraft =
             typeof collection.versions === 'object' &&
             collection.versions.drafts &&
             child._status !== 'published'
 
-          payload.update({
-            req,
+          await payload.update({
             id: child.id,
             collection: collection.slug,
-            draft: updateAsDraft,
             data: {
               ...child,
               breadcrumbs: populateBreadcrumbs(req, pluginConfig, collection, child),
             },
             depth: 0,
+            draft: updateAsDraft,
             locale,
+            req,
           })
         })
       } catch (err: unknown) {
@@ -48,8 +48,7 @@ const resaveChildren =
       }
     }
 
-    // Non-blocking
-    resaveChildrenAsync()
+    await resaveChildrenAsync()
 
     return undefined
   }
