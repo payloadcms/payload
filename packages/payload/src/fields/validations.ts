@@ -30,7 +30,7 @@ export const number: Validate<unknown, unknown, NumberField> = (
   value: number | number[],
   { hasMany, max, maxRows, min, minRows, required, t },
 ) => {
-  const hasNoValue = (!hasMany && !isNumber(value)) || (hasMany && !Array.isArray(value))
+  const hasNoValue = (!hasMany && !value) || (hasMany && !Array.isArray(value))
   if (hasNoValue && !required) return true
   if (hasNoValue && required) return t('validation:required')
 
@@ -82,7 +82,7 @@ export const number: Validate<unknown, unknown, NumberField> = (
 
 export const text: Validate<unknown, unknown, TextField> = (
   value: string,
-  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, required, t },
 ) => {
   let maxLength: number
 
@@ -107,7 +107,7 @@ export const text: Validate<unknown, unknown, TextField> = (
 
 export const password: Validate<unknown, unknown, TextField> = (
   value: string,
-  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, required, t },
 ) => {
   let maxLength: number
 
@@ -139,7 +139,7 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
 
 export const textarea: Validate<unknown, unknown, TextareaField> = (
   value: string,
-  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, required, t },
 ) => {
   let maxLength: number
 

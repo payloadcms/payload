@@ -431,7 +431,7 @@ describe('Field Validations', () => {
     it('should handle required value', () => {
       const val = ''
       const result = number(val, { ...numberOptions, required: true })
-      expect(result).toBe('validation:enterNumber')
+      expect(result).toBe('validation:required')
     })
     it('should validate minValue', () => {
       const val = 2.4
