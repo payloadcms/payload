@@ -1,6 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
 
-import { expect } from '@playwright/test'
 import { GraphQLClient } from 'graphql-request'
 
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
