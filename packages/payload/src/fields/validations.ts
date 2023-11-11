@@ -176,9 +176,7 @@ const validateArrayLength: any = (
   },
 ) => {
   const { maxRows, minRows, required, t } = options
-  if (value?.length === 3) {
-    console.log(value)
-  }
+
   const arrayLength = Array.isArray(value) ? value.length : 0
 
   if (!required && arrayLength === 0) return true
@@ -245,7 +243,7 @@ export const blocks: Validate<unknown, unknown, BlockField> = (
 
 const validateFilterOptions: Validate = async (
   value,
-  { id, data, filterOptions, payload, relationTo, siblingData, t, user, req },
+  { id, data, filterOptions, payload, relationTo, req, siblingData, t, user },
 ) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
