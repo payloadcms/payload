@@ -1,5 +1,6 @@
 import type { SerializedEditorState } from 'lexical'
 
+import { expect } from '@playwright/test'
 import { GraphQLClient } from 'graphql-request'
 
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
@@ -18,6 +19,7 @@ import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
 import { arrayDoc } from './collections/Array/shared'
 import { lexicalDocData } from './collections/Lexical/data'
+import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
 import { richTextDocData } from './collections/RichText/data'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText'
 import { textDoc } from './collections/Text/shared'
@@ -25,6 +27,7 @@ import { clearAndSeedEverything } from './seed'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
+  lexicalMigrateFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
@@ -224,7 +227,61 @@ describe('Lexical', () => {
       expect(uploadNode.value.media.filename).toStrictEqual('payload.png')
     })
   })
+  describe('converters and migrations', () => {
+    it('hTMLConverter: should output correct HTML for top-level lexical field', async () => {
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalMigrateFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalMigrateDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
 
+      const htmlField: string = lexicalDoc?.lexicalSimple_html as never
+      expect(htmlField).toStrictEqual('<p>simple</p>')
+    })
+    it('hTMLConverter: should output correct HTML for lexical field nested in group', async () => {
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalMigrateFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalMigrateDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const htmlField: string = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html as never
+      expect(htmlField).toStrictEqual('<p>group</p>')
+    })
+    it('hTMLConverter: should output correct HTML for lexical field nested in array', async () => {
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalMigrateFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalMigrateDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const htmlField1: string = lexicalDoc?.arrayWithLexicalField[0]
+        .lexicalInArrayField_html as never
+      const htmlField2: string = lexicalDoc?.arrayWithLexicalField[1]
+        .lexicalInArrayField_html as never
+
+      expect(htmlField1).toStrictEqual('<p>array 1</p>')
+      expect(htmlField2).toStrictEqual('<p>array 2</p>')
+    })
+  })
   describe('advanced - blocks', () => {
     it('should not populate relationships in blocks if depth is 0', async () => {
       const lexicalDoc: RichTextField = (
