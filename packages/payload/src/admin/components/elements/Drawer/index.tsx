@@ -12,6 +12,9 @@ import './index.scss'
 const baseClass = 'drawer'
 const zBase = 100
 
+const DrawerDepthContext = React.createContext(0)
+const useDrawerDepth = () => React.useContext(DrawerDepthContext)
+
 export const formatDrawerSlug = ({ depth, slug }: { depth: number; slug: string }): string =>
   `drawer_${depth}_${slug}`
 
@@ -51,7 +54,8 @@ export const Drawer: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation('general')
   const { closeModal, modalState } = useModal()
-  const drawerDepth = useEditDepth()
+  const editDepth = useEditDepth()
+  const drawerDepth = useDrawerDepth()
   const [isOpen, setIsOpen] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
 
@@ -81,7 +85,7 @@ export const Drawer: React.FC<Props> = ({
           zIndex: zBase + drawerDepth,
         }}
       >
-        {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
+        {drawerDepth === 0 && <div className={`${baseClass}__blur-bg`} />}
         <button
           aria-label={t('close')}
           className={`${baseClass}__close`}
@@ -92,26 +96,28 @@ export const Drawer: React.FC<Props> = ({
         <div className={`${baseClass}__content`}>
           <div className={`${baseClass}__blur-bg-content`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
-            <EditDepthContext.Provider value={drawerDepth + 1}>
-              {header && header}
-              {header === undefined && (
-                <div className={`${baseClass}__header`}>
-                  <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
-                    {title}
-                  </h2>
-                  <button
-                    aria-label={t('close')}
-                    className={`${baseClass}__header__close`}
-                    id={`close-drawer__${slug}`}
-                    onClick={() => closeModal(slug)}
-                    type="button"
-                  >
-                    <X />
-                  </button>
-                </div>
-              )}
-              {children}
-            </EditDepthContext.Provider>
+            <DrawerDepthContext.Provider value={drawerDepth + 1}>
+              <EditDepthContext.Provider value={editDepth + 1}>
+                {header && header}
+                {header === undefined && (
+                  <div className={`${baseClass}__header`}>
+                    <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
+                      {title}
+                    </h2>
+                    <button
+                      aria-label={t('close')}
+                      className={`${baseClass}__header__close`}
+                      id={`close-drawer__${slug}`}
+                      onClick={() => closeModal(slug)}
+                      type="button"
+                    >
+                      <X />
+                    </button>
+                  </div>
+                )}
+                {children}
+              </EditDepthContext.Provider>
+            </DrawerDepthContext.Provider>
           </Gutter>
         </div>
       </Modal>
