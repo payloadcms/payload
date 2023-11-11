@@ -1,13 +1,16 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import {
+  HTMLConverterFeature,
   LexicalPluginToLexicalFeature,
   LinkFeature,
   TreeviewFeature,
   UploadFeature,
   lexicalEditor,
+  lexicalHTML,
 } from '../../../../packages/richtext-lexical/src'
 import { lexicalMigrateFieldsSlug } from '../../slugs'
+import { getSimpleLexicalData } from './data'
 
 export const LexicalMigrateFields: CollectionConfig = {
   slug: lexicalMigrateFieldsSlug,
@@ -32,6 +35,7 @@ export const LexicalMigrateFields: CollectionConfig = {
           ...defaultFeatures,
           LexicalPluginToLexicalFeature(),
           TreeviewFeature(),
+          HTMLConverterFeature(),
           LinkFeature({
             fields: [
               {
@@ -62,6 +66,44 @@ export const LexicalMigrateFields: CollectionConfig = {
           }),
         ],
       }),
+    },
+    {
+      name: 'lexicalSimple',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [...defaultFeatures, HTMLConverterFeature()],
+      }),
+      defaultValue: getSimpleLexicalData('simple'),
+    },
+    lexicalHTML('lexicalSimple', { name: 'lexicalSimple_html' }),
+    {
+      name: 'groupWithLexicalField',
+      type: 'group',
+      fields: [
+        {
+          name: 'lexicalInGroupField',
+          type: 'richText',
+          editor: lexicalEditor({
+            features: ({ defaultFeatures }) => [...defaultFeatures, HTMLConverterFeature()],
+          }),
+          defaultValue: getSimpleLexicalData('group'),
+        },
+        lexicalHTML('lexicalInGroupField', { name: 'lexicalInGroupField_html' }),
+      ],
+    },
+    {
+      name: 'arrayWithLexicalField',
+      type: 'array',
+      fields: [
+        {
+          name: 'lexicalInArrayField',
+          type: 'richText',
+          editor: lexicalEditor({
+            features: ({ defaultFeatures }) => [...defaultFeatures, HTMLConverterFeature()],
+          }),
+        },
+        lexicalHTML('lexicalInArrayField', { name: 'lexicalInArrayField_html' }),
+      ],
     },
   ],
 }
