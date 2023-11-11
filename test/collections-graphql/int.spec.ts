@@ -103,7 +103,7 @@ describe('collections-graphql', () => {
     })
 
     it('should read using multiple queries', async () => {
-      const query = `query($id: String!) {
+      const query = `query {
           postIDs: Posts {
             docs {
               id
@@ -115,12 +115,12 @@ describe('collections-graphql', () => {
               title
             }
           }
-          singlePost: Post(id: $id) {
+          singlePost: Post(id: ${existingDocGraphQLID}) {
             id
             title
           }
       }`
-      const response = await client.request(query, { id: existingDoc.id })
+      const response = await client.request(query)
       const { postIDs, posts, singlePost } = response
       expect(postIDs.docs).toBeDefined()
       expect(posts.docs).toBeDefined()
