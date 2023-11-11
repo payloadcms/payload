@@ -16,7 +16,13 @@ export default function isolateTransactionID(req: PayloadRequest): PayloadReques
       return Reflect.has(p === 'transactionID' ? delegate : target, p)
     },
     set(target, p, newValue, receiver) {
-      return Reflect.set(p === 'transactionID' ? delegate : target, p, newValue, receiver)
+      if (p === 'transactionID') {
+        // in case of transactionID we must ignore any receiver, because
+        // "If provided and target does not have a setter for propertyKey, the property will be set on receiver instead."
+        return Reflect.set(delegate, p, newValue)
+      } else {
+        return Reflect.set(target, p, newValue, receiver)
+      }
     },
   }
   return new Proxy(req, handler)
