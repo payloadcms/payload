@@ -2,23 +2,29 @@ import type { fieldSchemaToJSON } from 'payload/utilities'
 
 import { traverseFields } from './traverseFields'
 
-export type MergeLiveDataArgs<T> = {
+export const mergeData = async <T>(args: {
   apiRoute?: string
-  depth: number
+  depth?: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
   initialData: T
+  returnNumberOfRequests?: boolean
   serverURL: string
-}
+}): Promise<
+  T & {
+    _numberOfRequests?: number
+  }
+> => {
+  const {
+    apiRoute,
+    depth,
+    fieldSchema,
+    incomingData,
+    initialData,
+    returnNumberOfRequests,
+    serverURL,
+  } = args
 
-export const mergeData = async <T>({
-  apiRoute,
-  depth,
-  fieldSchema,
-  incomingData,
-  initialData,
-  serverURL,
-}: MergeLiveDataArgs<T>): Promise<T> => {
   const result = { ...initialData }
 
   const populationPromises: Promise<void>[] = []
@@ -35,5 +41,8 @@ export const mergeData = async <T>({
 
   await Promise.all(populationPromises)
 
-  return result
+  return {
+    ...result,
+    ...(returnNumberOfRequests ? { _numberOfRequests: populationPromises.length } : {}),
+  }
 }

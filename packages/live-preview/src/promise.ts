@@ -1,4 +1,4 @@
-type Args = {
+export const promise = async (args: {
   accessor: number | string
   apiRoute?: string
   collection: string
@@ -6,20 +6,23 @@ type Args = {
   id: number | string
   ref: Record<string, unknown>
   serverURL: string
-}
+}): Promise<void> => {
+  const { id, accessor, apiRoute, collection, depth, ref, serverURL } = args
 
-export const promise = async ({
-  id,
-  accessor,
-  apiRoute,
-  collection,
-  depth,
-  ref,
-  serverURL,
-}: Args): Promise<void> => {
-  const res: any = await fetch(
-    `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`,
-  ).then((res) => res.json())
+  const url = `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`
+
+  let res: Record<string, unknown> | null | undefined = null
+
+  try {
+    res = await fetch(url, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((res) => res.json())
+  } catch (err) {
+    console.error(err) // eslint-disable-line no-console
+  }
 
   ref[accessor] = res
 }

@@ -72,6 +72,25 @@ export const BlockContent: React.FC<Props> = (props) => {
 
   const onFormChange = useCallback(
     ({ fields: formFields, formData }: { fields: Fields; formData: Data }) => {
+      // Recursively remove all undefined values from even being present in formData, as they will
+      // cause isDeepEqual to return false if, for example, formData has a key that fields.data
+      // does not have, even if it's undefined.
+      // Currently, this happens if a block has another sub-blocks field. Inside of formData, that sub-blocks field has an undefined blockName property.
+      // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
+      function removeUndefinedRecursively(obj: any) {
+        Object.keys(obj).forEach((key) => {
+          if (obj[key] && typeof obj[key] === 'object') {
+            removeUndefinedRecursively(obj[key])
+          } else if (obj[key] === undefined) {
+            delete obj[key]
+          }
+        })
+      }
+      removeUndefinedRecursively(formData)
+      removeUndefinedRecursively(fields.data)
+
+      // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
+      // which would trigger the "Leave without saving" dialog unnecessarily
       if (!isDeepEqual(fields.data, formData)) {
         editor.update(() => {
           const node: BlockNode = $getNodeByKey(nodeKey)

@@ -5,9 +5,9 @@ import type { Props } from './types'
 
 import { point } from '../../../../../fields/validations'
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
@@ -18,12 +18,25 @@ const baseClass = 'point'
 const PointField: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, condition, description, placeholder, readOnly, step, style, width } = {},
+    admin: {
+      className,
+      condition,
+      description,
+      placeholder,
+      readOnly,
+      step,
+      style,
+      width,
+      components: { Error, Label, BeforeInput, AfterInput } = {},
+    } = {},
     label,
     path: pathFromProps,
     required,
     validate = point,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const path = pathFromProps || name
 
@@ -76,41 +89,49 @@ const PointField: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
+      <ErrorComp message={errorMessage} showError={showError} />
       <ul className={`${baseClass}__wrap`}>
         <li>
-          <Label
+          <LabelComp
             htmlFor={`field-longitude-${path.replace(/\./g, '__')}`}
             label={`${getTranslation(label || name, i18n)} - ${t('longitude')}`}
             required={required}
           />
-          <input
-            disabled={readOnly}
-            id={`field-longitude-${path.replace(/\./g, '__')}`}
-            name={`${path}.longitude`}
-            onChange={(e) => handleChange(e, 0)}
-            placeholder={getTranslation(placeholder, i18n)}
-            step={step}
-            type="number"
-            value={value && typeof value[0] === 'number' ? value[0] : ''}
-          />
+          <div className="input-wrapper">
+            {BeforeInput}
+            <input
+              disabled={readOnly}
+              id={`field-longitude-${path.replace(/\./g, '__')}`}
+              name={`${path}.longitude`}
+              onChange={(e) => handleChange(e, 0)}
+              placeholder={getTranslation(placeholder, i18n)}
+              step={step}
+              type="number"
+              value={value && typeof value[0] === 'number' ? value[0] : ''}
+            />
+            {AfterInput}
+          </div>
         </li>
         <li>
-          <Label
+          <LabelComp
             htmlFor={`field-latitude-${path.replace(/\./g, '__')}`}
             label={`${getTranslation(label || name, i18n)} - ${t('latitude')}`}
             required={required}
           />
-          <input
-            disabled={readOnly}
-            id={`field-latitude-${path.replace(/\./g, '__')}`}
-            name={`${path}.latitude`}
-            onChange={(e) => handleChange(e, 1)}
-            placeholder={getTranslation(placeholder, i18n)}
-            step={step}
-            type="number"
-            value={value && typeof value[1] === 'number' ? value[1] : ''}
-          />
+          <div className="input-wrapper">
+            {BeforeInput}
+            <input
+              disabled={readOnly}
+              id={`field-latitude-${path.replace(/\./g, '__')}`}
+              name={`${path}.latitude`}
+              onChange={(e) => handleChange(e, 1)}
+              placeholder={getTranslation(placeholder, i18n)}
+              step={step}
+              type="number"
+              value={value && typeof value[1] === 'number' ? value[1] : ''}
+            />
+            {AfterInput}
+          </div>
         </li>
       </ul>
       <FieldDescription description={description} value={value} />

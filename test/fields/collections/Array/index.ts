@@ -1,10 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { arrayFieldsSlug } from '../../slugs'
 import { ArrayRowLabel } from './LabelComponent'
 
 export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
-
-export const arrayFieldsSlug = 'array-fields'
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
@@ -126,33 +125,16 @@ const ArrayFields: CollectionConfig = {
         },
       },
     },
-  ],
-}
-
-export const arrayDoc = {
-  items: [
     {
-      text: 'first row',
-    },
-    {
-      text: 'second row',
-    },
-    {
-      text: 'third row',
-    },
-    {
-      text: 'fourth row',
-    },
-    {
-      text: 'fifth row',
-    },
-    {
-      text: 'sixth row',
-    },
-  ],
-  collapsedArray: [
-    {
-      text: 'initialize collapsed',
+      name: 'arrayWithMinRows',
+      type: 'array',
+      minRows: 2,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
     },
   ],
 }

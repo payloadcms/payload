@@ -35,7 +35,7 @@ export default function findVersionsResolver(collection: Collection): Resolver {
       depth: 0,
       limit: args.limit,
       page: args.page,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       sort: args.sort,
       where: args.where,
     }

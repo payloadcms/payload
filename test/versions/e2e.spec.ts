@@ -27,19 +27,28 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
+import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { globalSlug } from '../admin/shared'
+import { globalSlug } from '../admin/slugs'
 import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { autosaveSlug, draftGlobalSlug, draftSlug, titleToDelete } from './shared'
+import { clearAndSeedEverything } from './seed'
+import { titleToDelete } from './shared'
+import {
+  autoSaveGlobalSlug,
+  autosaveCollectionSlug,
+  draftCollectionSlug,
+  draftGlobalSlug,
+} from './slugs'
 
-const { beforeAll, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 describe('versions', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
+  let autosaveURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
@@ -48,9 +57,14 @@ describe('versions', () => {
     page = await context.newPage()
   })
 
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+  })
+
   describe('draft collections', () => {
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, draftSlug)
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
     })
 
     // This test has to run before bulk updates that will rename the title
@@ -226,8 +240,19 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    test('global - should autosave', async () => {
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      // fill out global title and wait for autosave
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await page.locator('#field-title').fill('global title')
+      await wait(1000)
+
+      // refresh the page and ensure value autosaved
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await expect(page.locator('#field-title')).toHaveValue('global title')
+    })
+
     test('should retain localized data during autosave', async () => {
-      const autosaveURL = new AdminUrlUtil(serverURL, autosaveSlug)
       const locale = 'en'
       const spanishLocale = 'es'
       const title = 'english title'
@@ -285,6 +310,31 @@ describe('versions', () => {
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+    })
+
+    test('collection - autosave should only update the current document', async () => {
+      // create and save first doc
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('first post title')
+      await page.locator('#field-description').fill('first post description')
+      await page.locator('#action-save').click()
+
+      // create and save second doc
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('second post title')
+      await page.locator('#field-description').fill('second post description')
+      await page.locator('#action-save').click()
+
+      // update second doc and wait for autosave
+      await page.locator('#field-title').fill('updated second post title')
+      await page.locator('#field-description').fill('updated second post description')
+      await wait(1000)
+
+      // verify that the first doc is unchanged
+      await page.goto(autosaveURL.list)
+      await page.locator('tbody tr .cell-title a').nth(1).click()
+      await expect(page.locator('#field-title')).toHaveValue('first post title')
+      await expect(page.locator('#field-description')).toHaveValue('first post description')
     })
   })
 })

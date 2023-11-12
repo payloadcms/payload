@@ -56,7 +56,12 @@ export const DocumentControls: React.FC<{
 
   const { i18n, t } = useTranslation('general')
 
-  const showDotMenu = Boolean(collection && id && !disableActions)
+  const hasCreatePermission = 'create' in permissions && permissions.create?.permission
+  const hasDeletePermission = 'delete' in permissions && permissions.delete?.permission
+
+  const showDotMenu = Boolean(
+    collection && id && !disableActions && (hasCreatePermission || hasDeletePermission),
+  )
 
   return (
     <Gutter className={baseClass}>
@@ -203,7 +208,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
-                {'create' in permissions && permissions?.create?.permission && (
+                {hasCreatePermission && (
                   <React.Fragment>
                     <PopupList.Button
                       id="action-create"
@@ -217,7 +222,7 @@ export const DocumentControls: React.FC<{
                     )}
                   </React.Fragment>
                 )}
-                {'delete' in permissions && permissions?.delete?.permission && id && (
+                {hasDeletePermission && (
                   <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
                 )}
               </PopupList.ButtonGroup>

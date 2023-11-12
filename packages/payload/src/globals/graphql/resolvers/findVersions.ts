@@ -29,7 +29,7 @@ export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig
       globalConfig,
       limit: args.limit,
       page: args.page,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
       sort: args.sort,
       where: args.where,
     }
