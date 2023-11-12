@@ -387,7 +387,7 @@ describe('lexical', () => {
        */
       await lexicalBlock.locator('button').getByText('Add Sub Block').click()
 
-      const drawerContent = await page.locator('.drawer__content').first()
+      const drawerContent = page.locator('.drawer__content').first()
       await expect(drawerContent).toBeVisible()
 
       const textAreaAddBlockButton = drawerContent.locator('button').getByText('Text Area').first()
