@@ -33,7 +33,7 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
           )
         }
 
-        acc[process.env[envKey] as string] = new Resend(apiKey)
+        acc[process.env[envKey]] = new Resend(apiKey)
         return acc
       },
       {} as Record<string, Resend>,
@@ -118,30 +118,28 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
       }
 
       try {
-        const sendResponse = await resend.sendEmail({
+        const { data, error } = await resend.emails.send({
           from: fromToUse,
           html: (html || text) as string,
           subject: subject || '<No subject>',
           to: cleanTo,
         })
 
-        if ('error' in sendResponse) {
-          return callback(new Error('Error sending email', { cause: sendResponse.error }), null)
-        }
-        return callback(null, sendResponse)
-      } catch (err: unknown) {
-        if (isResendError(err)) {
+        if ('error' in error) {
           return callback(
-            new Error(`Error sending email: ${err.statusCode} ${err.name}: ${err.message}`),
+            new Error(`Error sending email: ${error.error}`, { cause: error.error }),
             null,
           )
-        } else if (err instanceof Error) {
+        }
+        return callback(null, data)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
           return callback(
             new Error(`Unexpected error sending email: ${err.message}: ${err.stack}`),
             null,
           )
         } else {
-          return callback(new Error(`Unexpected error sending email: ${err}`), null)
+          return callback(new Error(`Unexpected error sending email: ${JSON.stringify(err)}`), null)
         }
       }
     },
@@ -153,16 +151,4 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
     fromName: fromName,
     transport: nodemailer.createTransport(transportConfig),
   }
-}
-
-type ResendError = {
-  message: string
-  name: string
-  statusCode: number
-}
-
-function isResendError(err: unknown): err is ResendError {
-  return Boolean(
-    err && typeof err === 'object' && 'message' in err && 'statusCode' in err && 'name' in err,
-  )
 }
