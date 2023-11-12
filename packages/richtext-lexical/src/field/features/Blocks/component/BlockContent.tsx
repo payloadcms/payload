@@ -89,19 +89,31 @@ export const BlockContent: React.FC<Props> = (props) => {
       removeUndefinedRecursively(formData)
       removeUndefinedRecursively(fields.data)
 
+      // Unwrap all fields inside of blockFieldWrapperName - they should be saved cleanly at the top level
+      // When we are loading them in, they will be wrapped inside of blockFieldWrapperName again
+      formData = {
+        id: formData.id,
+        blockName: formData.blockName,
+        blockType: formData.blockType,
+        ...formData[blockFieldWrapperName],
+      }
+      delete formData[blockFieldWrapperName]
+
+      if (fields.data[blockFieldWrapperName]) {
+        fields.data = {
+          id: fields.data.id,
+          blockName: fields.data.blockName,
+          blockType: fields.data.blockType,
+          ...fields.data[blockFieldWrapperName],
+        }
+        delete fields.data[blockFieldWrapperName]
+      }
+
       // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
       // which would trigger the "Leave without saving" dialog unnecessarily
       if (!isDeepEqual(fields.data, formData)) {
         editor.update(() => {
           const node: BlockNode = $getNodeByKey(nodeKey)
-
-          // Unwrap all fields inside of blockFieldWrapperName - they should be saved cleanly at the top level
-          // When we are loading them in, they will be wrapped inside of blockFieldWrapperName again
-          formData = {
-            ...formData,
-            ...formData[blockFieldWrapperName],
-          }
-          delete formData[blockFieldWrapperName]
 
           if (node) {
             node.setFields({
