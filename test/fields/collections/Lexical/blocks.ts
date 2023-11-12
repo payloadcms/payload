@@ -113,6 +113,7 @@ export const SubBlockBlock: Block = {
             },
           ],
         },
+        SelectFieldBlock,
       ],
     },
   ],

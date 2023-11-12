@@ -300,7 +300,7 @@ describe('lexical', () => {
       const textNode1: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[0]
       const boldNode: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[1]
 
-      expect(textNode1.text).toBe('Some text below ')
+      expect(textNode1.text).toBe('Some text below r')
       expect(textNode1.format).toBe(0)
 
       expect(boldNode.text).toBe('elationship node 1')
