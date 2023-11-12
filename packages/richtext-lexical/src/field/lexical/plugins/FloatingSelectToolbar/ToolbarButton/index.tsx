@@ -71,7 +71,6 @@ export const ToolbarButton = ({
     <button
       className={className}
       onClick={() => {
-        console.log('onClick')
         if (enabled !== false) {
           entry.onClick({
             editor,
