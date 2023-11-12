@@ -184,7 +184,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -233,7 +233,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -313,7 +313,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // secondL: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -371,6 +371,74 @@ describe('lexical', () => {
 
       await expect(newHeadingInSubEditor).toBeVisible()
       await expect(newHeadingInSubEditor).toHaveText('A Heading')
+    })
+    test('should allow adding new blocks to a sub-blocks field, part of a parent lexical blocks field', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      await lexicalBlock.scrollIntoViewIfNeeded()
+      await expect(lexicalBlock).toBeVisible()
+
+      /**
+       * Create new textarea sub-block
+       */
+      await lexicalBlock.locator('button').getByText('Add Sub Block').click()
+
+      const drawerContent = page.locator('.drawer__content').first()
+      await expect(drawerContent).toBeVisible()
+
+      const textAreaAddBlockButton = drawerContent.locator('button').getByText('Text Area').first()
+      await expect(textAreaAddBlockButton).toBeVisible()
+      await textAreaAddBlockButton.click()
+
+      /**
+       * Check if it was created successfully and
+       * fill newly created textarea sub-block with text
+       */
+      const newSubBlock = lexicalBlock.locator('#subBlocks-row-1')
+      await expect(newSubBlock).toBeVisible()
+
+      const newContentTextArea = newSubBlock.locator('textarea').first()
+      await expect(newContentTextArea).toBeVisible()
+
+      // Type 'Some text in new sub block content textArea'
+      await newContentTextArea.click()
+      // Even though we could use newContentTextArea.fill, it's still nice to use .type here,
+      // as this also tests that this text area still receives keyboard input events properly. It's more realistic.
+      await page.keyboard.type('text123')
+      await expect(newContentTextArea).toHaveText('text123')
+
+      await saveDocAndAssert(page)
+
+      /**
+       * Using the local API, check if the data was saved correctly and
+       * can be retrieved correctly
+       */
+
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4]
+      const subBlocks = blockNode.fields.data.subBlocks
+
+      expect(subBlocks).toHaveLength(2)
+
+      const createdTextAreaBlock = subBlocks[1]
+
+      expect(createdTextAreaBlock.content).toBe('text123')
     })
   })
 })
