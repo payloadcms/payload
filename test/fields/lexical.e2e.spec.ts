@@ -306,5 +306,71 @@ describe('lexical', () => {
       expect(boldNode.text).toBe('elationship node 1')
       expect(boldNode.format).toBe(1)
     })
+    test('ensure slash menu is not hidden behind other blocks', async () => {
+      // This test makes sure there are no z-index issues here
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second
+      await lexicalBlock.scrollIntoViewIfNeeded()
+      await expect(lexicalBlock).toBeVisible()
+
+      // Find span in contentEditable with text "Some text below relationship node"
+      const spanInSubEditor = lexicalBlock
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await expect(spanInSubEditor).toBeVisible()
+      await spanInSubEditor.click() // Use click, because focus does not work
+
+      // Now go to the END of the span
+      for (let i = 0; i < 18; i++) {
+        await page.keyboard.press('ArrowRight')
+      }
+
+      // Now scroll down, so that the following slash menu is positioned below the cursor and not above it
+      await page.mouse.wheel(0, 600)
+
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+
+      const popover = page.locator('#typeahead-menu .typeahead-popover')
+      await expect(popover).toBeVisible()
+
+      const popoverBasicGroup = popover.locator('.group').nth(1) // Second group ("Basic") in popover
+      await expect(popoverBasicGroup).toBeVisible()
+
+      // Heading 2 should be the last, most bottom popover button element which should be initially visible, if not hidden by something (e.g. another block)
+      const popoverHeading2Button = popoverBasicGroup.locator('button.item').nth(4)
+      await expect(popoverHeading2Button).toBeVisible()
+
+      // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
+      const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
+      expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
+      expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
+      expect(popoverHeading2ButtonBoundingBox.height).toBeGreaterThan(0)
+      expect(popoverHeading2ButtonBoundingBox.width).toBeGreaterThan(0)
+
+      // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
+      // by using page.mouse and the correct coordinates
+      // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
+      // see: https://github.com/microsoft/playwright/issues/9923
+      // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
+      // and usually the only method which works.
+
+      const x = popoverHeading2ButtonBoundingBox.x
+      const y = popoverHeading2ButtonBoundingBox.y
+
+      await page.mouse.click(x, y, { button: 'left' })
+
+      await page.keyboard.type('A Heading')
+
+      const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
+
+      await expect(newHeadingInSubEditor).toBeVisible()
+      await expect(newHeadingInSubEditor).toHaveText('A Heading')
+    })
   })
 })
