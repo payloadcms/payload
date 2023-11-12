@@ -25,10 +25,13 @@ export const FilePreview: React.FC<Props> = ({ file }) => {
   const fileSize = `${Math.round(file.size / 1000000)} kb`
 
   return (
-    <div className={baseClass}>
+    <button className={baseClass} type="button">
       <img alt="" src={src} />
-      <p>{file.name}</p>
-      <p>{fileSize}</p>
-    </div>
+      <div className={`${baseClass}__details`}>
+        <p className={`${baseClass}__filename`}>{file.name}</p>
+        <p className={`${baseClass}__filesize`}>{fileSize}</p>
+      </div>
+      <div>x</div>
+    </button>
   )
 }

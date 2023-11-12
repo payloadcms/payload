@@ -67,16 +67,15 @@ export const ManageFilesDrawer: React.FC<Props> = ({ collection, initialFiles })
   const selectedFormData = state.allFormData[state.activeIndex]
 
   return (
-    <Drawer className={baseClass} closeAreaSize="small" header={false} slug={manageFilesDrawerSlug}>
+    <Drawer className={baseClass} header={false} slug={manageFilesDrawerSlug}>
       <div className={`${baseClass}__file-list`}>
         {Array.from(files).map((file, fileIndex) => (
-          <button
+          <FilePreview
+            file={file}
             key={`${file.name}-${fileIndex}`}
-            onClick={() => handleChangePreview(fileIndex)}
-            type="button"
-          >
-            <FilePreview file={file} />
-          </button>
+            // onDelete={null}
+            // onSelect={() => handleChangePreview(fileIndex)}
+          />
         ))}
       </div>
 

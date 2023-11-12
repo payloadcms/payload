@@ -1,4 +1,13 @@
+@import '../../../../../../../scss/styles';
+
 .file-preview {
+  @include btn-reset;
+  background: var(--theme-elevation-100);
+  border: 0;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  border-radius: 3px;
+  cursor: pointer;
   display: flex;
   gap: var(--base);
 
@@ -7,5 +16,19 @@
     height: 25px;
     object-fit: cover;
     border-radius: 2px;
+  }
+
+  &__details {
+    display: flex;
+    gap: calc(var(--base) / 2);
+  }
+
+  &__filename {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__filesize {
   }
 }
