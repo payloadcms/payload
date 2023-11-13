@@ -22,6 +22,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
     <div className={baseClass}>
       {breakpoints?.length > 0 && (
         <Popup
+          className={`${baseClass}__breakpoint`}
           button={(
             <>
               <span>{breakpoints.find(bp => bp.name == breakpoint)?.label ?? customLabel}</span>
@@ -69,6 +70,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         <PreviewFrameSizeInput axis="y" />
       </div>
       <Popup
+        className={`${baseClass}__zoom`}
         button={(
           <>
             <span>{zoom * 100}%</span>
