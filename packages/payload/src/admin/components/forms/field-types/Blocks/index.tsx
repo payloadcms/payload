@@ -100,6 +100,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string) => {
+      console.log('AddRow...', path, { ...rows })
       await addFieldRow({
         data: {
           blockType,
@@ -108,6 +109,7 @@ const BlocksField: React.FC<Props> = (props) => {
         rowIndex,
       })
       setModified(true)
+      console.log('AddRow done...', { ...rows })
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)

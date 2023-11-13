@@ -204,7 +204,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           className={`${baseClass}__fields`}
           fieldSchema={block.fields.map((field) => ({
             ...field,
-            path: createNestedFieldPath(blockFieldWrapperName, field),
+            path: createNestedFieldPath(null, field),
           }))}
           fieldTypes={field.fieldTypes}
           forceRender
@@ -217,7 +217,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       <FormSavePlugin
         fieldSchema={block.fields.map((field) => ({
           ...field,
-          path: createNestedFieldPath(blockFieldWrapperName, field),
+          path: createNestedFieldPath(null, field),
         }))}
         onChange={onFormChange}
       />

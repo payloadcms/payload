@@ -449,9 +449,20 @@ const Form: React.FC<Props> = (props) => {
         fieldConfig: fieldsFromProps,
         path,
       })
+      console.log(' getRowSchemaByPath > rowConfig', rowConfig)
       const rowFieldConfigs = buildFieldSchemaMap(rowConfig)
+      console.log(' getRowSchemaByPath > rowFieldConfigs', rowFieldConfigs)
+
       const pathSegments = splitPathByArrayFields(path)
+      console.log(' getRowSchemaByPath > pathSegments', pathSegments)
+
       const fieldKey = pathSegments.at(-1)
+      console.log(' getRowSchemaByPath > fieldKey', fieldKey)
+      console.log(
+        ' getRowSchemaByPath > what it gets from rowFieldConfigs. key:',
+        `${fieldKey}.${blockType}`,
+      )
+
       return rowFieldConfigs.get(blockType ? `${fieldKey}.${blockType}` : fieldKey)
     },
     [traverseRowConfigs, fieldsFromProps],
@@ -461,11 +472,13 @@ const Form: React.FC<Props> = (props) => {
   // The block data is saved in the rows property of the state, which is modified updated here.
   const addFieldRow: Context['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
+      console.log('Inside addFieldRow', path, data)
       const preferences = await getDocPreferences()
       const rowSchema = getRowSchemaByPath({
         blockType: data?.blockType,
         path,
       })
+      console.log('rowSchema', rowSchema, 'getting rows', data?.blockType, 'path', path)
 
       if (rowSchema) {
         const subFieldState = await buildStateFromSchema({
@@ -479,6 +492,8 @@ const Form: React.FC<Props> = (props) => {
           t,
           user,
         })
+
+        console.log('subFieldState', subFieldState)
 
         dispatchFields({
           blockType: data?.blockType,
