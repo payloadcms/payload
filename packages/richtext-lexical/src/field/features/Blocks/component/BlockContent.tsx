@@ -78,8 +78,14 @@ export const BlockContent: React.FC<Props> = (props) => {
   const path = '' as const
 
   const onFormChange = useCallback(
-    ({ fields: formSchema, formData: newFormData }: { fields: Fields; formData: Data }) => {
-      console.log('onFormChange')
+    ({
+      fields: fullFieldsWithValues,
+      formData: newFormData,
+    }: {
+      fields: Fields
+      formData: Data
+    }) => {
+      console.log('onFormChange', formData, { ...formData }, 'newFormData', { ...newFormData })
 
       // Recursively remove all undefined values from even being present in formData, as they will
       // cause isDeepEqual to return false if, for example, formData has a key that fields.data
@@ -105,7 +111,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           const node: BlockNode = $getNodeByKey(nodeKey)
 
           if (node) {
-            console.log('editor update')
+            console.warn('editor update')
             node.setFields(newFormData as BlockFields)
           }
         })
@@ -114,7 +120,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       // update error count
       if (hasSubmitted) {
         let rowErrorCount = 0
-        for (const formField of Object.values(formSchema)) {
+        for (const formField of Object.values(fullFieldsWithValues)) {
           if (formField?.valid === false) {
             rowErrorCount++
           }
@@ -147,6 +153,11 @@ export const BlockContent: React.FC<Props> = (props) => {
       $getNodeByKey(nodeKey).remove()
     })
   }, [editor, nodeKey])
+
+  const fieldSchemaWithPath = formSchema.map((field) => ({
+    ...field,
+    path: createNestedFieldPath(null, field),
+  }))
 
   return (
     <React.Fragment>
@@ -190,10 +201,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldSchema={formSchema.map((field) => ({
-            ...field,
-            path: createNestedFieldPath(null, field),
-          }))}
+          fieldSchema={fieldSchemaWithPath}
           fieldTypes={field.fieldTypes}
           forceRender
           margins="small"
@@ -202,13 +210,7 @@ export const BlockContent: React.FC<Props> = (props) => {
         />
       </Collapsible>
 
-      <FormSavePlugin
-        fieldSchema={formSchema.map((field) => ({
-          ...field,
-          path: createNestedFieldPath(null, field),
-        }))}
-        onChange={onFormChange}
-      />
+      <FormSavePlugin onChange={onFormChange} />
     </React.Fragment>
   )
 }
