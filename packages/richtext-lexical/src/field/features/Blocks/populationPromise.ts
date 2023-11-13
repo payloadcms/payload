@@ -21,7 +21,7 @@ export const blockPopulationPromiseHOC = (
     showHiddenFields,
   }) => {
     const blocks: Block[] = props.blocks
-    const blockFieldData = node.fields.data
+    const blockFieldData = node.fields
 
     const promises: Promise<void>[] = []
 

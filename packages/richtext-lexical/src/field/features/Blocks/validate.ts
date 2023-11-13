@@ -15,7 +15,7 @@ export const blockValidationHOC = (
     payloadConfig,
     validation,
   }) => {
-    const blockFieldData = node.fields.data
+    const blockFieldData = node.fields
     const blocks: Block[] = props.blocks
 
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
@@ -38,7 +38,7 @@ export const blockValidationHOC = (
 
     for (const field of block.fields) {
       if ('validate' in field && typeof field.validate === 'function' && field.validate) {
-        const fieldValue = 'name' in field ? node.fields.data[field.name] : null
+        const fieldValue = 'name' in field ? node.fields[field.name] : null
         const validationResult = await field.validate(fieldValue, {
           ...field,
           id: validation.options.id,

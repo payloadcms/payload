@@ -20,22 +20,15 @@ export type BlocksFeatureProps = {
 export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
   // Sanitization taken from payload/src/fields/config/sanitize.ts
   if (props?.blocks?.length) {
-    props.blocks = props.blocks.map((block) => ({
-      ...block,
-      fields: block.fields.concat(baseBlockFields),
-    }))
-
     props.blocks = props.blocks.map((block) => {
-      const unsanitizedBlock = { ...block }
-      unsanitizedBlock.labels = !unsanitizedBlock.labels
-        ? formatLabels(unsanitizedBlock.slug)
-        : unsanitizedBlock.labels
-
-      // unsanitizedBlock.fields are sanitized in the React component and not here.
-      // That's because we do not have access to the payload config here.
-
-      return unsanitizedBlock
+      return {
+        ...block,
+        fields: block.fields.concat(baseBlockFields),
+        labels: !block.labels ? formatLabels(block.slug) : block.labels,
+      }
     })
+    //  unsanitizedBlock.fields are sanitized in the React component and not here.
+    // That's because we do not have access to the payload config here.
   }
   return {
     feature: () => {
@@ -59,13 +52,6 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
           options: [
             {
               options: [
-                /*new SlashMenuOption('Block', {
-                  Icon: BlockIcon,
-                  keywords: ['block', 'blocks'],
-                  onSelect: ({ editor }) => {
-                    editor.dispatchCommand(INSERT_BLOCK_WITH_DRAWER_COMMAND, null)
-                  },
-                }),*/
                 ...props?.blocks?.map((block) => {
                   return new SlashMenuOption(block.slug, {
                     Icon: BlockIcon,
@@ -75,10 +61,9 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
                     keywords: ['block', 'blocks', block.slug],
                     onSelect: ({ editor }) => {
                       editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-                        data: {
-                          blockName: '',
-                          blockType: block.slug,
-                        },
+                        id: null,
+                        blockName: '',
+                        blockType: block.slug,
                       })
                     },
                   })
