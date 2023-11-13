@@ -6,7 +6,7 @@ import React, { useEffect, useMemo } from 'react'
 import { type BlockFields } from '../nodes/BlocksNode'
 const baseClass = 'lexical-block'
 
-import type { Data, Field } from 'payload/types'
+import type { Data } from 'payload/types'
 
 import {
   buildStateFromSchema,
@@ -55,37 +55,8 @@ function transformInputFieldsData(data: any, blockFieldWrapperName: string) {
   }
 }
 
-/**
- * Wrap fields inside of a group field (with blockFieldWrapperName as name) , so that they can be read by the RenderFields component
- */
-function transformInputFieldSchema(fields: Field[], blockFieldWrapperName: string): Field[] {
-  // First check if it has already been transformed
-
-  if (fields.find((field) => 'name' in field && field.name === blockFieldWrapperName)) {
-    return fields
-  }
-
-  // Add a group in the field schema, which represents all values saved in the blockFieldWrapperName
-  return [
-    ...fields.filter(
-      (field) => 'name' in field && ['blockName', 'blockType', 'id'].includes(field.name),
-    ),
-    {
-      name: blockFieldWrapperName,
-      admin: {
-        hideGutter: true,
-      },
-      fields: fields.filter(
-        (field) => !('name' in field) || !['blockName', 'blockType', 'id'].includes(field.name),
-      ),
-      label: '',
-      type: 'group',
-    },
-  ]
-}
-
 export const BlockComponent: React.FC<Props> = (props) => {
-  const { fields /** Fields DATA, not schema **/, nodeKey } = props
+  const { fields, nodeKey } = props
   const payloadConfig = useConfig()
   const submitted = useFormSubmitted()
 
@@ -93,15 +64,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const block = (
     editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps
-  )?.blocks?.find((block) => block.slug === fields?.data?.blockType) // block.fields = fields SCHEMA, not data
+  )?.blocks?.find((block) => block.slug === fields?.data?.blockType)
 
   const blockFieldWrapperName = block.slug + '-' + fields.data.id
-
-  console.log('block.fields before', { ...block.fields })
-
-  block.fields = transformInputFieldSchema(block.fields, blockFieldWrapperName)
-
-  console.log('block.fields after', { ...block.fields })
 
   // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
   const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
@@ -127,12 +92,28 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
       fields.data = transformInputFieldsData(fields.data, blockFieldWrapperName)
 
-      console.log('Block.fields should already be wrapped here:', block.fields)
+      // Add a group in the field schema, which represents all values saved in the blockFieldWrapperName
+      const wrappedFieldSchema = [
+        ...block.fields.filter(
+          (field) => 'name' in field && ['blockName', 'blockType', 'id'].includes(field.name),
+        ),
+        {
+          name: blockFieldWrapperName,
+          admin: {
+            hideGutter: true,
+          },
+          fields: block.fields.filter(
+            (field) => !('name' in field) || !['blockName', 'blockType', 'id'].includes(field.name),
+          ),
+          label: '',
+          type: 'group',
+        },
+      ]
 
       const stateFromSchema = await buildStateFromSchema({
         config,
         data: fields.data,
-        fieldSchema: block.fields as any,
+        fieldSchema: wrappedFieldSchema as any,
         locale,
         operation: 'update',
         preferences,
