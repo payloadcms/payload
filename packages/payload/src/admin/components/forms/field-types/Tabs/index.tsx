@@ -52,9 +52,9 @@ const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, t
       />
       <button
         className={[
-          `${baseClass}__switch-tab-button`,
-          tabHasErrors && `${baseClass}__switch-tab-button--has-error`,
-          isActive && `${baseClass}__switch-tab-button--active`,
+          `${baseClass}__tab-button`,
+          tabHasErrors && `${baseClass}__tab-button--has-error`,
+          isActive && `${baseClass}__tab-button--active`,
         ]
           .filter(Boolean)
           .join(' ')}
@@ -166,7 +166,9 @@ const TabsField: React.FC<Props> = (props) => {
                 className={[
                   `${baseClass}__tab`,
                   activeTabConfig.label &&
-                    `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
+                    `${baseClass}__tabConfigLabel-${toKebabCase(
+                      getTranslation(activeTabConfig.label, i18n),
+                    )}`,
                 ]
                   .filter(Boolean)
                   .join(' ')}
