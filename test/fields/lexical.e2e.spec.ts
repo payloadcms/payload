@@ -2,11 +2,17 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
+import type { SerializedBlockNode } from '../../packages/richtext-lexical/src'
+import type { RichTextField } from './payload-types'
+
 import payload from '../../packages/payload/src'
+import { saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
+import { lexicalDocData } from './collections/Lexical/data'
 import { clearAndSeedEverything } from './seed'
+import { lexicalFieldsSlug } from './slugs'
 
 const { beforeAll, describe, beforeEach } = test
 
@@ -47,7 +53,6 @@ describe('lexical', () => {
     // Other than the annoying unsaved changed prompt, this can also cause unnecessary auto-saves, when drafts & autosave is enabled
 
     await navigateToLexicalFields()
-
     await expect(
       page.locator('.rich-text-lexical').nth(1).locator('.lexical-block').first(),
     ).toBeVisible()
@@ -57,5 +62,383 @@ describe('lexical', () => {
 
     // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
     await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
+  })
+
+  test('should type and save typed text', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
+    await expect(spanInEditor).toBeVisible()
+
+    await spanInEditor.click() // Click works better than focus
+    // Now go to the END of the span
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press('ArrowRight')
+    }
+
+    await page.keyboard.type('moretext')
+    await expect(spanInEditor).toHaveText('Upload Node:moretext')
+
+    await saveDocAndAssert(page)
+
+    const lexicalDoc: RichTextField = (
+      await payload.find({
+        collection: lexicalFieldsSlug,
+        where: {
+          title: {
+            equals: lexicalDocData.title,
+          },
+        },
+        depth: 0,
+      })
+    ).docs[0] as never
+
+    const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+    const firstParagraphTextNode: SerializedTextNode = lexicalField.root.children[0].children[0]
+
+    expect(firstParagraphTextNode.text).toBe('Upload Node:moretext')
+  })
+  test('should be able to bold text using floating select toolbar', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const spanInEditor = richTextField.locator('span').getByText('Upload Node:').first()
+    await expect(spanInEditor).toBeVisible()
+
+    await spanInEditor.click() // Click works better than focus
+    await page.keyboard.press('ArrowRight')
+
+    // Now select the text 'Node' (the .click() makes it click in the middle of the span)
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+ArrowRight')
+    }
+    // The following text should now be selected: Node
+
+    const floatingToolbar_formatSection = page.locator(
+      '.floating-select-toolbar-popup__section-format',
+    )
+
+    await expect(floatingToolbar_formatSection).toBeVisible()
+
+    await expect(page.locator('.floating-select-toolbar-popup__button').first()).toBeVisible()
+
+    const boldButton = floatingToolbar_formatSection
+      .locator('.floating-select-toolbar-popup__button')
+      .first()
+
+    await expect(boldButton).toBeVisible()
+    await boldButton.click()
+
+    /**
+     * Next test section: check if it worked correctly
+     */
+
+    const boldText = richTextField
+      .locator('.LexicalEditorTheme__paragraph')
+      .first()
+      .locator('strong')
+    await expect(boldText).toBeVisible()
+    await expect(boldText).toHaveText('Node')
+
+    await saveDocAndAssert(page)
+
+    const lexicalDoc: RichTextField = (
+      await payload.find({
+        collection: lexicalFieldsSlug,
+        where: {
+          title: {
+            equals: lexicalDocData.title,
+          },
+        },
+        depth: 0,
+      })
+    ).docs[0] as never
+
+    const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+    const firstParagraph: SerializeParagrapbNode = lexicalField.root.children[0]
+    expect(firstParagraph.children).toHaveLength(3)
+
+    const textNode1: SerializedTextNode = firstParagraph.children[0]
+    const boldNode: SerializedTextNode = firstParagraph.children[1]
+    const textNode2: SerializedTextNode = firstParagraph.children[2]
+
+    expect(textNode1.text).toBe('Upload ')
+    expect(textNode1.format).toBe(0)
+
+    expect(boldNode.text).toBe('Node')
+    expect(boldNode.format).toBe(1)
+
+    expect(textNode2.text).toBe(':')
+    expect(textNode2.format).toBe(0)
+  })
+
+  describe('nested lexical editor in block', () => {
+    test('should type and save typed text', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
+      await lexicalBlock.scrollIntoViewIfNeeded()
+      await expect(lexicalBlock).toBeVisible()
+
+      // Find span in contentEditable with text "Some text below relationship node"
+      const spanInSubEditor = lexicalBlock
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await expect(spanInSubEditor).toBeVisible()
+      await spanInSubEditor.click() // Use click, because focus does not work
+
+      // Now go to the END of the span
+      for (let i = 0; i < 18; i++) {
+        await page.keyboard.press('ArrowRight')
+      }
+      await page.keyboard.type(' inserted text')
+
+      await expect(spanInSubEditor).toHaveText('Some text below relationship node 1 inserted text')
+      await saveDocAndAssert(page)
+
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const blockNode: SerializedBlockNode = lexicalField.root.children[3]
+      const textNodeInBlockNodeRichText =
+        blockNode.fields.data.richText.root.children[1].children[0]
+
+      expect(textNodeInBlockNodeRichText.text).toBe(
+        'Some text below relationship node 1 inserted text',
+      )
+    })
+    test('should be able to bold text using floating select toolbar', async () => {
+      // Reproduces https://github.com/payloadcms/payload/issues/4025
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
+      await lexicalBlock.scrollIntoViewIfNeeded()
+      await expect(lexicalBlock).toBeVisible()
+
+      // Find span in contentEditable with text "Some text below relationship node"
+      const spanInSubEditor = lexicalBlock
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await expect(spanInSubEditor).toBeVisible()
+      await spanInSubEditor.click() // Use click, because focus does not work
+
+      // Now go to the END of the span while selecting the text
+      for (let i = 0; i < 18; i++) {
+        await page.keyboard.press('Shift+ArrowRight')
+      }
+      // The following text should now be selected: elationship node 1
+
+      const floatingToolbar_formatSection = page.locator(
+        '.floating-select-toolbar-popup__section-format',
+      )
+
+      await expect(floatingToolbar_formatSection).toBeVisible()
+
+      await expect(page.locator('.floating-select-toolbar-popup__button').first()).toBeVisible()
+
+      const boldButton = floatingToolbar_formatSection
+        .locator('.floating-select-toolbar-popup__button')
+        .first()
+
+      await expect(boldButton).toBeVisible()
+      await boldButton.click()
+
+      /**
+       * Next test section: check if it worked correctly
+       */
+
+      const boldText = lexicalBlock
+        .locator('.LexicalEditorTheme__paragraph')
+        .first()
+        .locator('strong')
+      await expect(boldText).toBeVisible()
+      await expect(boldText).toHaveText('elationship node 1')
+
+      await saveDocAndAssert(page)
+
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const blockNode: SerializedBlockNode = lexicalField.root.children[3]
+      const paragraphNodeInBlockNodeRichText = blockNode.fields.data.richText.root.children[1]
+
+      expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
+
+      const textNode1: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[0]
+      const boldNode: SerializedTextNode = paragraphNodeInBlockNodeRichText.children[1]
+
+      expect(textNode1.text).toBe('Some text below r')
+      expect(textNode1.format).toBe(0)
+
+      expect(boldNode.text).toBe('elationship node 1')
+      expect(boldNode.format).toBe(1)
+    })
+    test('ensure slash menu is not hidden behind other blocks', async () => {
+      // This test makes sure there are no z-index issues here
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // secondL: "Block Node, with RichText Field, with Relationship Node"
+      await lexicalBlock.scrollIntoViewIfNeeded()
+      await expect(lexicalBlock).toBeVisible()
+
+      // Find span in contentEditable with text "Some text below relationship node"
+      const spanInSubEditor = lexicalBlock
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await expect(spanInSubEditor).toBeVisible()
+      await spanInSubEditor.click() // Use click, because focus does not work
+
+      // Now go to the END of the span
+      for (let i = 0; i < 18; i++) {
+        await page.keyboard.press('ArrowRight')
+      }
+
+      // Now scroll down, so that the following slash menu is positioned below the cursor and not above it
+      await page.mouse.wheel(0, 600)
+
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+
+      const popover = page.locator('#typeahead-menu .typeahead-popover')
+      await expect(popover).toBeVisible()
+
+      const popoverBasicGroup = popover.locator('.group').nth(1) // Second group ("Basic") in popover
+      await expect(popoverBasicGroup).toBeVisible()
+
+      // Heading 2 should be the last, most bottom popover button element which should be initially visible, if not hidden by something (e.g. another block)
+      const popoverHeading2Button = popoverBasicGroup.locator('button.item').nth(4)
+      await expect(popoverHeading2Button).toBeVisible()
+
+      // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
+      const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
+      expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
+      expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
+      expect(popoverHeading2ButtonBoundingBox.height).toBeGreaterThan(0)
+      expect(popoverHeading2ButtonBoundingBox.width).toBeGreaterThan(0)
+
+      // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
+      // by using page.mouse and the correct coordinates
+      // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
+      // see: https://github.com/microsoft/playwright/issues/9923
+      // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
+      // and usually the only method which works.
+
+      const x = popoverHeading2ButtonBoundingBox.x
+      const y = popoverHeading2ButtonBoundingBox.y
+
+      await page.mouse.click(x, y, { button: 'left' })
+
+      await page.keyboard.type('A Heading')
+
+      const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
+
+      await expect(newHeadingInSubEditor).toBeVisible()
+      await expect(newHeadingInSubEditor).toHaveText('A Heading')
+    })
+    test('should allow adding new blocks to a sub-blocks field, part of a parent lexical blocks field', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      await lexicalBlock.scrollIntoViewIfNeeded()
+      await expect(lexicalBlock).toBeVisible()
+
+      /**
+       * Create new textarea sub-block
+       */
+      await lexicalBlock.locator('button').getByText('Add Sub Block').click()
+
+      const drawerContent = page.locator('.drawer__content').first()
+      await expect(drawerContent).toBeVisible()
+
+      const textAreaAddBlockButton = drawerContent.locator('button').getByText('Text Area').first()
+      await expect(textAreaAddBlockButton).toBeVisible()
+      await textAreaAddBlockButton.click()
+
+      /**
+       * Check if it was created successfully and
+       * fill newly created textarea sub-block with text
+       */
+      const newSubBlock = lexicalBlock.locator('#subBlocks-row-1')
+      await expect(newSubBlock).toBeVisible()
+
+      const newContentTextArea = newSubBlock.locator('textarea').first()
+      await expect(newContentTextArea).toBeVisible()
+
+      // Type 'Some text in new sub block content textArea'
+      await newContentTextArea.click()
+      // Even though we could use newContentTextArea.fill, it's still nice to use .type here,
+      // as this also tests that this text area still receives keyboard input events properly. It's more realistic.
+      await page.keyboard.type('text123')
+      await expect(newContentTextArea).toHaveText('text123')
+
+      await saveDocAndAssert(page)
+
+      /**
+       * Using the local API, check if the data was saved correctly and
+       * can be retrieved correctly
+       */
+
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4]
+      const subBlocks = blockNode.fields.data.subBlocks
+
+      expect(subBlocks).toHaveLength(2)
+
+      const createdTextAreaBlock = subBlocks[1]
+
+      expect(createdTextAreaBlock.content).toBe('text123')
+    })
   })
 })

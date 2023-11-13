@@ -1,6 +1,5 @@
 import type { CollectionPermission, GlobalPermission } from '../auth/types'
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { TypeWithID } from '../collections/config/types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
 import type { Access } from '../config/types'
 import type { PayloadRequest } from '../express/types'
 import type { FieldAccess } from '../fields/config/types'
@@ -60,6 +59,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             collection: entity.slug,
             limit: 1,
             overrideAccess: true,
+            req,
             where: {
               ...where,
               and: [
@@ -80,6 +80,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           id,
           collection: entity.slug,
           overrideAccess: true,
+          req,
         })
       }
     }
