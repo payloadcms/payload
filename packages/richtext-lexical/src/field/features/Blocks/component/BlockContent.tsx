@@ -9,7 +9,7 @@ import { SectionTitle } from 'payload/components/fields/Blocks'
 import { RenderFields, createNestedFieldPath, useFormSubmitted } from 'payload/components/forms'
 import { useDocumentInfo } from 'payload/components/utilities'
 import { getTranslation } from 'payload/utilities'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { FieldProps } from '../../../../types'
@@ -20,6 +20,8 @@ import { FormSavePlugin } from './FormSavePlugin'
 type Props = {
   baseClass: string
   block: Block
+  blockFieldWrapperName: string
+  debug: boolean
   field: FieldProps
   formData: BlockFields
   formSchema: Field[]
@@ -35,6 +37,8 @@ export const BlockContent: React.FC<Props> = (props) => {
   const {
     baseClass,
     block: { labels },
+    blockFieldWrapperName,
+    debug,
     field,
     formData,
     formSchema,
@@ -77,22 +81,58 @@ export const BlockContent: React.FC<Props> = (props) => {
 
   const path = '' as const
 
+  if (debug) {
+    console.info(
+      'BlockContent rerender. formData',
+      {
+        ...formData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]?.children[0],
+      }.text,
+    )
+  }
+
+  useEffect(() => {
+    if (debug) {
+      console.info(
+        'BlockContent useEffect. formData',
+        {
+          ...formData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]
+            ?.children[0],
+        }.text,
+      )
+    }
+  }, [formData, blockFieldWrapperName, debug])
+
   const onFormChange = useCallback(
     ({
-      fields: fullFieldsWithValues,
-      formData: newFormData,
+      fullFieldsWithValues,
+      newFormData,
     }: {
-      fields: Fields
-      formData: Data
+      fullFieldsWithValues: Fields
+      newFormData: Data
     }) => {
-      console.log('onFormChange', formData, { ...formData }, 'newFormData', { ...newFormData })
+      if (debug) {
+        console.log(
+          'onFormChange',
+          'formData',
+
+          {
+            ...formData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]
+              ?.children[0],
+          }.text,
+          'newFormData',
+          {
+            ...newFormData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]
+              ?.children[0],
+          }.text,
+        )
+      }
 
       // Recursively remove all undefined values from even being present in formData, as they will
       // cause isDeepEqual to return false if, for example, formData has a key that fields.data
       // does not have, even if it's undefined.
       // Currently, this happens if a block has another sub-blocks field. Inside of formData, that sub-blocks field has an undefined blockName property.
       // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
-      function removeUndefinedRecursively(obj: any) {
+      function removeUndefinedRecursively(obj: object) {
         Object.keys(obj).forEach((key) => {
           if (obj[key] && typeof obj[key] === 'object') {
             removeUndefinedRecursively(obj[key])
@@ -111,7 +151,9 @@ export const BlockContent: React.FC<Props> = (props) => {
           const node: BlockNode = $getNodeByKey(nodeKey)
 
           if (node) {
-            console.warn('editor update')
+            if (debug) {
+              console.warn('editor update')
+            }
             node.setFields(newFormData as BlockFields)
           }
         })
@@ -128,7 +170,7 @@ export const BlockContent: React.FC<Props> = (props) => {
         setErrorCount(rowErrorCount)
       }
     },
-    [editor, nodeKey, hasSubmitted],
+    [editor, nodeKey, hasSubmitted, debug, blockFieldWrapperName, formData],
   )
 
   const onCollapsedChange = useCallback(() => {

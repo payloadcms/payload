@@ -44,6 +44,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
     editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps
   )?.blocks?.find((block) => block.slug === formData?.blockType)
 
+  const debug =
+    formData.blockName ===
+    'Block Node, with Blocks Field, With RichText Field, With Relationship Node'
+
   const unsanitizedFormSchema = block?.fields || []
 
   // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
@@ -69,7 +73,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   useEffect(() => {
     async function createInitialState() {
-      console.log('Creating initialState')
+      if (debug) {
+        console.log('Creating initialState')
+      }
       const preferences = await getDocPreferences()
 
       const stateFromSchema = await buildStateFromSchema({
@@ -115,7 +121,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
-    console.log('Memoizing formContent. formSchema', formSchema, 'initialState', initialState)
+    if (debug) {
+      console.log('Memoizing formContent. formSchema', formSchema, 'initialState', initialState)
+    }
     return (
       block &&
       initialState && (
@@ -123,6 +131,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
           <BlockContent
             baseClass={baseClass}
             block={block}
+            blockFieldWrapperName={blockFieldWrapperName}
+            debug={debug}
             field={parentLexicalRichTextField}
             formData={formData}
             formSchema={formSchema}
@@ -131,7 +141,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
         </Form>
       )
     )
-  }, [block, parentLexicalRichTextField, nodeKey, submitted, initialState])
+  }, [
+    block,
+    parentLexicalRichTextField,
+    nodeKey,
+    submitted,
+    initialState,
+    debug,
+    blockFieldWrapperName,
+  ])
 
   return <div className={baseClass}>{formContent}</div>
 }
