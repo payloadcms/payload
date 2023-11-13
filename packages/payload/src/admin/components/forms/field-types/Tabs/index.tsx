@@ -52,9 +52,9 @@ const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, t
       />
       <button
         className={[
-          `${baseClass}__tab-button`,
-          tabHasErrors && `${baseClass}__tab-button--has-error`,
-          isActive && `${baseClass}__tab-button--active`,
+          `${baseClass}__switch-tab-button`,
+          tabHasErrors && `${baseClass}__switch-tab-button--has-error`,
+          isActive && `${baseClass}__switch-tab-button--active`,
         ]
           .filter(Boolean)
           .join(' ')}

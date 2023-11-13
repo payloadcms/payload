@@ -48,7 +48,7 @@
     }
   }
 
-  &__tab-button {
+  &__switch-tab-button {
     @extend %btn-reset;
     @extend %h4;
     display: flex;
@@ -85,7 +85,7 @@
     }
   }
 
-  &__tab-button--active {
+  &__switch-tab-button--active {
     opacity: 1 !important;
 
     &:after {
@@ -104,7 +104,7 @@
       margin-right: calc(var(--gutter-h) * -1);
     }
 
-    &__tab-button {
+    &__switch-tab-button {
       margin: 0 base(0.75) 0 0;
       padding-bottom: base(0.5);
 
@@ -117,7 +117,7 @@
 
 html[data-theme='light'] {
   .tabs-field {
-    &__tab-button--has-error {
+    &__switch-tab-button--has-error {
       color: var(--theme-error-750);
       &:after {
         background: var(--theme-error-500);
@@ -128,7 +128,7 @@ html[data-theme='light'] {
 
 html[data-theme='dark'] {
   .tabs-field {
-    &__tab-button--has-error {
+    &__switch-tab-button--has-error {
       color: var(--theme-error-500);
       &:after {
         background: var(--theme-error-500);
