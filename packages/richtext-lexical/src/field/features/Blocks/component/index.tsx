@@ -108,7 +108,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
           <BlockContent
             baseClass={baseClass}
             block={block}
-            blockFieldWrapperName={blockFieldWrapperName}
             field={parentLexicalRichTextField}
             formData={formData}
             formSchema={formSchema}
@@ -117,7 +116,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         </Form>
       )
     )
-  }, [block, parentLexicalRichTextField, nodeKey, submitted, initialState, blockFieldWrapperName])
+  }, [block, parentLexicalRichTextField, nodeKey, submitted, initialState])
 
   return <div className={baseClass}>{formContent}</div>
 }
