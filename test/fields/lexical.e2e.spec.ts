@@ -219,8 +219,7 @@ describe('lexical', () => {
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
       const blockNode: SerializedBlockNode = lexicalField.root.children[3]
-      const textNodeInBlockNodeRichText =
-        blockNode.fields.data.richText.root.children[1].children[0]
+      const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
 
       expect(textNodeInBlockNodeRichText.text).toBe(
         'Some text below relationship node 1 inserted text',
@@ -293,7 +292,7 @@ describe('lexical', () => {
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
       const blockNode: SerializedBlockNode = lexicalField.root.children[3]
-      const paragraphNodeInBlockNodeRichText = blockNode.fields.data.richText.root.children[1]
+      const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
 
       expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
 
@@ -432,7 +431,7 @@ describe('lexical', () => {
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
       const blockNode: SerializedBlockNode = lexicalField.root.children[4]
-      const subBlocks = blockNode.fields.data.subBlocks
+      const subBlocks = blockNode.fields.subBlocks
 
       expect(subBlocks).toHaveLength(2)
 
