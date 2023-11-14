@@ -65,7 +65,10 @@ function generateEntitySchemas(
   }
 }
 
-function withNullableType(
+/**
+ * Returns a JSON Schema Type with 'null' added if the field is not required.
+ */
+export function withNullableJSONSchemaType(
   fieldType: JSONSchema4TypeName,
   isRequired: boolean,
 ): JSONSchema4TypeName | JSONSchema4TypeName[] {
@@ -100,7 +103,7 @@ function fieldsToJSONSchema(
           case 'code':
           case 'email':
           case 'date': {
-            fieldSchema = { type: withNullableType('string', isRequired) }
+            fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
             break
           }
 
@@ -108,16 +111,16 @@ function fieldsToJSONSchema(
             if (field.hasMany === true) {
               fieldSchema = {
                 items: { type: 'number' },
-                type: withNullableType('array', isRequired),
+                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
-              fieldSchema = { type: withNullableType('number', isRequired) }
+              fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
             }
             break
           }
 
           case 'checkbox': {
-            fieldSchema = { type: withNullableType('boolean', isRequired) }
+            fieldSchema = { type: withNullableJSONSchemaType('boolean', isRequired) }
             break
           }
 
@@ -140,7 +143,7 @@ function fieldsToJSONSchema(
           case 'radio': {
             fieldSchema = {
               enum: buildOptionEnums(field.options),
-              type: withNullableType('string', isRequired),
+              type: withNullableJSONSchemaType('string', isRequired),
             }
 
             break
@@ -155,12 +158,12 @@ function fieldsToJSONSchema(
                   enum: optionEnums,
                   type: 'string',
                 },
-                type: withNullableType('array', isRequired),
+                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
               fieldSchema = {
                 enum: optionEnums,
-                type: withNullableType('string', isRequired),
+                type: withNullableJSONSchemaType('string', isRequired),
               }
             }
 
@@ -179,7 +182,7 @@ function fieldsToJSONSchema(
               ],
               maxItems: 2,
               minItems: 2,
-              type: withNullableType('array', isRequired),
+              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
@@ -212,7 +215,7 @@ function fieldsToJSONSchema(
                       }
                     }),
                   },
-                  type: withNullableType('array', isRequired),
+                  type: withNullableJSONSchemaType('array', isRequired),
                 }
               } else {
                 fieldSchema = {
@@ -235,7 +238,7 @@ function fieldsToJSONSchema(
                         },
                       },
                       required: ['value', 'relationTo'],
-                      type: withNullableType('object', isRequired),
+                      type: withNullableJSONSchemaType('object', isRequired),
                     }
                   }),
                 }
@@ -252,13 +255,16 @@ function fieldsToJSONSchema(
                     },
                   ],
                 },
-                type: withNullableType('array', isRequired),
+                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
               fieldSchema = {
                 oneOf: [
                   {
-                    type: withNullableType(collectionIDFieldTypes[field.relationTo], isRequired),
+                    type: withNullableJSONSchemaType(
+                      collectionIDFieldTypes[field.relationTo],
+                      isRequired,
+                    ),
                   },
                   {
                     $ref: `#/definitions/${field.relationTo}`,
@@ -318,7 +324,7 @@ function fieldsToJSONSchema(
                   return blockSchema
                 }),
               },
-              type: withNullableType('array', isRequired),
+              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
@@ -334,7 +340,7 @@ function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                 ),
               },
-              type: withNullableType('array', isRequired),
+              type: withNullableJSONSchemaType('array', isRequired),
             }
 
             if (field.interfaceName) {

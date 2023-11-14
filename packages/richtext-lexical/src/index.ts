@@ -1,9 +1,8 @@
-import type { JSONSchema4TypeName } from 'json-schema'
 import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps } from 'payload/utilities'
+import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProvider } from './field/features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
@@ -145,7 +144,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
           },
         },
         required: ['root'],
-        type: withNullableType('object', isRequired),
+        type: withNullableJSONSchemaType('object', isRequired),
       }
     },
     populationPromise({
@@ -177,16 +176,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       editorConfig: finalSanitizedEditorConfig,
     }),
   }
-}
-
-function withNullableType(
-  fieldType: JSONSchema4TypeName,
-  isRequired: boolean,
-): JSONSchema4TypeName | JSONSchema4TypeName[] {
-  const fieldTypes = [fieldType]
-  if (isRequired) return fieldType
-  fieldTypes.push('null')
-  return fieldTypes
 }
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'

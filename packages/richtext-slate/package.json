@@ -18,10 +18,8 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
-    "@types/json-schema": "7.0.12",
     "i18next": "22.5.1",
     "is-hotkey": "0.2.0",
-    "json-schema": "^0.4.0",
     "react": "18.2.0",
     "react-i18next": "11.18.6",
     "slate": "0.91.4",
