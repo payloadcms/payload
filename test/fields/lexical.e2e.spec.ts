@@ -479,15 +479,13 @@ describe('lexical', () => {
       for (let i = 0; i < 18; i++) {
         await page.keyboard.press('ArrowRight')
       }
-      await page.keyboard.type(' inserted text')
+      await page.keyboard.type('2345')
 
       /**
        * 3. In the issue, after writing one character, the cursor focuses back into the parent editor and writes the text there.
        * This checks that this does not happen, and that it writes the text in the correct position (so, in nestedEditorParagraph, NOT in parentEditorParagraph)
        */
-      await expect(nestedEditorParagraph).toHaveText(
-        'Some text below relationship node 1 inserted text',
-      )
+      await expect(nestedEditorParagraph).toHaveText('Some text below relationship node 12345')
     })
   })
 })
