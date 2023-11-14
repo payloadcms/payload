@@ -397,7 +397,7 @@ describe('lexical', () => {
        * Check if it was created successfully and
        * fill newly created textarea sub-block with text
        */
-      const newSubBlock = lexicalBlock.locator('#subBlocks-row-1')
+      const newSubBlock = lexicalBlock.locator('.blocks-field__rows > div').nth(1)
       await expect(newSubBlock).toBeVisible()
 
       const newContentTextArea = newSubBlock.locator('textarea').first()
