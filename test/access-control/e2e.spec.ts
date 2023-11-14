@@ -6,7 +6,7 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { exactText, openDocControls, openNav } from '../helpers'
+import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -47,6 +47,7 @@ describe('access control', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
 
   test('field without read access should not show', async () => {

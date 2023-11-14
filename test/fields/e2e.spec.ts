@@ -6,7 +6,12 @@ import path from 'path'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { exactText, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import {
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  saveDocHotkeyAndAssert,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -38,6 +43,7 @@ describe('fields', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)

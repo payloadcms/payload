@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { exactText, saveDocAndAssert } from '../helpers'
+import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { mobileBreakpoint } from './shared'
@@ -43,6 +43,8 @@ describe('Live Preview', () => {
     await startLivePreviewDemo({
       payload,
     })
+
+    initPageConsoleErrorCatch(page)
   })
 
   test('collection - has tab', async () => {

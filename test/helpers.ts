@@ -116,3 +116,20 @@ export const findTableRow = async (page: Page, title: string): Promise<Locator> 
   expect(row).toBeTruthy()
   return row
 }
+
+/**
+ * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
+ * in the e2e test failing.
+ *
+ * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
+ * @param page
+ */
+export function initPageConsoleErrorCatch(page: Page) {
+  page.on('console', (msg) => {
+    if (msg.type() === 'error' && !msg.text().includes('the server responded with a status of')) {
+      // the the server responded with a status of error happens frequently. Will ignore it for now.
+      // Most importantly, this should catch react errors.
+      throw new Error(`Browser console error: ${msg.text()}`)
+    }
+  })
+}

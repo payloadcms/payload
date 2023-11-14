@@ -6,7 +6,7 @@ import type { SerializedBlockNode } from '../../packages/richtext-lexical/src'
 import type { RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
-import { saveDocAndAssert } from '../helpers'
+import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -40,6 +40,8 @@ describe('lexical', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
