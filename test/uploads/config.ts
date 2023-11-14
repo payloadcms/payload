@@ -97,6 +97,41 @@ export default buildConfigWithDefaults({
       fields: [],
     },
     {
+      slug: 'object-fit',
+      upload: {
+        staticURL: '/object-fit',
+        staticDir: './object-fit',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        imageSizes: [
+          {
+            name: 'fitContain',
+            width: 400,
+            height: 300,
+            fit: 'contain',
+          },
+          {
+            name: 'fitInside',
+            width: 300,
+            height: 400,
+            fit: 'inside',
+          },
+          {
+            name: 'fitCover',
+            width: 900,
+            height: 300,
+            fit: 'cover',
+          },
+          {
+            name: 'fitOutside',
+            width: 900,
+            height: 200,
+            fit: 'outside',
+          },
+        ],
+      },
+      fields: [],
+    },
+    {
       slug: 'crop-only',
       upload: {
         focalPoint: false,
