@@ -142,7 +142,7 @@ export class RelationshipNode extends DecoratorBlockNode {
   }
 
   getTextContent(): string {
-    return `${this?.__data?.relationTo} relation to ${this.__data?.value?.id}`
+    return `${this.__data?.relationTo} relation to ${this.__data?.value?.id}`
   }
 
   setData(data: RelationshipData): void {
