@@ -41,7 +41,7 @@ export interface Config {
 export interface LexicalField {
   id: string
   title: string
-  richTextLexicalSimple?: {
+  lexicalSimple?: {
     root: {
       children: {
         type: string
@@ -56,7 +56,7 @@ export interface LexicalField {
     }
     [k: string]: unknown
   } | null
-  richTextLexicalCustomFields: {
+  lexicalWithBlocks: {
     root: {
       children: {
         type: string
@@ -71,28 +71,13 @@ export interface LexicalField {
     }
     [k: string]: unknown
   }
-  richTextLexicalWithLexicalPluginData?: {
-    root: {
-      children: {
-        type: string
-        version: number
-        [k: string]: unknown
-      }[]
-      direction: ('ltr' | 'rtl') | null
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
-      indent: number
-      type: string
-      version: number
-    }
-    [k: string]: unknown
-  } | null
   updatedAt: string
   createdAt: string
 }
 export interface LexicalMigrateField {
   id: string
   title: string
-  richTextLexicalWithLexicalPluginData?: {
+  lexicalWithLexicalPluginData?: {
     root: {
       children: {
         type: string
@@ -107,6 +92,61 @@ export interface LexicalMigrateField {
     }
     [k: string]: unknown
   } | null
+  lexicalSimple?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
+  lexicalSimple_html?: string | null
+  groupWithLexicalField?: {
+    lexicalInGroupField?: {
+      root: {
+        children: {
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        type: string
+        version: number
+      }
+      [k: string]: unknown
+    } | null
+    lexicalInGroupField_html?: string | null
+  }
+  arrayWithLexicalField?:
+    | {
+        lexicalInArrayField?: {
+          root: {
+            children: {
+              type: string
+              version: number
+              [k: string]: unknown
+            }[]
+            direction: ('ltr' | 'rtl') | null
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+            indent: number
+            type: string
+            version: number
+          }
+          [k: string]: unknown
+        } | null
+        lexicalInArrayField_html?: string | null
+        id?: string | null
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -164,6 +204,12 @@ export interface ArrayField {
   rowLabelAsComponent?:
     | {
         title?: string | null
+        id?: string | null
+      }[]
+    | null
+  arrayWithMinRows?:
+    | {
+        text?: string | null
         id?: string | null
       }[]
     | null
@@ -346,6 +392,14 @@ export interface BlockField {
             blockType: 'block-b'
           }
       )[]
+    | null
+  blocksWithMinRows?:
+    | {
+        blockTitle?: string | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block'
+      }[]
     | null
   customBlocks?:
     | (
@@ -548,6 +602,7 @@ export interface NumberField {
   hasMany?: number[] | null
   validatesHasMany?: number[] | null
   localizedHasMany?: number[] | null
+  withMinRows?: number[] | null
   updatedAt: string
   createdAt: string
 }
@@ -585,6 +640,18 @@ export interface RelationshipField {
         relationTo: 'array-fields'
         value: string | ArrayField
       }
+  relationHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'text-fields'
+            value: string | TextField
+          }
+        | {
+            relationTo: 'array-fields'
+            value: string | ArrayField
+          }
+      )[]
+    | null
   relationToSelf?: (string | null) | RelationshipField
   relationToSelfSelectOnly?: (string | null) | RelationshipField
   relationWithDynamicDefault?: (string | null) | User
@@ -601,6 +668,12 @@ export interface RelationshipField {
         id?: string | null
       }[]
     | null
+  relationshipWithMinRows?:
+    | {
+        relationTo: 'text-fields'
+        value: string | TextField
+      }[]
+    | null
   updatedAt: string
   createdAt: string
 }
@@ -614,6 +687,9 @@ export interface TextField {
   overrideLength?: string | null
   fieldWithDefaultValue?: string | null
   dependentOnFieldWithDefaultValue?: string | null
+  customLabel?: string | null
+  customError?: string | null
+  beforeAndAfterInput?: string | null
   updatedAt: string
   createdAt: string
 }
