@@ -142,12 +142,4 @@ const SelectFields: CollectionConfig = {
   ],
 }
 
-export const selectsDoc = {
-  select: 'one',
-  selectHasMany: ['two', 'four'],
-  settings: {
-    category: ['a'],
-  },
-}
-
 export default SelectFields

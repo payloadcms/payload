@@ -179,6 +179,12 @@ describe('access control', () => {
       await page.goto(readOnlyUrl.edit(existingDoc.id))
       await expect(page.locator('#field-name')).toBeDisabled()
     })
+
+    test('should not render dot menu popup when `create` and `delete` access control is set to false', async () => {
+      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await wait(1000)
+      await expect(page.locator('.collection-edit .doc-controls .doc-controls__popup')).toBeHidden()
+    })
   })
 
   describe('readVersions', () => {

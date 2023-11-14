@@ -166,7 +166,9 @@ const TabsField: React.FC<Props> = (props) => {
                 className={[
                   `${baseClass}__tab`,
                   activeTabConfig.label &&
-                    `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
+                    `${baseClass}__tabConfigLabel-${toKebabCase(
+                      getTranslation(activeTabConfig.label, i18n),
+                    )}`,
                 ]
                   .filter(Boolean)
                   .join(' ')}

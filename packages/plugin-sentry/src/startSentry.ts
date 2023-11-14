@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { NextFunction, Request, Response } from 'express'
 import type express from 'express'
-import type { Payload } from 'payload/dist/payload'
+import type { Payload } from 'payload'
 
 /* eslint-disable no-console */
 import * as Sentry from '@sentry/node'

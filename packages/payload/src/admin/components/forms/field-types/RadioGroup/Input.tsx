@@ -5,9 +5,9 @@ import type { Description } from '../../FieldDescription/types'
 import type { OnChange } from './types'
 
 import { optionIsObject } from '../../../../../fields/config/types'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import RadioInput from './RadioInput'
 import './index.scss'
 import { fieldBaseClass } from '../shared'
@@ -28,6 +28,8 @@ export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
   style?: React.CSSProperties
   value?: string
   width?: string
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
 }
 
 const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
@@ -47,7 +49,12 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
     style,
     value,
     width,
+    Error,
+    Label,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const path = pathFromProps || name
 
@@ -69,9 +76,9 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <Error message={errorMessage} showError={showError} />
+        <ErrorComp message={errorMessage} showError={showError} />
       </div>
-      <Label htmlFor={`field-${path}`} label={label} required={required} />
+      <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
       <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
           let optionValue = ''

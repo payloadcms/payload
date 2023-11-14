@@ -1,3 +1,42 @@
+## [2.1.1](https://github.com/payloadcms/payload/compare/v2.1.0...v2.1.1) (2023-11-10)
+
+
+### Bug Fixes
+
+* conditionally hide dot menu in DocumentControls ([#4075](https://github.com/payloadcms/payload/issues/4075)) ([cef4cbb](https://github.com/payloadcms/payload/commit/cef4cbb0ee59e1b0b806808d79b402dce114755f))
+* disable editing option for svg image types ([#4071](https://github.com/payloadcms/payload/issues/4071)) ([949e265](https://github.com/payloadcms/payload/commit/949e265cd9c95b7d4063336dde86177008d54839))
+* fixes creation of related documents within a transaction if filterOptions is used ([#4087](https://github.com/payloadcms/payload/issues/4087)) ([acad288](https://github.com/payloadcms/payload/commit/acad2888cd9a13d5fb9e4c686b2267ea69454eaf))
+* hide empty image sizes from the preview drawer ([#3946](https://github.com/payloadcms/payload/issues/3946)) ([687f485](https://github.com/payloadcms/payload/commit/687f4850acf073df0a649ef6182bfc8387857173))
+* **live-preview:** ensures field schema exists before traversing fields ([#4074](https://github.com/payloadcms/payload/issues/4074)) ([7059a71](https://github.com/payloadcms/payload/commit/7059a71243a8f98dcc89af0bfe502247db9e4123))
+* **live-preview:** field recursion and relationship population ([#4045](https://github.com/payloadcms/payload/issues/4045)) ([2ad7340](https://github.com/payloadcms/payload/commit/2ad73401546ef6608fd67d1f00b537f149640d6a))
+* **live-preview:** properly handles apiRoute ([#4076](https://github.com/payloadcms/payload/issues/4076)) ([1f851f2](https://github.com/payloadcms/payload/commit/1f851f21b18c9a5076d9afc9a31abc7a97fcb0df))
+* **plugin-nested-docs:** sync write transaction errors ([#4084](https://github.com/payloadcms/payload/issues/4084)) ([47efd3b](https://github.com/payloadcms/payload/commit/47efd3b92e99594dd5b61f0017f4eb76e1d36eb7))
+* possible issue with access control not using req ([#4086](https://github.com/payloadcms/payload/issues/4086)) ([348a70c](https://github.com/payloadcms/payload/commit/348a70cc33409b0b48aff3acd2b94c2df5d88f3b))
+* **richtext-lexical:** Blocks: unnecessary saving node value when initially opening a document & new lexical tests ([#4059](https://github.com/payloadcms/payload/issues/4059)) ([fff377a](https://github.com/payloadcms/payload/commit/fff377ad22cce3b26142cde8f4125fcee95aa072))
+* **richtext-lexical:** floating select toolbar caret not positioned correctly if first line is selected ([#4062](https://github.com/payloadcms/payload/issues/4062)) ([c462df3](https://github.com/payloadcms/payload/commit/c462df38f65b155e131e6a7b46b2bb16cd090e45))
+
+## [2.1.0](https://github.com/payloadcms/payload/compare/v2.0.15...v2.1.0) (2023-11-08)
+
+
+### Features
+
+* add internationalization (i18n) to locales ([#4005](https://github.com/payloadcms/payload/issues/4005)) ([6a0a859](https://github.com/payloadcms/payload/commit/6a0a859563ed9e742260ea51a1839a1ef0f61fce))
+* Custom Error, Label, and before/after field components ([#3747](https://github.com/payloadcms/payload/issues/3747)) ([266c327](https://github.com/payloadcms/payload/commit/266c3274d03e4fd52c692eeef1ee9248dcf66189))
+
+
+### Bug Fixes
+
+* error on graphql multiple queries ([#3985](https://github.com/payloadcms/payload/issues/3985)) ([57da3c9](https://github.com/payloadcms/payload/commit/57da3c99a7e4ce5d3d1e17315e3691815f363704))
+* focal and cropping issues, adds test ([#4039](https://github.com/payloadcms/payload/issues/4039)) ([acba5e4](https://github.com/payloadcms/payload/commit/acba5e482b7ddc6e3dc6ba9b7736022770d69a55))
+* handle invalid tokens in refresh token operation ([#3647](https://github.com/payloadcms/payload/issues/3647)) ([131d89c](https://github.com/payloadcms/payload/commit/131d89c3f50c237e1ab2d7cd32d7a8226a9f8ce3))
+* hasMany number and select fields unable to save within arrays ([#4047](https://github.com/payloadcms/payload/issues/4047)) ([182c57b](https://github.com/payloadcms/payload/commit/182c57b191010ce3dcf659f39c1dc2f7cf80662e))
+* injects array and block ids into fieldSchemaToJSON ([#4043](https://github.com/payloadcms/payload/issues/4043)) ([d068ef7](https://github.com/payloadcms/payload/commit/d068ef7e2483d49dc41bdd7735042ddcaa0a684c))
+* parse predefined migrations via file arg or name prefix ([#4001](https://github.com/payloadcms/payload/issues/4001)) ([eb42c03](https://github.com/payloadcms/payload/commit/eb42c031ef980558ed051d4163925aa28d6ab090))
+* polymorphic hasMany relationships missing in postgres admin ([#4053](https://github.com/payloadcms/payload/issues/4053)) ([7a9af44](https://github.com/payloadcms/payload/commit/7a9af4417a56c621f01195f9a2904b9adffaad7a))
+* resets list filter row when the filter on field is changed ([#3956](https://github.com/payloadcms/payload/issues/3956)) ([8d14c21](https://github.com/payloadcms/payload/commit/8d14c213c878a1afda2b3bf03431fed5aa2a44e3))
+* Update API Views ([b008b6c](https://github.com/payloadcms/payload/commit/b008b6c6463c9dc3d8e61eaa0a9210aa1a189442))
+* vite not replacing env vars correctly when building ([67b3baa](https://github.com/payloadcms/payload/commit/67b3baaa445a13246be8178d57eaeba92888bef1))
+
 ## [2.0.15](https://github.com/payloadcms/payload/compare/v2.0.14...v2.0.15) (2023-11-03)
 
 

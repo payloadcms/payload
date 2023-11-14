@@ -1,5 +1,5 @@
 import type { Config } from 'payload/config'
-import { defaults } from 'payload/dist/config/defaults'
+import { defaults } from 'payload/config'
 
 import { sentry } from './plugin'
 
@@ -49,5 +49,5 @@ function createConfig(overrides?: Partial<Config>): Config {
   return {
     ...defaults,
     ...overrides,
-  }
+  } as Config
 }

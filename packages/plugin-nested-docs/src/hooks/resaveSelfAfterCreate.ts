@@ -11,16 +11,16 @@ interface DocWithBreadcrumbs {
 
 const resaveSelfAfterCreate =
   (collection: CollectionConfig): CollectionAfterChangeHook =>
-  async ({ req, doc, operation }) => {
-    const { payload, locale } = req
+  async ({ doc, operation, req }) => {
+    const { locale, payload } = req
     const { breadcrumbs = [] } = doc as DocWithBreadcrumbs
 
     if (operation === 'create') {
       const originalDocWithDepth0 = await payload.findByID({
-        req,
+        id: doc.id,
         collection: collection.slug,
         depth: 0,
-        id: doc.id,
+        req,
       })
 
       const updateAsDraft =
@@ -30,12 +30,8 @@ const resaveSelfAfterCreate =
 
       try {
         await payload.update({
-          req,
-          collection: collection.slug,
           id: doc.id,
-          locale,
-          depth: 0,
-          draft: updateAsDraft,
+          collection: collection.slug,
           data: {
             ...originalDocWithDepth0,
             breadcrumbs:
@@ -44,6 +40,10 @@ const resaveSelfAfterCreate =
                 doc: breadcrumbs.length === i + 1 ? doc.id : crumb.doc,
               })) || [],
           },
+          depth: 0,
+          draft: updateAsDraft,
+          locale,
+          req,
         })
       } catch (err: unknown) {
         payload.logger.error(

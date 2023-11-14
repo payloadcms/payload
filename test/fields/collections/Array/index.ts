@@ -125,33 +125,16 @@ const ArrayFields: CollectionConfig = {
         },
       },
     },
-  ],
-}
-
-export const arrayDoc = {
-  items: [
     {
-      text: 'first row',
-    },
-    {
-      text: 'second row',
-    },
-    {
-      text: 'third row',
-    },
-    {
-      text: 'fourth row',
-    },
-    {
-      text: 'fifth row',
-    },
-    {
-      text: 'sixth row',
-    },
-  ],
-  collapsedArray: [
-    {
-      text: 'initialize collapsed',
+      name: 'arrayWithMinRows',
+      type: 'array',
+      minRows: 2,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
     },
   ],
 }

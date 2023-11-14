@@ -3,6 +3,7 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import { GraphQLClient } from 'graphql-request'
 
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
+import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
 
@@ -12,26 +13,28 @@ import { isMongoose } from '../helpers/isMongoose'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
 import { arrayDefaultValue } from './collections/Array'
-import { blocksDoc } from './collections/Blocks'
-import { dateDoc } from './collections/Date'
-import { groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group'
-import { defaultNumber, numberDoc } from './collections/Number'
-import { pointDoc } from './collections/Point'
-import { tabsDoc } from './collections/Tabs'
+import { blocksDoc } from './collections/Blocks/shared'
+import { dateDoc } from './collections/Date/shared'
+import { groupDefaultChild, groupDefaultValue } from './collections/Group'
+import { groupDoc } from './collections/Group/shared'
+import { defaultNumber } from './collections/Number'
+import { numberDoc } from './collections/Number/shared'
+import { pointDoc } from './collections/Point/shared'
 import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
 } from './collections/Tabs/constants'
-import { defaultText } from './collections/Text'
+import { tabsDoc } from './collections/Tabs/shared'
+import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
 import { arrayFieldsSlug, groupFieldsSlug, relationshipFieldsSlug, tabsFieldsSlug } from './slugs'
 
-let client
+let client: RESTClient
 let graphQLClient: GraphQLClient
-let serverURL
-let config
-let token
+let serverURL: string
+let config: SanitizedConfig
+let token: string
 
 describe('Fields', () => {
   beforeAll(async () => {

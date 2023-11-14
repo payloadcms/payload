@@ -23,6 +23,7 @@ jobs:
       with:
         filters: |
           needs_build:
+            - '.github/workflows/**'
             - 'packages/**'
             - 'test/**'
             - 'pnpm-lock.yaml'
@@ -131,6 +132,7 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int
         env:
+          NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
@@ -140,7 +142,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1/4, 2/4, 3/4, 4/4]
+        part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
 
     steps:
       - name: Use Node.js 18

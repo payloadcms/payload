@@ -488,6 +488,43 @@ describe('admin', () => {
         'Home',
       )
     })
+
+    test('should allow custom translation of locale labels', async () => {
+      const selectOptionClass = '.localizer .popup-button-list__button'
+      const localizorButton = page.locator('.localizer .popup-button')
+      const secondLocale = page.locator(selectOptionClass).nth(1)
+
+      async function checkLocalLabels(firstLabel: string, secondLabel: string) {
+        await localizorButton.click()
+        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
+        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
+      }
+
+      await checkLocalLabels('English (en)', 'Spanish (es)')
+
+      // Change locale to Spanish
+      await localizorButton.click()
+      await expect(secondLocale).toContainText('Spanish (es)')
+      await secondLocale.click()
+
+      // Go to account page
+      await page.goto(url.account)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+      const options = page.locator('.rs__option')
+
+      // Change language to Spanish
+      await languageField.click()
+      await options.locator('text=Español').click()
+
+      await checkLocalLabels('Inglés (en)', 'Español (es)')
+
+      // Change locale and language back to English
+      await languageField.click()
+      await options.locator('text=English').click()
+      await localizorButton.click()
+      await expect(secondLocale).toContainText('Spanish (es)')
+    })
   })
 
   describe('list view', () => {
@@ -645,6 +682,38 @@ describe('admin', () => {
         // Remove filter
         await page.locator('.condition__actions-remove').click()
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
+      })
+
+      test('resets filter value and operator on field update', async () => {
+        const { id } = await createPost({ title: 'post1' })
+        await createPost({ title: 'post2' })
+
+        // open the column controls
+        await page.locator('.list-controls__toggle-columns').click()
+        await page.locator('.list-controls__toggle-where').click()
+        await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const operatorField = page.locator('.condition__operator')
+        await operatorField.click()
+
+        const dropdownOperatorOptions = operatorField.locator('.rs__option')
+        await dropdownOperatorOptions.locator('text=equals').click()
+
+        // execute filter (where ID equals id value)
+        const valueField = page.locator('.condition__value > input')
+        await valueField.fill(id)
+
+        const filterField = page.locator('.condition__field')
+        await filterField.click()
+
+        // select new filter field of Number
+        const dropdownFieldOptions = filterField.locator('.rs__option')
+        await dropdownFieldOptions.locator('text=Number').click()
+
+        // expect operator & value field to reset (be empty)
+        await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
+        await expect(valueField).toHaveValue('')
       })
 
       test('should accept where query from valid URL where parameter', async () => {

@@ -57,6 +57,38 @@ export default buildConfig({
 })
 ```
 
+**Example Payload config set up for localization with full locales objects (including [internationalization](/docs/configuration/i18n) support):**
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  collections: [
+    // collections go here
+  ],
+  localization: {
+    locales: [
+      {
+        label: {
+          en: 'English', // English label
+          nb: 'Engelsk', // Norwegian label
+        },
+        code: 'en',
+      },
+      {
+        label: {
+          en: 'Norwegian', // English label
+          nb: 'Norsk', // Norwegian label
+        },
+        code: 'nb',
+      },
+    ],
+    defaultLocale: 'en',
+    fallback: true,
+  },
+})
+```
+
 **Here is a brief explanation of each of the options available within the `localization` property:**
 
 **`locales`**

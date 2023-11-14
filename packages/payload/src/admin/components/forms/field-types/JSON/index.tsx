@@ -4,9 +4,9 @@ import type { Props } from './types'
 
 import { json } from '../../../../../fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
@@ -17,12 +17,24 @@ const baseClass = 'json-field'
 const JSONField: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, condition, description, editorOptions, readOnly, style, width } = {},
+    admin: {
+      className,
+      condition,
+      description,
+      editorOptions,
+      readOnly,
+      style,
+      width,
+      components: { Error, Label } = {},
+    } = {},
     label,
     path: pathFromProps,
     required,
     validate = json,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const path = pathFromProps || name
   const [stringValue, setStringValue] = useState<string>()
@@ -76,8 +88,8 @@ const JSONField: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
       <CodeEditor
         defaultLanguage="json"
         onChange={handleChange}

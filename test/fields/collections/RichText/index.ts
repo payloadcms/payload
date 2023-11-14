@@ -12,8 +12,6 @@ import { lexicalHTML } from '../../../../packages/richtext-lexical/src/field/fea
 import { slateEditor } from '../../../../packages/richtext-slate/src'
 import { richTextFieldsSlug } from '../../slugs'
 import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks'
-import { generateLexicalRichText } from './generateLexicalRichText'
-import { generateSlateRichText } from './generateSlateRichText'
 
 const RichTextFields: CollectionConfig = {
   slug: richTextFieldsSlug,
@@ -30,7 +28,7 @@ const RichTextFields: CollectionConfig = {
       required: true,
     },
     {
-      name: 'richTextLexicalCustomFields',
+      name: 'lexicalCustomFields',
       type: 'richText',
       required: true,
       editor: lexicalEditor({
@@ -72,9 +70,9 @@ const RichTextFields: CollectionConfig = {
         ],
       }),
     },
-    lexicalHTML('richTextLexicalCustomFields', { name: 'richTextLexicalCustomFields_htmll' }),
+    lexicalHTML('lexicalCustomFields', { name: 'lexicalCustomFields_html' }),
     {
-      name: 'richTextLexical',
+      name: 'lexical',
       type: 'richText',
       admin: {
         description: 'This rich text field uses the lexical editor.',

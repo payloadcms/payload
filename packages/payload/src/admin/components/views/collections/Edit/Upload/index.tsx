@@ -161,7 +161,7 @@ export const Upload: React.FC<Props> = (props) => {
                   value={value.name}
                 />
 
-                {isImage(value.type) && (
+                {isImage(value.type) && value.type !== 'image/svg+xml' && (
                   <UploadActions
                     canEdit={showCrop || showFocalPoint}
                     showSizePreviews={hasImageSizes && doc.filename && !replacingFile}
