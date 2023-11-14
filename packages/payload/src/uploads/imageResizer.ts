@@ -244,6 +244,7 @@ export default async function resizeAndTransformImageSizes({
         const resizeAspectRatio = resizeWidth / resizeHeight
         const originalAspectRatio = dimensions.width / dimensions.height
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+
         // Scale the image up or down to fit the resize dimensions
         const scaledImage = imageToResize.resize({
           height: prioritizeHeight ? resizeHeight : null,
