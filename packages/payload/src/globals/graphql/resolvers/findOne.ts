@@ -1,8 +1,9 @@
 /* eslint-disable no-param-reassign */
 
-import type { Document, PayloadRequest } from '../../../types'
+import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import findOne from '../../operations/findOne'
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
@@ -16,7 +17,7 @@ export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Do
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: { ...context.req } as PayloadRequest,
+      req: isolateTransactionID(context.req),
       slug,
     }
 
