@@ -251,7 +251,6 @@ export default async function resizeAndTransformImageSizes({
         })
         const { info: scaledImageInfo } = await scaledImage.toBuffer({ resolveWithObject: true })
 
-        console.log(scaledImageInfo)
         // Focal point adjustments
         const focalPoint = {
           x: isNumber(req.query.uploadEdits.focalPoint?.x)
