@@ -3,7 +3,7 @@
  * which requires it to be wrapped in a group field
  */
 export function transformInputFormData(data: any, blockFieldWrapperName: string) {
-  const dataCopy = { ...data }
+  const dataCopy = JSON.parse(JSON.stringify(data))
 
   const fieldDataWithoutBlockFields = { ...dataCopy }
   delete fieldDataWithoutBlockFields['id']

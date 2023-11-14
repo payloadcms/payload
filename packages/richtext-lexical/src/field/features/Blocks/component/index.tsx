@@ -44,10 +44,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps
   )?.blocks?.find((block) => block.slug === formData?.blockType)
 
-  const debug =
-    formData.blockName ===
-    'Block Node, with Blocks Field, With RichText Field, With Relationship Node'
-
   const unsanitizedFormSchema = block?.fields || []
 
   // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
@@ -73,14 +69,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   useEffect(() => {
     async function createInitialState() {
-      if (debug) {
-        console.log('Creating initialState')
-      }
       const preferences = await getDocPreferences()
 
       const stateFromSchema = await buildStateFromSchema({
         config,
-        data: formData,
+        data: JSON.parse(JSON.stringify(formData)),
         fieldSchema: formSchema as any,
         locale,
         operation: 'create',
@@ -89,7 +82,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       })
 
       if (!initialStateRef.current) {
-        initialStateRef.current = buildInitialState(formData)
+        initialStateRef.current = buildInitialState(JSON.parse(JSON.stringify(formData)))
       }
 
       // We have to merge the output of buildInitialState (above this useEffect) with the output of buildStateFromSchema.
@@ -101,19 +94,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
         ...stateFromSchema,
       }
 
-      /* console.log(
-        'stateFromSchema',
-        stateFromSchema,
-        'formData',
-        formData,
-        'schema',
-        formSchema,
-        'initialStateRef.current',
-        initialStateRef.current,
-        'consolidatedInitialState',
-        consolidatedInitialState,
-      )*/
-
       setInitialState(consolidatedInitialState)
     }
     void createInitialState()
@@ -121,9 +101,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   // Memoized Form JSX
   const formContent = useMemo(() => {
-    if (debug) {
-      console.log('Memoizing formContent. formSchema', formSchema, 'initialState', initialState)
-    }
     return (
       block &&
       initialState && (
@@ -132,7 +109,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
             baseClass={baseClass}
             block={block}
             blockFieldWrapperName={blockFieldWrapperName}
-            debug={debug}
             field={parentLexicalRichTextField}
             formData={formData}
             formSchema={formSchema}
@@ -141,15 +117,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         </Form>
       )
     )
-  }, [
-    block,
-    parentLexicalRichTextField,
-    nodeKey,
-    submitted,
-    initialState,
-    debug,
-    blockFieldWrapperName,
-  ])
+  }, [block, parentLexicalRichTextField, nodeKey, submitted, initialState, blockFieldWrapperName])
 
   return <div className={baseClass}>{formContent}</div>
 }

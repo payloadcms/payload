@@ -21,7 +21,6 @@ type Props = {
   baseClass: string
   block: Block
   blockFieldWrapperName: string
-  debug: boolean
   field: FieldProps
   formData: BlockFields
   formSchema: Field[]
@@ -38,7 +37,6 @@ export const BlockContent: React.FC<Props> = (props) => {
     baseClass,
     block: { labels },
     blockFieldWrapperName,
-    debug,
     field,
     formData,
     formSchema,
@@ -81,27 +79,6 @@ export const BlockContent: React.FC<Props> = (props) => {
 
   const path = '' as const
 
-  if (debug) {
-    console.info(
-      'BlockContent rerender. formData',
-      {
-        ...formData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]?.children[0],
-      }.text,
-    )
-  }
-
-  useEffect(() => {
-    if (debug) {
-      console.info(
-        'BlockContent useEffect. formData',
-        {
-          ...formData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]
-            ?.children[0],
-        }.text,
-      )
-    }
-  }, [formData, blockFieldWrapperName, debug])
-
   const onFormChange = useCallback(
     ({
       fullFieldsWithValues,
@@ -110,23 +87,6 @@ export const BlockContent: React.FC<Props> = (props) => {
       fullFieldsWithValues: Fields
       newFormData: Data
     }) => {
-      if (debug) {
-        console.log(
-          'onFormChange',
-          'formData',
-
-          {
-            ...formData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]
-              ?.children[0],
-          }.text,
-          'newFormData',
-          {
-            ...newFormData[blockFieldWrapperName]?.subBlocks[0]?.richText?.root?.children[1]
-              ?.children[0],
-          }.text,
-        )
-      }
-
       // Recursively remove all undefined values from even being present in formData, as they will
       // cause isDeepEqual to return false if, for example, formData has a key that fields.data
       // does not have, even if it's undefined.
@@ -151,9 +111,6 @@ export const BlockContent: React.FC<Props> = (props) => {
           const node: BlockNode = $getNodeByKey(nodeKey)
 
           if (node) {
-            if (debug) {
-              console.warn('editor update')
-            }
             node.setFields(newFormData as BlockFields)
           }
         })
@@ -170,7 +127,7 @@ export const BlockContent: React.FC<Props> = (props) => {
         setErrorCount(rowErrorCount)
       }
     },
-    [editor, nodeKey, hasSubmitted, debug, blockFieldWrapperName, formData],
+    [editor, nodeKey, hasSubmitted, blockFieldWrapperName, formData],
   )
 
   const onCollapsedChange = useCallback(() => {

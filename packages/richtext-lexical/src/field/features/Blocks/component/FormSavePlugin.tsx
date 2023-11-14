@@ -4,8 +4,6 @@ import type React from 'react'
 import { reduceFieldsToValues, useAllFormFields } from 'payload/components/forms'
 import { useEffect } from 'react'
 
-import './index.scss'
-
 type Props = {
   onChange?: ({
     fullFieldsWithValues,

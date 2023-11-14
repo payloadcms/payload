@@ -125,7 +125,7 @@ export class BlockNode extends DecoratorBlockNode {
   }
 
   setFields(fields: BlockFields): void {
-    let fieldsCopy = { ...fields }
+    let fieldsCopy = JSON.parse(JSON.stringify(fields)) as BlockFields
     // Possibly transform fields
     const blockFieldWrapperName = fieldsCopy.blockType + '-' + fieldsCopy.id
     if (fieldsCopy[blockFieldWrapperName]) {
