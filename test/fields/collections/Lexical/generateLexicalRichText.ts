@@ -206,6 +206,28 @@ export function generateLexicalRichText() {
           version: 1,
         },
         {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '65532e49fe515eb112e605a3',
+            blockName: 'Radio Buttons 1',
+            blockType: 'radioButtons',
+            radioButtons: 'option1',
+          },
+        },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '65532e50fe515eb112e605a4',
+            blockName: 'Radio Buttons 2',
+            blockType: 'radioButtons',
+            radioButtons: 'option1',
+          },
+        },
+        {
           children: [],
           direction: null,
           format: '',

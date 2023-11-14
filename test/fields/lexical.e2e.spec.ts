@@ -439,5 +439,68 @@ describe('lexical', () => {
 
       expect(createdTextAreaBlock.content).toBe('text123')
     })
+
+    test('should allow changing values of two different radio button blocks independently', async () => {
+      // This test ensures that https://github.com/payloadcms/payload/issues/3911 does not happen again
+
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(4)
+
+      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(5)
+      await radioButtonBlock2.scrollIntoViewIfNeeded()
+      await expect(radioButtonBlock1).toBeVisible()
+      await expect(radioButtonBlock2).toBeVisible()
+
+      // Click radio button option2 of radioButtonBlock1
+      await radioButtonBlock1
+        .locator('.radio-input:has-text("Option 2")')
+        .first() // This already is an input for some reason
+        .click()
+
+      // Ensure radio button option1 of radioButtonBlock2 (the default option) is still selected
+      await expect(
+        radioButtonBlock2.locator('.radio-input:has-text("Option 1")').first(),
+      ).toBeChecked()
+
+      // Click radio button option3 of radioButtonBlock2
+      await radioButtonBlock2
+        .locator('.radio-input:has-text("Option 3")')
+        .first() // This already is an input for some reason
+        .click()
+
+      // Ensure previously clicked option2 of radioButtonBlock1 is still selected
+      await expect(
+        radioButtonBlock1.locator('.radio-input:has-text("Option 2")').first(),
+      ).toBeChecked()
+
+      /**
+       * Now save and check the actual data. radio button block 1 should have option2 selected and radio button block 2 should have option3 selected
+       */
+
+      await saveDocAndAssert(page)
+
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const radio1: SerializedBlockNode = lexicalField.root.children[7]
+      const radio2: SerializedBlockNode = lexicalField.root.children[8]
+
+      expect(radio1.fields.radioButtons).toBe('option2')
+      expect(radio2.fields.radioButtons).toBe('option3')
+    })
   })
 })
