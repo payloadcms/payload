@@ -95,10 +95,4 @@ const ConditionalLogic: CollectionConfig = {
   ],
 }
 
-export const conditionalLogicDoc = {
-  text: 'Seeded conditional logic document',
-  toggleField: true,
-  fieldToToggle: 'spiderman',
-}
-
 export default ConditionalLogic

@@ -12,14 +12,13 @@ export interface Relation {
 
 const openAccess = {
   create: () => true,
+  delete: () => true,
   read: () => true,
   update: () => true,
-  delete: () => true,
 }
 
 const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
-    slug: collectionSlug,
     access: openAccess,
     fields: [
       {
@@ -27,6 +26,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         type: 'text',
       },
     ],
+    slug: collectionSlug,
   }
 }
 
@@ -35,47 +35,27 @@ export const relationSlug = 'relation'
 
 export const pointSlug = 'point'
 
+export const errorOnHookSlug = 'error-on-hooks'
+
 export default buildConfigWithDefaults({
-  graphQL: {
-    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
-    queries: (GraphQL) => {
-      return {
-        QueryWithInternalError: {
-          type: new GraphQL.GraphQLObjectType({
-            name: 'QueryWithInternalError',
-            fields: {
-              text: {
-                type: GraphQL.GraphQLString,
-              },
-            },
-          }),
-          resolve: () => {
-            // Throwing an internal error with potentially sensitive data
-            throw new Error('Lost connection to the Pentagon. Secret data: ******')
-          },
-        },
-      }
-    },
-  },
   collections: [
     {
-      slug: 'users',
-      auth: true,
       access: openAccess,
+      auth: true,
       fields: [],
+      slug: 'users',
     },
     {
-      slug: pointSlug,
       access: openAccess,
       fields: [
         {
-          type: 'point',
           name: 'point',
+          type: 'point',
         },
       ],
+      slug: pointSlug,
     },
     {
-      slug,
       access: openAccess,
       fields: [
         {
@@ -92,173 +72,173 @@ export default buildConfigWithDefaults({
         },
         {
           name: 'min',
-          type: 'number',
           min: 10,
+          type: 'number',
         },
         // Relationship
         {
           name: 'relationField',
-          type: 'relationship',
           relationTo: relationSlug,
+          type: 'relationship',
         },
         {
           name: 'relationToCustomID',
-          type: 'relationship',
           relationTo: 'custom-ids',
+          type: 'relationship',
         },
         // Relation hasMany
         {
           name: 'relationHasManyField',
-          type: 'relationship',
-          relationTo: relationSlug,
           hasMany: true,
+          relationTo: relationSlug,
+          type: 'relationship',
         },
         // Relation multiple relationTo
         {
           name: 'relationMultiRelationTo',
-          type: 'relationship',
           relationTo: [relationSlug, 'dummy'],
+          type: 'relationship',
         },
         // Relation multiple relationTo hasMany
         {
           name: 'relationMultiRelationToHasMany',
-          type: 'relationship',
-          relationTo: [relationSlug, 'dummy'],
           hasMany: true,
+          relationTo: [relationSlug, 'dummy'],
+          type: 'relationship',
         },
         {
           name: 'A1',
-          type: 'group',
           fields: [
             {
-              type: 'text',
               name: 'A2',
               defaultValue: 'textInRowInGroup',
+              type: 'text',
             },
           ],
+          type: 'group',
         },
         {
           name: 'B1',
-          type: 'group',
           fields: [
             {
-              type: 'collapsible',
-              label: 'Collapsible',
               fields: [
                 {
-                  type: 'text',
                   name: 'B2',
                   defaultValue: 'textInRowInGroup',
+                  type: 'text',
                 },
               ],
+              label: 'Collapsible',
+              type: 'collapsible',
             },
           ],
+          type: 'group',
         },
         {
           name: 'C1',
-          type: 'group',
           fields: [
             {
-              type: 'text',
               name: 'C2Text',
+              type: 'text',
             },
             {
-              type: 'row',
               fields: [
                 {
-                  type: 'collapsible',
-                  label: 'Collapsible2',
                   fields: [
                     {
                       name: 'C2',
-                      type: 'group',
                       fields: [
                         {
-                          type: 'row',
                           fields: [
                             {
-                              type: 'collapsible',
-                              label: 'Collapsible2',
                               fields: [
                                 {
-                                  type: 'text',
                                   name: 'C3',
+                                  type: 'text',
                                 },
                               ],
+                              label: 'Collapsible2',
+                              type: 'collapsible',
                             },
                           ],
+                          type: 'row',
                         },
                       ],
+                      type: 'group',
                     },
                   ],
+                  label: 'Collapsible2',
+                  type: 'collapsible',
                 },
               ],
+              type: 'row',
             },
           ],
+          type: 'group',
         },
         {
-          type: 'tabs',
           tabs: [
             {
-              label: 'Tab1',
               name: 'D1',
               fields: [
                 {
                   name: 'D2',
-                  type: 'group',
                   fields: [
                     {
-                      type: 'row',
                       fields: [
                         {
-                          type: 'collapsible',
-                          label: 'Collapsible2',
                           fields: [
                             {
-                              type: 'tabs',
                               tabs: [
                                 {
-                                  label: 'Tab1',
                                   fields: [
                                     {
                                       name: 'D3',
-                                      type: 'group',
                                       fields: [
                                         {
-                                          type: 'row',
                                           fields: [
                                             {
-                                              type: 'collapsible',
-                                              label: 'Collapsible2',
                                               fields: [
                                                 {
-                                                  type: 'text',
                                                   name: 'D4',
+                                                  type: 'text',
                                                 },
                                               ],
+                                              label: 'Collapsible2',
+                                              type: 'collapsible',
                                             },
                                           ],
+                                          type: 'row',
                                         },
                                       ],
+                                      type: 'group',
                                     },
                                   ],
+                                  label: 'Tab1',
                                 },
                               ],
+                              type: 'tabs',
                             },
                           ],
+                          label: 'Collapsible2',
+                          type: 'collapsible',
                         },
                       ],
+                      type: 'row',
                     },
                   ],
+                  type: 'group',
                 },
               ],
+              label: 'Tab1',
             },
           ],
+          type: 'tabs',
         },
       ],
+      slug,
     },
     {
-      slug: 'custom-ids',
       access: {
         read: () => true,
       },
@@ -272,47 +252,98 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      slug: 'custom-ids',
     },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
     {
-      slug: 'payload-api-test-ones',
-      access: {
-        read: () => true,
-      },
+      ...collectionWithName(errorOnHookSlug),
       fields: [
         {
-          name: 'payloadAPI',
+          name: 'title',
           type: 'text',
-          hooks: {
-            afterRead: [({ req }) => req.payloadAPI],
-          },
+        },
+        {
+          name: 'errorBeforeChange',
+          type: 'checkbox',
         },
       ],
+      hooks: {
+        afterDelete: [
+          ({ doc }) => {
+            if (doc?.errorAfterDelete) {
+              throw new Error('Error After Delete Thrown')
+            }
+          },
+        ],
+        beforeChange: [
+          ({ originalDoc }) => {
+            if (originalDoc?.errorBeforeChange) {
+              throw new Error('Error Before Change Thrown')
+            }
+          },
+        ],
+      },
     },
     {
-      slug: 'payload-api-test-twos',
       access: {
         read: () => true,
       },
       fields: [
         {
           name: 'payloadAPI',
-          type: 'text',
           hooks: {
             afterRead: [({ req }) => req.payloadAPI],
           },
+          type: 'text',
+        },
+      ],
+      slug: 'payload-api-test-ones',
+    },
+    {
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'payloadAPI',
+          hooks: {
+            afterRead: [({ req }) => req.payloadAPI],
+          },
+          type: 'text',
         },
         {
           name: 'relation',
-          type: 'relationship',
           relationTo: 'payload-api-test-ones',
+          type: 'relationship',
         },
       ],
+      slug: 'payload-api-test-twos',
     },
   ],
+  graphQL: {
+    queries: (GraphQL) => {
+      return {
+        QueryWithInternalError: {
+          resolve: () => {
+            // Throwing an internal error with potentially sensitive data
+            throw new Error('Lost connection to the Pentagon. Secret data: ******')
+          },
+          type: new GraphQL.GraphQLObjectType({
+            name: 'QueryWithInternalError',
+            fields: {
+              text: {
+                type: GraphQL.GraphQLString,
+              },
+            },
+          }),
+        },
+      }
+    },
+    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+  },
   onInit: async (payload) => {
-    const user = await payload.create({
+    await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
@@ -331,8 +362,8 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: slug,
       data: {
-        title: 'has custom ID relation',
         relationToCustomID: 1,
+        title: 'has custom ID relation',
       },
     })
 
@@ -353,23 +384,23 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: slug,
       data: {
-        title: 'with-description',
         description: 'description',
+        title: 'with-description',
       },
     })
 
     await payload.create({
       collection: slug,
       data: {
-        title: 'numPost1',
         number: 1,
+        title: 'numPost1',
       },
     })
     await payload.create({
       collection: slug,
       data: {
-        title: 'numPost2',
         number: 2,
+        title: 'numPost2',
       },
     })
 
@@ -390,15 +421,15 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: slug,
       data: {
-        title: 'rel to hasMany',
         relationHasManyField: rel1.id,
+        title: 'rel to hasMany',
       },
     })
     await payload.create({
       collection: slug,
       data: {
-        title: 'rel to hasMany 2',
         relationHasManyField: rel2.id,
+        title: 'rel to hasMany 2',
       },
     })
 
@@ -406,11 +437,11 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: slug,
       data: {
-        title: 'rel to multi',
         relationMultiRelationTo: {
           relationTo: relationSlug,
           value: rel2.id,
         },
+        title: 'rel to multi',
       },
     })
 
@@ -418,7 +449,6 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: slug,
       data: {
-        title: 'rel to multi hasMany',
         relationMultiRelationToHasMany: [
           {
             relationTo: relationSlug,
@@ -429,6 +459,7 @@ export default buildConfigWithDefaults({
             value: rel2.id,
           },
         ],
+        title: 'rel to multi hasMany',
       },
     })
 

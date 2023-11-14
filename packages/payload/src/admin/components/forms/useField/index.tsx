@@ -1,7 +1,6 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { UPDATE } from '../Form/types'
 import type { FieldType, Options } from './types'
 
 import useThrottledEffect from '../../../hooks/useThrottledEffect'
@@ -35,6 +34,8 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const initialValue = field?.initialValue as T
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
   const showError = valid === false && submitted
+
+  const prevValid = useRef(valid)
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -93,48 +94,55 @@ const useField = <T,>(options: Options): FieldType<T> => {
   useThrottledEffect(
     () => {
       const validateField = async () => {
-        const action: UPDATE = {
-          condition,
-          disableFormData:
-            disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
-          errorMessage: undefined,
-          path,
-          rows: field?.rows,
-          type: 'UPDATE',
-          valid: false,
-          validate,
-          value,
-        }
-
-        const validateOptions = {
-          id,
-          config,
-          data: getData(),
-          operation,
-          siblingData: getSiblingData(path),
-          t,
-          user,
-        }
-
         let valueToValidate = value
 
         if (field?.rows && Array.isArray(field.rows)) {
           valueToValidate = getDataByPath(path)
         }
 
+        let errorMessage: string | undefined
+        let valid: boolean | string = false
+
         const validationResult =
-          typeof validate === 'function' ? await validate(valueToValidate, validateOptions) : true
+          typeof validate === 'function'
+            ? await validate(valueToValidate, {
+                id,
+                config,
+                data: getData(),
+                operation,
+                siblingData: getSiblingData(path),
+                t,
+                user,
+              })
+            : true
 
         if (typeof validationResult === 'string') {
-          action.errorMessage = validationResult
-          action.valid = false
+          errorMessage = validationResult
+          valid = false
         } else {
-          action.valid = validationResult
-          action.errorMessage = undefined
+          valid = validationResult
+          errorMessage = undefined
         }
 
-        if (typeof dispatchField === 'function') {
-          dispatchField(action)
+        // Only dispatch if the validation result has changed
+        // This will prevent unnecessary rerenders
+        if (valid !== prevValid.current) {
+          prevValid.current = valid
+
+          if (typeof dispatchField === 'function') {
+            dispatchField({
+              condition,
+              disableFormData:
+                disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
+              errorMessage,
+              path,
+              rows: field?.rows,
+              type: 'UPDATE',
+              valid,
+              validate,
+              value,
+            })
+          }
         }
       }
 

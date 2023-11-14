@@ -99,7 +99,7 @@ export const generateFileData = async <T>({
     let fileBuffer: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
-    const isSharpRequired =
+    const fileHasAdjustments =
       fileSupportsResize &&
       Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
@@ -107,7 +107,7 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true
 
-    if (isSharpRequired) {
+    if (fileHasAdjustments) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
@@ -174,7 +174,7 @@ export const generateFileData = async <T>({
     fileData.filename = fsSafeName
     let fileForResize = file
 
-    if (isSharpRequired && cropData) {
+    if (cropData) {
       const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
 
       filesToSave.push({

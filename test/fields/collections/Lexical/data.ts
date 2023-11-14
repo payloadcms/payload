@@ -1,8 +1,6 @@
 import { generateLexicalRichText } from './generateLexicalRichText'
-import { payloadPluginLexicalData } from './generatePayloadPluginLexicalData'
 
-export const lexicalRichTextDoc = {
+export const lexicalDocData = {
   title: 'Rich Text',
-  richTextLexicalCustomFields: generateLexicalRichText(),
-  richTextLexicalWithLexicalPluginData: payloadPluginLexicalData,
+  lexicalWithBlocks: generateLexicalRichText(),
 }

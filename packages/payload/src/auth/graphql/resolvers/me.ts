@@ -1,4 +1,5 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 import me from '../../operations/me'
 
@@ -7,10 +8,11 @@ function meResolver(collection: Collection): any {
     const options = {
       collection,
       depth: 0,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     }
     return me(options)
   }
+
   return resolver
 }
 

@@ -63,12 +63,7 @@ export const RichTextCell: React.FC<
         return $getRoot().getTextContent()
       }) || ''
 
-    // Limit preview to 150 characters
-    if (textContent.length > 150) {
-      setPreview(textContent.slice(0, 150) + '...')
-      return
-    }
-
+    // Limiting the number of characters shown is done in a CSS rule
     setPreview(textContent)
   }, [data, editorConfig])
 

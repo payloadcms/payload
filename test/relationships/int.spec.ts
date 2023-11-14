@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 
+import type { PayloadRequest } from '../../packages/payload/src/express/types'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -463,6 +464,35 @@ describe('Relationships', () => {
         })
 
         expect(stanleyNeverMadeMovies.movies).toHaveLength(0)
+      })
+    })
+  })
+
+  describe('Creating', () => {
+    describe('With transactions', () => {
+      it('should be able to create filtered relations within a transaction', async () => {
+        const req = {} as PayloadRequest
+        req.transactionID = await payload.db.beginTransaction?.()
+        const related = await payload.create({
+          req,
+          collection: relationSlug,
+          data: {
+            name: 'parent',
+          },
+        })
+        const withRelation = await payload.create({
+          req,
+          collection: slug,
+          data: {
+            filteredRelation: related.id,
+          },
+        })
+
+        if (req.transactionID) {
+          await payload.db.commitTransaction?.(req.transactionID)
+        }
+
+        expect(withRelation.filteredRelation.id).toEqual(related.id)
       })
     })
   })

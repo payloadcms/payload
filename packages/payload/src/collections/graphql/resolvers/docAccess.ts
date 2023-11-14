@@ -18,7 +18,7 @@ export function docAccessResolver(): Resolver {
   async function resolver(_, args, context) {
     return docAccess({
       id: args.id,
-      req: context.req,
+      req: { ...context.req } as PayloadRequest,
     })
   }
 

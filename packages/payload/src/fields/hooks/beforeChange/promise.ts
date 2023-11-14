@@ -120,6 +120,7 @@ export const promise = async ({
         jsonError,
         operation,
         payload: req.payload,
+        req,
         siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         t: req.t,
         user: req.user,

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.0.15",
+  "version": "2.1.1",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",

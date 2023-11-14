@@ -111,7 +111,15 @@ function FloatingSelectToolbar({
       setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem, 'center')
 
       if (caretRef.current) {
-        setFloatingElemPosition(rangeRect, caretRef.current, popupCharStylesEditorElem, 'center')
+        setFloatingElemPosition(
+          rangeRect, // selection to position around
+          caretRef.current, // what to position
+          popupCharStylesEditorElem, // anchor elem
+          'center',
+          10,
+          5,
+          true,
+        )
       }
     }
   }, [editor, anchorElem])

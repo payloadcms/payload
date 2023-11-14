@@ -422,6 +422,7 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
               const newRows = transformSelects({
+                id: data._uuid || data.id,
                 data: localeData,
                 locale: localeKey,
               })
@@ -432,6 +433,7 @@ export const traverseFields = ({
         }
       } else if (Array.isArray(data[field.name])) {
         const newRows = transformSelects({
+          id: data._uuid || data.id,
           data: data[field.name],
         })
 

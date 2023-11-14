@@ -7,7 +7,6 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { FieldProps } from '../types'
 
-import { defaultRichTextValueV2 } from '../populate/defaultValue'
 import { richTextValidateHOC } from '../validate'
 import './index.scss'
 import { LexicalProvider } from './lexical/LexicalProvider'
@@ -25,7 +24,6 @@ const RichText: React.FC<FieldProps> = (props) => {
       style,
       width,
     },
-    defaultValue: defaultValueFromProps,
     editorConfig,
     label,
     path: pathFromProps,

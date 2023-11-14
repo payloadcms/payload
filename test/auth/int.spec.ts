@@ -636,6 +636,21 @@ describe('Auth', () => {
       }).then((res) => res.json())
       expect(editorMe.user.adminOnlyField).toBeUndefined()
     })
+
+    it('should not allow refreshing an invalid token', async () => {
+      const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+        body: JSON.stringify({
+          token: 'INVALID',
+        }),
+        headers,
+        method: 'post',
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(data.token).toBeUndefined()
+    })
   })
 
   describe('API Key', () => {

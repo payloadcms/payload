@@ -26,6 +26,7 @@ const Textarea: React.FC<Props> = (props) => {
       rtl,
       style,
       width,
+      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     label,
     localized,
@@ -82,6 +83,10 @@ const Textarea: React.FC<Props> = (props) => {
       style={style}
       value={value as string}
       width={width}
+      Error={Error}
+      Label={Label}
+      BeforeInput={BeforeInput}
+      AfterInput={AfterInput}
     />
   )
 }

@@ -71,15 +71,40 @@ export const BlockContent: React.FC<Props> = (props) => {
 
   const onFormChange = useCallback(
     ({ fields: formFields, formData }: { fields: Fields; formData: Data }) => {
-      if (!isDeepEqual(fields.data, formData)) {
-        editor.update(() => {
-          const node: BlockNode = $getNodeByKey(nodeKey)
-          if (node) {
-            node.setFields({
-              data: formData as any,
-            })
+      // Recursively remove all undefined values from even being present in formData, as they will
+      // cause isDeepEqual to return false if, for example, formData has a key that fields.data
+      // does not have, even if it's undefined.
+      // Currently, this happens if a block has another sub-blocks field. Inside of formData, that sub-blocks field has an undefined blockName property.
+      // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
+      function removeUndefinedRecursively(obj: any) {
+        Object.keys(obj).forEach((key) => {
+          if (obj[key] && typeof obj[key] === 'object') {
+            removeUndefinedRecursively(obj[key])
+          } else if (obj[key] === undefined) {
+            delete obj[key]
           }
         })
+      }
+      removeUndefinedRecursively(formData)
+      removeUndefinedRecursively(fields.data)
+
+      // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
+      // which would trigger the "Leave without saving" dialog unnecessarily
+      if (!isDeepEqual(fields.data, formData)) {
+        // Running this in the next tick in the meantime fixes this issue: https://github.com/payloadcms/payload/issues/4108
+        // I don't know why. When this is called immediately, it might focus out of a nested lexical editor field if an update is made there.
+        // My hypothesis is that the nested editor might not have fully finished its update cycle yet. By updating in the next tick, we
+        // ensure that the nested editor has finished its update cycle before we update the block node.
+        setTimeout(() => {
+          editor.update(() => {
+            const node: BlockNode = $getNodeByKey(nodeKey)
+            if (node) {
+              node.setFields({
+                data: formData as any,
+              })
+            }
+          })
+        }, 0)
       }
 
       // update error count

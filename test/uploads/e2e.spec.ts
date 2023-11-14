@@ -10,11 +10,13 @@ import wait from '../../packages/payload/src/utilities/wait'
 import { saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import { RESTClient } from '../helpers/rest'
 import { adminThumbnailSrc } from './collections/admin-thumbnail'
 import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared'
 
 const { beforeAll, describe } = test
 
+let client: RESTClient
 let mediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
@@ -27,6 +29,8 @@ describe('uploads', () => {
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadE2E(__dirname)
+    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
@@ -47,7 +51,7 @@ describe('uploads', () => {
       },
     })
 
-    pngDoc = findPNG.docs[0] as Media
+    pngDoc = findPNG.docs[0] as unknown as Media
 
     const findAudio = await payload.find({
       collection: audioSlug,
@@ -55,7 +59,7 @@ describe('uploads', () => {
       pagination: false,
     })
 
-    audioDoc = findAudio.docs[0] as Media
+    audioDoc = findAudio.docs[0] as unknown as Media
   })
 
   test('should see upload filename in relation list', async () => {
@@ -88,10 +92,6 @@ describe('uploads', () => {
     await saveDocAndAssert(page)
   })
 
-  test('should update file upload', async () => {
-    await page.goto(mediaURL.edit(pngDoc.id))
-  })
-
   test('should show resized images', async () => {
     await page.goto(mediaURL.edit(pngDoc.id))
 
@@ -99,50 +99,50 @@ describe('uploads', () => {
 
     const maintainedAspectRatioItem = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(0)
+      .nth(1)
       .locator('.file-meta__size-type')
     await expect(maintainedAspectRatioItem).toContainText('1024x1024')
 
     const differentFormatFromMainImageMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(1)
+      .nth(2)
       .locator('.file-meta__size-type')
     await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg')
 
     const maintainedImageSizeMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(2)
+      .nth(3)
       .locator('.file-meta__size-type')
     await expect(maintainedImageSizeMeta).toContainText('1600x1600')
 
     const maintainedImageSizeWithNewFormatMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(3)
+      .nth(4)
       .locator('.file-meta__size-type')
     await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600')
     await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg')
 
     const sameSizeMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(4)
+      .nth(5)
       .locator('.file-meta__size-type')
     await expect(sameSizeMeta).toContainText('320x80')
 
     const tabletMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(5)
+      .nth(6)
       .locator('.file-meta__size-type')
     await expect(tabletMeta).toContainText('640x480')
 
     const mobileMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(6)
+      .nth(7)
       .locator('.file-meta__size-type')
     await expect(mobileMeta).toContainText('320x240')
 
     const iconMeta = page
       .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(7)
+      .nth(8)
       .locator('.file-meta__size-type')
     await expect(iconMeta).toContainText('16x16')
   })
@@ -191,5 +191,80 @@ describe('uploads', () => {
     // Ensure adminThumbnail fn returns correct value based on audio/mp3 mime
     const audioUploadImage = page.locator('tr.row-2 .thumbnail img')
     expect(await audioUploadImage.getAttribute('src')).toContain(adminThumbnailSrc)
+  })
+
+  describe('image manipulation', () => {
+    test('should crop image correctly', async () => {
+      const positions = {
+        'top-left': {
+          focalX: 25,
+          focalY: 25,
+          dragX: 0,
+          dragY: 0,
+        },
+        'bottom-right': {
+          focalX: 75,
+          focalY: 75,
+          dragX: 800,
+          dragY: 800,
+        },
+      }
+      const createFocalCrop = async (page: Page, position: 'bottom-right' | 'top-left') => {
+        const { focalX, focalY, dragX, dragY } = positions[position]
+        await page.goto(mediaURL.create)
+
+        // select and upload file
+        const fileChooserPromise = page.waitForEvent('filechooser')
+        await page.getByText('Select a file').click()
+        const fileChooser = await fileChooserPromise
+        await fileChooser.setFiles(path.join(__dirname, 'test-image.jpg'))
+        await page.locator('.file-field__edit').click()
+
+        // set crop
+        await page.locator('.edit-upload__input input[name="Width (px)"]').fill('400')
+        await page.locator('.edit-upload__input input[name="Height (px)"]').fill('400')
+        // set focal point
+        await page.locator('.edit-upload__input input[name="X %"]').fill('25') // init left focal point
+        await page.locator('.edit-upload__input input[name="Y %"]').fill('25') // init top focal point
+
+        // hover the crop selection, position mouse outside of focal point hitbox
+        await page.locator('.ReactCrop__crop-selection').hover({ position: { x: 100, y: 100 } })
+        await page.mouse.down() // start drag
+        await page.mouse.move(dragX, dragY) // drag selection to the lower right corner
+        await page.mouse.up() // release drag
+
+        // focal point should reset to center
+        await expect(page.locator('.edit-upload__input input[name="X %"]')).toHaveValue(`${focalX}`)
+        await expect(page.locator('.edit-upload__input input[name="Y %"]')).toHaveValue(`${focalY}`)
+
+        await page.locator('button:has-text("Apply Changes")').click()
+        await page.waitForSelector('button#action-save')
+        await page.locator('button#action-save').click()
+      }
+
+      await createFocalCrop(page, 'bottom-right') // green square
+      await wait(1000) // wait for edit view navigation (saving images)
+      // get the ID of the doc
+      const greenSquareMediaID = page.url().split('/').pop()
+      await createFocalCrop(page, 'top-left') // red square
+      await wait(1000) // wait for edit view navigation (saving images)
+      const redSquareMediaID = page.url().split('/').pop()
+
+      const { doc: greenDoc } = await client.findByID({
+        id: greenSquareMediaID,
+        slug: mediaSlug,
+        auth: true,
+      })
+
+      const { doc: redDoc } = await client.findByID({
+        id: redSquareMediaID,
+        slug: mediaSlug,
+        auth: true,
+      })
+
+      // green and red squares should have different sizes (colors make the difference)
+      expect(greenDoc.filesize).toEqual(1205)
+      expect(redDoc.filesize).toEqual(1207)
+    })
   })
 })

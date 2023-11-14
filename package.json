@@ -113,5 +113,8 @@
     "*.{js,jsx,ts,tsx}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@sentry/react": "^7.77.0"
   }
 }
