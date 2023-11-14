@@ -440,5 +440,54 @@ describe('lexical', () => {
 
       expect(createdTextAreaBlock.content).toBe('text123')
     })
+
+    test('should not lose focus when writing in nested editor', async () => {
+      // https://github.com/payloadcms/payload/issues/4108
+      // Steps:
+      // 1. Focus parent editor
+      // 2. Focus nested editor and write something
+      // 3. In the issue, after writing one character, the cursor focuses back into the parent editor
+
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      /**
+       * 1. Focus parent editor
+       */
+      const parentEditorParagraph = richTextField.locator('span').getByText('Upload Node:').first()
+      await expect(parentEditorParagraph).toBeVisible()
+
+      await parentEditorParagraph.click() // Click works better than focus
+
+      const blockWithRichTextEditor = richTextField.locator('.lexical-block').nth(1) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      await blockWithRichTextEditor.scrollIntoViewIfNeeded()
+      await expect(blockWithRichTextEditor).toBeVisible()
+
+      /**
+       * 2. Focus nested editor and write something
+       */
+      const nestedEditorParagraph = blockWithRichTextEditor
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await expect(nestedEditorParagraph).toBeVisible()
+      await nestedEditorParagraph.click() // Click works better than focus
+
+      // Now go to the END of the paragraph
+      for (let i = 0; i < 18; i++) {
+        await page.keyboard.press('ArrowRight')
+      }
+      await page.keyboard.type(' inserted text')
+
+      /**
+       * 3. In the issue, after writing one character, the cursor focuses back into the parent editor and writes the text there.
+       * This checks that this does not happen, and that it writes the text in the correct position (so, in nestedEditorParagraph, NOT in parentEditorParagraph)
+       */
+      await expect(nestedEditorParagraph).toHaveText(
+        'Some text below relationship node 1 inserted text',
+      )
+    })
   })
 })
