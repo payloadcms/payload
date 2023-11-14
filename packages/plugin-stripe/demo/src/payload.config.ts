@@ -19,45 +19,25 @@ export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
     user: Users.slug,
-    bundler: viteBundler({
-      resolve: {
-        alias: {
-          config: mockModulePath,
-        },
-      },
-    }),
-    vite: (config) => ({
-      ...config,
-      define: {
-        ...config.define,
-      },
-      optimizeDeps: {
-        force: true,
-        ...config.optimizeDeps,
-        exclude: [...config.optimizeDeps.exclude],
-      },
-      resolve: {
-        ...(config?.resolve || {}),
-        alias: {
-          ...(config?.resolve?.alias || {}),
-          // remember, vite aliases are exact-match only
-          // stripePlugin: mockModulePath,
-          // 'payload-config': mockModulePath,
-          // './webhooks/subscriptionCreatedOrUpdated': mockModulePath,
-          // './webhooks/subscriptionDeleted': mockModulePath,
-          // './webhooks/syncPriceJSON': mockModulePath,
-
-          // 'payload-config': mockModulePath,
-          payload: path.join(__dirname, '../node_modules/payload'),
-          react: path.join(__dirname, '../node_modules/react'),
-          'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-          [path.resolve(__dirname, '../../src/index')]: path.resolve(
-            __dirname,
-            '../../src/admin.ts',
-          ),
-        },
-      },
-    }),
+    bundler: viteBundler(),
+    // vite: (config) => ({
+    //   ...config,
+    //   define: {
+    //     ...config.define,
+    //   },
+    //   optimizeDeps: {
+    //     force: true,
+    //     ...config.optimizeDeps,
+    //     exclude: [...config.optimizeDeps.exclude],
+    //   },
+    //   resolve: {
+    //     ...(config?.resolve || {}),
+    //     alias: {
+    //       ...(config?.resolve?.alias || {}),
+    //       util: mockModulePath,
+    //     },
+    //   },
+    // }),
     // bundler: webpackBundler(),
     // webpack: (config) => {
     //   const newConfig = {
