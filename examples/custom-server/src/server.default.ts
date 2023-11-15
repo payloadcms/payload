@@ -1,17 +1,12 @@
-import dotenv from 'dotenv'
-import path from 'path'
-
 // This file is used to replace `server.ts` when ejecting i.e. `yarn eject`
 // See `../eject.ts` for exact details on how this file is used
 // See `./README.md#eject` for more information
-
-dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
-})
-
+import { loadEnvConfig } from '@next/env'
 import express from 'express'
 
 import { getPayloadClient } from './getPayload'
+
+loadEnvConfig(process.cwd())
 
 const app = express()
 const PORT = process.env.PORT || 3000

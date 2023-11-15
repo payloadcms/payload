@@ -1,14 +1,11 @@
-import dotenv from 'dotenv'
-import path from 'path'
+import { loadEnvConfig } from '@next/env'
 import type { Payload } from 'payload'
 import payload from 'payload'
 import type { InitOptions } from 'payload/config'
 
 import { seed as seedData } from './seed'
 
-dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
-})
+loadEnvConfig(process.cwd())
 
 let cached = (global as any).payload
 

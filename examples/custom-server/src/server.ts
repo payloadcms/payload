@@ -1,15 +1,12 @@
-import dotenv from 'dotenv'
+import { loadEnvConfig } from '@next/env'
+import express from 'express'
 import next from 'next'
 import nextBuild from 'next/dist/build'
 import path from 'path'
 
-dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
-})
-
-import express from 'express'
-
 import { getPayloadClient } from './getPayload'
+
+loadEnvConfig(process.cwd())
 
 const app = express()
 const PORT = process.env.PORT || 3000
