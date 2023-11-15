@@ -1,5 +1,6 @@
 import { webpackBundler } from '@payloadcms/bundler-webpack'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+// import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
 import { slateEditor } from '@payloadcms/richtext-slate'
 import dotenv from 'dotenv'
 import path from 'path'
@@ -23,8 +24,13 @@ export default buildConfig({
     },
   },
   editor: slateEditor({}),
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+  // db: mongooseAdapter({
+  //   url: process.env.DATABASE_URI,
+  // }),
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URI,
+    },
   }),
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),

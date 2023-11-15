@@ -22,6 +22,7 @@
   "dependencies": {
     "@payloadcms/bundler-webpack": "latest",
     "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/db-postgres": "latest",
     "@payloadcms/richtext-slate": "latest",
     "dotenv": "^8.2.0",
     "escape-html": "^1.0.3",
