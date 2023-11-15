@@ -42,7 +42,11 @@ const start = async (): Promise<void> => {
 
   const nextHandler = nextApp.getRequestHandler()
 
-  app.use((req, res) => nextHandler(req, res))
+  app.use((req, res, nxt) => {
+    if (req.url.startsWith(payload.config.routes.admin)) return nxt();
+
+    return nextHandler(req, res);
+  });
 
   nextApp.prepare().then(() => {
     payload.logger.info('Next.js started')
