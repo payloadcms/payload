@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 async function init(args: { collection: string; req: PayloadRequest }): Promise<boolean> {
   const { collection: slug, req } = args

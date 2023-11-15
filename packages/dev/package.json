@@ -9,12 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.0.2-canary.18",
+    "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
+    "@payloadcms/next": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@types/node": "^20",
     "@types/react": "^18",

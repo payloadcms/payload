@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // experimental: {
-  //   serverComponentsExternalPackages: ['@payloadcms/db-mongodb'],
-  // },
-  // transpilePackages: ['@payloadcms/db-mongodb'],
+  experimental: {
+    serverComponentsExternalPackages: ['@payloadcms/db-mongodb', 'mongoose'],
+  },
+  transpilePackages: ['@payloadcms/db-mongodb', 'mongoose'],
   webpack: (config) => {
     return {
       ...config,

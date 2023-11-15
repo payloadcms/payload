@@ -39,6 +39,8 @@
     { "path": "./packages/payload" },
     { "path": "./packages/plugin-nested-docs" },
     { "path": "./packages/live-preview" },
-    { "path": "./packages/live-preview-react" }
+    { "path": "./packages/live-preview-react" },
+    { "path": "./packages/next" },
+    { "path": "./packages/ui" }
   ]
 }
