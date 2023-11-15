@@ -7,7 +7,7 @@ This example demonstrates how to serve your front-end alongside [Payload](https:
 To spin up this example locally, follow these steps:
 
 1. First clone the repo
-1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
+1. Then `cd YOUR_PROJECT_REPO && cp .env.local.example .env.local`
 1. Next `yarn && yarn dev`
 1. Now `open http://localhost:3000/admin` to access the admin panel
 1. Login with email `demo@payloadcms.com` and password `demo`
