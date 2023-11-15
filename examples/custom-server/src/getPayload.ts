@@ -39,7 +39,6 @@ export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promis
   }
 
   try {
-    process.env.PAYLOAD_DROP_DATABASE = seed ? 'true' : 'false'
     cached.client = await cached.promise
 
     if (seed) {
