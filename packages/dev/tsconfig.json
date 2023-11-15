@@ -12,16 +12,19 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "composite": true, // Make sure typescript knows that this module depends on their references
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "payload-config": ["./src/payload.config.ts"]
+      "payload-config": ["./src/payload.config.ts"],
+      "@payloadcms/next/*": ["../next/src/exports/*.ts"]
     }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"],
-  "references": [{ "path": "../payload" }]
+  "composite": true, // Make sure typescript knows that this module depends on their references
+  "references": [{ "path": "../payload" }, { "path": "../next" }]
 }

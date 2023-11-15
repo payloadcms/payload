@@ -46,6 +46,8 @@
     { "path": "./packages/plugin-seo" },
     { "path": "./packages/plugin-stripe" },
     { "path": "./packages/richtext-slate" },
-    { "path": "./packages/richtext-lexical" }
+    { "path": "./packages/richtext-lexical" },
+    { "path": "./packages/next" },
+    { "path": "./packages/ui" }
   ]
 }

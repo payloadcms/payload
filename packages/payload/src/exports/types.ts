@@ -45,7 +45,7 @@ export type {
   TypeWithID,
 } from './../collections/config/types'
 
-export type { Access, AccessArgs } from './../config/types'
+export type { Access, AccessArgs, SanitizedConfig } from './../config/types'
 
 export type {
   ArrayField,
