@@ -20,7 +20,8 @@
     ],
     "paths": {
       "payload-config": ["./src/payload.config.ts"],
-      "@payloadcms/next/*": ["../next/src/exports/*.ts"]
+      "@payloadcms/next/pages/*": ["../next/src/pages/*"],
+      "@payloadcms/next/routes/*": ["../next/src/routes/*"]
     }
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],

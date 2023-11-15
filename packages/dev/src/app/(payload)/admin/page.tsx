@@ -1,4 +1,4 @@
-import { dashboard } from 'payload/pages'
+import { Dashboard } from '@payloadcms/next/pages/Dashboard'
 import config from '../../../payload.config'
 
-export default dashboard({ config })
+export default Dashboard({ config })
