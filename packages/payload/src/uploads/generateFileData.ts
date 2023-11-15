@@ -17,6 +17,7 @@ import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
 import getFileByPath from './getFileByPath'
+import getFileByURL from './getFileByURL'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -63,12 +64,22 @@ export const generateFileData = async <T>({
   }
 
   if (!file && uploadEdits && data) {
-    const { filename } = data as FileData
-    const filePath = `${staticPath}/${filename}`
-    const response = await getFileByPath(filePath)
+    const { filename, url } = data as FileData
 
-    overwriteExistingFiles = true
-    file = response as UploadedFile
+    try {
+      if (url && url.startsWith('/')) {
+        const filePath = `${staticPath}/${filename}`
+        const response = await getFileByPath(filePath)
+        file = response as UploadedFile
+        overwriteExistingFiles = true
+      } else {
+        const response = await getFileByURL(url)
+        file = response as UploadedFile
+        overwriteExistingFiles = true
+      }
+    } catch (err) {
+      throw new FileUploadError(req.t)
+    }
   }
 
   if (!file) {
