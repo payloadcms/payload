@@ -34,5 +34,6 @@ export async function docAccess(args: Arguments): Promise<GlobalPermission> {
     return result
   } catch (e: unknown) {
     await killTransaction(req)
+    throw e
   }
 }
