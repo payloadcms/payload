@@ -1,7 +1,11 @@
 import path from 'path'
 import { buildConfig } from 'payload/config'
+import { viteBundler } from '@payloadcms/bundler-vite'
+// import { webpackBundler } from '@payloadcms/bundler-webpack'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { stripePlugin } from '../../src'
+import stripePlugin from '../../src'
 import Customers from './collections/Customers'
 import Products from './collections/Products'
 import Users from './collections/Users'
@@ -9,38 +13,62 @@ import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUp
 import { subscriptionDeleted } from './webhooks/subscriptionDeleted'
 import { syncPriceJSON } from './webhooks/syncPriceJSON'
 
+const mockModulePath = path.resolve(__dirname, './emptyModuleMock.js')
+
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
     user: Users.slug,
-    webpack: (config) => {
-      const newConfig = {
-        ...config,
-        resolve: {
-          ...config.resolve,
-          alias: {
-            ...config.resolve.alias,
-            payload: path.join(__dirname, '../node_modules/payload'),
-            react: path.join(__dirname, '../node_modules/react'),
-            'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-            [path.resolve(__dirname, '../../src/index')]: path.resolve(
-              __dirname,
-              '../../src/admin.ts',
-            ),
-          },
-        },
-      }
+    bundler: viteBundler(),
+    // vite: (config) => ({
+    //   ...config,
+    //   define: {
+    //     ...config.define,
+    //   },
+    //   optimizeDeps: {
+    //     force: true,
+    //     ...config.optimizeDeps,
+    //     exclude: [...config.optimizeDeps.exclude],
+    //   },
+    //   resolve: {
+    //     ...(config?.resolve || {}),
+    //     alias: {
+    //       ...(config?.resolve?.alias || {}),
+    //       util: mockModulePath,
+    //     },
+    //   },
+    // }),
+    // bundler: webpackBundler(),
+    // webpack: (config) => {
+    //   const newConfig = {
+    //     ...config,
+    //     resolve: {
+    //       ...config.resolve,
+    //       alias: {
+    //         ...config.resolve.alias,
+    //         payload: path.join(__dirname, '../node_modules/payload'),
+    //         react: path.join(__dirname, '../node_modules/react'),
+    //         'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+    //         [path.resolve(__dirname, '../../src/index')]: path.resolve(
+    //           __dirname,
+    //           '../../src/admin.ts',
+    //         ),
+    //       },
+    //     },
+    //   }
 
-      return newConfig
-    },
+    //   return newConfig
+    // },
   },
   collections: [Users, Customers, Products],
+  editor: lexicalEditor({}),
   localization: {
     locales: ['en', 'es', 'de'],
     defaultLocale: 'en',
     fallback: true,
   },
   plugins: [
+    // @ts-expect-error Conflicting types for relative package
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
@@ -98,4 +126,7 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
 })

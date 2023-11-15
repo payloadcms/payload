@@ -11,6 +11,8 @@ export const extendWebpackConfig =
         ? config.admin.webpack(webpackConfig)
         : webpackConfig
 
+    const mockModulePath = path.resolve(__dirname, './mocks/mockFile.js')
+
     return {
       ...existingWebpackConfig,
       resolve: {
@@ -18,6 +20,8 @@ export const extendWebpackConfig =
         alias: {
           ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
           '@payloadcms/plugin-stripe': path.resolve(__dirname, './admin.js'),
+          [path.resolve(__dirname, './routes/rest')]: mockModulePath,
+          [path.resolve(__dirname, './routes/webhooks')]: mockModulePath,
         },
       },
     }
