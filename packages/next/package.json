@@ -11,10 +11,15 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "exports": {
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
+    "./pages/*": {
+      "import": "./src/pages/*.ts",
+      "require": "./src/pages/*.ts",
+      "types": "./src/pages/*.ts"
+    },
+    "./routes/*": {
+      "import": "./src/routes/*.ts",
+      "require": "./src/routes/*.ts",
+      "types": "./src/routes/*.ts"
     }
   },
   "devDependencies": {
@@ -26,10 +31,15 @@
   },
   "publishConfig": {
     "exports": {
-      "./*": {
-        "import": "./dist/exports/*.ts",
-        "require": "./dist/exports/*.ts",
-        "types": "./dist/exports/*.d.ts"
+      "./pages/*": {
+        "import": "./dist/pages/*.ts",
+        "require": "./dist/pages/*.ts",
+        "types": "./dist/pages/*.d.ts"
+      },
+      "./routes/*": {
+        "import": "./dist/routes/*.ts",
+        "require": "./dist/routes/*.ts",
+        "types": "./dist/routes/*.d.ts"
       }
     },
     "registry": "https://registry.npmjs.org/",

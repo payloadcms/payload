@@ -10,15 +10,33 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
+  "exports": {
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
+    }
+  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
+  },
+  "dependencies": {
+    "@faceless-ui/modal": "2.0.1",
+    "@faceless-ui/scroll-info": "1.3.0",
+    "@faceless-ui/window-info": "2.1.1"
   },
   "peerDependencies": {
     "payload": "^2.0.0"
   },
   "publishConfig": {
-    "exports": null,
+    "exports": {
+      "./*": {
+        "import": "./dist/exports/*.ts",
+        "require": "./dist/exports/*.ts",
+        "types": "./dist/exports/*.d.ts"
+      }
+    },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
