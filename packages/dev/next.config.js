@@ -1,13 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ['@payloadcms/db-mongodb', 'mongoose'],
+    outputFileTracingExcludes: {
+      '**/*': ['drizzle-kit', 'drizzle-kit/utils'],
+    },
+    serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
   },
-  transpilePackages: ['@payloadcms/db-mongodb', 'mongoose'],
+  // transpilePackages: ['@payloadcms/db-mongodb', 'mongoose'],
   webpack: (config) => {
     return {
       ...config,
-      externals: [...config.externals, 'mongoose'],
+      externals: [
+        ...config.externals,
+        'drizzle-kit',
+        'drizzle-kit/utils',
+        'pino',
+        'pino-pretty',
+        'mongoose',
+      ],
     }
   },
 }
