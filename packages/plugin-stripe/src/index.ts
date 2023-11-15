@@ -55,7 +55,7 @@ const stripePlugin =
               ...collection.hooks,
               afterDelete: [
                 ...(existingHooks?.afterDelete || []),
-                async (args) =>
+                (args) =>
                   deleteFromStripe({
                     ...args,
                     collection,
@@ -64,7 +64,7 @@ const stripePlugin =
               ],
               beforeChange: [
                 ...(existingHooks?.beforeChange || []),
-                async (args) =>
+                (args) =>
                   syncExistingWithStripe({
                     ...args,
                     collection,
@@ -73,7 +73,7 @@ const stripePlugin =
               ],
               beforeValidate: [
                 ...(existingHooks?.beforeValidate || []),
-                async (args) =>
+                (args) =>
                   createNewInStripe({
                     ...args,
                     collection,
@@ -91,8 +91,8 @@ const stripePlugin =
         {
           handler: [
             express.raw({ type: 'application/json' }),
-            (req, res, next) => {
-              stripeWebhooks({
+            async (req, res, next) => {
+              await stripeWebhooks({
                 config,
                 next,
                 req,
@@ -108,8 +108,8 @@ const stripePlugin =
         ...(incomingStripeConfig?.rest
           ? [
               {
-                handler: (req: PayloadRequest, res: Response, next: NextFunction) => {
-                  stripeREST({
+                handler: async (req: PayloadRequest, res: Response, next: NextFunction) => {
+                  await stripeREST({
                     next,
                     req,
                     res,

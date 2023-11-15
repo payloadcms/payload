@@ -1,7 +1,7 @@
 import path from 'path'
 import { buildConfig } from 'payload/config'
 import { viteBundler } from '@payloadcms/bundler-vite'
-// import { webpackBundler } from '@payloadcms/bundler-webpack'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
@@ -20,45 +20,28 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     bundler: viteBundler(),
-    // vite: (config) => ({
-    //   ...config,
-    //   define: {
-    //     ...config.define,
-    //   },
-    //   optimizeDeps: {
-    //     force: true,
-    //     ...config.optimizeDeps,
-    //     exclude: [...config.optimizeDeps.exclude],
-    //   },
-    //   resolve: {
-    //     ...(config?.resolve || {}),
-    //     alias: {
-    //       ...(config?.resolve?.alias || {}),
-    //       util: mockModulePath,
-    //     },
-    //   },
-    // }),
     // bundler: webpackBundler(),
-    // webpack: (config) => {
-    //   const newConfig = {
-    //     ...config,
-    //     resolve: {
-    //       ...config.resolve,
-    //       alias: {
-    //         ...config.resolve.alias,
-    //         payload: path.join(__dirname, '../node_modules/payload'),
-    //         react: path.join(__dirname, '../node_modules/react'),
-    //         'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-    //         [path.resolve(__dirname, '../../src/index')]: path.resolve(
-    //           __dirname,
-    //           '../../src/admin.ts',
-    //         ),
-    //       },
-    //     },
-    //   }
+    webpack: (config) => {
+      const newConfig = {
+        ...config,
+        resolve: {
+          ...config.resolve,
+          alias: {
+            ...config.resolve.alias,
+            payload: path.join(__dirname, '../node_modules/payload'),
+            react: path.join(__dirname, '../node_modules/react'),
+            'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+            [path.resolve(__dirname, '../../src/index')]: path.resolve(
+              __dirname,
+              '../../src/admin.ts',
+            ),
+            util: mockModulePath,
+          },
+        },
+      }
 
-    //   return newConfig
-    // },
+      return newConfig
+    },
   },
   collections: [Users, Customers, Products],
   editor: lexicalEditor({}),
@@ -68,7 +51,6 @@ export default buildConfig({
     fallback: true,
   },
   plugins: [
-    // @ts-expect-error Conflicting types for relative package
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
       isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',

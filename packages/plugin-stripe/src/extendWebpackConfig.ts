@@ -20,6 +20,10 @@ export const extendWebpackConfig =
         alias: {
           ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
           '@payloadcms/plugin-stripe': path.resolve(__dirname, './admin.js'),
+          express: mockModulePath,
+          [path.resolve(__dirname, './hooks/createNewInStripe')]: mockModulePath,
+          [path.resolve(__dirname, './hooks/deleteFromStripe')]: mockModulePath,
+          [path.resolve(__dirname, './hooks/syncExistingWithStripe')]: mockModulePath,
           [path.resolve(__dirname, './routes/rest')]: mockModulePath,
           [path.resolve(__dirname, './routes/webhooks')]: mockModulePath,
         },
