@@ -18,7 +18,7 @@ export const State: React.FC<StateField & {
   return (
     <Width width={width}>
       <div className={classes.select}>
-        <label htmlFor="name" className={classes.label}>
+        <label htmlFor={name} className={classes.label}>
           {label}
         </label>
         <Controller
@@ -34,6 +34,7 @@ export const State: React.FC<StateField & {
               onChange={(val) => onChange(val.value)}
               className={classes.reactSelect}
               classNamePrefix="rs"
+              inputId={name}
             />
           )}
         />
