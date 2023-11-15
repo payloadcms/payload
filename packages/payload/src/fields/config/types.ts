@@ -51,21 +51,21 @@ export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (
 
 export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
   /**
-   * The full data passed to `create` or `update` the document. `data` is undefined during `read` operation.
+   * The incoming data used to `create` or `update` the document with. `data` is undefined during the `read` operation.
    */
   data?: Partial<T>
   /**
-   * The full document data before `update` is applied. `doc` is undefined during `create` and `update` operation.
+   * The original data of the document before the `update` is applied. `doc` is undefined during the `create` operation.
    */
   doc?: T
   /**
-   * `id` of the document being `read` or `update`. `id` is undefined during `create` operation.
+   * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
   id?: number | string
   /** The `Express` request object containing the currently authenticated `user` */
   req: PayloadRequest<U>
   /**
-   * Immediately adjacent field data passed to `create`, `read`, and `update` document with.
+   * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<P>
 }) => Promise<boolean> | boolean
