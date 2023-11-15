@@ -61,9 +61,15 @@ export function setFloatingElemPosition(
 
   floatingElem.style.opacity = '1'
 
-  if (specialHandlingForCaret && top == 0) {
-    top -= 46 // Especially this arbitrary number needs refactoring (this is for the caret)
+  if (specialHandlingForCaret && top == 0 /* 0 Happens when selecting 1st line */) {
+    top -= 44 // Especially this arbitrary number needs refactoring (this is for the caret)
     // rotate too
+    floatingElem.style.transform = `translate(${left}px, ${top}px) rotate(180deg)`
+  } else if (
+    specialHandlingForCaret &&
+    top === -63 /* -63 Happens when selecting 2nd line in multi-line paragraph */
+  ) {
+    top += 18 // Especially this arbitrary number needs refactoring (this is for the caret)
     floatingElem.style.transform = `translate(${left}px, ${top}px) rotate(180deg)`
   } else {
     floatingElem.style.transform = `translate(${left}px, ${top}px)`
