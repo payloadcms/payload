@@ -26,6 +26,15 @@ import { LinkPlugin } from './plugins/link'
 import { linkPopulationPromiseHOC } from './populationPromise'
 
 export type LinkFeatureProps = {
+  /**
+   * The collections that should be disabled for internal linking. Overrides the `enableRichTextLink` property in the collection config.
+   * This property is ignored if `enabledCollections` is set.
+   **/
+  disabledCollections?: false | string[]
+  /**
+   * The collections that should be enabled for internal linking. Overrides the `enableRichTextLink` property in the collection config
+   **/
+  enabledCollections?: false | string[]
   fields?:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
     | Field[]
