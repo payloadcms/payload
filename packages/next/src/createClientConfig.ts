@@ -30,6 +30,8 @@ export const createClientConfig = async (
 
   delete clientConfig.endpoints
   delete clientConfig.db
+  delete clientConfig.admin.webpack
+  delete clientConfig.admin.vite
 
   clientConfig.collections = config.collections.map((collection) => {
     const sanitized = { ...collection }
