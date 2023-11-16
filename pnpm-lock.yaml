@@ -153,6 +153,9 @@ importers:
       jwt-decode:
         specifier: 3.1.2
         version: 3.1.2
+      lexical:
+        specifier: 0.12.2
+        version: 0.12.2
       lint-staged:
         specifier: ^14.0.1
         version: 14.0.1
@@ -12688,7 +12691,6 @@ packages:
 
   /lexical@0.12.2:
     resolution: {integrity: sha512-Kxavd+ETjxtVwG/hvPd6WZfXD44sLOKe9Vlkwxy7lBQ1qZArS+rZfs+u5iXwXe6tX9f2PIM0u3RHsrCEDDE0fw==}
-    dev: false
 
   /lib0@0.2.85:
     resolution: {integrity: sha512-vtAhVttLXCu3ps2OIsTz8CdKYKdcMo7ds1MNBIcSXz6vrY8sxASqpTi4vmsAIn7xjWvyT7haKcWW6woP6jebjQ==}

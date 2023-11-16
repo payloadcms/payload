@@ -131,7 +131,7 @@ const preventResize = (
 
   const isWidthOrHeightNotDefined = !desiredHeight || !desiredWidth
   if (isWidthOrHeightNotDefined) {
-    // If with and height are not defined, it means there is a format conversion
+    // If width and height are not defined, it means there is a format conversion
     // and the image needs to be "resized" (transformed).
     return false // needs resize
   }
@@ -156,9 +156,10 @@ const preventResize = (
  * @returns true if the image should passed directly to sharp
  */
 const applyPayloadAdjustments = (
-  { height, width, withoutEnlargement, withoutReduction }: ImageSize,
+  { fit, height, width, withoutEnlargement, withoutReduction }: ImageSize,
   original: ProbedImageSize,
 ) => {
+  if (fit === 'contain' || fit === 'inside') return false
   if (!isNumber(height) && !isNumber(width)) return false
 
   const targetAspectRatio = width / height

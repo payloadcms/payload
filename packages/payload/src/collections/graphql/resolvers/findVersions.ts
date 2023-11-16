@@ -7,6 +7,7 @@ import type { PayloadRequest } from '../../../express/types'
 import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import findVersions from '../../operations/findVersions'
 
 export type Resolver = (
@@ -35,7 +36,7 @@ export default function findVersionsResolver(collection: Collection): Resolver {
       depth: 0,
       limit: args.limit,
       page: args.page,
-      req: { ...context.req } as PayloadRequest,
+      req: isolateTransactionID(context.req),
       sort: args.sort,
       where: args.where,
     }
