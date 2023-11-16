@@ -201,7 +201,12 @@ export const generateFileData = async <T>({
       fileData.width = info.width
       fileData.height = info.height
       fileData.filesize = info.size
-      req.files.file = fileForResize
+
+      if (file.tempFilePath) {
+        await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+      } else {
+        req.files.file = fileForResize
+      }
     } else {
       filesToSave.push({
         buffer: fileBuffer?.data || file.data,

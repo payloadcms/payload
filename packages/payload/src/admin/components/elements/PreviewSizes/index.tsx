@@ -71,7 +71,7 @@ const PreviewSizes: React.FC<{
   imageCacheTag?: string
 }> = ({ collection, doc, imageCacheTag }) => {
   const {
-    upload: { imageSizes, staticURL },
+    upload: { imageSizes, staticDir, staticURL },
   } = collection
   const { sizes } = doc
 
@@ -79,14 +79,14 @@ const PreviewSizes: React.FC<{
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
   const generateImageUrl = (filename) => {
-    return `${staticURL}/${filename}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+    return `${staticURL}/${staticDir}/${filename}${imageCacheTag ? `?${imageCacheTag}` : ''}`
   }
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
   }, [sizes, imageSizes, imageCacheTag])
 
   const mainPreviewSrc = selectedSize
-    ? generateImageUrl(`${orderedSizes[selectedSize]?.filename}`)
+    ? generateImageUrl(orderedSizes[selectedSize].filename)
     : generateImageUrl(doc.filename)
 
   const originalImage = useMemo(
