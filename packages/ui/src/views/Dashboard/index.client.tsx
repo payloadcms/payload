@@ -8,10 +8,11 @@ import type { Props } from './types'
 import { getTranslation } from 'payload/utilities'
 import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
 import { Button } from '../../elements/Button'
-import Card from '../../elements/Card'
+import { Card } from '../../elements/Card'
 import { Gutter } from '../../elements/Gutter'
 import './index.scss'
 import { ClientConfig } from 'payload/config'
+import { useAuth } from '../../providers/Auth'
 
 const baseClass = 'dashboard'
 
@@ -21,55 +22,62 @@ export const DefaultDashboardClient: React.FC<
   }
 > = (props) => {
   const {
-    collections,
-    globals,
-    permissions,
-    user,
+    config,
     config: {
       routes: { admin },
     },
   } = props
 
+  const { permissions, user } = useAuth()
+
+  const collections = config.collections.filter(
+    (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
+  )
+
+  const globals = config.globals.filter(
+    (global) => permissions?.globals?.[global.slug]?.read?.permission,
+  )
+
   const { i18n, t } = useTranslation('general')
 
   const [groups, setGroups] = useState<Group[]>([])
 
-  useEffect(() => {
-    setGroups(
-      groupNavItems(
-        [
-          ...(collections
-            ?.filter(
-              ({ admin: { hidden } }) =>
-                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-            )
-            .map((collection) => {
-              const entityToGroup: EntityToGroup = {
-                entity: collection,
-                type: EntityType.collection,
-              }
+  // useEffect(() => {
+  //   setGroups(
+  //     groupNavItems(
+  //       [
+  //         ...(collections
+  //           ?.filter(
+  //             ({ admin: { hidden } }) =>
+  //               !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+  //           )
+  //           .map((collection) => {
+  //             const entityToGroup: EntityToGroup = {
+  //               entity: collection,
+  //               type: EntityType.collection,
+  //             }
 
-              return entityToGroup
-            }) ?? []),
-          ...(globals
-            ?.filter(
-              ({ admin: { hidden } }) =>
-                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-            )
-            .map((global) => {
-              const entityToGroup: EntityToGroup = {
-                entity: global,
-                type: EntityType.global,
-              }
+  //             return entityToGroup
+  //           }) ?? []),
+  //         ...(globals
+  //           ?.filter(
+  //             ({ admin: { hidden } }) =>
+  //               !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+  //           )
+  //           .map((global) => {
+  //             const entityToGroup: EntityToGroup = {
+  //               entity: global,
+  //               type: EntityType.global,
+  //             }
 
-              return entityToGroup
-            }) ?? []),
-        ],
-        permissions,
-        i18n,
-      ),
-    )
-  }, [collections, globals, i18n, permissions, user])
+  //             return entityToGroup
+  //           }) ?? []),
+  //       ],
+  //       permissions,
+  //       i18n,
+  //     ),
+  //   )
+  // }, [collections, globals, i18n, permissions, user])
 
   return (
     <div className={baseClass}>
