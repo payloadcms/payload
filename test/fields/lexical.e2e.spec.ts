@@ -7,7 +7,7 @@ import type { SerializedBlockNode } from '../../packages/richtext-lexical/src'
 import type { LexicalField } from './payload-types'
 
 import payload from '../../packages/payload/src'
-import { saveDocAndAssert } from '../helpers'
+import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -42,6 +42,8 @@ describe('lexical', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
@@ -224,8 +226,7 @@ describe('lexical', () => {
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
       const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
-      const textNodeInBlockNodeRichText =
-        blockNode.fields.data.richText.root.children[1].children[0]
+      const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
 
       expect(textNodeInBlockNodeRichText.text).toBe(
         'Some text below relationship node 1 inserted text',
@@ -298,7 +299,7 @@ describe('lexical', () => {
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
       const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
-      const paragraphNodeInBlockNodeRichText = blockNode.fields.data.richText.root.children[1]
+      const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
 
       expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
 
@@ -403,7 +404,7 @@ describe('lexical', () => {
        * Check if it was created successfully and
        * fill newly created textarea sub-block with text
        */
-      const newSubBlock = lexicalBlock.locator('#subBlocks-row-1')
+      const newSubBlock = lexicalBlock.locator('.blocks-field__rows > div').nth(1)
       await expect(newSubBlock).toBeVisible()
 
       const newContentTextArea = newSubBlock.locator('textarea').first()
@@ -437,13 +438,76 @@ describe('lexical', () => {
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
       const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
-      const subBlocks = blockNode.fields.data.subBlocks
+      const subBlocks = blockNode.fields.subBlocks
 
       expect(subBlocks).toHaveLength(2)
 
       const createdTextAreaBlock = subBlocks[1]
 
       expect(createdTextAreaBlock.content).toBe('text123')
+    })
+
+    test('should allow changing values of two different radio button blocks independently', async () => {
+      // This test ensures that https://github.com/payloadcms/payload/issues/3911 does not happen again
+
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(4)
+
+      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(5)
+      await radioButtonBlock2.scrollIntoViewIfNeeded()
+      await expect(radioButtonBlock1).toBeVisible()
+      await expect(radioButtonBlock2).toBeVisible()
+
+      // Click radio button option2 of radioButtonBlock1
+      await radioButtonBlock1
+        .locator('.radio-input:has-text("Option 2")')
+        .first() // This already is an input for some reason
+        .click()
+
+      // Ensure radio button option1 of radioButtonBlock2 (the default option) is still selected
+      await expect(
+        radioButtonBlock2.locator('.radio-input:has-text("Option 1")').first(),
+      ).toBeChecked()
+
+      // Click radio button option3 of radioButtonBlock2
+      await radioButtonBlock2
+        .locator('.radio-input:has-text("Option 3")')
+        .first() // This already is an input for some reason
+        .click()
+
+      // Ensure previously clicked option2 of radioButtonBlock1 is still selected
+      await expect(
+        radioButtonBlock1.locator('.radio-input:has-text("Option 2")').first(),
+      ).toBeChecked()
+
+      /**
+       * Now save and check the actual data. radio button block 1 should have option2 selected and radio button block 2 should have option3 selected
+       */
+
+      await saveDocAndAssert(page)
+
+      const lexicalDoc: RichTextField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const radio1: SerializedBlockNode = lexicalField.root.children[7]
+      const radio2: SerializedBlockNode = lexicalField.root.children[8]
+
+      expect(radio1.fields.radioButtons).toBe('option2')
+      expect(radio2.fields.radioButtons).toBe('option3')
     })
 
     test('should not lose focus when writing in nested editor', async () => {

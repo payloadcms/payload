@@ -10,7 +10,7 @@ import { PreviewFrameSizeInput } from '../SizeInput'
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar-controls'
-const zoomOptions = [50,75,100,125,150,200]
+const zoomOptions = [50, 75, 100, 125, 150, 200]
 const customOption = {
   label: 'Custom', // TODO: Add i18n to this string
   value: 'custom',
@@ -25,19 +25,21 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
       {breakpoints?.length > 0 && (
         <Popup
           className={`${baseClass}__breakpoint`}
-          button={(
+          button={
             <>
-              <span>{breakpoints.find(bp => bp.name == breakpoint)?.label ?? customOption.label}</span>
+              <span>
+                {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
+              </span>
               &nbsp;
               <Chevron className={`${baseClass}__chevron`} />
             </>
-          )}
+          }
           render={({ close }) => (
             <PopupList.ButtonGroup>
               <React.Fragment>
                 {breakpoints.map((bp) => (
-                  <PopupList.Button 
-                    key={bp.name} 
+                  <PopupList.Button
+                    key={bp.name}
                     active={bp.name == breakpoint}
                     onClick={() => {
                       setBreakpoint(bp.name)
@@ -49,11 +51,14 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                 ))}
                 {/* Dynamically add this option so that it only appears when the width and height inputs are explicitly changed */}
                 {breakpoint === 'custom' && (
-                  <PopupList.Button active={breakpoint == customOption.value} onClick={() => {
-                    setBreakpoint(customOption.value)
-                    close()
-                  }}>
-                    { customOption.label }
+                  <PopupList.Button
+                    active={breakpoint == customOption.value}
+                    onClick={() => {
+                      setBreakpoint(customOption.value)
+                      close()
+                    }}
+                  >
+                    {customOption.label}
                   </PopupList.Button>
                 )}
               </React.Fragment>
@@ -73,20 +78,20 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
       </div>
       <Popup
         className={`${baseClass}__zoom`}
-        button={(
+        button={
           <>
             <span>{zoom * 100}%</span>
             &nbsp;
             <Chevron className={`${baseClass}__chevron`} />
           </>
-        )}
-        render={({close}) => (
+        }
+        render={({ close }) => (
           <PopupList.ButtonGroup>
             <React.Fragment>
               {zoomOptions.map((zoomValue) => (
-                <PopupList.Button 
-                  key={zoomValue} 
-                  active={(zoom*100) == zoomValue} 
+                <PopupList.Button
+                  key={zoomValue}
+                  active={zoom * 100 == zoomValue}
                   onClick={() => {
                     setZoom(zoomValue / 100)
                     close()

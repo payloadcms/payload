@@ -304,7 +304,7 @@ describe('Lexical', () => {
       /**
        * Depth 1 population:
        */
-      expect(relationshipBlockNode.fields.data.rel).toStrictEqual(createdJPGDocID)
+      expect(relationshipBlockNode.fields.rel).toStrictEqual(createdJPGDocID)
     })
 
     it('should populate relationships in blocks with depth=1', async () => {
@@ -328,7 +328,7 @@ describe('Lexical', () => {
       /**
        * Depth 1 population:
        */
-      expect(relationshipBlockNode.fields.data.rel.filename).toStrictEqual('payload.jpg')
+      expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload.jpg')
     })
 
     it('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async () => {
@@ -349,7 +349,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[3] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.data.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode
@@ -380,7 +380,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[3] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.data.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode
@@ -427,7 +427,7 @@ describe('Lexical', () => {
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
         .children[3] as SerializedBlockNode
 
-      const subEditor: SerializedEditorState = subEditorBlockNode.fields.data.richText
+      const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
 
       const subEditorRelationshipNode: SerializedRelationshipNode = subEditor.root
         .children[0] as SerializedRelationshipNode

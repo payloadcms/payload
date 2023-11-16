@@ -6,7 +6,12 @@ import path from 'path'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { exactText, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import {
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  saveDocHotkeyAndAssert,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -38,6 +43,7 @@ describe('fields', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
@@ -97,7 +103,7 @@ describe('fields', () => {
       await expect(error).toHaveText('#custom-error')
     })
 
-    test('should render BeforeInput and AfterInput', async () => {
+    test('should render beforeInput and afterInput', async () => {
       await page.goto(url.create)
       const input = page.locator('input[id="field-beforeAndAfterInput"]')
 
@@ -105,13 +111,13 @@ describe('fields', () => {
         return el.previousElementSibling
       })
       const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
-      await expect(prevSiblingText).toEqual('#before-input')
+      expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
       const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
-      await expect(nextSiblingText).toEqual('#after-input')
+      expect(nextSiblingText).toEqual('#after-input')
     })
   })
 

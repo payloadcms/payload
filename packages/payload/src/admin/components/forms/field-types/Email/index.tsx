@@ -10,8 +10,8 @@ import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const Email: React.FC<Props> = (props) => {
   const {
@@ -19,13 +19,13 @@ const Email: React.FC<Props> = (props) => {
     admin: {
       autoComplete,
       className,
+      components: { Error, Label, afterInput, beforeInput } = {},
       condition,
       description,
       placeholder,
       readOnly,
       style,
       width,
-      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     label,
     path: pathFromProps,
@@ -68,7 +68,7 @@ const Email: React.FC<Props> = (props) => {
       <ErrorComp message={errorMessage} showError={showError} />
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <div className="input-wrapper">
-        {BeforeInput}
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
         <input
           autoComplete={autoComplete}
           disabled={Boolean(readOnly)}
@@ -79,7 +79,7 @@ const Email: React.FC<Props> = (props) => {
           type="email"
           value={(value as string) || ''}
         />
-        {AfterInput}
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
       </div>
       <FieldDescription description={description} value={value} />
     </div>

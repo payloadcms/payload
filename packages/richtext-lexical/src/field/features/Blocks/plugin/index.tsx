@@ -9,7 +9,7 @@ import type { BlockFields } from '../nodes/BlocksNode'
 import { BlocksDrawerComponent } from '../drawer'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode'
 
-export type InsertBlockPayload = BlockFields
+export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 
 export const INSERT_BLOCK_COMMAND: LexicalCommand<InsertBlockPayload> =
   createCommand('INSERT_BLOCK_COMMAND')

@@ -7,7 +7,7 @@ import type { Media } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert } from '../helpers'
+import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -39,6 +39,8 @@ describe('uploads', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
 
     const findPNG = await payload.find({
       collection: mediaSlug,
