@@ -23,7 +23,7 @@ const sanitizeFields = (fields: Field[]): Field[] =>
   })
 
 export const createClientConfig = async (
-  configPromise: Promise<SanitizedConfig>,
+  configPromise: SanitizedConfig | Promise<SanitizedConfig>,
 ): Promise<ClientConfig> => {
   const config = await configPromise
   const clientConfig = { ...config }

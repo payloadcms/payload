@@ -27,7 +27,8 @@
     "@faceless-ui/window-info": "2.1.1"
   },
   "peerDependencies": {
-    "payload": "^2.0.0"
+    "payload": "^2.0.0",
+    "react-i18next": "11.18.6"
   },
   "publishConfig": {
     "exports": {
