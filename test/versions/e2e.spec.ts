@@ -248,6 +248,7 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    // TODO: This test is flaky and fails sometimes
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       // fill out global title and wait for autosave
