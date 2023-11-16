@@ -10,13 +10,15 @@ import { PreviewFrameSizeInput } from '../SizeInput'
 import './index.scss'
 
 const baseClass = 'live-preview-toolbar-controls'
+const zoomOptions = [50,75,100,125,150,200]
+const customOption = {
+  label: 'Custom', // TODO: Add i18n to this string
+  value: 'custom',
+}
 
 export const ToolbarControls: React.FC<EditViewProps> = () => {
   const { breakpoint, breakpoints, setBreakpoint, setPreviewWindowType, setZoom, url, zoom } =
     useLivePreviewContext()
-  const zoomOptions = [50,75,100,125,150,200]
-  const customValue = 'custom'
-  const customLabel = 'Custom' // TODO: Translate this string
 
   return (
     <div className={baseClass}>
@@ -25,7 +27,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           className={`${baseClass}__breakpoint`}
           button={(
             <>
-              <span>{breakpoints.find(bp => bp.name == breakpoint)?.label ?? customLabel}</span>
+              <span>{breakpoints.find(bp => bp.name == breakpoint)?.label ?? customOption.label}</span>
               &nbsp;
               <Chevron className={`${baseClass}__chevron`} />
             </>
@@ -47,11 +49,11 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                 ))}
                 {/* Dynamically add this option so that it only appears when the width and height inputs are explicitly changed */}
                 {breakpoint === 'custom' && (
-                  <PopupList.Button active={breakpoint == customValue} onClick={() => {
-                    setBreakpoint(customValue)
+                  <PopupList.Button active={breakpoint == customOption.value} onClick={() => {
+                    setBreakpoint(customOption.value)
                     close()
                   }}>
-                    { customLabel }
+                    { customOption.label }
                   </PopupList.Button>
                 )}
               </React.Fragment>
