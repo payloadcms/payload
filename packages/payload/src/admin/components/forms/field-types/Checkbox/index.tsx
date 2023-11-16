@@ -20,12 +20,12 @@ const Checkbox: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components: { Error, Label, afterInput, beforeInput } = {},
       condition,
       description,
       readOnly,
       style,
       width,
-      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     disableFormData,
     label,
@@ -85,15 +85,15 @@ const Checkbox: React.FC<Props> = (props) => {
         <ErrorComp alignCaret="left" message={errorMessage} showError={showError} />
       </div>
       <CheckboxInput
+        Label={Label}
+        afterInput={afterInput}
+        beforeInput={beforeInput}
         checked={Boolean(value)}
         id={fieldID}
         label={getTranslation(label || name, i18n)}
         name={path}
         onToggle={onToggle}
         readOnly={readOnly}
-        Label={Label}
-        BeforeInput={BeforeInput}
-        AfterInput={AfterInput}
         required={required}
       />
       <FieldDescription description={description} value={value} />

@@ -4,8 +4,12 @@ import type { TFunction } from 'i18next'
 import type { CSSProperties } from 'react'
 
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
+import type React from 'react'
+
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
+import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
 import type { Description } from '../../admin/components/forms/FieldDescription/types'
+import type { Props as LabelProps } from '../../admin/components/forms/Label/types'
 import type { RowLabel } from '../../admin/components/forms/RowLabel/types'
 import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
 import type { User } from '../../auth'
@@ -15,8 +19,6 @@ import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { Payload } from '../../payload'
 import type { Operation, Where } from '../../types'
-import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
-import type { Props as LabelProps } from '../../admin/components/forms/Label/types'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
@@ -170,16 +172,16 @@ export type NumberField = FieldBase & {
   admin?: Admin & {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
+    }
     /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
-    components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-      BeforeInput?: React.ReactElement<any>[]
-      AfterInput?: React.ReactElement<any>[]
-    }
   }
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
@@ -208,14 +210,14 @@ export type NumberField = FieldBase & {
 export type TextField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
-    placeholder?: Record<string, string> | string
-    rtl?: boolean
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
-      BeforeInput?: React.ReactElement<any>[]
-      AfterInput?: React.ReactElement<any>[]
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
     }
+    placeholder?: Record<string, string> | string
+    rtl?: boolean
   }
   maxLength?: number
   minLength?: number
@@ -225,28 +227,28 @@ export type TextField = FieldBase & {
 export type EmailField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
-    placeholder?: Record<string, string> | string
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
-      BeforeInput?: React.ReactElement<any>[]
-      AfterInput?: React.ReactElement<any>[]
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
     }
+    placeholder?: Record<string, string> | string
   }
   type: 'email'
 }
 
 export type TextareaField = FieldBase & {
   admin?: Admin & {
-    placeholder?: Record<string, string> | string
-    rows?: number
-    rtl?: boolean
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
-      BeforeInput?: React.ReactElement<any>[]
-      AfterInput?: React.ReactElement<any>[]
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
     }
+    placeholder?: Record<string, string> | string
+    rows?: number
+    rtl?: boolean
   }
   maxLength?: number
   minLength?: number
@@ -254,27 +256,27 @@ export type TextareaField = FieldBase & {
 }
 
 export type CheckboxField = FieldBase & {
-  type: 'checkbox'
   admin?: Admin & {
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
-      BeforeInput?: React.ReactElement<any>[]
-      AfterInput?: React.ReactElement<any>[]
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
     }
   }
+  type: 'checkbox'
 }
 
 export type DateField = FieldBase & {
   admin?: Admin & {
-    date?: ConditionalDateProps
-    placeholder?: Record<string, string> | string
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
-      BeforeInput?: React.ReactElement<any>[]
-      AfterInput?: React.ReactElement<any>[]
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
     }
+    date?: ConditionalDateProps
+    placeholder?: Record<string, string> | string
   }
   type: 'date'
 }
@@ -382,12 +384,12 @@ export type UploadField = FieldBase & {
 }
 
 type CodeAdmin = Admin & {
-  editorOptions?: EditorProps['options']
-  language?: string
   components?: {
     Error?: React.ComponentType<ErrorProps>
     Label?: React.ComponentType<LabelProps>
   }
+  editorOptions?: EditorProps['options']
+  language?: string
 }
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
@@ -398,11 +400,11 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
 }
 
 type JSONAdmin = Admin & {
-  editorOptions?: EditorProps['options']
   components?: {
     Error?: React.ComponentType<ErrorProps>
     Label?: React.ComponentType<LabelProps>
   }
+  editorOptions?: EditorProps['options']
 }
 
 export type JSONField = Omit<FieldBase, 'admin'> & {
@@ -412,12 +414,12 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
 
 export type SelectField = FieldBase & {
   admin?: Admin & {
-    isClearable?: boolean
-    isSortable?: boolean
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
     }
+    isClearable?: boolean
+    isSortable?: boolean
   }
   hasMany?: boolean
   options: Option[]
@@ -427,11 +429,11 @@ export type SelectField = FieldBase & {
 export type RelationshipField = FieldBase & {
   admin?: Admin & {
     allowCreate?: boolean
-    isSortable?: boolean
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
     }
+    isSortable?: boolean
   }
   filterOptions?: FilterOptions
   hasMany?: boolean
@@ -515,11 +517,11 @@ export type ArrayField = FieldBase & {
 
 export type RadioField = FieldBase & {
   admin?: Admin & {
-    layout?: 'horizontal' | 'vertical'
     components?: {
       Error?: React.ComponentType<ErrorProps>
       Label?: React.ComponentType<LabelProps>
     }
+    layout?: 'horizontal' | 'vertical'
   }
   options: Option[]
   type: 'radio'

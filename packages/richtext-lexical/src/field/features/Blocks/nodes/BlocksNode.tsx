@@ -15,15 +15,14 @@ import ObjectID from 'bson-objectid'
 import React from 'react'
 
 import { BlockComponent } from '../component'
+import { transformInputFormData } from '../utils/transformInputFormData'
 
 export type BlockFields = {
-  /** Block data */
-  data: {
-    [key: string]: any
-    blockName: string
-    blockType: string
-    id?: string
-  }
+  /** Block form data */
+  [key: string]: any
+  blockName: string
+  blockType: string
+  id: string
 }
 
 export type SerializedBlockNode = Spread<
@@ -66,6 +65,16 @@ export class BlockNode extends DecoratorBlockNode {
   }
 
   static importJSON(serializedNode: SerializedBlockNode): BlockNode {
+    if (serializedNode.version === 1) {
+      // Convert (version 1 had the fields wrapped in another, unnecessary data property)
+      serializedNode = {
+        ...serializedNode,
+        fields: {
+          ...(serializedNode as any).data.fields,
+        },
+        version: 2,
+      }
+    }
     const node = $createBlockNode(serializedNode.fields)
     node.setFormat(serializedNode.format)
     return node
@@ -75,11 +84,13 @@ export class BlockNode extends DecoratorBlockNode {
     return false
   }
   decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    const blockFieldWrapperName = this.getFields().blockType + '-' + this.getFields().id
+    const transformedFormData = transformInputFormData(this.getFields(), blockFieldWrapperName)
+
     return (
       <BlockComponent
-        className={config.theme.block ?? 'LexicalEditorTheme__block'}
-        fields={this.__fields}
-        format={this.__format}
+        blockFieldWrapperName={blockFieldWrapperName}
+        formData={transformedFormData}
         nodeKey={this.getKey()}
       />
     )
@@ -98,24 +109,37 @@ export class BlockNode extends DecoratorBlockNode {
       ...super.exportJSON(),
       fields: this.getFields(),
       type: this.getType(),
-      version: 1,
+      version: 2,
     }
   }
 
   getFields(): BlockFields {
     return this.getLatest().__fields
   }
+
   getId(): string {
     return this.__id
   }
-
   getTextContent(): string {
     return `Block Field`
   }
 
   setFields(fields: BlockFields): void {
+    let fieldsCopy = JSON.parse(JSON.stringify(fields)) as BlockFields
+    // Possibly transform fields
+    const blockFieldWrapperName = fieldsCopy.blockType + '-' + fieldsCopy.id
+    if (fieldsCopy[blockFieldWrapperName]) {
+      fieldsCopy = {
+        id: fieldsCopy.id,
+        blockName: fieldsCopy.blockName,
+        blockType: fieldsCopy.blockType,
+        ...fieldsCopy[blockFieldWrapperName],
+      }
+      delete fieldsCopy[blockFieldWrapperName]
+    }
+
     const writable = this.getWritable()
-    writable.__fields = fields
+    writable.__fields = fieldsCopy
   }
 }
 
@@ -123,10 +147,7 @@ export function $createBlockNode(fields: Exclude<BlockFields, 'id'>): BlockNode 
   return new BlockNode({
     fields: {
       ...fields,
-      data: {
-        ...fields.data,
-        id: fields?.data?.id || new ObjectID().toHexString(),
-      },
+      id: fields?.id || new ObjectID().toHexString(),
     },
   })
 }

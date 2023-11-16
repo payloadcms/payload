@@ -13,6 +13,30 @@ export const TextBlock: Block = {
   slug: 'text',
 }
 
+export const RadioButtonsBlock: Block = {
+  fields: [
+    {
+      name: 'radioButtons',
+      type: 'radio',
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+        {
+          label: 'Option 3',
+          value: 'option3',
+        },
+      ],
+    },
+  ],
+  slug: 'radioButtons',
+}
+
 export const RichTextBlock: Block = {
   fields: [
     {
