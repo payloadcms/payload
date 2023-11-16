@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import Button from '../Button'
+import { Button } from '../Button'
 import './index.scss'
 
 const baseClass = 'card'

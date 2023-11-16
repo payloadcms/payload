@@ -1,6 +1,6 @@
 import React from 'react'
 
-const CodeBlockIcon: React.FC = () => (
+export const CodeBlockIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic code-block-icon"
@@ -19,5 +19,3 @@ const CodeBlockIcon: React.FC = () => (
     />
   </svg>
 )
-
-export default CodeBlockIcon

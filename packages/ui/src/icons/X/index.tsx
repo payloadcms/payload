@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const X: React.FC<{ className?: string }> = ({ className }) => (
+export const X: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={[className, 'icon icon--x'].filter(Boolean).join(' ')}
     height="25"
@@ -14,5 +14,3 @@ const X: React.FC<{ className?: string }> = ({ className }) => (
     <line className="stroke" x1="8.6027" x2="16.2539" y1="8.69585" y2="16.3471" />
   </svg>
 )
-
-export default X

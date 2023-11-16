@@ -21,4 +21,12 @@ export type Props = {
   tooltip?: string
   type?: 'button' | 'submit'
   url?: string
+  /**
+   * Pass a component from your routing library to override the default anchor tag.
+   * @example
+   * import { Link } from 'react-router-dom'
+   * @example
+   * import { Link } from 'next/link'
+   **/
+  Link?: React.ElementType
 }

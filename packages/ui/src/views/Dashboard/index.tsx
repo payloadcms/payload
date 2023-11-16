@@ -1,50 +1,32 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
-import type { SanitizedGlobalConfig } from '../../../../exports/types'
+import type { Props } from './types'
 
-import { useStepNav } from '../../elements/StepNav'
-import { useAuth } from '../../utilities/Auth'
-import { useConfig } from '../../utilities/Config'
-import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import DefaultDashboard from './Default'
+import { Gutter } from '../../elements/Gutter'
+import './index.scss'
+import { DefaultDashboardClient } from './index.client'
 
-const Dashboard: React.FC = () => {
-  const { permissions, user } = useAuth()
-  const { setStepNav } = useStepNav()
-  const [filteredGlobals, setFilteredGlobals] = useState<SanitizedGlobalConfig[]>([])
+const baseClass = 'dashboard'
 
+export const DefaultDashboard: React.FC<Props> = (props) => {
   const {
-    admin: { components: { views: { Dashboard: CustomDashboardComponent } = {} } = {} } = {},
-    collections,
-    globals,
-  } = useConfig()
-
-  useEffect(() => {
-    setFilteredGlobals(
-      globals.filter((global) => permissions?.globals?.[global.slug]?.read?.permission),
-    )
-  }, [permissions, globals])
-
-  useEffect(() => {
-    setStepNav([])
-  }, [setStepNav])
+    config: {
+      admin: {
+        components: { afterDashboard, beforeDashboard },
+      },
+    },
+    clientConfig,
+  } = props
 
   return (
-    <RenderCustomComponent
-      CustomComponent={
-        typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
-      }
-      DefaultComponent={DefaultDashboard}
-      componentProps={{
-        collections: collections.filter(
-          (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
-        ),
-        globals: filteredGlobals,
-        permissions,
-        user,
-      }}
-    />
+    <div className={baseClass}>
+      <Gutter className={`${baseClass}__wrap`}>
+        {Array.isArray(beforeDashboard) &&
+          beforeDashboard.map((Component, i) => <Component key={i} />)}
+        <DefaultDashboardClient {...props} config={clientConfig} />
+        {Array.isArray(afterDashboard) &&
+          afterDashboard.map((Component, i) => <Component key={i} />)}
+      </Gutter>
+    </div>
   )
 }
-
-export default Dashboard

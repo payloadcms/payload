@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const DragHandle: React.FC<{ className?: string }> = ({ className }) => (
+export const DragHandle: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={['icon icon--drag-handle', className].filter(Boolean).join(' ')}
     viewBox="0 0 25 25"
@@ -16,5 +16,3 @@ const DragHandle: React.FC<{ className?: string }> = ({ className }) => (
     <circle className="fill" cx="14.532" cy="8.3" r="1" />
   </svg>
 )
-
-export default DragHandle

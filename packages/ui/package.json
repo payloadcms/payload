@@ -27,6 +27,11 @@
     "@faceless-ui/window-info": "2.1.1"
   },
   "peerDependencies": {
+    "@monaco-editor/react": "4.5.1",
+    "deepmerge": "4.3.1",
+    "i18next": "22.5.1",
+    "i18next-browser-languagedetector": "6.1.8",
+    "i18next-http-middleware": "3.3.2",
     "payload": "^2.0.0",
     "react-i18next": "11.18.6"
   },

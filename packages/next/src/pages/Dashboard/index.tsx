@@ -1,7 +1,7 @@
 import { SanitizedConfig } from 'payload/types'
 import React from 'react'
 import { RootProvider } from '@payloadcms/ui/providers'
-import { RenderCustomComponent } from '@payloadcms/ui/elements'
+import { RenderCustomComponent } from '@payloadcms/ui/utilities'
 import { createClientConfig } from '../../createClientConfig'
 import { DefaultDashboard } from '@payloadcms/ui/views'
 
@@ -10,7 +10,7 @@ export const Dashboard = ({ config: configPromise }: { config: Promise<Sanitized
     const config = await configPromise
     const clientConfig = await createClientConfig(config)
 
-    const CustomDashboardComponent = config.admin.components.views.Dashboard
+    const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 
     return (
       <RootProvider config={clientConfig}>
@@ -20,16 +20,16 @@ export const Dashboard = ({ config: configPromise }: { config: Promise<Sanitized
             typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
           }
           DefaultComponent={DefaultDashboard}
-          componentProps={
-            {
-              // collections: collections.filter(
-              //   (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
-              // ),
-              // globals: filteredGlobals,
-              // permissions,
-              // user,
-            }
-          }
+          componentProps={{
+            config,
+            clientConfig,
+            // collections: collections.filter(
+            //   (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
+            // ),
+            // globals: filteredGlobals,
+            // permissions,
+            // user,
+          }}
         />
       </RootProvider>
     )

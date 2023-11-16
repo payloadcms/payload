@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const Check: React.FC = () => (
+export const Check: React.FC = () => (
   <svg className="icon icon--check" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <path
       className="stroke"
@@ -18,5 +18,3 @@ const Check: React.FC = () => (
     />
   </svg>
 )
-
-export default Check

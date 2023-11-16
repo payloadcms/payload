@@ -1,3 +1,4 @@
+'use client'
 import type React from 'react'
 
 import { loader } from '@monaco-editor/react'
@@ -6,12 +7,14 @@ import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
 
-import { defaultOptions } from '../../../../translations/defaultOptions'
-import { getSupportedMonacoLocale } from '../../../utilities/getSupportedMonacoLocale'
-import { useConfig } from '../Config'
+import { defaultOptions } from 'payload/translations'
+import { getSupportedMonacoLocale } from '../../utilities/getSupportedMonacoLocale'
+import { ClientConfig } from 'payload/config'
 
-export const I18n: React.FC = () => {
-  const config = useConfig()
+export const I18n: React.FC<{
+  config: ClientConfig
+}> = (props) => {
+  const { config } = props
 
   if (i18n.isInitialized) {
     return null

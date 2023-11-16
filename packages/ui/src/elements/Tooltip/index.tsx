@@ -1,11 +1,12 @@
+'use client'
 import React, { useEffect } from 'react'
 
 import type { Props } from './types'
 
-import useIntersect from '../../../hooks/useIntersect'
+import { useIntersect } from '../../hooks/useIntersect'
 import './index.scss'
 
-const Tooltip: React.FC<Props> = (props) => {
+export const Tooltip: React.FC<Props> = (props) => {
   const { boundingRef, children, className, delay = 350, show: showFromProps = true } = props
 
   const [show, setShow] = React.useState(showFromProps)
@@ -58,5 +59,3 @@ const Tooltip: React.FC<Props> = (props) => {
     </React.Fragment>
   )
 }
-
-export default Tooltip

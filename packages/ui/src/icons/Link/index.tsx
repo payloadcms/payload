@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const LinkIcon: React.FC = () => (
+export const LinkIcon: React.FC = () => (
   <svg
     aria-hidden="true"
     className="graphic link icon icon--link"
@@ -18,5 +18,3 @@ const LinkIcon: React.FC = () => (
     />
   </svg>
 )
-
-export default LinkIcon

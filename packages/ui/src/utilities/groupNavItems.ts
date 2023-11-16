@@ -1,10 +1,10 @@
 import type { i18n as Ii18n } from 'i18next'
 
-import type { Permissions } from '../../auth'
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../globals/config/types'
+import type { Permissions } from 'payload/auth'
+import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedGlobalConfig } from 'payload/types'
 
-import { getTranslation } from '../../utilities/getTranslation'
+import { getTranslation } from 'payload/utilities'
 
 export enum EntityType {
   collection = 'collections',

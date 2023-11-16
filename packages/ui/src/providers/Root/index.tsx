@@ -5,6 +5,7 @@ import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import { WindowInfoProvider } from '@faceless-ui/window-info'
 import { ConfigProvider } from '../Config'
+import I18n from '../../elements/I18n'
 
 type Props = {
   config: ClientConfig
@@ -14,6 +15,7 @@ type Props = {
 export const RootProvider: React.FC<Props> = ({ config, children }) => {
   return (
     <ConfigProvider config={config}>
+      <I18n config={config} />
       <WindowInfoProvider
         breakpoints={{
           l: '(max-width: 1440px)',

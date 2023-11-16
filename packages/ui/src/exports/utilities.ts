@@ -1,1 +1,1 @@
-export { RenderCustomComponent } from '../utilities/RenderCustomComponent'
+export { RenderCustomComponent } from '../elements/RenderCustomComponent'

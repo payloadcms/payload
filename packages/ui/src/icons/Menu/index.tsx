@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const Menu: React.FC = () => (
+export const Menu: React.FC = () => (
   <svg
     className="icon icon--menu"
     fill="none"
@@ -16,5 +16,3 @@ const Menu: React.FC = () => (
     <rect className="fill" height="2" width="18" x="3.5" y="18.5" />
   </svg>
 )
-
-export default Menu

@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const CloseMenu: React.FC = () => (
+export const CloseMenu: React.FC = () => (
   <svg
     className="icon icon--close-menu"
     fill="none"
@@ -27,5 +27,3 @@ const CloseMenu: React.FC = () => (
     />
   </svg>
 )
-
-export default CloseMenu
