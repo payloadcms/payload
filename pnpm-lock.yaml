@@ -613,6 +613,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       payload:
         specifier: workspace:*
         version: link:../payload

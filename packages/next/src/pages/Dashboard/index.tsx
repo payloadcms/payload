@@ -1,5 +1,6 @@
 import { SanitizedConfig } from 'payload/types'
 import React from 'react'
+import { RootProvider } from '@payloadcms/ui/providers'
 import { createClientConfig } from '../../createClientConfig'
 
 export const Dashboard = ({ config: configPromise }: { config: Promise<SanitizedConfig> }) =>
@@ -7,8 +8,8 @@ export const Dashboard = ({ config: configPromise }: { config: Promise<Sanitized
     const config = await createClientConfig(configPromise)
 
     return (
-      <React.Fragment>
+      <RootProvider config={config}>
         <h1>Dashboard (rendered on server)</h1>
-      </React.Fragment>
+      </RootProvider>
     )
   }

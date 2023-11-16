@@ -23,6 +23,7 @@
     }
   },
   "devDependencies": {
+    "@payloadcms/ui": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
   },
