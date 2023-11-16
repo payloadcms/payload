@@ -6,6 +6,7 @@ import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import { WindowInfoProvider } from '@faceless-ui/window-info'
 import { ConfigProvider } from '../Config'
 import I18n from '../../elements/I18n'
+import { AuthProvider } from '../Auth'
 
 type Props = {
   config: ClientConfig
@@ -26,8 +27,10 @@ export const RootProvider: React.FC<Props> = ({ config, children }) => {
       >
         <ScrollInfoProvider>
           <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-            {children}
-            <ModalContainer />
+            <AuthProvider>
+              {children}
+              <ModalContainer />
+            </AuthProvider>
           </ModalProvider>
         </ScrollInfoProvider>
       </WindowInfoProvider>
