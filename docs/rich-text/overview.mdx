@@ -1,0 +1,18 @@
+---
+title: Overview
+label: Overview
+order: 10
+desc: Rich Text within Payload is extremely powerful. We've combined the beauty of the Medium editor with the power of the Notion editor all in one place.
+keywords: slatejs, lexical, rich text, json, custom editor, javascript, typescript
+---
+
+Payload currently supports two official rich text editors and you can choose either one depending on your needs.
+
+1. [SlateJS](/docs/rich-text/slate) - stable, backwards-compatible with 1.0
+2. [Lexical](/docs/rich-text/lexical) - beta, where things will be moving in the future
+
+These editors are built on an "adapter pattern" which means that you will need to install the editor you'd like to use. Take a look at the docs for the editor you'd like to use for instructions on how to install it.
+
+The big TL;DR here is that Slate is what we have used in the past, and we still support it for existing projects, but if you're building something new and you're feeling adventurous, you should give Lexical a shot. Slate has a lot of good stuff, but Lexical has lots more.
+
+No matter which editor you use, you have to install it at the top-level on the `config.editor` property, which will then cascade throughout all of your rich text fields and be used accordingly. Additionally, you also have the option to override the editor on a field-by-field basis if you'd like.

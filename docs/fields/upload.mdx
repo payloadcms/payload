@@ -7,13 +7,24 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 ---
 
 <Banner>
-  The Upload field allows for the selection of a Document from a collection supporting Uploads, and formats the selection as a thumbnail in the Admin panel.
+  The Upload field allows for the selection of a Document from a collection supporting Uploads, and
+  formats the selection as a thumbnail in the Admin panel.
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong><br />
-  To use this field, you need to have a Collection configured to allow Uploads. For more information, [click here](/docs/upload/overview) to read about how to enable Uploads on a collection by collection basis.
+  <strong>Important:</strong>
+  <br />
+  To use this field, you need to have a Collection configured to allow Uploads. For more
+  information, [click here](/docs/upload/overview) to read about how to enable Uploads on a
+  collection by collection basis.
 </Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+  alt="Shows an upload field in the Payload admin panel"
+  caption="Admin panel screenshot of an Upload field"
+/>
 
 **Example uses:**
 
@@ -32,7 +43,7 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 | **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
-| **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`index`**          | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
 | **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
 | **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
@@ -50,19 +61,19 @@ _\* An asterisk denotes that a property is required._
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "backgroundImage", // required
-      type: "upload", // required
-      relationTo: "media", // required
+      name: 'backgroundImage', // required
+      type: 'upload', // required
+      relationTo: 'media', // required
       required: true,
     },
   ],
-};
+}
 ```
 
 ### Filtering upload options
@@ -83,18 +94,22 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 
 ```ts
 const uploadField = {
-  name: "image",
-  type: "upload",
-  relationTo: "media",
+  name: 'image',
+  type: 'upload',
+  relationTo: 'media',
   filterOptions: {
-    mimeType: { contains: "image" },
+    mimeType: { contains: 'image' },
   },
-};
+}
 ```
 
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  <strong>Note:</strong><br />
-  When an upload field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong> unless you call the default upload field validation function imported from <strong>payload/fields/validations</strong> in your validate function.
+  <strong>Note:</strong>
+  <br />
+  When an upload field has both <strong>filterOptions</strong> and a custom{' '}
+  <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong>{' '}
+  unless you call the default upload field validation function imported from{' '}
+  <strong>payload/fields/validations</strong> in your validate function.
 </Banner>

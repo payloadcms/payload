@@ -1,0 +1,39 @@
+@import '../../../scss/styles.scss';
+
+.status {
+  &__label {
+    color: var(--theme-elevation-500);
+  }
+
+  &__value {
+    font-weight: 600;
+  }
+
+  &__value-wrap {
+    white-space: nowrap;
+  }
+
+  &__action {
+    text-decoration: underline;
+  }
+
+  &__modal {
+    @include blur-bg;
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    &__toggle {
+      @extend %btn-reset;
+    }
+
+    .btn {
+      margin-right: $baseline;
+    }
+  }
+
+  &__modal-template {
+    position: relative;
+    z-index: 1;
+  }
+}

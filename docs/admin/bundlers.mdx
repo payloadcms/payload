@@ -1,0 +1,54 @@
+---
+title: Bundlers
+label: Bundlers
+order: 60
+desc: Bundlers are used to bundle the code that serves Payload's Admin Panel.
+---
+
+Payload has two official bundlers, the [Webpack Bundler](/docs/admin/webpack) and the [Vite Bundler](/docs/admin/vite). You must install a bundler to use the admin panel.
+
+##### Install a bundler
+
+Webpack (recommended):
+
+```text
+yarn add @payloadcms/bundler-webpack
+```
+
+Vite (beta):
+
+```text
+yarn add @payloadcms/bundler-vite
+```
+
+##### Configure the bundler
+
+```ts
+// payload.config.ts
+
+import { buildConfig } from 'payload/config'
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+// import { viteBundler } from '@payloadcms/bundler-vite'
+
+export default buildConfig({
+  // highlight-start
+  admin: {
+    bundler: webpackBundler() // or viteBundler()
+  },
+  // highlight-end
+})
+```
+
+### What are bundlers?
+
+At their core, a bundler's main goal is to take a bunch of files and turn them into a few optimized files that you ship to the browser. The admin UI has a root `index.html` entry point, and from there the bundler traverses the dependency tree, bundling all of the files that are required from that point on.
+
+Since the bundled file is sent to the browser, it can't include any server-only code. You will need to remove any server-only code from your admin UI before bundling it. You can learn more about [excluding server code](/docs/admin/excluding-server-code) section.
+
+<Banner type="warning">
+  <strong>Using environment variables in the admin UI</strong>
+  <br />
+  Bundles should not contain sensitive information. By default, Payload
+  excludes env variables from the bundle. If you need to use env variables in your payload config,
+  you need to prefix them with `PAYLOAD_PUBLIC_` to make them available to the client-side code.
+</Banner>

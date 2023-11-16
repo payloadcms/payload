@@ -7,9 +7,16 @@ keywords: date, fields, config, configuration, documentation, Content Management
 ---
 
 <Banner>
-  The Date field type saves a Date in the database and provides the Admin panel
-  with a customizable time picker interface.
+  The Date field type saves a Date in the database and provides the Admin panel with a customizable
+  time picker interface.
 </Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/date.png"
+  srcDark="https://payloadcms.com/images/docs/fields/date-dark.png"
+  alt="Shows a Date field in the Payload admin panel"
+  caption="Admin panel screenshot of a Date field"
+/>
 
 This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin panel component.
 
@@ -19,7 +26,7 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
 | **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
-| **`index`**        | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
 | **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
 | **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
@@ -48,6 +55,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 | **`date.maxDate`** \*          | Max date value to allow.                                                                    |
 | **`date.minTime`** \*          | Min time value to allow.                                                                    |
 | **`date.maxTime`** \*          | Max date value to allow.                                                                    |
+| **`date.overrides`** \*        | Pass any valid props directly to the [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md)     |
 | **`date.timeIntervals`** \*    | Time intervals to display. Defaults to 30 minutes.                                          |
 | **`date.timeFormat`** \*       | Determines time format. Defaults to `'h:mm aa'`.                                            |
 
@@ -68,41 +76,41 @@ When only `pickerAppearance` is set, an equivalent format will be rendered in th
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "dateOnly",
-      type: "date",
+      name: 'dateOnly',
+      type: 'date',
       admin: {
         date: {
-          pickerAppearance: "dayOnly",
-          displayFormat: "d MMM yyy",
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyy',
         },
       },
     },
     {
-      name: "timeOnly",
-      type: "date",
+      name: 'timeOnly',
+      type: 'date',
       admin: {
         date: {
-          pickerAppearance: "timeOnly",
-          displayFormat: "h:mm:ss a",
+          pickerAppearance: 'timeOnly',
+          displayFormat: 'h:mm:ss a',
         },
       },
     },
     {
-      name: "monthOnly",
-      type: "date",
+      name: 'monthOnly',
+      type: 'date',
       admin: {
         date: {
-          pickerAppearance: "monthOnly",
-          displayFormat: "MMMM yyyy",
+          pickerAppearance: 'monthOnly',
+          displayFormat: 'MMMM yyyy',
         },
       },
     },
   ],
-};
+}
 ```

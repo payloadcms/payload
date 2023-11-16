@@ -25,13 +25,16 @@ export const RecoverPasswordForm: React.FC = () => {
   } = useForm<FormData>()
 
   const onSubmit = useCallback(async (data: FormData) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/forgot-password`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/forgot-password`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    })
+    )
 
     if (response.ok) {
       setSuccess(true)
@@ -52,7 +55,7 @@ export const RecoverPasswordForm: React.FC = () => {
             <p>
               {`Please enter your email below. You will receive an email message with instructions on
               how to reset your password. To manage your all users, `}
-              <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+              <Link href={`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/admin/collections/users`}>
                 login to the admin dashboard
               </Link>
               {'.'}

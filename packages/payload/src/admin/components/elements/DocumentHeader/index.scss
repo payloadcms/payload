@@ -1,0 +1,51 @@
+@import '../../../scss/styles.scss';
+
+.doc-header {
+  width: 100%;
+  margin-top: base(0.5);
+  padding-bottom: calc(var(--base) * 1.5);
+  display: flex;
+  align-items: center;
+  position: relative;
+  display: flex;
+  gap: calc(var(--base) / 2);
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    height: 1px;
+    background: var(--theme-elevation-100);
+    width: 100%;
+    left: 0;
+    top: calc(100% - 1px);
+  }
+
+  &__title {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  @include mid-break {
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: base(0.25);
+    padding-bottom: calc(var(--base) / 1.5);
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+    padding-bottom: calc(var(--base) / 2);
+
+    &__title {
+      width: 100%;
+      padding-left: var(--gutter-h);
+      padding-right: var(--gutter-h);
+    }
+  }
+
+  @include small-break {
+    margin-top: 0;
+  }
+}

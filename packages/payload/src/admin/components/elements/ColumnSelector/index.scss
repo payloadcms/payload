@@ -1,0 +1,28 @@
+@import '../../../scss/styles.scss';
+
+.column-selector {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--theme-elevation-50);
+  padding: base(1) base(1) base(0.5);
+
+  &__column {
+    margin-right: base(0.5);
+    margin-bottom: base(0.5);
+    background-color: transparent;
+    box-shadow: 0 0 0 1px var(--theme-elevation-200);
+
+    &.column-selector__column--active {
+      background-color: var(--theme-elevation-150);
+    }
+  }
+
+  // TODO: delete this once all icons have been migrated to viewbox edge-to-edge
+  .pill__icon {
+    padding: 0;
+  }
+
+  @include small-break {
+    padding: calc(var(--base) / 2) calc(var(--base) / 2) 0;
+  }
+}

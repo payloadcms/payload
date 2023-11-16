@@ -1,30 +1,24 @@
-<a href="https://payloadcms.com">
-  <img width="100%" src="src/admin/assets/images/github-banner-alt.jpg" alt="Payload headless CMS Admin panel built with React" />
-</a>
+<a href="https://payloadcms.com"><img width="100%" src="https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/assets/images/github-banner-alt.jpg?raw=true" alt="Payload headless CMS Admin panel built with React" /></a>
 <br />
 <br />
 <p align="left">
-  <a href="https://github.com/payloadcms/payload/actions">
-    <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/payloadcms/payload/tests.yml?style=flat-square">
-  </a>
+  <a href="https://github.com/payloadcms/payload/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/payloadcms/payload/main.yml?style=flat-square"></a>
   &nbsp;
-  <a href="https://discord.gg/payload">
-    <img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" />
-  </a>
+  <a href="https://discord.gg/payload"><img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" /></a>
   &nbsp;
-  <a href="https://www.npmjs.com/package/payload">
-    <img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" />
-  </a>
+  <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
-  <a href="https://twitter.com/payloadcms">
-    <img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" />
-  </a>
+  <a href="https://twitter.com/payloadcms"><img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" /></a>
 </p>
 <hr/>
 <h4>
 <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
 </h4>
 <hr/>
+
+> [!IMPORTANT]
+> 🎉 <strong>Payload 2.0 is now available!</strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
+
 <h3>Benefits over a regular CMS</h3>
 <ul>
   <li>Don’t hit some third-party SaaS API, hit your own API</li>
@@ -39,6 +33,7 @@
 </ul>
 
 ## ☁️ Deploy instantly with Payload Cloud.
+
 Create a cloud account, connect your GitHub, and [deploy in minutes](https://payloadcms.com/new).
 
 ## 🚀 Get started by self-hosting completely free, forever.
@@ -46,18 +41,27 @@ Create a cloud account, connect your GitHub, and [deploy in minutes](https://pay
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
 
 ```text
-npx create-payload-app
+npx create-payload-app@latest
 ```
 
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ## 🖱️ One-click templates
-### 🛒 [E-Commerce](https://github.com/payloadcms/payload/tree/master/templates/ecommerce)
-Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need.
 
-[All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)&nbsp;·&nbsp;[Community Templates](https://github.com/topics/payload-template)
+Jumpstart your next project by starting with a pre-made template. These are production-ready, end-to-end solutions designed to get you to market as fast as possible.
 
-**If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.**
+### [🛒 E-Commerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce)
+
+Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Comes with a beautiful, fully functional front-end complete with shopping cart, checkout, orders, and much more.
+
+### [🌐 Website](https://github.com/payloadcms/payload/tree/main/templates/website)
+
+Build any kind of website, blog, or portfolio from small to enterprise. Comes with a beautiful, fully functional front-end complete with posts, projects, comments, and much more.
+
+We're constantly adding more templates to our [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates). If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
+
+- [Official Templates](https://github.com/payloadcms/payload/tree/main/templates)
+- [Community Templates](https://github.com/topics/payload-template)
 
 ## ✨ Features
 
@@ -85,15 +89,19 @@ Eliminate the need to combine Shopify and a CMS, and instead do it all with Payl
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
+Migrating from v1 to v2? Check out the [2.0 Release Notes](https://github.com/payloadcms/payload/releases/tag/v2.0.0) on how to do it.
+
 ## 🙋 Contributing
 
-If you want to add contributions to this repository, please follow the instructions in [contributing.md](./contributing.md).
+If you want to add contributions to this repository, please follow the instructions in [contributing.md](./CONTRIBUTING.md).
 
 ## 📚 Examples
 
-The examples directory is a great resource for learning how to setup Payload in a variety of different ways.
+The [Examples Directory](./examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
 
-[Examples Directory](./examples)
+- [Examples Directory](./examples)
+- [Payload Blog](https://payloadcms.com/blog)
+- [Payload YouTube](https://www.youtube.com/@payloadcms)
 
 ## 🔌 Plugins
 

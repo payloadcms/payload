@@ -1,0 +1,46 @@
+@import 'payload/scss';
+
+.rich-text-lexical {
+  display: flex;
+
+  .errorBoundary {
+    pre {
+      text-wrap: unset;
+    }
+  }
+
+  &__wrap {
+    width: 100%;
+    position: relative;
+  }
+
+  &--read-only {
+    .editor-shell {
+      .editor {
+        background: var(--theme-elevation-200);
+        color: var(--theme-elevation-450);
+        padding: base(0.5);
+      }
+    }
+  }
+}
+
+html[data-theme='light'] {
+  .rich-text-lexical {
+    &.error {
+      .editor-shell {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme='dark'] {
+  .rich-text-lexical {
+    &.error {
+      .editor-shell {
+        @include darkInputError;
+      }
+    }
+  }
+}

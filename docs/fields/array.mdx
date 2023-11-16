@@ -7,19 +7,22 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 ---
 
 <Banner>
-  The Array field type is used when you need to have a set of "repeating"
-  fields. It stores an array of objects containing the fields that you define.
-  Its uses can be simple or highly complex.
+  The Array field type is used when you need to have a set of "repeating" fields. It stores an array
+  of objects containing the fields that you define. Its uses can be simple or highly complex.
 </Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/array.png"
+  srcDark="https://payloadcms.com/images/docs/fields/array-dark.png"
+  alt="Array field with two Rows in Payload admin panel"
+  caption="Admin panel screenshot of an Array field with two Rows"
+/>
 
 **Example uses:**
 
 - A "slider" with an image ([upload field](/docs/fields/upload)) and a caption ([text field](/docs/fields/text))
 - Navigational structures where editors can specify nav items containing pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
 - Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)), label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
-
-![Array field in Payload admin panel](https://payloadcms.com/images/docs/fields/array.jpg)
-_Admin panel screenshot of an Array field with a Row containing two text fields, a read-only text field and a checkbox_
 
 ### Config
 
@@ -29,6 +32,8 @@ _Admin panel screenshot of an Array field with a Row containing two text fields,
 | **`label`**         | Text used as the heading in the Admin panel or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                     |
 | **`fields`** \*     | Array of field types to correspond to each row of the Array.                                                                                                                                                                                                                       |
 | **`validate`**      | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                       |
+| **`minRows`**       | A number for the fewest allowed items during validation when a value is present.                                                                                                                                                                                                   |
+| **`maxRows`**       | A number for the most allowed items during validation when a value is present.                                                                                                                                                                                                     |
 | **`saveToJWT`**     | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                                                                                                      |
 | **`hooks`**         | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                                                                                                         |
 | **`access`**        | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                                                                                                            |
@@ -57,47 +62,47 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "slider", // required
-      type: "array", // required
-      label: "Image Slider",
+      name: 'slider', // required
+      type: 'array', // required
+      label: 'Image Slider',
       minRows: 2,
       maxRows: 10,
-      interfaceName: "CardSlider", // optional
+      interfaceName: 'CardSlider', // optional
       labels: {
-        singular: "Slide",
-        plural: "Slides",
+        singular: 'Slide',
+        plural: 'Slides',
       },
       fields: [
         // required
         {
-          name: "title",
-          type: "text",
+          name: 'title',
+          type: 'text',
         },
         {
-          name: "image",
-          type: "upload",
-          relationTo: "media",
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
           required: true,
         },
         {
-          name: "caption",
-          type: "text",
+          name: 'caption',
+          type: 'text',
         },
       ],
       admin: {
         components: {
           RowLabel: ({ data, index }) => {
-            return data?.title || `Slide ${String(index).padStart(2, "0")}`;
+            return data?.title || `Slide ${String(index).padStart(2, '0')}`
           },
         },
       },
     },
   ],
-};
+}
 ```

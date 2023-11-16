@@ -1,0 +1,27 @@
+---
+title: Environment Variables in Admin UI
+label: Environment Variables
+order: 100
+desc: NEEDS TO BE WRITTEN
+---
+
+## Admin environment vars
+
+<Banner type="warning">
+  <strong>Important:</strong>
+  <br />
+  Be careful about what variables you provide to your client-side code. Analyze every single one to
+  make sure that you're not accidentally leaking anything that an attacker could exploit. Only keys
+  that are safe for anyone to read in plain text should be provided to your Admin panel.
+</Banner>
+
+By default, `env` variables are **not** provided to the Admin panel for security and safety reasons.
+But, Payload provides you with a way to still provide `env` vars to your frontend code.
+
+**Payload will automatically supply any present `env` variables that are prefixed with `PAYLOAD_PUBLIC_` directly to the Admin panel.**
+
+For example, if you've got the following environment variable:
+
+`PAYLOAD_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXXXXXXX`
+
+This key will automatically be made available to the Payload bundle and can be referenced in your Admin component code as `process.env.PAYLOAD_PUBLIC_STRIPE_PUBLISHABLE_KEY`.

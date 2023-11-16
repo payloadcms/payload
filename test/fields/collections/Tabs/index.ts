@@ -1,21 +1,28 @@
 /* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { blocksField, blocksFieldSeedData } from '../Blocks';
-import { UIField } from './UIField';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-export const tabsSlug = 'tabs-fields';
-
-export const namedTabText = 'Some text in a named tab';
-export const namedTabDefaultValue = 'default text inside of a named tab';
-export const localizedTextValue = 'localized text';
+import { tabsFieldsSlug } from '../../slugs'
+import { getBlocksField } from '../Blocks'
+import { UIField } from './UIField'
+import { namedTabDefaultValue } from './constants'
 
 const TabsFields: CollectionConfig = {
-  slug: tabsSlug,
+  slug: tabsFieldsSlug,
   access: {
     read: () => true,
   },
   versions: true,
   fields: [
+    {
+      name: 'sidebarField',
+      type: 'text',
+      label: 'Sidebar Field',
+      admin: {
+        position: 'sidebar',
+        description:
+          'This should not collapse despite there being many tabs pushing the main fields open.',
+      },
+    },
     {
       type: 'tabs',
       tabs: [
@@ -54,7 +61,7 @@ const TabsFields: CollectionConfig = {
         {
           label: 'Tab with Blocks',
           description: 'Blocks are rendered here to ensure they populate and render correctly.',
-          fields: [blocksField],
+          fields: [getBlocksField()],
         },
         {
           label: 'Tab with Group',
@@ -135,7 +142,6 @@ const TabsFields: CollectionConfig = {
         },
         {
           name: 'namedTabWithDefaultValue',
-          label: 'Tab with Default Value',
           description: 'This tab has a name, which should namespace the contained fields.',
           fields: [
             {
@@ -159,7 +165,6 @@ const TabsFields: CollectionConfig = {
         },
         {
           name: 'accessControlTab',
-          label: 'Access Control Tab',
           access: {
             read: () => false,
           },
@@ -177,29 +182,29 @@ const TabsFields: CollectionConfig = {
           hooks: {
             beforeValidate: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {};
-                data.hooksTab.beforeValidate = true;
-                return data.hooksTab;
+                if (!data.hooksTab) data.hooksTab = {}
+                data.hooksTab.beforeValidate = true
+                return data.hooksTab
               },
             ],
             beforeChange: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {};
-                data.hooksTab.beforeChange = true;
-                return data.hooksTab;
+                if (!data.hooksTab) data.hooksTab = {}
+                data.hooksTab.beforeChange = true
+                return data.hooksTab
               },
             ],
             afterChange: [
               ({ originalDoc }) => {
-                originalDoc.hooksTab.afterChange = true;
-                return originalDoc.hooksTab;
+                originalDoc.hooksTab.afterChange = true
+                return originalDoc.hooksTab
               },
             ],
             afterRead: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {};
-                data.hooksTab.afterRead = true;
-                return data.hooksTab;
+                if (!data.hooksTab) data.hooksTab = {}
+                data.hooksTab.afterRead = true
+                return data.hooksTab
               },
             ],
           },
@@ -269,58 +274,6 @@ const TabsFields: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
-export const tabsDoc = {
-  array: [
-    {
-      text: "Hello, I'm the first row",
-    },
-    {
-      text: 'Second row here',
-    },
-    {
-      text: 'Here is some data for the third row',
-    },
-  ],
-  blocks: blocksFieldSeedData,
-  group: {
-    number: 12,
-  },
-  nestedTab: {
-    text: 'Some text in a nested, named tab',
-  },
-  tab: {
-    array: [
-      {
-        text: "Hello, I'm the first row, in a named tab",
-      },
-      {
-        text: 'Second row here, in a named tab',
-      },
-      {
-        text: 'Here is some data for the third row, in a named tab',
-      },
-    ],
-    text: namedTabText,
-  },
-  text: 'localized',
-  localizedTab: {
-    text: localizedTextValue,
-  },
-  accessControlTab: {
-    text: 'cannot be read',
-  },
-  hooksTab: {
-    beforeValidate: false,
-    beforeChange: false,
-    afterChange: false,
-    afterRead: false,
-  },
-  textarea: 'Here is some text that goes in a textarea',
-  anotherText: 'Super tired of writing this text',
-  textInRow: 'hello',
-  numberInRow: 235,
-};
-
-export default TabsFields;
+export default TabsFields

@@ -7,9 +7,16 @@ keywords: group, fields, config, configuration, documentation, Content Managemen
 ---
 
 <Banner>
-  The Group field allows fields to be nested under a common property name. It
-  also groups fields together visually in the Admin panel.
+  The Group field allows fields to be nested under a common property name. It also groups fields
+  together visually in the Admin panel.
 </Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/group.png"
+  srcDark="https://payloadcms.com/images/docs/fields/group-dark.png"
+  alt="Shows a Group field in the Payload admin panel"
+  caption="Admin panel screenshot of a Group field"
+/>
 
 ### Config
 
@@ -44,27 +51,27 @@ Set this property to `true` to hide this field's gutter within the admin panel. 
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "pageMeta", // required
-      type: "group", // required
-      interfaceName: "Meta", // optional
+      name: 'pageMeta', // required
+      type: 'group', // required
+      interfaceName: 'Meta', // optional
       fields: [
         // required
         {
-          name: "title",
-          type: "text",
+          name: 'title',
+          type: 'text',
           required: true,
           minLength: 20,
           maxLength: 100,
         },
         {
-          name: "description",
-          type: "textarea",
+          name: 'description',
+          type: 'textarea',
           required: true,
           minLength: 40,
           maxLength: 160,
@@ -72,5 +79,5 @@ export const ExampleCollection: CollectionConfig = {
       ],
     },
   ],
-};
+}
 ```

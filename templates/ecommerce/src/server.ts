@@ -18,7 +18,6 @@ const PORT = process.env.PORT || 3000
 const start = async (): Promise<void> => {
   await payload.init({
     secret: process.env.PAYLOAD_SECRET || '',
-    mongoURL: process.env.MONGODB_URI || '',
     express: app,
     onInit: () => {
       payload.logger.info(`Payload Admin URL: ${payload.getAdminURL()}`)
@@ -26,8 +25,8 @@ const start = async (): Promise<void> => {
   })
 
   if (process.env.PAYLOAD_SEED === 'true') {
-    payload.logger.info('---- SEEDING DATABASE ----')
     await seed(payload)
+    process.exit()
   }
 
   if (process.env.NEXT_BUILD) {
@@ -47,7 +46,7 @@ const start = async (): Promise<void> => {
 
   const nextHandler = nextApp.getRequestHandler()
 
-  app.get('*', (req, res) => nextHandler(req, res))
+  app.use((req, res) => nextHandler(req, res))
 
   nextApp.prepare().then(() => {
     payload.logger.info('Starting Next.js...')

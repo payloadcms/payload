@@ -1,0 +1,120 @@
+@import '../../../scss/styles';
+
+.hamburger {
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background-color: transparent;
+  outline: none;
+  position: relative;
+  @include blur-bg;
+
+  --hamburger-padding: 8px;
+  --hamburger-size: 9px;
+  --hamburger-line-gap: 3px;
+
+  color: var(--theme-text);
+
+  &__wrapper {
+    border: 1px solid var(--theme-elevation-150);
+    padding: var(--hamburger-padding);
+    border-radius: 3px;
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    width: 100%;
+
+    &:hover {
+      border: 1px solid var(--theme-elevation-500);
+      background-color: var(--theme-elevation-100);
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__icon {
+    position: relative;
+    z-index: 1;
+    height: var(--hamburger-size);
+    width: var(--hamburger-size);
+    display: flex;
+    .stroke {
+      stroke: currentColor;
+      stroke-width: 1px;
+    }
+
+    svg {
+      height: 100%;
+    }
+  }
+
+  &__close-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate3d(-50%, -50%, 0);
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: var(--hamburger-line-gap);
+    width: 100%;
+    margin: auto;
+  }
+
+  &__line {
+    background-color: currentColor;
+    width: 100%;
+    height: 1px;
+  }
+
+  &__x-left {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0) rotate(45deg);
+  }
+
+  &__x-right {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+  }
+
+  &__collapse-chevron {
+    left: -1px;
+    position: relative;
+  }
+
+  &--active {
+    .hamburger {
+      &__x,
+      &__collapse,
+      &__collapse-label {
+        display: block;
+        opacity: 1;
+      }
+
+      &__icon {
+        display: none;
+        opacity: 0;
+      }
+    }
+  }
+
+  @include mid-break {
+    &__collapse-chevron {
+      top: 1px;
+      left: 0px;
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# lint and format
+ae7d6f97d205491390f15850e5104c7abded1550
+1fbda85cd04a774cb978778b0f813001664c53dd
+
+# prettier all templates
+75a428ddc4672903455998eaba7ae9f9d710bf85
+
+# re-run prettier and eslint everywhere again
+cdaa0acd61d3001407609915bd573b78565d5571
+
+# prettier write again
+dfac7395fed95fc5d8ebca21b786ce70821942bb
+
+# lint and format plugin-cloud
+fb7d1be2f3325d076b7c967b1730afcef37922c2
+
+# lint and format create-payload-app
+5fd3d430001efe86515262ded5e26f00c1451181

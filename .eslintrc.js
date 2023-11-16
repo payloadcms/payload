@@ -1,104 +1,38 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
-    },
-  },
-  plugins: [
-    '@typescript-eslint',
-  ],
-  extends: [
-    './eslint-config',
-  ],
-  settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
-    },
-  },
+  extends: ['@payloadcms'],
   overrides: [
     {
-      files: ['test/**/int.spec.ts'],
-      rules: {
-        '@typescript-eslint/no-use-before-define': 'off',
-        '@typescript-eslint/consistent-type-imports': 'warn',
-        'jest/prefer-strict-equal': 'off',
-      }
+      extends: ['plugin:@typescript-eslint/disable-type-checked'],
+      files: ['*.js', '*.cjs', '*.json', '*.md', '*.yml', '*.yaml'],
     },
     {
-      files: ['test/**/e2e.spec.ts'],
-      extends: [
-        'plugin:playwright/playwright-test'
-      ],
+      files: ['packages/eslint-config-payload/**'],
       rules: {
-        'jest/consistent-test-it': 'off',
-        'jest/require-top-level-describe': 'off',
-        'jest/no-test-callback': 'off',
-        'jest/prefer-strict-equal': 'off',
-        'jest/expect-expect': 'off',
-        'jest-dom/prefer-to-have-attribute': 'off',
-      }
-    },
-    {
-      files: ['*.ts', '*.tsx'],
-      parser: '@typescript-eslint/parser',
-      extends: [
-        'plugin:@typescript-eslint/recommended',
-      ],
-      rules: {
-        'no-shadow': 'off',
-        '@typescript-eslint/no-shadow': ['error'],
-        'import/no-unresolved': [
-          2,
-          {
-            ignore: [
-              'payload-config',
-              'payload/generated-types',
-            ],
-          },
-        ],
+        'perfectionist/sort-objects': 'off',
       },
     },
     {
-      files: ['*.spec.ts'],
+      files: ['package.json', 'tsconfig.json'],
       rules: {
-        '@typescript-eslint/no-use-before-define': 'off',
-      },
-    },
-    {
-      files: ['*.e2e.ts'],
-      rules: {
-        '@typescript-eslint/no-use-before-define': 'off',
-        'jest/expect-expect': 'off',
+        'perfectionist/sort-array-includes': 'off',
+        'perfectionist/sort-astro-attributes': 'off',
+        'perfectionist/sort-classes': 'off',
+        'perfectionist/sort-enums': 'off',
+        'perfectionist/sort-exports': 'off',
+        'perfectionist/sort-imports': 'off',
+        'perfectionist/sort-interfaces': 'off',
+        'perfectionist/sort-jsx-props': 'off',
+        'perfectionist/sort-keys': 'off',
+        'perfectionist/sort-maps': 'off',
+        'perfectionist/sort-named-exports': 'off',
+        'perfectionist/sort-named-imports': 'off',
+        'perfectionist/sort-object-types': 'off',
+        'perfectionist/sort-objects': 'off',
+        'perfectionist/sort-svelte-attributes': 'off',
+        'perfectionist/sort-union-types': 'off',
+        'perfectionist/sort-vue-attributes': 'off',
       },
     },
   ],
-  rules: {
-    'import/no-extraneous-dependencies': ['error', { packageDir: './' }],
-    'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
-    'import/prefer-default-export': 'off',
-    'react/prop-types': 'off',
-    'react/require-default-props': 'off',
-    'react/no-unused-prop-types': 'off',
-    'no-console': 'warn',
-    'no-sparse-arrays': 'off',
-    'no-underscore-dangle': 'off',
-    'no-use-before-define': 'off',
-    'arrow-body-style': 0,
-    '@typescript-eslint/no-use-before-define': 'off',
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-        jsx: 'never',
-        ts: 'never',
-        tsx: 'never',
-      },
-    ],
-  },
-};
+  root: true,
+}

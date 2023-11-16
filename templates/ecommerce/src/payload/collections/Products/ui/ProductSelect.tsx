@@ -16,28 +16,17 @@ export const ProductSelect: React.FC<TextField> = props => {
 
   React.useEffect(() => {
     const getStripeProducts = async () => {
-      const productsFetch = await fetch('/api/stripe/rest', {
-        method: 'post',
+      const productsFetch = await fetch('/api/stripe/products', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          stripeMethod: 'products.list',
-          stripeArgs: [
-            {
-              limit: 100,
-            },
-          ],
-        }),
       })
 
       const res = await productsFetch.json()
 
-      const { data } = res
-
-      if (data && 'data' in data) {
-        const fetchedProducts = data.data.reduce(
+      if (res?.data) {
+        const fetchedProducts = res.data.reduce(
           (acc, item) => {
             acc.push({
               label: item.name || item.id,

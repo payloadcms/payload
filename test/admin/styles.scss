@@ -1,7 +1,8 @@
-.nav__controls {
-    font-family: monospace;
-    background-image: url('/placeholder.png');
+#custom-css {
+  font-family: monospace;
+  background-image: url('/placeholder.png');
 }
-.nav__controls:before {
-    content: 'custom-css';
+
+#custom-css::after {
+  content: 'custom-css';
 }

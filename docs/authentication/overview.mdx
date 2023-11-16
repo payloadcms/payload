@@ -12,13 +12,14 @@ keywords: authentication, config, configuration, overview, documentation, Conten
 />
 
 <Banner>
-  Payload provides for highly secure and customizable user Authentication out of the box, which allows for users to identify themselves to Payload.
+  Payload provides for highly secure and customizable user Authentication out of the box, which
+  allows for users to identify themselves to Payload.
 </Banner>
 
 Authentication is used within the Payload Admin panel itself as well as throughout your app(s) themselves however you determine necessary.
 
 ![Authentication admin panel functionality](https://payloadcms.com/images/docs/auth-admin.jpg)
-*Admin panel screenshot depicting an Admins Collection with Auth enabled*
+_Admin panel screenshot depicting an Admins Collection with Auth enabled_
 
 **Here are some common use cases of Authentication outside of Payload's dashboard itself:**
 
@@ -38,7 +39,7 @@ Every Payload Collection can opt-in to supporting Authentication by specifying t
 Simple example collection:
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const Admins: CollectionConfig = {
   slug: 'admins',
@@ -62,7 +63,7 @@ export const Admins: CollectionConfig = {
         'editor',
         'developer',
       ],
-    }
+    },
   ],
 }
 ```
@@ -83,9 +84,14 @@ Once enabled, each document that is created within the Collection can be thought
 
 Successfully logging in returns a `JWT` (JSON web token) which is how a user will identify themselves to Payload. By providing this JWT via either an HTTP-only cookie or an `Authorization` header, Payload will automatically identify the user and add its user JWT data to the Express `req`, which is available throughout Payload including within access control, hooks, and more.
 
+You can specify what data gets encoded to the JWT token by setting `saveToJWT` to true in your auth collection fields. If you wish to use a different key other than the field `name`, you can provide it to `saveToJWT` as a string. It is also possible to use `saveToJWT` on fields that are nested in inside groups and tabs. If a group has a `saveToJWT` set it will include the object with all sub-fields in the token. You can set `saveToJWT: false` for any fields you wish to omit. If a field inside a group has `saveToJWT` set, but the group does not, the field will be included at the top level of the token.
+
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  You can access the logged in user from access control functions and hooks via the Express <strong>req</strong>. The logged in user is automatically added as the <strong>user</strong> property.
+  <strong>Tip:</strong>
+  <br />
+  You can access the logged-in user from access control functions and hooks via the Express{' '}
+  <strong>req</strong>. The logged-in user is automatically added as the <strong>user</strong>{' '}
+  property.
 </Banner>
 
 ### HTTP-only cookies
@@ -105,16 +111,19 @@ Fetch example, including credentials:
 ```ts
 const response = await fetch('http://localhost:3000/api/pages', {
   credentials: 'include',
-});
+})
 
-const pages = await response.json();
+const pages = await response.json()
 ```
 
 For more about how to automatically include cookies in requests from your app to your Payload API, [click here](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Sending_a_request_with_credentials_included).
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  To make sure you have a Payload cookie set properly in your browser after logging in, you can use Chrome's Developer Tools - Application - Cookies - [your-domain-here]. The Chrome Developer tools will still show HTTP-only cookies, even when JavaScript running on the page can't.
+  <strong>Tip:</strong>
+  <br />
+  To make sure you have a Payload cookie set properly in your browser after logging in, you can use
+  Chrome's Developer Tools - Application - Cookies - [your-domain-here]. The Chrome Developer tools
+  will still show HTTP-only cookies, even when JavaScript running on the page can't.
 </Banner>
 
 ### CSRF Protection
@@ -126,28 +135,33 @@ For example, let's say you have a very popular app running at coolsite.com. This
 So, if a user of coolsite.com is logged in and just browsing around on the internet, they might stumble onto a page with bad intentions. That bad page might automatically make requests to all sorts of sites to see if they can find one that they can log into - and coolsite.com might be on their list. If your user was logged in while they visited that evil site, the attacker could do whatever they wanted as if they were your coolsite.com user by just sending requests to the coolsite API (which would automatically include the auth cookie). They could send themselves a bunch of money from your user's account, change the user's password, etc. This is what a CSRF attack is.
 
 <Banner type="warning">
-  <strong>To protect against CSRF attacks, Payload only accepts cookie-based authentication from domains that you explicitly whitelist.</strong>
+  <strong>
+    To protect against CSRF attacks, Payload only accepts cookie-based authentication from domains
+    that you explicitly whitelist.
+  </strong>
 </Banner>
 
 To define domains that should allow users to identify themselves via the Payload HTTP-only cookie, use the `csrf` option on the base Payload config to whitelist domains that you trust.
 
 `payload.config.ts`:
+
 ```ts
-import { buildConfig } from 'payload/config';
+import { buildConfig } from 'payload/config'
 
 const config = buildConfig({
   collections: [
     // collections here
   ],
   // highlight-start
-  csrf: [ // whitelist of domains to allow cookie auth from
+  csrf: [
+    // whitelist of domains to allow cookie auth from
     'https://your-frontend-app.com',
     'https://your-other-frontend-app.com',
   ],
   // highlight-end
-});
+})
 
-export default config;
+export default config
 ```
 
 ### Identifying users via the Authorization Header
@@ -155,11 +169,12 @@ export default config;
 In addition to authenticating via an HTTP-only cookie, you can also identify users via the `Authorization` header on an HTTP request.
 
 Example:
+
 ```ts
 const request = await fetch('http://localhost:3000', {
   headers: {
-    Authorization: `JWT ${token}`
-  }
+    Authorization: `JWT ${token}`,
+  },
 })
 ```
 

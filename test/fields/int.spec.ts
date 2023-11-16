@@ -1,63 +1,209 @@
-import type { IndexDirection, IndexOptions } from 'mongoose';
-import { GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { RESTClient } from '../helpers/rest';
-import configPromise from '../uploads/config';
-import payload from '../../src';
-import { pointDoc } from './collections/Point';
-import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array';
-import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
-import { defaultText } from './collections/Text';
-import { blocksFieldSeedData } from './collections/Blocks';
-import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
-import { defaultNumber, numberDoc } from './collections/Number';
-import { dateDoc } from './collections/Date';
-import type { PaginatedDocs } from '../../src/mongoose/types';
-import type { RichTextField } from './payload-types';
+import type { IndexDirection, IndexOptions } from 'mongoose'
 
-let client;
-let graphQLClient: GraphQLClient;
-let serverURL;
-let config;
-let token;
+import { GraphQLClient } from 'graphql-request'
+
+import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
+import type { SanitizedConfig } from '../../packages/payload/src/config/types'
+import type { PaginatedDocs } from '../../packages/payload/src/database/types'
+import type { RichTextField } from './payload-types'
+
+import payload from '../../packages/payload/src'
+import { initPayloadTest } from '../helpers/configHelpers'
+import { isMongoose } from '../helpers/isMongoose'
+import { RESTClient } from '../helpers/rest'
+import configPromise from '../uploads/config'
+import { arrayDefaultValue } from './collections/Array'
+import { blocksDoc } from './collections/Blocks/shared'
+import { dateDoc } from './collections/Date/shared'
+import { groupDefaultChild, groupDefaultValue } from './collections/Group'
+import { groupDoc } from './collections/Group/shared'
+import { defaultNumber } from './collections/Number'
+import { numberDoc } from './collections/Number/shared'
+import { pointDoc } from './collections/Point/shared'
+import {
+  localizedTextValue,
+  namedTabDefaultValue,
+  namedTabText,
+} from './collections/Tabs/constants'
+import { tabsDoc } from './collections/Tabs/shared'
+import { defaultText } from './collections/Text/shared'
+import { clearAndSeedEverything } from './seed'
+import { arrayFieldsSlug, groupFieldsSlug, relationshipFieldsSlug, tabsFieldsSlug } from './slugs'
+
+let client: RESTClient
+let graphQLClient: GraphQLClient
+let serverURL: string
+let config: SanitizedConfig
+let token: string
 
 describe('Fields', () => {
   beforeAll(async () => {
-    ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }));
-    config = await configPromise;
+    ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
+    config = await configPromise
 
-    client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
-    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
-    graphQLClient = new GraphQLClient(graphQLURL);
-    token = await client.login();
-  });
+    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
+    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
+    graphQLClient = new GraphQLClient(graphQLURL)
+    token = await client.login()
+  })
+
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
+    await client.login()
+  })
 
   describe('text', () => {
-    let doc;
-    const text = 'text field';
-    beforeAll(async () => {
+    let doc
+    const text = 'text field'
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'text-fields',
         data: { text },
-      });
-    });
+      })
+    })
 
     it('creates with default values', () => {
-      expect(doc.text).toEqual(text);
-      expect(doc.defaultFunction).toEqual(defaultText);
-      expect(doc.defaultAsync).toEqual(defaultText);
-    });
-  });
+      expect(doc.text).toEqual(text)
+      expect(doc.defaultFunction).toEqual(defaultText)
+      expect(doc.defaultAsync).toEqual(defaultText)
+    })
+
+    it('should populate default values in beforeValidate hook', async () => {
+      const { dependentOnFieldWithDefaultValue, fieldWithDefaultValue } = await payload.create({
+        collection: 'text-fields',
+        data: { text },
+      })
+
+      await expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
+    })
+  })
+
+  describe('relationship', () => {
+    let textDoc
+    let otherTextDoc
+    let selfReferencing
+    let parent
+    let child
+    let grandChild
+    let relationshipInArray
+    const textDocText = 'text document'
+    const otherTextDocText = 'alt text'
+    const relationshipText = 'relationship text'
+
+    beforeEach(async () => {
+      textDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: textDocText,
+        },
+      })
+      otherTextDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: otherTextDocText,
+        },
+      })
+      const relationship = { relationTo: 'text-fields', value: textDoc.id }
+      parent = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      child = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationToSelf: parent.id,
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      grandChild = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationToSelf: child.id,
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      selfReferencing = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      relationshipInArray = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          array: [
+            {
+              relationship: otherTextDoc.id,
+            },
+          ],
+          relationship,
+        },
+      })
+    })
+
+    it('should query parent self-reference', async () => {
+      const childResult = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationToSelf: { equals: parent.id },
+        },
+      })
+
+      const grandChildResult = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationToSelf: { equals: child.id },
+        },
+      })
+
+      const anyChildren = await payload.find({
+        collection: relationshipFieldsSlug,
+      })
+      const allChildren = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          'relationToSelf.text': { equals: relationshipText },
+        },
+      })
+
+      expect(childResult.docs[0].id).toStrictEqual(child.id)
+      expect(grandChildResult.docs[0].id).toStrictEqual(grandChild.id)
+      expect(allChildren.docs).toHaveLength(2)
+    })
+
+    it('should query relationship inside array', async () => {
+      const result = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          'array.relationship.text': { equals: otherTextDocText },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]).toMatchObject(relationshipInArray)
+    })
+  })
 
   describe('timestamps', () => {
-    const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10);
-    let doc;
-    beforeAll(async () => {
+    const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
+    let doc
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'date-fields',
         data: dateDoc,
-      });
-    });
+      })
+    })
 
     it('should query updatedAt', async () => {
       const { docs } = await payload.find({
@@ -68,10 +214,10 @@ describe('Fields', () => {
             greater_than_equal: tenMinutesAgo,
           },
         },
-      });
+      })
 
-      expect(docs.map(({ id }) => id)).toContain(doc.id);
-    });
+      expect(docs.map(({ id }) => id)).toContain(doc.id)
+    })
 
     it('should query createdAt', async () => {
       const result = await payload.find({
@@ -82,32 +228,32 @@ describe('Fields', () => {
             greater_than_equal: tenMinutesAgo,
           },
         },
-      });
+      })
 
-      expect(result.docs[0].id).toEqual(doc.id);
-    });
-  });
+      expect(result.docs[0].id).toEqual(doc.id)
+    })
+  })
 
   describe('select', () => {
-    let doc;
-    beforeAll(async () => {
+    let doc
+    beforeEach(async () => {
       const { id } = await payload.create({
         collection: 'select-fields',
-        locale: 'en',
         data: {
           selectHasManyLocalized: ['one', 'two'],
         },
-      });
+        locale: 'en',
+      })
       doc = await payload.findByID({
+        id,
         collection: 'select-fields',
         locale: 'all',
-        id,
-      });
-    });
+      })
+    })
 
     it('creates with hasMany localized', () => {
-      expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two']);
-    });
+      expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two'])
+    })
 
     it('retains hasMany updates', async () => {
       const { id } = await payload.create({
@@ -115,459 +261,464 @@ describe('Fields', () => {
         data: {
           selectHasMany: ['one', 'two'],
         },
-      });
+      })
 
       const updatedDoc = await payload.update({
-        collection: 'select-fields',
         id,
+        collection: 'select-fields',
         data: {
           select: 'one',
         },
-      });
+      })
 
-      expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true);
-      expect(updatedDoc.selectHasMany).toEqual(['one', 'two']);
-    });
-  });
+      expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true)
+      expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
+    })
+  })
 
   describe('number', () => {
-    let doc;
-    beforeAll(async () => {
+    let doc
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'number-fields',
         data: numberDoc,
-      });
-    });
+      })
+    })
 
     it('creates with default values', async () => {
-      expect(doc.number).toEqual(numberDoc.number);
-      expect(doc.min).toEqual(numberDoc.min);
-      expect(doc.max).toEqual(numberDoc.max);
-      expect(doc.positiveNumber).toEqual(numberDoc.positiveNumber);
-      expect(doc.negativeNumber).toEqual(numberDoc.negativeNumber);
-      expect(doc.decimalMin).toEqual(numberDoc.decimalMin);
-      expect(doc.decimalMax).toEqual(numberDoc.decimalMax);
-      expect(doc.defaultNumber).toEqual(defaultNumber);
-    });
+      expect(doc.number).toEqual(numberDoc.number)
+      expect(doc.min).toEqual(numberDoc.min)
+      expect(doc.max).toEqual(numberDoc.max)
+      expect(doc.positiveNumber).toEqual(numberDoc.positiveNumber)
+      expect(doc.negativeNumber).toEqual(numberDoc.negativeNumber)
+      expect(doc.decimalMin).toEqual(numberDoc.decimalMin)
+      expect(doc.decimalMax).toEqual(numberDoc.decimalMax)
+      expect(doc.defaultNumber).toEqual(defaultNumber)
+    })
 
     it('should not create number below minimum', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          min: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: min');
-    });
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            min: 5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: min')
+    })
     it('should not create number above max', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          max: 15,
-        },
-      })).rejects.toThrow('The following field is invalid: max');
-    });
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            max: 15,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: max')
+    })
 
     it('should not create number below 0', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          positiveNumber: -5,
-        },
-      })).rejects.toThrow('The following field is invalid: positiveNumber');
-    });
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            positiveNumber: -5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: positiveNumber')
+    })
 
     it('should not create number above 0', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          negativeNumber: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: negativeNumber');
-    });
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            negativeNumber: 5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: negativeNumber')
+    })
     it('should not create a decimal number below min', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          decimalMin: -0.25,
-        },
-      })).rejects.toThrow('The following field is invalid: decimalMin');
-    });
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            decimalMin: -0.25,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: decimalMin')
+    })
 
     it('should not create a decimal number above max', async () => {
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          decimalMax: 1.5,
-        },
-      })).rejects.toThrow('The following field is invalid: decimalMax');
-    });
+      await expect(async () =>
+        payload.create({
+          collection: 'number-fields',
+          data: {
+            decimalMax: 1.5,
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: decimalMax')
+    })
     it('should localize an array of numbers using hasMany', async () => {
-      const localizedHasMany = [5, 10];
+      const localizedHasMany = [5, 10]
       const { id } = await payload.create({
         collection: 'number-fields',
-        locale: 'en',
         data: {
           localizedHasMany,
         },
-      });
+        locale: 'en',
+      })
       const localizedDoc = await payload.findByID({
+        id,
         collection: 'number-fields',
         locale: 'all',
-        id,
-      });
+      })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany);
-    });
-  });
+      expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
+    })
+  })
 
-  describe('indexes', () => {
-    let indexes;
-    const definitions: Record<string, IndexDirection> = {};
-    const options: Record<string, IndexOptions> = {};
+  if (isMongoose(payload) || !['postgres'].includes(process.env.PAYLOAD_DATABASE)) {
+    describe('indexes', () => {
+      let indexes
+      const definitions: Record<string, IndexDirection> = {}
+      const options: Record<string, IndexOptions> = {}
 
-    beforeAll(() => {
-      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      beforeEach(() => {
+        indexes = (payload.db as MongooseAdapter).collections[
+          'indexed-fields'
+        ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
 
-      indexes.forEach((index) => {
-        const field = Object.keys(index[0])[0];
-        definitions[field] = index[0][field];
-        // eslint-disable-next-line prefer-destructuring
-        options[field] = index[1];
-      });
-    });
+        indexes.forEach((index) => {
+          const field = Object.keys(index[0])[0]
+          definitions[field] = index[0][field]
+          // eslint-disable-next-line prefer-destructuring
+          options[field] = index[1]
+        })
+      })
 
-    it('should have indexes', () => {
-      expect(definitions.text).toEqual(1);
-    });
-    it('should have unique indexes', () => {
-      expect(definitions.uniqueText).toEqual(1);
-      expect(options.uniqueText).toMatchObject({ unique: true });
-    });
-    it('should have 2dsphere indexes on point fields', () => {
-      expect(definitions.point).toEqual('2dsphere');
-    });
-    it('should have 2dsphere indexes on point fields in groups', () => {
-      expect(definitions['group.point']).toEqual('2dsphere');
-    });
-    it('should have a sparse index on a unique localized field in a group', () => {
-      expect(definitions['group.localizedUnique.en']).toEqual(1);
-      expect(options['group.localizedUnique.en']).toMatchObject({ unique: true, sparse: true });
-      expect(definitions['group.localizedUnique.es']).toEqual(1);
-      expect(options['group.localizedUnique.es']).toMatchObject({ unique: true, sparse: true });
-    });
-    it('should have unique indexes in a collapsible', () => {
-      expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1);
-      expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true });
-      expect(definitions.collapsibleTextUnique).toEqual(1);
-      expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
-    });
-    it('should have unique compound indexes', () => {
-      expect(definitions.partOne).toEqual(1);
-      expect(options.partOne).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
-    });
+      it('should have indexes', () => {
+        expect(definitions.text).toEqual(1)
+      })
+
+      it('should have unique indexes', () => {
+        expect(definitions.uniqueText).toEqual(1)
+        expect(options.uniqueText).toMatchObject({ unique: true })
+      })
+
+      it('should have 2dsphere indexes on point fields', () => {
+        expect(definitions.point).toEqual('2dsphere')
+      })
+
+      it('should have 2dsphere indexes on point fields in groups', () => {
+        expect(definitions['group.point']).toEqual('2dsphere')
+      })
+
+      it('should have a sparse index on a unique localized field in a group', () => {
+        expect(definitions['group.localizedUnique.en']).toEqual(1)
+        expect(options['group.localizedUnique.en']).toMatchObject({ sparse: true, unique: true })
+        expect(definitions['group.localizedUnique.es']).toEqual(1)
+        expect(options['group.localizedUnique.es']).toMatchObject({ sparse: true, unique: true })
+      })
+
+      it('should have unique indexes in a collapsible', () => {
+        expect(definitions['collapsibleLocalizedUnique.en']).toEqual(1)
+        expect(options['collapsibleLocalizedUnique.en']).toMatchObject({
+          sparse: true,
+          unique: true,
+        })
+        expect(definitions.collapsibleTextUnique).toEqual(1)
+        expect(options.collapsibleTextUnique).toMatchObject({ unique: true })
+      })
+    })
+
+    describe('version indexes', () => {
+      let indexes
+      const definitions: Record<string, IndexDirection> = {}
+      const options: Record<string, IndexOptions> = {}
+
+      beforeEach(() => {
+        indexes = (payload.db as MongooseAdapter).versions['indexed-fields'].schema.indexes() as [
+          Record<string, IndexDirection>,
+          IndexOptions,
+        ]
+        indexes.forEach((index) => {
+          const field = Object.keys(index[0])[0]
+          definitions[field] = index[0][field]
+          // eslint-disable-next-line prefer-destructuring
+          options[field] = index[1]
+        })
+      })
+
+      it('should have versions indexes', () => {
+        expect(definitions['version.text']).toEqual(1)
+      })
+    })
+
+    describe('point', () => {
+      let doc
+      const point = [7, -7]
+      const localized = [5, -2]
+      const group = { point: [1, 9] }
+
+      beforeEach(async () => {
+        const findDoc = await payload.find({
+          collection: 'point-fields',
+          pagination: false,
+        })
+        ;[doc] = findDoc.docs
+      })
+
+      it('should read', async () => {
+        const find = await payload.find({
+          collection: 'point-fields',
+          pagination: false,
+        })
+
+        ;[doc] = find.docs
+
+        expect(doc.point).toEqual(pointDoc.point)
+        expect(doc.localized).toEqual(pointDoc.localized)
+        expect(doc.group).toMatchObject(pointDoc.group)
+      })
+
+      it('should create', async () => {
+        doc = await payload.create({
+          collection: 'point-fields',
+          data: {
+            group,
+            localized,
+            point,
+          },
+        })
+
+        expect(doc.point).toEqual(point)
+        expect(doc.localized).toEqual(localized)
+        expect(doc.group).toMatchObject(group)
+      })
+
+      it('should not create duplicate point when unique', async () => {
+        // first create the point field
+        doc = await payload.create({
+          collection: 'point-fields',
+          data: {
+            group,
+            localized,
+            point,
+          },
+        })
+
+        // Now make sure we can't create a duplicate (since 'localized' is a unique field)
+        await expect(() =>
+          payload.create({
+            collection: 'point-fields',
+            data: {
+              group,
+              localized,
+              point,
+            },
+          }),
+        ).rejects.toThrow(Error)
+
+        await expect(async () =>
+          payload.create({
+            collection: 'number-fields',
+            data: {
+              min: 5,
+            },
+          }),
+        ).rejects.toThrow('The following field is invalid: min')
+
+        expect(doc.point).toEqual(point)
+        expect(doc.localized).toEqual(localized)
+        expect(doc.group).toMatchObject(group)
+      })
+    })
+  }
+
+  describe('unique indexes', () => {
     it('should throw validation error saving on unique fields', async () => {
       const data = {
         text: 'a',
         uniqueText: 'a',
-      };
+      }
       await payload.create({
         collection: 'indexed-fields',
         data,
-      });
+      })
       expect(async () => {
         const result = await payload.create({
           collection: 'indexed-fields',
           data,
-        });
-        return result.error;
-      }).toBeDefined();
-    });
-    it('should throw validation error saving on unique combined fields', async () => {
-      await payload.delete({ collection: 'indexed-fields', where: {} });
-      const data1 = {
-        text: 'a',
-        uniqueText: 'a',
-        partOne: 'u',
-        partTwo: 'u',
-      };
-      const data2 = {
-        text: 'b',
-        uniqueText: 'b',
-        partOne: 'u',
-        partTwo: 'u',
-      };
-      await payload.create({
-        collection: 'indexed-fields',
-        data: data1,
-      });
-      expect(async () => {
-        const result = await payload.create({
-          collection: 'indexed-fields',
-          data: data2,
-        });
-        return result.error;
-      }).toBeDefined();
-    });
-  });
+        })
+        return result.error
+      }).toBeDefined()
+    })
+  })
 
-  describe('version indexes', () => {
-    let indexes;
-    const definitions: Record<string, IndexDirection> = {};
-    const options: Record<string, IndexOptions> = {};
-
-    beforeAll(() => {
-      indexes = payload.versions['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
-      indexes.forEach((index) => {
-        const field = Object.keys(index[0])[0];
-        definitions[field] = index[0][field];
-        // eslint-disable-next-line prefer-destructuring
-        options[field] = index[1];
-      });
-    });
-
-    it('should have versions indexes', () => {
-      expect(definitions['version.text']).toEqual(1);
-    });
-    it('should have version indexes from collection indexes', () => {
-      expect(definitions['version.partOne']).toEqual(1);
-      expect(options['version.partOne']).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
-    });
-  });
-
-  describe('point', () => {
-    let doc;
-    const point = [7, -7];
-    const localized = [5, -2];
-    const group = { point: [1, 9] };
-
-    beforeAll(async () => {
-      const findDoc = await payload.find({
-        collection: 'point-fields',
-        pagination: false,
-      });
-      [doc] = findDoc.docs;
-    });
-
-    it('should read', async () => {
-      const find = await payload.find({
-        collection: 'point-fields',
-        pagination: false,
-      });
-
-      [doc] = find.docs;
-
-      expect(doc.point).toEqual(pointDoc.point);
-      expect(doc.localized).toEqual(pointDoc.localized);
-      expect(doc.group).toMatchObject(pointDoc.group);
-    });
-
-    it('should create', async () => {
-      doc = await payload.create({
-        collection: 'point-fields',
-        data: {
-          point,
-          localized,
-          group,
-        },
-      });
-
-      expect(doc.point).toEqual(point);
-      expect(doc.localized).toEqual(localized);
-      expect(doc.group).toMatchObject(group);
-    });
-
-    it('should not create duplicate point when unique', async () => {
-      await expect(() => payload.create({
-        collection: 'point-fields',
-        data: {
-          point,
-          localized,
-          group,
-        },
-      }))
-        .rejects
-        .toThrow(Error);
-
-      await expect(async () => payload.create({
-        collection: 'number-fields',
-        data: {
-          min: 5,
-        },
-      })).rejects.toThrow('The following field is invalid: min');
-
-      expect(doc.point).toEqual(point);
-      expect(doc.localized).toEqual(localized);
-      expect(doc.group).toMatchObject(group);
-    });
-  });
   describe('array', () => {
-    let doc;
-    const collection = arrayFieldsSlug;
+    let doc
+    const collection = arrayFieldsSlug
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection,
         data: {},
-      });
-    });
-
-    it('should return undefined arrays when no data present', async () => {
-      const document = await payload.create({
-        collection: arrayFieldsSlug,
-        data: arrayDoc,
-      });
-
-      expect(document.potentiallyEmptyArray).toBeUndefined();
-    });
+      })
+    })
 
     it('should create with ids and nested ids', async () => {
       const docWithIDs = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
-      });
-      expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined();
-    });
+      })
+      expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
+    })
 
     it('should create with defaultValue', async () => {
-      expect(doc.items).toMatchObject(arrayDefaultValue);
-      expect(doc.localized).toMatchObject(arrayDefaultValue);
-    });
+      expect(doc.items).toMatchObject(arrayDefaultValue)
+      expect(doc.localized).toMatchObject(arrayDefaultValue)
+    })
 
     it('should update without overwriting other locales with defaultValue', async () => {
-      const localized = [{ text: 'unique' }];
-      const enText = 'english';
-      const esText = 'spanish';
+      const localized = [{ text: 'unique' }]
+      const enText = 'english'
+      const esText = 'spanish'
       const { id } = await payload.create({
         collection,
         data: {
           localized,
         },
-      });
+      })
 
       const enDoc = await payload.update({
-        collection,
         id,
-        locale: 'en',
+        collection,
         data: {
           localized: [{ text: enText }],
         },
-      });
+        locale: 'en',
+      })
 
       const esDoc = await payload.update({
-        collection,
         id,
-        locale: 'es',
+        collection,
         data: {
           localized: [{ text: esText }],
         },
-      });
+        locale: 'es',
+      })
 
-      const allLocales = await payload.findByID({
-        collection,
+      const allLocales = (await payload.findByID({
         id,
+        collection,
         locale: 'all',
-      }) as unknown as { localized: { en: unknown, es: unknown } };
+      })) as unknown as { localized: { en: unknown; es: unknown } }
 
-      expect(enDoc.localized[0].text).toStrictEqual(enText);
-      expect(esDoc.localized[0].text).toStrictEqual(esText);
-      expect(allLocales.localized.en[0].text).toStrictEqual(enText);
-      expect(allLocales.localized.es[0].text).toStrictEqual(esText);
-    });
-  });
+      expect(enDoc.localized[0].text).toStrictEqual(enText)
+      expect(esDoc.localized[0].text).toStrictEqual(esText)
+      expect(allLocales.localized.en[0].text).toStrictEqual(enText)
+      expect(allLocales.localized.es[0].text).toStrictEqual(esText)
+    })
+  })
 
   describe('group', () => {
-    let document;
+    let document
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
-      });
-    });
+      })
+    })
 
     it('should create with defaultValue', async () => {
-      expect(document.group.defaultParent).toStrictEqual(groupDefaultValue);
-      expect(document.group.defaultChild).toStrictEqual(groupDefaultChild);
-    });
-  });
+      expect(document.group.defaultParent).toStrictEqual(groupDefaultValue)
+      expect(document.group.defaultChild).toStrictEqual(groupDefaultChild)
+    })
+  })
 
   describe('tabs', () => {
-    let document;
+    let document
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       document = await payload.create({
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         data: tabsDoc,
-      });
-    });
+      })
+    })
 
     it('should create with fields inside a named tab', async () => {
-      expect(document.tab.text).toStrictEqual(namedTabText);
-    });
+      expect(document.tab.text).toStrictEqual(namedTabText)
+    })
 
     it('should create with defaultValue inside a named tab', async () => {
-      expect(document.tab.defaultValue).toStrictEqual(namedTabDefaultValue);
-    });
+      expect(document.tab.defaultValue).toStrictEqual(namedTabDefaultValue)
+    })
 
     it('should create with defaultValue inside a named tab with no other values', async () => {
-      expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(namedTabDefaultValue);
-    });
+      expect(document.namedTabWithDefaultValue.defaultValue).toStrictEqual(namedTabDefaultValue)
+    })
 
     it('should create with localized text inside a named tab', async () => {
       document = await payload.findByID({
-        collection: tabsSlug,
         id: document.id,
+        collection: tabsFieldsSlug,
         locale: 'all',
-      });
-      expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue);
-    });
+      })
+      expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue)
+    })
 
     it('should allow access control on a named tab', async () => {
       document = await payload.findByID({
-        collection: tabsSlug,
         id: document.id,
+        collection: tabsFieldsSlug,
         overrideAccess: false,
-      });
-      expect(document.accessControlTab).toBeUndefined();
-    });
+      })
+      expect(document.accessControlTab).toBeUndefined()
+    })
 
     it('should allow hooks on a named tab', async () => {
       const newDocument = await payload.create({
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         data: tabsDoc,
-      });
-      expect(newDocument.hooksTab.beforeValidate).toBe(true);
-      expect(newDocument.hooksTab.beforeChange).toBe(true);
-      expect(newDocument.hooksTab.afterChange).toBe(true);
-      expect(newDocument.hooksTab.afterRead).toBe(true);
-    });
+      })
+      expect(newDocument.hooksTab.beforeValidate).toBe(true)
+      expect(newDocument.hooksTab.beforeChange).toBe(true)
+      expect(newDocument.hooksTab.afterChange).toBe(true)
+      expect(newDocument.hooksTab.afterRead).toBe(true)
+    })
 
     it('should return empty object for groups when no data present', async () => {
       const doc = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
-      });
+      })
 
-      expect(doc.potentiallyEmptyGroup).toEqual({});
-    });
-  });
+      expect(doc.potentiallyEmptyGroup).toBeDefined()
+    })
+  })
 
   describe('blocks', () => {
     it('should retrieve doc with blocks', async () => {
       const blockFields = await payload.find({
         collection: 'block-fields',
-      });
+      })
 
-      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksFieldSeedData[0].blockType);
-      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksFieldSeedData[0].text);
+      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksDoc.blocks[0].blockType)
+      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksDoc.blocks[0].text)
 
-      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksFieldSeedData[2].blockType);
-      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksFieldSeedData[2].blockName);
-      expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(blocksFieldSeedData[2].subBlocks[0].number);
-      expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(blocksFieldSeedData[2].subBlocks[1].text);
-    });
+      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksDoc.blocks[2].blockType)
+      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksDoc.blocks[2].blockName)
+      expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(
+        blocksDoc.blocks[2].subBlocks[0].number,
+      )
+      expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(
+        blocksDoc.blocks[2].subBlocks[1].text,
+      )
+    })
 
     it('should query based on richtext data within a block', async () => {
       const blockFieldsSuccess = await payload.find({
@@ -577,9 +728,9 @@ describe('Fields', () => {
             like: 'fun',
           },
         },
-      });
+      })
 
-      expect(blockFieldsSuccess.docs).toHaveLength(1);
+      expect(blockFieldsSuccess.docs).toHaveLength(1)
 
       const blockFieldsFail = await payload.find({
         collection: 'block-fields',
@@ -588,10 +739,10 @@ describe('Fields', () => {
             like: 'funny',
           },
         },
-      });
+      })
 
-      expect(blockFieldsFail.docs).toHaveLength(0);
-    });
+      expect(blockFieldsFail.docs).toHaveLength(0)
+    })
 
     it('should query based on richtext data within a localized block, specifying locale', async () => {
       const blockFieldsSuccess = await payload.find({
@@ -601,9 +752,9 @@ describe('Fields', () => {
             like: 'fun',
           },
         },
-      });
+      })
 
-      expect(blockFieldsSuccess.docs).toHaveLength(1);
+      expect(blockFieldsSuccess.docs).toHaveLength(1)
 
       const blockFieldsFail = await payload.find({
         collection: 'block-fields',
@@ -612,10 +763,10 @@ describe('Fields', () => {
             like: 'funny',
           },
         },
-      });
+      })
 
-      expect(blockFieldsFail.docs).toHaveLength(0);
-    });
+      expect(blockFieldsFail.docs).toHaveLength(0)
+    })
 
     it('should query based on richtext data within a localized block, without specifying locale', async () => {
       const blockFieldsSuccess = await payload.find({
@@ -625,9 +776,9 @@ describe('Fields', () => {
             like: 'fun',
           },
         },
-      });
+      })
 
-      expect(blockFieldsSuccess.docs).toHaveLength(1);
+      expect(blockFieldsSuccess.docs).toHaveLength(1)
 
       const blockFieldsFail = await payload.find({
         collection: 'block-fields',
@@ -636,33 +787,52 @@ describe('Fields', () => {
             like: 'funny',
           },
         },
-      });
+      })
 
-      expect(blockFieldsFail.docs).toHaveLength(0);
-    });
-  });
+      expect(blockFieldsFail.docs).toHaveLength(0)
+    })
+
+    it('should create when existing block ids are used', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        limit: 1,
+      })
+      const [doc] = blockFields.docs
+
+      const result = await payload.create({
+        collection: 'block-fields',
+        data: {
+          ...doc,
+        },
+      })
+
+      expect(result.id).toBeDefined()
+    })
+  })
 
   describe('json', () => {
     it('should save json data', async () => {
-      const json = { foo: 'bar' };
+      const json = { foo: 'bar' }
       const doc = await payload.create({
         collection: 'json-fields',
         data: {
           json,
         },
-      });
+      })
 
-      expect(doc.json).toStrictEqual({ foo: 'bar' });
-    });
+      expect(doc.json).toStrictEqual({ foo: 'bar' })
+    })
 
     it('should validate json', async () => {
-      await expect(async () => payload.create({
-        collection: 'json-fields',
-        data: {
-          json: '{ bad input: true }',
-        },
-      })).rejects.toThrow('The following field is invalid: json');
-    });
+      await expect(async () =>
+        payload.create({
+          collection: 'json-fields',
+          data: {
+            json: '{ bad input: true }',
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: json')
+    })
 
     it('should save empty json objects', async () => {
       const jsonFieldsDoc = await payload.create({
@@ -672,23 +842,23 @@ describe('Fields', () => {
             state: {},
           },
         },
-      });
+      })
 
-      expect(jsonFieldsDoc.json.state).toEqual({});
+      expect(jsonFieldsDoc.json.state).toEqual({})
 
       const updatedJsonFieldsDoc = await payload.update({
-        collection: 'json-fields',
         id: jsonFieldsDoc.id,
+        collection: 'json-fields',
         data: {
           json: {
             state: {},
           },
         },
-      });
+      })
 
-      expect(updatedJsonFieldsDoc.json.state).toEqual({});
-    });
-  });
+      expect(updatedJsonFieldsDoc.json.state).toEqual({})
+    })
+  })
 
   describe('richText', () => {
     it('should allow querying on rich text content', async () => {
@@ -699,9 +869,9 @@ describe('Fields', () => {
             like: 'doesnt exist',
           },
         },
-      });
+      })
 
-      expect(emptyRichTextQuery.docs).toHaveLength(0);
+      expect(emptyRichTextQuery.docs).toHaveLength(0)
 
       const workingRichTextQuery = await payload.find({
         collection: 'rich-text-fields',
@@ -710,10 +880,23 @@ describe('Fields', () => {
             like: 'hello',
           },
         },
-      });
+      })
 
-      expect(workingRichTextQuery.docs).toHaveLength(1);
-    });
+      expect(workingRichTextQuery.docs).toHaveLength(1)
+    })
+
+    it('should show center alignment', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'hello',
+          },
+        },
+      })
+
+      expect(query.docs[0].richText[0].textAlign).toEqual('center')
+    })
 
     it('should populate link relationship', async () => {
       const query = await payload.find({
@@ -723,20 +906,25 @@ describe('Fields', () => {
             equals: 'internal',
           },
         },
-      });
+      })
 
-      const nodes = query.docs[0].richText;
-      expect(nodes).toBeDefined();
-      const child = nodes.flatMap((n) => n.children)
-        .find((c) => c.doc);
+      const nodes = query.docs[0].richText
+      expect(nodes).toBeDefined()
+      const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
       expect(child).toMatchObject({
-        type: 'link',
         linkType: 'internal',
-      });
-      expect(child.doc.relationTo).toEqual('array-fields');
-      expect(typeof child.doc.value.id).toBe('string');
-      expect(child.doc.value.items).toHaveLength(6);
-    });
+        type: 'link',
+      })
+      expect(child.doc.relationTo).toEqual('array-fields')
+
+      if (payload.db.defaultIDType === 'number') {
+        expect(typeof child.doc.value.id).toBe('number')
+      } else {
+        expect(typeof child.doc.value.id).toBe('string')
+      }
+
+      expect(child.doc.value.items).toHaveLength(6)
+    })
 
     it('should respect rich text depth parameter', async () => {
       const query = `query {
@@ -745,13 +933,32 @@ describe('Fields', () => {
             richText(depth: 2)
           }
         }
-      }`;
-      const response = await graphQLClient.request(query, {}, {
-        Authorization: `JWT ${token}`,
-      });
-      const { docs }: PaginatedDocs<RichTextField> = response.RichTextFields;
-      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any;
-      expect(uploadElement.value.media.filename).toStrictEqual('payload.png');
-    });
-  });
-});
+      }`
+      const response = await graphQLClient.request(
+        query,
+        {},
+        {
+          Authorization: `JWT ${token}`,
+        },
+      )
+      const { docs }: PaginatedDocs<RichTextField> = response.RichTextFields
+      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any
+      expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
+    })
+  })
+
+  describe('relationships', () => {
+    it('should not crash if querying with empty in operator', async () => {
+      const query = await payload.find({
+        collection: 'relationship-fields',
+        where: {
+          'relationship.value': {
+            in: [],
+          },
+        },
+      })
+
+      expect(query.docs).toBeDefined()
+    })
+  })
+})

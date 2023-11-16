@@ -1,0 +1,51 @@
+{
+  "name": "@payloadcms/bundler-vite",
+  "version": "0.1.4",
+  "description": "The officially supported Vite bundler adapter for Payload",
+  "repository": "https://github.com/payloadcms/payload",
+  "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "author": {
+    "email": "info@payloadcms.com",
+    "name": "Payload",
+    "url": "https://payloadcms.com"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm copyTsx",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyTsx": "copyfiles -u 1 \"src/entry.tsx\" dist/",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "dependencies": {
+    "@rollup/plugin-image": "^3.0.2",
+    "@vitejs/plugin-react": "^4.0.4",
+    "compression": "1.7.4",
+    "connect-history-api-fallback": "1.6.0",
+    "get-port": "5.1.1",
+    "path-browserify": "1.0.1",
+    "vite": "^4.4.9",
+    "vite-plugin-virtual": "^0.2.0"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "^2.0.0",
+    "react-dom": "18.2.0"
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
+  },
+  "files": [
+    "dist",
+    "mock.js"
+  ]
+}

@@ -1,15 +1,19 @@
-import { v4 as uuid } from 'uuid';
-import { mapAsync } from '../../src/utilities/mapAsync';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { AuthDebug } from './AuthDebug';
+import { v4 as uuid } from 'uuid'
 
-export const slug = 'users';
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { AuthDebug } from './AuthDebug'
+import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
-    autoLogin: false,
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+      prefillOnly: true,
+    },
   },
   collections: [
     {
@@ -29,14 +33,125 @@ export default buildConfigWithDefaults({
       },
       fields: [
         {
+          name: 'adminOnlyField',
+          type: 'text',
+          access: {
+            read: ({
+              req: {
+                user: { roles = [] },
+              },
+            }) => {
+              return roles.includes('admin')
+            },
+          },
+        },
+        {
           name: 'roles',
           label: 'Role',
           type: 'select',
           options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
-          defaultValue: 'user',
+          defaultValue: ['user'],
           required: true,
           saveToJWT: true,
           hasMany: true,
+        },
+        {
+          name: 'namedSaveToJWT',
+          label: 'Named Save To JWT',
+          type: 'text',
+          defaultValue: namedSaveToJWTValue,
+          saveToJWT: saveToJWTKey,
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'liftedSaveToJWT',
+              label: 'Lifted Save To JWT',
+              type: 'text',
+              saveToJWT: 'x-lifted-from-group',
+              defaultValue: 'lifted from group',
+            },
+          ],
+        },
+        {
+          name: 'groupSaveToJWT',
+          label: 'Group Save To JWT',
+          type: 'group',
+          saveToJWT: 'x-group',
+          fields: [
+            {
+              name: 'saveToJWTString',
+              label: 'Save To JWT String',
+              type: 'text',
+              saveToJWT: 'x-test',
+              defaultValue: 'nested property',
+            },
+            {
+              name: 'saveToJWTFalse',
+              label: 'Save To JWT False',
+              type: 'text',
+              saveToJWT: false,
+              defaultValue: 'nested property',
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'saveToJWTTab',
+              label: 'Save To JWT Tab',
+              saveToJWT: true,
+              fields: [
+                {
+                  name: 'test',
+                  type: 'text',
+                  saveToJWT: 'x-field',
+                  defaultValue: 'yes',
+                },
+              ],
+            },
+            {
+              name: 'tabSaveToJWTString',
+              label: 'Tab Save To JWT String',
+              saveToJWT: 'tab-test',
+              fields: [
+                {
+                  name: 'includedByDefault',
+                  type: 'text',
+                  defaultValue: 'yes',
+                },
+              ],
+            },
+            {
+              label: 'No Name',
+              fields: [
+                {
+                  name: 'tabLiftedSaveToJWT',
+                  label: 'Tab Lifted Save To JWT',
+                  type: 'text',
+                  saveToJWT: true,
+                  defaultValue: 'lifted from unnamed tab',
+                },
+                {
+                  name: 'unnamedTabSaveToJWTString',
+                  label: 'Unnamed Tab Save To JWT String',
+                  type: 'text',
+                  saveToJWT: 'x-tab-field',
+                  defaultValue: 'text',
+                },
+                {
+                  name: 'unnamedTabSaveToJWTFalse',
+                  label: 'Unnamed Tab Save To JWT False',
+                  type: 'text',
+                  saveToJWT: false,
+                  defaultValue: 'false',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'custom',
@@ -57,6 +172,10 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'api-keys',
+      labels: {
+        singular: 'API Key',
+        plural: 'API Keys',
+      },
       access: {
         read: ({ req: { user } }) => {
           if (user.collection === 'api-keys') {
@@ -64,14 +183,21 @@ export default buildConfigWithDefaults({
               id: {
                 equals: user.id,
               },
-            };
+            }
           }
-          return true;
+          return true
         },
       },
       auth: {
         disableLocalStrategy: true,
         useAPIKey: true,
+      },
+      fields: [],
+    },
+    {
+      slug: 'public-users',
+      auth: {
+        verify: true,
       },
       fields: [],
     },
@@ -84,7 +210,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         custom: 'Hello, world!',
       },
-    });
+    })
 
     await mapAsync([...Array(2)], async () => {
       await payload.create({
@@ -93,7 +219,7 @@ export default buildConfigWithDefaults({
           apiKey: uuid(),
           enableAPIKey: true,
         },
-      });
-    });
+      })
+    })
   },
-});
+})

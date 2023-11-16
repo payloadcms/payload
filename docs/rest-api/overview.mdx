@@ -7,11 +7,10 @@ keywords: rest, api, documentation, Content Management System, cms, headless, ja
 ---
 
 <Banner>
-  A fully functional REST API is automatically generated from your Collection
-  and Global configs.
+  A fully functional REST API is automatically generated from your Collection and Global configs.
 </Banner>
 
-All Payload API routes are mounted prefixed to your config's `routes.api` URL segment (default: `/api`).
+All Payload API routes are mounted and prefixed to your config's `routes.api` URL segment (default: `/api`).
 
 **REST query parameters:**
 
@@ -439,45 +438,45 @@ Globals cannot be created or deleted, so there are only two REST endpoints opene
 <RestExamples
   data={[
     {
-      operation: "Get Global",
-      method: "GET",
-      path: "/api/globals/{global-slug}",
-      description: "Get a global by slug",
+      operation: 'Get Global',
+      method: 'GET',
+      path: '/api/globals/{global-slug}',
+      description: 'Get a global by slug',
       example: {
-        slug: "getGlobal",
+        slug: 'getGlobal',
         req: {
           credentials: true,
           headers: true,
         },
         res: {
-          announcement: "Here is an announcement!",
-          globalType: "announcement",
-          createdAt: "2023-04-28T08:53:56.066Z",
-          updatedAt: "2023-04-28T08:53:56.066Z",
-          id: "644b89a496c64a833fe579c9",
+          announcement: 'Here is an announcement!',
+          globalType: 'announcement',
+          createdAt: '2023-04-28T08:53:56.066Z',
+          updatedAt: '2023-04-28T08:53:56.066Z',
+          id: '644b89a496c64a833fe579c9',
         },
       },
     },
     {
-      operation: "Update Global",
-      method: "POST",
-      path: "/api/globals/{global-slug}",
-      description: "Update a global by slug",
+      operation: 'Update Global',
+      method: 'POST',
+      path: '/api/globals/{global-slug}',
+      description: 'Update a global by slug',
       example: {
-        slug: "updateGlobal",
+        slug: 'updateGlobal',
         req: {
           headers: true,
           credentials: true,
           body: {
-            announcement: "Paging Doctor Scrunt",
+            announcement: 'Paging Doctor Scrunt',
           },
         },
         res: {
-          announcement: "Paging Doctor Scrunt",
-          globalType: "announcement",
-          createdAt: "2023-04-28T08:53:56.066Z",
-          updatedAt: "2023-04-28T08:53:56.066Z",
-          id: "644b89a496c64a833fe579c9",
+          announcement: 'Paging Doctor Scrunt',
+          globalType: 'announcement',
+          createdAt: '2023-04-28T08:53:56.066Z',
+          updatedAt: '2023-04-28T08:53:56.066Z',
+          id: '644b89a496c64a833fe579c9',
         },
       },
     },
@@ -491,65 +490,65 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 <RestExamples
   data={[
     {
-      operation: "Get Preference",
-      method: "GET",
-      path: "/api/_preferences/{key}",
-      description: "Get a preference by key",
+      operation: 'Get Preference',
+      method: 'GET',
+      path: '/api/payload-preferences/{key}',
+      description: 'Get a preference by key',
       example: {
-        slug: "getPreference",
+        slug: 'getPreference',
         req: {
           headers: true,
           credentials: true,
         },
         res: {
-          _id: "644bb7a8307b3d363c6edf2c",
-          key: "region",
-          user: "644b8453cd20c7857da5a9b0",
-          userCollection: "users",
+          _id: '644bb7a8307b3d363c6edf2c',
+          key: 'region',
+          user: '644b8453cd20c7857da5a9b0',
+          userCollection: 'users',
           __v: 0,
-          createdAt: "2023-04-28T12:10:16.689Z",
-          updatedAt: "2023-04-28T12:10:16.689Z",
-          value: "Europe/London",
+          createdAt: '2023-04-28T12:10:16.689Z',
+          updatedAt: '2023-04-28T12:10:16.689Z',
+          value: 'Europe/London',
         },
       },
     },
     {
-      operation: "Create Preference",
-      method: "POST",
-      path: "/api/_preferences/{key}",
-      description: "Create or update a preference by key",
+      operation: 'Create Preference',
+      method: 'POST',
+      path: '/api/payload-preferences/{key}',
+      description: 'Create or update a preference by key',
       example: {
-        slug: "createPreference",
+        slug: 'createPreference',
         req: {
           headers: true,
           credentials: true,
           body: {
-            value: "Europe/London",
+            value: 'Europe/London',
           },
         },
         res: {
-          message: "Updated successfully.",
+          message: 'Updated successfully.',
           doc: {
-            user: "644b8453cd20c7857da5a9b0",
-            key: "region",
-            userCollection: "users",
-            value: "Europe/London",
+            user: '644b8453cd20c7857da5a9b0',
+            key: 'region',
+            userCollection: 'users',
+            value: 'Europe/London',
           },
         },
       },
     },
     {
-      operation: "Delete Preference",
-      method: "DELETE",
-      path: "/api/_preferences/{key}",
-      description: "Delete a preference by key",
+      operation: 'Delete Preference',
+      method: 'DELETE',
+      path: '/api/payload-preferences/{key}',
+      description: 'Delete a preference by key',
       example: {
-        slug: "deletePreference",
+        slug: 'deletePreference',
         req: {
           headers: true,
         },
         res: {
-          message: "deletedSuccessfully",
+          message: 'deletedSuccessfully',
         },
       },
     },
@@ -573,37 +572,36 @@ Each endpoint object needs to have:
 Example:
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 // a collection of 'orders' with an additional route for tracking details, reachable at /api/orders/:id/tracking
 export const Orders: CollectionConfig = {
-  slug: "orders",
+  slug: 'orders',
   fields: [
     /* ... */
   ],
   // highlight-start
   endpoints: [
     {
-      path: "/:id/tracking",
-      method: "get",
+      path: '/:id/tracking',
+      method: 'get',
       handler: async (req, res, next) => {
-        const tracking = await getTrackingInfo(req.params.id);
+        const tracking = await getTrackingInfo(req.params.id)
         if (tracking) {
-          res.status(200).send({ tracking });
+          res.status(200).send({ tracking })
         } else {
-          res.status(404).send({ error: "not found" });
+          res.status(404).send({ error: 'not found' })
         }
       },
     },
   ],
   // highlight-end
-};
+}
 ```
 
 <Banner>
   <strong>Note:</strong>
   <br />
-  **req** will have the **payload** object and can be used inside your endpoint
-  handlers for making calls like req.payload.find() that will make use of access
-  control and hooks.
+  **req** will have the **payload** object and can be used inside your endpoint handlers for making
+  calls like req.payload.find() that will make use of access control and hooks.
 </Banner>

@@ -23,127 +23,318 @@
  *  - specify locales to show
  */
 
+import type { Page } from '@playwright/test'
 
-import type { Page } from '@playwright/test';
-import { expect, test } from '@playwright/test';
-import { initPayloadE2E } from '../helpers/configHelpers';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil';
-import { draftSlug, autosaveSlug } from './shared';
-import wait from '../../src/utilities/wait';
+import { expect, test } from '@playwright/test'
 
-const { beforeAll, describe } = test;
+import payload from '../../packages/payload/src'
+import wait from '../../packages/payload/src/utilities/wait'
+import { globalSlug } from '../admin/slugs'
+import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
+import { AdminUrlUtil } from '../helpers/adminUrlUtil'
+import { initPayloadE2E } from '../helpers/configHelpers'
+import { clearAndSeedEverything } from './seed'
+import { titleToDelete } from './shared'
+import {
+  autoSaveGlobalSlug,
+  autosaveCollectionSlug,
+  draftCollectionSlug,
+  draftGlobalSlug,
+} from './slugs'
+
+const { beforeAll, beforeEach, describe } = test
 
 describe('versions', () => {
-  let page: Page;
-  let serverURL: string;
+  let page: Page
+  let url: AdminUrlUtil
+  let serverURL: string
+  let autosaveURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
-    const config = await initPayloadE2E(__dirname);
-    serverURL = config.serverURL;
+    const config = await initPayloadE2E(__dirname)
+    serverURL = config.serverURL
+    const context = await browser.newContext()
+    page = await context.newPage()
+  })
 
-    const context = await browser.newContext();
-    page = await context.newPage();
-  });
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+  })
 
   describe('draft collections', () => {
-    let url: AdminUrlUtil;
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, draftSlug);
-    });
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+    })
 
-    test('should bulk publish', async () => {
-      await page.goto(url.list);
+    // This test has to run before bulk updates that will rename the title
+    test('should delete', async () => {
+      await page.goto(url.list)
 
-      await page.locator('.select-all__input').click();
+      const rows = page.locator(`tr`)
+      const rowToDelete = rows.filter({ hasText: titleToDelete })
 
-      await page.locator('.publish-many__toggle').click();
+      await rowToDelete.locator('.cell-_select input').click()
+      await page.locator('.delete-documents__toggle').click()
+      await page.locator('#confirm-delete').click()
 
-      await page.locator('#confirm-publish').click();
+      await expect(page.locator('.Toastify__toast--success')).toContainText(
+        'Deleted 1 Draft Post successfully.',
+      )
 
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published');
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Published');
-    });
+      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
+    })
 
-    test('should bulk unpublish', async () => {
-      await page.goto(url.list);
+    test('bulk update - should publish many', async () => {
+      await page.goto(url.list)
 
-      await page.locator('.select-all__input').click();
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
 
-      await page.locator('.unpublish-many__toggle').click();
+      // Bulk edit the selected rows
+      await page.locator('.publish-many__toggle').click()
+      await page.locator('#confirm-publish').click()
 
-      await page.locator('#confirm-unpublish').click();
+      // Check that the statuses for each row has been updated to `published`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText(
+        'Published',
+      )
 
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft');
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft');
-    });
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
+    })
 
-    test('should publish while editing many', async () => {
-      const description = 'published document';
-      await page.goto(url.list);
-      await page.locator('.select-all__input').click();
-      await page.locator('.edit-many__toggle').click();
-      await page.locator('.field-select .rs__control').click();
-      const options = page.locator('.rs__option');
-      const field = await options.locator('text=description');
-      await field.click();
-      await page.locator('#field-description').fill(description);
-      await page.locator('.form-submit .edit-many__publish').click();
+    test('bulk update - should unpublish many', async () => {
+      await page.goto(url.list)
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText('Updated 2 Draft Posts successfully.');
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Published');
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Published');
-    });
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
 
-    test('should save as draft while editing many', async () => {
-      const description = 'draft document';
-      await page.goto(url.list);
-      await page.locator('.select-all__input').click();
-      await page.locator('.edit-many__toggle').click();
-      await page.locator('.field-select .rs__control').click();
-      const options = page.locator('.rs__option');
-      const field = await options.locator('text=description');
-      await field.click();
-      await page.locator('#field-description').fill(description);
-      await page.locator('.form-submit .edit-many__draft').click();
+      // Bulk edit the selected rows
+      await page.locator('.unpublish-many__toggle').click()
+      await page.locator('#confirm-unpublish').click()
 
-      await expect(page.locator('.Toastify__toast--success')).toContainText('Updated 2 Draft Posts successfully.');
-      await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft');
-      await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft');
-    });
+      // Check that the statuses for each row has been updated to `draft`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
+    })
+
+    test('bulk update - should publish changes', async () => {
+      const description = 'published document'
+      await page.goto(url.list)
+
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
+
+      // Bulk edit the selected rows to `published` status
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+      const options = page.locator('.rs__option')
+      const field = options.locator('text=Description')
+      await field.click()
+      await page.locator('#field-description').fill(description)
+      await page.locator('.form-submit .edit-many__publish').click()
+
+      await expect(page.locator('.Toastify__toast--success')).toContainText(
+        'Draft Posts successfully.',
+      )
+
+      // Check that the statuses for each row has been updated to `published`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText(
+        'Published',
+      )
+
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
+    })
+
+    test('bulk update - should draft changes', async () => {
+      const description = 'draft document'
+      await page.goto(url.list)
+
+      // Select specific rows by title
+      await selectTableRow(page, 'Published Title')
+      await selectTableRow(page, 'Draft Title')
+
+      // Bulk edit the selected rows to `draft` status
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+      const options = page.locator('.rs__option')
+      const field = options.locator('text=Description')
+      await field.click()
+      await page.locator('#field-description').fill(description)
+      await page.locator('.form-submit .edit-many__draft').click()
+
+      await expect(page.locator('.Toastify__toast--success')).toContainText(
+        'Draft Posts successfully.',
+      )
+
+      // Check that the statuses for each row has been updated to `draft`
+      await expect(await findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
+      await expect(await findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
+    })
+
+    test('collection - has versions tab', async () => {
+      await page.goto(url.list)
+      await page.locator('tbody tr .cell-title a').first().click()
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: 'Versions',
+      })
+
+      expect(versionsTab).toBeTruthy()
+      const href = await versionsTab.locator('a').first().getAttribute('href')
+      expect(href).toBe(`${pathname}/versions`)
+    })
+
+    test('collection - tab displays proper number of versions', async () => {
+      await page.goto(url.list)
+
+      const linkToDoc = page
+        .locator('tbody tr .cell-title a', {
+          hasText: exactText('Title With Many Versions 11'),
+        })
+        .first()
+
+      expect(linkToDoc).toBeTruthy()
+      await linkToDoc.click()
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: 'Versions',
+      })
+
+      const versionCount = await versionsTab.locator('.doc-tab__count').first().textContent()
+      expect(versionCount).toBe('11')
+    })
+
+    test('collection - has versions route', async () => {
+      await page.goto(url.list)
+      await page.locator('tbody tr .cell-title a').first().click()
+      await page.goto(`${page.url()}/versions`)
+      expect(page.url()).toMatch(/\/versions$/)
+    })
+
+    test('global - has versions tab', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(global.global(draftGlobalSlug))
+
+      const docURL = page.url()
+      const pathname = new URL(docURL).pathname
+
+      const versionsTab = page.locator('.doc-tab', {
+        hasText: 'Versions',
+      })
+
+      expect(versionsTab).toBeTruthy()
+      const href = await versionsTab.locator('a').first().getAttribute('href')
+      expect(href).toBe(`${pathname}/versions`)
+    })
+
+    test('global - has versions route', async () => {
+      const global = new AdminUrlUtil(serverURL, globalSlug)
+      const versionsURL = `${global.global(globalSlug)}/versions`
+      await page.goto(versionsURL)
+      expect(page.url()).toMatch(/\/versions$/)
+    })
+
+    test('global - should autosave', async () => {
+      const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
+      // fill out global title and wait for autosave
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await page.locator('#field-title').fill('global title')
+      await wait(1000)
+
+      // refresh the page and ensure value autosaved
+      await page.goto(url.global(autoSaveGlobalSlug))
+      await expect(page.locator('#field-title')).toHaveValue('global title')
+    })
 
     test('should retain localized data during autosave', async () => {
-      const autosaveURL = new AdminUrlUtil(serverURL, autosaveSlug);
-      const locale = 'en';
-      const spanishLocale = 'es';
-      const title = 'english title';
-      const spanishTitle = 'spanish title';
-      const description = 'description';
-      const newDescription = 'new description';
+      const locale = 'en'
+      const spanishLocale = 'es'
+      const title = 'english title'
+      const spanishTitle = 'spanish title'
+      const description = 'description'
+      const newDescription = 'new description'
 
-      await page.goto(autosaveURL.create);
-      await page.locator('#field-title').fill(title);
-      await page.locator('#field-description').fill(description);
-      await wait(500);
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill(title)
+      await page.locator('#field-description').fill(description)
+      await wait(500) // wait for autosave
 
-      await changeLocale(spanishLocale);
-      await page.locator('#field-title').fill(spanishTitle);
-      await wait(500);
+      await changeLocale(page, spanishLocale)
+      await page.locator('#field-title').fill(spanishTitle)
+      await wait(500) // wait for autosave
 
-      await changeLocale(locale);
-      await page.locator('#field-description').fill(newDescription);
-      await wait(500);
+      await changeLocale(page, locale)
+      await page.locator('#field-description').fill(newDescription)
+      await wait(500) // wait for autosave
 
-      await changeLocale(spanishLocale);
-      await wait(500);
-      await page.reload();
-      await expect(page.locator('#field-title')).toHaveValue(spanishTitle);
-      await expect(page.locator('#field-description')).toHaveValue(newDescription);
-    });
-  });
+      await changeLocale(page, spanishLocale)
+      await wait(500) // wait for autosave
 
-  async function changeLocale(newLocale: string) {
-    await page.locator('.localizer >> button').first().click();
-    await page.locator(`.localizer >> a:has-text("${newLocale}")`).click();
-    expect(page.url()).toContain(`locale=${newLocale}`);
-  }
-});
+      await page.reload()
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+      await expect(page.locator('#field-description')).toHaveValue(newDescription)
+    })
+
+    test('should restore localized docs correctly', async () => {
+      const spanishLocale = 'es'
+      const spanishTitle = 'spanish title'
+      const englishTitle = 'english title'
+
+      await page.goto(url.create)
+
+      // fill out doc in english
+      await page.locator('#field-title').fill(englishTitle)
+      await page.locator('#field-description').fill('unchanged description')
+      await page.locator('#action-save').click()
+
+      // change locale to spanish
+      await changeLocale(page, spanishLocale)
+
+      // fill out doc in spanish
+      await page.locator('#field-title').fill(spanishTitle)
+      await page.locator('#action-save').click()
+
+      // fill out draft content in spanish
+      await page.locator('#field-title').fill(`${spanishTitle}--draft`)
+      await page.locator('#action-save-draft').click()
+
+      // revert to last published version
+      await page.locator('#action-revert-to-published').click()
+      await page.locator('#action-revert-to-published-confirm').click()
+
+      // verify that spanish content is reverted correctly
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
+    })
+
+    test('collection - autosave should only update the current document', async () => {
+      // create and save first doc
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('first post title')
+      await page.locator('#field-description').fill('first post description')
+      await page.locator('#action-save').click()
+
+      // create and save second doc
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('second post title')
+      await page.locator('#field-description').fill('second post description')
+      await page.locator('#action-save').click()
+
+      // update second doc and wait for autosave
+      await page.locator('#field-title').fill('updated second post title')
+      await page.locator('#field-description').fill('updated second post description')
+      await wait(1000)
+
+      // verify that the first doc is unchanged
+      await page.goto(autosaveURL.list)
+      await page.locator('tbody tr .cell-title a').nth(1).click()
+      await expect(page.locator('#field-title')).toHaveValue('first post title')
+      await expect(page.locator('#field-description')).toHaveValue('first post description')
+    })
+  })
+})

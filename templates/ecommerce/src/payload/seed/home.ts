@@ -41,7 +41,7 @@ export const home: Partial<Page> = {
           {
             type: 'link',
             linkType: 'custom',
-            url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
             newTab: true,
             children: [
               {
@@ -75,7 +75,7 @@ export const home: Partial<Page> = {
           appearance: 'secondary',
           reference: null,
           label: 'View on GitHub',
-          url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
+          url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
           newTab: true,
         },
       },
@@ -93,7 +93,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Core features',
+                  text: 'Core Features',
                 },
               ],
               type: 'h2',
@@ -121,7 +121,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Manage this users, pages, products, and more from the ',
+                  text: "Manage this site's users, pages, products, and more from the ",
                 },
                 {
                   type: 'link',
@@ -141,10 +141,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -163,7 +160,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Complete user ',
+                  text: 'User ',
                 },
                 {
                   type: 'link',
@@ -189,17 +186,14 @@ export const home: Partial<Page> = {
                   ],
                 },
                 {
-                  text: ' flows with email verification and password reset.',
+                  text: ' flows are complete with email verification and password reset.',
                 },
               ],
             },
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -251,10 +245,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -266,7 +257,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Gated Content',
+                  text: 'Paywall',
                 },
               ],
               type: 'h3',
@@ -281,10 +272,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -295,7 +283,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Shopping cart',
+                  text: 'Shopping Cart',
                 },
               ],
               type: 'h3',
@@ -303,17 +291,14 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Shopping carts persist between sessions, can saved for later and accessed from any device.',
+                  text: 'Shopping carts persist between sessions, can be saved for later, and are accessible from any device.',
                 },
               ],
             },
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -332,17 +317,14 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Secure in-app checkout powered by Stripe so your customers never have to leave your site.',
+                  text: 'Secure in-app checkout powered by Stripe means your customers never have to leave your site.',
                 },
               ],
             },
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -353,7 +335,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Page builder',
+                  text: 'Page Builder',
                 },
               ],
               type: 'h3',
@@ -368,10 +350,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -410,10 +389,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -424,7 +400,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Dark mode',
+                  text: 'Dark Mode',
                 },
               ],
               type: 'h3',
@@ -432,17 +408,14 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Users will experience this site in their preferred color scheme and each block can be inverted.',
+                  text: 'Users will experience this site in their preferred color scheme, and each block can be inverted.',
                 },
               ],
             },
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -454,6 +427,31 @@ export const home: Partial<Page> = {
       blockName: 'Media Block',
       position: 'default',
       media: '{{PRODUCT2_IMAGE}}',
+    },
+    {
+      blockName: 'Archive Block',
+      blockType: 'archive',
+      introContent: [
+        {
+          type: 'h4',
+          children: [
+            {
+              text: 'Recent Products',
+            },
+          ],
+        },
+        {
+          type: 'p',
+          children: [
+            {
+              text: 'The products below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or products can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
+            },
+          ],
+        },
+      ],
+      populateBy: 'collection',
+      relationTo: 'products',
+      categories: [],
     },
     {
       blockType: 'cta',

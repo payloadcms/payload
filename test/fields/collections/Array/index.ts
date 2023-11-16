@@ -1,12 +1,9 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { ArrayRowLabel } from './LabelComponent';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-export const arrayDefaultValue = [
-  { text: 'row one' },
-  { text: 'row two' },
-];
+import { arrayFieldsSlug } from '../../slugs'
+import { ArrayRowLabel } from './LabelComponent'
 
-export const arrayFieldsSlug = 'array-fields';
+export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
@@ -84,6 +81,16 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
           name: 'text',
         },
+        {
+          type: 'group',
+          name: 'groupInRow',
+          fields: [
+            {
+              type: 'text',
+              name: 'textInGroupInRow',
+            },
+          ],
+        },
       ],
     },
     {
@@ -118,35 +125,18 @@ const ArrayFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'arrayWithMinRows',
+      type: 'array',
+      minRows: 2,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
-};
+}
 
-export const arrayDoc = {
-  items: [
-    {
-      text: 'first row',
-    },
-    {
-      text: 'second row',
-    },
-    {
-      text: 'third row',
-    },
-    {
-      text: 'fourth row',
-    },
-    {
-      text: 'fifth row',
-    },
-    {
-      text: 'sixth row',
-    },
-  ],
-  collapsedArray: [
-    {
-      text: 'initialize collapsed',
-    },
-  ],
-};
-
-export default ArrayFields;
+export default ArrayFields

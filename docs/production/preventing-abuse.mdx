@@ -18,16 +18,21 @@ Set the max number of failed login attempts before a user account is locked out 
 
 To prevent DDoS, brute-force, and similar attacks, you can set IP-based rate limits so that once a certain threshold of requests has been hit by a single IP, further requests from the same IP will be ignored. The Payload config `rateLimit` property accepts an object with the following properties:
 
-| Option                       | Description |
-| ---------------------------- | ----------- |
-| **`window`**                 | Time in milliseconds to track requests per IP. Defaults to `90000` (15 minutes). |
-| **`max`**                    | Number of requests served from a single IP before limiting. Defaults to `500`. |
-| **`skip`**                   | Express middleware function that can return true (or promise resulting in true) that will bypass limit. |
-| **`trustProxy`**             | True or false, to enable to allow requests to pass through a proxy such as a load balancer or an `nginx` reverse proxy. |
+| Option           | Description                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **`window`**     | Time in milliseconds to track requests per IP. Defaults to `90000` (15 minutes).                                        |
+| **`max`**        | Number of requests served from a single IP before limiting. Defaults to `500`.                                          |
+| **`skip`**       | Express middleware function that can return true (or promise resulting in true) that will bypass limit.                 |
+| **`trustProxy`** | True or false, to enable to allow requests to pass through a proxy such as a load balancer or an `nginx` reverse proxy. |
 
 <Banner type="warning">
-  <strong>Warning:</strong><br/>
-  Very commonly, NodeJS apps are served behind `nginx` reverse proxies and similar. If you use rate-limiting while you're behind a proxy, <strong>all</strong> IP addresses from everyone that uses your API will appear as if they are from a local origin (127.0.0.1), and your users will get rate-limited very quickly without cause. If you plan to host your app behind a proxy, make sure you set <strong>trustProxy</strong> to <strong>true</strong>.
+  <strong>Warning:</strong>
+  <br />
+  Very commonly, NodeJS apps are served behind `nginx` reverse proxies and similar. If you use
+  rate-limiting while you're behind a proxy, <strong>all</strong> IP addresses from everyone that
+  uses your API will appear as if they are from a local origin (127.0.0.1), and your users will get
+  rate-limited very quickly without cause. If you plan to host your app behind a proxy, make sure
+  you set <strong>trustProxy</strong> to <strong>true</strong>.
 </Banner>
 
 ### Max Depth

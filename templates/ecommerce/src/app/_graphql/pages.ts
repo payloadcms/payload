@@ -14,8 +14,8 @@ export const PAGES = `
 `
 
 export const PAGE = `
-  query Page($slug: String ) {
-    Pages(where: { AND: [{ slug: { equals: $slug }}] }) {
+  query Page($slug: String, $draft: Boolean) {
+    Pages(where: { AND: [{ slug: { equals: $slug }}] }, limit: 1, draft: $draft) {
       docs {
         id
         title

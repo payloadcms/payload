@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react'
 import { Metadata } from 'next'
 
-import { fetchGlobals } from '../../_api/fetchGlobals'
+import { Settings } from '../../../payload/payload-types'
+import { fetchSettings } from '../../_api/fetchGlobals'
 import { Gutter } from '../../_components/Gutter'
 import { Message } from '../../_components/Message'
 import { LowImpactHero } from '../../_heros/LowImpact'
@@ -18,7 +19,14 @@ export default async function Checkout() {
     )}&redirect=${encodeURIComponent('/checkout')}`,
   })
 
-  const { settings } = await fetchGlobals()
+  let settings: Settings | null = null
+
+  try {
+    settings = await fetchSettings()
+  } catch (error) {
+    // no need to redirect to 404 here, just simply render the page with fallback data where necessary
+    console.error(error) // eslint-disable-line no-console
+  }
 
   return (
     <Fragment>
@@ -38,7 +46,7 @@ export default async function Checkout() {
                 </a>
                 {' then set them as environment variables. See the '}
                 <a
-                  href="https://github.com/payloadcms/payload/blob/master/templates/ecommerce/README.md#stripe"
+                  href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

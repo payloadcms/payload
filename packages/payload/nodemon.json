@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/nodemon.json",
+  "exec": "ts-node ../../test/dev.ts -- -I",
+  "ext": "ts,js,json",
+  "ignore": [
+    ".git",
+    "node_modules",
+    "node_modules/**/node_modules",
+    "src/admin",
+    "src/**/*.spec.ts",
+    "test/**/payload-types.ts"
+  ],
+  "watch": ["src/**/*.ts", "../../test/", "../../packages/**/*.ts"],
+  "stdin": false
+}

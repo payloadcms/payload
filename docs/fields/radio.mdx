@@ -6,34 +6,46 @@ desc: The Radio field type allows for the selection of one value from a predefin
 keywords: radio, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
-  The Radio Group field type allows for the selection of one value from a predefined set of possible values and presents a radio group-style set of inputs to the Admin panel.
+<Banner>
+  The Radio Group field type allows for the selection of one value from a predefined set of possible
+  values and presents a radio group-style set of inputs to the Admin panel.
 </Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/radio.png"
+  srcDark="https://payloadcms.com/images/docs/fields/radio-dark.png"
+  alt="Shows a Radio field in the Payload admin panel"
+  caption="Admin panel screenshot of a Radio field"
+/>
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names) |
-| **`options`** *      | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing an `label` string and a `value` string. |
-| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
-| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
-| **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
-| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
-| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
-| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
-| **`defaultValue`**   | Provide data to be used for this field's default value. The default value must exist within provided values in `options`. [More](/docs/fields/overview#default-values) |
-| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
-| **`required`**       | Require this field to have a value. |
-| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
-| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
+| Option             | Description                                                                                                                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
+| **`options`** \*   | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing an `label` string and a `value` string.                                          |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
+| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
+| **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
+| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
+| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
+| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
+| **`defaultValue`** | Provide data to be used for this field's default value. The default value must exist within provided values in `options`. [More](/docs/fields/overview#default-values)                              |
+| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
+| **`required`**     | Require this field to have a value.                                                                                                                                                                 |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                           |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 <Banner type="warning">
-  <strong>Important:</strong><br/>
-  Option values should be strings that do not contain hyphens or special characters due to GraphQL enumeration naming constraints. Underscores are allowed. If you determine you need your option values to be non-strings or contain special characters, they will be formatted accordingly before being used as a GraphQL enum.
+  <strong>Important:</strong>
+  <br />
+  Option values should be strings that do not contain hyphens or special characters due to GraphQL
+  enumeration naming constraints. Underscores are allowed. If you determine you need your option
+  values to be non-strings or contain special characters, they will be formatted accordingly before
+  being used as a GraphQL enum.
 </Banner>
 
 ### Admin config
@@ -47,8 +59,9 @@ The `layout` property allows for the radio group to be styled as a horizonally o
 ### Example
 
 `collections/ExampleCollection.ts`
+
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -56,7 +69,8 @@ export const ExampleCollection: CollectionConfig = {
     {
       name: 'color', // required
       type: 'radio', // required
-      options: [ // required
+      options: [
+        // required
         {
           label: 'Mint',
           value: 'mint',
@@ -69,8 +83,8 @@ export const ExampleCollection: CollectionConfig = {
       defaultValue: 'mint', // The first value in options.
       admin: {
         layout: 'horizontal',
-      }
-    }
-  ]
+      },
+    },
+  ],
 }
 ```

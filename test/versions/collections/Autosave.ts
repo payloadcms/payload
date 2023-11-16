@@ -1,8 +1,9 @@
-import type { CollectionConfig } from '../../../src/collections/config/types';
-import { autosaveSlug } from '../shared';
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+
+import { autosaveCollectionSlug } from '../slugs'
 
 const AutosavePosts: CollectionConfig = {
-  slug: autosaveSlug,
+  slug: autosaveCollectionSlug,
   labels: {
     singular: 'Autosave Post',
     plural: 'Autosave Posts',
@@ -23,7 +24,7 @@ const AutosavePosts: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => {
       if (user) {
-        return true;
+        return true
       }
 
       return {
@@ -39,7 +40,7 @@ const AutosavePosts: CollectionConfig = {
             },
           },
         ],
-      };
+      }
     },
     readVersions: ({ req: { user } }) => Boolean(user),
   },
@@ -59,6 +60,6 @@ const AutosavePosts: CollectionConfig = {
       required: true,
     },
   ],
-};
+}
 
-export default AutosavePosts;
+export default AutosavePosts

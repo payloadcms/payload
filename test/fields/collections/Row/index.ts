@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-export const rowFieldsSlug = 'row-fields';
+import { rowFieldsSlug } from '../../slugs'
 
 const RowFields: CollectionConfig = {
   slug: rowFieldsSlug,
@@ -26,7 +26,55 @@ const RowFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'field_with_width_a',
+          label: 'Field with 50% width',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'field_with_width_b',
+          label: 'Field with 50% width',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          label: 'Collapsible within a row',
+          type: 'collapsible',
+          fields: [
+            {
+              name: 'field_within_collapsible_a',
+              label: 'Field within collapsible',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'Collapsible within a row',
+          type: 'collapsible',
+          fields: [
+            {
+              name: 'field_within_collapsible_b',
+              label: 'Field within collapsible',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
-};
+}
 
-export default RowFields;
+export default RowFields

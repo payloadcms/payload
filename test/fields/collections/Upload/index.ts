@@ -1,8 +1,11 @@
-import path from 'path';
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import path from 'path'
+
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+
+import { uploadsSlug } from '../../slugs'
 
 const Uploads: CollectionConfig = {
-  slug: 'uploads',
+  slug: uploadsSlug,
   upload: {
     staticDir: path.resolve(__dirname, './uploads'),
   },
@@ -14,7 +17,7 @@ const Uploads: CollectionConfig = {
     {
       type: 'upload',
       name: 'media',
-      relationTo: 'uploads',
+      relationTo: uploadsSlug,
       filterOptions: {
         mimeType: {
           equals: 'image/png',
@@ -26,10 +29,6 @@ const Uploads: CollectionConfig = {
       name: 'richText',
     },
   ],
-};
+}
 
-export const uploadsDoc = {
-  text: 'An upload here',
-};
-
-export default Uploads;
+export default Uploads

@@ -1,0 +1,314 @@
+name: build
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: ['main']
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      needs_build: ${{ steps.filter.outputs.needs_build }}
+      templates: ${{ steps.filter.outputs.templates }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 25
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          needs_build:
+            - '.github/workflows/**'
+            - 'packages/**'
+            - 'test/**'
+            - 'pnpm-lock.yaml'
+            - 'package.json'
+          templates:
+            - 'templates/**'
+    - name: Log all filter results
+      run: |
+        echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+        echo "templates: ${{ steps.filter.outputs.templates }}"
+
+  core-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - run: pnpm install
+      - run: pnpm run build
+
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [mongoose, postgres]
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payloadtests
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Start PostgreSQL
+        uses: CasperWA/postgresql-action@v1.2
+        with:
+          postgresql version: '14'  # See https://hub.docker.com/_/postgres for available versions
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+        if: matrix.database == 'postgres'
+
+      - run: sleep 30
+      - name: Configure PostgreSQL
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
+          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+        if: matrix.database == 'postgres'
+
+      - name: Component Tests
+        run: pnpm test:components
+
+      - name: Integration Tests
+        run: pnpm test:int
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+
+  tests-e2e:
+    runs-on: ubuntu-latest
+    needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: E2E Tests
+        uses: nick-fields/retry@v2
+        with:
+          retry_on: error
+          max_attempts: 2
+          timeout_minutes: 15
+          command: pnpm test:e2e --part ${{ matrix.part }} --bail
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 1
+
+  tests-type-generation:
+    runs-on: ubuntu-latest
+    needs: core-build
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Generate Payload Types
+        run: pnpm dev:generate-types fields
+
+      - name: Generate GraphQL schema file
+        run: pnpm dev:generate-graphql-schema graphql-schema-gen
+
+  build-packages:
+    runs-on: ubuntu-latest
+    needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg:
+          - db-mongodb
+          - db-postgres
+          - bundler-webpack
+          - bundler-vite
+          - richtext-slate
+          - richtext-lexical
+          - live-preview
+          - live-preview-react
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Build ${{ matrix.pkg }}
+        run: pnpm turbo run build --filter=${{ matrix.pkg }}
+
+  plugins:
+    runs-on: ubuntu-latest
+    needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg:
+          - create-payload-app
+          - plugin-cloud
+          - plugin-cloud-storage
+          - plugin-form-builder
+          - plugin-nested-docs
+          - plugin-search
+          - plugin-sentry
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Build ${{ matrix.pkg }}
+        run: pnpm turbo run build --filter=${{ matrix.pkg }}
+
+      - name: Test ${{ matrix.pkg }}
+        run: pnpm --filter ${{ matrix.pkg }} run test
+        if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions
+
+  templates:
+    needs: changes
+    if: ${{ needs.changes.outputs.templates == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [blank, website, ecommerce]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
+
+      - name: Build Website
+        run: |
+          cd templates/${{ matrix.template }}
+          cp .env.example .env
+          yarn install
+          yarn build

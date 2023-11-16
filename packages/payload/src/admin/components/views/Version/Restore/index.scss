@@ -1,0 +1,30 @@
+@import '../../../../scss/styles.scss';
+
+.restore-version {
+  cursor: pointer;
+
+  &__modal {
+    @include blur-bg;
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    &__toggle {
+      @extend %btn-reset;
+    }
+
+    .btn {
+      [dir='ltr'] & {
+        margin-right: $baseline;
+      }
+      [dir='rtl'] & {
+        margin-left: $baseline;
+      }
+    }
+  }
+
+  &__modal-template {
+    position: relative;
+    z-index: 1;
+  }
+}

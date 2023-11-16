@@ -16,7 +16,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   const create = useCallback<Create>(
     async args => {
       if (api === 'rest') {
-        const user = await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users`, args)
+        const user = await rest(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users`, args)
         setUser(user)
         return user
       }
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   const login = useCallback<Login>(
     async args => {
       if (api === 'rest') {
-        const user = await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/login`, args)
+        const user = await rest(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/login`, args)
         setUser(user)
         return user
       }
@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
 
   const logout = useCallback<Logout>(async () => {
     if (api === 'rest') {
-      await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/logout`)
+      await rest(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/logout`)
       setUser(null)
       return
     }
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
     const fetchMe = async () => {
       if (api === 'rest') {
         const user = await rest(
-          `${process.env.NEXT_PUBLIC_CMS_URL}/api/users/me`,
+          `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/me`,
           {},
           {
             method: 'GET',
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
     async args => {
       if (api === 'rest') {
         const user = await rest(
-          `${process.env.NEXT_PUBLIC_CMS_URL}/api/users/forgot-password`,
+          `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/forgot-password`,
           args,
         )
         setUser(user)
@@ -132,7 +132,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode; api?: 'rest' | 
   const resetPassword = useCallback<ResetPassword>(
     async args => {
       if (api === 'rest') {
-        const user = await rest(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/reset-password`, args)
+        const user = await rest(
+          `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/reset-password`,
+          args,
+        )
         setUser(user)
         return user
       }

@@ -1,40 +1,56 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { ArrayCollection } from './collections/Array';
-import { LocalizedPost, RelationshipLocalized } from './payload-types';
+import type { LocalizedPost } from './payload-types'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { ArrayCollection } from './collections/Array'
 import {
   defaultLocale,
   englishTitle,
+  localizedPostsSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationSpanishTitle,
   relationSpanishTitle2,
+  relationshipLocalizedSlug,
   spanishLocale,
   spanishTitle,
-} from './shared';
+  withLocalizedRelSlug,
+  withRequiredLocalizedFields,
+} from './shared'
 
 export type LocalizedPostAllLocale = LocalizedPost & {
   title: {
-    en?: string;
-    es?: string;
-  };
-};
-
-export const localizedPostsSlug = 'localized-posts';
-export const withLocalizedRelSlug = 'with-localized-relationship';
-export const relationshipLocalizedSlug = 'relationship-localized';
-export const withRequiredLocalizedFields = 'localized-required';
+    en?: string
+    es?: string
+  }
+}
 
 const openAccess = {
   read: () => true,
   create: () => true,
   delete: () => true,
   update: () => true,
-};
+}
 
 export default buildConfigWithDefaults({
   localization: {
-    locales: [defaultLocale, spanishLocale],
+    locales: [
+      {
+        label: 'English',
+        code: defaultLocale,
+        rtl: false,
+      },
+      {
+        label: 'Spanish',
+        code: spanishLocale,
+        rtl: false,
+      },
+      {
+        label: 'Arabic',
+        code: 'ar',
+        rtl: true,
+      },
+    ],
     defaultLocale,
     fallback: true,
   },
@@ -66,6 +82,27 @@ export default buildConfigWithDefaults({
         {
           name: 'description',
           type: 'text',
+        },
+        {
+          name: 'localizedCheckbox',
+          type: 'checkbox',
+          localized: true,
+        },
+        {
+          name: 'children',
+          type: 'relationship',
+          relationTo: localizedPostsSlug,
+          hasMany: true,
+        },
+        {
+          type: 'group',
+          name: 'group',
+          fields: [
+            {
+              name: 'children',
+              type: 'text',
+            },
+          ],
         },
       ],
     },
@@ -214,21 +251,21 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    const collection = localizedPostsSlug;
+    const collection = localizedPostsSlug
 
     await payload.create({
       collection,
       data: {
         title: englishTitle,
       },
-    });
+    })
 
-    const localizedPost = await payload.create<LocalizedPost>({
+    const localizedPost = await payload.create({
       collection,
       data: {
         title: englishTitle,
       },
-    });
+    })
 
     await payload.create({
       collection: 'users',
@@ -237,49 +274,49 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         relation: localizedPost.id,
       },
-    });
+    })
 
-    await payload.update<LocalizedPost>({
+    await payload.update({
       collection,
       id: localizedPost.id,
       locale: spanishLocale,
       data: {
         title: spanishTitle,
       },
-    });
+    })
 
-    const localizedRelation = await payload.create<LocalizedPost>({
+    const localizedRelation = await payload.create({
       collection,
       data: {
         title: relationEnglishTitle,
       },
-    });
+    })
 
-    await payload.update<LocalizedPost>({
+    await payload.update({
       collection,
       id: localizedPost.id,
       locale: spanishLocale,
       data: {
         title: relationSpanishTitle,
       },
-    });
+    })
 
-    const localizedRelation2 = await payload.create<LocalizedPost>({
+    const localizedRelation2 = await payload.create({
       collection,
       data: {
         title: relationEnglishTitle2,
       },
-    });
-    await payload.update<LocalizedPost>({
+    })
+    await payload.update({
       collection,
       id: localizedPost.id,
       locale: spanishLocale,
       data: {
         title: relationSpanishTitle2,
       },
-    });
+    })
 
-    await payload.create<RelationshipLocalized>({
+    await payload.create({
       collection: withLocalizedRelSlug,
       data: {
         relationship: localizedRelation.id,
@@ -290,7 +327,7 @@ export default buildConfigWithDefaults({
           { relationTo: localizedPostsSlug, value: localizedRelation2.id },
         ],
       },
-    });
+    })
     await payload.create({
       collection: relationshipLocalizedSlug,
       locale: 'en',
@@ -308,7 +345,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
 
     const globalArray = await payload.updateGlobal({
       slug: 'global-array',
@@ -322,7 +359,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
 
     await payload.updateGlobal({
       slug: 'global-array',
@@ -333,6 +370,6 @@ export default buildConfigWithDefaults({
           text: `test es ${i + 1}`,
         })),
       },
-    });
+    })
   },
-});
+})

@@ -1,0 +1,46 @@
+@import '../../../scss/styles.scss';
+
+.array-actions {
+  &__button {
+    @extend %btn-reset;
+    cursor: pointer;
+    border-radius: 100px;
+
+    &:hover {
+      background: var(--theme-elevation-0);
+    }
+  }
+
+  &__actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__action {
+    display: flex;
+    gap: calc(var(--base) / 2);
+    align-items: center;
+
+    svg {
+      position: relative;
+
+      .stroke {
+        stroke-width: 1px;
+      }
+    }
+  }
+
+  &__move-up {
+    margin-bottom: 2px;
+  }
+
+  &__move-down {
+    margin-top: 6px;
+    margin-bottom: 2px;
+  }
+
+  &__action-chevron {
+    padding: 0 calc(var(--base) / 4);
+  }
+}

@@ -1,7 +1,9 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+
+import { selectFieldsSlug } from '../../slugs'
 
 const SelectFields: CollectionConfig = {
-  slug: 'select-fields',
+  slug: selectFieldsSlug,
   fields: [
     {
       name: 'select',
@@ -122,12 +124,22 @@ const SelectFields: CollectionConfig = {
       type: 'select',
       options: ['One', 'Two', 'Three'],
     },
+    {
+      type: 'group',
+      name: 'settings',
+      fields: [
+        {
+          name: 'category',
+          type: 'select',
+          hasMany: true,
+          options: [
+            { value: 'a', label: 'A' },
+            { value: 'b', label: 'B' },
+          ],
+        },
+      ],
+    },
   ],
-};
+}
 
-export const selectsDoc = {
-  select: 'one',
-  selectHasMany: ['two', 'four'],
-};
-
-export default SelectFields;
+export default SelectFields

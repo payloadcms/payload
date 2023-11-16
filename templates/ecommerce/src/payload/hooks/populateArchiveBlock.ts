@@ -1,4 +1,4 @@
-import type { AfterReadHook } from 'payload/dist/globals/config/types'
+import type { AfterReadHook } from 'payload/dist/collections/config/types'
 
 import type { Page, Product } from '../payload-types'
 
@@ -26,7 +26,7 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
                     categories: {
                       in: archiveBlock?.categories
                         ?.map(cat => {
-                          if (typeof cat === 'string') return cat
+                          if (typeof cat === 'string' || typeof cat === 'number') return cat
                           return cat.id
                         })
                         .join(','),
@@ -34,7 +34,7 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
                   }
                 : {}),
             },
-            sort: '-publishedDate',
+            sort: '-publishedOn',
           })
 
           return {

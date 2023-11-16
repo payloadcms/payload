@@ -1,12 +1,15 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+
+import { radioFieldsSlug } from '../../slugs'
 
 const RadioFields: CollectionConfig = {
-  slug: 'radio-fields',
+  slug: radioFieldsSlug,
   fields: [
     {
       name: 'radio',
       label: {
-        en: 'Radio en', es: 'Radio es',
+        en: 'Radio en',
+        es: 'Radio es',
       },
       type: 'radio',
       options: [
@@ -25,10 +28,6 @@ const RadioFields: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
-export const radiosDoc = {
-  radio: 'one',
-};
-
-export default RadioFields;
+export default RadioFields

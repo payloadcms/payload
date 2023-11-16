@@ -7,95 +7,96 @@
 
 export interface Config {
   collections: {
-    posts: Post;
-    relation: Relation;
-    'strict-access': StrictAccess;
-    'chained-relation': ChainedRelation;
-    'custom-id-relation': CustomIdRelation;
-    'custom-id-number-relation': CustomIdNumberRelation;
-    screenings: Screening;
-    movies: Movie;
-    directors: Director;
-    users: User;
-  };
-  globals: {};
+    posts: Post
+    relation: Relation
+    'strict-access': StrictAccess
+    'chained-relation': ChainedRelation
+    'custom-id-relation': CustomIdRelation
+    'custom-id-number-relation': CustomIdNumberRelation
+    screenings: Screening
+    movies: Movie
+    directors: Director
+    users: User
+  }
+  globals: {}
 }
 export interface Post {
-  id: string;
-  title?: string;
-  description?: string;
-  number?: number;
-  relationField?: string | Relation;
-  defaultAccessRelation?: string | StrictAccess;
-  chainedRelation?: string | ChainedRelation;
-  maxDepthRelation?: string | Relation;
-  customIdRelation?: string | CustomIdRelation;
-  customIdNumberRelation?: number | CustomIdNumberRelation;
-  filteredRelation?: string | Relation;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title?: string
+  description?: string
+  number?: number
+  relationField?: string | Relation
+  defaultAccessRelation?: string | StrictAccess
+  chainedRelation?: string | ChainedRelation
+  maxDepthRelation?: string | Relation
+  customIdRelation?: string | CustomIdRelation
+  customIdNumberRelation?: number | CustomIdNumberRelation
+  filteredRelation?: string | Relation
+  updatedAt: string
+  createdAt: string
 }
 export interface Relation {
-  id: string;
-  name?: string;
-  disableRelation: boolean;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  disableRelation: boolean
+  updatedAt: string
+  createdAt: string
 }
 export interface StrictAccess {
-  id: string;
-  name?: string;
-  disableRelation: boolean;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  disableRelation: boolean
+  updatedAt: string
+  createdAt: string
 }
 export interface ChainedRelation {
-  id: string;
-  name?: string;
-  relation?: string | ChainedRelation;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  relation?: string | ChainedRelation
+  updatedAt: string
+  createdAt: string
 }
 export interface CustomIdRelation {
-  id: string;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface CustomIdNumberRelation {
-  id: number;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface Screening {
-  id: string;
-  name?: string;
-  movie?: string | Movie;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  movie?: string | Movie
+  updatedAt: string
+  createdAt: string
 }
 export interface Movie {
-  id: string;
-  name?: string;
-  director?: string | Director;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  director?: string | Director
+  updatedAt: string
+  createdAt: string
 }
 export interface Director {
-  id: string;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  movies?: Array<string | Movie>
+  updatedAt: string
+  createdAt: string
 }
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }

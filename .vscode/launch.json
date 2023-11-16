@@ -1,22 +1,177 @@
 {
   // Use IntelliSense to learn about possible attributes.
   // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
   "configurations": [
     {
-      "command": "yarn run dev _community",
+      "command": "pnpm run dev _community",
+      "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",
-      "type": "node-terminal",
-      "cwd": "${workspaceFolder}"
+      "type": "node-terminal"
     },
     {
-      "command": "yarn run dev fields",
-      "name": "Run Dev Fields",
+      "command": "pnpm run dev plugin-cloud-storage",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev - plugin-cloud-storage",
       "request": "launch",
       "type": "node-terminal",
-      "cwd": "${workspaceFolder}"
+      "env": {
+        "PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER": "s3"
+      }
     },
-  ]
+    {
+      "command": "pnpm run dev fields",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Fields",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run dev:postgres fields",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Postgres",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run dev versions",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Versions",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run dev localization",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Localization",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run dev uploads",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Uploads",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "PAYLOAD_BUNDLER=vite pnpm run dev fields",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Fields (Vite)",
+      "request": "launch",
+      "type": "node-terminal",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "command": "pnpm run test:int live-preview",
+      "cwd": "${workspaceFolder}",
+      "name": "Live Preview Integration",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts build",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/fields/config.ts",
+        "PAYLOAD_BUNDLER": "vite",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+      },
+      "name": "Build CLI - Vite",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts build",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/fields/config.ts",
+        "PAYLOAD_ANALYZE_BUNDLE": "true",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+      },
+      "name": "Build CLI - Webpack",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts generate:types",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/_community/config.ts",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+      },
+      "name": "Generate Types CLI",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:status",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
+      "name": "Migrate CLI - status",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:create yass",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
+      "name": "Migrate CLI - create",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:down",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
+      "name": "Migrate CLI - down",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:reset",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
+      "name": "Migrate CLI - reset",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "ts-node ./packages/payload/src/bin/index.ts migrate:refresh",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "mongoose",
+        "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
+      "name": "Migrate CLI - refresh",
+      "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal"
+    }
+  ],
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0"
 }

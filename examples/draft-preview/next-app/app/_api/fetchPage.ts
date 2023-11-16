@@ -16,10 +16,15 @@ export const fetchPage = async (
   const pageRes: {
     docs: Page[]
   } = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[slug][equals]=${slug}${
+    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?where[slug][equals]=${slug}${
       draft && payloadToken ? '&draft=true' : ''
     }`,
     {
+      method: 'GET',
+      // this is the key we'll use to on-demand revalidate pages that use this data
+      // we do this by calling `revalidateTag()` using the same key
+      // see `app/api/revalidate.ts` for more info
+      next: { tags: [`pages_${slug}`] },
       ...(draft && payloadToken
         ? {
             headers: {

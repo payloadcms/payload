@@ -1,0 +1,154 @@
+@import '../../../scss/styles.scss';
+
+.nav {
+  position: sticky;
+  top: 0;
+  left: 0;
+  flex-shrink: 0;
+  height: 100vh;
+  width: var(--nav-width);
+  border-right: 1px solid var(--theme-elevation-100);
+  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+
+  &--nav-open {
+    transform: translate3d(0, 0, 0);
+    transition: transform var(--nav-trans-time) linear;
+  }
+
+  &__header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: var(--app-header-height);
+  }
+
+  &__header-content {
+    z-index: 1;
+    position: relative;
+    height: 100%;
+  }
+
+  &__mobile-close {
+    display: none;
+    background: none;
+    border: 0;
+    outline: 0;
+    padding: calc(var(--base) * 0.75) var(--gutter-h);
+  }
+
+  &__scroll {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: var(--app-header-height) base(1) base(2) base(1);
+    overflow-y: auto;
+
+    // remove the scrollbar here to prevent layout shift as nav groups are toggled
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+  }
+
+  &__label {
+    color: var(--theme-elevation-400);
+  }
+
+  &__controls {
+    margin-top: auto;
+    margin-bottom: 0;
+
+    > * {
+      margin-top: base(1);
+    }
+
+    a:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+
+  &__log-out {
+    &:hover {
+      g {
+        transform: translateX(-#{base(0.125)});
+      }
+    }
+  }
+
+  nav {
+    a {
+      position: relative;
+      padding: base(0.125) base(1.5) base(0.125) 0;
+      display: flex;
+      text-decoration: none;
+
+      &:focus:not(:focus-visible) {
+        box-shadow: none;
+        font-weight: 600;
+      }
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+
+      &.active {
+        font-weight: normal;
+        padding-left: 0;
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__link {
+    display: flex;
+    align-items: center;
+
+    &.active {
+      .nav__link-icon {
+        display: block;
+      }
+    }
+  }
+
+  &__link-icon {
+    display: none;
+    margin-right: calc(var(--base) * 0.25);
+    top: -1px;
+    position: relative;
+  }
+
+  @include mid-break {
+    &__scroll {
+      padding: var(--app-header-height) base(0.5) base(2);
+    }
+  }
+
+  @include small-break {
+    &__scroll {
+      padding: var(--app-header-height) var(--gutter-h) base(2);
+    }
+
+    nav a {
+      font-size: base(0.875);
+      line-height: base(1.5);
+    }
+
+    &--nav-open {
+      transition: none;
+    }
+
+    &__mobile-close {
+      display: flex;
+      height: 100%;
+      align-items: center;
+    }
+  }
+}

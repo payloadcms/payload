@@ -1,17 +1,17 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { jsonFieldsSlug } from '../../slugs'
 
 type JSONField = {
-  id: string;
-  json?: any;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string
+  id: string
+  json?: any
+  updatedAt: string
 }
 
 const JSON: CollectionConfig = {
-  slug: 'json-fields',
-  versions: {
-    maxPerDoc: 1,
+  access: {
+    read: () => true,
   },
   fields: [
     {
@@ -19,20 +19,10 @@ const JSON: CollectionConfig = {
       type: 'json',
     },
   ],
-};
-
-export const jsonDoc: Partial<JSONField> = {
-  json: {
-    property: 'value',
-    arr: [
-      'val1',
-      'val2',
-      'val3',
-    ],
-    nested: {
-      value: 'nested value',
-    },
+  slug: jsonFieldsSlug,
+  versions: {
+    maxPerDoc: 1,
   },
-};
+}
 
-export default JSON;
+export default JSON

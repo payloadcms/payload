@@ -7,9 +7,16 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 ---
 
 <Banner>
-  The Relationship field is one of the most powerful fields Payload features. It
-  provides for the ability to easily relate documents together.
+  The Relationship field is one of the most powerful fields Payload features. It provides for the
+  ability to easily relate documents together.
 </Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/relationship.png"
+  srcDark="https://payloadcms.com/images/docs/fields/relationship-dark.png"
+  alt="Shows a relationship field in the Payload admin panel"
+  caption="Admin panel screenshot of a Relationship field"
+/>
 
 **Example uses:**
 
@@ -31,7 +38,7 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`label`**         | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`unique`**        | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
 | **`validate`**      | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
-| **`index`**         | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`index`**         | Build a an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`saveToJWT`**     | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
 | **`hooks`**         | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
 | **`access`**        | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
@@ -47,8 +54,8 @@ _\* An asterisk denotes that a property is required._
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  The [Depth](/docs/getting-started/concepts#depth) parameter can be used to
-  automatically populate related documents that are returned by the API.
+  The [Depth](/docs/getting-started/concepts#depth) parameter can be used to automatically populate
+  related documents that are returned by the API.
 </Banner>
 
 ### Admin config
@@ -67,7 +74,7 @@ Set to `false` if you'd like to disable the ability to create new documents from
 
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
+The `filterOptions` property can either be a `Where` query directly, or a function (synchronous or asynchronous) that returns one. When using a function, it will be called with an argument object containing the following properties:
 
 | Property      | Description                                                                          |
 | ------------- | ------------------------------------------------------------------------------------ |
@@ -80,32 +87,32 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 ### Example
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "purchase",
-      type: "relationship",
-      relationTo: ["products", "services"],
+      name: 'purchase',
+      type: 'relationship',
+      relationTo: ['products', 'services'],
       filterOptions: ({ relationTo, siblingData }) => {
         // returns a Where query dynamically by the type of relationship
-        if (relationTo === "products") {
+        if (relationTo === 'products') {
           return {
             stock: { greater_than: siblingData.quantity },
-          };
+          }
         }
 
-        if (relationTo === "services") {
+        if (relationTo === 'services') {
           return {
             isAvailable: { equals: true },
-          };
+          }
         }
       },
     },
   ],
-};
+}
 ```
 
 You can learn more about writing queries [here](/docs/queries/overview).
@@ -113,11 +120,10 @@ You can learn more about writing queries [here](/docs/queries/overview).
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  When a relationship field has both <strong>filterOptions</strong> and a custom{" "}
-  <strong>validate</strong> function, the api will not validate{" "}
-  <strong>filterOptions</strong> unless you call the default relationship field
-  validation function imported from <strong>payload/fields/validations</strong>{" "}
-  in your validate function.
+  When a relationship field has both <strong>filterOptions</strong> and a custom{' '}
+  <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong>{' '}
+  unless you call the default relationship field validation function imported from{' '}
+  <strong>payload/fields/validations</strong> in your validate function.
 </Banner>
 
 ### How the data is saved
@@ -146,7 +152,7 @@ The shape of the data to save for a document with the field configured this way 
 
 ```json
 {
-  // MongoDB ObjectID of the related user
+  // ObjectID of the related user
   "owner": "6031ac9e1289176380734024"
 }
 ```
@@ -261,3 +267,27 @@ Relationship fields with `hasMany` set to more than one kind of collections save
 Querying is done in the same way as the earlier Polymorphic example:
 
 `?where[owners.value][equals]=6031ac9e1289176380734024`.
+
+
+#### Querying and Filtering Polymorphic Relationships
+
+Polymorphic and non-polymorphic relationships must be queried differently because of how the related data is stored and may be inconsistent across different collections. Because of this, filtering polymorphic relationship fields from the Collection List admin UI is limited to the `id` value.
+
+For a polymorphic relationship, the response will always be an array of objects. Each object will contain the `relationTo` and `value` properties.
+
+The data can be queried by the related document ID:
+
+`?where[field.value][equals]=6031ac9e1289176380734024`.
+
+Or by the related document Collection slug:
+
+`?where[field.relationTo][equals]=your-collection-slug`.
+
+However, you **cannot** query on any field values within the related document.
+Since we are referencing multiple collections, the field you are querying on may not exist and break the query.
+
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  You <strong>cannot</strong> query on a field within a polymorphic relationship as you would with a non-polymorphic relationship.
+</Banner>

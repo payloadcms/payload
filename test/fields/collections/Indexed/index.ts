@@ -1,25 +1,29 @@
-import type { BeforeDuplicate, CollectionConfig } from '../../../../src/collections/config/types';
-import { IndexedField } from '../../payload-types';
+import type {
+  BeforeDuplicate,
+  CollectionConfig,
+} from '../../../../packages/payload/src/collections/config/types'
+import type { IndexedField } from '../../payload-types'
+
+import { indexedFieldsSlug } from '../../slugs'
 
 const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
   return {
     ...data,
-    uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
+    collapsibleLocalizedUnique: data.collapsibleLocalizedUnique
+      ? `${data.collapsibleLocalizedUnique}-copy`
+      : '',
+    collapsibleTextUnique: data.collapsibleTextUnique ? `${data.collapsibleTextUnique}-copy` : '',
     group: {
-      ...data.group || {},
+      ...(data.group || {}),
       localizedUnique: data.group?.localizedUnique ? `${data.group?.localizedUnique}-copy` : '',
     },
-    collapsibleTextUnique: data.collapsibleTextUnique ? `${data.collapsibleTextUnique}-copy` : '',
-    collapsibleLocalizedUnique: data.collapsibleLocalizedUnique ? `${data.collapsibleLocalizedUnique}-copy` : '',
-    partOne: data.partOne ? `${data.partOne}-copy` : '',
-    partTwo: data.partTwo ? `${data.partTwo}-copy` : '',
-  };
-};
+    uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
+  }
+}
 
 const IndexedFields: CollectionConfig = {
-  slug: 'indexed-fields',
+  slug: indexedFieldsSlug,
   // used to assert that versions also get indexes
-  versions: true,
   admin: {
     hooks: {
       beforeDuplicate,
@@ -28,9 +32,9 @@ const IndexedFields: CollectionConfig = {
   fields: [
     {
       name: 'text',
-      type: 'text',
-      required: true,
       index: true,
+      required: true,
+      type: 'text',
     },
     {
       name: 'uniqueText',
@@ -42,54 +46,46 @@ const IndexedFields: CollectionConfig = {
       type: 'point',
     },
     {
-      type: 'group',
       name: 'group',
       fields: [
         {
           name: 'localizedUnique',
+          localized: true,
           type: 'text',
           unique: true,
-          localized: true,
+        },
+        {
+          name: 'unique',
+          type: 'text',
+          unique: true,
         },
         {
           name: 'point',
           type: 'point',
         },
       ],
+      type: 'group',
     },
     {
-      type: 'collapsible',
-      label: 'Collapsible',
       fields: [
         {
           name: 'collapsibleLocalizedUnique',
+          localized: true,
           type: 'text',
           unique: true,
-          localized: true,
         },
         {
           name: 'collapsibleTextUnique',
-          type: 'text',
           label: 'collapsibleTextUnique',
+          type: 'text',
           unique: true,
         },
       ],
-    },
-    {
-      name: 'partOne',
-      type: 'text',
-    },
-    {
-      name: 'partTwo',
-      type: 'text',
+      label: 'Collapsible',
+      type: 'collapsible',
     },
   ],
-  indexes: [
-    {
-      fields: { partOne: 1, partTwo: 1 },
-      options: { unique: true, name: 'compound-index', sparse: true },
-    },
-  ],
-};
+  versions: true,
+}
 
-export default IndexedFields;
+export default IndexedFields

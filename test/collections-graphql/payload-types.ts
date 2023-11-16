@@ -7,100 +7,100 @@
 
 export interface Config {
   collections: {
-    users: User;
-    posts: Post;
-    'custom-ids': CustomId;
-    relation: Relation;
-    dummy: Dummy;
-  };
-  globals: {};
+    users: User
+    posts: Post
+    'custom-ids': CustomId
+    relation: Relation
+    dummy: Dummy
+  }
+  globals: {}
 }
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }
 export interface Post {
-  id: string;
-  title?: string;
-  description?: string;
-  number?: number;
-  min?: number;
-  relationField?: string | Relation;
-  relationToCustomID?: number | CustomId;
-  relationHasManyField?: string[] | Relation[];
+  id: string
+  title?: string
+  description?: string
+  number?: number
+  min?: number
+  relationField?: string | Relation
+  relationToCustomID?: number | CustomId
+  relationHasManyField?: string[] | Relation[]
   relationMultiRelationTo?:
     | {
-        value: string | Relation;
-        relationTo: 'relation';
+        value: string | Relation
+        relationTo: 'relation'
       }
     | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      };
+        value: string | Dummy
+        relationTo: 'dummy'
+      }
   relationMultiRelationToHasMany?:
     | (
         | {
-            value: string;
-            relationTo: 'relation';
+            value: string
+            relationTo: 'relation'
           }
         | {
-            value: string;
-            relationTo: 'dummy';
+            value: string
+            relationTo: 'dummy'
           }
       )[]
     | (
         | {
-            value: Relation;
-            relationTo: 'relation';
+            value: Relation
+            relationTo: 'relation'
           }
         | {
-            value: Dummy;
-            relationTo: 'dummy';
+            value: Dummy
+            relationTo: 'dummy'
           }
-      )[];
+      )[]
   A1?: {
-    A2?: string;
-  };
+    A2?: string
+  }
   B1?: {
-    B2?: string;
-  };
+    B2?: string
+  }
   C1?: {
     C2?: {
-      C3?: string;
-    };
-  };
+      C3?: string
+    }
+  }
   D1: {
     D2?: {
       D3?: {
-        D4?: string;
-      };
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
+        D4?: string
+      }
+    }
+  }
+  updatedAt: string
+  createdAt: string
 }
 export interface Relation {
-  id: string;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface CustomId {
-  id: number;
-  title?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  title?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface Dummy {
-  id: string;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  updatedAt: string
+  createdAt: string
 }

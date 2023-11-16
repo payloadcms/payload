@@ -8,10 +8,7 @@ keywords: overview, access control, permissions, documentation, Content Manageme
 
 Access control within Payload is extremely powerful while remaining easy and intuitive to manage. Declaring who should have access to what documents is no more complex than writing a simple JavaScript function that either returns a `boolean` or a [`query`](/docs/queries/overview) constraint to restrict which documents users can interact with.
 
-<YouTube
-  id="DoPLyXG26Dg"
-  title="Overview of Payload Access Control"
-/>
+<YouTube id="DoPLyXG26Dg" title="Overview of Payload Access Control" />
 
 **Example use cases:**
 
@@ -32,13 +29,18 @@ Access control within Payload is extremely powerful while remaining easy and int
 const defaultPayloadAccess = ({ req: { user } }) => {
   // Return `true` if a user is found
   // and `false` if it is undefined or null
-  return Boolean(user);
+  return Boolean(user)
 }
 ```
 
 <Banner type="success">
-  <strong>Note:</strong><br/>
-  In the Local API, all Access Control functions are skipped by default, allowing your server to do whatever it needs. But, you can opt back in by setting the option <strong>overrideAccess</strong> to <strong>false</strong>.
+  <strong>Note:</strong>
+  <br />
+  In the Local API, all Access Control functions are skipped by default, allowing your server to do
+  whatever it needs. But, you can opt back in by setting the option <strong>
+    overrideAccess
+  </strong>{' '}
+  to <strong>false</strong>.
 </Banner>
 
 ### Access Control Types
@@ -49,12 +51,13 @@ You can manage access within Payload on three different levels:
 - [Fields](/docs/access-control/fields)
 - [Globals](/docs/access-control/globals)
 
-
 ### When Access Control is Executed
 
 <Banner type="success">
-  <strong>Note:</strong><br/>
-  Access control functions are utilized in two places. It's important to understand how and when your access control is executed.
+  <strong>Note:</strong>
+  <br />
+  Access control functions are utilized in two places. It's important to understand how and when
+  your access control is executed.
 </Banner>
 
 #### As you execute operations
@@ -70,8 +73,11 @@ To accomplish this, Payload ships with an `Access` operation, which is executed 
 ### Argument Availability
 
 <Banner type="warning">
-  <strong>Important:</strong><br/>
-  When your access control functions are executed via the <strong>access</strong> operation, the <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>, because Payload is executing your functions without referencing a specific document.
+  <strong>Important:</strong>
+  <br />
+  When your access control functions are executed via the <strong>access</strong> operation, the{' '}
+  <strong>id</strong> and <strong>data</strong> arguments will be <strong>undefined</strong>,
+  because Payload is executing your functions without referencing a specific document.
 </Banner>
 
 If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your access control is being executed via the `access` operation, to determine solely what the user can do within the Admin UI.

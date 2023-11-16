@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { useEffect } from 'react'
+import { Redirect } from 'react-router-dom'
 
+import type { AdminViewComponent } from '../../../../../packages/payload/src/config/types'
+
+import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
+import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import DefaultTemplate from '../../../../../src/admin/components/templates/Default';
-import Button from '../../../../../src/admin/components/elements/Button';
-import Eyebrow from '../../../../../src/admin/components/elements/Eyebrow';
-import { AdminView } from '../../../../../src/config/types';
-import { useStepNav } from '../../../../../src/admin/components/elements/StepNav';
-import { useConfig } from '../../../../../src/admin/components/utilities/Config';
-import Meta from '../../../../../src/admin/components/utilities/Meta';
+import DefaultTemplate from '../../../../../packages/payload/src/admin/components/templates/Default'
+import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
+import Meta from '../../../../../packages/payload/src/admin/components/utilities/Meta'
 
 // In your projects, you can import as follows:
 // import { DefaultTemplate } from 'payload/components/templates';
@@ -17,9 +17,16 @@ import Meta from '../../../../../src/admin/components/utilities/Meta';
 // import { useStepNav } from 'payload/components/hooks';
 // import { useConfig, Meta } from 'payload/components/utilities';
 
-const CustomDefaultRoute: AdminView = ({ user, canAccessAdmin }) => {
-  const { routes: { admin: adminRoute } } = useConfig();
-  const { setStepNav } = useStepNav();
+import './index.scss'
+
+const baseClass = 'custom-default-view'
+
+const CustomDefaultView: AdminViewComponent = ({ canAccessAdmin, user }) => {
+  const {
+    routes: { admin: adminRoute },
+  } = useConfig()
+
+  const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us
   // to set the step nav to display our custom route name
@@ -27,38 +34,44 @@ const CustomDefaultRoute: AdminView = ({ user, canAccessAdmin }) => {
   useEffect(() => {
     setStepNav([
       {
-        label: 'Custom Route with Default Template',
+        label: 'Custom Admin View with Default Template',
       },
-    ]);
-  }, [setStepNav]);
+    ])
+  }, [setStepNav])
 
   // If an unauthorized user tries to navigate straight to this page,
   // Boot 'em out
   if (!user || (user && !canAccessAdmin)) {
-    return (
-      <Redirect to={`${adminRoute}/unauthorized`} />
-    );
+    return <Redirect to={`${adminRoute}/unauthorized`} />
   }
 
   return (
     <DefaultTemplate>
       <Meta
-        title="Custom Route with Default Template"
-        description="Building custom routes into Payload is easy."
+        description="Building custom views into Payload is easy."
         keywords="Custom React Components, Payload, CMS"
+        title="Custom Admin View with Default Template"
       />
-      <Eyebrow />
-      <h1>Custom Route</h1>
-      <p>Here is a custom route that was added in the Payload config. It uses the Default Template, so the sidebar is rendered.</p>
-      <Button
-        el="link"
-        to={`${adminRoute}`}
-        buttonStyle="secondary"
+      <div
+        className={`${baseClass}__content`}
+        style={{
+          paddingLeft: 'var(--gutter-h)',
+          paddingRight: 'var(--gutter-h)',
+        }}
       >
-        Go to Dashboard
-      </Button>
+        <h1>Custom Admin View</h1>
+        <p>
+          Here is a custom admin view that was added in the Payload config. It uses the Default
+          Template, so the sidebar is rendered.
+        </p>
+        <div className={`${baseClass}__controls`}>
+          <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
+            Go to Dashboard
+          </Button>
+        </div>
+      </div>
     </DefaultTemplate>
-  );
-};
+  )
+}
 
-export default CustomDefaultRoute;
+export default CustomDefaultView

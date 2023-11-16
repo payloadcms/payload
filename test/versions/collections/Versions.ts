@@ -1,8 +1,9 @@
-import type { CollectionConfig } from '../../../src/collections/config/types';
-import { versionSlug } from '../shared';
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+
+import { versionCollectionSlug } from '../slugs'
 
 const VersionPosts: CollectionConfig = {
-  slug: versionSlug,
+  slug: versionCollectionSlug,
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'description', 'createdAt'],
@@ -15,7 +16,7 @@ const VersionPosts: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => {
       if (user) {
-        return true;
+        return true
       }
 
       return {
@@ -31,7 +32,7 @@ const VersionPosts: CollectionConfig = {
             },
           },
         ],
-      };
+      }
     },
     readVersions: ({ req: { user } }) => Boolean(user),
   },
@@ -51,6 +52,6 @@ const VersionPosts: CollectionConfig = {
       required: true,
     },
   ],
-};
+}
 
-export default VersionPosts;
+export default VersionPosts

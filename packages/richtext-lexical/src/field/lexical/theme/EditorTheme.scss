@@ -1,0 +1,507 @@
+@import 'payload/scss';
+
+.LexicalEditorTheme {
+  &__ltr {
+    text-align: left;
+  }
+  &__ltr {
+    text-align: left;
+  }
+
+  &__rtl {
+    text-align: right;
+  }
+
+  &__paragraph {
+    margin: 0 0 1.5em;
+    position: relative;
+  }
+
+  &__quote {
+    margin: 0;
+    margin-left: 20px;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: rgb(101, 103, 107);
+    border-left-color: rgb(206, 208, 212);
+    border-left-width: 4px;
+    border-left-style: solid;
+    padding-left: 16px;
+  }
+
+  &__h1 {
+    font-size: 2.8rem;
+    line-height: 1.125;
+    color: rgb(5, 5, 5);
+    font-weight: 500;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  &__h2 {
+    font-size: 2rem;
+    color: rgb(5, 5, 5);
+    font-weight: 700;
+    margin-top: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  &__h3 {
+    font-size: 1.4rem;
+    color: rgb(101, 103, 107);
+    font-weight: 700;
+    margin-top: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  &__indent {
+    --lexical-indent-base-value: 40px;
+  }
+
+  &__textBold {
+    font-weight: bold;
+  }
+
+  &__textItalic {
+    font-style: italic;
+  }
+
+  &__textUnderline {
+    text-decoration: underline;
+  }
+
+  &__textStrikethrough {
+    text-decoration: line-through;
+  }
+
+  &__textUnderlineStrikethrough {
+    text-decoration: underline line-through;
+  }
+
+  &__textSubscript {
+    font-size: 0.8em;
+    vertical-align: sub !important;
+  }
+
+  &__textSuperscript {
+    font-size: 0.8em;
+    vertical-align: super;
+  }
+
+  &__textCode {
+    background-color: rgb(240, 242, 245);
+    padding: 1px 0.25rem;
+    font-family: Menlo, Consolas, Monaco, monospace;
+    font-size: 94%;
+  }
+
+  &__hashtag {
+    background-color: rgba(88, 144, 255, 0.15);
+    border-bottom: 1px solid rgba(88, 144, 255, 0.3);
+  }
+
+  .ContentEditable__root &__link {
+    pointer-events: none;
+  }
+
+  &__link {
+    color: var(--color-blue-600);
+    text-decoration: none;
+    border-bottom: 1px dotted;
+  }
+
+  &__code {
+    /*background-color: rgb(240, 242, 245);*/
+    font-family: Menlo, Consolas, Monaco, monospace;
+    display: block;
+    padding: 8px 8px 8px 52px;
+    line-height: 1.53;
+    font-size: 13px;
+    margin: 0;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    tab-size: 2;
+    /* white-space: pre; */
+    overflow-x: auto;
+    position: relative;
+  }
+
+  &__code:before {
+    content: attr(data-gutter);
+    position: absolute;
+    /*background-color: #eee;*/
+    left: 0;
+    top: 0;
+    border-right: 1px solid #ccc;
+    padding: 8px;
+    color: #777;
+    white-space: pre-wrap;
+    text-align: right;
+    min-width: 25px;
+  }
+
+  &__table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    max-width: 100%;
+    overflow-y: scroll;
+    table-layout: fixed;
+    width: calc(100% - 25px);
+    margin: 30px 0;
+  }
+
+  &__tableSelected {
+    outline: 2px solid rgb(60, 132, 244);
+  }
+
+  &__tableCell {
+    border: 1px solid #bbb;
+    min-width: 75px;
+    vertical-align: top;
+    text-align: start;
+    padding: 6px 8px;
+    position: relative;
+    cursor: default;
+    outline: none;
+  }
+
+  &__tableCellSortedIndicator {
+    display: block;
+    opacity: 0.5;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: #999;
+  }
+
+  &__tableCellResizer {
+    position: absolute;
+    right: -4px;
+    height: 100%;
+    width: 8px;
+    cursor: ew-resize;
+    z-index: 10;
+    top: 0;
+  }
+
+  &__tableCellHeader {
+    background-color: #f2f3f5;
+    text-align: start;
+  }
+
+  &__tableCellSelected {
+    background-color: #c9dbf0;
+  }
+
+  &__tableCellPrimarySelected {
+    border: 2px solid rgb(60, 132, 244);
+    display: block;
+    height: calc(100% - 2px);
+    position: absolute;
+    width: calc(100% - 2px);
+    left: -1px;
+    top: -1px;
+    z-index: 2;
+  }
+
+  &__tableCellEditing {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+  }
+
+  &__tableAddColumns {
+    position: absolute;
+    top: 0;
+    width: 20px;
+    background-color: #eee;
+    height: 100%;
+    right: 0;
+    animation: table-controls 0.2s ease;
+    border: 0;
+    cursor: pointer;
+  }
+
+  &__tableAddColumns:hover {
+    background-color: #c9dbf0;
+  }
+
+  &__tableAddRows {
+    position: absolute;
+    bottom: -25px;
+    width: calc(100% - 25px);
+    background-color: #eee;
+    height: 20px;
+    left: 0;
+    animation: table-controls 0.2s ease;
+    border: 0;
+    cursor: pointer;
+  }
+
+  &__tableAddRows:hover {
+    background-color: #c9dbf0;
+  }
+
+  @keyframes table-controls {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  &__tableCellResizeRuler {
+    display: block;
+    position: absolute;
+    width: 1px;
+    background-color: rgb(60, 132, 244);
+    height: 100%;
+    top: 0;
+  }
+
+  &__tableCellActionButtonContainer {
+    display: block;
+    right: 5px;
+    top: 6px;
+    position: absolute;
+    z-index: 4;
+    width: 20px;
+    height: 20px;
+  }
+
+  &__tableCellActionButton {
+    background-color: #eee;
+    display: block;
+    border: 0;
+    border-radius: 20px;
+    width: 20px;
+    height: 20px;
+    color: #222;
+    cursor: pointer;
+  }
+
+  &__tableCellActionButton:hover {
+    background-color: #ddd;
+  }
+
+  &__characterLimit {
+    display: inline;
+    background-color: #ffbbbb !important;
+  }
+
+  &__ol1 {
+    padding: 0;
+    margin: 0;
+    list-style-position: inside;
+    margin: 0 0 1.5em;
+  }
+
+  &__ol2 {
+    padding: 0;
+    margin: 0;
+    list-style-type: upper-alpha;
+    list-style-position: inside;
+  }
+
+  &__ol3 {
+    padding: 0;
+    margin: 0;
+    list-style-type: lower-alpha;
+    list-style-position: inside;
+  }
+
+  &__ol4 {
+    padding: 0;
+    margin: 0;
+    list-style-type: upper-roman;
+    list-style-position: inside;
+  }
+
+  &__ol5 {
+    padding: 0;
+    margin: 0;
+    list-style-type: lower-roman;
+    list-style-position: inside;
+  }
+
+  &__ul {
+    padding: 0;
+    margin: 0 0 1.5em;
+    list-style-position: inside;
+  }
+
+  &__listItem {
+    margin: 0 0px 0.4em 16px;
+  }
+
+  &__listItemChecked,
+  &__listItemUnchecked {
+    position: relative;
+    margin-left: 8px;
+    margin-right: 8px;
+    padding-left: 24px;
+    padding-right: 24px;
+    list-style-type: none;
+    outline: none;
+  }
+
+  &__listItemChecked {
+    text-decoration: line-through;
+  }
+
+  &__listItemUnchecked:before,
+  &__listItemChecked:before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    top: 2px;
+    left: 0;
+    cursor: pointer;
+    display: block;
+    background-size: cover;
+    position: absolute;
+  }
+
+  &__listItemUnchecked[dir='rtl']:before,
+  &__listItemChecked[dir='rtl']:before {
+    left: auto;
+    right: 0;
+  }
+
+  &__listItemUnchecked:focus:before,
+  &__listItemChecked:focus:before {
+    box-shadow: 0 0 0 2px #a6cdfe;
+    border-radius: 2px;
+  }
+
+  &__listItemUnchecked:before {
+    border: 1px solid #999;
+    border-radius: 2px;
+  }
+
+  &__listItemChecked:before {
+    border: 1px solid rgb(61, 135, 245);
+    border-radius: 2px;
+    background-color: #3d87f5;
+    background-repeat: no-repeat;
+  }
+
+  &__listItemChecked:after {
+    content: '';
+    cursor: pointer;
+    border-color: #fff;
+    border-style: solid;
+    position: absolute;
+    display: block;
+    top: 6px;
+    width: 3px;
+    left: 7px;
+    right: 7px;
+    height: 6px;
+    transform: rotate(45deg);
+    border-width: 0 2px 2px 0;
+  }
+
+  &__nestedListItem {
+    list-style-type: none;
+  }
+
+  &__nestedListItem:before,
+  &__nestedListItem:after {
+    display: none;
+  }
+
+  &__tokenComment {
+    color: slategray;
+  }
+
+  &__tokenPunctuation {
+    color: #999;
+  }
+
+  &__tokenProperty {
+    color: #905;
+  }
+
+  &__tokenSelector {
+    color: #690;
+  }
+
+  &__tokenOperator {
+    color: #9a6e3a;
+  }
+
+  &__tokenAttr {
+    color: #07a;
+  }
+
+  &__tokenVariable {
+    color: #e90;
+  }
+
+  &__tokenFunction {
+    color: #dd4a68;
+  }
+
+  &__mark {
+    background: rgba(255, 212, 0, 0.14);
+    border-bottom: 2px solid rgba(255, 212, 0, 0.3);
+    padding-bottom: 2px;
+  }
+
+  &__markOverlap {
+    background: rgba(255, 212, 0, 0.3);
+    border-bottom: 2px solid rgba(255, 212, 0, 0.7);
+  }
+
+  &__mark.selected {
+    background: rgba(255, 212, 0, 0.5);
+    border-bottom: 2px solid rgba(255, 212, 0, 1);
+  }
+
+  &__markOverlap.selected {
+    background: rgba(255, 212, 0, 0.7);
+    border-bottom: 2px solid rgba(255, 212, 0, 0.7);
+  }
+
+  &__embedBlock {
+    user-select: none;
+  }
+
+  &__embedBlockFocus {
+    outline: 2px solid rgb(60, 132, 244);
+  }
+}
+
+html[data-theme='dark'] {
+  .LexicalEditorTheme {
+    &__h1,
+    &__h2 {
+      color: rgb(255, 255, 255);
+    }
+
+    &__h3 {
+      color: rgb(148, 151, 157);
+    }
+
+    &__link {
+      color: var(--color-blue-600);
+    }
+
+    &__tableCellHeader {
+      background-color: var(--theme-elevation-50);
+    }
+
+    &__quote {
+      color: rgb(193, 198, 206);
+      border-left-color: var(--theme-elevation-150);
+    }
+
+    &__textCode {
+      background-color: rgb(0, 0, 0);
+    }
+  }
+}

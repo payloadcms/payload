@@ -1,5 +1,6 @@
-import path from 'path';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import path from 'path'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 
 export default buildConfigWithDefaults({
   graphQL: {
@@ -141,5 +142,16 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      // this should not be written to the generated schema
+      slug: 'no-graphql',
+      graphQL: false,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
   ],
-});
+})

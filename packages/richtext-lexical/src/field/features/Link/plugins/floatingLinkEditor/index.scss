@@ -1,0 +1,78 @@
+@import 'payload/scss';
+
+html[data-theme='light'] {
+  .link-editor {
+    @include shadow-m;
+  }
+}
+
+.link-editor {
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  background: var(--color-base-0);
+  padding: 0px 3.72px 0px 6.25px;
+  vertical-align: middle;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  border-radius: 6.25px;
+  transition: opacity 0.2s;
+  height: 37.5px;
+  will-change: transform;
+
+  .link-input {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    min-height: 28px;
+    box-sizing: border-box;
+    padding: 2px 4px;
+    font-size: 15px;
+    border: 0;
+    outline: 0;
+    position: relative;
+    font-family: var(--font-body);
+
+    a {
+      text-decoration: none;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-right: 30px;
+      text-overflow: ellipsis;
+      color: var(--color-blue-600);
+      border-bottom: 1px dotted;
+
+      &:hover {
+        color: var(--color-blue-400);
+      }
+    }
+  }
+
+  button {
+    all: unset;
+    background-size: 16px;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    color: var(--color-base-600);
+    border-radius: 4px;
+
+    &:hover:not([disabled]) {
+      background-color: var(--color-base-100);
+    }
+  }
+
+  .link-edit {
+    background-image: url(../../../../lexical/ui/icons/Edit/index.svg);
+  }
+
+  .link-trash {
+    background-image: url(../../../../lexical/ui/icons/Remove/index.svg);
+  }
+}

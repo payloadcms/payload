@@ -1,14 +1,16 @@
 /* eslint-disable no-param-reassign */
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 const validateFieldTransformAction = (hook: string, value) => {
   if (value !== undefined && value !== null && !Array.isArray(value)) {
-    console.error(hook, value);
-    throw new Error('Field transformAction should convert value to array [x, y] and not { coordinates: [x, y] }');
+    console.error(hook, value)
+    throw new Error(
+      'Field transformAction should convert value to array [x, y] and not { coordinates: [x, y] }',
+    )
   }
-  return value;
-};
-export const transformSlug = 'transforms';
+  return value
+}
+export const transformSlug = 'transforms'
 const TransformHooks: CollectionConfig = {
   slug: transformSlug,
   access: {
@@ -44,32 +46,32 @@ const TransformHooks: CollectionConfig = {
     beforeRead: [(operation) => operation.doc],
     beforeChange: [
       (operation) => {
-        operation.data.beforeChange = !operation.data.location?.coordinates;
-        return operation.data;
+        operation.data.beforeChange = !operation.data.location?.coordinates
+        return operation.data
       },
     ],
     afterRead: [
       (operation) => {
-        const { doc } = operation;
-        doc.afterReadHook = !doc.location?.coordinates;
-        return doc;
+        const { doc } = operation
+        doc.afterReadHook = !doc.location?.coordinates
+        return doc
       },
     ],
     afterChange: [
       (operation) => {
-        const { doc } = operation;
-        doc.afterChangeHook = !doc.location?.coordinates;
-        return doc;
+        const { doc } = operation
+        doc.afterChangeHook = !doc.location?.coordinates
+        return doc
       },
     ],
     afterDelete: [
       (operation) => {
-        const { doc } = operation;
-        operation.doc.afterDeleteHook = !doc.location?.coordinates;
-        return doc;
+        const { doc } = operation
+        operation.doc.afterDeleteHook = !doc.location?.coordinates
+        return doc
       },
     ],
   },
-};
+}
 
-export default TransformHooks;
+export default TransformHooks

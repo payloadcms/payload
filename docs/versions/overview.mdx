@@ -7,8 +7,8 @@ keywords: version history, revisions, audit log, draft, publish, restore, autosa
 ---
 
 <Banner>
-  Payload's powerful Versions functionality allows you to keep a running history
-  of changes over time and extensible to fit any content publishing workflow.
+  Payload's powerful Versions functionality allows you to keep a running history of changes over
+  time and extensible to fit any content publishing workflow.
 </Banner>
 
 When enabled, Payload will automatically scaffold a new Collection in your database to store versions of your document(s) over time, and the Admin UI will be extended with additional views that allow you to browse document versions, view diffs in order to see exactly what has changed in your documents (and when they changed), and restore documents back to prior versions easily.
@@ -26,9 +26,9 @@ _Comparing an old version to a newer version of a document_
 - Build a powerful publishing schedule mechanism to create documents and have them become publicly readable automatically at a future date
 
 <Banner type="success">
-  Versions are extremely performant and totally opt-in. They don't change the
-  shape of your data at all. All versions are stored in a separate Collection
-  and can be turned on and off easily at your discretion.
+  Versions are extremely performant and totally opt-in. They don't change the shape of your data at
+  all. All versions are stored in a separate Collection and can be turned on and off easily at your
+  discretion.
 </Banner>
 
 ### Options
@@ -69,7 +69,7 @@ Global versions work similarly to Collection versions but have a slightly differ
 
 #### Database impact
 
-By enabling `versions`, a new MongoDB collection will be made to store versions for your collection or global. The collection will be named based off the `slug` of the collection or global and will follow this pattern (where `slug` is replaced with the `slug` of your collection or global):
+By enabling `versions`, a new database collection will be made to store versions for your collection or global. The collection will be named based off the `slug` of the collection or global and will follow this pattern (where `slug` is replaced with the `slug` of your collection or global):
 
 ```
 _slug_versions
@@ -126,18 +126,18 @@ Versions expose new operations for both collections and globals. They allow you 
 // Result will be a paginated set of Versions.
 // See /docs/queries/pagination for more.
 const result = await payload.findVersions({
-  collection: "posts", // required
+  collection: 'posts', // required
   depth: 2,
   page: 1,
   limit: 10,
   where: {}, // pass a `where` query here
-  sort: "-createdAt",
-  locale: "en",
+  sort: '-createdAt',
+  locale: 'en',
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-});
+})
 ```
 
 #### Find by ID
@@ -145,15 +145,15 @@ const result = await payload.findVersions({
 ```js
 // Result will be a Post document.
 const result = await payload.findVersionByID({
-  collection: "posts", // required
-  id: "507f1f77bcf86cd799439013", // required
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439013', // required
   depth: 2,
-  locale: "en",
+  locale: 'en',
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-});
+})
 ```
 
 #### Restore
@@ -161,13 +161,13 @@ const result = await payload.findVersionByID({
 ```js
 // Result will be the restored global document.
 const result = await payload.restoreVersion({
-  collection: "posts", // required
-  id: "507f1f77bcf86cd799439013", // required
+  collection: 'posts', // required
+  id: '507f1f77bcf86cd799439013', // required
   depth: 2,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-});
+})
 ```
 
 **Global REST endpoints:**
@@ -199,18 +199,18 @@ const result = await payload.restoreVersion({
 // Result will be a paginated set of Versions.
 // See /docs/queries/pagination for more.
 const result = await payload.findGlobalVersions({
-  slug: "header", // required
+  slug: 'header', // required
   depth: 2,
   page: 1,
   limit: 10,
   where: {}, // pass a `where` query here
-  sort: "-createdAt",
-  locale: "en",
+  sort: '-createdAt',
+  locale: 'en',
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-});
+})
 ```
 
 #### Find by ID
@@ -218,15 +218,15 @@ const result = await payload.findGlobalVersions({
 ```js
 // Result will be a Post document.
 const result = await payload.findGlobalVersionByID({
-  slug: "header", // required
-  id: "507f1f77bcf86cd799439013", // required
+  slug: 'header', // required
+  id: '507f1f77bcf86cd799439013', // required
   depth: 2,
-  locale: "en",
+  locale: 'en',
   fallbackLocale: false,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-});
+})
 ```
 
 #### Restore
@@ -234,13 +234,13 @@ const result = await payload.findGlobalVersionByID({
 ```js
 // Result will be the restored global document.
 const result = await payload.restoreGlobalVersion({
-  slug: "header", // required
-  id: "507f1f77bcf86cd799439013", // required
+  slug: 'header', // required
+  id: '507f1f77bcf86cd799439013', // required
   depth: 2,
   user: dummyUser,
   overrideAccess: false,
   showHiddenFields: true,
-});
+})
 ```
 
 ### Access Control

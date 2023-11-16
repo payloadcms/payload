@@ -7,9 +7,8 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 ---
 
 <Banner>
-  Payload provides for everything you need to enable file upload, storage, and
-  management directly on your server—including extremely powerful file access
-  control.
+  Payload provides for everything you need to enable file upload, storage, and management directly
+  on your server—including extremely powerful file access control.
 </Banner>
 
 ![Upload admin panel functionality](https://payloadcms.com/images/docs/upload-admin.jpg)
@@ -34,31 +33,35 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 
 <Banner type="success">
   <strong>Tip:</strong>
-  <br />A common pattern is to create a <strong>Media</strong> collection and enable{" "}
-  <strong>upload</strong> on that collection.
+  <br />A common pattern is to create a <strong>Media</strong> collection and enable <strong>
+    upload
+  </strong> on that collection.
 </Banner>
 
-#### Collection Upload Options
+### Collection Upload Options
 
-| Option                    | Description                                                                                                                                     |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`staticURL`** \*        | The URL path to use to access your uploads. Relative path like `/media` will be served by payload. Full path like `https://example.com/media` needs to be served by another web server. |
-| **`staticDir`** \*        | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config.           |
-| **`imageSizes`**          | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                              |
-| **`formatOptions`**       | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat) |
-| **`resizeOptions`**       | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                              |
-| **`adminThumbnail`**      | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails)                                         |
-| **`mimeTypes`**           | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                        |
-| **`disableLocalStorage`** | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                     |
-| **`staticOptions`**       | Set options for `express.static` to use while serving your static files. [More](http://expressjs.com/en/resources/middleware/serve-static.html) |
-| **`handlers`**            | Array of Express request handlers to execute before the built-in Payload static middleware executes.                                            |
+| Option                      | Description                                                                                                                                                                             |
+| -------------------------   | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`staticURL`** \*          | The URL path to use to access your uploads. Relative path like `/media` will be served by payload. Full path like `https://example.com/media` needs to be served by another web server. |
+| **`staticDir`** \*          | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config.                                                   |
+| **`adminThumbnail`**        | Set the way that the Admin panel will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                 |
+| **`crop`**                  | Set to `false` to disable the cropping tool in the Admin panel. Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                      |
+| **`disableLocalStorage`**   | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                             |
+| **`focalPoint`**            | Set to `false` to disable the focal point selection tool in the Admin panel. The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector) |
+| **`formatOptions`**         | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                 |
+| **`handlers`**              | Array of Express request handlers to execute before the built-in Payload static middleware executes.                                                                                    |
+| **`imageSizes`**            | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                      |
+| **`mimeTypes`**             | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                |
+| **`staticOptions`**         | Set options for `express.static` to use while serving your static files. [More](http://expressjs.com/en/resources/middleware/serve-static.html)                                         |
+| **`resizeOptions`**         | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                         |
+| **`filesRequiredOnCreate`** | Mandate file data on creation, default is true.                                                                                                                                         |
 
 _An asterisk denotes that a property above is required._
 
 **Example Upload collection:**
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -98,7 +101,7 @@ export const Media: CollectionConfig = {
       type: 'text',
     },
   ],
-};
+}
 ```
 
 ### Payload-wide Upload Options
@@ -108,7 +111,7 @@ Payload relies on the [`express-fileupload`](https://www.npmjs.com/package/expre
 A common example of what you might want to customize within Payload-wide Upload options would be to increase the allowed `fileSize` of uploads sent to Payload:
 
 ```ts
-import { buildConfig } from 'payload/config';
+import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   collections: [
@@ -128,7 +131,7 @@ export default buildConfig({
       fileSize: 5000000, // 5MB, written in bytes
     },
   },
-});
+})
 ```
 
 ### Image Sizes
@@ -145,6 +148,33 @@ All auto-resized images are exposed to be re-used in hooks and similar via an ob
 
 The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
 
+##### Handling Image Enlargement
+
+When an uploaded image is smaller than the defined image size, we have 3 options:
+
+`withoutEnlargement: undefined | false | true`
+
+1.`undefined` [default]: uploading images with smaller width AND height than the image size will return null
+2. `false`: always enlarge images to the image size
+3. `true`: if the image is smaller than the image size, return the original image
+
+<Banner type="error">
+  <strong>Note:</strong>
+  <br />
+  By default, the image size will return NULL when the uploaded image is smaller than the defined image size.
+  Use the `withoutEnlargement` prop to change this.
+</Banner>
+
+### Crop and Focal Point Selector
+
+This feature is only available for image file types.
+
+Setting `crop: false` and `focalPoint: false` in your Upload config will be disable the respective selector in the Admin panel.
+
+Image cropping occurs before any resizing, the resized images will therefore be generated from the cropped image (**not** the original image).
+
+If no resizing options are specified (`imageSizes` or `resizeOptions`), the focal point selector will not be displayed.
+
 ### Disabling Local Upload Storage
 
 If you are using a plugin to send your files off to a third-party file storage host or CDN, like Amazon S3 or similar, you may not want to store your files locally at all. You can prevent Payload from writing files to disk by specifying `disableLocalStorage: true` on your collection's upload config.
@@ -152,11 +182,10 @@ If you are using a plugin to send your files off to a third-party file storage h
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  This is a fairly advanced feature. If you do disable local file storage, by
-  default, your admin panel's thumbnails will be broken as you will not have
-  stored a file. It will be totally up to you to use either a plugin or your own
-  hooks to store your files in a permanent manner, as well as provide your own
-  admin thumbnail using <strong>upload.adminThumbnail</strong>.
+  This is a fairly advanced feature. If you do disable local file storage, by default, your admin
+  panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you
+  to use either a plugin or your own hooks to store your files in a permanent manner, as well as
+  provide your own admin thumbnail using <strong>upload.adminThumbnail</strong>.
 </Banner>
 
 ### Admin Thumbnails
@@ -169,7 +198,7 @@ You can specify how Payload retrieves admin thumbnails for your upload-enabled C
 **Example custom Admin thumbnail:**
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -184,13 +213,14 @@ export const Media: CollectionConfig = {
       `https://google.com/custom-path-to-file/${doc.filename}`,
     // highlight-end
   },
-};
+}
 ```
 
 <Banner>
   <strong>Note:</strong>
   <br />
-  This function runs in the browser. If your function returns `null` or `false` Payload will show the default generic file thumbnail instead.
+  This function runs in the browser. If your function returns `null` or `false` Payload will show
+  the default generic file thumbnail instead.
 </Banner>
 
 ### MimeTypes
@@ -202,7 +232,7 @@ Some example values are: `image/*`, `audio/*`, `video/*`, `image/png`, `applicat
 **Example mimeTypes usage:**
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -211,7 +241,7 @@ export const Media: CollectionConfig = {
     staticDir: 'media',
     mimeTypes: ['image/*', 'application/pdf'], // highlight-line
   },
-};
+}
 ```
 
 ### Uploading Files
@@ -219,9 +249,8 @@ export const Media: CollectionConfig = {
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  Uploading files is currently only possible through the REST and Local APIs due
-  to how GraphQL works. It's difficult and fairly nonsensical to support
-  uploading files through GraphQL.
+  Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
+  works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
 </Banner>
 
 To upload a file, use your collection's [`create`](/docs/rest-api/overview#collections) endpoint. Send it all the data that your Collection requires, as well as a `file` key containing the file that you'd like to upload.

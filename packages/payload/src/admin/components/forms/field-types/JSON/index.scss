@@ -1,0 +1,35 @@
+@import '../../../../scss/styles.scss';
+
+.json-field {
+  position: relative;
+}
+
+html[data-theme='light'] {
+  .json-field {
+    &.error {
+      .code-editor {
+        border-color: var(--theme-error-500);
+      }
+
+      .monaco-editor-background,
+      .margin {
+        background-color: var(--theme-error-50);
+      }
+    }
+  }
+}
+
+html[data-theme='dark'] {
+  .json-field {
+    &.error {
+      .code-editor {
+        border-color: var(--theme-error-500);
+      }
+
+      .monaco-editor-background,
+      .margin {
+        background-color: var(--theme-error-100);
+      }
+    }
+  }
+}

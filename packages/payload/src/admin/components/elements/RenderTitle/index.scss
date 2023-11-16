@@ -1,0 +1,9 @@
+@import '../../../scss/styles.scss';
+
+.render-title {
+  &__id {
+    vertical-align: middle;
+    position: relative;
+    top: -3px;
+  }
+}

@@ -20,16 +20,13 @@ export const product1: Partial<Product> = {
             {
               children: [
                 {
-                  text: "All content from this point is completely dynamic using custom layout building block configured in the CMS. This can be anything you'd like.",
+                  text: "This content is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
                 },
               ],
             },
           ],
           link: {
-            reference: {
-              relationTo: 'pages',
-              value: '',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -37,4 +34,5 @@ export const product1: Partial<Product> = {
       ],
     },
   ],
+  relatedProducts: [], // this is populated by the seed script
 }

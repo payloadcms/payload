@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload/types'
 
 import { admins } from '../../access/admins'
-import { checkRole } from '../Users/checkRole'
+import { adminsOrLoggedIn } from '../../access/adminsOrLoggedIn'
 import { adminsOrOrderedBy } from './access/adminsOrOrderedBy'
 import { clearUserCart } from './hooks/clearUserCart'
 import { populateOrderedBy } from './hooks/populateOrderedBy'
@@ -21,7 +21,7 @@ export const Orders: CollectionConfig = {
   access: {
     read: adminsOrOrderedBy,
     update: admins,
-    create: admins,
+    create: adminsOrLoggedIn,
     delete: admins,
   },
   fields: [
@@ -37,9 +37,6 @@ export const Orders: CollectionConfig = {
       name: 'stripePaymentIntentID',
       label: 'Stripe Payment Intent ID',
       type: 'text',
-      access: {
-        read: ({ req: { user } }) => checkRole(['admin'], user),
-      },
       admin: {
         position: 'sidebar',
         components: {

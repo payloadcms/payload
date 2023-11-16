@@ -1,0 +1,57 @@
+@import 'payload/scss';
+
+html[data-theme='light'] {
+  .floating-select-toolbar-popup {
+    @include shadow-m;
+  }
+}
+
+.floating-select-toolbar-popup {
+  display: flex;
+  align-items: center;
+  background: var(--color-base-0);
+  padding: 0px 3.72px 0px 6.25px;
+  vertical-align: middle;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  opacity: 0;
+  border-radius: 6.25px;
+  transition: opacity 0.2s;
+  height: 37.5px;
+  will-change: transform;
+
+  .caret {
+    z-index: 93;
+    position: absolute;
+    top: calc(100% - 16px);
+    border: 12px solid transparent;
+    pointer-events: none;
+    border-top-color: var(--color-base-0);
+  }
+
+  &__section {
+    display: flex;
+    align-items: center;
+
+    .icon {
+      min-width: 20px;
+      height: 20px;
+      color: var(--color-base-600);
+    }
+
+    .divider {
+      width: 1px;
+      height: 15px;
+      background-color: var(--color-base-100);
+      margin: 0 6.25px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    button.insert-comment {
+      display: none;
+    }
+  }
+}

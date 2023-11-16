@@ -1,19 +1,16 @@
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-export const chainingHooksSlug = 'chaining-hooks';
+export const chainingHooksSlug = 'chaining-hooks'
 
 const AppendTextHook = ({ doc }) => ({
   ...doc,
   text: `${doc.text}!`,
-});
+})
 
 const ChainingHooks: CollectionConfig = {
   slug: chainingHooksSlug,
   hooks: {
-    afterRead: [
-      AppendTextHook,
-      AppendTextHook,
-    ],
+    afterRead: [AppendTextHook, AppendTextHook],
   },
   fields: [
     {
@@ -21,6 +18,6 @@ const ChainingHooks: CollectionConfig = {
       name: 'text',
     },
   ],
-};
+}
 
-export default ChainingHooks;
+export default ChainingHooks

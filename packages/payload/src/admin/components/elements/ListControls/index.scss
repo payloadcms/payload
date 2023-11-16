@@ -1,0 +1,98 @@
+@import '../../../scss/styles';
+
+.list-controls {
+  &__wrap {
+    display: flex;
+    align-items: center;
+    background-color: var(--theme-elevation-50);
+  }
+
+  .search-filter {
+    flex-grow: 1;
+
+    input {
+      margin: 0;
+    }
+  }
+
+  &__buttons-wrap {
+    display: flex;
+    align-items: center;
+    gap: base(0.5);
+
+    [dir='ltr'] & {
+      margin-right: base(0.5);
+    }
+
+    [dir='rtl'] & {
+      margin-left: base(0.5);
+    }
+
+    .pill {
+      background-color: var(--theme-elevation-200);
+
+      &:hover {
+        background-color: var(--theme-elevation-150);
+      }
+    }
+  }
+
+  &__buttons-active {
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  .column-selector,
+  .where-builder,
+  .sort-complex {
+    margin-top: base(1);
+  }
+
+  @include small-break {
+    &__wrap {
+      flex-wrap: wrap;
+      background-color: unset;
+    }
+
+    .search-filter {
+      margin-bottom: base(0.5);
+      width: 100%;
+    }
+
+    &__buttons-wrap {
+      [dir='ltr'] & {
+        margin-right: 0;
+      }
+
+      [dir='rtl'] & {
+        margin-left: 0;
+      }
+
+      .pill {
+        padding: base(0.5) base(1);
+
+        svg {
+          margin-left: auto;
+        }
+      }
+    }
+
+    &__buttons {
+      margin: 0;
+      width: 100%;
+    }
+
+    .column-selector,
+    .where-builder,
+    .sort-complex {
+      margin-top: calc(var(--base) / 2);
+    }
+
+    &__toggle-columns,
+    &__toggle-where,
+    &__toggle-sort {
+      flex: 1;
+    }
+  }
+}

@@ -7,21 +7,28 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 ---
 
 <Banner>
-  The Select field provides a dropdown-style interface for choosing options from
-  a predefined list as an enumeration.
+  The Select field provides a dropdown-style interface for choosing options from a predefined list
+  as an enumeration.
 </Banner>
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/select.png"
+  srcDark="https://payloadcms.com/images/docs/fields/select-dark.png"
+  alt="Shows a Select field in the Payload admin panel"
+  caption="Admin panel screenshot of a Select field"
+/>
 
 ### Config
 
 | Option             | Description                                                                                                                                                                                         |
-| ------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
 | **`options`** \*   | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing a `label` string and a `value` string.                                           |
 | **`hasMany`**      | Boolean when, if set to `true`, allows this field to have many selections instead of only one.                                                                                                      |
 | **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`unique`**       | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
 | **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
-| **`index`**        | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
+| **`index`**        | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
 | **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
 | **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
@@ -37,11 +44,10 @@ _\* An asterisk denotes that a property is required._
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  Option values should be strings that do not contain hyphens or special
-  characters due to GraphQL enumeration naming constraints. Underscores are
-  allowed. If you determine you need your option values to be non-strings or
-  contain special characters, they will be formatted accordingly before being
-  used as a GraphQL enum.
+  Option values should be strings that do not contain hyphens or special characters due to GraphQL
+  enumeration naming constraints. Underscores are allowed. If you determine you need your option
+  values to be non-strings or contain special characters, they will be formatted accordingly before
+  being used as a GraphQL enum.
 </Banner>
 
 ### Admin config
@@ -59,8 +65,9 @@ Set to `true` if you'd like this field to be sortable within the Admin UI using 
 ### Example
 
 `collections/ExampleCollection.ts`
+
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -87,8 +94,89 @@ export const ExampleCollection: CollectionConfig = {
           value: 'carbon_fiber_dashboard',
         },
       ],
-    }
-  ]
+    },
+  ],
+}
+```
+
+### Customization
+
+The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config.
+
+```ts
+export const CustomSelectField: Field = {
+  name: 'customSelectField',
+  type: 'select', // or 'text' if you have dynamic options
+  admin: {
+    components: {
+      Field: CustomSelectComponent({
+        options: [
+          {
+            label: 'Option 1',
+            value: '1',
+          },
+          {
+            label: 'Option 2',
+            value: '2',
+          },
+        ],
+      }),
+    },
+  }
+}
+```
+
+You can import the existing Select component directly from Payload, then extend and customize it as needed.
+
+```ts
+import * as React from 'react';
+import { SelectInput, useField } from 'payload/components/forms';
+import { useAuth } from 'payload/components/utilities';
+
+type customSelectProps = {
+  path: string;
+  options: {
+    label: string;
+    value: string;
+  }[];
 }
 
+export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, options }) => {
+  const { value, setValue } = useField<string>({ path })
+  const { user } = useAuth()
+
+  const adjustedOptions = options.filter((option) => {
+    /*
+      A common use case for a custom select
+      is to show different options based on
+      the current user's role.
+    */
+    return option;
+  });
+
+  return (
+    <div>
+      <label className="field-label">
+        Custom Select
+      </label>
+      <SelectInput
+        path={path}
+        name={path}
+        options={adjustedOptions}
+        value={value}
+        onChange={() => setValue(e.value)}
+      />
+    </div>
+  )
+}
 ```
+
+If you are looking to create a dynamic select field, the following tutorial will walk you through the process of creating a custom select field that fetches its options from an external API.
+
+<VideoDrawer
+ id='Efn9OxSjA6Y'
+ label='How to Create a Custom Select Field'
+ drawerTitle='How to Create a Custom Select Field: A Step-by-Step Guide'
+/>
+
+If you want to learn more about custom components check out the [Admin > Custom Component](/docs/admin/components#field-component) docs.

@@ -1,17 +1,15 @@
 module.exports = {
-  verbose: true,
+  globalSetup: './test/jest.setup.ts',
+  moduleNameMapper: {
+    '\\.(css|scss)$': '<rootDir>/packages/payload/src/bundlers/mocks/emptyModule.js',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+      '<rootDir>/packages/payload/src/bundlers/mocks/fileMock.js',
+  },
   testEnvironment: 'node',
-  testMatch: [
-    '**/src/**/*.spec.ts',
-    '**/test/**/*int.spec.ts',
-  ],
+  testMatch: ['<rootDir>/packages/payload/src/**/*.spec.ts', '<rootDir>/test/**/*int.spec.ts'],
+  testTimeout: 90000,
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
-  globalSetup: './test/jest.setup.ts',
-  testTimeout: 90000,
-  moduleNameMapper: {
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/bundlers/mocks/fileMock.js',
-    '\\.(css|scss)$': '<rootDir>/src/bundlers/mocks/emptyModule.js',
-  },
-};
+  verbose: true,
+}

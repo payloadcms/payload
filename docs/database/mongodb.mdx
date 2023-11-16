@@ -1,0 +1,47 @@
+---
+title: MongoDB
+label: MongoDB
+order: 40
+desc: Payload has supported MongoDB natively since we started. The flexible nature of MongoDB lends itself well to Payload's powerful fields.
+keywords: MongoDB, documentation, typescript, Content Management System, cms, headless, javascript, node, react, express
+---
+
+To use Payload with MongoDB, install the package `@payloadcms/db-mongodb`. It will come with everything you need to store your Payload data in MongoDB.
+
+Then from there, pass it to your Payload config as follows:
+
+```ts
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the Mongoose adapter here
+  db: mongooseAdapter({
+    // Mongoose-specific arguments go here.
+    // URL is required.
+    url: process.env.DATABASE_URI,
+  }),
+})
+```
+
+### Options
+
+| Option                | Description                                                                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `autoPluralization`   | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s.  |
+| `connectOptions`      | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose. |
+| `disableIndexHints`      | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false |
+| `migrationDir`        | Customize the directory that migrations are stored. |
+
+### Access to Mongoose models
+
+After Payload is initialized, this adapter exposes all of your Mongoose models and they are available for you to work with directly.
+
+You can access Mongoose models as follows:
+
+- Collection models - `payload.db.collections[myCollectionSlug]`
+- Globals model - `payload.db.globals`
+- Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`

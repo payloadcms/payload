@@ -1,50 +1,17 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { Field } from '../../../../src/fields/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
-export const blocksFieldSeedData = [
-  {
-    blockName: 'First block',
-    blockType: 'text',
-    text: 'first block',
-    richText: [{
-      children: [{ text: '' }],
-    }],
-  },
-  {
-    blockName: 'Second block',
-    blockType: 'number',
-    number: 342,
-  },
-  {
-    blockName: 'Sub-block demonstration',
-    blockType: 'subBlocks',
-    subBlocks: [
-      {
-        blockName: 'First sub block',
-        blockType: 'number',
-        number: 123,
-      },
-      {
-        blockName: 'Second sub block',
-        blockType: 'text',
-        text: 'second sub block',
-      },
-    ],
-  },
-  {
-    blockName: 'I18n Block',
-    blockType: 'i18n-text',
-    text: 'first block',
-  },
-] as const;
+import { blockFieldsSlug } from '../../slugs'
+import { AddCustomBlocks } from './components/AddCustomBlocks'
+import { getBlocksFieldSeedData } from './shared'
 
-export const blocksField: Field = {
+export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
   type: 'blocks',
   required: true,
   blocks: [
     {
-      slug: 'text',
+      slug: prefix ? `${prefix}Content` : 'content',
       fields: [
         {
           name: 'text',
@@ -58,7 +25,7 @@ export const blocksField: Field = {
       ],
     },
     {
-      slug: 'number',
+      slug: prefix ? `${prefix}Number` : 'number',
       fields: [
         {
           name: 'number',
@@ -68,7 +35,7 @@ export const blocksField: Field = {
       ],
     },
     {
-      slug: 'subBlocks',
+      slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
       fields: [
         {
           type: 'collapsible',
@@ -105,7 +72,7 @@ export const blocksField: Field = {
       ],
     },
     {
-      slug: 'tabs',
+      slug: prefix ? `${prefix}Tabs` : 'tabs',
       fields: [
         {
           type: 'tabs',
@@ -141,15 +108,15 @@ export const blocksField: Field = {
       ],
     },
   ],
-  defaultValue: blocksFieldSeedData,
-};
+  defaultValue: getBlocksFieldSeedData(prefix),
+})
 
 const BlockFields: CollectionConfig = {
-  slug: 'block-fields',
+  slug: blockFieldsSlug,
   fields: [
-    blocksField,
+    getBlocksField(),
     {
-      ...blocksField,
+      ...getBlocksField('localized'),
       name: 'collapsedByDefaultBlocks',
       localized: true,
       admin: {
@@ -157,7 +124,7 @@ const BlockFields: CollectionConfig = {
       },
     },
     {
-      ...blocksField,
+      ...getBlocksField('localized'),
       name: 'localizedBlocks',
       localized: true,
     },
@@ -203,12 +170,94 @@ const BlockFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'blocks',
+      name: 'blocksWithSimilarConfigs',
+      blocks: [
+        {
+          slug: 'block-a',
+          fields: [
+            {
+              type: 'array',
+              name: 'items',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'title',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'block-b',
+          fields: [
+            {
+              type: 'array',
+              name: 'items',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'title2',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blocksWithMinRows',
+      type: 'blocks',
+      minRows: 2,
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'blockTitle',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'customBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block-1',
+          fields: [
+            {
+              name: 'block1Title',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'block-2',
+          fields: [
+            {
+              name: 'block2Title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'ui',
+      name: 'ui',
+      admin: {
+        components: {
+          Field: AddCustomBlocks,
+        },
+      },
+    },
   ],
-};
+}
 
-export const blocksDoc = {
-  blocks: blocksFieldSeedData,
-  localizedBlocks: blocksFieldSeedData,
-};
-
-export default BlockFields;
+export default BlockFields

@@ -1,103 +1,86 @@
-import React, { Fragment, useCallback } from 'react';
-import { Modal, useModal } from '@faceless-ui/modal';
-import { Transforms } from 'slate';
-import { useSlate, ReactEditor } from 'slate-react';
-import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal';
-import ElementButton from '../../../../../../../src/admin/components/forms/field-types/RichText/elements/Button';
-import X from '../../../../../../../src/admin/components/icons/X';
-import Button from '../../../../../../../src/admin/components/elements/Button';
-import Form from '../../../../../../../src/admin/components/forms/Form';
-import Submit from '../../../../../../../src/admin/components/forms/Submit';
-import reduceFieldsToValues from '../../../../../../../src/admin/components/forms/Form/reduceFieldsToValues';
-import Text from '../../../../../../../src/admin/components/forms/field-types/Text';
-import Checkbox from '../../../../../../../src/admin/components/forms/field-types/Checkbox';
-import Select from '../../../../../../../src/admin/components/forms/field-types/Select';
+import { Modal, useModal } from '@faceless-ui/modal'
+import React, { Fragment, useCallback } from 'react'
+import { Transforms } from 'slate'
+import { ReactEditor, useSlate } from 'slate-react'
 
-import './index.scss';
+import Button from '../../../../../../../packages/payload/src/admin/components/elements/Button'
+import Form from '../../../../../../../packages/payload/src/admin/components/forms/Form'
+import reduceFieldsToValues from '../../../../../../../packages/payload/src/admin/components/forms/Form/reduceFieldsToValues'
+import Submit from '../../../../../../../packages/payload/src/admin/components/forms/Submit'
+import Checkbox from '../../../../../../../packages/payload/src/admin/components/forms/field-types/Checkbox'
+import ElementButton from '../../../../../../../packages/payload/src/admin/components/forms/field-types/RichText/elements/Button'
+import Select from '../../../../../../../packages/payload/src/admin/components/forms/field-types/Select'
+import Text from '../../../../../../../packages/payload/src/admin/components/forms/field-types/Text'
+import X from '../../../../../../../packages/payload/src/admin/components/icons/X'
+import MinimalTemplate from '../../../../../../../packages/payload/src/admin/components/templates/Minimal'
+import './index.scss'
 
-const baseClass = 'button-rich-text-button';
+const baseClass = 'button-rich-text-button'
 
 const initialFormData = {
   style: 'primary',
-};
+}
 
-const insertButton = (editor, { href, label, style, newTab = false }: any) => {
-  const text = { text: ' ' };
+const insertButton = (editor, { href, label, newTab = false, style }: any) => {
+  const text = { text: ' ' }
   const button = {
-    type: 'button',
+    children: [text],
     href,
-    style,
-    newTab,
     label,
-    children: [
-      text,
-    ],
-  };
-
-  const nodes = [button, { children: [{ text: '' }] }];
-
-  if (editor.blurSelection) {
-    Transforms.select(editor, editor.blurSelection);
+    newTab,
+    style,
+    type: 'button',
   }
 
-  Transforms.insertNodes(editor, nodes);
+  const nodes = [button, { children: [{ text: '' }] }]
 
-  const currentPath = editor.selection.anchor.path[0];
-  const newSelection = { anchor: { path: [currentPath + 1, 0], offset: 0 }, focus: { path: [currentPath + 1, 0], offset: 0 } };
+  if (editor.blurSelection) {
+    Transforms.select(editor, editor.blurSelection)
+  }
 
-  Transforms.select(editor, newSelection);
-  ReactEditor.focus(editor);
-};
+  Transforms.insertNodes(editor, nodes)
 
-const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
-  const { open, closeAll } = useModal();
-  const editor = useSlate();
+  const currentPath = editor.selection.anchor.path[0]
+  const newSelection = {
+    anchor: { offset: 0, path: [currentPath + 1, 0] },
+    focus: { offset: 0, path: [currentPath + 1, 0] },
+  }
 
-  const handleAddButton = useCallback((fields) => {
-    const data = reduceFieldsToValues(fields);
-    insertButton(editor, data);
-    closeAll();
-  }, [editor, closeAll]);
+  Transforms.select(editor, newSelection)
+  ReactEditor.focus(editor)
+}
 
-  const modalSlug = `${path}-add-button`;
+const ToolbarButton: React.FC<{ path: string }> = ({ path }) => {
+  const { closeAll, open } = useModal()
+  const editor = useSlate()
+
+  const handleAddButton = useCallback(
+    (fields) => {
+      const data = reduceFieldsToValues(fields)
+      insertButton(editor, data)
+      closeAll()
+    },
+    [editor, closeAll],
+  )
+
+  const modalSlug = `${path}-add-button`
 
   return (
     <Fragment>
-      <ElementButton
-        className={baseClass}
-        format="button"
-        onClick={() => open(modalSlug)}
-      >
+      <ElementButton className={baseClass} format="button" onClick={() => open(modalSlug)}>
         Button
       </ElementButton>
-      <Modal
-        slug={modalSlug}
-        className={`${baseClass}__modal`}
-      >
+      <Modal className={`${baseClass}__modal`} slug={modalSlug}>
         <MinimalTemplate>
           <header className={`${baseClass}__header`}>
             <h3>Add button</h3>
-            <Button
-              buttonStyle="none"
-              onClick={closeAll}
-            >
+            <Button buttonStyle="none" onClick={closeAll}>
               <X />
             </Button>
           </header>
-          <Form
-            onSubmit={handleAddButton}
-            initialData={initialFormData}
-          >
-            <Text
-              label="Label"
-              name="label"
-              required
-            />
-            <Text
-              label="URL"
-              name="href"
-              required
-            />
+          <Form initialData={initialFormData} onSubmit={handleAddButton}>
+            <Text label="Label" name="label" required />
+            <Text label="URL" name="href" required />
             <Select
               label="Style"
               name="style"
@@ -112,18 +95,13 @@ const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
                 },
               ]}
             />
-            <Checkbox
-              label="Open in new tab"
-              name="newTab"
-            />
-            <Submit>
-              Add button
-            </Submit>
+            <Checkbox label="Open in new tab" name="newTab" />
+            <Submit>Add button</Submit>
           </Form>
         </MinimalTemplate>
       </Modal>
     </Fragment>
-  );
-};
+  )
+}
 
-export default ToolbarButton;
+export default ToolbarButton
