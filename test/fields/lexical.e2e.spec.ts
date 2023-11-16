@@ -1,9 +1,10 @@
 import type { Page } from '@playwright/test'
+import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
 import { expect, test } from '@playwright/test'
 
 import type { SerializedBlockNode } from '../../packages/richtext-lexical/src'
-import type { RichTextField } from './payload-types'
+import type { LexicalField } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { saveDocAndAssert } from '../helpers'
@@ -20,6 +21,7 @@ let client: RESTClient
 let page: Page
 let serverURL: string
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function navigateToRichTextFields() {
   const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
   await page.goto(url.list)
@@ -84,7 +86,7 @@ describe('lexical', () => {
 
     await saveDocAndAssert(page)
 
-    const lexicalDoc: RichTextField = (
+    const lexicalDoc: LexicalField = (
       await payload.find({
         collection: lexicalFieldsSlug,
         where: {
@@ -97,7 +99,9 @@ describe('lexical', () => {
     ).docs[0] as never
 
     const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-    const firstParagraphTextNode: SerializedTextNode = lexicalField.root.children[0].children[0]
+    const firstParagraphTextNode: SerializedTextNode = (
+      lexicalField.root.children[0] as SerializedParagraphNode
+    ).children[0] as SerializedTextNode
 
     expect(firstParagraphTextNode.text).toBe('Upload Node:moretext')
   })
@@ -147,7 +151,7 @@ describe('lexical', () => {
 
     await saveDocAndAssert(page)
 
-    const lexicalDoc: RichTextField = (
+    const lexicalDoc: LexicalField = (
       await payload.find({
         collection: lexicalFieldsSlug,
         where: {
@@ -160,12 +164,13 @@ describe('lexical', () => {
     ).docs[0] as never
 
     const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-    const firstParagraph: SerializeParagrapbNode = lexicalField.root.children[0]
+    const firstParagraph: SerializedParagraphNode = lexicalField.root
+      .children[0] as SerializedParagraphNode
     expect(firstParagraph.children).toHaveLength(3)
 
-    const textNode1: SerializedTextNode = firstParagraph.children[0]
-    const boldNode: SerializedTextNode = firstParagraph.children[1]
-    const textNode2: SerializedTextNode = firstParagraph.children[2]
+    const textNode1: SerializedTextNode = firstParagraph.children[0] as SerializedTextNode
+    const boldNode: SerializedTextNode = firstParagraph.children[1] as SerializedTextNode
+    const textNode2: SerializedTextNode = firstParagraph.children[2] as SerializedTextNode
 
     expect(textNode1.text).toBe('Upload ')
     expect(textNode1.format).toBe(0)
@@ -205,7 +210,7 @@ describe('lexical', () => {
       await expect(spanInSubEditor).toHaveText('Some text below relationship node 1 inserted text')
       await saveDocAndAssert(page)
 
-      const lexicalDoc: RichTextField = (
+      const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
@@ -218,7 +223,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3]
+      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
       const textNodeInBlockNodeRichText =
         blockNode.fields.data.richText.root.children[1].children[0]
 
@@ -279,7 +284,7 @@ describe('lexical', () => {
 
       await saveDocAndAssert(page)
 
-      const lexicalDoc: RichTextField = (
+      const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
@@ -292,7 +297,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3]
+      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
       const paragraphNodeInBlockNodeRichText = blockNode.fields.data.richText.root.children[1]
 
       expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
@@ -418,7 +423,7 @@ describe('lexical', () => {
        * can be retrieved correctly
        */
 
-      const lexicalDoc: RichTextField = (
+      const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
@@ -431,7 +436,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[4]
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
       const subBlocks = blockNode.fields.data.subBlocks
 
       expect(subBlocks).toHaveLength(2)

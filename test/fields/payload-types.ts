@@ -41,28 +41,110 @@ export interface Config {
 export interface LexicalField {
   id: string
   title: string
-  richTextLexicalSimple?:
-    | {
+  lexicalSimple?: {
+    root: {
+      children: {
+        type: string
+        version: number
         [k: string]: unknown
       }[]
-    | null
-  richTextLexicalCustomFields: {
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
     [k: string]: unknown
-  }[]
-  richTextLexicalWithLexicalPluginData?:
-    | {
+  } | null
+  lexicalWithBlocks: {
+    root: {
+      children: {
+        type: string
+        version: number
         [k: string]: unknown
       }[]
-    | null
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  }
   updatedAt: string
   createdAt: string
 }
 export interface LexicalMigrateField {
   id: string
   title: string
-  richTextLexicalWithLexicalPluginData?:
-    | {
+  lexicalWithLexicalPluginData?: {
+    root: {
+      children: {
+        type: string
+        version: number
         [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
+  lexicalSimple?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
+  lexicalSimple_html?: string | null
+  groupWithLexicalField?: {
+    lexicalInGroupField?: {
+      root: {
+        children: {
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        type: string
+        version: number
+      }
+      [k: string]: unknown
+    } | null
+    lexicalInGroupField_html?: string | null
+  }
+  arrayWithLexicalField?:
+    | {
+        lexicalInArrayField?: {
+          root: {
+            children: {
+              type: string
+              version: number
+              [k: string]: unknown
+            }[]
+            direction: ('ltr' | 'rtl') | null
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+            indent: number
+            type: string
+            version: number
+          }
+          [k: string]: unknown
+        } | null
+        lexicalInArrayField_html?: string | null
+        id?: string | null
       }[]
     | null
   updatedAt: string
@@ -558,6 +640,18 @@ export interface RelationshipField {
         relationTo: 'array-fields'
         value: string | ArrayField
       }
+  relationHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'text-fields'
+            value: string | TextField
+          }
+        | {
+            relationTo: 'array-fields'
+            value: string | ArrayField
+          }
+      )[]
+    | null
   relationToSelf?: (string | null) | RelationshipField
   relationToSelfSelectOnly?: (string | null) | RelationshipField
   relationWithDynamicDefault?: (string | null) | User
@@ -593,21 +687,46 @@ export interface TextField {
   overrideLength?: string | null
   fieldWithDefaultValue?: string | null
   dependentOnFieldWithDefaultValue?: string | null
+  customLabel?: string | null
+  customError?: string | null
+  beforeAndAfterInput?: string | null
   updatedAt: string
   createdAt: string
 }
 export interface RichTextField {
   id: string
   title: string
-  richTextLexicalCustomFields: {
-    [k: string]: unknown
-  }[]
-  richTextLexicalCustomFields_htmll?: string | null
-  richTextLexical?:
-    | {
+  lexicalCustomFields: {
+    root: {
+      children: {
+        type: string
+        version: number
         [k: string]: unknown
       }[]
-    | null
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  }
+  lexicalCustomFields_html?: string | null
+  lexical?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null
   richText: {
     [k: string]: unknown
