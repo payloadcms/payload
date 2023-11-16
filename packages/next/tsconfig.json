@@ -22,6 +22,12 @@
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx"
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [{ "path": "../payload" }]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "src/**/*.json",
+    "../ui/src/createClientConfig.ts"
+  ],
+  "references": [{ "path": "../payload" }, { "path": "../ui" }]
 }
