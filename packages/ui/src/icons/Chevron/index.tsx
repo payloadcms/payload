@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const Chevron: React.FC<{
+export const Chevron: React.FC<{
   className?: string
   direction?: 'left' | 'right' | 'up' | 'down'
   size?: 'small' | 'large'
@@ -29,5 +29,3 @@ const Chevron: React.FC<{
     <path className="stroke" d="M1.42871 1.5332L4.42707 4.96177L7.42543 1.5332" />
   </svg>
 )
-
-export default Chevron

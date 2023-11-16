@@ -1,11 +1,12 @@
+'use client'
 import React, { useEffect } from 'react'
 
 import type { Props } from './types'
 
-import useIntersect from '../../../hooks/useIntersect'
+import { useIntersect } from '../../hooks/useIntersect'
 import './index.scss'
 
-const Tooltip: React.FC<Props> = (props) => {
+export const Tooltip: React.FC<Props> = (props) => {
   const {
     alignCaret = 'center',
     boundingRef,
@@ -77,5 +78,3 @@ const Tooltip: React.FC<Props> = (props) => {
     </React.Fragment>
   )
 }
-
-export default Tooltip

@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const Search: React.FC = () => (
+export const Search: React.FC = () => (
   <svg
     className="icon icon--search"
     fill="none"
@@ -13,5 +13,3 @@ const Search: React.FC = () => (
     <line className="stroke" x1="14.914" x2="20.5002" y1="13.9998" y2="19.586" />
   </svg>
 )
-
-export default Search

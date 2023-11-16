@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const LogOut: React.FC = () => (
+export const LogOut: React.FC = () => (
   <svg
     className="icon icon--logout"
     fill="none"
@@ -16,5 +16,3 @@ const LogOut: React.FC = () => (
     </g>
   </svg>
 )
-
-export default LogOut

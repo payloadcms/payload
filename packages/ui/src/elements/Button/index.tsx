@@ -1,29 +1,28 @@
 import React, { Fragment, forwardRef, isValidElement } from 'react'
-import { Link } from 'react-router-dom'
 
 import type { Props } from './types'
 
-import chevron from '../../icons/Chevron'
-import edit from '../../icons/Edit'
-import linkIcon from '../../icons/Link'
-import plus from '../../icons/Plus'
-import swap from '../../icons/Swap'
-import x from '../../icons/X'
-import Tooltip from '../Tooltip'
+import { Chevron } from '../../icons/Chevron'
+import { Edit } from '../../icons/Edit'
+import { LinkIcon } from '../../icons/Link'
+import { Plus } from '../../icons/Plus'
+import { Swap } from '../../icons/Swap'
+import { X } from '../../icons/X'
+import { Tooltip } from '../Tooltip'
 import './index.scss'
 
 const icons = {
-  chevron,
-  edit,
-  link: linkIcon,
-  plus,
-  swap,
-  x,
+  chevron: Chevron,
+  edit: Edit,
+  link: LinkIcon,
+  plus: Plus,
+  swap: Swap,
+  x: X,
 }
 
 const baseClass = 'btn'
 
-const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
+export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
   const BuiltInIcon = icons[icon]
 
   return (
@@ -46,7 +45,7 @@ const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
   )
 }
 
-const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
+export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
   const {
     id,
     'aria-label': ariaLabel,
@@ -66,6 +65,7 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
     tooltip,
     type = 'button',
     url,
+    Link,
   } = props
 
   const [showTooltip, setShowTooltip] = React.useState(false)
@@ -108,6 +108,8 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
 
   switch (el) {
     case 'link':
+      if (!Link) throw new Error('Link is required when using el="link"')
+
       return (
         <Link {...buttonProps} to={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
@@ -137,5 +139,3 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
       )
   }
 })
-
-export default Button

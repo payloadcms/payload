@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-const Swap: React.FC = () => (
+export const Swap: React.FC = () => (
   <svg className="icon icon--swap" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <path className="stroke" d="M9.84631 4.78679L6.00004 8.63306L9.84631 12.4793" />
     <path className="stroke" d="M15.1537 20.1059L19 16.2596L15.1537 12.4133" />
@@ -10,5 +10,3 @@ const Swap: React.FC = () => (
     <line className="stroke" x1="18" x2="10" y1="16.1195" y2="16.1195" />
   </svg>
 )
-
-export default Swap

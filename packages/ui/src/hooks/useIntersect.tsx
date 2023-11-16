@@ -1,9 +1,10 @@
+'use client'
 /* eslint-disable no-shadow */
 import { useEffect, useRef, useState } from 'react'
 
 type Intersect = [setNode: React.Dispatch<Element>, entry: IntersectionObserverEntry]
 
-const useIntersect = (
+export const useIntersect = (
   { root = null, rootMargin = '0px', threshold = 0 } = {},
   disable?: boolean,
 ): Intersect => {
@@ -32,5 +33,3 @@ const useIntersect = (
 
   return [setNode, entry]
 }
-
-export default useIntersect

@@ -1,32 +1,36 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
 
-import type { EntityToGroup, Group } from '../../../utilities/groupNavItems'
+import type { EntityToGroup, Group } from '../../utilities/groupNavItems'
 import type { Props } from './types'
 
-import { getTranslation } from '../../../../utilities/getTranslation'
-import { EntityType, groupNavItems } from '../../../utilities/groupNavItems'
-import Button from '../../elements/Button'
+import { getTranslation } from 'payload/utilities'
+import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
+import { Button } from '../../elements/Button'
 import Card from '../../elements/Card'
 import { Gutter } from '../../elements/Gutter'
-import { useConfig } from '../../utilities/Config'
 import './index.scss'
+import { ClientConfig } from 'payload/config'
 
 const baseClass = 'dashboard'
 
-const Dashboard: React.FC<Props> = (props) => {
-  const { collections, globals, permissions, user } = props
-
-  const { push } = useHistory()
-  const { i18n, t } = useTranslation('general')
-
+export const DefaultDashboardClient: React.FC<
+  Omit<Props, 'config'> & {
+    config: ClientConfig
+  }
+> = (props) => {
   const {
-    admin: {
-      components: { afterDashboard, beforeDashboard },
+    collections,
+    globals,
+    permissions,
+    user,
+    config: {
+      routes: { admin },
     },
-    routes: { admin },
-  } = useConfig()
+  } = props
+
+  const { i18n, t } = useTranslation('general')
 
   const [groups, setGroups] = useState<Group[]>([])
 
@@ -34,8 +38,8 @@ const Dashboard: React.FC<Props> = (props) => {
     setGroups(
       groupNavItems(
         [
-          ...collections
-            .filter(
+          ...(collections
+            ?.filter(
               ({ admin: { hidden } }) =>
                 !(typeof hidden === 'function' ? hidden({ user }) : hidden),
             )
@@ -46,9 +50,9 @@ const Dashboard: React.FC<Props> = (props) => {
               }
 
               return entityToGroup
-            }),
-          ...globals
-            .filter(
+            }) ?? []),
+          ...(globals
+            ?.filter(
               ({ admin: { hidden } }) =>
                 !(typeof hidden === 'function' ? hidden({ user }) : hidden),
             )
@@ -59,7 +63,7 @@ const Dashboard: React.FC<Props> = (props) => {
               }
 
               return entityToGroup
-            }),
+            }) ?? []),
         ],
         permissions,
         i18n,
@@ -70,8 +74,6 @@ const Dashboard: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <Gutter className={`${baseClass}__wrap`}>
-        {Array.isArray(beforeDashboard) &&
-          beforeDashboard.map((Component, i) => <Component key={i} />)}
         {groups.map(({ entities, label }, groupIndex) => {
           return (
             <div className={`${baseClass}__group`} key={groupIndex}>
@@ -87,7 +89,7 @@ const Dashboard: React.FC<Props> = (props) => {
                   if (type === EntityType.collection) {
                     title = getTranslation(entity.labels.plural, i18n)
                     buttonAriaLabel = t('showAllLabel', { label: title })
-                    onClick = () => push({ pathname: `${admin}/collections/${entity.slug}` })
+                    // onClick = () => push({ pathname: `${admin}/collections/${entity.slug}` })
                     createHREF = `${admin}/collections/${entity.slug}/create`
                     hasCreatePermission =
                       permissions?.collections?.[entity.slug]?.create?.permission
@@ -96,7 +98,7 @@ const Dashboard: React.FC<Props> = (props) => {
                   if (type === EntityType.global) {
                     title = getTranslation(entity.label, i18n)
                     buttonAriaLabel = t('editLabel', { label: getTranslation(entity.label, i18n) })
-                    onClick = () => push({ pathname: `${admin}/globals/${entity.slug}` })
+                    // onClick = () => push({ pathname: `${admin}/globals/${entity.slug}` })
                   }
 
                   return (
@@ -130,11 +132,7 @@ const Dashboard: React.FC<Props> = (props) => {
             </div>
           )
         })}
-        {Array.isArray(afterDashboard) &&
-          afterDashboard.map((Component, i) => <Component key={i} />)}
       </Gutter>
     </div>
   )
 }
-
-export default Dashboard

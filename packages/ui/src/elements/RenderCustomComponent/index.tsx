@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-const RenderCustomComponent: React.FC<Props> = (props) => {
+export const RenderCustomComponent: React.FC<Props> = (props) => {
   const { CustomComponent, DefaultComponent, componentProps } = props
 
   if (CustomComponent) {
@@ -11,5 +11,3 @@ const RenderCustomComponent: React.FC<Props> = (props) => {
 
   return <DefaultComponent {...componentProps} />
 }
-
-export default RenderCustomComponent
