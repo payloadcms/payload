@@ -103,7 +103,7 @@ describe('fields', () => {
       await expect(error).toHaveText('#custom-error')
     })
 
-    test('should render BeforeInput and AfterInput', async () => {
+    test('should render beforeInput and afterInput', async () => {
       await page.goto(url.create)
       const input = page.locator('input[id="field-beforeAndAfterInput"]')
 
@@ -111,13 +111,13 @@ describe('fields', () => {
         return el.previousElementSibling
       })
       const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
-      await expect(prevSiblingText).toEqual('#before-input')
+      expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
       const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
-      await expect(nextSiblingText).toEqual('#after-input')
+      expect(nextSiblingText).toEqual('#after-input')
     })
   })
 

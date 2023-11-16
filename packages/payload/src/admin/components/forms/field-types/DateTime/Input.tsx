@@ -17,10 +17,10 @@ const baseClass = 'date-time-field'
 export type DateTimeInputProps = Omit<DateField, 'admin' | 'name' | 'type'> & {
   className?: string
   components: {
-    AfterInput?: React.ReactElement<any>[]
-    BeforeInput?: React.ReactElement<any>[]
     Error?: React.ComponentType<any>
     Label?: React.ComponentType<any>
+    afterInput?: React.ComponentType<any>[]
+    beforeInput?: React.ComponentType<any>[]
   }
   datePickerProps?: DateField['admin']['date']
   description?: Description
@@ -39,7 +39,7 @@ export type DateTimeInputProps = Omit<DateField, 'admin' | 'name' | 'type'> & {
 export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
   const {
     className,
-    components: { AfterInput, BeforeInput, Error, Label } = {},
+    components: { Error, Label, afterInput, beforeInput } = {},
     datePickerProps,
     description,
     errorMessage,
@@ -81,7 +81,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
       </div>
       <LabelComp htmlFor={path} label={label} required={required} />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
-        {BeforeInput}
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
         <DatePicker
           {...datePickerProps}
           onChange={onChange}
@@ -89,7 +89,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
           readOnly={readOnly}
           value={value}
         />
-        {AfterInput}
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
       </div>
       <FieldDescription description={description} value={value} />
     </div>

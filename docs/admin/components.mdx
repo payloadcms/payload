@@ -432,14 +432,14 @@ All Payload fields support the ability to swap in your own React components. So,
 | **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More](#cell-component) |
 | **`Field`**  | Swap out the field itself within all `Edit` views. [More](#field-component)                                                 |
 
-As an alternative to replacing the entire Field component, you may want to keep the majority of the default Field component and only swap components within. This allows you to replace the **`Label`** or **`Error`** within a field component or add additional components inside the field with **`BeforeInput`** or **`AfterInput`**. **`BeforeInput`** and **`AfterInput`** are allowed in any fields that don't contain other fields, except [UI](/docs/fields/ui) and [Rich Text](/docs/fields/rich-text).
+As an alternative to replacing the entire Field component, you may want to keep the majority of the default Field component and only swap components within. This allows you to replace the **`Label`** or **`Error`** within a field component or add additional components inside the field with **`beforeInput`** or **`afterInput`**. **`beforeInput`** and **`afterInput`** are allowed in any fields that don't contain other fields, except [UI](/docs/fields/ui) and [Rich Text](/docs/fields/rich-text).
 
 | Component         | Description                                                                                                     |
 | ----------------- | --------------------------------------------------------------------------------------------------------------- |
 | **`Label`**       | Override the default Label in the Field Component. [More](#label-component)                                     |
 | **`Error`**       | Override the default Label in the Field Component. [More](#error-component)                                     |
-| **`BeforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More](#afterinput-and-beforeinput) |
-| **`AfterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More](#afterinput-and-beforeinput)  |
+| **`beforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More](#afterinput-and-beforeinput) |
+| **`afterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More](#afterinput-and-beforeinput)  |
 
 ## Cell Component
 
@@ -530,7 +530,7 @@ const CustomLabel: React.FC<Props> = (props) => {
       {getTranslation(label, i18n)}
       {required && <span className="required">*</span>}
     </span>);
-  } 
+  }
 
   return null
 }
@@ -564,7 +564,7 @@ const CustomError: React.FC<Props> = (props) => {
 }
 ```
 
-## AfterInput and BeforeInput
+## afterInput and beforeInput
 
 With these properties you can add multiple components before and after the input element. For example, you can add an absolutely positioned button to clear the current field value.
 
@@ -583,9 +583,7 @@ const fieldField: Field = {
   type: 'text',
   admin: {
     components: {
-      AfterInput: [
-        <ClearButton />
-      ]
+      afterInput: [ClearButton]
     }
   }
 }

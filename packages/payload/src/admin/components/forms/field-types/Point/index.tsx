@@ -10,8 +10,8 @@ import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const baseClass = 'point'
 
@@ -20,6 +20,7 @@ const PointField: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components: { Error, Label, afterInput, beforeInput } = {},
       condition,
       description,
       placeholder,
@@ -27,7 +28,6 @@ const PointField: React.FC<Props> = (props) => {
       step,
       style,
       width,
-      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     label,
     path: pathFromProps,
@@ -98,7 +98,7 @@ const PointField: React.FC<Props> = (props) => {
             required={required}
           />
           <div className="input-wrapper">
-            {BeforeInput}
+            {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
             <input
               disabled={readOnly}
               id={`field-longitude-${path.replace(/\./g, '__')}`}
@@ -109,7 +109,7 @@ const PointField: React.FC<Props> = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            {AfterInput}
+            {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
           </div>
         </li>
         <li>
@@ -119,7 +119,7 @@ const PointField: React.FC<Props> = (props) => {
             required={required}
           />
           <div className="input-wrapper">
-            {BeforeInput}
+            {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
             <input
               disabled={readOnly}
               id={`field-latitude-${path.replace(/\./g, '__')}`}
@@ -130,7 +130,7 @@ const PointField: React.FC<Props> = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            {AfterInput}
+            {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
           </div>
         </li>
       </ul>

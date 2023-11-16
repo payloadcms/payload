@@ -13,14 +13,15 @@ import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const NumberField: React.FC<Props> = (props) => {
   const {
     name,
     admin: {
       className,
+      components: { Error, Label, afterInput, beforeInput } = {},
       condition,
       description,
       placeholder,
@@ -28,7 +29,6 @@ const NumberField: React.FC<Props> = (props) => {
       step,
       style,
       width,
-      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     hasMany,
     label,
@@ -162,7 +162,7 @@ const NumberField: React.FC<Props> = (props) => {
         />
       ) : (
         <div className="input-wrapper">
-          {BeforeInput}
+          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
           <input
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
@@ -178,7 +178,7 @@ const NumberField: React.FC<Props> = (props) => {
             type="number"
             value={typeof value === 'number' ? value : ''}
           />
-          {AfterInput}
+          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
       )}
 
