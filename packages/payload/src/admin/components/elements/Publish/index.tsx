@@ -32,9 +32,10 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
 
 type Props = {
   CustomComponent?: CustomPublishButtonProps
+  hasPublishPermission?: boolean
 }
 
-export const Publish: React.FC<Props> = ({ CustomComponent }) => {
+export const Publish: React.FC<Props> = ({ CustomComponent, hasPublishPermission }) => {
   const { publishedDoc, unpublishedVersions } = useDocumentInfo()
   const { submit } = useForm()
   const modified = useFormModified()
@@ -42,9 +43,10 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0
   const canPublish = modified || hasNewerVersions || !publishedDoc
+  const DefaultComponent = hasPublishPermission ? DefaultPublishButton : null
 
   const publish = useCallback(() => {
-    submit({
+    void submit({
       overrides: {
         _status: 'published',
       },
@@ -54,7 +56,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   return (
     <RenderCustomComponent
       CustomComponent={CustomComponent}
-      DefaultComponent={DefaultPublishButton}
+      DefaultComponent={DefaultComponent}
       componentProps={{
         id: 'action-save',
         DefaultButton: DefaultPublishButton,

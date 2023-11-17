@@ -39,6 +39,14 @@ const DraftPosts: CollectionConfig = {
   },
   fields: [
     {
+      name: '_status',
+      access: {
+        update: ({ req }) => req.user.email === 'dev@paylaodcms.com',
+      },
+      label: 'status',
+      type: 'text',
+    },
+    {
       name: 'title',
       label: 'Title',
       localized: true,

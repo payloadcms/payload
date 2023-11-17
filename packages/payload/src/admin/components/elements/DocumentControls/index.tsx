@@ -58,6 +58,8 @@ export const DocumentControls: React.FC<{
 
   const hasCreatePermission = 'create' in permissions && permissions.create?.permission
   const hasDeletePermission = 'delete' in permissions && permissions.delete?.permission
+  const hasPublishPermission =
+    'publish' in permissions && permissions.fields?._status?.update?.permission
 
   const showDotMenu = Boolean(
     collection && id && !disableActions && (hasCreatePermission || hasDeletePermission),
@@ -180,6 +182,7 @@ export const DocumentControls: React.FC<{
                         collection?.admin?.components?.edit?.PublishButton ||
                         global?.admin?.components?.elements?.PublishButton
                       }
+                      hasPublishPermission={hasPublishPermission}
                     />
                   </React.Fragment>
                 ) : (
