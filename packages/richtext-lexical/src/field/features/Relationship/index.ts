@@ -16,7 +16,7 @@ export type RelationshipFeatureProps =
        * The collections that should be disabled. Overrides the `enableRichTextRelationship` property in the collection config.
        * When this property is set, `enabledCollections` will not be available.
        **/
-      disabledCollections: string[]
+      disabledCollections?: string[]
 
       // Ensures that enabledCollections is not available when disabledCollections is set
       enabledCollections?: never
@@ -29,7 +29,7 @@ export type RelationshipFeatureProps =
        * The collections that should be enabled. Overrides the `enableRichTextRelationship` property in the collection config
        * When this property is set, `disabledCollections` will not be available.
        **/
-      enabledCollections: string[]
+      enabledCollections?: string[]
     }
 
 export const RelationshipFeature = (props?: RelationshipFeatureProps): FeatureProvider => {
