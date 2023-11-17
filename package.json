@@ -79,6 +79,7 @@
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "8.12.2",
+    "next": "14.0.2",
     "node-fetch": "2.6.12",
     "nodemon": "3.0.1",
     "prettier": "^3.0.3",

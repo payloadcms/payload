@@ -10,12 +10,12 @@ import { NavToggler } from '../../elements/Nav/NavToggler'
 import { useNav } from '../../elements/Nav/context'
 import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
-import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import './index.scss'
 
 const baseClass = 'template-default'
 
-const Default: React.FC<Props> = ({ children, className }) => {
+export const Default: React.FC<Props> = ({ children, className }) => {
   const {
     admin: {
       components: { Nav: CustomNav } = {
@@ -54,5 +54,3 @@ const Default: React.FC<Props> = ({ children, className }) => {
     </Fragment>
   )
 }
-
-export default Default

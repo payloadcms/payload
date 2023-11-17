@@ -1,5 +1,6 @@
 import type { ElementType, MouseEvent } from 'react'
 import type React from 'react'
+import { LinkType } from '../../types'
 
 export type Props = {
   'aria-label'?: string
@@ -21,12 +22,5 @@ export type Props = {
   tooltip?: string
   type?: 'button' | 'submit'
   url?: string
-  /**
-   * Pass a component from your routing library to override the default anchor tag.
-   * @example
-   * import { Link } from 'react-router-dom'
-   * @example
-   * import { Link } from 'next/link'
-   **/
-  Link?: React.ElementType
+  Link?: LinkType
 }
