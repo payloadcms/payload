@@ -15,8 +15,6 @@ import { INSERT_RELATIONSHIP_COMMAND } from '../plugins'
 import { EnabledRelationshipsCondition } from '../utils/EnabledRelationshipsCondition'
 import './index.scss'
 
-const baseClass = 'lexical-relationship-drawer'
-
 export const INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND: LexicalCommand<{
   replace: { nodeKey: string } | false
 }> = createCommand('INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND')
@@ -50,7 +48,7 @@ const insertRelationship = ({
 }
 
 type Props = {
-  enabledCollectionSlugs: string[]
+  enabledCollectionSlugs: null | string[]
 }
 
 const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
@@ -102,7 +100,9 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
 }
 
 export const RelationshipDrawer = (props: Props): React.ReactNode => {
-  return (
+  return props?.enabledCollectionSlugs?.length > 0 ? ( // If enabledCollectionSlugs it overrides what EnabledRelationshipsCondition is doing
+    <RelationshipDrawerComponent {...props} />
+  ) : (
     <EnabledRelationshipsCondition {...props}>
       <RelationshipDrawerComponent {...props} />
     </EnabledRelationshipsCondition>

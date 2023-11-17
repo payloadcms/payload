@@ -63,7 +63,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
         placeholder={<p className="editor-placeholder">Start typing...</p>}
       />
       <OnChangePlugin
-        // Selection changes can be ignore here, reducing the
+        // Selection changes can be ignored here, reducing the
         // frequency that the FieldComponent and Payload receive updates.
         // Selection changes are only needed if you are saving selection state
         ignoreSelectionChange
