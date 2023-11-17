@@ -199,6 +199,9 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
+    const params = {
+      locale: code || undefined,
+    }
     if (pluralType === 'globals') {
       docAccessURL = `/globals/${slug}/access`
     } else if (pluralType === 'collections' && id) {
@@ -206,7 +209,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}`, {
+      const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
@@ -219,7 +222,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       // (i.e. create has no id)
       setDocPermissions(permissions[pluralType][slug])
     }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language])
+  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, code])
 
   const getDocPreferences = useCallback(async () => {
     return getPreference<DocumentPreferences>(preferencesKey)
