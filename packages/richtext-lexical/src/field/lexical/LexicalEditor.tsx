@@ -51,6 +51,11 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
 
   return (
     <React.Fragment>
+      {editorConfig.features.plugins.map((plugin) => {
+        if (plugin.position === 'top') {
+          return <plugin.Component key={plugin.key} />
+        }
+      })}
       <RichTextPlugin
         ErrorBoundary={LexicalErrorBoundary}
         contentEditable={
