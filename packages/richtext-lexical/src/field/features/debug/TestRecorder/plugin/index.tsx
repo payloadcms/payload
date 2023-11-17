@@ -1,3 +1,4 @@
+'use client'
 import type { GridSelection, LexicalEditor, NodeSelection, RangeSelection } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'

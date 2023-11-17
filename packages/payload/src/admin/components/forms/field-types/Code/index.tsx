@@ -9,8 +9,8 @@ import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const prismToMonacoLanguageMap = {
   js: 'javascript',
@@ -24,6 +24,7 @@ const Code: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       editorOptions,
@@ -31,7 +32,6 @@ const Code: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
-      components: { Error, Label } = {},
     } = {},
     label,
     path: pathFromProps,

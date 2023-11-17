@@ -30,7 +30,13 @@ import { expect, test } from '@playwright/test'
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import { globalSlug } from '../admin/slugs'
-import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
+import {
+  changeLocale,
+  exactText,
+  findTableCell,
+  initPageConsoleErrorCatch,
+  selectTableRow,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { clearAndSeedEverything } from './seed'
@@ -55,6 +61,8 @@ describe('versions', () => {
     serverURL = config.serverURL
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
 
   beforeEach(async () => {
@@ -240,6 +248,7 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    // TODO: This test is flaky and fails sometimes
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       // fill out global title and wait for autosave

@@ -12,6 +12,7 @@ import {
   checkBreadcrumb,
   checkPageTitle,
   exactText,
+  initPageConsoleErrorCatch,
   openDocControls,
   openNav,
   saveDocAndAssert,
@@ -61,6 +62,7 @@ describe('admin', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)

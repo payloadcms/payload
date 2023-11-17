@@ -61,8 +61,10 @@ export const lexicalHTML: (
     },
     hooks: {
       afterRead: [
-        async ({ collection, field, siblingData }) => {
-          // find the path of this field, as well as its sibling fields, by looking for this `field` in collection.fields and traversing it recursively
+        async ({ collection, field, global, siblingData }) => {
+          const fields = collection ? collection.fields : global.fields
+
+          // find the path of this field, as well as its sibling fields, by looking for this `field` in fields and traversing it recursively
           function findFieldPathAndSiblingFields(
             fields: Field[],
             path: string[],
@@ -91,7 +93,7 @@ export const lexicalHTML: (
 
             return null
           }
-          const { path, siblingFields } = findFieldPathAndSiblingFields(collection.fields, [])
+          const { path, siblingFields } = findFieldPathAndSiblingFields(fields, [])
 
           const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
             siblingFields.find(

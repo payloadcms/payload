@@ -10,10 +10,14 @@ import { getTranslation } from '../../../../../utilities/getTranslation'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
+  afterInput?: React.ComponentType<any>[]
+  beforeInput?: React.ComponentType<any>[]
   className?: string
   description?: Description
   errorMessage?: string
@@ -28,14 +32,14 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   style?: React.CSSProperties
   value?: string
   width?: string
-  Error?: React.ComponentType<any>
-  Label?: React.ComponentType<any>
-  BeforeInput?: React.ReactElement<any>[]
-  AfterInput?: React.ReactElement<any>[]
 }
 
 const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
     description,
     errorMessage,
@@ -51,10 +55,6 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     style,
     value,
     width,
-    Error,
-    Label,
-    BeforeInput,
-    AfterInput,
   } = props
 
   const { i18n } = useTranslation()
@@ -83,7 +83,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
           <div className="textarea-clone" data-value={value || placeholder || ''} />
-          {BeforeInput}
+          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
           <textarea
             className="textarea-element"
             data-rtl={rtl}
@@ -95,7 +95,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             rows={rows}
             value={value || ''}
           />
-          {AfterInput}
+          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
       </label>
       <FieldDescription description={description} value={value} />

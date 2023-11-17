@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps } from 'payload/utilities'
+import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { AdapterArguments } from './types'
 
@@ -21,6 +21,14 @@ export function slateEditor(
       Component: RichTextField,
       toMergeIntoProps: args,
     }),
+    outputSchema: ({ isRequired }) => {
+      return {
+        items: {
+          type: 'object',
+        },
+        type: withNullableJSONSchemaType('array', isRequired),
+      }
+    },
     populationPromise({
       currentDepth,
       depth,

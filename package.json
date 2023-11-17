@@ -77,6 +77,7 @@
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "jwt-decode": "3.1.2",
+    "lexical": "0.12.2",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
     "mongodb-memory-server": "8.12.2",

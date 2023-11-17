@@ -6,7 +6,12 @@ import type { LocalizedPost } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { changeLocale, openDocControls, saveDocAndAssert } from '../helpers'
+import {
+  changeLocale,
+  initPageConsoleErrorCatch,
+  openDocControls,
+  saveDocAndAssert,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { englishTitle, localizedPostsSlug, spanishLocale } from './shared'
@@ -44,6 +49,8 @@ describe('Localization', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
 
   describe('localized text', () => {
