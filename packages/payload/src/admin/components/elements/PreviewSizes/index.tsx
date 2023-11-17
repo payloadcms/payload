@@ -71,7 +71,7 @@ const PreviewSizes: React.FC<{
   imageCacheTag?: string
 }> = ({ collection, doc, imageCacheTag }) => {
   const {
-    upload: { imageSizes, staticDir, staticURL },
+    upload: { imageSizes, staticURL },
   } = collection
   const { sizes } = doc
 
@@ -79,10 +79,8 @@ const PreviewSizes: React.FC<{
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
   const generateImageUrl = (doc) => {
+    if (!doc.filename) return null
     if (doc.url) return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
-    return `${staticURL}/${staticDir ? `${staticDir}/` : ''}${doc.filename}${
-      imageCacheTag ? `?${imageCacheTag}` : ''
-    }`
   }
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
@@ -130,6 +128,7 @@ const PreviewSizes: React.FC<{
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
             const previewSrc = generateImageUrl(val)
+            console.log(previewSrc)
 
             if (previewSrc) {
               return (
