@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { useConfig } from '../../utilities/Config'
-import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+import { SanitizedConfig } from 'payload/config'
 
 const css = `
   .graphic-logo path {
@@ -31,7 +31,11 @@ const PayloadLogo: React.FC = () => (
   </svg>
 )
 
-const Logo: React.FC = () => {
+export const Logo: React.FC<{
+  config: SanitizedConfig
+}> = (props) => {
+  const { config } = props
+
   const {
     admin: {
       components: {
@@ -40,9 +44,7 @@ const Logo: React.FC = () => {
         },
       } = {},
     } = {},
-  } = useConfig()
+  } = config
 
   return <RenderCustomComponent CustomComponent={CustomLogo} DefaultComponent={PayloadLogo} />
 }
-
-export default Logo

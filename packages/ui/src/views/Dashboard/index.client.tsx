@@ -1,9 +1,8 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { EntityToGroup, Group } from '../../utilities/groupNavItems'
-import type { Props } from './types'
+import type { Group } from '../../utilities/groupNavItems'
 
 import { getTranslation } from 'payload/utilities'
 import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
@@ -11,30 +10,26 @@ import { Button } from '../../elements/Button'
 import { Card } from '../../elements/Card'
 import { Gutter } from '../../elements/Gutter'
 import './index.scss'
-import { ClientConfig } from 'payload/config'
 import { useAuth } from '../../providers/Auth'
+import { useConfig } from '../../providers/Config'
 
 const baseClass = 'dashboard'
 
-export const DefaultDashboardClient: React.FC<
-  Omit<Props, 'config'> & {
-    config: ClientConfig
-  }
-> = (props) => {
+export const DefaultDashboardClient: React.FC = () => {
+  const config = useConfig()
   const {
-    config,
-    config: {
-      routes: { admin },
-    },
-  } = props
+    collections: collectionsConfig,
+    globals: globalsConfig,
+    routes: { admin },
+  } = config
 
   const { permissions, user } = useAuth()
 
-  const collections = config.collections.filter(
+  const collections = collectionsConfig.filter(
     (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
   )
 
-  const globals = config.globals.filter(
+  const globals = globalsConfig.filter(
     (global) => permissions?.globals?.[global.slug]?.read?.permission,
   )
 

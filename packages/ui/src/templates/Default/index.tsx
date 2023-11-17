@@ -11,12 +11,12 @@ import { NavToggler } from '../../elements/Nav/NavToggler'
 import { useNav } from '../../elements/Nav/context'
 import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
-import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import './index.scss'
 
 const baseClass = 'template-default'
 
-const Default: React.FC<
+export const Default: React.FC<
   Props & { collection?: SanitizedCollectionConfig; global?: SanitizedGlobalConfig }
 > = ({ children, className }) => {
   const {
@@ -57,5 +57,3 @@ const Default: React.FC<
     </Fragment>
   )
 }
-
-export default Default

@@ -20,6 +20,11 @@
       "import": "./src/routes/*.ts",
       "require": "./src/routes/*.ts",
       "types": "./src/routes/*.ts"
+    },
+    "./layouts/*": {
+      "import": "./src/layouts/*.ts",
+      "require": "./src/layouts/*.ts",
+      "types": "./src/layouts/*.ts"
     }
   },
   "devDependencies": {
@@ -28,7 +33,8 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.0.0"
+    "payload": "^2.0.0",
+    "next": "^14.0.0"
   },
   "publishConfig": {
     "exports": {

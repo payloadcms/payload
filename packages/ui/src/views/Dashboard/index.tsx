@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
-
-import type { Props } from './types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { Gutter } from '../../elements/Gutter'
 import './index.scss'
@@ -9,14 +8,15 @@ import { useActions } from '../../utilities/ActionsProvider'
 
 const baseClass = 'dashboard'
 
-export const DefaultDashboard: React.FC<Props> = (props) => {
+export const DefaultDashboard: React.FC<{
+  config: SanitizedConfig
+}> = (props) => {
   const {
     config: {
       admin: {
         components: { afterDashboard, beforeDashboard },
       },
     },
-    clientConfig,
   } = props
 
   const { setViewActions } = useActions()
@@ -30,7 +30,7 @@ export const DefaultDashboard: React.FC<Props> = (props) => {
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) &&
           beforeDashboard.map((Component, i) => <Component key={i} />)}
-        <DefaultDashboardClient {...props} config={clientConfig} />
+        <DefaultDashboardClient />
         {Array.isArray(afterDashboard) &&
           afterDashboard.map((Component, i) => <Component key={i} />)}
       </Gutter>
