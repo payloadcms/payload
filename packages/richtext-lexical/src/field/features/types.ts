@@ -91,6 +91,11 @@ export type Feature = {
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        position: 'top' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
         Component: React.FC<{ anchorElem: HTMLElement }>
         position: 'bottom' // Determines at which position the Component will be added.
       }
@@ -187,7 +192,19 @@ export type SanitizedFeatures = Required<
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
         Component: React.FC
         key: string
+        position: 'bottom' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        key: string
         position: 'normal' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        key: string
+        position: 'top' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -195,12 +212,6 @@ export type SanitizedFeatures = Required<
         desktopOnly?: boolean
         key: string
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        key: string
-        position: 'bottom' // Determines at which position the Component will be added.
       }
   >
   /**  The node types mapped to their populationPromises */
