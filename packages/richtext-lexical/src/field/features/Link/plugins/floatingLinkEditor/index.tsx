@@ -9,16 +9,10 @@ import './index.scss'
 
 export const FloatingLinkEditorPlugin: React.FC<
   {
-    anchorElem?: HTMLElement
+    anchorElem: HTMLElement
   } & LinkFeatureProps
-> = ({ anchorElem = document.body, disabledCollections, enabledCollections, fields }) => {
-  return createPortal(
-    <LinkEditor
-      anchorElem={anchorElem}
-      disabledCollections={disabledCollections}
-      enabledCollections={enabledCollections}
-      fields={fields}
-    />,
-    anchorElem,
-  )
+> = (props) => {
+  const { anchorElem = document.body } = props
+
+  return createPortal(<LinkEditor {...props} anchorElem={anchorElem} />, anchorElem)
 }

@@ -25,20 +25,38 @@ import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/Lin
 import { LinkPlugin } from './plugins/link'
 import { linkPopulationPromiseHOC } from './populationPromise'
 
-export type LinkFeatureProps = {
+type ExclusiveLinkCollectionsProps =
+  | {
+      /**
+       * The collections that should be disabled for internal linking. Overrides the `enableRichTextLink` property in the collection config.
+       * When this property is set, `enabledCollections` will not be available.
+       **/
+      disabledCollections: string[]
+
+      // Ensures that enabledCollections is not available when disabledCollections is set
+      enabledCollections?: never
+    }
+  | {
+      // Ensures that disabledCollections is not available when enabledCollections is set
+      disabledCollections?: never
+
+      /**
+       * The collections that should be enabled for internal linking. Overrides the `enableRichTextLink` property in the collection config
+       * When this property is set, `disabledCollections` will not be available.
+       **/
+      enabledCollections: string[]
+    }
+
+export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
   /**
-   * The collections that should be disabled for internal linking. Overrides the `enableRichTextLink` property in the collection config.
-   * This property is ignored if `enabledCollections` is set.
-   **/
-  disabledCollections?: false | string[]
-  /**
-   * The collections that should be enabled for internal linking. Overrides the `enableRichTextLink` property in the collection config
-   **/
-  enabledCollections?: false | string[]
+   * A function or array defining additional fields for the link feature. These will be
+   * displayed in the link editor drawer.
+   */
   fields?:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
     | Field[]
 }
+
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
   return {
     feature: () => {
