@@ -1,5 +1,6 @@
 import type { Config } from 'payload/config'
 import type { Field } from 'payload/types'
+import type { RadioField, TextField } from 'payload/types'
 
 import { extractTranslations } from 'payload/utilities'
 
@@ -73,18 +74,17 @@ export const getBaseFields = (
           required: true,
           type: 'text',
         },
-      ],
+      ] as Field[],
       type: 'group',
     },
   ]
 
   if (enabledRelations?.length) {
-    baseFields[1].fields[0].options.push({
+    ;(baseFields[1].fields[0] as RadioField).options.push({
       label: translations['fields:internalLink'],
       value: 'internal',
     })
-
-    baseFields[1].fields[1].admin = {
+    ;(baseFields[1].fields[1] as TextField).admin = {
       condition: ({ fields }) => fields?.linkType !== 'internal',
     }
 
