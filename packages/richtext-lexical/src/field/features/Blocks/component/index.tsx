@@ -94,6 +94,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
         ...stateFromSchema,
       }
 
+      // We need to delete consolidatedInitialState[blockFieldWrapperName] - it's an unnecessary property.
+      // It causes issues when we later use reduceFieldsToValues in the FormSavePlugin, because that may
+      // cause some sub-fields to "use" the wrong value from the blockFieldWrapperName property (which shouldn't be there)
+      // This fixes the 'should respect row removal in nested array field' fields lexical e2e test
+      delete consolidatedInitialState[blockFieldWrapperName]
+
       setInitialState(consolidatedInitialState)
     }
     void createInitialState()
