@@ -490,7 +490,7 @@ describe('lexical', () => {
 
       await saveDocAndAssert(page)
 
-      const lexicalDoc: RichTextField = (
+      const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
@@ -503,8 +503,8 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const radio1: SerializedBlockNode = lexicalField.root.children[7]
-      const radio2: SerializedBlockNode = lexicalField.root.children[8]
+      const radio1: SerializedBlockNode = lexicalField.root.children[7] as SerializedBlockNode
+      const radio2: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
 
       expect(radio1.fields.radioButtons).toBe('option2')
       expect(radio2.fields.radioButtons).toBe('option3')
@@ -555,6 +555,65 @@ describe('lexical', () => {
        * This checks that this does not happen, and that it writes the text in the correct position (so, in nestedEditorParagraph, NOT in parentEditorParagraph)
        */
       await expect(nestedEditorParagraph).toHaveText('Some text below relationship node 12345')
+    })
+
+    test('should respect row removal in nested array field', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(6)
+
+      await conditionalArrayBlock.scrollIntoViewIfNeeded()
+      await expect(conditionalArrayBlock).toBeVisible()
+
+      const selectField = conditionalArrayBlock.locator('.react-select').first()
+      await selectField.click()
+
+      const selectFieldMenu = selectField.locator('.rs__menu').first()
+      await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
+
+      await conditionalArrayBlock.getByText('Add Column').click()
+
+      await conditionalArrayBlock
+        .locator('.array-field__draggable-rows')
+        .first()
+        .locator('.array-field__row')
+        .nth(1)
+        .locator('.input-wrapper input')
+        .first()
+        .fill('second text')
+
+      await saveDocAndAssert(page)
+
+      await selectField.click()
+      await selectFieldMenu.locator('.rs__option').nth(0).click() // Select "1" (1 columns / array fields)
+
+      // Remove 2nd column
+      await conditionalArrayBlock
+        .locator('.array-field__draggable-rows')
+        .first()
+        .locator('.array-field__row')
+        .nth(1)
+        .locator('.array-actions__button')
+        .first()
+        .click()
+
+      await conditionalArrayBlock
+        .locator('.array-field__draggable-rows')
+        .first()
+        .locator('.array-field__row')
+        .nth(1)
+        .locator('.popup__content')
+        .first()
+        .locator('Button')
+        .nth(1)
+        .click()
+
+      await saveDocAndAssert(page)
+      // This can be triggered if the 2nd row's data is not actually deleted (<= this is the bug), as the validation expects just one row
+      await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
     })
   })
 })
