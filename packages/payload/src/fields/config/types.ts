@@ -100,6 +100,10 @@ type Admin = {
     Field?: React.ComponentType<any>
     Filter?: React.ComponentType<any>
   }
+  /**
+   * You can programmatically show / hide fields based on what other fields are doing.
+   * This is also run on the server, to determine if the field should be validated.
+   */
   condition?: Condition
   description?: Description
   disableBulkEdit?: boolean
