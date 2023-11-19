@@ -1,7 +1,11 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
+import { extractTranslations } from '../../../packages/payload/src/translations/extractTranslations'
+import { statuses } from '../../../packages/payload/src/versions/baseFields'
 import { CustomPublishButton } from '../elements/CustomSaveButton'
 import { draftCollectionSlug } from '../slugs'
+
+const labels = extractTranslations(['version:draft', 'version:published', 'version:status'])
 
 const DraftPosts: CollectionConfig = {
   access: {
@@ -43,8 +47,16 @@ const DraftPosts: CollectionConfig = {
       access: {
         update: ({ req }) => req.user.email === 'dev@paylaodcms.com',
       },
-      label: 'status',
-      type: 'text',
+      admin: {
+        components: {
+          Field: () => null,
+        },
+        disableBulkEdit: true,
+      },
+      defaultValue: 'draft',
+      label: labels['version:status'],
+      options: statuses,
+      type: 'select',
     },
     {
       name: 'title',
