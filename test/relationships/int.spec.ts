@@ -196,6 +196,37 @@ describe('Relationships', () => {
           expect(doc?.customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
         })
 
+        it('should allow querying by hasMany relationship field', async () => {
+          const movie = await payload.create({
+            collection: 'movies',
+            data: {
+              name: 'Pulp Fiction',
+            },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie.id],
+            },
+          })
+
+          const query = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                contains: movie.id,
+              },
+            },
+          })
+
+          expect(query.totalDocs).toEqual(1)
+
+          console.log('result', JSON.stringify(query, null, 2))
+        })
+
         it('should validate the format of text id relationships', async () => {
           await expect(async () =>
             createPost({
