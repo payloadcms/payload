@@ -314,7 +314,7 @@ import {
 
 const yourEditorConfig; // <= your editor config here
 
-const headlessEditor = await createHeadlessEditor({
+const headlessEditor = createHeadlessEditor({
   nodes: getEnabledNodes({
     editorConfig: sanitizeEditorConfig(yourEditorConfig),
   }),
