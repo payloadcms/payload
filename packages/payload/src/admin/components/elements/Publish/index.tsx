@@ -32,10 +32,9 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
 
 type Props = {
   CustomComponent?: CustomPublishButtonProps
-  hasPublishPermission?: boolean
 }
 
-export const Publish: React.FC<Props> = ({ CustomComponent, hasPublishPermission }) => {
+export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const { publishedDoc, unpublishedVersions } = useDocumentInfo()
   const { submit } = useForm()
   const modified = useFormModified()
@@ -43,6 +42,8 @@ export const Publish: React.FC<Props> = ({ CustomComponent, hasPublishPermission
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0
   const canPublish = modified || hasNewerVersions || !publishedDoc
+
+  // TODO: call endpoint to set hasPublishPermission
   const DefaultComponent = hasPublishPermission ? DefaultPublishButton : null
 
   const publish = useCallback(() => {

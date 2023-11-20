@@ -1,7 +1,6 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
 import { extractTranslations } from '../../../packages/payload/src/translations/extractTranslations'
-import { statuses } from '../../../packages/payload/src/versions/baseFields'
 import { CustomPublishButton } from '../elements/CustomSaveButton'
 import { draftCollectionSlug } from '../slugs'
 
@@ -42,22 +41,6 @@ const DraftPosts: CollectionConfig = {
     useAsTitle: 'title',
   },
   fields: [
-    {
-      name: '_status',
-      access: {
-        update: ({ req }) => req.user.email === 'dev@paylaodcms.com',
-      },
-      admin: {
-        components: {
-          Field: () => null,
-        },
-        disableBulkEdit: true,
-      },
-      defaultValue: 'draft',
-      label: labels['version:status'],
-      options: statuses,
-      type: 'select',
-    },
     {
       name: 'title',
       label: 'Title',
