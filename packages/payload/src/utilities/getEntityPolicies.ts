@@ -100,7 +100,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
       docBeingAccessed = await getEntityDoc()
     }
-    const accessResult = await access({ id, doc: docBeingAccessed, req })
+
+    const data = req?.body
+
+    const accessResult = await access({ id, data, doc: docBeingAccessed, req })
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
