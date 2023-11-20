@@ -8,11 +8,12 @@
   height: 100vh;
   width: var(--nav-width);
   border-right: 1px solid var(--theme-elevation-100);
-  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+  overflow-x: hidden;
+  opacity: 0;
+  transition: opacity var(--nav-trans-time) ease-in-out;
 
   &--nav-open {
-    transform: translate3d(0, 0, 0);
-    transition: transform var(--nav-trans-time) linear;
+    opacity: 1;
   }
 
   &__header {
@@ -142,7 +143,7 @@
     }
 
     &--nav-open {
-      transition: none;
+      width: 100%;
     }
 
     &__mobile-close {
