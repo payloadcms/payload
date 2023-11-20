@@ -71,45 +71,71 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    // Hidden fields for testing purposes
     {
-      name: 'relationshipPolyHasMany',
+      name: 'relationshipInRichText',
+      type: 'richText',
+    },
+    {
+      name: 'relationshipAsUpload',
+      type: 'upload',
+      relationTo: 'media',
+    },
+    {
+      name: 'relationshipMonoHasOne',
       type: 'relationship',
-      relationTo: ['posts'],
-      hasMany: true,
-      admin: {
-        hidden: true,
-      },
+      relationTo: 'posts',
     },
     {
       name: 'relationshipMonoHasMany',
       type: 'relationship',
       relationTo: 'posts',
       hasMany: true,
-      admin: {
-        hidden: true,
-      },
     },
     {
-      name: 'relationshipMonoHasOne',
+      name: 'relationshipPolyHasOne',
       type: 'relationship',
-      relationTo: 'posts',
-      admin: {
-        hidden: true,
-      },
+      relationTo: ['posts'],
+    },
+    {
+      name: 'relationshipPolyHasMany',
+      type: 'relationship',
+      relationTo: ['posts'],
+      hasMany: true,
     },
     {
       name: 'arrayOfRelationships',
       type: 'array',
-      admin: {
-        hidden: true,
-        disabled: true,
-      },
       fields: [
         {
-          name: 'relationshipWithinArray',
+          name: 'uploadInArray',
+          type: 'upload',
+          relationTo: 'media',
+        },
+        {
+          name: 'richTextInArray',
+          type: 'richText',
+        },
+        {
+          name: 'relationshipInArrayMonoHasOne',
           type: 'relationship',
           relationTo: 'posts',
+        },
+        {
+          name: 'relationshipInArrayMonoHasMany',
+          type: 'relationship',
+          relationTo: 'posts',
+          hasMany: true,
+        },
+        {
+          name: 'relationshipInArrayPolyHasOne',
+          type: 'relationship',
+          relationTo: ['posts'],
+        },
+        {
+          name: 'relationshipInArrayPolyHasMany',
+          type: 'relationship',
+          relationTo: ['posts'],
+          hasMany: true,
         },
       ],
     },

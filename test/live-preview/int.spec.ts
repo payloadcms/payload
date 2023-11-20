@@ -200,6 +200,7 @@ describe('Collections - Live Preview', () => {
         ...initialData,
         relationshipMonoHasOne: testPost.id,
         relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
@@ -207,9 +208,15 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(3)
+    expect(merge1._numberOfRequests).toEqual(4)
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
+
+    expect(merge1.relationshipPolyHasOne).toMatchObject({
+      value: testPost,
+      relationTo: postsSlug,
+    })
+
     expect(merge1.relationshipPolyHasMany).toMatchObject([
       { value: testPost, relationTo: postsSlug },
     ])
@@ -222,6 +229,7 @@ describe('Collections - Live Preview', () => {
         ...merge1,
         relationshipMonoHasOne: null,
         relationshipMonoHasMany: [],
+        relationshipPolyHasOne: null,
         relationshipPolyHasMany: [],
       },
       initialData,
@@ -232,9 +240,11 @@ describe('Collections - Live Preview', () => {
     expect(merge2._numberOfRequests).toEqual(0)
     expect(merge2.relationshipMonoHasOne).toBeFalsy()
     expect(merge2.relationshipMonoHasMany).toEqual([])
+    expect(merge2.relationshipPolyHasOne).toBeFalsy()
     expect(merge2.relationshipPolyHasMany).toEqual([])
 
     // Now populate the relationships again
+    // This will ensure that the first merge wasn't just initial state
     const merge3 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
@@ -242,6 +252,7 @@ describe('Collections - Live Preview', () => {
         ...merge2,
         relationshipMonoHasOne: testPost.id,
         relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
@@ -249,9 +260,12 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge3._numberOfRequests).toEqual(3)
+    expect(merge3._numberOfRequests).toEqual(4)
     expect(merge3.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge3.relationshipMonoHasMany).toMatchObject([testPost])
+
+    expect(merge3.relationshipPolyHasOne).toMatchObject({ value: testPost, relationTo: postsSlug })
+
     expect(merge3.relationshipPolyHasMany).toMatchObject([
       { value: testPost, relationTo: postsSlug },
     ])
@@ -270,7 +284,18 @@ describe('Collections - Live Preview', () => {
         arrayOfRelationships: [
           {
             id: '123',
-            relationshipWithinArray: testPost.id,
+            relationshipInArrayMonoHasOne: testPost.id,
+            relationshipInArrayMonoHasMany: [testPost.id],
+            relationshipInArrayPolyHasOne: {
+              value: testPost.id,
+              relationTo: postsSlug,
+            },
+            relationshipInArrayPolyHasMany: [
+              {
+                value: testPost.id,
+                relationTo: postsSlug,
+              },
+            ],
           },
         ],
       },
@@ -279,12 +304,23 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1._numberOfRequests).toEqual(4)
     expect(merge1.arrayOfRelationships).toHaveLength(1)
     expect(merge1.arrayOfRelationships).toMatchObject([
       {
         id: '123',
-        relationshipWithinArray: testPost,
+        relationshipInArrayMonoHasOne: testPost,
+        relationshipInArrayMonoHasMany: [testPost],
+        relationshipInArrayPolyHasOne: {
+          value: testPost,
+          relationTo: postsSlug,
+        },
+        relationshipInArrayPolyHasMany: [
+          {
+            value: testPost,
+            relationTo: postsSlug,
+          },
+        ],
       },
     ])
 
@@ -297,11 +333,25 @@ describe('Collections - Live Preview', () => {
         arrayOfRelationships: [
           {
             id: '456',
-            relationshipWithinArray: undefined,
+            relationshipInArrayMonoHasOne: undefined,
+            relationshipInArrayMonoHasMany: [],
+            relationshipInArrayPolyHasOne: undefined,
+            relationshipInArrayPolyHasMany: [],
           },
           {
             id: '123',
-            relationshipWithinArray: testPost.id,
+            relationshipInArrayMonoHasOne: testPost.id,
+            relationshipInArrayMonoHasMany: [testPost.id],
+            relationshipInArrayPolyHasOne: {
+              value: testPost.id,
+              relationTo: postsSlug,
+            },
+            relationshipInArrayPolyHasMany: [
+              {
+                value: testPost.id,
+                relationTo: postsSlug,
+              },
+            ],
           },
         ],
       },
@@ -310,7 +360,7 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
+    expect(merge2._numberOfRequests).toEqual(4)
     expect(merge2.arrayOfRelationships).toHaveLength(2)
     expect(merge2.arrayOfRelationships).toMatchObject([
       {
@@ -318,7 +368,18 @@ describe('Collections - Live Preview', () => {
       },
       {
         id: '123',
-        relationshipWithinArray: testPost,
+        relationshipInArrayMonoHasOne: testPost,
+        relationshipInArrayMonoHasMany: [testPost],
+        relationshipInArrayPolyHasOne: {
+          value: testPost,
+          relationTo: postsSlug,
+        },
+        relationshipInArrayPolyHasMany: [
+          {
+            value: testPost,
+            relationTo: postsSlug,
+          },
+        ],
       },
     ])
   })

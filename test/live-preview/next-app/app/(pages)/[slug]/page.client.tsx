@@ -6,6 +6,7 @@ import React from 'react'
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import { Hero } from '@/app/_components/Hero'
 import { Blocks } from '@/app/_components/Blocks'
+import { RelationshipsBlock } from '@/app/_blocks/Relationships'
 
 export const PageClient: React.FC<{
   page: PageType
@@ -20,7 +21,14 @@ export const PageClient: React.FC<{
     <React.Fragment>
       <Hero {...data?.hero} />
       <Blocks
-        blocks={data?.layout}
+        blocks={[
+          ...(data?.layout ?? []),
+          {
+            blockType: 'relationships',
+            blockName: 'Relationships',
+            data: data,
+          },
+        ]}
         disableTopPadding={
           !data?.hero || data?.hero?.type === 'none' || data?.hero?.type === 'lowImpact'
         }

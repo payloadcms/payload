@@ -9,6 +9,7 @@ import { RelatedPosts, type RelatedPostsProps } from '../../_blocks/RelatedPosts
 import { toKebabCase } from '../../_utilities/toKebabCase'
 import { BackgroundColor } from '../BackgroundColor'
 import { VerticalPadding, VerticalPaddingOptions } from '../VerticalPadding'
+import { RelationshipsBlock, RelationshipsBlockProps } from '../../_blocks/Relationships'
 
 const blockComponents = {
   cta: CallToActionBlock,
@@ -16,12 +17,13 @@ const blockComponents = {
   mediaBlock: MediaBlock,
   archive: ArchiveBlock,
   relatedPosts: RelatedPosts,
+  relationships: RelationshipsBlock,
 }
 
 type Block = NonNullable<Page['layout']>[number]
 
 export const Blocks: React.FC<{
-  blocks?: (Block | RelatedPostsProps)[] | null
+  blocks?: (Block | RelatedPostsProps | RelationshipsBlockProps)[] | null
   disableTopPadding?: boolean
 }> = (props) => {
   const { disableTopPadding, blocks } = props
