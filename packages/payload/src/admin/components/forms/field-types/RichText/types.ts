@@ -31,7 +31,7 @@ export type RichTextAdapter<
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
 
-  outputSchema: ({
+  outputSchema?: ({
     field,
     isRequired,
   }: {
