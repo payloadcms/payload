@@ -235,6 +235,31 @@ export function generateLexicalRichText() {
           type: 'paragraph',
           version: 1,
         },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '65588bfa80fb5a147a378e74',
+            blockName: '',
+            blockType: 'conditionalLayout',
+            layout: '1',
+            columns: [
+              {
+                id: '65588bfb80fb5a147a378e75',
+                text: 'text in conditionalLayout block',
+              },
+            ],
+          },
+        }, // Do not remove this blocks node. It ensures that validation passes when it's created
+        {
+          children: [],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
       ],
       direction: 'ltr',
     },
