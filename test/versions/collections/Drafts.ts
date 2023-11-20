@@ -1,7 +1,10 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
+import { extractTranslations } from '../../../packages/payload/src/translations/extractTranslations'
 import { CustomPublishButton } from '../elements/CustomSaveButton'
 import { draftCollectionSlug } from '../slugs'
+
+const labels = extractTranslations(['version:draft', 'version:published', 'version:status'])
 
 const DraftPosts: CollectionConfig = {
   access: {
