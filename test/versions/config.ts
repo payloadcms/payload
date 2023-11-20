@@ -7,17 +7,11 @@ import DraftPosts from './collections/Drafts'
 import Posts from './collections/Posts'
 import VersionPosts from './collections/Versions'
 import AutosaveGlobal from './globals/Autosave'
+import DisablePublishGlobal from './globals/DisablePublish'
 import DraftGlobal from './globals/Draft'
 import { clearAndSeedEverything } from './seed'
 
 export default buildConfigWithDefaults({
-  collections: [DisablePublish, Posts, AutosavePosts, DraftPosts, VersionPosts],
-  globals: [AutosaveGlobal, DraftGlobal],
-  indexSortableFields: true,
-  localization: {
-    defaultLocale: 'en',
-    locales: ['en', 'es'],
-  },
   admin: {
     webpack: (config) => ({
       ...config,
@@ -29,6 +23,13 @@ export default buildConfigWithDefaults({
         },
       },
     }),
+  },
+  collections: [DisablePublish, Posts, AutosavePosts, DraftPosts, VersionPosts],
+  globals: [AutosaveGlobal, DraftGlobal, DisablePublishGlobal],
+  indexSortableFields: true,
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
   },
   onInit: async (payload) => {
     await clearAndSeedEverything(payload)

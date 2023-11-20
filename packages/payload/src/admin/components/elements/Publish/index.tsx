@@ -2,7 +2,7 @@ import qs from 'qs'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useAllFormFields, useForm, useFormModified } from '../../forms/Form/context'
+import { useForm, useFormModified } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
