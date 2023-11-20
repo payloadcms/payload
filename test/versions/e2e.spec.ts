@@ -354,13 +354,13 @@ describe('versions', () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
 
-      await expect(page.locator('#action-save')).toBeEmpty()
+      await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
     test('should hide publish when access control prevents create operation', async () => {
       await page.goto(disablePublishURL.create)
 
-      await expect(page.locator('#action-save')).toBeEmpty()
+      await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
     test('should hide publish when access control prevents update operation', async () => {
@@ -375,7 +375,7 @@ describe('versions', () => {
 
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
-      await expect(page.locator('#action-save')).toBeEmpty()
+      await expect(page.locator('#action-save')).not.toBeAttached()
     })
   })
 })
