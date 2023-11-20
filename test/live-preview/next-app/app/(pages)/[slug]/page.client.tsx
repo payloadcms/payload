@@ -1,7 +1,7 @@
 'use client'
 
 import { Page as PageType } from '@/payload-types'
-import { useLivePreview } from '../../../../../../packages/live-preview-react'
+import { useLivePreview } from '../../../../../../packages/live-preview-react/src'
 import React from 'react'
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import { Hero } from '@/app/_components/Hero'

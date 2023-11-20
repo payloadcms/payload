@@ -18,8 +18,10 @@ const blockComponents = {
   relatedPosts: RelatedPosts,
 }
 
+type Block = NonNullable<Page['layout']>[number]
+
 export const Blocks: React.FC<{
-  blocks?: (Page['layout'][0] | RelatedPostsProps)[]
+  blocks?: (Block | RelatedPostsProps)[] | null
   disableTopPadding?: boolean
 }> = (props) => {
   const { disableTopPadding, blocks } = props
