@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/payloadcms/payload/compare/v2.2.0...v2.2.1) (2023-11-21)
+
+
+### Bug Fixes
+
+* make outputSchema optional on richtext config ([#4230](https://github.com/payloadcms/payload/issues/4230)) ([3a784a0](https://github.com/payloadcms/payload/commit/3a784a06cc6c42c96b8d6cf023d942e6661be7b5))
+
 ## [2.2.0](https://github.com/payloadcms/payload/compare/v2.1.1...v2.2.0) (2023-11-20)
 
 
