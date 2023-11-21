@@ -23,14 +23,20 @@ const baseClass = 'where-builder'
 const reduceFields = (fields, i18n) =>
   flattenTopLevelFields(fields).reduce((reduced, field) => {
     if (typeof fieldTypes[field.type] === 'object') {
+      const operatorKeys = new Set()
+      const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
+        if (!operatorKeys.has(operator.value)) {
+          operatorKeys.add(operator.value)
+          return [...acc, operator]
+        }
+        return acc
+      }, [])
+
       const formattedField = {
         label: getTranslation(field.label || field.name, i18n),
         value: field.name,
         ...fieldTypes[field.type],
-        operators: fieldTypes[field.type].operators.map((operator) => ({
-          ...operator,
-          label: i18n.t(`operators:${operator.label}`),
-        })),
+        operators,
         props: {
           ...field,
         },
