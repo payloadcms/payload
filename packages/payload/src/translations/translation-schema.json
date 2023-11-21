@@ -268,6 +268,12 @@
         "loadingDocument": {
           "type": "string"
         },
+        "localesNotSaved_one": {
+          "type": "string"
+        },
+        "localesNotSaved_other": {
+          "type": "string"
+        },
         "missingEmail": {
           "type": "string"
         },
@@ -348,6 +354,8 @@
         "invalidFileType",
         "invalidFileTypeValue",
         "loadingDocument",
+        "localesNotSaved_one",
+        "localesNotSaved_other",
         "missingEmail",
         "missingIDOfDocument",
         "missingIDOfVersion",

@@ -14,7 +14,12 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { englishTitle, localizedPostsSlug, spanishLocale } from './shared'
+import {
+  englishTitle,
+  localizedPostsSlug,
+  spanishLocale,
+  withRequiredLocalizedFields,
+} from './shared'
 
 /**
  * TODO: Localization
@@ -27,6 +32,7 @@ import { englishTitle, localizedPostsSlug, spanishLocale } from './shared'
 
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
+let urlWithRequiredLocalizedFields: AdminUrlUtil
 
 const defaultLocale = 'en'
 const title = 'english title'
@@ -46,6 +52,7 @@ describe('Localization', () => {
     })
 
     url = new AdminUrlUtil(serverURL, localizedPostsSlug)
+    urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -57,7 +64,7 @@ describe('Localization', () => {
     test('create english post, switch to spanish', async () => {
       await page.goto(url.create)
 
-      await fillValues({ title, description })
+      await fillValues({ description, title })
       await saveDocAndAssert(page)
 
       // Change back to English
@@ -67,7 +74,7 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toBeEmpty()
       await expect(page.locator('#field-description')).toHaveValue(description)
 
-      await fillValues({ title: spanishTitle, description })
+      await fillValues({ description, title: spanishTitle })
       await saveDocAndAssert(page)
       await changeLocale(page, defaultLocale)
 
@@ -84,7 +91,7 @@ describe('Localization', () => {
       // Change to Spanish
       await changeLocale(page, newLocale)
 
-      await fillValues({ title: spanishTitle, description })
+      await fillValues({ description, title: spanishTitle })
       await saveDocAndAssert(page)
 
       // Change back to English
@@ -96,7 +103,7 @@ describe('Localization', () => {
 
       // Add English
 
-      await fillValues({ title, description })
+      await fillValues({ description, title })
       await saveDocAndAssert(page)
       await saveDocAndAssert(page)
 
@@ -112,7 +119,7 @@ describe('Localization', () => {
       // Change to Arabic
       await changeLocale(page, newLocale)
 
-      await fillValues({ title: arabicTitle, description })
+      await fillValues({ description, title: arabicTitle })
       await saveDocAndAssert(page)
 
       // Change back to English
@@ -124,7 +131,7 @@ describe('Localization', () => {
 
       // Add English
 
-      await fillValues({ title, description })
+      await fillValues({ description, title })
       await saveDocAndAssert(page)
       await saveDocAndAssert(page)
 
@@ -138,8 +145,8 @@ describe('Localization', () => {
       const localizedPost = await payload.create({
         collection: localizedPostsSlug,
         data: {
-          title: englishTitle,
           localizedCheckbox: true,
+          title: englishTitle,
         },
         locale: defaultLocale,
       })
@@ -147,12 +154,12 @@ describe('Localization', () => {
       const id = localizedPost.id.toString()
 
       await payload.update({
-        collection: localizedPostsSlug,
         id,
-        locale: spanishLocale,
+        collection: localizedPostsSlug,
         data: {
           title: spanishTitle,
         },
+        locale: spanishLocale,
       })
 
       await page.goto(url.edit(id))
@@ -175,7 +182,7 @@ describe('Localization', () => {
     test('should duplicate localized checkbox correctly', async () => {
       await page.goto(url.create)
       await changeLocale(page, defaultLocale)
-      await fillValues({ title: englishTitle, description })
+      await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
 
       await page.locator('#action-save').click()
@@ -198,11 +205,33 @@ describe('Localization', () => {
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-localizedCheckbox')).not.toBeChecked()
     })
+
+    test('should duplicate even if missing some localized data', async () => {
+      // create a localized required doc
+      await page.goto(urlWithRequiredLocalizedFields.create)
+      await changeLocale(page, defaultLocale)
+      await page.locator('#field-title').fill(englishTitle)
+      await page.locator('#field-layout .blocks-field__drawer-toggler').click()
+      await page.locator('button[title="Text"]').click()
+      await page.fill('#field-layout__0__text', 'test')
+      await saveDocAndAssert(page)
+
+      const originalDocURL = page.url()
+      // duplicate
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
+      await page.locator('#action-save').click()
+
+      // verify that the locale did copy
+      await expect(page.locator('#field-title')).toContainText(englishTitle)
+      // expect that the document has a new id
+      expect(page.url()).not.toStrictEqual(originalDocURL)
+    })
   })
 })
 
 async function fillValues(data: Partial<LocalizedPost>) {
-  const { title: titleVal, description: descVal } = data
+  const { description: descVal, title: titleVal } = data
 
   if (titleVal) await page.locator('#field-title').fill(titleVal)
   if (descVal) await page.locator('#field-description').fill(descVal)
