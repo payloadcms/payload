@@ -223,7 +223,7 @@ describe('Localization', () => {
       await page.locator('#action-save').click()
 
       // verify that the locale did copy
-      await expect(page.locator('#field-title')).toContainText(englishTitle)
+      await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       // expect that the document has a new id
       expect(page.url()).not.toStrictEqual(originalDocURL)
     })
