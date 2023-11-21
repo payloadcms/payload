@@ -32,7 +32,7 @@ const resaveChildren =
             collection: collection.slug,
             data: {
               ...child,
-              breadcrumbs: populateBreadcrumbs(req, pluginConfig, collection, child),
+              breadcrumbs: await populateBreadcrumbs(req, pluginConfig, collection, child),
             },
             depth: 0,
             draft: updateAsDraft,
