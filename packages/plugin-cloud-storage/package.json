@@ -10,7 +10,7 @@
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "yarn clean && yarn build",
+    "prepublishOnly": "pnpm clean && pnpm build",
     "test": "echo \"No tests available.\""
   },
   "peerDependencies": {
