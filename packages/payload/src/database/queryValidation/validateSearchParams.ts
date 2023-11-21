@@ -129,10 +129,14 @@ export async function validateSearchParam({
             fieldAccess = fieldAccess[field.name]
           } else {
             segments.forEach((segment, pathIndex) => {
-              if (pathIndex === segments.length - 1) {
-                fieldAccess = fieldAccess[segment]
-              } else {
-                fieldAccess = fieldAccess[segment].fields
+              if (fieldAccess[segment]) {
+                if (pathIndex === segments.length - 1) {
+                  fieldAccess = fieldAccess[segment]
+                } else if ('fields' in fieldAccess[segment]) {
+                  fieldAccess = fieldAccess[segment].fields
+                } else if ('blocks' in fieldAccess[segment]) {
+                  fieldAccess = fieldAccess[segment]
+                }
               }
             })
           }
