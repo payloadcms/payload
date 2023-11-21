@@ -132,10 +132,20 @@ function fieldsToJSONSchema(
           }
 
           case 'richText': {
-            fieldSchema = field.editor.outputSchema({
-              field,
-              isRequired,
-            })
+            if (field.editor.outputSchema) {
+              fieldSchema = field.editor.outputSchema({
+                field,
+                isRequired,
+              })
+            } else {
+              // Maintain backwards compatibility with existing rich text editors
+              fieldSchema = {
+                items: {
+                  type: 'object',
+                },
+                type: withNullableJSONSchemaType('array', isRequired),
+              }
+            }
 
             break
           }

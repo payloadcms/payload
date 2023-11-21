@@ -434,7 +434,7 @@ export const richText = baseField.keys({
       CellComponent: componentSchema.required(),
       FieldComponent: componentSchema.required(),
       afterReadPromise: joi.func().optional(),
-      outputSchema: joi.func().required(),
+      outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })
