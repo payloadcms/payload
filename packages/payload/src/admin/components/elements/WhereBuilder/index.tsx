@@ -27,7 +27,13 @@ const reduceFields = (fields, i18n) =>
       const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
-          return [...acc, operator]
+          return [
+            ...acc,
+            {
+              ...operator,
+              label: i18n.t(`operators:${operator.label}`),
+            },
+          ]
         }
         return acc
       }, [])
