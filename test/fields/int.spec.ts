@@ -8,6 +8,7 @@ import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { isMongoose } from '../helpers/isMongoose'
 import { RESTClient } from '../helpers/rest'
@@ -35,6 +36,7 @@ let graphQLClient: GraphQLClient
 let serverURL: string
 let config: SanitizedConfig
 let token: string
+let user: any
 
 describe('Fields', () => {
   beforeAll(async () => {
@@ -45,6 +47,14 @@ describe('Fields', () => {
     const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
     graphQLClient = new GraphQLClient(graphQLURL)
     token = await client.login()
+
+    user = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
   })
 
   beforeEach(async () => {
@@ -807,6 +817,65 @@ describe('Fields', () => {
       })
 
       expect(result.id).toBeDefined()
+    })
+
+    it('should filter based on nested block fields', async () => {
+      await payload.create({
+        collection: 'block-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text: 'green',
+            },
+          ],
+        },
+      })
+      await payload.create({
+        collection: 'block-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text: 'pink',
+            },
+          ],
+        },
+      })
+      await payload.create({
+        collection: 'block-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text: 'green',
+            },
+          ],
+        },
+      })
+
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        overrideAccess: false,
+        user,
+        where: {
+          and: [
+            {
+              'blocks.text': {
+                equals: 'green',
+              },
+            },
+            {
+              'blocks.blockType': {
+                equals: 'content',
+              },
+            },
+          ],
+        },
+      })
+
+      const { docs } = blockFields
+      expect(docs).toHaveLength(2)
     })
   })
 
