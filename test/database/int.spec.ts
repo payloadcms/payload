@@ -161,18 +161,30 @@ describe('database', () => {
           },
           req,
         })
-
-        try {
-          await payload.create({
+        const promises = [
+          payload.create({
             collection,
             data: {
               throwAfterChange: true,
               title,
             },
             req,
-          })
-        } catch (error: unknown) {
-          // catch error and carry on
+          }),
+          // multiple documents should be able to fail without error
+          payload.create({
+            collection,
+            data: {
+              throwAfterChange: true,
+              title,
+            },
+            req,
+          }),
+        ]
+
+        try {
+          await Promise.all(promises)
+        } catch (e) {
+          // catch errors and carry on
         }
 
         expect(req.transactionID).toBeFalsy()

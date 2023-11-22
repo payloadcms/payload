@@ -151,7 +151,7 @@ export type BeginTransaction = (
   options?: Record<string, unknown>,
 ) => Promise<null | number | string>
 
-export type RollbackTransaction = (id: number | string) => Promise<void>
+export type RollbackTransaction = (id: number | string) => Promise<void> | void
 
 export type CommitTransaction = (id: number | string) => Promise<void>
 
