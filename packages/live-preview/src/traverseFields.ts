@@ -1,6 +1,7 @@
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
 import { promise } from './promise'
+import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
   apiRoute?: string
@@ -26,6 +27,18 @@ export const traverseFields = <T>(args: {
       const fieldName = fieldSchema.name
 
       switch (fieldSchema.type) {
+        case 'richText':
+          result[fieldName] = traverseRichText({
+            apiRoute,
+            depth,
+            incomingData: incomingData[fieldName],
+            populationPromises,
+            result: result[fieldName],
+            serverURL,
+          })
+
+          break
+
         case 'array':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingRow, i) => {
@@ -50,6 +63,7 @@ export const traverseFields = <T>(args: {
               return result[fieldName][i]
             })
           }
+
           break
 
         case 'blocks':

@@ -21,88 +21,124 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
         <p>
           This block is for testing purposes only. It renders every possible type of relationship.
         </p>
-        <p>Upload:</p>
-        {data?.relationshipAsUpload && (
+        <p>
+          <b>Rich Text:</b>
+        </p>
+        {data?.relationshipInRichText && <RichText content={data.relationshipInRichText} />}
+        <p>
+          <b>Upload:</b>
+        </p>
+        {data?.relationshipAsUpload ? (
           <div>
             {typeof data?.relationshipAsUpload === 'string'
               ? data?.relationshipAsUpload
               : data?.relationshipAsUpload.filename}
           </div>
+        ) : (
+          <div>None</div>
         )}
-        <p>Rich Text:</p>
-        {data?.relationshipInRichText && <RichText content={data.relationshipInRichText} />}
-        <p>Monomorphic Has One:</p>
-        {data?.relationshipMonoHasOne && (
+        <p>
+          <b>Monomorphic Has One:</b>
+        </p>
+        {data?.relationshipMonoHasOne ? (
           <div>
             {typeof data?.relationshipMonoHasOne === 'string'
               ? data?.relationshipMonoHasOne
               : data?.relationshipMonoHasOne.title}
           </div>
+        ) : (
+          <div>None</div>
         )}
-        <p>Monomorphic Has Many:</p>
-        {data?.relationshipMonoHasMany?.map(
-          (item, index) =>
-            item && <div key={index}>{typeof item === 'string' ? item : item.title}</div>,
+        <p>
+          <b>Monomorphic Has Many:</b>
+        </p>
+        {data?.relationshipMonoHasMany?.map((item, index) =>
+          item ? <div key={index}>{typeof item === 'string' ? item : item.title}</div> : 'null',
         )}
-        <p>Polymorphic Has One:</p>
-        {data?.relationshipPolyHasOne && (
+        <p>
+          <b>Polymorphic Has One:</b>
+        </p>
+        {data?.relationshipPolyHasOne ? (
           <div>
             {typeof data?.relationshipPolyHasOne.value === 'string'
               ? data?.relationshipPolyHasOne.value
               : data?.relationshipPolyHasOne.value.title}
           </div>
+        ) : (
+          <div>None</div>
         )}
-        <p>Polymorphic Has Many:</p>
-        {data?.relationshipPolyHasMany?.map(
-          (item, index) =>
-            item.value && (
-              <div key={index}>
-                {typeof item.value === 'string' ? item.value : item.value.title}
-              </div>
-            ),
+        <p>
+          <b>Polymorphic Has Many:</b>
+        </p>
+        {data?.relationshipPolyHasMany?.map((item, index) =>
+          item.value ? (
+            <div key={index}>{typeof item.value === 'string' ? item.value : item.value.title}</div>
+          ) : (
+            'null'
+          ),
         )}
-        <p>Array of Relationships:</p>
+        <p>
+          <b>Array of Relationships:</b>
+        </p>
         {data?.arrayOfRelationships?.map((item, index) => (
           <div className={classes.array} key={index}>
-            <p>Upload:</p>
-            {item?.uploadInArray && (
+            <p>
+              <b>Rich Text:</b>
+            </p>
+            {item?.richTextInArray && <RichText content={item.richTextInArray} />}
+            <p>
+              <b>Upload:</b>
+            </p>
+            {item?.uploadInArray ? (
               <div>
                 {typeof item?.uploadInArray === 'string'
                   ? item?.uploadInArray
                   : item?.uploadInArray.filename}
               </div>
+            ) : (
+              <div>None</div>
             )}
-            <p>Rich Text:</p>
-            {item?.richTextInArray && <RichText content={item.richTextInArray} />}
-            <p>Monomorphic Has One:</p>
-            {item?.relationshipInArrayMonoHasOne && (
+            <p>
+              <b>Monomorphic Has One:</b>
+            </p>
+            {item?.relationshipInArrayMonoHasOne ? (
               <div>
                 {typeof item?.relationshipInArrayMonoHasOne === 'string'
                   ? item?.relationshipInArrayMonoHasOne
                   : item?.relationshipInArrayMonoHasOne.title}
               </div>
+            ) : (
+              <div>None</div>
             )}
-            <p>Monomorphic Has Many:</p>
-            {item?.relationshipInArrayMonoHasMany?.map(
-              (rel, relIndex) =>
-                rel && <div key={relIndex}>{typeof rel === 'string' ? rel : rel.title}</div>,
+            <p>
+              <b>Monomorphic Has Many:</b>
+            </p>
+            {item?.relationshipInArrayMonoHasMany?.map((rel, relIndex) =>
+              rel ? <div key={relIndex}>{typeof rel === 'string' ? rel : rel.title}</div> : 'null',
             )}
-            <p>Polymorphic Has One:</p>
-            {item?.relationshipInArrayPolyHasOne && (
+            <p>
+              <b>Polymorphic Has One:</b>
+            </p>
+            {item?.relationshipInArrayPolyHasOne ? (
               <div>
                 {typeof item?.relationshipInArrayPolyHasOne.value === 'string'
                   ? item?.relationshipInArrayPolyHasOne.value
                   : item?.relationshipInArrayPolyHasOne.value.title}
               </div>
+            ) : (
+              <div>None</div>
             )}
-            <p>Polymorphic Has Many:</p>
-            {item?.relationshipInArrayPolyHasMany?.map(
-              (rel, relIndex) =>
-                rel.value && (
-                  <div key={relIndex}>
-                    {typeof rel.value === 'string' ? rel.value : rel.value.title}
-                  </div>
-                ),
+            <p>
+              <b>Polymorphic Has Many:</b>
+            </p>
+            {item?.relationshipInArrayPolyHasMany?.map((rel, relIndex) =>
+              rel.value ? (
+                <div key={relIndex}>
+                  {typeof rel.value === 'string' ? rel.value : rel.value.title}
+                </div>
+              ) : (
+                'null'
+              ),
             )}
           </div>
         ))}

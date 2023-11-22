@@ -384,6 +384,127 @@ describe('Collections - Live Preview', () => {
     ])
   })
 
+  it('— relationships - populates within rich text', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Add a relationship
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        relationshipInRichText: [
+          {
+            type: 'paragraph',
+            text: 'Paragraph 1',
+          },
+          {
+            type: 'reference',
+            reference: {
+              relationTo: 'posts',
+              value: testPost.id,
+            },
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationshipInRichText).toHaveLength(2)
+    expect(merge1.relationshipInRichText[1].reference.value).toMatchObject(testPost)
+
+    // Remove the relationship
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        relationshipInRichText: [
+          {
+            type: 'paragraph',
+            text: 'Paragraph 1',
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2._numberOfRequests).toEqual(0)
+    expect(merge2.relationshipInRichText).toHaveLength(1)
+    expect(merge2.relationshipInRichText[0].type).toEqual('paragraph')
+  })
+
+  it('— rich text - merges rich text', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Add a relationship
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        hero: {
+          type: 'lowImpact',
+          richText: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  text: 'Paragraph 1',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(0)
+    expect(merge1.hero.richText).toHaveLength(1)
+    expect(merge1.hero.richText[0].children[0].text).toEqual('Paragraph 1')
+
+    // Update the rich text
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        hero: {
+          type: 'lowImpact',
+          richText: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  text: 'Paragraph 1 (Updated)',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2._numberOfRequests).toEqual(0)
+    expect(merge2.hero.richText).toHaveLength(1)
+    expect(merge2.hero.richText[0].children[0].text).toEqual('Paragraph 1 (Updated)')
+  })
+
   it('— relationships - populates within blocks', async () => {
     const block1 = (shallow?: boolean): Extract<Page['layout'][0], { blockType: 'cta' }> => ({
       blockType: 'cta',

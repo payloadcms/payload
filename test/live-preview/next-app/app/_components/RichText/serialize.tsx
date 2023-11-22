@@ -78,7 +78,9 @@ const serialize = (children?: Children): React.ReactNode[] =>
       case 'relationship':
         return (
           <span key={i}>
-            {node.value && typeof node.value === 'object' ? node.value.title : node.value}
+            {node.value && typeof node.value === 'object'
+              ? node.value.title || node.value.id
+              : node.value}
           </span>
         )
       case 'link':
