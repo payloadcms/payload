@@ -10,6 +10,7 @@ export const extendWebpackConfig = (existingWebpackConfig: WebpackConfig): Webpa
       alias: {
         ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
         '@google-cloud/storage': path.resolve(__dirname, './mock.js'),
+        [path.resolve(__dirname, '../../../gcs.js')]: path.resolve(__dirname, './mock.js'),
       },
       fallback: {
         ...(existingWebpackConfig.resolve?.fallback ? existingWebpackConfig.resolve.fallback : {}),

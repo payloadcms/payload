@@ -10,6 +10,7 @@ export const extendWebpackConfig = (existingWebpackConfig: WebpackConfig): Webpa
       alias: {
         ...(existingWebpackConfig.resolve?.alias ? existingWebpackConfig.resolve.alias : {}),
         '@payloadcms/plugin-cloud-storage/azure': path.resolve(__dirname, './mock.js'),
+        [path.resolve(__dirname, '../../../azure.js')]: path.resolve(__dirname, './mock.js'),
       },
       fallback: {
         ...(existingWebpackConfig.resolve?.fallback ? existingWebpackConfig.resolve.fallback : {}),
