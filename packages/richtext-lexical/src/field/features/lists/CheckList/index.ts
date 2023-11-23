@@ -4,6 +4,7 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist'
+import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { CHECK_LIST } from './markdownTransformers'
 import { LexicalCheckListPlugin } from './plugin'
@@ -14,6 +15,22 @@ export const CheckListFeature = (): FeatureProvider => {
   return {
     feature: ({ featureProviderMap }) => {
       return {
+        floatingSelectToolbar: {
+          sections: [
+            TextDropdownSectionWithEntries([
+              {
+                ChildComponent: ChecklistIcon,
+                isActive: () => false,
+                key: 'checkList',
+                label: `Check List`,
+                onClick: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
+                },
+                order: 12,
+              },
+            ]),
+          ],
+        },
         markdownTransformers: [CHECK_LIST],
         nodes:
           featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
