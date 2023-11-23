@@ -1,6 +1,7 @@
 import type { Transformer } from '@lexical/markdown'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
+import type { LexicalNodeReplacement } from 'lexical'
 import type { SanitizedConfig } from 'payload/config'
 import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
@@ -78,7 +79,7 @@ export type Feature = {
     converters?: {
       html?: HTMLConverter
     }
-    node: Klass<LexicalNode>
+    node: Klass<LexicalNode> | LexicalNodeReplacement
     populationPromises?: Array<PopulationPromise>
     type: string
     validations?: Array<NodeValidation>
