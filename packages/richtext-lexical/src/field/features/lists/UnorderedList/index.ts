@@ -8,7 +8,7 @@ import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { LexicalListPlugin } from '../plugin'
 import { UNORDERED_LIST } from './markdownTransformer'
 
-export const UnoderedListFeature = (): FeatureProvider => {
+export const UnorderedListFeature = (): FeatureProvider => {
   return {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
