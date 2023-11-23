@@ -117,11 +117,25 @@ export async function validateSearchParam({
 
         if (versionFields) {
           if (fieldPath === 'parent' || fieldPath === 'version') {
-            fieldAccess = policies[entityType][entitySlug].read.permission
+            fieldAccess = policies[entityType][entitySlug]
           } else if (segments[0] === 'parent' || segments[0] === 'version') {
-            fieldAccess = policies[entityType][entitySlug].read.permission
+            fieldAccess = policies[entityType][entitySlug]
             segments.shift()
+          } else {
+            segments.forEach((segment, pathIndex) => {
+              if (fieldAccess[segment]) {
+                if (pathIndex === segments.length - 1) {
+                  fieldAccess = fieldAccess[segment]
+                } else if ('fields' in fieldAccess[segment]) {
+                  fieldAccess = fieldAccess[segment].fields
+                } else if ('blocks' in fieldAccess[segment]) {
+                  fieldAccess = fieldAccess[segment]
+                }
+              }
+            })
           }
+
+          fieldAccess = fieldAccess.read.permission
         } else {
           fieldAccess = policies[entityType][entitySlug].fields
 
