@@ -4,14 +4,31 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList'
+import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { LexicalListPlugin } from '../plugin'
 import { UNORDERED_LIST } from './markdownTransformer'
 
 export const UnorderedListFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
+        floatingSelectToolbar: {
+          sections: [
+            TextDropdownSectionWithEntries([
+              {
+                ChildComponent: UnorderedListIcon,
+                isActive: () => false,
+                key: 'unorderedList',
+                label: `Unordered List`,
+                onClick: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+                },
+                order: 11,
+              },
+            ]),
+          ],
+        },
         markdownTransformers: [UNORDERED_LIST],
         nodes: [
           {
