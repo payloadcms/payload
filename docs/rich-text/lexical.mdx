@@ -346,7 +346,7 @@ Once you have your headless editor instance, you can use it to convert HTML to L
 ```ts
 import { $generateNodesFromDOM } from '@lexical/html'
 import { $getRoot,$getSelection } from 'lexical'
-import JSDOM from 'jsdom'
+import { JSDOM } from 'jsdom';
 
 headlessEditor.update(() => {
   // In a headless environment you can use a package such as JSDom to parse the HTML string.
