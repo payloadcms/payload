@@ -126,9 +126,13 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (url.startsWith(event.origin)) {
-        const data = JSON.parse(event.data)
+        let data
 
-        if (data.type === 'payload-live-preview' && data.ready) {
+        try {
+          data = JSON.parse(event.data)
+        } catch (e) {}
+
+        if (data && data.type === 'payload-live-preview' && data.ready) {
           setAppIsReady(true)
         }
       }
