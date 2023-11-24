@@ -125,7 +125,7 @@ export const traverseFields = <T>(args: {
         case 'relationship':
           // Handle `hasMany` relationships
           if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {
-            if (!result[fieldName]) {
+            if (!result[fieldName] || !incomingData[fieldName].length) {
               result[fieldName] = []
             }
 

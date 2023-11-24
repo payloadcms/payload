@@ -52,8 +52,20 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
         <p>
           <b>Monomorphic Has Many:</b>
         </p>
-        {data?.relationshipMonoHasMany?.map((item, index) =>
-          item ? <div key={index}>{typeof item === 'string' ? item : item.title}</div> : 'null',
+        {data?.relationshipMonoHasMany ? (
+          <Fragment>
+            {data?.relationshipMonoHasMany.length
+              ? data?.relationshipMonoHasMany?.map((item, index) =>
+                  item ? (
+                    <div key={index}>{typeof item === 'string' ? item : item.title}</div>
+                  ) : (
+                    'null'
+                  ),
+                )
+              : 'None'}
+          </Fragment>
+        ) : (
+          <div>None</div>
         )}
         <p>
           <b>Polymorphic Has One:</b>
@@ -70,12 +82,22 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
         <p>
           <b>Polymorphic Has Many:</b>
         </p>
-        {data?.relationshipPolyHasMany?.map((item, index) =>
-          item.value ? (
-            <div key={index}>{typeof item.value === 'string' ? item.value : item.value.title}</div>
-          ) : (
-            'null'
-          ),
+        {data?.relationshipPolyHasMany ? (
+          <Fragment>
+            {data?.relationshipPolyHasMany.length
+              ? data?.relationshipPolyHasMany?.map((item, index) =>
+                  item.value ? (
+                    <div key={index}>
+                      {typeof item.value === 'string' ? item.value : item.value.title}
+                    </div>
+                  ) : (
+                    'null'
+                  ),
+                )
+              : 'None'}
+          </Fragment>
+        ) : (
+          <div>None</div>
         )}
         <p>
           <b>Array of Relationships:</b>
@@ -113,8 +135,20 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
             <p>
               <b>Monomorphic Has Many:</b>
             </p>
-            {item?.relationshipInArrayMonoHasMany?.map((rel, relIndex) =>
-              rel ? <div key={relIndex}>{typeof rel === 'string' ? rel : rel.title}</div> : 'null',
+            {item?.relationshipInArrayMonoHasMany ? (
+              <Fragment>
+                {item?.relationshipInArrayMonoHasMany.length
+                  ? item?.relationshipInArrayMonoHasMany?.map((rel, relIndex) =>
+                      rel ? (
+                        <div key={relIndex}>{typeof rel === 'string' ? rel : rel.title}</div>
+                      ) : (
+                        'null'
+                      ),
+                    )
+                  : 'None'}
+              </Fragment>
+            ) : (
+              <div>None</div>
             )}
             <p>
               <b>Polymorphic Has One:</b>
@@ -131,14 +165,22 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
             <p>
               <b>Polymorphic Has Many:</b>
             </p>
-            {item?.relationshipInArrayPolyHasMany?.map((rel, relIndex) =>
-              rel.value ? (
-                <div key={relIndex}>
-                  {typeof rel.value === 'string' ? rel.value : rel.value.title}
-                </div>
-              ) : (
-                'null'
-              ),
+            {item?.relationshipInArrayPolyHasMany ? (
+              <Fragment>
+                {item?.relationshipInArrayPolyHasMany.length
+                  ? item?.relationshipInArrayPolyHasMany?.map((rel, relIndex) =>
+                      rel.value ? (
+                        <div key={relIndex}>
+                          {typeof rel.value === 'string' ? rel.value : rel.value.title}
+                        </div>
+                      ) : (
+                        'null'
+                      ),
+                    )
+                  : 'None'}
+              </Fragment>
+            ) : (
+              <div>None</div>
             )}
           </div>
         ))}

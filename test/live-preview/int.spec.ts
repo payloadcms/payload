@@ -220,13 +220,20 @@ describe('Collections - Live Preview', () => {
     expect(merge1.relationshipPolyHasMany).toMatchObject([
       { value: testPost, relationTo: postsSlug },
     ])
+  })
+  it('— relationships - can clear relationships', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      relationshipMonoHasOne: testPost.id,
+      relationshipMonoHasMany: [testPost.id],
+      relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
+      relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+    }
 
-    // Clear relationships
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...merge1,
         relationshipMonoHasOne: null,
         relationshipMonoHasMany: [],
         relationshipPolyHasOne: null,
@@ -242,33 +249,6 @@ describe('Collections - Live Preview', () => {
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasOne).toBeFalsy()
     expect(merge2.relationshipPolyHasMany).toEqual([])
-
-    // Now populate the relationships again
-    // This will ensure that the first merge wasn't just initial state
-    const merge3 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...merge2,
-        relationshipMonoHasOne: testPost.id,
-        relationshipMonoHasMany: [testPost.id],
-        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
-        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-    })
-
-    expect(merge3._numberOfRequests).toEqual(4)
-    expect(merge3.relationshipMonoHasOne).toMatchObject(testPost)
-    expect(merge3.relationshipMonoHasMany).toMatchObject([testPost])
-
-    expect(merge3.relationshipPolyHasOne).toMatchObject({ value: testPost, relationTo: postsSlug })
-
-    expect(merge3.relationshipPolyHasMany).toMatchObject([
-      { value: testPost, relationTo: postsSlug },
-    ])
   })
 
   it('— relationships - populates within arrays', async () => {

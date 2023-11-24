@@ -50,6 +50,79 @@ export const Pages: CollectionConfig = {
             },
           ],
         },
+        {
+          label: 'Test',
+          fields: [
+            {
+              name: 'relationshipInRichText',
+              type: 'richText',
+            },
+            {
+              name: 'relationshipAsUpload',
+              type: 'upload',
+              relationTo: 'media',
+            },
+            {
+              name: 'relationshipMonoHasOne',
+              type: 'relationship',
+              relationTo: 'posts',
+            },
+            {
+              name: 'relationshipMonoHasMany',
+              type: 'relationship',
+              relationTo: 'posts',
+              hasMany: true,
+            },
+            {
+              name: 'relationshipPolyHasOne',
+              type: 'relationship',
+              relationTo: ['posts'],
+            },
+            {
+              name: 'relationshipPolyHasMany',
+              type: 'relationship',
+              relationTo: ['posts'],
+              hasMany: true,
+            },
+            {
+              name: 'arrayOfRelationships',
+              type: 'array',
+              fields: [
+                {
+                  name: 'uploadInArray',
+                  type: 'upload',
+                  relationTo: 'media',
+                },
+                {
+                  name: 'richTextInArray',
+                  type: 'richText',
+                },
+                {
+                  name: 'relationshipInArrayMonoHasOne',
+                  type: 'relationship',
+                  relationTo: 'posts',
+                },
+                {
+                  name: 'relationshipInArrayMonoHasMany',
+                  type: 'relationship',
+                  relationTo: 'posts',
+                  hasMany: true,
+                },
+                {
+                  name: 'relationshipInArrayPolyHasOne',
+                  type: 'relationship',
+                  relationTo: ['posts'],
+                },
+                {
+                  name: 'relationshipInArrayPolyHasMany',
+                  type: 'relationship',
+                  relationTo: ['posts'],
+                  hasMany: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -68,74 +141,6 @@ export const Pages: CollectionConfig = {
           name: 'image',
           type: 'upload',
           relationTo: 'media',
-        },
-      ],
-    },
-    {
-      name: 'relationshipInRichText',
-      type: 'richText',
-    },
-    {
-      name: 'relationshipAsUpload',
-      type: 'upload',
-      relationTo: 'media',
-    },
-    {
-      name: 'relationshipMonoHasOne',
-      type: 'relationship',
-      relationTo: 'posts',
-    },
-    {
-      name: 'relationshipMonoHasMany',
-      type: 'relationship',
-      relationTo: 'posts',
-      hasMany: true,
-    },
-    {
-      name: 'relationshipPolyHasOne',
-      type: 'relationship',
-      relationTo: ['posts'],
-    },
-    {
-      name: 'relationshipPolyHasMany',
-      type: 'relationship',
-      relationTo: ['posts'],
-      hasMany: true,
-    },
-    {
-      name: 'arrayOfRelationships',
-      type: 'array',
-      fields: [
-        {
-          name: 'uploadInArray',
-          type: 'upload',
-          relationTo: 'media',
-        },
-        {
-          name: 'richTextInArray',
-          type: 'richText',
-        },
-        {
-          name: 'relationshipInArrayMonoHasOne',
-          type: 'relationship',
-          relationTo: 'posts',
-        },
-        {
-          name: 'relationshipInArrayMonoHasMany',
-          type: 'relationship',
-          relationTo: 'posts',
-          hasMany: true,
-        },
-        {
-          name: 'relationshipInArrayPolyHasOne',
-          type: 'relationship',
-          relationTo: ['posts'],
-        },
-        {
-          name: 'relationshipInArrayPolyHasMany',
-          type: 'relationship',
-          relationTo: ['posts'],
-          hasMany: true,
         },
       ],
     },
