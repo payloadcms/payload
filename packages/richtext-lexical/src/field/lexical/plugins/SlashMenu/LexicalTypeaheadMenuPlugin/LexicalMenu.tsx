@@ -17,21 +17,16 @@ import {
 } from 'lexical'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
+import type { MenuTextMatch } from '../useMenuTriggerMatch'
 import type { SlashMenuOption } from './types'
 import type { SlashMenuGroup } from './types'
-
-export type MenuTextMatch = {
-  leadOffset: number
-  matchingString: string
-  replaceableString: string
-}
 
 export type MenuResolution = {
   getRect: () => DOMRect
   match?: MenuTextMatch
 }
 
-export const PUNCTUATION = '\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%\'"~=<>_:;'
+const baseClass = 'slash-menu-popup'
 
 export type MenuRenderFn = (
   anchorElementRef: MutableRefObject<HTMLElement | null>,
@@ -98,7 +93,9 @@ function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | null {
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
+  // eslint-disable-next-line react/destructuring-assignment
   const characterOffset = match.replaceableString.length
+  // eslint-disable-next-line react/destructuring-assignment
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {
@@ -234,7 +231,7 @@ export function LexicalMenu({
     (option: SlashMenuOption) => {
       const rootElem = editor.getRootElement()
       if (rootElem !== null) {
-        rootElem.setAttribute('aria-activedescendant', 'typeahead-item-' + option.key)
+        rootElem.setAttribute('aria-activedescendant', `${baseClass}__item-${option.key}`)
         setSelectedOptionKey(option.key)
       }
     },
@@ -471,9 +468,10 @@ export function useMenuAnchorRef(
 
     const menuEle = containerDiv.firstChild as Element
     if (rootElement !== null && resolution !== null) {
-      let { height, left, top, width } = resolution.getRect()
+      const { height, width } = resolution.getRect()
+      let { left, top } = resolution.getRect()
+
       const rawTop = top
-      const rawLeft = left
       top -= anchorElem.getBoundingClientRect().top + window.scrollY
       left -= anchorElem.getBoundingClientRect().left + window.scrollX
       containerDiv.style.left = `${left + window.scrollX}px`
@@ -553,5 +551,3 @@ export function useMenuAnchorRef(
 
   return anchorElementRef
 }
-
-export type TriggerFn = (text: string, editor: LexicalEditor) => MenuTextMatch | null

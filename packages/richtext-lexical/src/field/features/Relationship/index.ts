@@ -30,9 +30,12 @@ export const RelationshipFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Basic',
+              key: 'basic',
               options: [
-                new SlashMenuOption('Relationship', {
+                new SlashMenuOption('relationship', {
                   Icon: RelationshipIcon,
+                  displayName: 'Relationship',
                   keywords: ['relationship', 'relation', 'rel'],
                   onSelect: ({ editor }) => {
                     // dispatch INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND
@@ -42,7 +45,6 @@ export const RelationshipFeature = (): FeatureProvider => {
                   },
                 }),
               ],
-              title: 'Basic',
             },
           ],
         },

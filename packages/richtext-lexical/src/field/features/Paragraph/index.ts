@@ -36,9 +36,12 @@ export const ParagraphFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Basic',
+              key: 'basic',
               options: [
-                new SlashMenuOption('Paragraph', {
+                new SlashMenuOption('paragraph', {
                   Icon: TextIcon,
+                  displayName: 'Paragraph',
                   keywords: ['normal', 'paragraph', 'p', 'text'],
                   onSelect: ({ editor }) => {
                     editor.update(() => {
@@ -50,7 +53,6 @@ export const ParagraphFeature = (): FeatureProvider => {
                   },
                 }),
               ],
-              title: 'Basic',
             },
           ],
         },

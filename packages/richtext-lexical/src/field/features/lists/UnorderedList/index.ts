@@ -56,16 +56,18 @@ export const UnorderedListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Lists',
+              key: 'lists',
               options: [
-                new SlashMenuOption('Unordered List', {
+                new SlashMenuOption('unorderedlist', {
                   Icon: UnorderedListIcon,
+                  displayName: 'Unordered List',
                   keywords: ['unordered list', 'ul'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
                   },
                 }),
               ],
-              title: 'Lists',
             },
           ],
         },
