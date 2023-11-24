@@ -60,16 +60,18 @@ export const OrderedListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Lists',
+              key: 'lists',
               options: [
-                new SlashMenuOption('Ordered List', {
+                new SlashMenuOption('orderedlist', {
                   Icon: OrderedListIcon,
+                  displayName: 'Ordered List',
                   keywords: ['ordered list', 'ol'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
                   },
                 }),
               ],
-              title: 'Lists',
             },
           ],
         },

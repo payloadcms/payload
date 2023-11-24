@@ -66,11 +66,14 @@ export const BlockQuoteFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Basic',
+              key: 'basic',
               options: [
-                new SlashMenuOption(`Blockquote`, {
+                new SlashMenuOption(`blockquote`, {
                   Icon: BlockquoteIcon,
+                  displayName: `Blockquote`,
                   keywords: ['quote', 'blockquote'],
-                  onSelect: ({ editor }) => {
+                  onSelect: () => {
                     const selection = $getSelection()
                     if ($isRangeSelection(selection)) {
                       $setBlocksType(selection, () => $createQuoteNode())
@@ -78,7 +81,6 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                   },
                 }),
               ],
-              title: 'Basic',
             },
           ],
         },

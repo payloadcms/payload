@@ -61,16 +61,18 @@ export const CheckListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Lists',
+              key: 'lists',
               options: [
-                new SlashMenuOption('Check List', {
+                new SlashMenuOption('checklist', {
                   Icon: ChecklistIcon,
+                  displayName: 'Check List',
                   keywords: ['check list', 'check', 'checklist', 'cl'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
                   },
                 }),
               ],
-              title: 'Lists',
             },
           ],
         },
