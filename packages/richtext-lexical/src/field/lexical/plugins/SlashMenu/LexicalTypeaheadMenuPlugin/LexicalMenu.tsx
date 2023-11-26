@@ -40,7 +40,7 @@ export type MenuRenderFn = (
 ) => JSX.Element | ReactPortal | null
 
 const scrollIntoViewIfNeeded = (target: HTMLElement) => {
-  const typeaheadContainerNode = document.getElementById('typeahead-menu')
+  const typeaheadContainerNode = document.getElementById('slash-menu')
   if (!typeaheadContainerNode) return
 
   const typeaheadRect = typeaheadContainerNode.getBoundingClientRect()
@@ -507,15 +507,15 @@ export function useMenuAnchorRef(
         if (className != null) {
           containerDiv.className = className
         }
-        containerDiv.setAttribute('aria-label', 'Typeahead menu')
-        containerDiv.setAttribute('id', 'typeahead-menu')
+        containerDiv.setAttribute('aria-label', 'Slash menu')
+        containerDiv.setAttribute('id', 'slash-menu')
         containerDiv.setAttribute('role', 'listbox')
         containerDiv.style.display = 'block'
         containerDiv.style.position = 'absolute'
         anchorElem.append(containerDiv)
       }
       anchorElementRef.current = containerDiv
-      rootElement.setAttribute('aria-controls', 'typeahead-menu')
+      rootElement.setAttribute('aria-controls', 'slash-menu')
     }
   }, [editor, resolution, className, anchorElem])
 
