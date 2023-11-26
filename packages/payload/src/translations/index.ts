@@ -17,6 +17,8 @@ import nl from './nl.json'
 import pl from './pl.json'
 import pt from './pt.json'
 import ro from './ro.json'
+import rs from './rs.json'
+import rsLatin from './rs-latin.json'
 import ru from './ru.json'
 import sv from './sv.json'
 import th from './th.json'
@@ -45,6 +47,8 @@ export default {
   pl,
   pt,
   ro,
+  rs,
+  rsLatin,
   ru,
   sv,
   th,
