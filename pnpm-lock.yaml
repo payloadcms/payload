@@ -490,6 +490,9 @@ importers:
       to-snake-case:
         specifier: 1.0.0
         version: 1.0.0
+      uuid:
+        specifier: 9.0.0
+        version: 9.0.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
