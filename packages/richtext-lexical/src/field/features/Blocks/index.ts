@@ -51,9 +51,11 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Blocks',
+              key: 'blocks',
               options: [
-                ...props?.blocks?.map((block) => {
-                  return new SlashMenuOption(block.slug, {
+                ...props.blocks.map((block) => {
+                  return new SlashMenuOption('block-' + block.slug, {
                     Icon: BlockIcon,
                     displayName: ({ i18n }) => {
                       return getTranslation(block.labels.singular, i18n)
@@ -69,7 +71,6 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
                   })
                 }),
               ],
-              title: 'Blocks',
             },
           ],
         },

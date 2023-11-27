@@ -1,6 +1,7 @@
 import type { Transformer } from '@lexical/markdown'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
+import type { LexicalNodeReplacement } from 'lexical'
 import type { SanitizedConfig } from 'payload/config'
 import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
@@ -78,7 +79,7 @@ export type Feature = {
     converters?: {
       html?: HTMLConverter
     }
-    node: Klass<LexicalNode>
+    node: Klass<LexicalNode> | LexicalNodeReplacement
     populationPromises?: Array<PopulationPromise>
     type: string
     validations?: Array<NodeValidation>
@@ -88,6 +89,11 @@ export type Feature = {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
         Component: React.FC
         position: 'normal' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        position: 'top' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -187,7 +193,19 @@ export type SanitizedFeatures = Required<
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
         Component: React.FC
         key: string
+        position: 'bottom' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        key: string
         position: 'normal' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        key: string
+        position: 'top' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -195,12 +213,6 @@ export type SanitizedFeatures = Required<
         desktopOnly?: boolean
         key: string
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        key: string
-        position: 'bottom' // Determines at which position the Component will be added.
       }
   >
   /**  The node types mapped to their populationPromises */

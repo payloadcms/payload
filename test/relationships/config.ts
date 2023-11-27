@@ -199,6 +199,39 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      fields: [
+        {
+          name: 'movieReviewer',
+          relationTo: 'users',
+          required: true,
+          type: 'relationship',
+        },
+        {
+          name: 'likes',
+          hasMany: true,
+          relationTo: 'users',
+          type: 'relationship',
+        },
+        {
+          name: 'visibility',
+          options: [
+            {
+              label: 'followers',
+              value: 'followers',
+            },
+            {
+              label: 'public',
+              value: 'public',
+            },
+          ],
+          required: true,
+          type: 'radio',
+        },
+      ],
+
+      slug: 'movieReviews',
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

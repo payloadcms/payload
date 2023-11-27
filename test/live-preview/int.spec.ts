@@ -200,6 +200,7 @@ describe('Collections - Live Preview', () => {
         ...initialData,
         relationshipMonoHasOne: testPost.id,
         relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
@@ -207,21 +208,35 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(3)
+    expect(merge1._numberOfRequests).toEqual(4)
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
+
+    expect(merge1.relationshipPolyHasOne).toMatchObject({
+      value: testPost,
+      relationTo: postsSlug,
+    })
+
     expect(merge1.relationshipPolyHasMany).toMatchObject([
       { value: testPost, relationTo: postsSlug },
     ])
+  })
+  it('— relationships - can clear relationships', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      relationshipMonoHasOne: testPost.id,
+      relationshipMonoHasMany: [testPost.id],
+      relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
+      relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+    }
 
-    // Clear relationships
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
       incomingData: {
-        ...merge1,
         relationshipMonoHasOne: null,
         relationshipMonoHasMany: [],
+        relationshipPolyHasOne: null,
         relationshipPolyHasMany: [],
       },
       initialData,
@@ -232,29 +247,8 @@ describe('Collections - Live Preview', () => {
     expect(merge2._numberOfRequests).toEqual(0)
     expect(merge2.relationshipMonoHasOne).toBeFalsy()
     expect(merge2.relationshipMonoHasMany).toEqual([])
+    expect(merge2.relationshipPolyHasOne).toBeFalsy()
     expect(merge2.relationshipPolyHasMany).toEqual([])
-
-    // Now populate the relationships again
-    const merge3 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...merge2,
-        relationshipMonoHasOne: testPost.id,
-        relationshipMonoHasMany: [testPost.id],
-        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-    })
-
-    expect(merge3._numberOfRequests).toEqual(3)
-    expect(merge3.relationshipMonoHasOne).toMatchObject(testPost)
-    expect(merge3.relationshipMonoHasMany).toMatchObject([testPost])
-    expect(merge3.relationshipPolyHasMany).toMatchObject([
-      { value: testPost, relationTo: postsSlug },
-    ])
   })
 
   it('— relationships - populates within arrays', async () => {
@@ -270,7 +264,18 @@ describe('Collections - Live Preview', () => {
         arrayOfRelationships: [
           {
             id: '123',
-            relationshipWithinArray: testPost.id,
+            relationshipInArrayMonoHasOne: testPost.id,
+            relationshipInArrayMonoHasMany: [testPost.id],
+            relationshipInArrayPolyHasOne: {
+              value: testPost.id,
+              relationTo: postsSlug,
+            },
+            relationshipInArrayPolyHasMany: [
+              {
+                value: testPost.id,
+                relationTo: postsSlug,
+              },
+            ],
           },
         ],
       },
@@ -279,12 +284,23 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1._numberOfRequests).toEqual(4)
     expect(merge1.arrayOfRelationships).toHaveLength(1)
     expect(merge1.arrayOfRelationships).toMatchObject([
       {
         id: '123',
-        relationshipWithinArray: testPost,
+        relationshipInArrayMonoHasOne: testPost,
+        relationshipInArrayMonoHasMany: [testPost],
+        relationshipInArrayPolyHasOne: {
+          value: testPost,
+          relationTo: postsSlug,
+        },
+        relationshipInArrayPolyHasMany: [
+          {
+            value: testPost,
+            relationTo: postsSlug,
+          },
+        ],
       },
     ])
 
@@ -297,11 +313,25 @@ describe('Collections - Live Preview', () => {
         arrayOfRelationships: [
           {
             id: '456',
-            relationshipWithinArray: undefined,
+            relationshipInArrayMonoHasOne: undefined,
+            relationshipInArrayMonoHasMany: [],
+            relationshipInArrayPolyHasOne: undefined,
+            relationshipInArrayPolyHasMany: [],
           },
           {
             id: '123',
-            relationshipWithinArray: testPost.id,
+            relationshipInArrayMonoHasOne: testPost.id,
+            relationshipInArrayMonoHasMany: [testPost.id],
+            relationshipInArrayPolyHasOne: {
+              value: testPost.id,
+              relationTo: postsSlug,
+            },
+            relationshipInArrayPolyHasMany: [
+              {
+                value: testPost.id,
+                relationTo: postsSlug,
+              },
+            ],
           },
         ],
       },
@@ -310,7 +340,7 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge2._numberOfRequests).toEqual(1)
+    expect(merge2._numberOfRequests).toEqual(4)
     expect(merge2.arrayOfRelationships).toHaveLength(2)
     expect(merge2.arrayOfRelationships).toMatchObject([
       {
@@ -318,9 +348,141 @@ describe('Collections - Live Preview', () => {
       },
       {
         id: '123',
-        relationshipWithinArray: testPost,
+        relationshipInArrayMonoHasOne: testPost,
+        relationshipInArrayMonoHasMany: [testPost],
+        relationshipInArrayPolyHasOne: {
+          value: testPost,
+          relationTo: postsSlug,
+        },
+        relationshipInArrayPolyHasMany: [
+          {
+            value: testPost,
+            relationTo: postsSlug,
+          },
+        ],
       },
     ])
+  })
+
+  it('— relationships - populates within rich text', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Add a relationship
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        relationshipInRichText: [
+          {
+            type: 'paragraph',
+            text: 'Paragraph 1',
+          },
+          {
+            type: 'reference',
+            reference: {
+              relationTo: 'posts',
+              value: testPost.id,
+            },
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationshipInRichText).toHaveLength(2)
+    expect(merge1.relationshipInRichText[1].reference.value).toMatchObject(testPost)
+
+    // Remove the relationship
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        relationshipInRichText: [
+          {
+            type: 'paragraph',
+            text: 'Paragraph 1',
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2._numberOfRequests).toEqual(0)
+    expect(merge2.relationshipInRichText).toHaveLength(1)
+    expect(merge2.relationshipInRichText[0].type).toEqual('paragraph')
+  })
+
+  it('— rich text - merges rich text', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Add a relationship
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        hero: {
+          type: 'lowImpact',
+          richText: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  text: 'Paragraph 1',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(0)
+    expect(merge1.hero.richText).toHaveLength(1)
+    expect(merge1.hero.richText[0].children[0].text).toEqual('Paragraph 1')
+
+    // Update the rich text
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        hero: {
+          type: 'lowImpact',
+          richText: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  text: 'Paragraph 1 (Updated)',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2._numberOfRequests).toEqual(0)
+    expect(merge2.hero.richText).toHaveLength(1)
+    expect(merge2.hero.richText[0].children[0].text).toEqual('Paragraph 1 (Updated)')
   })
 
   it('— relationships - populates within blocks', async () => {
