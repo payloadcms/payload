@@ -38,7 +38,6 @@ export const getFields = ({ collection, stripeConfig, syncConfig }: Args): Field
     name: 'docUrl',
     admin: {
       components: {
-        // @ts-ignore
         Field: (args) =>
           LinkToDoc({
             ...args,

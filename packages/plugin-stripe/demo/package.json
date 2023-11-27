@@ -20,7 +20,7 @@
     "@payloadcms/richtext-lexical": "^0.1.16",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^2.0.15",
+    "payload": "^2.2.1",
     "stripe": "^10.10.0"
   },
   "devDependencies": {

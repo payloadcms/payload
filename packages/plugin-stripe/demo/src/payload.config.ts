@@ -13,35 +13,12 @@ import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUp
 import { subscriptionDeleted } from './webhooks/subscriptionDeleted'
 import { syncPriceJSON } from './webhooks/syncPriceJSON'
 
-const mockModulePath = path.resolve(__dirname, './emptyModuleMock.js')
-
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
     user: Users.slug,
     bundler: viteBundler(),
     // bundler: webpackBundler(),
-    // webpack: (config) => {
-    //   const newConfig = {
-    //     ...config,
-    //     resolve: {
-    //       ...config.resolve,
-    //       alias: {
-    //         ...config.resolve.alias,
-    //         payload: path.join(__dirname, '../node_modules/payload'),
-    //         react: path.join(__dirname, '../node_modules/react'),
-    //         'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-    //         [path.resolve(__dirname, '../../src/index')]: path.resolve(
-    //           __dirname,
-    //           '../../src/admin.ts',
-    //         ),
-    //         util: mockModulePath,
-    //       },
-    //     },
-    //   }
-
-    //   return newConfig
-    // },
   },
   collections: [Users, Customers, Products],
   editor: lexicalEditor({}),
