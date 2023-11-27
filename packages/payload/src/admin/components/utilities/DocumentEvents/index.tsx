@@ -2,16 +2,15 @@ import React, { createContext, useContext, useState } from 'react'
 
 import type { UpdatedDocument } from './types'
 
-import { type DocumentEventsContext } from './types'
-
 const Context = createContext({
-  updates: null,
-} as DocumentEventsContext)
+  mostRecentUpdate: null,
+  reportUpdate: (doc: UpdatedDocument) => null, // eslint-disable-line @typescript-eslint/no-unused-vars
+})
 
 export const DocumentEventsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [updates, reportUpdate] = useState<Array<UpdatedDocument>>([])
+  const [mostRecentUpdate, reportUpdate] = useState<UpdatedDocument>(null)
 
-  return <Context.Provider value={{ reportUpdate, updates }}>{children}</Context.Provider>
+  return <Context.Provider value={{ mostRecentUpdate, reportUpdate }}>{children}</Context.Provider>
 }
 
 export const useDocumentEvents = () => useContext(Context)

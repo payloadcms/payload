@@ -44,11 +44,10 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const onSave = useCallback(
     async (json) => {
-      reportUpdate([
-        {
-          relationTo: global.slug,
-        },
-      ])
+      reportUpdate({
+        entitySlug: global.slug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
 
       getVersions()
       getDocPermissions()

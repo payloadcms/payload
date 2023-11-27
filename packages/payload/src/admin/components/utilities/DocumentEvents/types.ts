@@ -1,9 +1,10 @@
 export type UpdatedDocument = {
+  entitySlug: string
   id?: string
-  relationTo: string
+  updatedAt: string
 }
 
 export type DocumentEventsContext = {
+  mostRecentUpdate: UpdatedDocument
   reportUpdate: (updatedDocument: Array<UpdatedDocument>) => void
-  updates: Array<UpdatedDocument>
 }

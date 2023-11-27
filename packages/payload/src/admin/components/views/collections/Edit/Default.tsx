@@ -51,13 +51,11 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
 
   const onSave = useCallback(
     async (json) => {
-      reportUpdate([
-        {
-          id,
-          relationTo: collection.slug,
-        },
-      ])
-
+      reportUpdate({
+        id,
+        entitySlug: collection.slug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
       if (auth && id === user.id) {
         await refreshCookieAsync()
       }
