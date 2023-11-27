@@ -5,7 +5,8 @@ import type { Post } from './payload-types'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
-import configPromise, { pointSlug, slug } from './config'
+import { idToString } from '../helpers/idToString'
+import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config'
 
 const title = 'title'
 
@@ -42,8 +43,7 @@ describe('collections-graphql', () => {
 
     beforeEach(async () => {
       existingDoc = await createPost()
-      existingDocGraphQLID =
-        payload.db.defaultIDType === 'number' ? existingDoc.id : `"${existingDoc.id}"`
+      existingDocGraphQLID = idToString(existingDoc.id, payload)
     })
 
     it('should create', async () => {
@@ -67,7 +67,7 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = await client.request(query, { title })
+      const response = (await client.request(query, { title })) as any
       const doc: Post = response.createPost
 
       expect(doc).toMatchObject({ title })
@@ -102,6 +102,97 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
+    it('should read using multiple queries', async () => {
+      const query = `query {
+          postIDs: Posts {
+            docs {
+              id
+            }
+          }
+          posts: Posts {
+            docs {
+              id
+              title
+            }
+          }
+          singlePost: Post(id: ${existingDocGraphQLID}) {
+            id
+            title
+          }
+      }`
+      const response = await client.request(query)
+      const { postIDs, posts, singlePost } = response
+      expect(postIDs.docs).toBeDefined()
+      expect(posts.docs).toBeDefined()
+      expect(singlePost.id).toBeDefined()
+    })
+
+    it('should commit or rollback multiple mutations independently', async () => {
+      const firstTitle = 'first title'
+      const secondTitle = 'second title'
+      const first = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          errorBeforeChange: true,
+          title: firstTitle,
+        },
+      })
+      const second = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          errorBeforeChange: true,
+          title: secondTitle,
+        },
+      })
+
+      const updated = 'updated title'
+
+      const query = `mutation {
+          createPost(data: {title: "${title}"}) {
+              id
+              title
+            }
+          updateFirst: updateErrorOnHook(id: ${idToString(
+            first.id,
+            payload,
+          )}, data: {title: "${updated}"}) {
+            title
+          }
+          updateSecond: updateErrorOnHook(id: ${idToString(
+            second.id,
+            payload,
+          )}, data: {title: "${updated}"}) {
+            id
+            title
+          }
+      }`
+
+      client.requestConfig.errorPolicy = 'all'
+      const response = await client.request(query)
+      client.requestConfig.errorPolicy = 'none'
+
+      const createdResult = await payload.findByID({
+        id: response.createPost.id,
+        collection: slug,
+      })
+      const updateFirstResult = await payload.findByID({
+        id: first.id,
+        collection: errorOnHookSlug,
+      })
+      const updateSecondResult = await payload.findByID({
+        id: second.id,
+        collection: errorOnHookSlug,
+      })
+
+      expect(response?.createPost.id).toBeDefined()
+      expect(response?.updateFirst).toBeNull()
+      expect(response?.updateSecond).toBeNull()
+
+      expect(createdResult).toMatchObject(response.createPost)
+      expect(updateFirstResult).toMatchObject(first)
+      expect(updateSecondResult).toStrictEqual(second)
+    })
+
     it('should retain payload api', async () => {
       const query = `
         query {
@@ -120,6 +211,18 @@ describe('collections-graphql', () => {
       const res = response.PayloadApiTestTwos
 
       expect(res.docs[0].relation.payloadAPI).toStrictEqual('GraphQL')
+    })
+
+    it('should have access to headers in resolver', async () => {
+      const query = `query {
+        ContentTypes {
+          docs {
+            contentType
+          }
+        }
+      }`
+      const response = await client.request(query)
+      expect(response.ContentTypes?.docs[0]?.contentType).toEqual('application/json')
     })
 
     it('should update existing', async () => {
@@ -676,6 +779,86 @@ describe('collections-graphql', () => {
         expect(totalDocs).toStrictEqual(1)
         expect(docs[0].relationToCustomID.id).toStrictEqual(1)
       })
+
+      it('should query a document with a deleted relationship', async () => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationField: relation.id,
+            title: 'has deleted relation',
+          },
+        })
+
+        await payload.delete({
+          id: relation.id,
+          collection: relationSlug,
+        })
+
+        const query = `query {
+          Posts(where: { title: { equals: "has deleted relation" }}) {
+            docs {
+              id
+              title
+              relationField {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const response = await client.request(query)
+        const { docs } = response.Posts
+
+        expect(docs[0].relationField).toBeFalsy()
+      })
+
+      it('should query a document with a deleted relationship hasMany', async () => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationHasManyField: [relation.id],
+            title: 'has deleted relation hasMany',
+          },
+        })
+
+        await payload.delete({
+          id: relation.id,
+          collection: relationSlug,
+        })
+
+        const query = `query {
+          Posts(where: { title: { equals: "has deleted relation hasMany" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const response = await client.request(query)
+        const { docs } = response.Posts
+
+        expect(docs[0].relationHasManyField).toHaveLength(0)
+      })
     })
   })
 
@@ -685,11 +868,11 @@ describe('collections-graphql', () => {
 
       // language=graphQL
       const query = `query {
-        Posts(where: { title: { exists: true }}) {
-          docs {
-            badFieldName
+          Posts(where: { title: { exists: true }}) {
+              docs {
+                  badFieldName
+              }
           }
-        }
       }`
       await client.request(query).catch((err) => {
         error = err
@@ -702,12 +885,12 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation {
-        createPost(data: {min: 1}) {
-          id
-          min
-          createdAt
-          updatedAt
-        }
+          createPost(data: {min: 1}) {
+              id
+              min
+              createdAt
+              updatedAt
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -722,21 +905,21 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation createTest {
-        test1:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test1:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test2:createUser(data: { email: "test2@test.com", password: "" }) {
-          email
-        }
+          test2:createUser(data: { email: "test2@test.com", password: "" }) {
+              email
+          }
 
-        test3:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test3:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test4:createUser(data: { email: "", password: "test" }) {
-          email
-        }
+          test4:createUser(data: { email: "", password: "test" }) {
+              email
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -775,9 +958,9 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `query {
-        QueryWithInternalError {
-            text
-        }
+          QueryWithInternalError {
+              text
+          }
       }`
 
       await client.request(query).catch((err) => {

@@ -7,9 +7,9 @@ import type { Description } from '../../FieldDescription/types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import ReactSelect from '../../../elements/ReactSelect'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
@@ -29,6 +29,8 @@ export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> &
   style?: React.CSSProperties
   value?: string | string[]
   width?: string
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
 }
 
 const SelectInput: React.FC<SelectInputProps> = (props) => {
@@ -50,9 +52,14 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     style,
     value,
     width,
+    Error,
+    Label,
   } = props
 
   const { i18n } = useTranslation()
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   let valueToRender = defaultValue
 
@@ -89,8 +96,8 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <ReactSelect
         disabled={readOnly}
         isClearable={isClearable}

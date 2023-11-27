@@ -12,9 +12,9 @@ export const documentTabSchema = {
 }
 
 export const customViewSchema = joi.object({
-  Component: componentSchema.required(),
+  Component: componentSchema,
   Tab: joi.alternatives().try(documentTabSchema, componentSchema),
-  path: joi.string().required(),
+  path: joi.string(),
 })
 
 export const livePreviewSchema = {

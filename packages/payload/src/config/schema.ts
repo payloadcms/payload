@@ -97,6 +97,7 @@ export default joi.object({
       CellComponent: component.required(),
       FieldComponent: component.required(),
       afterReadPromise: joi.func().optional(),
+      outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })
@@ -134,7 +135,13 @@ export default joi.object({
         joi.array().items(
           joi.object().keys({
             code: joi.string(),
-            label: joi.string(),
+            label: joi
+              .alternatives()
+              .try(
+                joi.object().pattern(joi.string(), [joi.string()]),
+                joi.string(),
+                joi.valid(false),
+              ),
             rtl: joi.boolean(),
             toString: joi.func(),
           }),

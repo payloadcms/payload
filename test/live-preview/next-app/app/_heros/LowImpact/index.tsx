@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Page } from '../../../payload/payload-types'
+import { Page } from '../../../payload-types'
 import { Gutter } from '../../_components/Gutter'
 import RichText from '../../_components/RichText'
 import { VerticalPadding } from '../../_components/VerticalPadding'

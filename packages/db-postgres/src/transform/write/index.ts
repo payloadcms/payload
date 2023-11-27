@@ -25,6 +25,7 @@ export const transformForWrite = ({
   const rowToInsert: RowToInsert = {
     arrays: {},
     blocks: {},
+    blocksToDelete: new Set(),
     locales: {},
     numbers: [],
     relationships: [],
@@ -40,6 +41,7 @@ export const transformForWrite = ({
     arrays: rowToInsert.arrays,
     baseTableName: tableName,
     blocks: rowToInsert.blocks,
+    blocksToDelete: rowToInsert.blocksToDelete,
     columnPrefix: '',
     data,
     fieldPrefix: '',

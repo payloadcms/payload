@@ -111,7 +111,15 @@ function FloatingSelectToolbar({
       setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem, 'center')
 
       if (caretRef.current) {
-        setFloatingElemPosition(rangeRect, caretRef.current, popupCharStylesEditorElem, 'center')
+        setFloatingElemPosition(
+          rangeRect, // selection to position around
+          caretRef.current, // what to position
+          popupCharStylesEditorElem, // anchor elem
+          'center',
+          10,
+          5,
+          true,
+        )
       }
     }
   }, [editor, anchorElem])
@@ -173,7 +181,12 @@ function FloatingSelectToolbar({
                   key={section.key}
                 >
                   {section.type === 'dropdown' && section.entries.length && (
-                    <ToolbarDropdown Icon={section.ChildComponent} entries={section.entries} />
+                    <ToolbarDropdown
+                      Icon={section.ChildComponent}
+                      anchorElem={anchorElem}
+                      editor={editor}
+                      entries={section.entries}
+                    />
                   )}
                   {section.type === 'buttons' &&
                     section.entries.length &&

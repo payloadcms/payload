@@ -62,9 +62,7 @@ The `parent` relationship field is automatically added to every document which a
 
 #### Breadcrumbs
 
-The `breadcrumbs` field is an array which dynamically populates all parent relationships of a document up to the top level. It does not store any data in the database, and instead, acts as a `virtual` field which is dynamically populated each time the document is loaded.
-
-The `breadcrumbs` array stores the following fields:
+The `breadcrumbs` field is an array which dynamically populates all parent relationships of a document up to the top level and stores the following fields.
 
 - `label`
 

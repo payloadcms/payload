@@ -1,44 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
-export const getBlocksFieldSeedData = (prefix?: string): any => [
-  {
-    blockName: 'First block',
-    blockType: prefix ? `${prefix}Content` : 'content',
-    text: 'first block',
-    richText: [
-      {
-        children: [{ text: '' }],
-      },
-    ],
-  },
-  {
-    blockName: 'Second block',
-    blockType: prefix ? `${prefix}Number` : 'number',
-    number: 342,
-  },
-  {
-    blockName: 'Sub-block demonstration',
-    blockType: prefix ? `${prefix}SubBlocks` : 'subBlocks',
-    subBlocks: [
-      {
-        blockName: 'First sub block',
-        blockType: 'number',
-        number: 123,
-      },
-      {
-        blockName: 'Second sub block',
-        blockType: 'text',
-        text: 'second sub block',
-      },
-    ],
-  },
-  {
-    blockName: 'I18n Block',
-    blockType: 'i18n-text',
-    text: 'first block',
-  },
-]
+import { blockFieldsSlug } from '../../slugs'
+import { AddCustomBlocks } from './components/AddCustomBlocks'
+import { getBlocksFieldSeedData } from './shared'
 
 export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
@@ -147,7 +112,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
 })
 
 const BlockFields: CollectionConfig = {
-  slug: 'block-fields',
+  slug: blockFieldsSlug,
   fields: [
     getBlocksField(),
     {
@@ -210,7 +175,7 @@ const BlockFields: CollectionConfig = {
       name: 'blocksWithSimilarConfigs',
       blocks: [
         {
-          slug: 'block-1',
+          slug: 'block-a',
           fields: [
             {
               type: 'array',
@@ -226,7 +191,7 @@ const BlockFields: CollectionConfig = {
           ],
         },
         {
-          slug: 'block-2',
+          slug: 'block-b',
           fields: [
             {
               type: 'array',
@@ -243,12 +208,56 @@ const BlockFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'blocksWithMinRows',
+      type: 'blocks',
+      minRows: 2,
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'blockTitle',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'customBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block-1',
+          fields: [
+            {
+              name: 'block1Title',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'block-2',
+          fields: [
+            {
+              name: 'block2Title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'ui',
+      name: 'ui',
+      admin: {
+        components: {
+          Field: AddCustomBlocks,
+        },
+      },
+    },
   ],
-}
-
-export const blocksDoc = {
-  blocks: getBlocksFieldSeedData(),
-  localizedBlocks: getBlocksFieldSeedData('localized'),
 }
 
 export default BlockFields

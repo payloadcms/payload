@@ -96,7 +96,7 @@ To swap out any of these views, simply pass in your custom component to the `adm
 }
 ```
 
-For more granular control, pass a configuration object instead. Payload exposes all of the properties of `<Route />` component in [React Router v5](https://v5.reactrouter.com):
+For more granular control, pass a configuration object instead. Each view corresponds to its own `<Route />` component in [React Router v5](https://v5.reactrouter.com). Payload exposes all of the properties of React Router:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -129,13 +129,19 @@ To add a _new_ view to the Admin Panel, simply add another key to the `views` ob
 }
 ```
 
+<Banner type="warning">
+  <strong>Note:</strong>
+  <br />
+  Routes are cascading. This means that unless explicitly given the `exact` property, they will match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all routes in your application. Alternatively, you could define your nested route _before_ your parent route.
+</Banner>
+
 _For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/main/test/admin/components)._
 
 For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component).
 
 ### Collections
 
-You can override components on a collection-by-collection basis via their `admin` property.
+You can override components on a collection-by-collection basis via the `admin.components` property.
 
 | Path                       | Description                                                                                                            |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -259,15 +265,15 @@ You can also add _new_ tabs to the `Edit` view by adding another key to the `com
 
 ### Globals
 
-As with Collections, you can override components on a global-by-global basis via their `admin` property.
+As with Collections, you can override components on a global-by-global basis via the `admin.components` property.
 
-| Path                       | Description                                                                                                            |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **`edit.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
-| **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
-| **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
-| **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
-| **`views`**                | Override or create new views within the Payload Admin UI. [More](#global-views)                                        |
+| Path                           | Description                                                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **`elements.SaveButton`**      | Replace the default `Save` button with a custom component. Drafts must be disabled                                     |
+| **`elements.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
+| **`elements.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
+| **`elements.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
+| **`views`**                    | Override or create new views within the Payload Admin UI. [More](#global-views)                                        |
 
 #### Global views
 
@@ -426,6 +432,15 @@ All Payload fields support the ability to swap in your own React components. So,
 | **`Cell`**   | Used in the `List` view's table to represent a table-based preview of the data stored in the field. [More](#cell-component) |
 | **`Field`**  | Swap out the field itself within all `Edit` views. [More](#field-component)                                                 |
 
+As an alternative to replacing the entire Field component, you may want to keep the majority of the default Field component and only swap components within. This allows you to replace the **`Label`** or **`Error`** within a field component or add additional components inside the field with **`beforeInput`** or **`afterInput`**. **`beforeInput`** and **`afterInput`** are allowed in any fields that don't contain other fields, except [UI](/docs/fields/ui) and [Rich Text](/docs/fields/rich-text).
+
+| Component         | Description                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| **`Label`**       | Override the default Label in the Field Component. [More](#label-component)                                     |
+| **`Error`**       | Override the default Label in the Field Component. [More](#error-component)                                     |
+| **`beforeInput`** | An array of elements that will be added before `input`/`textarea` elements. [More](#afterinput-and-beforeinput) |
+| **`afterInput`**  | An array of elements that will be added after `input`/`textarea` elements. [More](#afterinput-and-beforeinput)  |
+
 ## Cell Component
 
 These are the props that will be passed to your custom Cell to use in your own components.
@@ -480,6 +495,101 @@ const CustomTextField: React.FC<Props> = ({ path }) => {
   For more information regarding the hooks that are available to you while you build custom
   components, including the <strong>useField</strong> hook, [click here](/docs/admin/hooks).
 </Banner>
+
+## Label Component
+
+These are the props that will be passed to your custom Label.
+
+| Property         | Description                                                      |
+| ---------------- | ---------------------------------------------------------------- |
+| **`htmlFor`**    | Property used to set `for` attribute for label.                  |
+| **`label`**      | Label value provided in field, it can be used with i18n.         |
+| **`required`**   | A boolean value that represents if the field is required or not. |
+
+#### Example
+
+```tsx
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { getTranslation } from 'payload/utilities/getTranslation'
+
+type Props = {
+  htmlFor?: string
+  label?: Record<string, string> | false | string
+  required?: boolean
+}
+
+const CustomLabel: React.FC<Props> = (props) => {
+  const { htmlFor, label, required = false } = props
+
+  const { i18n } = useTranslation()
+
+  if (label) {
+    return (<span>
+      {getTranslation(label, i18n)}
+      {required && <span className="required">*</span>}
+    </span>);
+  }
+
+  return null
+}
+```
+
+## Error Component
+
+These are the props that will be passed to your custom Error.
+
+| Property         | Description                                                   |
+| ---------------- | ------------------------------------------------------------- |
+| **`message`**    | The error message.                                            |
+| **`showError`**  | A boolean value that represents if the error should be shown. |
+
+#### Example
+
+```tsx
+import React from 'react'
+
+type Props = {
+  message: string
+  showError?: boolean
+}
+
+const CustomError: React.FC<Props> = (props) => {
+  const { message, showError } = props
+
+  if (showError) {
+    return <p style={{color: 'red'}}>{message}</p>
+  } else return null;
+}
+```
+
+## afterInput and beforeInput
+
+With these properties you can add multiple components before and after the input element. For example, you can add an absolutely positioned button to clear the current field value.
+
+#### Example
+
+```tsx
+import React from 'react'
+import './style.scss'
+
+const ClearButton: React.FC = () => {
+  return <button onClick={() => {/* ... */}}>X</button>
+}
+
+const fieldField: Field = {
+  name: 'title',
+  type: 'text',
+  admin: {
+    components: {
+      afterInput: [ClearButton]
+    }
+  }
+}
+
+export default titleField;
+```
 
 ## Custom providers
 

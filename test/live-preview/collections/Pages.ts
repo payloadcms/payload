@@ -5,8 +5,7 @@ import { CallToAction } from '../blocks/CallToAction'
 import { Content } from '../blocks/Content'
 import { MediaBlock } from '../blocks/MediaBlock'
 import { hero } from '../fields/hero'
-
-export const pagesSlug = 'pages'
+import { pagesSlug } from '../shared'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
@@ -69,6 +68,48 @@ export const Pages: CollectionConfig = {
           name: 'image',
           type: 'upload',
           relationTo: 'media',
+        },
+      ],
+    },
+    // Hidden fields for testing purposes
+    {
+      name: 'relationshipPolyHasMany',
+      type: 'relationship',
+      relationTo: ['posts'],
+      hasMany: true,
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'relationshipMonoHasMany',
+      type: 'relationship',
+      relationTo: 'posts',
+      hasMany: true,
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'relationshipMonoHasOne',
+      type: 'relationship',
+      relationTo: 'posts',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'arrayOfRelationships',
+      type: 'array',
+      admin: {
+        hidden: true,
+        disabled: true,
+      },
+      fields: [
+        {
+          name: 'relationshipWithinArray',
+          type: 'relationship',
+          relationTo: 'posts',
         },
       ],
     },

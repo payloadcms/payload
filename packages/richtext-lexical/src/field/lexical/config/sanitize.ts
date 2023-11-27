@@ -73,7 +73,7 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
     }
 
     if (feature.floatingSelectToolbar?.sections?.length) {
-      for (const section of feature.floatingSelectToolbar?.sections) {
+      for (const section of feature.floatingSelectToolbar.sections) {
         // 1. find the section with the same key or create new one
         let foundSection = sanitized.floatingSelectToolbar.sections.find(
           (sanitizedSection) => sanitizedSection.key === section.key,
@@ -108,7 +108,7 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
       for (const optionGroup of feature.slashMenu.options) {
         // 1. find the group with the same name or create new one
         let group = sanitized.slashMenu.groupsWithOptions.find(
-          (group) => group.title === optionGroup.title,
+          (group) => group.key === optionGroup.key,
         )
         if (!group) {
           group = {
@@ -117,7 +117,7 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
           }
         } else {
           sanitized.slashMenu.groupsWithOptions = sanitized.slashMenu.groupsWithOptions.filter(
-            (group) => group.title !== optionGroup.title,
+            (group) => group.key !== optionGroup.key,
           )
         }
 

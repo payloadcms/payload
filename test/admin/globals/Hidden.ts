@@ -1,7 +1,9 @@
 import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
 
+import { hiddenGlobalSlug } from '../slugs'
+
 export const GlobalHidden: GlobalConfig = {
-  slug: 'hidden-global',
+  slug: hiddenGlobalSlug,
   admin: {
     hidden: () => true,
   },

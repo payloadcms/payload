@@ -20,12 +20,13 @@ export const Textarea: React.FC<
   return (
     <Width width={width}>
       <div className={classes.wrap}>
-        <label htmlFor="name" className={classes.label}>
+        <label htmlFor={name} className={classes.label}>
           {label}
         </label>
         <textarea
           rows={rows}
           className={classes.textarea}
+          id={name}
           {...register(name, { required: requiredFromProps })}
         />
         {requiredFromProps && errors[name] && <Error />}

@@ -29,7 +29,7 @@ export const extendWebpackConfig =
       },
     }
 
-    return Object.entries(options.collections).reduce(
+    const modifiedConfig = Object.entries(options.collections).reduce(
       (resultingWebpackConfig, [slug, collectionOptions]) => {
         const matchedCollection = config.collections?.find((coll) => coll.slug === slug)
 
@@ -47,4 +47,6 @@ export const extendWebpackConfig =
       },
       newConfig,
     )
+
+    return modifiedConfig
   }

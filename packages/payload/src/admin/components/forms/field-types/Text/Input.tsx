@@ -7,13 +7,17 @@ import type { TextField } from '../../../../../fields/config/types'
 import type { Description } from '../../FieldDescription/types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
-import './index.scss'
+import DefaultLabel from '../../Label'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 export type TextInputProps = Omit<TextField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
+  afterInput?: React.ComponentType<any>[]
+  beforeInput?: React.ComponentType<any>[]
   className?: string
   description?: Description
   errorMessage?: string
@@ -33,6 +37,10 @@ export type TextInputProps = Omit<TextField, 'type'> & {
 
 const TextInput: React.FC<TextInputProps> = (props) => {
   const {
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
     description,
     errorMessage,
@@ -53,6 +61,9 @@ const TextInput: React.FC<TextInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
+
   return (
     <div
       className={[fieldBaseClass, 'text', className, showError && 'error', readOnly && 'read-only']
@@ -63,20 +74,24 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-      <input
-        data-rtl={rtl}
-        disabled={readOnly}
-        id={`field-${path.replace(/\./g, '__')}`}
-        name={path}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        placeholder={getTranslation(placeholder, i18n)}
-        ref={inputRef}
-        type="text"
-        value={value || ''}
-      />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <div className="input-wrapper">
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
+        <input
+          data-rtl={rtl}
+          disabled={readOnly}
+          id={`field-${path.replace(/\./g, '__')}`}
+          name={path}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+          placeholder={getTranslation(placeholder, i18n)}
+          ref={inputRef}
+          type="text"
+          value={value || ''}
+        />
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+      </div>
       <FieldDescription
         className={`field-description-${path.replace(/\./g, '__')}`}
         description={description}

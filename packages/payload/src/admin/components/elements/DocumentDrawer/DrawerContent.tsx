@@ -62,7 +62,9 @@ const Content: React.FC<DocumentDrawerProps> = ({
       ? Edit
       : typeof Edit === 'object' && typeof Edit.Default === 'function'
       ? Edit.Default
-      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
+      : typeof Edit?.Default === 'object' &&
+        'Component' in Edit.Default &&
+        typeof Edit.Default.Component === 'function'
       ? Edit.Default.Component
       : undefined
 

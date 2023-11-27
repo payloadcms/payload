@@ -46,12 +46,15 @@ const VersionsView: React.FC<IndexProps> = (props) => {
     // 2. "components.Edit.Versions"
     // 3. "components.Edit.Versions.Component"
     const Edit = collection?.admin?.components?.views?.Edit
+
     CustomVersionsView =
       typeof Edit === 'function'
         ? Edit
         : typeof Edit === 'object' && typeof Edit.Versions === 'function'
         ? Edit.Versions
-        : typeof Edit?.Versions === 'object' && typeof Edit.Versions.Component === 'function'
+        : typeof Edit?.Versions === 'object' &&
+          'Component' in Edit.Versions &&
+          typeof Edit.Versions.Component === 'function'
         ? Edit.Versions.Component
         : undefined
   }
@@ -64,12 +67,15 @@ const VersionsView: React.FC<IndexProps> = (props) => {
 
     // See note above about cascading component definitions
     const Edit = global?.admin?.components?.views?.Edit
+
     CustomVersionsView =
       typeof Edit === 'function'
         ? Edit
         : typeof Edit === 'object' && typeof Edit.Versions === 'function'
         ? Edit.Versions
-        : typeof Edit?.Versions === 'object' && typeof Edit.Versions.Component === 'function'
+        : typeof Edit?.Versions === 'object' &&
+          'Component' in Edit.Versions &&
+          typeof Edit.Versions.Component === 'function'
         ? Edit.Versions.Component
         : undefined
   }

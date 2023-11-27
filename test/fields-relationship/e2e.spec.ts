@@ -13,7 +13,7 @@ import type {
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { openDocControls, saveDocAndAssert } from '../helpers'
+import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -47,6 +47,8 @@ describe('fields - relationship', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
 
   beforeEach(async () => {
@@ -445,7 +447,7 @@ describe('fields - relationship', () => {
       await expect(relationship).toContainText('Untitled - ID: ')
     })
 
-    test('should show useAsTitle on relation in list view', async () => {
+    test('x in list view', async () => {
       await page.goto(url.list)
       await wait(110)
       const relationship = page.locator('.row-1 .cell-relationshipWithTitle')

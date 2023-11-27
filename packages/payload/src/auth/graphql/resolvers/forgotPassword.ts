@@ -1,5 +1,6 @@
 import type { Collection } from '../../../collections/config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import forgotPassword from '../../operations/forgotPassword'
 
 function forgotPasswordResolver(collection: Collection): any {
@@ -11,7 +12,7 @@ function forgotPasswordResolver(collection: Collection): any {
       },
       disableEmail: args.disableEmail,
       expiration: args.expiration,
-      req: context.req,
+      req: isolateTransactionID(context.req),
     }
 
     await forgotPassword(options)

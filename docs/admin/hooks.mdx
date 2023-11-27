@@ -758,3 +758,29 @@ const MyComponent: React.FC = () => {
 ### usePreferences
 
 Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).
+
+### useTableColumns
+
+Returns methods to manipulate table columns
+
+```tsx
+import { useTableColumns } from 'payload/components/hooks'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { setActiveColumns } = useTableColumns()
+
+  const resetColumns = () => {
+    setActiveColumns(['id', 'createdAt', 'updatedAt'])
+  }
+  // highlight-end
+
+  return (
+    <button
+      type="button"
+      onClick={resetColumns}
+    >
+      Reset columns
+    </button>
+  )
+}

@@ -1,11 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { arrayFieldsSlug } from '../../slugs'
 import { ArrayRowLabel } from './LabelComponent'
-import { AddCustomBlocks } from './components/AddCustomBlocks'
 
 export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
-
-export const arrayFieldsSlug = 'array-fields'
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
@@ -128,65 +126,15 @@ const ArrayFields: CollectionConfig = {
       },
     },
     {
-      name: 'customBlocks',
-      type: 'blocks',
-      blocks: [
+      name: 'arrayWithMinRows',
+      type: 'array',
+      minRows: 2,
+      fields: [
         {
-          slug: 'block-1',
-          fields: [
-            {
-              name: 'block1Title',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          slug: 'block-2',
-          fields: [
-            {
-              name: 'block2Title',
-              type: 'text',
-            },
-          ],
+          name: 'text',
+          type: 'text',
         },
       ],
-    },
-    {
-      type: 'ui',
-      name: 'ui',
-      admin: {
-        components: {
-          Field: AddCustomBlocks,
-        },
-      },
-    },
-  ],
-}
-
-export const arrayDoc = {
-  items: [
-    {
-      text: 'first row',
-    },
-    {
-      text: 'second row',
-    },
-    {
-      text: 'third row',
-    },
-    {
-      text: 'fourth row',
-    },
-    {
-      text: 'fifth row',
-    },
-    {
-      text: 'sixth row',
-    },
-  ],
-  collapsedArray: [
-    {
-      text: 'initialize collapsed',
     },
   ],
 }

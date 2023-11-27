@@ -2,6 +2,64 @@ import type { Block } from '../../../../packages/payload/src/fields/config/types
 
 import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
 
+export const BlockColumns: any = {
+  type: 'array',
+  name: 'columns',
+  interfaceName: 'BlockColumns',
+  admin: {
+    initCollapsed: true,
+  },
+  fields: [
+    {
+      name: 'text',
+      type: 'text',
+    },
+  ],
+}
+export const ConditionalLayoutBlock: Block = {
+  fields: [
+    {
+      label: 'Layout',
+      name: 'layout',
+      type: 'select',
+      options: ['1', '2', '3'],
+      defaultValue: '1',
+      required: true,
+    },
+    {
+      ...BlockColumns,
+      admin: {
+        condition: (data, siblingData) => {
+          return ['1'].includes(siblingData.layout)
+        },
+      },
+      minRows: 1,
+      maxRows: 1,
+    },
+    {
+      ...BlockColumns,
+      admin: {
+        condition: (data, siblingData) => {
+          return ['2'].includes(siblingData.layout)
+        },
+      },
+      minRows: 2,
+      maxRows: 2,
+    },
+    {
+      ...BlockColumns,
+      admin: {
+        condition: (data, siblingData) => {
+          return ['3'].includes(siblingData.layout)
+        },
+      },
+      minRows: 3,
+      maxRows: 3,
+    },
+  ],
+  slug: 'conditionalLayout',
+}
+
 export const TextBlock: Block = {
   fields: [
     {
@@ -11,6 +69,30 @@ export const TextBlock: Block = {
     },
   ],
   slug: 'text',
+}
+
+export const RadioButtonsBlock: Block = {
+  fields: [
+    {
+      name: 'radioButtons',
+      type: 'radio',
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option2',
+        },
+        {
+          label: 'Option 3',
+          value: 'option3',
+        },
+      ],
+    },
+  ],
+  slug: 'radioButtons',
 }
 
 export const RichTextBlock: Block = {
@@ -113,6 +195,7 @@ export const SubBlockBlock: Block = {
             },
           ],
         },
+        SelectFieldBlock,
       ],
     },
   ],

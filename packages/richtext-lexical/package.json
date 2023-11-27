@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "0.1.16",
+  "version": "0.2.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -19,26 +19,26 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
-    "@lexical/headless": "0.12.2",
-    "@lexical/link": "0.12.2",
-    "@lexical/list": "0.12.2",
-    "@lexical/mark": "0.12.2",
-    "@lexical/markdown": "0.12.2",
-    "@lexical/react": "0.12.2",
-    "@lexical/rich-text": "0.12.2",
-    "@lexical/selection": "0.12.2",
-    "@lexical/utils": "0.12.2",
+    "@lexical/headless": "0.12.4",
+    "@lexical/link": "0.12.4",
+    "@lexical/list": "0.12.4",
+    "@lexical/mark": "0.12.4",
+    "@lexical/markdown": "0.12.4",
+    "@lexical/react": "0.12.4",
+    "@lexical/rich-text": "0.12.4",
+    "@lexical/selection": "0.12.4",
+    "@lexical/utils": "0.12.4",
     "bson-objectid": "2.0.4",
     "classnames": "^2.3.2",
+    "deep-equal": "2.2.3",
     "i18next": "22.5.1",
-    "lexical": "0.12.2",
+    "lexical": "0.12.4",
     "lodash": "4.17.21",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "^4.0.11",
     "react-i18next": "11.18.6",
-    "ts-essentials": "7.0.3",
-    "deep-equal": "2.2.2"
+    "ts-essentials": "7.0.3"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -47,7 +47,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.0.14"
+    "payload": "^2.2.0"
   },
   "exports": {
     ".": {

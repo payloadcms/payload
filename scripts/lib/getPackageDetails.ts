@@ -27,7 +27,6 @@ export const getPackageDetails = async (pkg?: string): Promise<PackageDetails[]>
   } else {
     packageDirs = fse.readdirSync(packagesDir).filter((d) => d !== 'eslint-config-payload')
   }
-  console.log(packageDirs)
 
   const packageDetails = await Promise.all(
     packageDirs.map(async (dirName) => {

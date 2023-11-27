@@ -1,12 +1,11 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextField, TextField } from 'payload/types'
+import type { Field, RichTextField, TextField } from 'payload/types'
 
-import type { LexicalRichTextAdapter } from '../../../../../index'
+import type { LexicalRichTextAdapter, SanitizedEditorConfig } from '../../../../../index'
 import type { AdapterProps } from '../../../../../types'
 import type { HTMLConverter } from '../converter/types'
 import type { HTMLConverterFeatureProps } from '../index'
 
-import { cloneDeep } from '../../../../../index'
 import { convertLexicalToHTML } from '../converter'
 import { defaultHTMLConverters } from '../converter/defaultConverters'
 
@@ -14,10 +13,46 @@ type Props = {
   name: string
 }
 
-export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField = (
-  lexicalFieldName,
-  props,
-) => {
+/**
+ * Combines the default HTML converters with HTML converters found in the features, and with HTML converters configured in the htmlConverter feature.
+ *
+ * @param editorConfig
+ */
+export const consolidateHTMLConverters = ({
+  editorConfig,
+}: {
+  editorConfig: SanitizedEditorConfig
+}) => {
+  const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
+  const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature?.props
+
+  const defaultConvertersWithConvertersFromFeatures = defaultHTMLConverters
+
+  for (const converter of editorConfig.features.converters.html) {
+    defaultConvertersWithConvertersFromFeatures.push(converter)
+  }
+
+  const finalConverters =
+    htmlConverterFeatureProps?.converters &&
+    typeof htmlConverterFeatureProps?.converters === 'function'
+      ? htmlConverterFeatureProps.converters({
+          defaultConverters: defaultConvertersWithConvertersFromFeatures,
+        })
+      : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
+        defaultConvertersWithConvertersFromFeatures
+
+  return finalConverters
+}
+
+export const lexicalHTML: (
+  /**
+   * A string which matches the lexical field name you want to convert to HTML.
+   *
+   * This has to be a SIBLING field of this lexicalHTML field - otherwise, it won't be able to find the lexical field.
+   **/
+  lexicalFieldName: string,
+  props: Props,
+) => TextField = (lexicalFieldName, props) => {
   const { name = 'lexicalHTML' } = props
   return {
     name: name,
@@ -26,9 +61,42 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
     },
     hooks: {
       afterRead: [
-        async ({ collection, context, data, originalDoc, siblingData }) => {
+        async ({ collection, field, global, siblingData }) => {
+          const fields = collection ? collection.fields : global.fields
+
+          // find the path of this field, as well as its sibling fields, by looking for this `field` in fields and traversing it recursively
+          function findFieldPathAndSiblingFields(
+            fields: Field[],
+            path: string[],
+          ): {
+            path: string[]
+            siblingFields: Field[]
+          } {
+            for (const curField of fields) {
+              if (curField === field) {
+                return {
+                  path: [...path, curField.name],
+                  siblingFields: fields,
+                }
+              }
+
+              if ('fields' in curField && 'name' in curField) {
+                const result = findFieldPathAndSiblingFields(curField.fields, [
+                  ...path,
+                  curField.name,
+                ])
+                if (result) {
+                  return result
+                }
+              }
+            }
+
+            return null
+          }
+          const { path, siblingFields } = findFieldPathAndSiblingFields(fields, [])
+
           const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
-            collection.fields.find(
+            siblingFields.find(
               (field) => 'name' in field && field.name === lexicalFieldName,
             ) as RichTextField<SerializedEditorState, AdapterProps>
 
@@ -40,7 +108,7 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
 
           if (!lexicalField) {
             throw new Error(
-              'You cannot use the lexicalHTML field because the lexical field was not found',
+              'You cannot use the lexicalHTML field because the referenced lexical field was not found',
             )
           }
 
@@ -54,26 +122,13 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
 
           if (!config?.resolvedFeatureMap?.has('htmlConverter')) {
             throw new Error(
-              'You cannot use the lexicalHTML field because the htmlConverter feature was not found',
+              'You cannot use the lexicalHTML field because the linked lexical field does not have a HTMLConverterFeature',
             )
           }
-          const htmlConverterFeature = config.resolvedFeatureMap.get('htmlConverter')
-          const htmlConverterFeatureProps: HTMLConverterFeatureProps = htmlConverterFeature.props
 
-          const defaultConvertersWithConvertersFromFeatures = cloneDeep(defaultHTMLConverters)
-
-          for (const converter of config.features.converters.html) {
-            defaultConvertersWithConvertersFromFeatures.push(converter)
-          }
-
-          const finalConverters =
-            htmlConverterFeatureProps?.converters &&
-            typeof htmlConverterFeatureProps?.converters === 'function'
-              ? htmlConverterFeatureProps.converters({
-                  defaultConverters: defaultConvertersWithConvertersFromFeatures,
-                })
-              : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
-                defaultConvertersWithConvertersFromFeatures
+          const finalConverters = consolidateHTMLConverters({
+            editorConfig: config,
+          })
 
           return await convertLexicalToHTML({
             converters: finalConverters,
