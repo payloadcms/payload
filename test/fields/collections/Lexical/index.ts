@@ -2,16 +2,15 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 
 import {
   BlocksFeature,
-  HTMLConverterFeature,
-  LexicalPluginToLexicalFeature,
   LinkFeature,
-  TestRecorderFeature,
   TreeviewFeature,
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
 import { lexicalFieldsSlug } from '../../slugs'
 import {
+  ConditionalLayoutBlock,
+  RadioButtonsBlock,
   RelationshipBlock,
   RichTextBlock,
   SelectFieldBlock,
@@ -51,6 +50,8 @@ export const LexicalFields: CollectionConfig = {
               SelectFieldBlock,
               RelationshipBlock,
               SubBlockBlock,
+              RadioButtonsBlock,
+              ConditionalLayoutBlock,
             ],
           }),
         ],
@@ -102,6 +103,8 @@ export const LexicalFields: CollectionConfig = {
               SelectFieldBlock,
               RelationshipBlock,
               SubBlockBlock,
+              RadioButtonsBlock,
+              ConditionalLayoutBlock,
             ],
           }),
         ],

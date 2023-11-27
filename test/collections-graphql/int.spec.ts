@@ -6,7 +6,7 @@ import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { idToString } from '../helpers/idToString'
-import configPromise, { errorOnHookSlug, pointSlug, slug } from './config'
+import configPromise, { errorOnHookSlug, pointSlug, relationSlug, slug } from './config'
 
 const title = 'title'
 
@@ -778,6 +778,86 @@ describe('collections-graphql', () => {
 
         expect(totalDocs).toStrictEqual(1)
         expect(docs[0].relationToCustomID.id).toStrictEqual(1)
+      })
+
+      it('should query a document with a deleted relationship', async () => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationField: relation.id,
+            title: 'has deleted relation',
+          },
+        })
+
+        await payload.delete({
+          id: relation.id,
+          collection: relationSlug,
+        })
+
+        const query = `query {
+          Posts(where: { title: { equals: "has deleted relation" }}) {
+            docs {
+              id
+              title
+              relationField {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const response = await client.request(query)
+        const { docs } = response.Posts
+
+        expect(docs[0].relationField).toBeFalsy()
+      })
+
+      it('should query a document with a deleted relationship hasMany', async () => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationHasManyField: [relation.id],
+            title: 'has deleted relation hasMany',
+          },
+        })
+
+        await payload.delete({
+          id: relation.id,
+          collection: relationSlug,
+        })
+
+        const query = `query {
+          Posts(where: { title: { equals: "has deleted relation hasMany" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const response = await client.request(query)
+        const { docs } = response.Posts
+
+        expect(docs[0].relationHasManyField).toHaveLength(0)
       })
     })
   })

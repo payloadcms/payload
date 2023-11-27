@@ -14,6 +14,10 @@ import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 export type TextInputProps = Omit<TextField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
+  afterInput?: React.ComponentType<any>[]
+  beforeInput?: React.ComponentType<any>[]
   className?: string
   description?: Description
   errorMessage?: string
@@ -29,14 +33,14 @@ export type TextInputProps = Omit<TextField, 'type'> & {
   style?: React.CSSProperties
   value?: string
   width?: string
-  Error?: React.ComponentType<any>
-  Label?: React.ComponentType<any>
-  BeforeInput?: React.ReactElement<any>[]
-  AfterInput?: React.ReactElement<any>[]
 }
 
 const TextInput: React.FC<TextInputProps> = (props) => {
   const {
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
     description,
     errorMessage,
@@ -53,10 +57,6 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     style,
     value,
     width,
-    Error,
-    Label,
-    BeforeInput,
-    AfterInput,
   } = props
 
   const { i18n } = useTranslation()
@@ -77,7 +77,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
       <ErrorComp message={errorMessage} showError={showError} />
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <div className="input-wrapper">
-        {BeforeInput}
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
         <input
           data-rtl={rtl}
           disabled={readOnly}
@@ -90,7 +90,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
           type="text"
           value={value || ''}
         />
-        {AfterInput}
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
       </div>
       <FieldDescription
         className={`field-description-${path.replace(/\./g, '__')}`}

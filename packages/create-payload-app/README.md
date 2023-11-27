@@ -10,7 +10,7 @@ CLI for easily starting new Payload project
 
       $ npx create-payload-app
       $ npx create-payload-app my-project
-      $ npx create-payload-app -n my-project -t blog
+      $ npx create-payload-app -n my-project -t website
 
   OPTIONS
 

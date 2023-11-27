@@ -181,7 +181,12 @@ function FloatingSelectToolbar({
                   key={section.key}
                 >
                   {section.type === 'dropdown' && section.entries.length && (
-                    <ToolbarDropdown Icon={section.ChildComponent} entries={section.entries} />
+                    <ToolbarDropdown
+                      Icon={section.ChildComponent}
+                      anchorElem={anchorElem}
+                      editor={editor}
+                      entries={section.entries}
+                    />
                   )}
                   {section.type === 'buttons' &&
                     section.entries.length &&

@@ -172,20 +172,34 @@ export default buildConfig({
   collections: [Subscriptions],
   admin: {
     bundler: viteBundler(),
-    vite: (config) => {
-      return {
-        ...config,
-        resolve: {
-          ...config.resolve,
-          // highlight-start
-          alias: {
-            ...config.resolve.alias,
-            // remember, vite aliases are exact-match only
-            './hooks/createStripeSubscription': mockModulePath,
-          },
-          // highlight-end
-        },
+    vite: (incomingViteConfig) => {
+      const existingAliases = incomingViteConfig?.resolve?.alias || {};
+      let aliasArray: { find: string | RegExp; replacement: string; }[] = [];
+
+      // Pass the existing Vite aliases
+      if (Array.isArray(existingAliases)) {
+        aliasArray = existingAliases;
+      } else {
+        aliasArray = Object.values(existingAliases);
       }
+
+
+      // highlight-start
+      // Add your own aliases using the find and replacement keys
+      // remember, vite aliases are exact-match only
+      aliasArray.push({
+        find: '../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+      });
+      // highlight-end
+
+      return {
+        ...incomingViteConfig,
+        resolve: {
+          ...(incomingViteConfig?.resolve || {}),
+          alias: aliasArray,
+        }
+      };
     },
   },
 })

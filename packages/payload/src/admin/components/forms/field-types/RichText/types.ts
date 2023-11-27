@@ -1,3 +1,5 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import type { PayloadRequest } from '../../../../../express/types'
 import type { RichTextField, Validate } from '../../../../../fields/config/types'
 import type { CellComponentProps } from '../../../views/collections/List/Cell/types'
@@ -29,6 +31,13 @@ export type RichTextAdapter<
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
 
+  outputSchema?: ({
+    field,
+    isRequired,
+  }: {
+    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    isRequired: boolean
+  }) => JSONSchema4
   populationPromise?: (data: {
     currentDepth?: number
     depth: number

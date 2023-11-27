@@ -157,17 +157,44 @@ export interface Page {
     description?: string | null
     image?: string | Media | null
   }
+  relationshipInRichText?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  relationshipAsUpload?: string | Media | null
+  relationshipMonoHasOne?: (string | null) | Post
+  relationshipMonoHasMany?: (string | Post)[] | null
+  relationshipPolyHasOne?: {
+    relationTo: 'posts'
+    value: string | Post
+  } | null
   relationshipPolyHasMany?:
     | {
         relationTo: 'posts'
         value: string | Post
       }[]
     | null
-  relationshipMonoHasMany?: (string | Post)[] | null
-  relationshipMonoHasOne?: (string | null) | Post
   arrayOfRelationships?:
     | {
-        relationshipWithinArray?: (string | null) | Post
+        uploadInArray?: string | Media | null
+        richTextInArray?:
+          | {
+              [k: string]: unknown
+            }[]
+          | null
+        relationshipInArrayMonoHasOne?: (string | null) | Post
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null
+        relationshipInArrayPolyHasOne?: {
+          relationTo: 'posts'
+          value: string | Post
+        } | null
+        relationshipInArrayPolyHasMany?:
+          | {
+              relationTo: 'posts'
+              value: string | Post
+            }[]
+          | null
         id?: string | null
       }[]
     | null

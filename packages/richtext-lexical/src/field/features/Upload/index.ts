@@ -63,9 +63,12 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Basic',
+              key: 'basic',
               options: [
-                new SlashMenuOption('Upload', {
+                new SlashMenuOption('upload', {
                   Icon: UploadIcon,
+                  displayName: 'Upload',
                   keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
@@ -74,7 +77,6 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
                   },
                 }),
               ],
-              title: 'Basic',
             },
           ],
         },
