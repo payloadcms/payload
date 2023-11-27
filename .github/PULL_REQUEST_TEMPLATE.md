@@ -12,8 +12,8 @@
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Change to the [templates](../templates/) directory (does not affect core functionality)
-- [ ] Change to the [examples](../examples/) directory (does not affect core functionality)
+- [ ] Change to the [templates](https://github.com/payloadcms/payload/tree/main/templates) directory (does not affect core functionality)
+- [ ] Change to the [examples](https://github.com/payloadcms/payload/tree/main/examples) directory (does not affect core functionality)
 - [ ] This change requires a documentation update
 
 ## Checklist:

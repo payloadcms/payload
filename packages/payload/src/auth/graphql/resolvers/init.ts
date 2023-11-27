@@ -1,12 +1,11 @@
-import type { PayloadRequest } from '../../../express/types'
-
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import init from '../../operations/init'
 
 function initResolver(collection: string) {
   async function resolver(_, args, context) {
     const options = {
       collection,
-      req: { ...context.req } as PayloadRequest,
+      req: isolateTransactionID(context.req),
     }
 
     return init(options)

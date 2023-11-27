@@ -8,10 +8,7 @@ type Children = Leaf[]
 
 type Leaf = {
   type: string
-  value?: {
-    url: string
-    alt: string
-  }
+  value?: any
   children?: Children
   url?: string
   [key: string]: unknown
@@ -78,6 +75,14 @@ const serialize = (children?: Children): React.ReactNode[] =>
         return <ol key={i}>{serialize(node.children)}</ol>
       case 'li':
         return <li key={i}>{serialize(node.children)}</li>
+      case 'relationship':
+        return (
+          <span key={i}>
+            {node.value && typeof node.value === 'object'
+              ? node.value.title || node.value.id
+              : node.value}
+          </span>
+        )
       case 'link':
         return (
           <Link

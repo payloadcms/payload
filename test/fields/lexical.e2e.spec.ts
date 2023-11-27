@@ -1,12 +1,13 @@
 import type { Page } from '@playwright/test'
+import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
 
 import { expect, test } from '@playwright/test'
 
 import type { SerializedBlockNode } from '../../packages/richtext-lexical/src'
-import type { RichTextField } from './payload-types'
+import type { LexicalField } from './payload-types'
 
 import payload from '../../packages/payload/src'
-import { saveDocAndAssert } from '../helpers'
+import { initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -20,6 +21,7 @@ let client: RESTClient
 let page: Page
 let serverURL: string
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function navigateToRichTextFields() {
   const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
   await page.goto(url.list)
@@ -40,6 +42,8 @@ describe('lexical', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
@@ -84,7 +88,7 @@ describe('lexical', () => {
 
     await saveDocAndAssert(page)
 
-    const lexicalDoc: RichTextField = (
+    const lexicalDoc: LexicalField = (
       await payload.find({
         collection: lexicalFieldsSlug,
         where: {
@@ -97,7 +101,9 @@ describe('lexical', () => {
     ).docs[0] as never
 
     const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-    const firstParagraphTextNode: SerializedTextNode = lexicalField.root.children[0].children[0]
+    const firstParagraphTextNode: SerializedTextNode = (
+      lexicalField.root.children[0] as SerializedParagraphNode
+    ).children[0] as SerializedTextNode
 
     expect(firstParagraphTextNode.text).toBe('Upload Node:moretext')
   })
@@ -147,7 +153,7 @@ describe('lexical', () => {
 
     await saveDocAndAssert(page)
 
-    const lexicalDoc: RichTextField = (
+    const lexicalDoc: LexicalField = (
       await payload.find({
         collection: lexicalFieldsSlug,
         where: {
@@ -160,12 +166,13 @@ describe('lexical', () => {
     ).docs[0] as never
 
     const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-    const firstParagraph: SerializeParagrapbNode = lexicalField.root.children[0]
+    const firstParagraph: SerializedParagraphNode = lexicalField.root
+      .children[0] as SerializedParagraphNode
     expect(firstParagraph.children).toHaveLength(3)
 
-    const textNode1: SerializedTextNode = firstParagraph.children[0]
-    const boldNode: SerializedTextNode = firstParagraph.children[1]
-    const textNode2: SerializedTextNode = firstParagraph.children[2]
+    const textNode1: SerializedTextNode = firstParagraph.children[0] as SerializedTextNode
+    const boldNode: SerializedTextNode = firstParagraph.children[1] as SerializedTextNode
+    const textNode2: SerializedTextNode = firstParagraph.children[2] as SerializedTextNode
 
     expect(textNode1.text).toBe('Upload ')
     expect(textNode1.format).toBe(0)
@@ -205,7 +212,7 @@ describe('lexical', () => {
       await expect(spanInSubEditor).toHaveText('Some text below relationship node 1 inserted text')
       await saveDocAndAssert(page)
 
-      const lexicalDoc: RichTextField = (
+      const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
@@ -218,9 +225,8 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3]
-      const textNodeInBlockNodeRichText =
-        blockNode.fields.data.richText.root.children[1].children[0]
+      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
+      const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
 
       expect(textNodeInBlockNodeRichText.text).toBe(
         'Some text below relationship node 1 inserted text',
@@ -279,7 +285,7 @@ describe('lexical', () => {
 
       await saveDocAndAssert(page)
 
-      const lexicalDoc: RichTextField = (
+      const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
@@ -292,8 +298,8 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3]
-      const paragraphNodeInBlockNodeRichText = blockNode.fields.data.richText.root.children[1]
+      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
+      const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
 
       expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
 
@@ -336,14 +342,18 @@ describe('lexical', () => {
       await page.keyboard.press('Enter')
       await page.keyboard.press('/')
 
-      const popover = page.locator('#typeahead-menu .typeahead-popover')
+      const popover = page.locator('#slash-menu .slash-menu-popup')
       await expect(popover).toBeVisible()
 
-      const popoverBasicGroup = popover.locator('.group').nth(1) // Second group ("Basic") in popover
+      const popoverBasicGroup = popover
+        .locator('.slash-menu-popup__group.slash-menu-popup__group-basic')
+        .first() // Second group ("Basic") in popover
       await expect(popoverBasicGroup).toBeVisible()
 
       // Heading 2 should be the last, most bottom popover button element which should be initially visible, if not hidden by something (e.g. another block)
-      const popoverHeading2Button = popoverBasicGroup.locator('button.item').nth(4)
+      const popoverHeading2Button = popoverBasicGroup
+        .locator('button.slash-menu-popup__item-heading-2')
+        .first()
       await expect(popoverHeading2Button).toBeVisible()
 
       // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
@@ -398,7 +408,7 @@ describe('lexical', () => {
        * Check if it was created successfully and
        * fill newly created textarea sub-block with text
        */
-      const newSubBlock = lexicalBlock.locator('#subBlocks-row-1')
+      const newSubBlock = lexicalBlock.locator('.blocks-field__rows > div').nth(1)
       await expect(newSubBlock).toBeVisible()
 
       const newContentTextArea = newSubBlock.locator('textarea').first()
@@ -418,7 +428,7 @@ describe('lexical', () => {
        * can be retrieved correctly
        */
 
-      const lexicalDoc: RichTextField = (
+      const lexicalDoc: LexicalField = (
         await payload.find({
           collection: lexicalFieldsSlug,
           where: {
@@ -431,14 +441,183 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[4]
-      const subBlocks = blockNode.fields.data.subBlocks
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
+      const subBlocks = blockNode.fields.subBlocks
 
       expect(subBlocks).toHaveLength(2)
 
       const createdTextAreaBlock = subBlocks[1]
 
       expect(createdTextAreaBlock.content).toBe('text123')
+    })
+
+    test('should allow changing values of two different radio button blocks independently', async () => {
+      // This test ensures that https://github.com/payloadcms/payload/issues/3911 does not happen again
+
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(4)
+
+      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(5)
+      await radioButtonBlock2.scrollIntoViewIfNeeded()
+      await expect(radioButtonBlock1).toBeVisible()
+      await expect(radioButtonBlock2).toBeVisible()
+
+      // Click radio button option2 of radioButtonBlock1
+      await radioButtonBlock1
+        .locator('.radio-input:has-text("Option 2")')
+        .first() // This already is an input for some reason
+        .click()
+
+      // Ensure radio button option1 of radioButtonBlock2 (the default option) is still selected
+      await expect(
+        radioButtonBlock2.locator('.radio-input:has-text("Option 1")').first(),
+      ).toBeChecked()
+
+      // Click radio button option3 of radioButtonBlock2
+      await radioButtonBlock2
+        .locator('.radio-input:has-text("Option 3")')
+        .first() // This already is an input for some reason
+        .click()
+
+      // Ensure previously clicked option2 of radioButtonBlock1 is still selected
+      await expect(
+        radioButtonBlock1.locator('.radio-input:has-text("Option 2")').first(),
+      ).toBeChecked()
+
+      /**
+       * Now save and check the actual data. radio button block 1 should have option2 selected and radio button block 2 should have option3 selected
+       */
+
+      await saveDocAndAssert(page)
+
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
+      const radio1: SerializedBlockNode = lexicalField.root.children[7] as SerializedBlockNode
+      const radio2: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
+
+      expect(radio1.fields.radioButtons).toBe('option2')
+      expect(radio2.fields.radioButtons).toBe('option3')
+    })
+
+    test('should not lose focus when writing in nested editor', async () => {
+      // https://github.com/payloadcms/payload/issues/4108
+      // Steps:
+      // 1. Focus parent editor
+      // 2. Focus nested editor and write something
+      // 3. In the issue, after writing one character, the cursor focuses back into the parent editor
+
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      /**
+       * 1. Focus parent editor
+       */
+      const parentEditorParagraph = richTextField.locator('span').getByText('Upload Node:').first()
+      await expect(parentEditorParagraph).toBeVisible()
+
+      await parentEditorParagraph.click() // Click works better than focus
+
+      const blockWithRichTextEditor = richTextField.locator('.lexical-block').nth(1) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      await blockWithRichTextEditor.scrollIntoViewIfNeeded()
+      await expect(blockWithRichTextEditor).toBeVisible()
+
+      /**
+       * 2. Focus nested editor and write something
+       */
+      const nestedEditorParagraph = blockWithRichTextEditor
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await expect(nestedEditorParagraph).toBeVisible()
+      await nestedEditorParagraph.click() // Click works better than focus
+
+      // Now go to the END of the paragraph
+      for (let i = 0; i < 18; i++) {
+        await page.keyboard.press('ArrowRight')
+      }
+      await page.keyboard.type('2345')
+
+      /**
+       * 3. In the issue, after writing one character, the cursor focuses back into the parent editor and writes the text there.
+       * This checks that this does not happen, and that it writes the text in the correct position (so, in nestedEditorParagraph, NOT in parentEditorParagraph)
+       */
+      await expect(nestedEditorParagraph).toHaveText('Some text below relationship node 12345')
+    })
+
+    test('should respect row removal in nested array field', async () => {
+      await navigateToLexicalFields()
+      const richTextField = page.locator('.rich-text-lexical').nth(1) // second
+      await richTextField.scrollIntoViewIfNeeded()
+      await expect(richTextField).toBeVisible()
+
+      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(6)
+
+      await conditionalArrayBlock.scrollIntoViewIfNeeded()
+      await expect(conditionalArrayBlock).toBeVisible()
+
+      const selectField = conditionalArrayBlock.locator('.react-select').first()
+      await selectField.click()
+
+      const selectFieldMenu = selectField.locator('.rs__menu').first()
+      await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
+
+      await conditionalArrayBlock.getByText('Add Column').click()
+
+      await conditionalArrayBlock
+        .locator('.array-field__draggable-rows')
+        .first()
+        .locator('.array-field__row')
+        .nth(1)
+        .locator('.input-wrapper input')
+        .first()
+        .fill('second text')
+
+      await saveDocAndAssert(page)
+
+      await selectField.click()
+      await selectFieldMenu.locator('.rs__option').nth(0).click() // Select "1" (1 columns / array fields)
+
+      // Remove 2nd column
+      await conditionalArrayBlock
+        .locator('.array-field__draggable-rows')
+        .first()
+        .locator('.array-field__row')
+        .nth(1)
+        .locator('.array-actions__button')
+        .first()
+        .click()
+
+      await conditionalArrayBlock
+        .locator('.array-field__draggable-rows')
+        .first()
+        .locator('.array-field__row')
+        .nth(1)
+        .locator('.popup__content')
+        .first()
+        .locator('Button')
+        .nth(1)
+        .click()
+
+      await saveDocAndAssert(page)
+      // This can be triggered if the 2nd row's data is not actually deleted (<= this is the bug), as the validation expects just one row
+      await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
     })
   })
 })

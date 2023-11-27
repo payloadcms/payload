@@ -6,7 +6,12 @@ import path from 'path'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { exactText, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import {
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  saveDocHotkeyAndAssert,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
@@ -38,6 +43,7 @@ describe('fields', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
   beforeEach(async () => {
     await clearAndSeedEverything(payload)
@@ -97,7 +103,7 @@ describe('fields', () => {
       await expect(error).toHaveText('#custom-error')
     })
 
-    test('should render BeforeInput and AfterInput', async () => {
+    test('should render beforeInput and afterInput', async () => {
       await page.goto(url.create)
       const input = page.locator('input[id="field-beforeAndAfterInput"]')
 
@@ -105,13 +111,13 @@ describe('fields', () => {
         return el.previousElementSibling
       })
       const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
-      await expect(prevSiblingText).toEqual('#before-input')
+      expect(prevSiblingText).toEqual('#before-input')
 
       const nextSibling = await input.evaluateHandle((el) => {
         return el.nextElementSibling
       })
       const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
-      await expect(nextSiblingText).toEqual('#after-input')
+      expect(nextSiblingText).toEqual('#after-input')
     })
   })
 
@@ -213,7 +219,7 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'indexed-fields')
     })
 
-    // TODO: This test is flaky
+    // TODO - This test is flaky. Rarely, but sometimes it randomly fails.
     test('should display unique constraint error in ui', async () => {
       const uniqueText = 'uniqueText'
       await payload.create({
@@ -873,6 +879,22 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-title a').click()
     }
+    describe('cell', () => {
+      test('ensure cells are smaller than 300px in height', async () => {
+        const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
+        await page.goto(url.list) // Navigate to rich-text list view
+
+        const table = page.locator('.list-controls ~ .table')
+        const lexicalCell = table.locator('.cell-lexicalCustomFields').first()
+        const lexicalHtmlCell = table.locator('.cell-lexicalCustomFields_html').first()
+        const entireRow = table.locator('.row-1').first()
+
+        // Make sure each of the 3 above are no larger than 300px in height:
+        expect((await lexicalCell.boundingBox()).height).toBeLessThanOrEqual(300)
+        expect((await lexicalHtmlCell.boundingBox()).height).toBeLessThanOrEqual(300)
+        expect((await entireRow.boundingBox()).height).toBeLessThanOrEqual(300)
+      })
+    })
 
     describe('toolbar', () => {
       test('should run url validation', async () => {

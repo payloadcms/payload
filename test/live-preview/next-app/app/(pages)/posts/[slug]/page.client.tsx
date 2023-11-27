@@ -1,7 +1,7 @@
 'use client'
 
 import { Post as PostType } from '@/payload-types'
-import { useLivePreview } from '../../../../../../../packages/live-preview-react'
+import { useLivePreview } from '../../../../../../../packages/live-preview-react/src'
 import React from 'react'
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import { Blocks } from '@/app/_components/Blocks'

@@ -153,7 +153,7 @@ Here's an overview of all the included features:
 | **`HeadingFeature`**           | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                   |
 | **`AlignFeature`**             | Yes                 | Allows you to align text left, centered and right                                                                                                                                      |
 | **`IndentFeature`**            | Yes                 | Allows you to indent text with the tab key                                                                                                                                             |
-| **`UnoderedListFeature`**      | Yes                 | Adds unordered lists (ol)                                                                                                                                                              |
+| **`UnorderedListFeature`**      | Yes                 | Adds unordered lists (ol)                                                                                                                                                              |
 | **`OrderedListFeature`**       | Yes                 | Adds ordered lists (ul)                                                                                                                                                                |
 | **`CheckListFeature`**         | Yes                 | Adds checklists                                                                                                                                                                        |
 | **`LinkFeature`**              | Yes                 | Allows you to create internal and external links                                                                                                                                       |
@@ -314,11 +314,29 @@ import {
 
 const yourEditorConfig; // <= your editor config here
 
-const headlessEditor = await createHeadlessEditor({
+const headlessEditor = createHeadlessEditor({
   nodes: getEnabledNodes({
     editorConfig: sanitizeEditorConfig(yourEditorConfig),
   }),
 })
+```
+
+### Getting the editor config
+
+As you can see, you need to provide an editor config in order to create a headless editor. This is because the editor config is used to determine which nodes & features are enabled, and which converters are used.
+
+To get the editor config, simply import the default editor config and adjust it - just like you did inside of the `editor: lexicalEditor({})` property:
+
+```ts
+import { defaultEditorConfig, defaultEditorFeatures } from '@payloadcms/richtext-lexical' // <= make sure this package is installed
+
+const yourEditorConfig = defaultEditorConfig
+
+// If you made changes to the features of the field's editor config, you should also make those changes here:
+yourEditorConfig.features = [
+  ...defaultEditorFeatures,
+  // Add your custom features here
+]
 ```
 
 ### HTML => Lexical
@@ -328,13 +346,14 @@ Once you have your headless editor instance, you can use it to convert HTML to L
 ```ts
 import { $generateNodesFromDOM } from '@lexical/html'
 import { $getRoot,$getSelection } from 'lexical'
+import { JSDOM } from 'jsdom';
 
 headlessEditor.update(() => {
   // In a headless environment you can use a package such as JSDom to parse the HTML string.
   const dom = new JSDOM(htmlString)
 
   // Once you have the DOM instance it's easy to generate LexicalNodes.
-  const nodes = $generateNodesFromDOM(editor, dom.window.document)
+  const nodes = $generateNodesFromDOM(headlessEditor, dom.window.document)
 
   // Select the root
   $getRoot().select()
@@ -347,6 +366,8 @@ headlessEditor.update(() => {
 // Do this if you then want to get the editor JSON
 const editorJSON = headlessEditor.getEditorState().toJSON()
 ```
+
+Functions prefixed with a `$` can only be run inside of an `editor.update()` or `editorState.read()` callback.
 
 This has been taken from the [lexical serialization & deserialization docs](https://lexical.dev/docs/concepts/serialization#html---lexical).
 
@@ -395,7 +416,6 @@ try {
   headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
 } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
-  return ''
 }
 
 // Export to markdown
@@ -406,6 +426,35 @@ headlessEditor.getEditorState().read(() => {
 ```
 
 The `.setEditorState()` function immediately updates your editor state. Thus, there's no need for the `discrete: true` flag when reading the state afterward.
+
+
+### Lexical => Plain Text
+
+Export content from the Lexical editor into plain text using these steps:
+
+1. Import your current editor state into the headless editor.
+2. Convert and fetch the resulting plain text string.
+
+Here's the code for it:
+
+```ts
+import type { SerializedEditorState } from "lexical"
+import { $getRoot } from "lexical"
+
+const yourEditorState: SerializedEditorState // <= your current editor state here
+
+// Import editor state into your headless editor
+try {
+  headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState)) // This should commit the editor state immediately
+} catch (e) {
+  logger.error({ err: e }, 'ERROR parsing editor state')
+}
+
+// Export to plain text
+const plainTextContent = headlessEditor.getEditorState().read(() => {
+  return $getRoot().getTextContent()
+}) || ''
+```
 
 ## Migrating from Slate
 

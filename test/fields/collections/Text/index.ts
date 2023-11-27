@@ -104,8 +104,8 @@ const TextFields: CollectionConfig = {
       name: 'beforeAndAfterInput',
       admin: {
         components: {
-          AfterInput: [AfterInput],
-          BeforeInput: [BeforeInput],
+          afterInput: [AfterInput],
+          beforeInput: [BeforeInput],
         },
       },
       type: 'text',

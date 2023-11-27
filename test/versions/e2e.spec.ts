@@ -30,7 +30,13 @@ import { expect, test } from '@playwright/test'
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
 import { globalSlug } from '../admin/slugs'
-import { changeLocale, exactText, findTableCell, selectTableRow } from '../helpers'
+import {
+  changeLocale,
+  exactText,
+  findTableCell,
+  initPageConsoleErrorCatch,
+  selectTableRow,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { clearAndSeedEverything } from './seed'
@@ -38,6 +44,8 @@ import { titleToDelete } from './shared'
 import {
   autoSaveGlobalSlug,
   autosaveCollectionSlug,
+  disablePublishGlobalSlug,
+  disablePublishSlug,
   draftCollectionSlug,
   draftGlobalSlug,
 } from './slugs'
@@ -49,12 +57,15 @@ describe('versions', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let autosaveURL: AdminUrlUtil
+  let disablePublishURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
 
   beforeEach(async () => {
@@ -65,6 +76,7 @@ describe('versions', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
     })
 
     // This test has to run before bulk updates that will rename the title
@@ -240,6 +252,7 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    // TODO: This test is flaky and fails sometimes
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       // fill out global title and wait for autosave
@@ -335,6 +348,34 @@ describe('versions', () => {
       await page.locator('tbody tr .cell-title a').nth(1).click()
       await expect(page.locator('#field-title')).toHaveValue('first post title')
       await expect(page.locator('#field-description')).toHaveValue('first post description')
+    })
+
+    test('should hide publish when access control prevents updating on globals', async () => {
+      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
+      await page.goto(url.global(disablePublishGlobalSlug))
+
+      await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('should hide publish when access control prevents create operation', async () => {
+      await page.goto(disablePublishURL.create)
+
+      await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('should hide publish when access control prevents update operation', async () => {
+      const publishedDoc = await payload.create({
+        collection: disablePublishSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
+
+      await expect(page.locator('#action-save')).not.toBeAttached()
     })
   })
 })

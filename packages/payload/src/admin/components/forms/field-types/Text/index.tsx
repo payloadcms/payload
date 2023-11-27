@@ -15,6 +15,7 @@ const Text: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components: { Error, Label, afterInput, beforeInput } = {},
       condition,
       description,
       placeholder,
@@ -22,7 +23,6 @@ const Text: React.FC<Props> = (props) => {
       rtl,
       style,
       width,
-      components: { Error, Label, BeforeInput, AfterInput } = {},
     } = {},
     inputRef,
     label,
@@ -60,6 +60,10 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <TextInput
+      Error={Error}
+      Label={Label}
+      afterInput={afterInput}
+      beforeInput={beforeInput}
       className={className}
       description={description}
       errorMessage={errorMessage}
@@ -78,10 +82,6 @@ const Text: React.FC<Props> = (props) => {
       style={style}
       value={value}
       width={width}
-      Error={Error}
-      Label={Label}
-      BeforeInput={BeforeInput}
-      AfterInput={AfterInput}
     />
   )
 }

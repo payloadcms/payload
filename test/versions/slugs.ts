@@ -6,6 +6,10 @@ export const postCollectionSlug = 'posts' as const
 
 export const versionCollectionSlug = 'version-posts' as const
 
+export const disablePublishSlug = 'disable-publish' as const
+
+export const disablePublishGlobalSlug = 'disable-publish-global' as const
+
 export const collectionSlugs = [
   autosaveCollectionSlug,
   draftCollectionSlug,

@@ -1,4 +1,5 @@
 import { useModal } from '@faceless-ui/modal'
+import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory, useLocation } from 'react-router-dom'
@@ -10,6 +11,7 @@ import type { AuthContext } from './types'
 import { requests } from '../../../api'
 import useDebounce from '../../../hooks/useDebounce'
 import { useConfig } from '../Config'
+import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
 
@@ -21,6 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const { pathname } = useLocation()
   const { push } = useHistory()
+  const { code } = useLocale()
 
   const config = useConfig()
 
@@ -144,8 +147,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [serverURL, api, userSlug, revokeTokenAndExpire])
 
   const refreshPermissions = useCallback(async () => {
+    const params = {
+      locale: code,
+    }
     try {
-      const request = await requests.get(`${serverURL}${api}/access`, {
+      const request = await requests.get(`${serverURL}${api}/access?${qs.stringify(params)}`, {
         headers: {
           'Accept-Language': i18n.language,
         },
@@ -160,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       toast.error(`Refreshing permissions failed: ${e.message}`)
     }
-  }, [serverURL, api, i18n])
+  }, [serverURL, api, i18n, code])
 
   const fetchFullUser = React.useCallback(async () => {
     try {
