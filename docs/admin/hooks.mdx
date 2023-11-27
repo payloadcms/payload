@@ -784,3 +784,31 @@ const MyComponent: React.FC = () => {
     </button>
   )
 }
+```
+
+### useDocumentEvents
+
+The `useDocumentEvents` hook provides a way of subscribing to cross-document events. For example, if you are using `useAllFormFields` to listen for updates in your document, then you update a nested document from within a drawer, the form state would only ever contain document ids. This hook provides the following:
+
+| Property                  | Description                                                                                                                 |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| **`updates`**             | An array of documents which have been updated. Each item is an object containing a `relationTo` and `id` property (if a collection)                                                      |
+| **`reportUpdates`**       | A method to report updates to the context. It accepts an array objects with the `relationTo` and `id` (if a collection)     |
+
+**Example:**
+
+```tsx
+import { useDocumentEvents } from 'payload/components/utilities'
+
+const ListenForNestedUpdates: React.FC = () => {
+  const { updates } = useDocumentEvents()
+
+  useEffect(() => {
+    if (updates && updates.length) {
+      // Do something with the updates
+    }
+  }, [updates])
+
+  return <span>{JSON.stringify(updates, null, 2)}</span>
+}
+```
