@@ -17,6 +17,7 @@ import { StepNavProvider } from './components/elements/StepNav'
 import { AuthProvider } from './components/utilities/Auth'
 import { ConfigProvider } from './components/utilities/Config'
 import { CustomProvider } from './components/utilities/CustomProvider'
+import { DocumentEventsProvider } from './components/utilities/DocumentEvents'
 import { I18n } from './components/utilities/I18n'
 import { LoadingOverlayProvider } from './components/utilities/LoadingOverlay'
 import { LocaleProvider } from './components/utilities/Locale'
@@ -49,11 +50,13 @@ const Root = ({ config: incomingConfig }: { config?: SanitizedConfig }) => {
                         <LocaleProvider>
                           <StepNavProvider>
                             <LoadingOverlayProvider>
-                              <NavProvider>
-                                <CustomProvider>
-                                  <Routes />
-                                </CustomProvider>
-                              </NavProvider>
+                              <DocumentEventsProvider>
+                                <NavProvider>
+                                  <CustomProvider>
+                                    <Routes />
+                                  </CustomProvider>
+                                </NavProvider>
+                              </DocumentEventsProvider>
                             </LoadingOverlayProvider>
                           </StepNavProvider>
                         </LocaleProvider>

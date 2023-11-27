@@ -11,6 +11,7 @@ import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
+import { useDocumentEvents } from '../../utilities/DocumentEvents'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { EditDepthContext } from '../../utilities/EditDepth'
 import { useLocale } from '../../utilities/Locale'
@@ -37,10 +38,18 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     serverURL,
   } = useConfig()
 
+  const { reportUpdate } = useDocumentEvents()
+
   const { admin: { components: { views: { Edit: Edit } = {} } = {} } = {}, fields, slug } = global
 
   const onSave = useCallback(
     async (json) => {
+      reportUpdate([
+        {
+          relationTo: global.slug,
+        },
+      ])
+
       getVersions()
       getDocPermissions()
       setUpdatedAt(json?.result?.updatedAt)
@@ -59,7 +68,18 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       })
       setInitialState(state)
     },
-    [getVersions, fields, user, locale, t, getDocPermissions, getDocPreferences, config],
+    [
+      getVersions,
+      fields,
+      user,
+      locale,
+      t,
+      getDocPermissions,
+      getDocPreferences,
+      config,
+      global,
+      reportUpdate,
+    ],
   )
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(`${serverURL}${api}/globals/${slug}`, {
