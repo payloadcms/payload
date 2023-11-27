@@ -342,14 +342,18 @@ describe('lexical', () => {
       await page.keyboard.press('Enter')
       await page.keyboard.press('/')
 
-      const popover = page.locator('#typeahead-menu .typeahead-popover')
+      const popover = page.locator('#slash-menu .slash-menu-popup')
       await expect(popover).toBeVisible()
 
-      const popoverBasicGroup = popover.locator('.group').nth(1) // Second group ("Basic") in popover
+      const popoverBasicGroup = popover
+        .locator('.slash-menu-popup__group.slash-menu-popup__group-basic')
+        .first() // Second group ("Basic") in popover
       await expect(popoverBasicGroup).toBeVisible()
 
       // Heading 2 should be the last, most bottom popover button element which should be initially visible, if not hidden by something (e.g. another block)
-      const popoverHeading2Button = popoverBasicGroup.locator('button.item').nth(4)
+      const popoverHeading2Button = popoverBasicGroup
+        .locator('button.slash-menu-popup__item-heading-2')
+        .first()
       await expect(popoverHeading2Button).toBeVisible()
 
       // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues

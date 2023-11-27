@@ -205,8 +205,11 @@ export const number: Validate<unknown, unknown, NumberField> = (
     if (typeof lengthValidationResult === 'string') return lengthValidationResult
   }
 
-  if (!value && required) return t('validation:required')
-  if (!value && !required) return true
+  if (!value && !isNumber(value)) {
+    // if no value is present, validate based on required
+    if (required) return t('validation:required')
+    if (!required) return true
+  }
 
   const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
 

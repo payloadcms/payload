@@ -97,7 +97,7 @@ export default joi.object({
       CellComponent: component.required(),
       FieldComponent: component.required(),
       afterReadPromise: joi.func().optional(),
-      outputSchema: joi.func().required(),
+      outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })

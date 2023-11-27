@@ -153,7 +153,7 @@ Here's an overview of all the included features:
 | **`HeadingFeature`**           | Yes                 | Adds Heading Nodes (by default, H1 - H6, but that can be customized)                                                                                                                   |
 | **`AlignFeature`**             | Yes                 | Allows you to align text left, centered and right                                                                                                                                      |
 | **`IndentFeature`**            | Yes                 | Allows you to indent text with the tab key                                                                                                                                             |
-| **`UnoderedListFeature`**      | Yes                 | Adds unordered lists (ol)                                                                                                                                                              |
+| **`UnorderedListFeature`**      | Yes                 | Adds unordered lists (ol)                                                                                                                                                              |
 | **`OrderedListFeature`**       | Yes                 | Adds ordered lists (ul)                                                                                                                                                                |
 | **`CheckListFeature`**         | Yes                 | Adds checklists                                                                                                                                                                        |
 | **`LinkFeature`**              | Yes                 | Allows you to create internal and external links                                                                                                                                       |
@@ -346,7 +346,7 @@ Once you have your headless editor instance, you can use it to convert HTML to L
 ```ts
 import { $generateNodesFromDOM } from '@lexical/html'
 import { $getRoot,$getSelection } from 'lexical'
-import JSDOM from 'jsdom'
+import { JSDOM } from 'jsdom';
 
 headlessEditor.update(() => {
   // In a headless environment you can use a package such as JSDom to parse the HTML string.
