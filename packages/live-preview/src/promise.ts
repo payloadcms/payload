@@ -1,8 +1,8 @@
 export const promise = async (args: {
   accessor: number | string
   apiRoute?: string
-  cache: Map<string, unknown>
-  cacheKey: string
+  cache?: Map<string, unknown>
+  cacheKey?: string
   collection: string
   depth: number
   id: number | string
@@ -11,17 +11,19 @@ export const promise = async (args: {
 }): Promise<void> => {
   const { id, accessor, apiRoute, cache, cacheKey, collection, depth, ref, serverURL } = args
 
-  if (cache.has(cacheKey)) {
-    ref[accessor] = cache.get(cacheKey)
+  const cachedValue = cache && cacheKey && cache.get(cacheKey)
+
+  if (cachedValue) {
+    ref[accessor] = cachedValue
     return
   }
 
   const url = `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`
 
-  let res: Record<string, unknown> | null | undefined = null
+  let doc: Record<string, unknown> | null | undefined = null
 
   try {
-    res = await fetch(url, {
+    doc = await fetch(url, {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -31,9 +33,9 @@ export const promise = async (args: {
     console.error(err) // eslint-disable-line no-console
   }
 
-  if (!cache.has(cacheKey)) {
-    cache.set(cacheKey, res)
+  if (cache && cacheKey) {
+    cache.set(cacheKey, doc)
   }
 
-  ref[accessor] = res
+  ref[accessor] = doc
 }

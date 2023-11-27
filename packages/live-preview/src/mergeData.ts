@@ -4,6 +4,7 @@ import { traverseFields } from './traverseFields'
 
 export const mergeData = async <T>(args: {
   apiRoute?: string
+  cache?: Map<string, unknown>
   depth?: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
@@ -17,6 +18,7 @@ export const mergeData = async <T>(args: {
 > => {
   const {
     apiRoute,
+    cache,
     depth,
     fieldSchema,
     incomingData,
@@ -28,7 +30,6 @@ export const mergeData = async <T>(args: {
   const result = { ...initialData }
 
   const populationPromises: Promise<void>[] = []
-  const cache = new Map()
 
   traverseFields({
     apiRoute,

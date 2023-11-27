@@ -32,8 +32,11 @@ export const handleMessage = async <T>(args: {
         return initialData
       }
 
+      const cache = new Map()
+
       const mergedData = await mergeData<T>({
         apiRoute,
+        cache,
         depth,
         fieldSchema: payloadLivePreviewFieldSchema,
         incomingData: eventData.data,

@@ -10,7 +10,7 @@ export const traverseRichText = ({
   serverURL,
 }: {
   apiRoute: string
-  cache: Map<string, unknown>
+  cache?: Map<string, unknown>
   depth: number
   incomingData: any
   populationPromises: Promise<void>[]
@@ -34,9 +34,10 @@ export const traverseRichText = ({
 
     if ('relationTo' in incomingData && 'value' in incomingData && incomingData.value) {
       const cacheKey = `${incomingData.relationTo}_${incomingData.value}`
+      const cachedValue = cache && cache.get(cacheKey)
 
-      if (cache.has(cacheKey)) {
-        result = cache.get(cacheKey)
+      if (cachedValue) {
+        result = cachedValue
       } else {
         populationPromises.push(
           promise({

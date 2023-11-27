@@ -5,7 +5,7 @@ import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
   apiRoute?: string
-  cache: Map<string, unknown>
+  cache?: Map<string, unknown>
   depth?: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
@@ -153,9 +153,10 @@ export const traverseFields = <T>(args: {
 
                 if (oldID !== newID || oldRelation !== newRelation) {
                   const cacheKey = `${newRelation}_${newID}`
+                  const cachedValue = cache && cache.get(cacheKey)
 
-                  if (cache.has(cacheKey)) {
-                    result[fieldName][i] = cache.get(cacheKey)
+                  if (cachedValue) {
+                    result[fieldName][i] = cachedValue
                   } else {
                     populationPromises.push(
                       promise({
@@ -176,9 +177,10 @@ export const traverseFields = <T>(args: {
                 // Handle `hasMany` monomorphic
                 if (result[fieldName][i]?.id !== incomingRelation) {
                   const cacheKey = `${fieldSchema.relationTo}_${incomingRelation}`
+                  const cachedValue = cache && cache.get(cacheKey)
 
-                  if (cache.has(cacheKey)) {
-                    result[fieldName][i] = cache.get(cacheKey)
+                  if (cachedValue) {
+                    result[fieldName][i] = cachedValue
                   } else {
                     populationPromises.push(
                       promise({
@@ -240,9 +242,10 @@ export const traverseFields = <T>(args: {
                 // otherwise set the value to null
                 if (newID) {
                   const cacheKey = `${newRelation}_${newID}`
+                  const cachedValue = cache && cache.get(cacheKey)
 
-                  if (cache.has(cacheKey)) {
-                    result[fieldName] = cache.get(cacheKey)
+                  if (cachedValue) {
+                    result[fieldName] = cachedValue
                   } else {
                     populationPromises.push(
                       promise({
@@ -283,9 +286,10 @@ export const traverseFields = <T>(args: {
                 // otherwise set the value to null
                 if (newID) {
                   const cacheKey = `${fieldSchema.relationTo}_${newID}`
+                  const cachedValue = cache && cache.get(cacheKey)
 
-                  if (cache.has(cacheKey)) {
-                    result[fieldName] = cache.get(cacheKey)
+                  if (cachedValue) {
+                    result[fieldName] = cachedValue
                   } else {
                     populationPromises.push(
                       promise({

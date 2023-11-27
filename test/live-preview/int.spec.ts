@@ -205,7 +205,7 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(4)
+    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
   })
 
@@ -277,7 +277,7 @@ describe('Collections - Live Preview', () => {
     ])
   })
 
-  it('— relationships - can clear relationships', async () => {
+  it('— relationships - clears relationships', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
       relationshipMonoHasOne: testPost.id,
@@ -305,6 +305,65 @@ describe('Collections - Live Preview', () => {
     expect(merge2.relationshipMonoHasMany).toEqual([])
     expect(merge2.relationshipPolyHasOne).toBeFalsy()
     expect(merge2.relationshipPolyHasMany).toEqual([])
+  })
+
+  it('— relationships - caches relationships', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const cache = new Map()
+
+    const initialMerge = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        relationshipMonoHasOne: testPost.id,
+        relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
+        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      cache,
+    })
+
+    expect(initialMerge._numberOfRequests).toEqual(4)
+
+    const clearedMerge = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        relationshipMonoHasOne: null,
+        relationshipMonoHasMany: [],
+        relationshipPolyHasOne: null,
+        relationshipPolyHasMany: [],
+      },
+      initialData: initialMerge,
+      serverURL,
+      returnNumberOfRequests: true,
+      cache,
+    })
+
+    expect(clearedMerge._numberOfRequests).toEqual(0)
+
+    const cachedMerge = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        relationshipMonoHasOne: testPost.id,
+        relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
+        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+      },
+      initialData: clearedMerge,
+      serverURL,
+      returnNumberOfRequests: true,
+      cache,
+    })
+
+    expect(cachedMerge._numberOfRequests).toEqual(0)
   })
 
   it('— relationships - populates within arrays', async () => {
