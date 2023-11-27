@@ -128,7 +128,6 @@ const PreviewSizes: React.FC<{
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
             const previewSrc = generateImageUrl(val)
-            console.log(previewSrc)
 
             if (previewSrc) {
               return (
