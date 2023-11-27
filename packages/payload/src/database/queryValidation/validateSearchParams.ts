@@ -116,10 +116,8 @@ export async function validateSearchParam({
         const segments = fieldPath.split('.')
 
         if (versionFields) {
-          if (fieldPath === 'parent' || fieldPath === 'version') {
-            fieldAccess = policies[entityType][entitySlug]
-          } else if (segments[0] === 'parent' || segments[0] === 'version') {
-            fieldAccess = policies[entityType][entitySlug]
+          fieldAccess = policies[entityType][entitySlug]
+          if (segments[0] === 'parent' || segments[0] === 'version') {
             segments.shift()
           } else {
             segments.forEach((segment, pathIndex) => {
