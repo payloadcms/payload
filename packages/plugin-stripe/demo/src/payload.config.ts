@@ -1,7 +1,7 @@
 import path from 'path'
 import { buildConfig } from 'payload/config'
 import { viteBundler } from '@payloadcms/bundler-vite'
-import { webpackBundler } from '@payloadcms/bundler-webpack'
+// import { webpackBundler } from '@payloadcms/bundler-webpack'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
@@ -21,27 +21,27 @@ export default buildConfig({
     user: Users.slug,
     bundler: viteBundler(),
     // bundler: webpackBundler(),
-    webpack: (config) => {
-      const newConfig = {
-        ...config,
-        resolve: {
-          ...config.resolve,
-          alias: {
-            ...config.resolve.alias,
-            payload: path.join(__dirname, '../node_modules/payload'),
-            react: path.join(__dirname, '../node_modules/react'),
-            'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-            [path.resolve(__dirname, '../../src/index')]: path.resolve(
-              __dirname,
-              '../../src/admin.ts',
-            ),
-            util: mockModulePath,
-          },
-        },
-      }
+    // webpack: (config) => {
+    //   const newConfig = {
+    //     ...config,
+    //     resolve: {
+    //       ...config.resolve,
+    //       alias: {
+    //         ...config.resolve.alias,
+    //         payload: path.join(__dirname, '../node_modules/payload'),
+    //         react: path.join(__dirname, '../node_modules/react'),
+    //         'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+    //         [path.resolve(__dirname, '../../src/index')]: path.resolve(
+    //           __dirname,
+    //           '../../src/admin.ts',
+    //         ),
+    //         util: mockModulePath,
+    //       },
+    //     },
+    //   }
 
-      return newConfig
-    },
+    //   return newConfig
+    // },
   },
   collections: [Users, Customers, Products],
   editor: lexicalEditor({}),
