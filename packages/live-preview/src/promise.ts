@@ -1,13 +1,20 @@
 export const promise = async (args: {
   accessor: number | string
   apiRoute?: string
+  cache: Map<string, unknown>
+  cacheKey: string
   collection: string
   depth: number
   id: number | string
   ref: Record<string, unknown>
   serverURL: string
 }): Promise<void> => {
-  const { id, accessor, apiRoute, collection, depth, ref, serverURL } = args
+  const { id, accessor, apiRoute, cache, cacheKey, collection, depth, ref, serverURL } = args
+
+  if (cache.has(cacheKey)) {
+    ref[accessor] = cache.get(cacheKey)
+    return
+  }
 
   const url = `${serverURL}${apiRoute || '/api'}/${collection}/${id}?depth=${depth}`
 
@@ -22,6 +29,10 @@ export const promise = async (args: {
     }).then((res) => res.json())
   } catch (err) {
     console.error(err) // eslint-disable-line no-console
+  }
+
+  if (!cache.has(cacheKey)) {
+    cache.set(cacheKey, res)
   }
 
   ref[accessor] = res

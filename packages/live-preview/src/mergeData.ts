@@ -28,9 +28,11 @@ export const mergeData = async <T>(args: {
   const result = { ...initialData }
 
   const populationPromises: Promise<void>[] = []
+  const cache = new Map()
 
   traverseFields({
     apiRoute,
+    cache,
     depth,
     fieldSchema,
     incomingData,

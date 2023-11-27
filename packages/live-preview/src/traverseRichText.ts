@@ -2,6 +2,7 @@ import { promise } from './promise'
 
 export const traverseRichText = ({
   apiRoute,
+  cache,
   depth,
   incomingData,
   populationPromises,
@@ -9,6 +10,7 @@ export const traverseRichText = ({
   serverURL,
 }: {
   apiRoute: string
+  cache: Map<string, unknown>
   depth: number
   incomingData: any
   populationPromises: Promise<void>[]
@@ -19,6 +21,7 @@ export const traverseRichText = ({
     result = incomingData.map((incomingRow) =>
       traverseRichText({
         apiRoute,
+        cache,
         depth,
         incomingData: incomingRow,
         populationPromises,
@@ -30,23 +33,32 @@ export const traverseRichText = ({
     result = incomingData
 
     if ('relationTo' in incomingData && 'value' in incomingData && incomingData.value) {
-      populationPromises.push(
-        promise({
-          id: typeof incomingData.value === 'object' ? incomingData.value.id : incomingData.value,
-          accessor: 'value',
-          apiRoute,
-          collection: String(incomingData.relationTo),
-          depth,
-          ref: result,
-          serverURL,
-        }),
-      )
+      const cacheKey = `${incomingData.relationTo}_${incomingData.value}`
+
+      if (cache.has(cacheKey)) {
+        result = cache.get(cacheKey)
+      } else {
+        populationPromises.push(
+          promise({
+            id: typeof incomingData.value === 'object' ? incomingData.value.id : incomingData.value,
+            accessor: 'value',
+            apiRoute,
+            cache,
+            cacheKey,
+            collection: String(incomingData.relationTo),
+            depth,
+            ref: result,
+            serverURL,
+          }),
+        )
+      }
     } else {
       result = {}
 
       Object.keys(incomingData).forEach((key) => {
         result[key] = traverseRichText({
           apiRoute,
+          cache,
           depth,
           incomingData: incomingData[key],
           populationPromises,

@@ -5,6 +5,7 @@ import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
   apiRoute?: string
+  cache: Map<string, unknown>
   depth?: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
@@ -14,6 +15,7 @@ export const traverseFields = <T>(args: {
 }): void => {
   const {
     apiRoute,
+    cache,
     depth,
     fieldSchema: fieldSchemas,
     incomingData,
@@ -30,6 +32,7 @@ export const traverseFields = <T>(args: {
         case 'richText':
           result[fieldName] = traverseRichText({
             apiRoute,
+            cache,
             depth,
             incomingData: incomingData[fieldName],
             populationPromises,
@@ -52,6 +55,7 @@ export const traverseFields = <T>(args: {
 
               traverseFields({
                 apiRoute,
+                cache,
                 depth,
                 fieldSchema: fieldSchema.fields,
                 incomingData: incomingRow,
@@ -87,6 +91,7 @@ export const traverseFields = <T>(args: {
 
               traverseFields({
                 apiRoute,
+                cache,
                 depth,
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
@@ -111,6 +116,7 @@ export const traverseFields = <T>(args: {
 
           traverseFields({
             apiRoute,
+            cache,
             depth,
             fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
@@ -146,32 +152,48 @@ export const traverseFields = <T>(args: {
                 const newRelation = incomingRelation.relationTo
 
                 if (oldID !== newID || oldRelation !== newRelation) {
-                  populationPromises.push(
-                    promise({
-                      id: incomingRelation.value,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: newRelation,
-                      depth,
-                      ref: result[fieldName][i],
-                      serverURL,
-                    }),
-                  )
+                  const cacheKey = `${newRelation}_${newID}`
+
+                  if (cache.has(cacheKey)) {
+                    result[fieldName][i] = cache.get(cacheKey)
+                  } else {
+                    populationPromises.push(
+                      promise({
+                        id: incomingRelation.value,
+                        accessor: 'value',
+                        apiRoute,
+                        cache,
+                        cacheKey,
+                        collection: newRelation,
+                        depth,
+                        ref: result[fieldName][i],
+                        serverURL,
+                      }),
+                    )
+                  }
                 }
               } else {
                 // Handle `hasMany` monomorphic
                 if (result[fieldName][i]?.id !== incomingRelation) {
-                  populationPromises.push(
-                    promise({
-                      id: incomingRelation,
-                      accessor: i,
-                      apiRoute,
-                      collection: String(fieldSchema.relationTo),
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                  const cacheKey = `${fieldSchema.relationTo}_${incomingRelation}`
+
+                  if (cache.has(cacheKey)) {
+                    result[fieldName][i] = cache.get(cacheKey)
+                  } else {
+                    populationPromises.push(
+                      promise({
+                        id: incomingRelation,
+                        accessor: i,
+                        apiRoute,
+                        cache,
+                        cacheKey,
+                        collection: String(fieldSchema.relationTo),
+                        depth,
+                        ref: result[fieldName],
+                        serverURL,
+                      }),
+                    )
+                  }
                 }
               }
             })
@@ -217,17 +239,25 @@ export const traverseFields = <T>(args: {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  populationPromises.push(
-                    promise({
-                      id: newID,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: newRelation,
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                  const cacheKey = `${newRelation}_${newID}`
+
+                  if (cache.has(cacheKey)) {
+                    result[fieldName] = cache.get(cacheKey)
+                  } else {
+                    populationPromises.push(
+                      promise({
+                        id: newID,
+                        accessor: 'value',
+                        apiRoute,
+                        cache,
+                        cacheKey,
+                        collection: newRelation,
+                        depth,
+                        ref: result[fieldName],
+                        serverURL,
+                      }),
+                    )
+                  }
                 } else {
                   result[fieldName] = null
                 }
@@ -252,17 +282,25 @@ export const traverseFields = <T>(args: {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  populationPromises.push(
-                    promise({
-                      id: newID,
-                      accessor: fieldName,
-                      apiRoute,
-                      collection: String(fieldSchema.relationTo),
-                      depth,
-                      ref: result as Record<string, unknown>,
-                      serverURL,
-                    }),
-                  )
+                  const cacheKey = `${fieldSchema.relationTo}_${newID}`
+
+                  if (cache.has(cacheKey)) {
+                    result[fieldName] = cache.get(cacheKey)
+                  } else {
+                    populationPromises.push(
+                      promise({
+                        id: newID,
+                        accessor: fieldName,
+                        apiRoute,
+                        cache,
+                        cacheKey,
+                        collection: String(fieldSchema.relationTo),
+                        depth,
+                        ref: result as Record<string, unknown>,
+                        serverURL,
+                      }),
+                    )
+                  }
                 } else {
                   result[fieldName] = null
                 }
