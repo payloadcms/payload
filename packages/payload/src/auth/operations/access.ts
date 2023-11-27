@@ -43,55 +43,54 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
 
   try {
     const shouldCommit = await initTransaction(req)
-    await Promise.all(
-      config.collections.map(async (collection) => {
-        const collectionOperations = [...allOperations]
 
-        if (
-          collection.auth &&
-          typeof collection.auth.maxLoginAttempts !== 'undefined' &&
-          collection.auth.maxLoginAttempts !== 0
-        ) {
-          collectionOperations.push('unlock')
-        }
+    await config.collections.reduce(async (prevPromise, collection) => {
+      await prevPromise
+      const collectionOperations = [...allOperations]
 
-        if (collection.versions) {
-          collectionOperations.push('readVersions')
-        }
+      if (
+        collection.auth &&
+        typeof collection.auth.maxLoginAttempts !== 'undefined' &&
+        collection.auth.maxLoginAttempts !== 0
+      ) {
+        collectionOperations.push('unlock')
+      }
 
-        const collectionPolicy = await getEntityPolicies({
-          entity: collection,
-          operations: collectionOperations,
-          req,
-          type: 'collection',
-        })
-        results.collections = {
-          ...results.collections,
-          [collection.slug]: collectionPolicy,
-        }
-      }),
-    )
+      if (collection.versions) {
+        collectionOperations.push('readVersions')
+      }
 
-    await Promise.all(
-      config.globals.map(async (global) => {
-        const globalOperations: AllOperations[] = ['read', 'update']
+      const collectionPolicy = await getEntityPolicies({
+        entity: collection,
+        operations: collectionOperations,
+        req,
+        type: 'collection',
+      })
+      results.collections = {
+        ...results.collections,
+        [collection.slug]: collectionPolicy,
+      }
+    }, Promise.resolve())
 
-        if (global.versions) {
-          globalOperations.push('readVersions')
-        }
+    await config.globals.reduce(async (prevPromise, global) => {
+      await prevPromise
+      const globalOperations: AllOperations[] = ['read', 'update']
 
-        const globalPolicy = await getEntityPolicies({
-          entity: global,
-          operations: globalOperations,
-          req,
-          type: 'global',
-        })
-        results.globals = {
-          ...results.globals,
-          [global.slug]: globalPolicy,
-        }
-      }),
-    )
+      if (global.versions) {
+        globalOperations.push('readVersions')
+      }
+
+      const globalPolicy = await getEntityPolicies({
+        entity: global,
+        operations: globalOperations,
+        req,
+        type: 'global',
+      })
+      results.globals = {
+        ...results.globals,
+        [global.slug]: globalPolicy,
+      }
+    }, Promise.resolve())
 
     if (shouldCommit) await commitTransaction(req)
     return results
