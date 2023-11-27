@@ -319,7 +319,7 @@ const token = await payload.forgotPassword({
 //   token: 'o38jf0q34jfij43f3f...', // JWT used for auth
 //   user: { ... } // the user document that just logged in
 // }
-const result = await payload.forgotPassword({
+const result = await payload.resetPassword({
   collection: 'users', // required
   data: {
     // required
