@@ -1,23 +1,16 @@
+/* eslint-disable jest/require-top-level-describe */
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
-import shelljs from 'shelljs'
 
 import payload from '../../packages/payload/src'
+import { describeIfInCIOrHasLocalstack } from '../helpers'
 import { initPayloadTest } from '../helpers/configHelpers'
 
 const TEST_BUCKET = 'payload-bucket'
 
 let client: AWS.S3Client
-describe('plugin-cloud-storage', () => {
+describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {
   beforeAll(async () => {
-    // Check that localstack is running
-    const { code } = shelljs.exec(`docker ps | grep localstack`)
-    if (code !== 0) {
-      throw new Error(
-        `Localstack is not running. Please run "pnpm docker:start" before running this test.`,
-      )
-    }
-
     client = new AWS.S3({
       endpoint: 'http://localhost:4566',
       region: 'us-east-1',
