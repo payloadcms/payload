@@ -30,7 +30,7 @@ type Args = {
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
 // - Flatten locales into requested locale
-// - Sanitize outgoing data (point field, etc)
+// - Sanitize outgoing data (point field, etc.)
 // - Execute field hooks
 // - Execute read access control
 // - Populate relationships
@@ -443,7 +443,7 @@ export const promise = async ({
         if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
-      await traverseFields({
+      traverseFields({
         collection,
         context,
         currentDepth,
