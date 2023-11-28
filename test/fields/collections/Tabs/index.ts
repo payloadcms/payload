@@ -106,6 +106,10 @@ const TabsFields: CollectionConfig = {
                 },
               ],
             },
+            {
+              name: 'json',
+              type: 'json',
+            },
           ],
         },
         {

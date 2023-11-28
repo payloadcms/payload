@@ -1,3 +1,19 @@
+## [2.2.2](https://github.com/payloadcms/payload/compare/v2.2.1...v2.2.2) (2023-11-27)
+
+
+### Features
+
+* **i18n:** adds Korean translation ([#4258](https://github.com/payloadcms/payload/issues/4258)) ([1401718](https://github.com/payloadcms/payload/commit/1401718b3b549ce1454389a982474dbe159eb61f))
+
+
+### Bug Fixes
+
+* number field validation ([#4233](https://github.com/payloadcms/payload/issues/4233)) ([19fcfc2](https://github.com/payloadcms/payload/commit/19fcfc27af2ecb68ff989dcaed19b7b7d041a322))
+* passes date options to the react-datepicker in filter UI, removes duplicate options from operators select ([#4225](https://github.com/payloadcms/payload/issues/4225)) ([3d2b62b](https://github.com/payloadcms/payload/commit/3d2b62b2100e36a54adc6a675257a4d671fdd469))
+* prevent json data getting reset when switching tabs ([#4123](https://github.com/payloadcms/payload/issues/4123)) ([1dcd3a2](https://github.com/payloadcms/payload/commit/1dcd3a27825ed9d276b997a66f84bb2c05e87955))
+* transactions broken within doc access ([443847e](https://github.com/payloadcms/payload/commit/443847ec716a3b87032d9d1904b6c90aadd47197))
+* typo in polish translations ([#4234](https://github.com/payloadcms/payload/issues/4234)) ([56a4692](https://github.com/payloadcms/payload/commit/56a469266207ef83053b0c9176d1be4fc26087e6))
+
 ## [2.2.1](https://github.com/payloadcms/payload/compare/v2.2.0...v2.2.1) (2023-11-21)
 
 
