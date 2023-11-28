@@ -381,8 +381,6 @@ describe('Lexical', () => {
       const relationshipBlockNode: SerializedBlockNode = lexicalField.root
         .children[3] as SerializedBlockNode
 
-      console.log('relationshipBlockNode:', relationshipBlockNode.fields.rel)
-
       /**
        * Depth 1 population:
        */
@@ -397,8 +395,8 @@ describe('Lexical', () => {
       expect(Object.keys(relationshipBlockNode.fields.rel[1])).toHaveLength(2)
       expect(relationshipBlockNode.fields.rel[1].relationTo).toStrictEqual('uploads')
       expect(relationshipBlockNode.fields.rel[1].value.id).toStrictEqual(createdJPGDocID)
-      expect(relationshipBlockNode.fields.rel[0].value.text).toStrictEqual(uploadsDoc.text)
-      expect(relationshipBlockNode.fields.rel[0].value.filename).toStrictEqual('payload.jpg')
+      expect(relationshipBlockNode.fields.rel[1].value.text).toStrictEqual(uploadsDoc.text)
+      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual('payload.jpg')
     })
 
     it('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async () => {
