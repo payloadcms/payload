@@ -15,7 +15,7 @@ export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = cre
   'INSERT_RELATIONSHIP_COMMAND',
 )
 
-export default function RelationshipPlugin(): JSX.Element | null {
+export function RelationshipPlugin(): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 

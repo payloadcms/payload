@@ -10,6 +10,51 @@ import type { FloatingToolbarSectionEntry } from '../types'
 import { DropDown, DropDownItem } from './DropDown'
 import './index.scss'
 
+export const ToolbarEntry = ({
+  anchorElem,
+  editor,
+  entry,
+}: {
+  anchorElem: HTMLElement
+  editor: LexicalEditor
+  entry: FloatingToolbarSectionEntry
+}) => {
+  if (entry.Component) {
+    const Component = entry?.Component
+      ? React.lazy(() =>
+          entry.Component().then((resolvedComponent) => ({
+            default: resolvedComponent,
+          })),
+        )
+      : null
+    return (
+      Component && (
+        <React.Suspense>
+          <Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />
+        </React.Suspense>
+      )
+    )
+  }
+
+  const ChildComponent = entry?.ChildComponent
+    ? React.lazy(() =>
+        entry.ChildComponent().then((resolvedChildComponent) => ({
+          default: resolvedChildComponent,
+        })),
+      )
+    : null
+  return (
+    <DropDownItem entry={entry} key={entry.key}>
+      {ChildComponent && (
+        <React.Suspense>
+          <ChildComponent />
+        </React.Suspense>
+      )}
+      <span className="text">{entry.label}</span>
+    </DropDownItem>
+  )
+}
+
 export const ToolbarDropdown = ({
   Icon,
   anchorElem,
@@ -31,21 +76,8 @@ export const ToolbarDropdown = ({
     >
       {entries.length &&
         entries.map((entry) => {
-          if (entry.Component) {
-            return (
-              <entry.Component
-                anchorElem={anchorElem}
-                editor={editor}
-                entry={entry}
-                key={entry.key}
-              />
-            )
-          }
           return (
-            <DropDownItem entry={entry} key={entry.key}>
-              <entry.ChildComponent />
-              <span className="text">{entry.label}</span>
-            </DropDownItem>
+            <ToolbarEntry anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />
           )
         })}
     </DropDown>

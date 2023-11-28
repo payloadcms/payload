@@ -44,6 +44,13 @@ function SlashMenuItem({
   if (title.length > 25) {
     title = title.substring(0, 25) + '...'
   }
+  const LazyIcon = option?.Icon
+    ? React.lazy(() =>
+        option.Icon().then((resolvedIcon) => ({
+          default: resolvedIcon,
+        })),
+      )
+    : null
 
   return (
     <button
@@ -58,7 +65,12 @@ function SlashMenuItem({
       tabIndex={-1}
       type="button"
     >
-      <option.Icon />
+      {LazyIcon && (
+        <React.Suspense>
+          <LazyIcon />
+        </React.Suspense>
+      )}
+
       <span className={`${baseClass}__item-text`}>{title}</span>
     </button>
   )
