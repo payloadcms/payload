@@ -50,7 +50,7 @@ export type BeforeOperationHook = (args: {
   operation: HookOperationType
 }) => any
 
-export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
+export type BeforeValidateHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
@@ -65,10 +65,10 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req?: PayloadRequest
+  req?: PayloadRequest<U>
 }) => any
 
-export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
+export type BeforeChangeHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
@@ -83,10 +83,10 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req: PayloadRequest
+  req: PayloadRequest<U>
 }) => any
 
-export type AfterChangeHook<T extends TypeWithID = any> = (args: {
+export type AfterChangeHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
@@ -96,43 +96,43 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
-  req: PayloadRequest
+  req: PayloadRequest<U>
 }) => any
 
-export type BeforeReadHook<T extends TypeWithID = any> = (args: {
+export type BeforeReadHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   query: { [key: string]: any }
-  req: PayloadRequest
+  req: PayloadRequest<U>
 }) => any
 
-export type AfterReadHook<T extends TypeWithID = any> = (args: {
+export type AfterReadHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   findMany?: boolean
   query?: { [key: string]: any }
-  req: PayloadRequest
+  req: PayloadRequest<U>
 }) => any
 
-export type BeforeDeleteHook = (args: {
+export type BeforeDeleteHook<U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   id: number | string
-  req: PayloadRequest
+  req: PayloadRequest<U>
 }) => any
 
-export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
+export type AfterDeleteHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   id: number | string
-  req: PayloadRequest
+  req: PayloadRequest<U>
 }) => any
 
 export type AfterOperationHook<T extends TypeWithID = any> = (
@@ -147,45 +147,45 @@ export type AfterErrorHook = (
   collection: SanitizedCollectionConfig | null,
 ) => { response: any; status: number } | void
 
-export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
+export type BeforeLoginHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequest<U>
   user: T
 }) => any
 
-export type AfterLoginHook<T extends TypeWithID = any> = (args: {
+export type AfterLoginHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequest<U>
   token: string
   user: T
 }) => any
 
-export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
+export type AfterLogoutHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequest<U>
   res: Response
 }) => any
 
-export type AfterMeHook<T extends TypeWithID = any> = (args: {
+export type AfterMeHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
-  req: PayloadRequest
+  req: PayloadRequest<U>
   response: unknown
 }) => any
 
-export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
+export type AfterRefreshHook<T extends TypeWithID = any, U = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
   exp: number
-  req: PayloadRequest
+  req: PayloadRequest<U>
   res: Response
   token: string
 }) => any
