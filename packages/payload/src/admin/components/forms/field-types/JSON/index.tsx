@@ -9,8 +9,8 @@ import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const baseClass = 'json-field'
 
@@ -19,13 +19,13 @@ const JSONField: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       editorOptions,
       readOnly,
       style,
       width,
-      components: { Error, Label } = {},
     } = {},
     label,
     path: pathFromProps,
@@ -69,8 +69,8 @@ const JSONField: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    setStringValue(JSON.stringify(initialValue, null, 2))
-  }, [initialValue])
+    setStringValue(JSON.stringify(value ? value : initialValue, null, 2))
+  }, [initialValue, value])
 
   return (
     <div
