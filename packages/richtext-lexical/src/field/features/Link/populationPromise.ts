@@ -9,14 +9,19 @@ export const linkPopulationPromiseHOC = (
   props: LinkFeatureProps,
 ): PopulationPromise<SerializedLinkNode> => {
   const linkPopulationPromise: PopulationPromise<SerializedLinkNode> = ({
+    context,
     currentDepth,
     depth,
+    editorPopulationPromises,
     field,
+    findMany,
+    flattenLocales,
     node,
     overrideAccess,
     populationPromises,
     req,
     showHiddenFields,
+    siblingDoc,
   }) => {
     const promises: Promise<void>[] = []
 
@@ -42,10 +47,14 @@ export const linkPopulationPromiseHOC = (
     }
     if (Array.isArray(props.fields)) {
       recurseNestedFields({
+        context,
         currentDepth,
         data: node.fields || {},
         depth,
+        editorPopulationPromises,
         fields: props.fields,
+        findMany,
+        flattenLocales,
         overrideAccess,
         populationPromises,
         promises,

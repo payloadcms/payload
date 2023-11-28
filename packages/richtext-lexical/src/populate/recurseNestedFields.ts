@@ -1,3 +1,4 @@
+import type { RequestContext } from 'payload'
 import type { Field, PayloadRequest } from 'payload/types'
 
 import { afterReadTraverseFields } from 'payload/utilities'
@@ -5,12 +6,19 @@ import { afterReadTraverseFields } from 'payload/utilities'
 import type { PopulationPromise } from '../field/features/types'
 
 type NestedRichTextFieldsArgs = {
+  context: RequestContext
   currentDepth?: number
   data: unknown
   depth: number
+  /**
+   * This maps all the population promises to the node types
+   */
+  editorPopulationPromises: Map<string, Array<PopulationPromise>>
   fields: Field[]
+  findMany: boolean
+  flattenLocales: boolean
   overrideAccess: boolean
-  populationPromises: Map<string, Array<PopulationPromise>>
+  populationPromises: Promise<void>[]
   promises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
@@ -18,10 +26,13 @@ type NestedRichTextFieldsArgs = {
 }
 
 export const recurseNestedFields = ({
+  context,
   currentDepth = 0,
   data,
   depth,
   fields,
+  findMany,
+  flattenLocales,
   overrideAccess = false,
   populationPromises,
   promises,
@@ -30,22 +41,22 @@ export const recurseNestedFields = ({
   siblingDoc,
 }: NestedRichTextFieldsArgs): void => {
   afterReadTraverseFields({
-    collection: null,
-    context: {},
+    collection: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
+    context,
     currentDepth,
     depth,
-    doc: data as any,
-    fieldPromises: promises,
+    doc: data as any, // Looks like it's only needed for hooks and access control, so doesn't matter what we pass here right now
+    fieldPromises: promises, // Not sure if what I pass in here makes sense. But it doesn't seem like it's used at all anyways
     fields,
-    findMany: false,
-    flattenLocales: false,
-    global: null,
+    findMany,
+    flattenLocales,
+    global: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
     overrideAccess,
-    populationPromises: [], // TODO: idk what this is
+    populationPromises, // This is not the same as populationPromises passed into this recurseNestedFields. These are just promises resolved at the very end.
     req,
     showHiddenFields,
     siblingDoc,
-    triggerAccessControl: false,
-    triggerHooks: false,
+    triggerAccessControl: false, // TODO: Enable this to support access control
+    triggerHooks: false, // TODO: Enable this to support hooks
   })
 }

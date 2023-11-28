@@ -142,10 +142,14 @@ export const promise = async ({
       // This is run here AND in the GraphQL Resolver
       if (editor?.populationPromise) {
         const populationPromise = editor.populationPromise({
+          context,
           currentDepth,
           depth,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,
