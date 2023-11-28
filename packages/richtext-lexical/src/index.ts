@@ -148,10 +148,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     },
     populationPromise({
+      context,
       currentDepth,
       depth,
       field,
+      findMany,
+      flattenLocales,
       overrideAccess,
+      populationPromises,
       req,
       showHiddenFields,
       siblingDoc,
@@ -159,11 +163,15 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       // check if there are any features with nodes which have populationPromises for this field
       if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
         return richTextRelationshipPromise({
+          context,
           currentDepth,
           depth,
+          editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
-          populationPromises: finalSanitizedEditorConfig.features.populationPromises,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,

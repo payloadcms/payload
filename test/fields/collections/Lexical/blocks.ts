@@ -1,6 +1,7 @@
 import type { Block } from '../../../../packages/payload/src/fields/config/types'
 
 import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
+import { textFieldsSlug } from '../Text/shared'
 
 export const BlockColumns: any = {
   type: 'array',
@@ -123,6 +124,18 @@ export const UploadAndRichTextBlock: Block = {
   slug: 'uploadAndRichText',
 }
 
+export const RelationshipHasManyBlock: Block = {
+  fields: [
+    {
+      name: 'rel',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: [textFieldsSlug, 'uploads'],
+      required: true,
+    },
+  ],
+  slug: 'relationshipHasManyBlock',
+}
 export const RelationshipBlock: Block = {
   fields: [
     {
