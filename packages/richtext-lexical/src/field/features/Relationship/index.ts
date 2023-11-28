@@ -1,7 +1,7 @@
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { RelationshipNode } from './nodes/RelationshipNode'
 import { relationshipPopulationPromise } from './populationPromise'
 

@@ -15,7 +15,7 @@ import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeatu
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
-import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
+import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands'
 import { linkPopulationPromiseHOC } from './populationPromise'
 
 export type LinkFeatureProps = {

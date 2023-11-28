@@ -1,25 +1,16 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import {
-  $getNodeByKey,
-  COMMAND_PRIORITY_EDITOR,
-  type LexicalCommand,
-  type LexicalEditor,
-  createCommand,
-} from 'lexical'
+import { $getNodeByKey, COMMAND_PRIORITY_EDITOR, type LexicalEditor } from 'lexical'
 import { useListDrawer } from 'payload/components/elements'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { $createRelationshipNode } from '../nodes/RelationshipNode'
 import { INSERT_RELATIONSHIP_COMMAND } from '../plugins'
 import { EnabledRelationshipsCondition } from '../utils/EnabledRelationshipsCondition'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './commands'
 import './index.scss'
 
 const baseClass = 'lexical-relationship-drawer'
-
-export const INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND: LexicalCommand<{
-  replace: { nodeKey: string } | false
-}> = createCommand('INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND')
 
 const insertRelationship = ({
   id,

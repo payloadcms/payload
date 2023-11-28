@@ -7,7 +7,7 @@ import type { FeatureProvider } from '../types'
 import type { SerializedUploadNode } from './nodes/UploadNode'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { UploadNode } from './nodes/UploadNode'
 import { uploadPopulationPromiseHOC } from './populationPromise'
 import { uploadValidation } from './validate'

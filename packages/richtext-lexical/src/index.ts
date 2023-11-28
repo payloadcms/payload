@@ -10,11 +10,11 @@ import type { AdapterProps } from './types'
 
 import { RichTextCell } from './cell'
 import { RichTextField } from './field'
+import { defaultEditorFeatures } from './field/lexical/config/default'
 import {
-  defaultEditorFeatures,
   defaultEditorLexicalConfig,
   defaultSanitizedEditorConfig,
-} from './field/lexical/config/default'
+} from './field/lexical/config/defaultClient'
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
@@ -297,11 +297,15 @@ export {
   useEditorConfigContext,
 } from './field/lexical/config/EditorConfigProvider'
 export {
-  defaultEditorConfig,
   defaultEditorFeatures,
+  defaultHeadlessEditorConfig,
+  defaultSanitizedHeadlessEditorConfig,
+} from './field/lexical/config/default'
+export {
+  defaultEditorConfig,
   defaultEditorLexicalConfig,
   defaultSanitizedEditorConfig,
-} from './field/lexical/config/default'
+} from './field/lexical/config/defaultClient'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
 export { getEnabledNodes } from './field/lexical/nodes'

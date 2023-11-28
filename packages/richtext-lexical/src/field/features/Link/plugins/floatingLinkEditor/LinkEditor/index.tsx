@@ -1,5 +1,4 @@
 'use client'
-import type { LexicalCommand } from 'lexical'
 import type { Data, Fields } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
@@ -12,7 +11,6 @@ import {
   COMMAND_PRIORITY_LOW,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
-  createCommand,
 } from 'lexical'
 import { formatDrawerSlug } from 'payload/components/elements'
 import {
@@ -38,10 +36,7 @@ import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/uti
 import { LinkDrawer } from '../../../drawer'
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode'
 import { transformExtraFields } from '../utilities'
-
-export const TOGGLE_LINK_WITH_MODAL_COMMAND: LexicalCommand<LinkPayload | null> = createCommand(
-  'TOGGLE_LINK_WITH_MODAL_COMMAND',
-)
+import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands'
 
 export function LinkEditor({
   anchorElem,

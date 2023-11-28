@@ -4,7 +4,7 @@ import type { FeatureProvider, ResolvedFeatureMap, SanitizedFeatures } from '../
 
 export type EditorConfig = {
   features: FeatureProvider[]
-  lexical: LexicalEditorConfig
+  lexical?: LexicalEditorConfig
 }
 
 export type SanitizedEditorConfig = {
