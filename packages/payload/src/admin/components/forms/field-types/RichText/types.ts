@@ -1,6 +1,7 @@
 import type { JSONSchema4 } from 'json-schema'
 
 import type { PayloadRequest } from '../../../../../express/types'
+import type { RequestContext } from '../../../../../express/types'
 import type { RichTextField, Validate } from '../../../../../fields/config/types'
 import type { CellComponentProps } from '../../../views/collections/List/Cell/types'
 
@@ -39,10 +40,14 @@ export type RichTextAdapter<
     isRequired: boolean
   }) => JSONSchema4
   populationPromise?: (data: {
+    context: RequestContext
     currentDepth?: number
     depth: number
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    findMany: boolean
+    flattenLocales: boolean
     overrideAccess?: boolean
+    populationPromises: Promise<void>[]
     req: PayloadRequest
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>

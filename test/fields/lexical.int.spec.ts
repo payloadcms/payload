@@ -22,6 +22,7 @@ import { lexicalMigrateDocData } from './collections/LexicalMigrate/data'
 import { richTextDocData } from './collections/RichText/data'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText'
 import { textDoc } from './collections/Text/shared'
+import { uploadsDoc } from './collections/Upload/shared'
 import { clearAndSeedEverything } from './seed'
 import {
   arrayFieldsSlug,
@@ -331,6 +332,73 @@ describe('Lexical', () => {
       expect(relationshipBlockNode.fields.rel.filename).toStrictEqual('payload.jpg')
     })
 
+    it('should correctly populate polymorphic hasMany relationships in blocks with depth=0', async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 0,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks
+
+      const relationshipBlockNode: SerializedBlockNode = lexicalField.root
+        .children[3] as SerializedBlockNode
+
+      /**
+       * Depth 0 population:
+       */
+      expect(Object.keys(relationshipBlockNode.fields.rel[0])).toHaveLength(2)
+      expect(relationshipBlockNode.fields.rel[0].relationTo).toStrictEqual('text-fields')
+      expect(relationshipBlockNode.fields.rel[0].value).toStrictEqual(createdTextDocID)
+
+      expect(Object.keys(relationshipBlockNode.fields.rel[1])).toHaveLength(2)
+      expect(relationshipBlockNode.fields.rel[1].relationTo).toStrictEqual('uploads')
+      expect(relationshipBlockNode.fields.rel[1].value).toStrictEqual(createdJPGDocID)
+    })
+
+    it('should correctly populate polymorphic hasMany relationships in blocks with depth=1', async () => {
+      // Related issue: https://github.com/payloadcms/payload/issues/4277
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+          depth: 1,
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks
+
+      const relationshipBlockNode: SerializedBlockNode = lexicalField.root
+        .children[3] as SerializedBlockNode
+
+      /**
+       * Depth 1 population:
+       */
+      expect(Object.keys(relationshipBlockNode.fields.rel[0])).toHaveLength(2)
+      expect(relationshipBlockNode.fields.rel[0].relationTo).toStrictEqual('text-fields')
+      expect(relationshipBlockNode.fields.rel[0].value.id).toStrictEqual(createdTextDocID)
+      expect(relationshipBlockNode.fields.rel[0].value.text).toStrictEqual(textDoc.text)
+      expect(relationshipBlockNode.fields.rel[0].value.localizedText).toStrictEqual(
+        textDoc.localizedText,
+      )
+
+      expect(Object.keys(relationshipBlockNode.fields.rel[1])).toHaveLength(2)
+      expect(relationshipBlockNode.fields.rel[1].relationTo).toStrictEqual('uploads')
+      expect(relationshipBlockNode.fields.rel[1].value.id).toStrictEqual(createdJPGDocID)
+      expect(relationshipBlockNode.fields.rel[1].value.text).toStrictEqual(uploadsDoc.text)
+      expect(relationshipBlockNode.fields.rel[1].value.filename).toStrictEqual('payload.jpg')
+    })
+
     it('should not populate relationship nodes inside of a sub-editor from a blocks node with 0 depth', async () => {
       const lexicalDoc: LexicalField = (
         await payload.find({
@@ -347,7 +415,7 @@ describe('Lexical', () => {
       const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks
 
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
-        .children[3] as SerializedBlockNode
+        .children[4] as SerializedBlockNode
 
       const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
 
@@ -378,7 +446,7 @@ describe('Lexical', () => {
       const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks
 
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
-        .children[3] as SerializedBlockNode
+        .children[4] as SerializedBlockNode
 
       const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
 
@@ -425,7 +493,7 @@ describe('Lexical', () => {
       const lexicalField: SerializedEditorState = lexicalDoc?.lexicalWithBlocks
 
       const subEditorBlockNode: SerializedBlockNode = lexicalField.root
-        .children[3] as SerializedBlockNode
+        .children[4] as SerializedBlockNode
 
       const subEditor: SerializedEditorState = subEditorBlockNode.fields.richText
 
