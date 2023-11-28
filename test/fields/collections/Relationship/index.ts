@@ -13,12 +13,20 @@ const RelationshipFields: CollectionConfig = {
       relationTo: ['text-fields', 'array-fields'],
       required: true,
       type: 'relationship',
+      admin: {
+        sortOptions: '-id',
+      },
     },
     {
       name: 'relationHasManyPolymorphic',
       type: 'relationship',
       relationTo: ['text-fields', 'array-fields'],
       hasMany: true,
+      admin: {
+        sortOptions: {
+          'text-fields': '-text',
+        },
+      },
     },
     {
       name: 'relationToSelf',

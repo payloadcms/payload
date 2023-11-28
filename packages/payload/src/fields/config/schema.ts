@@ -366,6 +366,9 @@ export const relationship = baseField.keys({
       Label: componentSchema,
     }),
     isSortable: joi.boolean().default(false),
+    sortOptions: joi
+      .alternatives()
+      .try(joi.string(), joi.object().pattern(joi.string(), joi.string())),
   }),
   defaultValue: joi.alternatives().try(joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),

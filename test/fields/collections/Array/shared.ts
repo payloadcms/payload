@@ -35,3 +35,30 @@ export const arrayDoc: Partial<ArrayField> = {
     },
   ],
 }
+
+export const anotherArrayDoc: Partial<ArrayField> = {
+  items: [
+    {
+      text: 'first row',
+    },
+    {
+      text: 'second row',
+    },
+    {
+      text: 'third row',
+    },
+  ],
+  collapsedArray: [
+    {
+      text: 'initialize collapsed',
+    },
+  ],
+  arrayWithMinRows: [
+    {
+      text: 'first row',
+    },
+    {
+      text: 'second row',
+    },
+  ],
+}

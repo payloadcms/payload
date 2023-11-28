@@ -438,6 +438,7 @@ export type RelationshipField = FieldBase & {
       Label?: React.ComponentType<LabelProps>
     }
     isSortable?: boolean
+    sortOptions?: { [collectionSlug: string]: string } | string
   }
   filterOptions?: FilterOptions
   hasMany?: boolean

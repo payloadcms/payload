@@ -40,13 +40,14 @@ const Relationship: React.FC<Props> = (props) => {
     admin: {
       allowCreate = true,
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       isSortable = true,
       readOnly,
+      sortOptions,
       style,
       width,
-      components: { Error, Label } = {},
     } = {},
     filterOptions,
     hasMany,
@@ -139,7 +140,14 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSearch
+            if (typeof sortOptions === 'string') {
+              fieldToSearch = sortOptions
+            } else if (sortOptions && typeof sortOptions === 'object') {
+              fieldToSearch = sortOptions[relation] || collection?.admin?.useAsTitle || 'id'
+            } else {
+              fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            }
 
             const query: {
               [key: string]: unknown
@@ -236,6 +244,7 @@ const Relationship: React.FC<Props> = (props) => {
       locale,
       filterOptionsResult,
       serverURL,
+      sortOptions,
       api,
       i18n,
       config,
