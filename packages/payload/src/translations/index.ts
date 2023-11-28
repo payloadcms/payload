@@ -11,6 +11,7 @@ import hr from './hr.json'
 import hu from './hu.json'
 import it from './it.json'
 import ja from './ja.json'
+import ko from './ko.json'
 import my from './my.json'
 import nb from './nb.json'
 import nl from './nl.json'
@@ -39,6 +40,7 @@ export default {
   hu,
   it,
   ja,
+  ko,
   my,
   nb,
   nl,

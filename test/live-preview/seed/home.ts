@@ -93,12 +93,46 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
       ],
     },
   ],
+  relationshipAsUpload: '{{MEDIA_ID}}',
+  relationshipInRichText: [
+    {
+      children: [
+        {
+          text: ' ',
+        },
+      ],
+      relationTo: 'posts',
+      type: 'relationship',
+      value: {
+        id: '{{POST_1_ID}}',
+      },
+    },
+  ],
   relationshipMonoHasMany: ['{{POST_1_ID}}'],
   relationshipMonoHasOne: '{{POST_1_ID}}',
   relationshipPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],
+  relationshipPolyHasOne: { relationTo: 'posts', value: '{{POST_1_ID}}' },
   arrayOfRelationships: [
     {
-      relationshipWithinArray: '{{POST_1_ID}}',
+      uploadInArray: '{{MEDIA_ID}}',
+      richTextInArray: [
+        {
+          children: [
+            {
+              text: ' ',
+            },
+          ],
+          relationTo: 'posts',
+          type: 'relationship',
+          value: {
+            id: '{{POST_1_ID}}',
+          },
+        },
+      ],
+      relationshipInArrayMonoHasMany: ['{{POST_1_ID}}'],
+      relationshipInArrayMonoHasOne: '{{POST_1_ID}}',
+      relationshipInArrayPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],
+      relationshipInArrayPolyHasOne: { relationTo: 'posts', value: '{{POST_1_ID}}' },
     },
   ],
 }
