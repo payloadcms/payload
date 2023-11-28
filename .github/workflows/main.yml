@@ -114,10 +114,7 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Start LocalStack
-        uses: LocalStack/setup-localstack@v0.1.2
-        with:
-          image-tag: 'latest'
-          configuration: SERVICES=s3 DEBUG=1 DATA_DIR=/tmp/localstack/data
+        run: pnpm docker:start
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
