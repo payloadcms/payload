@@ -3,6 +3,7 @@ import path from 'path'
 
 import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
 
+import { lexicalEditor } from '../../packages/richtext-lexical/src'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import ArrayFields from './collections/Array'
 import BlockFields from './collections/Blocks'
@@ -28,6 +29,7 @@ import TextFields from './collections/Text'
 import Uploads from './collections/Upload'
 import Uploads2 from './collections/Upload2'
 import Uploads3 from './collections/Uploads3'
+import Introduction from './globals/Introduction'
 import { clearAndSeedEverything } from './seed'
 
 export const collectionSlugs: CollectionConfig[] = [
@@ -85,10 +87,16 @@ export default buildConfigWithDefaults({
     }),
   },
   collections: collectionSlugs,
+  globals: [Introduction],
+  editor: lexicalEditor(),
+  i18n: {
+    lng: 'vi',
+    fallbackLng: 'vi', // default
+  },
   localization: {
-    defaultLocale: 'en',
+    locales: ['en', 'vi'],
+    defaultLocale: 'vi',
     fallback: true,
-    locales: ['en', 'es'],
   },
   onInit: async (payload) => {
     await clearAndSeedEverything(payload)

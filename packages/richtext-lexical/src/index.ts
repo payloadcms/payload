@@ -9,7 +9,6 @@ import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config
 import type { AdapterProps } from './types'
 
 import { RichTextCell } from './cell'
-import { RichTextField } from './field'
 import {
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
@@ -61,10 +60,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       Component: RichTextCell,
       toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
     }),
-    FieldComponent: withMergedProps({
-      Component: RichTextField,
-      toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-    }),
+    FieldComponent: () =>
+      // @ts-expect-error
+      import('./field').then((module) => {
+        const RichTextField = module.RichTextField
+        return import('payload/utilities').then((module2) =>
+          module2.withMergedProps({
+            Component: RichTextField,
+            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+          }),
+        )
+      }),
     afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
       return new Promise<void>((resolve, reject) => {
         const promises: Promise<void>[] = []
@@ -186,6 +192,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 }
 
+export { RichTextField } from './field'
 export { BlockQuoteFeature } from './field/features/BlockQuote'
 export { BlocksFeature } from './field/features/Blocks'
 export {
@@ -195,8 +202,8 @@ export {
   BlockNode,
   type SerializedBlockNode,
 } from './field/features/Blocks/nodes/BlocksNode'
-export { HeadingFeature } from './field/features/Heading'
 
+export { HeadingFeature } from './field/features/Heading'
 export { LinkFeature } from './field/features/Link'
 export type { LinkFeatureProps } from './field/features/Link'
 export {
@@ -205,6 +212,7 @@ export {
   AutoLinkNode,
   type SerializedAutoLinkNode,
 } from './field/features/Link/nodes/AutoLinkNode'
+
 export {
   $createLinkNode,
   $isLinkNode,
@@ -213,7 +221,6 @@ export {
   type SerializedLinkNode,
   TOGGLE_LINK_COMMAND,
 } from './field/features/Link/nodes/LinkNode'
-
 export { ParagraphFeature } from './field/features/Paragraph'
 export { RelationshipFeature } from './field/features/Relationship'
 export {
@@ -249,11 +256,11 @@ export { TextHTMLConverter } from './field/features/converters/html/converter/co
 export { defaultHTMLConverters } from './field/features/converters/html/converter/defaultConverters'
 export type { HTMLConverter } from './field/features/converters/html/converter/types'
 export { consolidateHTMLConverters } from './field/features/converters/html/field'
+
 export { lexicalHTML } from './field/features/converters/html/field'
-
 export { TestRecorderFeature } from './field/features/debug/TestRecorder'
-export { TreeviewFeature } from './field/features/debug/TreeView'
 
+export { TreeviewFeature } from './field/features/debug/TreeView'
 export { BoldTextFeature } from './field/features/format/Bold'
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
 export { ItalicTextFeature } from './field/features/format/Italic'
@@ -268,8 +275,8 @@ export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnorderedListFeature } from './field/features/lists/UnorderedList'
 export { LexicalPluginToLexicalFeature } from './field/features/migrations/LexicalPluginToLexical'
 export { SlateToLexicalFeature } from './field/features/migrations/SlateToLexical'
-export { SlateHeadingConverter } from './field/features/migrations/SlateToLexical/converter/converters/heading'
 
+export { SlateHeadingConverter } from './field/features/migrations/SlateToLexical/converter/converters/heading'
 export { SlateIndentConverter } from './field/features/migrations/SlateToLexical/converter/converters/indent'
 export { SlateLinkConverter } from './field/features/migrations/SlateToLexical/converter/converters/link'
 export { SlateListItemConverter } from './field/features/migrations/SlateToLexical/converter/converters/listItem'
@@ -278,6 +285,7 @@ export { SlateRelationshipConverter } from './field/features/migrations/SlateToL
 export { SlateUnknownConverter } from './field/features/migrations/SlateToLexical/converter/converters/unknown'
 export { SlateUnorderedListConverter } from './field/features/migrations/SlateToLexical/converter/converters/unorderedList'
 export { SlateUploadConverter } from './field/features/migrations/SlateToLexical/converter/converters/upload'
+
 export { defaultSlateConverters } from './field/features/migrations/SlateToLexical/converter/defaultConverters'
 
 export {
@@ -289,7 +297,6 @@ export type {
   SlateNode,
   SlateNodeConverter,
 } from './field/features/migrations/SlateToLexical/converter/types'
-
 export type {
   Feature,
   FeatureProvider,
@@ -312,20 +319,19 @@ export {
 } from './field/lexical/config/default'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
-export { getEnabledNodes } from './field/lexical/nodes'
 
+export { getEnabledNodes } from './field/lexical/nodes'
 export { ToolbarButton } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarButton'
 export { ToolbarDropdown } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarDropdown/index'
 export {
   type FloatingToolbarSection,
   type FloatingToolbarSectionEntry,
 } from './field/lexical/plugins/FloatingSelectToolbar/types'
-export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
 // export SanitizedEditorConfig
 export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
 export { RichTextCell }
-export { RichTextField }
+export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/index'
 export {
   SlashMenuGroup,
   SlashMenuOption,
