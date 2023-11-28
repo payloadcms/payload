@@ -8,7 +8,6 @@ import { $createRelationshipNode } from '../nodes/RelationshipNode'
 import { INSERT_RELATIONSHIP_COMMAND } from '../plugins'
 import { EnabledRelationshipsCondition } from '../utils/EnabledRelationshipsCondition'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './commands'
-import './index.scss'
 
 const baseClass = 'lexical-relationship-drawer'
 

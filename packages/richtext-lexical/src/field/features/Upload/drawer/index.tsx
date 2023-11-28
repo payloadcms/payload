@@ -8,7 +8,6 @@ import { EnabledRelationshipsCondition } from '../../Relationship/utils/EnabledR
 import { $createUploadNode } from '../nodes/UploadNode'
 import { INSERT_UPLOAD_COMMAND } from '../plugin'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './commands'
-import './index.scss'
 
 const baseClass = 'lexical-upload-drawer'
 
