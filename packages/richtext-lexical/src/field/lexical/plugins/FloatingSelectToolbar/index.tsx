@@ -10,7 +10,7 @@ import {
   COMMAND_PRIORITY_LOW,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
@@ -32,15 +32,27 @@ function ButtonSectionEntry({
   editor: LexicalEditor
   entry: FloatingToolbarSectionEntry
 }): JSX.Element {
-  if (entry.Component) {
-    const Component = entry?.Component
+  const Component = useMemo(() => {
+    return entry?.Component
       ? React.lazy(() =>
           entry.Component().then((resolvedComponent) => ({
             default: resolvedComponent,
           })),
         )
       : null
+  }, [entry])
 
+  const ChildComponent = useMemo(() => {
+    return entry?.ChildComponent
+      ? React.lazy(() =>
+          entry.ChildComponent().then((resolvedChildComponent) => ({
+            default: resolvedChildComponent,
+          })),
+        )
+      : null
+  }, [entry])
+
+  if (entry.Component) {
     return (
       Component && (
         <React.Suspense>
@@ -49,14 +61,6 @@ function ButtonSectionEntry({
       )
     )
   }
-
-  const ChildComponent = entry?.ChildComponent
-    ? React.lazy(() =>
-        entry.ChildComponent().then((resolvedChildComponent) => ({
-          default: resolvedChildComponent,
-        })),
-      )
-    : null
 
   return (
     <ToolbarButton entry={entry} key={entry.key}>
@@ -82,14 +86,16 @@ function ToolbarSection({
 }): JSX.Element {
   const { editorConfig } = useEditorConfigContext()
 
-  const Icon =
-    section.type === 'dropdown' && section.entries.length && section.ChildComponent
+  const Icon = useMemo(() => {
+    return section?.type === 'dropdown' && section.entries.length && section.ChildComponent
       ? React.lazy(() =>
           section.ChildComponent().then((resolvedComponent) => ({
             default: resolvedComponent,
           })),
         )
       : null
+  }, [section])
+
   return (
     <div
       className={`floating-select-toolbar-popup__section floating-select-toolbar-popup__section-${section.key}`}

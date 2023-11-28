@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 const baseClass = 'floating-select-toolbar-popup__dropdown'
 
@@ -19,14 +19,27 @@ export const ToolbarEntry = ({
   editor: LexicalEditor
   entry: FloatingToolbarSectionEntry
 }) => {
-  if (entry.Component) {
-    const Component = entry?.Component
+  const Component = useMemo(() => {
+    return entry?.Component
       ? React.lazy(() =>
           entry.Component().then((resolvedComponent) => ({
             default: resolvedComponent,
           })),
         )
       : null
+  }, [entry])
+
+  const ChildComponent = useMemo(() => {
+    return entry?.ChildComponent
+      ? React.lazy(() =>
+          entry.ChildComponent().then((resolvedChildComponent) => ({
+            default: resolvedChildComponent,
+          })),
+        )
+      : null
+  }, [entry])
+
+  if (entry.Component) {
     return (
       Component && (
         <React.Suspense>
@@ -36,13 +49,6 @@ export const ToolbarEntry = ({
     )
   }
 
-  const ChildComponent = entry?.ChildComponent
-    ? React.lazy(() =>
-        entry.ChildComponent().then((resolvedChildComponent) => ({
-          default: resolvedChildComponent,
-        })),
-      )
-    : null
   return (
     <DropDownItem entry={entry} key={entry.key}>
       {ChildComponent && (

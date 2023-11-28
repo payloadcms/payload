@@ -44,13 +44,16 @@ function SlashMenuItem({
   if (title.length > 25) {
     title = title.substring(0, 25) + '...'
   }
-  const LazyIcon = option?.Icon
-    ? React.lazy(() =>
-        option.Icon().then((resolvedIcon) => ({
-          default: resolvedIcon,
-        })),
-      )
-    : null
+
+  const LazyIcon = useMemo(() => {
+    return option?.Icon
+      ? React.lazy(() =>
+          option.Icon().then((resolvedIcon) => ({
+            default: resolvedIcon,
+          })),
+        )
+      : null
+  }, [option])
 
   return (
     <button
