@@ -476,6 +476,114 @@ describe('Collections - Live Preview', () => {
     expect(merge2.relationshipInRichText[0].type).toEqual('paragraph')
   })
 
+  it('— relationships - does not re-populate existing rich text relationships', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      relationshipInRichText: [
+        {
+          type: 'paragraph',
+          text: 'Paragraph 1',
+        },
+        {
+          type: 'reference',
+          reference: {
+            relationTo: 'posts',
+            value: testPost,
+          },
+        },
+      ],
+    }
+
+    // Add a relationship
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        relationshipInRichText: [
+          {
+            type: 'paragraph',
+            text: 'Paragraph 1',
+          },
+          {
+            type: 'reference',
+            reference: {
+              relationTo: 'posts',
+              value: testPost.id,
+            },
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(0)
+    expect(merge1.relationshipInRichText).toHaveLength(2)
+    expect(merge1.relationshipInRichText[1].reference.value).toMatchObject(testPost)
+  })
+
+  it('— relationships - populates within blocks', async () => {
+    const block1 = (shallow?: boolean): Extract<Page['layout'][0], { blockType: 'cta' }> => ({
+      blockType: 'cta',
+      id: '123',
+      links: [
+        {
+          link: {
+            label: 'Link 1',
+            type: 'reference',
+            reference: {
+              relationTo: 'posts',
+              value: shallow ? testPost?.id : testPost,
+            },
+          },
+        },
+      ],
+    })
+
+    const block2: Extract<Page['layout'][0], { blockType: 'content' }> = {
+      blockType: 'content',
+      id: '456',
+      columns: [
+        {
+          id: '789',
+          richText: [
+            {
+              type: 'paragraph',
+              text: 'Column 1',
+            },
+          ],
+        },
+      ],
+    }
+
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      layout: [block1(), block2],
+    }
+
+    // Add a new block before the populated one
+    // Then check to see that the relationship is still populated
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        layout: [block2, block1(true)],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    // Check that the relationship on the first has been removed
+    // And that the relationship on the second has been populated
+    expect(merge2.layout[0].links).toBeUndefined()
+    expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
+    expect(merge2._numberOfRequests).toEqual(1)
+  })
+
   it('— rich text - merges rich text', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
@@ -538,66 +646,6 @@ describe('Collections - Live Preview', () => {
     expect(merge2._numberOfRequests).toEqual(0)
     expect(merge2.hero.richText).toHaveLength(1)
     expect(merge2.hero.richText[0].children[0].text).toEqual('Paragraph 1 (Updated)')
-  })
-
-  it('— relationships - populates within blocks', async () => {
-    const block1 = (shallow?: boolean): Extract<Page['layout'][0], { blockType: 'cta' }> => ({
-      blockType: 'cta',
-      id: '123',
-      links: [
-        {
-          link: {
-            label: 'Link 1',
-            type: 'reference',
-            reference: {
-              relationTo: 'posts',
-              value: shallow ? testPost?.id : testPost,
-            },
-          },
-        },
-      ],
-    })
-
-    const block2: Extract<Page['layout'][0], { blockType: 'content' }> = {
-      blockType: 'content',
-      id: '456',
-      columns: [
-        {
-          id: '789',
-          richText: [
-            {
-              type: 'paragraph',
-              text: 'Column 1',
-            },
-          ],
-        },
-      ],
-    }
-
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-      layout: [block1(), block2],
-    }
-
-    // Add a new block before the populated one
-    // Then check to see that the relationship is still populated
-    const merge2 = await mergeData({
-      depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...initialData,
-        layout: [block2, block1(true)],
-      },
-      initialData,
-      serverURL,
-      returnNumberOfRequests: true,
-    })
-
-    // Check that the relationship on the first has been removed
-    // And that the relationship on the second has been populated
-    expect(merge2.layout[0].links).toBeUndefined()
-    expect(merge2.layout[1].links[0].link.reference.value).toMatchObject(testPost)
-    expect(merge2._numberOfRequests).toEqual(1)
   })
 
   it('— blocks - adds, reorders, and removes blocks', async () => {
