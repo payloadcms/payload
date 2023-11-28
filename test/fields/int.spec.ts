@@ -582,6 +582,32 @@ describe('Fields', () => {
       expect(doc.localized).toMatchObject(arrayDefaultValue)
     })
 
+    it('should create with nested array', async () => {
+      const subArrayText = 'something expected'
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              subArray: [
+                {
+                  text: subArrayText,
+                },
+              ],
+              text: 'test',
+            },
+          ],
+        },
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection,
+      })
+
+      expect(result.items[0].subArray[0].text).toStrictEqual(subArrayText)
+    })
+
     it('should update without overwriting other locales with defaultValue', async () => {
       const localized = [{ text: 'unique' }]
       const enText = 'english'
