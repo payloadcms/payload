@@ -187,8 +187,7 @@ describe('Collections - Live Preview', () => {
 
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
   })
-
-  it('— relationships - populates all types', async () => {
+  it('— relationships - populates monomorphic has one relationships', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
     }
@@ -199,8 +198,71 @@ describe('Collections - Live Preview', () => {
       incomingData: {
         ...initialData,
         relationshipMonoHasOne: testPost.id,
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
+  })
+
+  it('— relationships - populates monomorphic has many relationships', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
         relationshipMonoHasMany: [testPost.id],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
+  })
+
+  it('— relationships - populates polymorphic has one relationships', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
         relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationshipPolyHasOne).toMatchObject({
+      value: testPost,
+      relationTo: postsSlug,
+    })
+  })
+
+  it('— relationships - populates polymorphic has many relationships', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData,
@@ -208,19 +270,12 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(4)
-    expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
-    expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
-
-    expect(merge1.relationshipPolyHasOne).toMatchObject({
-      value: testPost,
-      relationTo: postsSlug,
-    })
-
+    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.relationshipPolyHasMany).toMatchObject([
       { value: testPost, relationTo: postsSlug },
     ])
   })
+
   it('— relationships - can clear relationships', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
