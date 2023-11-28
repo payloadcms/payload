@@ -865,11 +865,6 @@ describe('Fields', () => {
                 equals: 'green',
               },
             },
-            {
-              'blocks.blockType': {
-                equals: 'content',
-              },
-            },
           ],
         },
       })
