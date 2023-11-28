@@ -191,7 +191,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -225,7 +225,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
       const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
 
       expect(textNodeInBlockNodeRichText.text).toBe(
@@ -239,7 +239,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -298,7 +298,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
       const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
 
       expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
@@ -319,7 +319,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // secondL: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -388,7 +388,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(3) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -441,7 +441,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
+      const blockNode: SerializedBlockNode = lexicalField.root.children[5] as SerializedBlockNode
       const subBlocks = blockNode.fields.subBlocks
 
       expect(subBlocks).toHaveLength(2)
@@ -459,9 +459,9 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(4)
+      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(5)
 
-      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(5)
+      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(6)
       await radioButtonBlock2.scrollIntoViewIfNeeded()
       await expect(radioButtonBlock1).toBeVisible()
       await expect(radioButtonBlock2).toBeVisible()
@@ -507,8 +507,8 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const radio1: SerializedBlockNode = lexicalField.root.children[7] as SerializedBlockNode
-      const radio2: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
+      const radio1: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
+      const radio2: SerializedBlockNode = lexicalField.root.children[9] as SerializedBlockNode
 
       expect(radio1.fields.radioButtons).toBe('option2')
       expect(radio2.fields.radioButtons).toBe('option3')
@@ -534,7 +534,7 @@ describe('lexical', () => {
 
       await parentEditorParagraph.click() // Click works better than focus
 
-      const blockWithRichTextEditor = richTextField.locator('.lexical-block').nth(1) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      const blockWithRichTextEditor = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
       await blockWithRichTextEditor.scrollIntoViewIfNeeded()
       await expect(blockWithRichTextEditor).toBeVisible()
 
@@ -567,7 +567,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(6)
+      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
 
       await conditionalArrayBlock.scrollIntoViewIfNeeded()
       await expect(conditionalArrayBlock).toBeVisible()

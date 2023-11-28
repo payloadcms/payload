@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
 import { blockFieldsSlug } from '../../slugs'
+import { RelationshipHasManyBlock } from '../Lexical/blocks'
 import { AddCustomBlocks } from './components/AddCustomBlocks'
 import { getBlocksFieldSeedData } from './shared'
 
@@ -10,6 +11,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
   type: 'blocks',
   required: true,
   blocks: [
+    RelationshipHasManyBlock,
     {
       slug: prefix ? `${prefix}Content` : 'content',
       fields: [
