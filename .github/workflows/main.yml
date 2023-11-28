@@ -90,6 +90,10 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: payloadtests
+      AWS_ENDPOINT_URL: http://127.0.0.1:4566
+      AWS_ACCESS_KEY_ID: localstack
+      AWS_SECRET_ACCESS_KEY: localstack
+      AWS_REGION: us-east-1
 
     steps:
       - name: Use Node.js 18
