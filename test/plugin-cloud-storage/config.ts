@@ -137,6 +137,5 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-    console.log(process.env.S3_ENDPOINT)
   },
 })

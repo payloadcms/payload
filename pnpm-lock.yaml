@@ -29,6 +29,9 @@ importers:
         specifier: 5.3.4
         version: 5.3.4(react@18.2.0)
     devDependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.142.0
+        version: 3.427.0
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:packages/eslint-config-payload
