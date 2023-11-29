@@ -14,7 +14,10 @@ const RelationshipFields: CollectionConfig = {
       required: true,
       type: 'relationship',
       admin: {
-        sortOptions: '-id',
+        sortOptions: {
+          'text-fields': '-id',
+          'array-fields': '-id',
+        },
       },
     },
     {

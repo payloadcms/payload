@@ -430,22 +430,37 @@ export type SelectField = FieldBase & {
   type: 'select'
 }
 
-export type RelationshipField = FieldBase & {
-  admin?: Admin & {
-    allowCreate?: boolean
-    components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-    }
-    isSortable?: boolean
-    sortOptions?: { [collectionSlug: string]: string } | string
+type PolymorphicRelationship = {
+  admin?: {
+    sortOptions?: { [collectionSlug: string]: string }
   }
-  filterOptions?: FilterOptions
-  hasMany?: boolean
-  maxDepth?: number
-  relationTo: string | string[]
-  type: 'relationship'
-} & (
+  relationTo: string[]
+}
+
+type SingleRelationship = {
+  admin?: {
+    sortOptions?: string
+  }
+  relationTo: string
+}
+
+export type RelationshipTypes = PolymorphicRelationship | SingleRelationship
+
+export type RelationshipField = FieldBase &
+  RelationshipTypes & {
+    admin?: Admin & {
+      allowCreate?: boolean
+      components?: {
+        Error?: React.ComponentType<ErrorProps>
+        Label?: React.ComponentType<LabelProps>
+      }
+      isSortable?: boolean
+    }
+    filterOptions?: FilterOptions
+    hasMany?: boolean
+    maxDepth?: number
+    type: 'relationship'
+  } & (
     | {
         hasMany: true
         /**
