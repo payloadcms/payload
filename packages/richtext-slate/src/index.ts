@@ -7,6 +7,7 @@ import type { AdapterArguments } from './types'
 import RichTextCell from './cell'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
 import { richTextValidate } from './data/validation'
+import RichTextField from './field'
 
 export function slateEditor(
   args: AdapterArguments,
@@ -16,18 +17,10 @@ export function slateEditor(
       Component: RichTextCell,
       toMergeIntoProps: args,
     }),
-    FieldComponent: () =>
-      // @ts-expect-error
-      import('./field').then((module) => {
-        const RichTextField = module.RichTextField
-        return import('payload/utilities').then((module) =>
-          module.withMergedProps({
-            Component: RichTextField,
-            toMergeIntoProps: args,
-          }),
-        )
-      }),
-
+    FieldComponent: withMergedProps({
+      Component: RichTextField,
+      toMergeIntoProps: args,
+    }),
     outputSchema: ({ isRequired }) => {
       return {
         items: {

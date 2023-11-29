@@ -22,9 +22,7 @@ export type RichTextAdapter<
     CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>
   >
 
-  FieldComponent: () => Promise<
-    React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-  >
+  FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
 
   afterReadPromise?: ({
     field,

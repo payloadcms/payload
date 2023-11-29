@@ -9,6 +9,7 @@ import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config
 import type { AdapterProps } from './types'
 
 import { RichTextCell } from './cell'
+import { RichTextField } from './field'
 import {
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
@@ -60,17 +61,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       Component: RichTextCell,
       toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
     }),
-    FieldComponent: () =>
-      // @ts-expect-error
-      import('./field').then((module) => {
-        const RichTextField = module.RichTextField
-        return import('payload/utilities').then((module2) =>
-          module2.withMergedProps({
-            Component: RichTextField,
-            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-          }),
-        )
-      }),
+    FieldComponent: withMergedProps({
+      Component: RichTextField,
+      toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+    }),
     afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
       return new Promise<void>((resolve, reject) => {
         const promises: Promise<void>[] = []
