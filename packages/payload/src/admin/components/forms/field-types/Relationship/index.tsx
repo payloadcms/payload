@@ -141,10 +141,12 @@ const Relationship: React.FC<Props> = (props) => {
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
             let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
-            if (typeof sortOptions === 'string') {
-              fieldToSearch = sortOptions
-            } else if (sortOptions?.[relation]) {
-              fieldToSearch = sortOptions[relation]
+            if (!searchArg) {
+              if (typeof sortOptions === 'string') {
+                fieldToSearch = sortOptions
+              } else if (sortOptions?.[relation]) {
+                fieldToSearch = sortOptions[relation]
+              }
             }
 
             const query: {
@@ -259,7 +261,7 @@ const Relationship: React.FC<Props> = (props) => {
     (searchArg: string, valueArg: Value | Value[]) => {
       if (search !== searchArg) {
         setLastLoadedPage({})
-        updateSearch(searchArg, valueArg)
+        updateSearch(searchArg, valueArg, searchArg !== '')
       }
     },
     [search, updateSearch],
