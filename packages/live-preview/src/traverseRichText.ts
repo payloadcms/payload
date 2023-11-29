@@ -39,9 +39,27 @@ export const traverseRichText = ({
       result = {}
     }
 
+    // Remove keys from `result` that do not appear in `incomingData`
+    // There's likely another way to do this,
+    // But recursion and references make this very difficult
+    Object.keys(result).forEach((key) => {
+      if (!(key in incomingData)) {
+        delete result[key]
+      }
+    })
+
+    // Iterate over the keys of `incomingData` and populate `result`
     Object.keys(incomingData).forEach((key) => {
       if (!result[key]) {
-        result[key] = incomingData[key]
+        // Instantiate the key in `result` if it doesn't exist
+        // Ensure its type matches the type of the `incomingData`
+        // We don't have a schema to check against here
+        result[key] =
+          incomingData[key] && typeof incomingData[key] === 'object'
+            ? Array.isArray(incomingData[key])
+              ? []
+              : {}
+            : incomingData[key]
       }
 
       const isRelationship = key === 'value' && 'relationTo' in incomingData

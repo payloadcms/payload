@@ -4,6 +4,7 @@ import type { Media, Page, Post } from './payload-types'
 
 import { handleMessage } from '../../packages/live-preview/src/handleMessage'
 import { mergeData } from '../../packages/live-preview/src/mergeData'
+import { traverseRichText } from '../../packages/live-preview/src/traverseRichText'
 import payload from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { fieldSchemaToJSON } from '../../packages/payload/src/utilities/fieldSchemaToJSON'
@@ -494,7 +495,7 @@ describe('Collections - Live Preview', () => {
       ],
     }
 
-    // Add a relationship
+    // Make a change to the text
     const merge1 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
@@ -503,7 +504,7 @@ describe('Collections - Live Preview', () => {
         relationshipInRichText: [
           {
             type: 'paragraph',
-            text: 'Paragraph 1',
+            text: 'Paragraph 1 (Updated)',
           },
           {
             type: 'reference',
@@ -521,6 +522,7 @@ describe('Collections - Live Preview', () => {
 
     expect(merge1._numberOfRequests).toEqual(0)
     expect(merge1.relationshipInRichText).toHaveLength(2)
+    expect(merge1.relationshipInRichText[0].text).toEqual('Paragraph 1 (Updated)')
     expect(merge1.relationshipInRichText[1].reference.value).toMatchObject(testPost)
   })
 
@@ -584,68 +586,95 @@ describe('Collections - Live Preview', () => {
     expect(merge2._numberOfRequests).toEqual(1)
   })
 
-  it('— rich text - merges rich text', async () => {
-    const initialData: Partial<Page> = {
-      title: 'Test Page',
-    }
-
+  it('— rich text - merges text changes', async () => {
     // Add a relationship
-    const merge1 = await mergeData({
+    const merge1 = await traverseRichText({
       depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...initialData,
-        hero: {
-          type: 'lowImpact',
-          richText: [
+      apiRoute: undefined,
+      incomingData: [
+        {
+          type: 'paragraph',
+          children: [
             {
-              type: 'paragraph',
-              children: [
-                {
-                  text: 'Paragraph 1',
-                },
-              ],
+              text: 'Paragraph 1',
             },
           ],
         },
-      },
-      initialData,
+      ],
+      result: [],
+      populationPromises: [],
       serverURL,
-      returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(0)
-    expect(merge1.hero.richText).toHaveLength(1)
-    expect(merge1.hero.richText[0].children[0].text).toEqual('Paragraph 1')
+    expect(merge1).toHaveLength(1)
+    expect(merge1[0].children[0].text).toEqual('Paragraph 1')
 
     // Update the rich text
-    const merge2 = await mergeData({
+    const merge2 = await traverseRichText({
       depth: 1,
-      fieldSchema: schemaJSON,
-      incomingData: {
-        ...merge1,
-        hero: {
-          type: 'lowImpact',
-          richText: [
+      apiRoute: undefined,
+      incomingData: [
+        {
+          type: 'paragraph',
+          children: [
             {
-              type: 'paragraph',
-              children: [
-                {
-                  text: 'Paragraph 1 (Updated)',
-                },
-              ],
+              text: 'Paragraph 1 (Updated)',
             },
           ],
         },
-      },
-      initialData,
+      ],
+      populationPromises: [],
+      result: merge1,
       serverURL,
-      returnNumberOfRequests: true,
     })
 
-    expect(merge2._numberOfRequests).toEqual(0)
-    expect(merge2.hero.richText).toHaveLength(1)
-    expect(merge2.hero.richText[0].children[0].text).toEqual('Paragraph 1 (Updated)')
+    expect(merge2).toHaveLength(1)
+    expect(merge2[0].children[0].text).toEqual('Paragraph 1 (Updated)')
+  })
+
+  it('— rich text - can reset heading type', async () => {
+    // Add a heading with an H1 type
+    const merge1 = await traverseRichText({
+      depth: 1,
+      apiRoute: undefined,
+      incomingData: [
+        {
+          type: 'h1',
+          children: [
+            {
+              text: 'Heading',
+            },
+          ],
+        },
+      ],
+      populationPromises: [],
+      result: [],
+      serverURL,
+    })
+
+    expect(merge1).toHaveLength(1)
+    expect(merge1[0].type).toEqual('h1')
+
+    // Update the rich text to remove the heading type
+    const merge2 = await traverseRichText({
+      depth: 1,
+      apiRoute: undefined,
+      incomingData: [
+        {
+          children: [
+            {
+              text: 'Heading',
+            },
+          ],
+        },
+      ],
+      populationPromises: [],
+      result: merge1,
+      serverURL,
+    })
+
+    expect(merge2).toHaveLength(1)
+    expect(merge2[0].type).toBeUndefined()
   })
 
   it('— blocks - adds, reorders, and removes blocks', async () => {
