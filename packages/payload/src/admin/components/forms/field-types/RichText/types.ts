@@ -21,7 +21,6 @@ export type RichTextAdapter<
   CellComponent: () => React.FC<
     CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>
   >
-  // Using a function to return the React.FC fixes the following issue: https://github.com/payloadcms/payload/issues/4282
   FieldComponent: () => React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
   afterReadPromise?: ({
     field,
