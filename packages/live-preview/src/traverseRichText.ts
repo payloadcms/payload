@@ -1,19 +1,15 @@
-import { promise } from './promise'
+import type { PopulationsByCollection } from './types'
 
 export const traverseRichText = ({
-  apiRoute,
   depth,
   incomingData,
-  populationPromises,
+  populationsByCollection,
   result,
-  serverURL,
 }: {
-  apiRoute: string
   depth: number
   incomingData: any
-  populationPromises: Promise<any>[]
+  populationsByCollection: PopulationsByCollection
   result: any
-  serverURL: string
 }): any => {
   if (Array.isArray(incomingData)) {
     if (!result) {
@@ -26,12 +22,10 @@ export const traverseRichText = ({
       }
 
       return traverseRichText({
-        apiRoute,
         depth,
         incomingData: item,
-        populationPromises,
+        populationsByCollection,
         result: result[index],
-        serverURL,
       })
     })
   } else if (incomingData && typeof incomingData === 'object') {
@@ -68,26 +62,22 @@ export const traverseRichText = ({
         const needsPopulation = !result.value || typeof result.value !== 'object'
 
         if (needsPopulation) {
-          populationPromises.push(
-            promise({
-              id: incomingData[key],
-              accessor: 'value',
-              apiRoute,
-              collection: incomingData.relationTo,
-              depth,
-              ref: result,
-              serverURL,
-            }),
-          )
+          if (!populationsByCollection[incomingData.relationTo]) {
+            populationsByCollection[incomingData.relationTo] = []
+          }
+
+          populationsByCollection[incomingData.relationTo].push({
+            id: incomingData[key],
+            accessor: 'value',
+            ref: result,
+          })
         }
       } else {
         result[key] = traverseRichText({
-          apiRoute,
           depth,
           incomingData: incomingData[key],
-          populationPromises,
+          populationsByCollection,
           result: result[key],
-          serverURL,
         })
       }
     })

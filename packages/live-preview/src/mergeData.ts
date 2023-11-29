@@ -1,4 +1,7 @@
+import type { PaginatedDocs } from 'payload/database'
 import type { fieldSchemaToJSON } from 'payload/utilities'
+
+import type { PopulationsByCollection } from './types'
 
 import { traverseFields } from './traverseFields'
 
@@ -27,22 +30,52 @@ export const mergeData = async <T>(args: {
 
   const result = { ...initialData }
 
-  const populationPromises: Promise<void>[] = []
+  const populationsByCollection: PopulationsByCollection = {}
 
   traverseFields({
-    apiRoute,
     depth,
     fieldSchema,
     incomingData,
-    populationPromises,
+    populationsByCollection,
     result,
-    serverURL,
   })
 
-  await Promise.all(populationPromises)
+  await Promise.all(
+    Object.entries(populationsByCollection).map(async ([collection, populations]) => {
+      const ids = new Set(populations.map(({ id }) => id))
+      const url = `${serverURL}${
+        apiRoute || '/api'
+      }/${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`
+
+      let res: PaginatedDocs
+
+      try {
+        res = await fetch(url, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then((res) => res.json())
+
+        if (res?.docs?.length > 0) {
+          res.docs.forEach((doc) => {
+            populationsByCollection[collection].forEach((population) => {
+              if (population.id === doc.id) {
+                population.ref[population.accessor] = doc
+              }
+            })
+          })
+        }
+      } catch (err) {
+        console.error(err) // eslint-disable-line no-console
+      }
+    }),
+  )
 
   return {
     ...result,
-    ...(returnNumberOfRequests ? { _numberOfRequests: populationPromises.length } : {}),
+    ...(returnNumberOfRequests
+      ? { _numberOfRequests: Object.keys(populationsByCollection).length }
+      : {}),
   }
 }
