@@ -4,13 +4,11 @@ import React, { Suspense, lazy } from 'react'
 
 import type { FieldProps } from '../types'
 
-export const RichTextField: React.FC<FieldProps> = (props) => {
-  // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
-  const RichTextEditor = lazy(() => import('./Field'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
+const RichTextEditor = lazy(() => import('./Field'))
 
-  return (
-    <Suspense fallback={<ShimmerEffect height="35vh" />}>
-      <RichTextEditor {...props} />
-    </Suspense>
-  )
-}
+export const RichTextField: React.FC<FieldProps> = (props) => (
+  <Suspense fallback={<ShimmerEffect height="35vh" />}>
+    <RichTextEditor {...props} />
+  </Suspense>
+)

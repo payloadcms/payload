@@ -31,51 +31,6 @@ export const LexicalFields: CollectionConfig = {
   },
   fields: [
     {
-      type: 'tabs',
-      tabs: [
-        {
-          name: 'one',
-          fields: [
-            {
-              name: 'sometext',
-              type: 'text',
-            },
-            {
-              name: 'rttt',
-              type: 'richText',
-              editor: lexicalEditor(),
-            },
-          ],
-        },
-        {
-          name: 'two',
-          fields: [
-            {
-              name: 'sometext',
-              type: 'text',
-            },
-            {
-              name: 'rttt',
-              type: 'richText',
-            },
-          ],
-        },
-        {
-          name: 'three',
-          fields: [
-            {
-              name: 'sometext',
-              type: 'text',
-            },
-            {
-              name: 'rttt',
-              type: 'richText',
-            },
-          ],
-        },
-      ],
-    },
-    {
       name: 'title',
       type: 'text',
       required: true,

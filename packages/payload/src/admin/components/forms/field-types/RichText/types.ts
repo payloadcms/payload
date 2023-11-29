@@ -21,9 +21,7 @@ export type RichTextAdapter<
   CellComponent: React.FC<
     CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>
   >
-
   FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-
   afterReadPromise?: ({
     field,
     incomingEditorState,
