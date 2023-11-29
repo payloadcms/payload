@@ -1,6 +1,7 @@
 import type { ArrayField } from '../../payload-types'
 
 export const arrayDoc: Partial<ArrayField> = {
+  title: 'array doc 1',
   items: [
     {
       text: 'first row',
@@ -37,6 +38,7 @@ export const arrayDoc: Partial<ArrayField> = {
 }
 
 export const anotherArrayDoc: Partial<ArrayField> = {
+  title: 'array doc 2',
   items: [
     {
       text: 'first row',
