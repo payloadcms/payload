@@ -340,7 +340,7 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(4)
+    expect(merge1._numberOfRequests).toEqual(1)
     expect(merge1.arrayOfRelationships).toHaveLength(1)
     expect(merge1.arrayOfRelationships).toMatchObject([
       {
@@ -396,7 +396,7 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge2._numberOfRequests).toEqual(4)
+    expect(merge2._numberOfRequests).toEqual(1)
     expect(merge2.arrayOfRelationships).toHaveLength(2)
     expect(merge2.arrayOfRelationships).toMatchObject([
       {
