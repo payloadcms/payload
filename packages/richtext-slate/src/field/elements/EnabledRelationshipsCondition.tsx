@@ -1,3 +1,5 @@
+'use client'
+
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useConfig } from 'payload/components/utilities'
