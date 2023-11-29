@@ -184,6 +184,27 @@ describe('lexical', () => {
     expect(textNode2.format).toBe(0)
   })
 
+  test('Make sure highly specific issue does not occur when two richText fields share the same editor prop', async () => {
+    // Reproduces https://github.com/payloadcms/payload/issues/4282
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'tabsWithRichText')
+    await page.goto(url.global('tabsWithRichText'))
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    await richTextField.click() // Use click, because focus does not work
+    await page.keyboard.type('some text')
+
+    await page.locator('.tabs-field__tabs').first().getByText('en tab2').first().click()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const contentEditable = richTextField.locator('.ContentEditable__root').first()
+    const textContent = await contentEditable.textContent()
+
+    expect(textContent).not.toBe('some text')
+    expect(textContent).toBe('')
+  })
+
   describe('nested lexical editor in block', () => {
     test('should type and save typed text', async () => {
       await navigateToLexicalFields()

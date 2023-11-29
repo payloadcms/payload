@@ -13,14 +13,16 @@ export function slateEditor(
   args: AdapterArguments,
 ): RichTextAdapter<any[], AdapterArguments, AdapterArguments> {
   return {
-    CellComponent: withMergedProps({
-      Component: RichTextCell,
-      toMergeIntoProps: args,
-    }),
-    FieldComponent: withMergedProps({
-      Component: RichTextField,
-      toMergeIntoProps: args,
-    }),
+    CellComponent: () =>
+      withMergedProps({
+        Component: RichTextCell,
+        toMergeIntoProps: args,
+      }),
+    FieldComponent: () =>
+      withMergedProps({
+        Component: RichTextField,
+        toMergeIntoProps: args,
+      }),
     outputSchema: ({ isRequired }) => {
       return {
         items: {
