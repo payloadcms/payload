@@ -36,7 +36,7 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
         }
       }
 
-      const parentID = parentRows[parentRowIndex].id
+      const parentID = parentRows[parentRowIndex].id || parentRows[parentRowIndex]._parentID
 
       // Add any sub arrays that need to be created
       // We will call this recursively below

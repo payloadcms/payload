@@ -11,50 +11,68 @@ export const traverseRichText = ({
   apiRoute: string
   depth: number
   incomingData: any
-  populationPromises: Promise<void>[]
+  populationPromises: Promise<any>[]
   result: any
   serverURL: string
 }): any => {
   if (Array.isArray(incomingData)) {
-    result = incomingData.map((incomingRow) =>
-      traverseRichText({
+    if (!result) {
+      result = []
+    }
+
+    result = incomingData.map((item, index) => {
+      if (!result[index]) {
+        result[index] = item
+      }
+
+      return traverseRichText({
         apiRoute,
         depth,
-        incomingData: incomingRow,
+        incomingData: item,
         populationPromises,
-        result,
+        result: result[index],
         serverURL,
-      }),
-    )
-  } else if (typeof incomingData === 'object' && incomingData !== null) {
-    result = incomingData
-
-    if ('relationTo' in incomingData && 'value' in incomingData && incomingData.value) {
-      populationPromises.push(
-        promise({
-          id: typeof incomingData.value === 'object' ? incomingData.value.id : incomingData.value,
-          accessor: 'value',
-          apiRoute,
-          collection: String(incomingData.relationTo),
-          depth,
-          ref: result,
-          serverURL,
-        }),
-      )
-    } else {
+      })
+    })
+  } else if (incomingData && typeof incomingData === 'object') {
+    if (!result) {
       result = {}
+    }
 
-      Object.keys(incomingData).forEach((key) => {
+    Object.keys(incomingData).forEach((key) => {
+      if (!result[key]) {
+        result[key] = incomingData[key]
+      }
+
+      const isRelationship = key === 'value' && 'relationTo' in incomingData
+
+      if (isRelationship) {
+        const needsPopulation = !result.value || typeof result.value !== 'object'
+
+        if (needsPopulation) {
+          populationPromises.push(
+            promise({
+              id: incomingData[key],
+              accessor: 'value',
+              apiRoute,
+              collection: incomingData.relationTo,
+              depth,
+              ref: result,
+              serverURL,
+            }),
+          )
+        }
+      } else {
         result[key] = traverseRichText({
           apiRoute,
           depth,
           incomingData: incomingData[key],
           populationPromises,
-          result,
+          result: result[key],
           serverURL,
         })
-      })
-    }
+      }
+    })
   } else {
     result = incomingData
   }
