@@ -1,7 +1,7 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import type { PopulationsByCollection } from './types'
+import type { PopulationsByCollection, RecentUpdate } from './types'
 
 import { traverseFields } from './traverseFields'
 
@@ -11,6 +11,7 @@ export const mergeData = async <T>(args: {
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
   initialData: T
+  mostRecentUpdate?: RecentUpdate
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -24,6 +25,7 @@ export const mergeData = async <T>(args: {
     fieldSchema,
     incomingData,
     initialData,
+    mostRecentUpdate,
     returnNumberOfRequests,
     serverURL,
   } = args
@@ -35,6 +37,7 @@ export const mergeData = async <T>(args: {
   traverseFields({
     fieldSchema,
     incomingData,
+    mostRecentUpdate,
     populationsByCollection,
     result,
   })

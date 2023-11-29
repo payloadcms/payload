@@ -1,11 +1,13 @@
-import type { PopulationsByCollection } from './types'
+import type { PopulationsByCollection, RecentUpdate } from './types'
 
 export const traverseRichText = ({
   incomingData,
+  mostRecentUpdate,
   populationsByCollection,
   result,
 }: {
   incomingData: any
+  mostRecentUpdate?: RecentUpdate
   populationsByCollection: PopulationsByCollection
   result: any
 }): any => {
@@ -21,6 +23,7 @@ export const traverseRichText = ({
 
       return traverseRichText({
         incomingData: item,
+        mostRecentUpdate,
         populationsByCollection,
         result: result[index],
       })
@@ -57,8 +60,10 @@ export const traverseRichText = ({
 
       if (isRelationship) {
         const needsPopulation = !result.value || typeof result.value !== 'object'
+        const hasChanged =
+          result && typeof result === 'object' && result.value.id === mostRecentUpdate?.id
 
-        if (needsPopulation) {
+        if (needsPopulation || hasChanged) {
           if (!populationsByCollection[incomingData.relationTo]) {
             populationsByCollection[incomingData.relationTo] = []
           }
@@ -72,6 +77,7 @@ export const traverseRichText = ({
       } else {
         result[key] = traverseRichText({
           incomingData: incomingData[key],
+          mostRecentUpdate,
           populationsByCollection,
           result: result[key],
         })

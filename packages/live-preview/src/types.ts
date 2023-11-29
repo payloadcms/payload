@@ -9,3 +9,10 @@ export type PopulationsByCollection = {
     ref: Record<string, unknown>
   }>
 }
+
+// TODO: import this from `payload/utilities`
+export type RecentUpdate = {
+  entitySlug: string
+  id?: string
+  updatedAt: string
+}

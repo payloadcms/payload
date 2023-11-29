@@ -42,6 +42,7 @@ export const handleMessage = async <T>(args: {
         fieldSchema: payloadLivePreviewFieldSchema,
         incomingData: eventData.data,
         initialData: payloadLivePreviewPreviousData || initialData,
+        mostRecentUpdate: eventData.mostRecentUpdate,
         serverURL,
       })
 

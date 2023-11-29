@@ -1,16 +1,23 @@
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import type { PopulationsByCollection } from './types'
+import type { PopulationsByCollection, RecentUpdate } from './types'
 
 import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
+  mostRecentUpdate?: RecentUpdate
   populationsByCollection: PopulationsByCollection
   result: T
 }): void => {
-  const { fieldSchema: fieldSchemas, incomingData, populationsByCollection, result } = args
+  const {
+    fieldSchema: fieldSchemas,
+    incomingData,
+    mostRecentUpdate,
+    populationsByCollection,
+    result,
+  } = args
 
   fieldSchemas.forEach((fieldSchema) => {
     if ('name' in fieldSchema && typeof fieldSchema.name === 'string') {
@@ -20,6 +27,7 @@ export const traverseFields = <T>(args: {
         case 'richText':
           result[fieldName] = traverseRichText({
             incomingData: incomingData[fieldName],
+            mostRecentUpdate,
             populationsByCollection,
             result: result[fieldName],
           })
@@ -40,6 +48,7 @@ export const traverseFields = <T>(args: {
               traverseFields({
                 fieldSchema: fieldSchema.fields,
                 incomingData: incomingRow,
+                mostRecentUpdate,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -72,6 +81,7 @@ export const traverseFields = <T>(args: {
               traverseFields({
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
+                mostRecentUpdate,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -93,6 +103,7 @@ export const traverseFields = <T>(args: {
           traverseFields({
             fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
+            mostRecentUpdate,
             populationsByCollection,
             result: result[fieldName],
           })
@@ -123,7 +134,11 @@ export const traverseFields = <T>(args: {
                 const newID = incomingRelation.value
                 const newRelation = incomingRelation.relationTo
 
-                if (oldID !== newID || oldRelation !== newRelation) {
+                const hasChanged = newID !== oldID || newRelation !== oldRelation
+                const hasUpdated =
+                  newRelation === mostRecentUpdate?.entitySlug && newID === mostRecentUpdate?.id
+
+                if (hasChanged || hasUpdated) {
                   if (!populationsByCollection[newRelation]) {
                     populationsByCollection[newRelation] = []
                   }
@@ -136,7 +151,12 @@ export const traverseFields = <T>(args: {
                 }
               } else {
                 // Handle `hasMany` monomorphic
-                if (result[fieldName][i]?.id !== incomingRelation) {
+                const hasChanged = incomingRelation !== result[fieldName][i]?.id
+                const hasUpdated =
+                  fieldSchema.relationTo === mostRecentUpdate?.entitySlug &&
+                  incomingRelation === mostRecentUpdate?.id
+
+                if (hasChanged || hasUpdated) {
                   if (!populationsByCollection[fieldSchema.relationTo]) {
                     populationsByCollection[fieldSchema.relationTo] = []
                   }
@@ -185,9 +205,13 @@ export const traverseFields = <T>(args: {
               const newRelation = hasNewValue ? incomingData[fieldName].relationTo : ''
               const oldRelation = hasOldValue ? result[fieldName].relationTo : ''
 
+              const hasChanged = newID !== oldID || newRelation !== oldRelation
+              const hasUpdated =
+                newRelation === mostRecentUpdate?.entitySlug && newID === mostRecentUpdate?.id
+
               // if the new value/relation is different from the old value/relation
               // populate the new value, otherwise leave it alone
-              if (newID !== oldID || newRelation !== oldRelation) {
+              if (hasChanged || hasUpdated) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
@@ -218,9 +242,14 @@ export const traverseFields = <T>(args: {
                   result[fieldName].id) ||
                 result[fieldName]
 
+              const hasChanged = newID !== oldID
+              const hasUpdated =
+                fieldSchema.relationTo === mostRecentUpdate?.entitySlug &&
+                newID === mostRecentUpdate?.id
+
               // if the new value is different from the old value
               // populate the new value, otherwise leave it alone
-              if (newID !== oldID) {
+              if (hasChanged || hasUpdated) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {

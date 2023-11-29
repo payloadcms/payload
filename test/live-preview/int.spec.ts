@@ -586,11 +586,89 @@ describe('Collections - Live Preview', () => {
     expect(merge2._numberOfRequests).toEqual(1)
   })
 
+  it('— relationships - populates updated relationships whose IDs have not changed', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Populate the relationships
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        title: 'Test Page',
+        relationshipMonoHasOne: testPost.id,
+        relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
+        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
+    expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])
+
+    expect(merge1.relationshipPolyHasOne).toMatchObject({
+      value: testPost,
+      relationTo: postsSlug,
+    })
+
+    expect(merge1.relationshipPolyHasMany).toMatchObject([
+      { value: testPost, relationTo: postsSlug },
+    ])
+
+    // Update the test post
+    const updatedTestPost = await payload.update({
+      collection: postsSlug,
+      id: testPost.id,
+      data: {
+        title: 'Test Post (Recently Updated)',
+      },
+    })
+
+    const mostRecentUpdate = {
+      id: updatedTestPost.id.toString(), // TODO: don't cast to string once the types are fixed
+      entitySlug: postsSlug,
+      updatedAt: updatedTestPost.updatedAt as string,
+    }
+
+    // Merge again using the `mostRecentUpdate` argument
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        title: 'Test Page',
+        relationshipMonoHasOne: testPost.id,
+        relationshipMonoHasMany: [testPost.id],
+        relationshipPolyHasOne: { value: testPost.id, relationTo: postsSlug },
+        relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
+      },
+      initialData: merge1,
+      mostRecentUpdate,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2._numberOfRequests).toEqual(1)
+    expect(merge2.relationshipMonoHasOne).toMatchObject(updatedTestPost)
+    expect(merge2.relationshipMonoHasMany).toMatchObject([updatedTestPost])
+
+    expect(merge2.relationshipPolyHasOne).toMatchObject({
+      value: updatedTestPost,
+      relationTo: postsSlug,
+    })
+
+    expect(merge2.relationshipPolyHasMany).toMatchObject([
+      { value: updatedTestPost, relationTo: postsSlug },
+    ])
+  })
+
   it('— rich text - merges text changes', async () => {
     // Add a relationship
     const merge1 = await traverseRichText({
-      depth: 1,
-      apiRoute: undefined,
       incomingData: [
         {
           type: 'paragraph',
@@ -602,8 +680,7 @@ describe('Collections - Live Preview', () => {
         },
       ],
       result: [],
-      populationPromises: [],
-      serverURL,
+      populationsByCollection: {},
     })
 
     expect(merge1).toHaveLength(1)
@@ -611,8 +688,6 @@ describe('Collections - Live Preview', () => {
 
     // Update the rich text
     const merge2 = await traverseRichText({
-      depth: 1,
-      apiRoute: undefined,
       incomingData: [
         {
           type: 'paragraph',
@@ -623,9 +698,8 @@ describe('Collections - Live Preview', () => {
           ],
         },
       ],
-      populationPromises: [],
+      populationsByCollection: {},
       result: merge1,
-      serverURL,
     })
 
     expect(merge2).toHaveLength(1)
@@ -635,8 +709,6 @@ describe('Collections - Live Preview', () => {
   it('— rich text - can reset heading type', async () => {
     // Add a heading with an H1 type
     const merge1 = await traverseRichText({
-      depth: 1,
-      apiRoute: undefined,
       incomingData: [
         {
           type: 'h1',
@@ -647,9 +719,8 @@ describe('Collections - Live Preview', () => {
           ],
         },
       ],
-      populationPromises: [],
+      populationsByCollection: {},
       result: [],
-      serverURL,
     })
 
     expect(merge1).toHaveLength(1)
@@ -657,8 +728,6 @@ describe('Collections - Live Preview', () => {
 
     // Update the rich text to remove the heading type
     const merge2 = await traverseRichText({
-      depth: 1,
-      apiRoute: undefined,
       incomingData: [
         {
           children: [
@@ -668,9 +737,8 @@ describe('Collections - Live Preview', () => {
           ],
         },
       ],
-      populationPromises: [],
+      populationsByCollection: {},
       result: merge1,
-      serverURL,
     })
 
     expect(merge2).toHaveLength(1)
