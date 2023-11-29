@@ -33,7 +33,6 @@ export const mergeData = async <T>(args: {
   const populationsByCollection: PopulationsByCollection = {}
 
   traverseFields({
-    depth,
     fieldSchema,
     incomingData,
     populationsByCollection,

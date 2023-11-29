@@ -5,13 +5,12 @@ import type { PopulationsByCollection } from './types'
 import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
-  depth?: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
   populationsByCollection: PopulationsByCollection
   result: T
 }): void => {
-  const { depth, fieldSchema: fieldSchemas, incomingData, populationsByCollection, result } = args
+  const { fieldSchema: fieldSchemas, incomingData, populationsByCollection, result } = args
 
   fieldSchemas.forEach((fieldSchema) => {
     if ('name' in fieldSchema && typeof fieldSchema.name === 'string') {
@@ -20,7 +19,6 @@ export const traverseFields = <T>(args: {
       switch (fieldSchema.type) {
         case 'richText':
           result[fieldName] = traverseRichText({
-            depth,
             incomingData: incomingData[fieldName],
             populationsByCollection,
             result: result[fieldName],
@@ -40,7 +38,6 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
-                depth,
                 fieldSchema: fieldSchema.fields,
                 incomingData: incomingRow,
                 populationsByCollection,
@@ -73,7 +70,6 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
-                depth,
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
                 populationsByCollection,
@@ -95,7 +91,6 @@ export const traverseFields = <T>(args: {
           }
 
           traverseFields({
-            depth,
             fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
             populationsByCollection,

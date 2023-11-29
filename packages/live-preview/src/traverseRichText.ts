@@ -1,12 +1,10 @@
 import type { PopulationsByCollection } from './types'
 
 export const traverseRichText = ({
-  depth,
   incomingData,
   populationsByCollection,
   result,
 }: {
-  depth: number
   incomingData: any
   populationsByCollection: PopulationsByCollection
   result: any
@@ -22,7 +20,6 @@ export const traverseRichText = ({
       }
 
       return traverseRichText({
-        depth,
         incomingData: item,
         populationsByCollection,
         result: result[index],
@@ -74,7 +71,6 @@ export const traverseRichText = ({
         }
       } else {
         result[key] = traverseRichText({
-          depth,
           incomingData: incomingData[key],
           populationsByCollection,
           result: result[key],
