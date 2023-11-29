@@ -6,54 +6,62 @@ import { ArrayRowLabel } from './LabelComponent'
 export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
 
 const ArrayFields: CollectionConfig = {
-  slug: arrayFieldsSlug,
   admin: {
     enableRichTextLink: false,
   },
   fields: [
     {
       name: 'items',
-      type: 'array',
-      required: true,
       defaultValue: arrayDefaultValue,
       fields: [
         {
           name: 'text',
-          type: 'text',
           required: true,
+          type: 'text',
+        },
+        {
+          name: 'subArray',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+          type: 'array',
         },
       ],
+      required: true,
+      type: 'array',
     },
     {
       name: 'collapsedArray',
-      type: 'array',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-          required: true,
-        },
-      ],
       admin: {
         initCollapsed: true,
       },
+      fields: [
+        {
+          name: 'text',
+          required: true,
+          type: 'text',
+        },
+      ],
+      type: 'array',
     },
     {
       name: 'localized',
-      type: 'array',
-      required: true,
-      localized: true,
       defaultValue: arrayDefaultValue,
       fields: [
         {
           name: 'text',
-          type: 'text',
           required: true,
+          type: 'text',
         },
       ],
+      localized: true,
+      required: true,
+      type: 'array',
     },
     {
-      type: 'array',
       name: 'readOnly',
       admin: {
         readOnly: true,
@@ -68,75 +76,78 @@ const ArrayFields: CollectionConfig = {
       ],
       fields: [
         {
-          type: 'text',
           name: 'text',
+          type: 'text',
         },
       ],
+      type: 'array',
     },
     {
-      type: 'array',
       name: 'potentiallyEmptyArray',
       fields: [
         {
-          type: 'text',
           name: 'text',
+          type: 'text',
         },
         {
-          type: 'group',
           name: 'groupInRow',
           fields: [
             {
-              type: 'text',
               name: 'textInGroupInRow',
+              type: 'text',
             },
           ],
+          type: 'group',
         },
       ],
+      type: 'array',
     },
     {
-      type: 'array',
       name: 'rowLabelAsFunction',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
       admin: {
-        description: 'Row labels rendered from a function.',
         components: {
           RowLabel: ({ data }) => data.title,
         },
+        description: 'Row labels rendered from a function.',
       },
-    },
-    {
-      type: 'array',
-      name: 'rowLabelAsComponent',
       fields: [
         {
           name: 'title',
           type: 'text',
         },
       ],
+      type: 'array',
+    },
+    {
+      name: 'rowLabelAsComponent',
       admin: {
-        description: 'Row labels rendered as react components.',
         components: {
           RowLabel: ArrayRowLabel,
         },
+        description: 'Row labels rendered as react components.',
       },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      type: 'array',
     },
     {
       name: 'arrayWithMinRows',
-      type: 'array',
-      minRows: 2,
       fields: [
         {
           name: 'text',
           type: 'text',
         },
       ],
+      minRows: 2,
+      type: 'array',
     },
   ],
+  slug: arrayFieldsSlug,
+  versions: true,
 }
 
 export default ArrayFields
