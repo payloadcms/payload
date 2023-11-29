@@ -64,8 +64,8 @@ describe('Lexical', () => {
       await payload.find({
         collection: arrayFieldsSlug,
         where: {
-          id: {
-            exists: true,
+          title: {
+            equals: 'array doc 1',
           },
         },
       })
@@ -75,8 +75,8 @@ describe('Lexical', () => {
       await payload.find({
         collection: uploadsSlug,
         where: {
-          id: {
-            exists: true,
+          filename: {
+            equals: 'payload.jpg',
           },
         },
       })
@@ -86,8 +86,8 @@ describe('Lexical', () => {
       await payload.find({
         collection: textFieldsSlug,
         where: {
-          id: {
-            exists: true,
+          text: {
+            equals: 'Seeded text document',
           },
         },
       })
@@ -97,8 +97,8 @@ describe('Lexical', () => {
       await payload.find({
         collection: richTextFieldsSlug,
         where: {
-          id: {
-            exists: true,
+          title: {
+            equals: 'Rich Text',
           },
         },
       })
