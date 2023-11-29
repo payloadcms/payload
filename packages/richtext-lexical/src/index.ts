@@ -57,14 +57,16 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 
   return {
-    CellComponent: withMergedProps({
-      Component: RichTextCell,
-      toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-    }),
-    FieldComponent: withMergedProps({
-      Component: RichTextField,
-      toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-    }),
+    CellComponent: () =>
+      withMergedProps({
+        Component: RichTextCell,
+        toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+      }),
+    FieldComponent: () =>
+      withMergedProps({
+        Component: RichTextField,
+        toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+      }),
     afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
       return new Promise<void>((resolve, reject) => {
         const promises: Promise<void>[] = []

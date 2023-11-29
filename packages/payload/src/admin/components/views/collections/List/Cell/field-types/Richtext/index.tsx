@@ -8,7 +8,9 @@ const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment
   const editor: RichTextAdapter = props.field.editor
 
-  return <editor.CellComponent {...props} />
+  const Component = editor.CellComponent()
+
+  return <Component {...props} />
 }
 
 export default RichTextCell
