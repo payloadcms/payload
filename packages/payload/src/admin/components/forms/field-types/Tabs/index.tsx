@@ -95,7 +95,7 @@ const TabsField: React.FC<Props> = (props) => {
         : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
       setActiveTabIndex(initialIndex || 0)
     }
-    getInitialPref()
+    void getInitialPref()
   }, [path, indexPath, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
@@ -193,7 +193,11 @@ const TabsField: React.FC<Props> = (props) => {
                   fieldTypes={fieldTypes}
                   forceRender={forceRender}
                   indexPath={indexPath}
-                  key={String(activeTabConfig.label)}
+                  key={
+                    activeTabConfig.label
+                      ? getTranslation(activeTabConfig.label, i18n)
+                      : activeTabConfig['name']
+                  }
                   margins="small"
                   permissions={
                     tabHasName(activeTabConfig) && permissions?.[activeTabConfig.name]

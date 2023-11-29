@@ -5,11 +5,13 @@
  * - each tab has a different label in each language. Needs to be a LOCALIZED label, not a single label for all languages. Only then can it be reproduced
  */
 
+import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
+
 import { lexicalEditor } from '../../../packages/richtext-lexical/src'
 
 const initializedEditor = lexicalEditor()
 
-const TabsWithRichText: any = {
+const TabsWithRichText: GlobalConfig = {
   slug: 'tabsWithRichText',
   fields: [
     {

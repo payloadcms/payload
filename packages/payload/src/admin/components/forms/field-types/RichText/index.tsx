@@ -5,12 +5,13 @@ import type { RichTextAdapter } from './types'
 const RichText: React.FC<RichTextField> = (fieldprops) => {
   // eslint-disable-next-line react/destructuring-assignment
   const editor: RichTextAdapter = fieldprops.editor
+  const { FieldComponent } = editor
 
-  const FieldComponent: React.FC<any> = useMemo(() => {
-    return editor.FieldComponent()
-  }, [editor, fieldprops])
+  const FieldComponentImpl: React.FC<any> = useMemo(() => {
+    return FieldComponent()
+  }, [FieldComponent])
 
-  return <FieldComponent {...fieldprops} />
+  return <FieldComponentImpl {...fieldprops} />
 }
 
 export default RichText
