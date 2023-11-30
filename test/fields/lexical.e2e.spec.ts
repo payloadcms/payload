@@ -205,6 +205,63 @@ describe('lexical', () => {
     expect(textContent).toBe('')
   })
 
+  test('ensure blocks content is not hidden behind components outside of the editor', async () => {
+    // This test makes sure there are no z-index issues here
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    // Find span in contentEditable with text "Some text below relationship node"
+    const contentEditable = richTextField.locator('.ContentEditable__root').first()
+    await expect(contentEditable).toBeVisible()
+    await contentEditable.click() // Use click, because focus does not work
+
+    await page.keyboard.press('/')
+
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    // Heading 2 should be the last, most bottom popover button element which should be initially visible, if not hidden by something (e.g. another block)
+    const popoverSelectButton = slashMenuPopover
+      .locator('button.slash-menu-popup__item-block-select')
+      .first()
+    await expect(popoverSelectButton).toBeVisible()
+    await popoverSelectButton.click()
+
+    const newSelectBlock = richTextField.locator('.lexical-block').first()
+    await newSelectBlock.scrollIntoViewIfNeeded()
+    await expect(newSelectBlock).toBeVisible()
+
+    await page.mouse.wheel(0, 300) // Scroll down so that the future react-select menu popover is displayed below and not above
+
+    const reactSelect = newSelectBlock.locator('.rs__control').first()
+    await reactSelect.click()
+
+    const popover = page.locator('.rs__menu').first()
+    const popoverOption3 = popover.locator('.rs__option').nth(2)
+
+    const popoverOption3BoundingBox = await popoverOption3.boundingBox()
+    expect(popoverOption3BoundingBox).not.toBeNull()
+    expect(popoverOption3BoundingBox).not.toBeUndefined()
+    expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
+    expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
+
+    // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
+    // by using page.mouse and the correct coordinates
+    // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
+    // see: https://github.com/microsoft/playwright/issues/9923
+    // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
+    // and usually the only method which works.
+
+    const x = popoverOption3BoundingBox.x
+    const y = popoverOption3BoundingBox.y
+
+    await page.mouse.click(x, y, { button: 'left' })
+
+    await expect(reactSelect.locator('.rs__value-container').first()).toHaveText('Option 3')
+  })
+
   describe('nested lexical editor in block', () => {
     test('should type and save typed text', async () => {
       await navigateToLexicalFields()
