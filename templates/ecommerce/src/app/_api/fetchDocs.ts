@@ -6,6 +6,8 @@ import { PAGES } from '../_graphql/pages'
 import { PRODUCTS } from '../_graphql/products'
 import { payloadToken } from './token'
 
+import { GRAPHQL_API_URL } from './shared'
+
 const queryMap = {
   pages: {
     query: PAGES,
@@ -34,7 +36,7 @@ export const fetchDocs = async <T>(
     token = cookies().get(payloadToken)
   }
 
-  const docs: T[] = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
+  const docs: T[] = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
