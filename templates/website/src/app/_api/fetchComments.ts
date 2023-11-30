@@ -1,5 +1,6 @@
 import type { Comment, Post, User } from '../../payload/payload-types'
 import { COMMENTS_BY_DOC, COMMENTS_BY_USER } from '../_graphql/comments'
+import { GRAPHQL_API_URL } from './shared'
 
 export const fetchComments = async (args: {
   user?: User['id']
@@ -7,7 +8,7 @@ export const fetchComments = async (args: {
 }): Promise<Comment[]> => {
   const { user, doc } = args || {}
 
-  const docs: Comment[] = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
+  const docs: Comment[] = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
