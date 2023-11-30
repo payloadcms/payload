@@ -4,6 +4,7 @@ import type { EditViewProps } from '../../types'
 
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
+import { useDocumentEvents } from '../../../utilities/DocumentEvents'
 import { useLivePreviewContext } from '../Context/context'
 import { DeviceContainer } from '../Device'
 import { IFrame } from '../IFrame'
@@ -22,6 +23,8 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     setIframeHasLoaded,
     url,
   } = useLivePreviewContext()
+
+  const { mostRecentUpdate } = useDocumentEvents()
 
   const { breakpoint, fieldSchemaJSON } = useLivePreviewContext()
 
@@ -49,6 +52,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
 
       const message = JSON.stringify({
         data: values,
+        externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
         type: 'payload-live-preview',
       })
@@ -73,6 +77,7 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
     iframeRef,
     setIframeHasLoaded,
     fieldSchemaJSON,
+    mostRecentUpdate,
   ])
 
   if (previewWindowType === 'iframe') {
