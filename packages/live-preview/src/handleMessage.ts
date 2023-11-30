@@ -39,10 +39,10 @@ export const handleMessage = async <T>(args: {
       const mergedData = await mergeData<T>({
         apiRoute,
         depth,
+        externallyUpdatedRelationship: eventData.externallyUpdatedRelationship,
         fieldSchema: payloadLivePreviewFieldSchema,
         incomingData: eventData.data,
         initialData: payloadLivePreviewPreviousData || initialData,
-        mostRecentUpdate: eventData.mostRecentUpdate,
         serverURL,
       })
 

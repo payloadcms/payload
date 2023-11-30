@@ -586,7 +586,7 @@ describe('Collections - Live Preview', () => {
     expect(merge2._numberOfRequests).toEqual(1)
   })
 
-  it('— relationships - populates updated relationships whose IDs have not changed', async () => {
+  it('— relationships - re-populates externally updated relationships', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
     }
@@ -629,13 +629,13 @@ describe('Collections - Live Preview', () => {
       },
     })
 
-    const mostRecentUpdate = {
+    const externallyUpdatedRelationship = {
       id: updatedTestPost.id.toString(), // TODO: don't cast to string once the types are fixed
       entitySlug: postsSlug,
       updatedAt: updatedTestPost.updatedAt as string,
     }
 
-    // Merge again using the `mostRecentUpdate` argument
+    // Merge again using the `externallyUpdatedRelationship` argument
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
@@ -647,7 +647,7 @@ describe('Collections - Live Preview', () => {
         relationshipPolyHasMany: [{ value: testPost.id, relationTo: postsSlug }],
       },
       initialData: merge1,
-      mostRecentUpdate,
+      externallyUpdatedRelationship,
       serverURL,
       returnNumberOfRequests: true,
     })

@@ -5,16 +5,16 @@ import type { PopulationsByCollection, RecentUpdate } from './types'
 import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
+  externallyUpdatedRelationship?: RecentUpdate
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
-  mostRecentUpdate?: RecentUpdate
   populationsByCollection: PopulationsByCollection
   result: T
 }): void => {
   const {
+    externallyUpdatedRelationship,
     fieldSchema: fieldSchemas,
     incomingData,
-    mostRecentUpdate,
     populationsByCollection,
     result,
   } = args
@@ -26,8 +26,8 @@ export const traverseFields = <T>(args: {
       switch (fieldSchema.type) {
         case 'richText':
           result[fieldName] = traverseRichText({
+            externallyUpdatedRelationship,
             incomingData: incomingData[fieldName],
-            mostRecentUpdate,
             populationsByCollection,
             result: result[fieldName],
           })
@@ -46,9 +46,9 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
+                externallyUpdatedRelationship,
                 fieldSchema: fieldSchema.fields,
                 incomingData: incomingRow,
-                mostRecentUpdate,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -79,9 +79,9 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
+                externallyUpdatedRelationship,
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
-                mostRecentUpdate,
                 populationsByCollection,
                 result: result[fieldName][i],
               })
@@ -101,9 +101,9 @@ export const traverseFields = <T>(args: {
           }
 
           traverseFields({
+            externallyUpdatedRelationship,
             fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
-            mostRecentUpdate,
             populationsByCollection,
             result: result[fieldName],
           })
@@ -136,7 +136,8 @@ export const traverseFields = <T>(args: {
 
                 const hasChanged = newID !== oldID || newRelation !== oldRelation
                 const hasUpdated =
-                  newRelation === mostRecentUpdate?.entitySlug && newID === mostRecentUpdate?.id
+                  newRelation === externallyUpdatedRelationship?.entitySlug &&
+                  newID === externallyUpdatedRelationship?.id
 
                 if (hasChanged || hasUpdated) {
                   if (!populationsByCollection[newRelation]) {
@@ -153,8 +154,8 @@ export const traverseFields = <T>(args: {
                 // Handle `hasMany` monomorphic
                 const hasChanged = incomingRelation !== result[fieldName][i]?.id
                 const hasUpdated =
-                  fieldSchema.relationTo === mostRecentUpdate?.entitySlug &&
-                  incomingRelation === mostRecentUpdate?.id
+                  fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
+                  incomingRelation === externallyUpdatedRelationship?.id
 
                 if (hasChanged || hasUpdated) {
                   if (!populationsByCollection[fieldSchema.relationTo]) {
@@ -207,7 +208,8 @@ export const traverseFields = <T>(args: {
 
               const hasChanged = newID !== oldID || newRelation !== oldRelation
               const hasUpdated =
-                newRelation === mostRecentUpdate?.entitySlug && newID === mostRecentUpdate?.id
+                newRelation === externallyUpdatedRelationship?.entitySlug &&
+                newID === externallyUpdatedRelationship?.id
 
               // if the new value/relation is different from the old value/relation
               // populate the new value, otherwise leave it alone
@@ -244,8 +246,8 @@ export const traverseFields = <T>(args: {
 
               const hasChanged = newID !== oldID
               const hasUpdated =
-                fieldSchema.relationTo === mostRecentUpdate?.entitySlug &&
-                newID === mostRecentUpdate?.id
+                fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
+                newID === externallyUpdatedRelationship?.id
 
               // if the new value is different from the old value
               // populate the new value, otherwise leave it alone

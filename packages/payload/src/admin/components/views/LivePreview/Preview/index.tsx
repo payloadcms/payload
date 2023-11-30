@@ -52,8 +52,8 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
 
       const message = JSON.stringify({
         data: values,
+        externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
-        mostRecentUpdate,
         type: 'payload-live-preview',
       })
 

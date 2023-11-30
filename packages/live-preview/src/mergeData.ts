@@ -8,10 +8,10 @@ import { traverseFields } from './traverseFields'
 export const mergeData = async <T>(args: {
   apiRoute?: string
   depth?: number
+  externallyUpdatedRelationship?: RecentUpdate
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
   initialData: T
-  mostRecentUpdate?: RecentUpdate
   returnNumberOfRequests?: boolean
   serverURL: string
 }): Promise<
@@ -22,10 +22,10 @@ export const mergeData = async <T>(args: {
   const {
     apiRoute,
     depth,
+    externallyUpdatedRelationship,
     fieldSchema,
     incomingData,
     initialData,
-    mostRecentUpdate,
     returnNumberOfRequests,
     serverURL,
   } = args
@@ -35,9 +35,9 @@ export const mergeData = async <T>(args: {
   const populationsByCollection: PopulationsByCollection = {}
 
   traverseFields({
+    externallyUpdatedRelationship,
     fieldSchema,
     incomingData,
-    mostRecentUpdate,
     populationsByCollection,
     result,
   })
