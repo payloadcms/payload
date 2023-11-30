@@ -9,6 +9,7 @@
 export interface Config {
   collections: {
     users: User
+    tenants: Tenant
     pages: Page
     posts: Post
     categories: Category
@@ -34,9 +35,17 @@ export interface User {
   lockUntil?: string | null
   password: string | null
 }
+export interface Tenant {
+  id: string
+  title: string
+  clientURL: string
+  updatedAt: string
+  createdAt: string
+}
 export interface Page {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'

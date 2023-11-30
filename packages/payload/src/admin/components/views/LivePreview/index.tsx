@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
@@ -137,6 +137,7 @@ export const LivePreviewView: React.FC<
     fieldTypes: FieldTypes
   }
 > = (props) => {
+  const { data } = props
   const config = useConfig()
   const documentInfo = useDocumentInfo()
   const locale = useLocale()
@@ -157,14 +158,27 @@ export const LivePreviewView: React.FC<
     }
   }
 
-  const url =
-    typeof livePreviewConfig?.url === 'function'
-      ? livePreviewConfig?.url({
-          data: props?.data,
+  const [url, setURL] = React.useState<string | undefined>(() => {
+    if (typeof livePreviewConfig?.url === 'string') return livePreviewConfig?.url
+  })
+
+  useEffect(() => {
+    const getURL = async () => {
+      let newURL = typeof livePreviewConfig?.url === 'string' ? livePreviewConfig?.url : undefined
+
+      if (typeof livePreviewConfig?.url === 'function') {
+        newURL = await livePreviewConfig.url({
+          data,
           documentInfo,
           locale,
         })
-      : livePreviewConfig?.url
+      }
+
+      setURL(newURL)
+    }
+
+    getURL() // eslint-disable-line @typescript-eslint/no-floating-promises
+  }, [data, documentInfo, locale, livePreviewConfig])
 
   const breakpoints: LivePreviewConfig['breakpoints'] = [
     ...(livePreviewConfig?.breakpoints || []),
@@ -180,6 +194,8 @@ export const LivePreviewView: React.FC<
     eventType: 'payload-live-preview',
     url,
   })
+
+  if (!url) return null
 
   return (
     <LivePreviewProvider

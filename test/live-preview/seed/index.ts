@@ -5,7 +5,7 @@ import type { Config } from '../../../packages/payload/src/config/types'
 import { devUser } from '../../credentials'
 import removeFiles from '../../helpers/removeFiles'
 import { postsSlug } from '../collections/Posts'
-import { pagesSlug } from '../shared'
+import { pagesSlug, tenantsSlug } from '../shared'
 import { footer } from './footer'
 import { header } from './header'
 import { home } from './home'
@@ -13,6 +13,8 @@ import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
 import { postsPage } from './posts-page'
+import { tenant1 } from './tenant-1'
+import { tenant2 } from './tenant-2'
 
 export const seed: Config['onInit'] = async (payload) => {
   const uploadsDir = path.resolve(__dirname, './media')
@@ -25,6 +27,17 @@ export const seed: Config['onInit'] = async (payload) => {
       password: devUser.password,
     },
   })
+
+  const [tenant1Doc] = await Promise.all([
+    await payload.create({
+      collection: tenantsSlug,
+      data: tenant1,
+    }),
+    await payload.create({
+      collection: tenantsSlug,
+      data: tenant2,
+    }),
+  ])
 
   const media = await payload.create({
     collection: 'media',
@@ -39,21 +52,21 @@ export const seed: Config['onInit'] = async (payload) => {
   const [post1Doc, post2Doc, post3Doc] = await Promise.all([
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post1).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+      data: JSON.parse(JSON.stringify(post1).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
     }),
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post2).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+      data: JSON.parse(JSON.stringify(post2).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
     }),
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post3).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+      data: JSON.parse(JSON.stringify(post3).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
     }),
   ])
 
   const postsPageDoc = await payload.create({
     collection: pagesSlug,
-    data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+    data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
   })
 
   let postsPageDocID = postsPageDoc.id
@@ -72,17 +85,20 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: pagesSlug,
     data: JSON.parse(
       JSON.stringify(home)
-        .replace(/"\{\{MEDIA_ID\}\}"/g, mediaID)
-        .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)
-        .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID)
-        .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
-        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID),
+        .replace(/"\{\{MEDIA_ID\}\}"/g, mediaID.toString())
+        .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID.toString())
+        .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID.toString())
+        .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID.toString())
+        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID.toString())
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
     ),
   })
 
   await payload.updateGlobal({
     slug: 'header',
-    data: JSON.parse(JSON.stringify(header).replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)),
+    data: JSON.parse(
+      JSON.stringify(header).replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID.toString()),
+    ),
   })
 
   await payload.updateGlobal({
