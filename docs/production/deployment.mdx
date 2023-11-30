@@ -11,7 +11,8 @@ keywords: deployment, production, config, configuration, documentation, Content 
   launch. <strong>Awesome! Great work!</strong> Now, what's next?
 </Banner>
 
-There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need to consider these main aspects:
+There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need
+to consider these main aspects:
 
 1. [Basics](#basics)
 1. [Security](#security)
@@ -21,19 +22,26 @@ There are many ways to deploy Payload to a production environment. When evaluati
 
 ## Basics
 
-In order for Payload to run, it requires both the server code and the built admin panel. These will be the `dist` and `build` directories by default. If you've used `create-payload-app` to create your project, executing the `build` npm script will build both and output these directories.
+In order for Payload to run, it requires both the server code and the built admin panel. These will be the `dist`
+and `build` directories by default. If you've used `create-payload-app` to create your project, executing the `build`
+npm script will build both and output these directories.
 
 ## Security
 
-Payload features a suite of security features that you can rely on to strengthen your application's security. When deploying to Production, it's a good idea to double-check that you are making proper use of each of them.
+Payload features a suite of security features that you can rely on to strengthen your application's security. When
+deploying to Production, it's a good idea to double-check that you are making proper use of each of them.
 
 ##### The Secret Key
 
-When you initialize Payload, you provide it with a `secret` property. This property should be impossible to guess and extremely difficult for brute-force attacks to crack. Make sure your Production `secret` is a long, complex string. It's often best practice to store it in an `env` file which is not checked into your Git repository, using `dotenv` to supply it to your `payload.init` call.
+When you initialize Payload, you provide it with a `secret` property. This property should be impossible to guess and
+extremely difficult for brute-force attacks to crack. Make sure your Production `secret` is a long, complex string. It's
+often best practice to store it in an `env` file which is not checked into your Git repository, using `dotenv` to supply
+it to your `payload.init` call.
 
 ##### Double-check and thoroughly test all Access Control
 
-Because _**you**_ are in complete control of who can do what with your data, you should double and triple-check that you wield that power responsibly before deploying to Production.
+Because _**you**_ are in complete control of who can do what with your data, you should double and triple-check that you
+wield that power responsibly before deploying to Production.
 
 <Banner type="error">
   <strong>By default, all Access Control functions require that a user is successfully logged in to Payload to create, read, update, or delete data.</strong>{' '}
@@ -44,7 +52,8 @@ Because _**you**_ are in complete control of who can do what with your data, you
 
 ##### Building the Admin panel
 
-Before running in Production, you need to have built a production-ready copy of the Payload Admin panel. To do this, Payload provides the `build` NPM script. You can use it by adding a `script` to your `package.json` file like this:
+Before running in Production, you need to have built a production-ready copy of the Payload Admin panel. To do this,
+Payload provides the `build` NPM script. You can use it by adding a `script` to your `package.json` file like this:
 
 `package.json`:
 
@@ -60,19 +69,26 @@ Before running in Production, you need to have built a production-ready copy of 
 }
 ```
 
-Then, to build Payload, you would run `npm run build` in your project folder. A production-ready Admin bundle will be created in the `build` directory.
+Then, to build Payload, you would run `npm run build` in your project folder. A production-ready Admin bundle will be
+created in the `build` directory.
 
 ##### Setting Node to Production
 
-Make sure you set the environment variable `NODE_ENV` to `production`. Based on this variable, many Node packages automatically optimize themselves. In production, Payload automatically disables the [GraphQL Playground](/docs/graphql/overview#graphql-playground), serves a production-ready version of the Admin panel, and other changes.
+Make sure you set the environment variable `NODE_ENV` to `production`. Based on this variable, many Node packages
+automatically optimize themselves. In production, Payload automatically disables
+the [GraphQL Playground](/docs/graphql/overview#graphql-playground), serves a production-ready version of the Admin
+panel, and other changes.
 
 ##### Secure Cookie Settings
 
-You should be using an SSL certificate for production Payload instances, which means you can [enable secure cookies](/docs/authentication/config) in your Authentication-enabled Collection configs.
+You should be using an SSL certificate for production Payload instances, which means you
+can [enable secure cookies](/docs/authentication/config) in your Authentication-enabled Collection configs.
 
 ##### Preventing API Abuse
 
-Payload comes with a robust set of built-in anti-abuse measures, such as locking out users after X amount of failed login attempts, request rate limiting, GraphQL query complexity limits, max `depth` settings, and more. [Click here to learn more](/docs/production/preventing-abuse).
+Payload comes with a robust set of built-in anti-abuse measures, such as locking out users after X amount of failed
+login attempts, request rate limiting, GraphQL query complexity limits, max `depth` settings, and
+more. [Click here to learn more](/docs/production/preventing-abuse).
 
 ## MongoDB
 
@@ -80,11 +96,18 @@ Payload can be used with any MongoDB compatible database including AWS DocumentD
 
 ##### Managing MongoDB yourself
 
-If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephemeral-filesystems) such as a [DigitalOcean Droplet](https://www.digitalocean.com/products/droplets/) or an [Amazon EC2](https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc) server, you might opt to install MongoDB directly on that server itself so that Node can communicate with it locally. With this approach, you can benefit from faster response times, but scaling can become more involved as your app's user base grows.
+If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephemeral-filesystems) such as
+a [DigitalOcean Droplet](https://www.digitalocean.com/products/droplets/) or
+an [Amazon EC2](https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc)
+server, you might opt to install MongoDB directly on that server itself so that Node can communicate with it locally.
+With this approach, you can benefit from faster response times, but scaling can become more involved as your app's user
+base grows.
 
 ##### Letting someone else do it
 
-Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
+Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas
+or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and
+backups.
 
 <Banner type="warning">
   <strong>Note:</strong>
@@ -98,21 +121,31 @@ Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas
 
 ##### DocumentDB
 
-When using AWS DocumentDB, you will need to configure connection options for authentication in the `mongoOptions` passed to `payload.init`. You also need to set `mongoOptions.useFacet` to `false` to disable use of the unsupported `$facet` aggregation.
+When using AWS DocumentDB, you will need to configure connection options for authentication in the `connectOptions`
+passed to the `mongooseAdapter` . You also need to set `connectOptions.useFacet` to `false` to disable use of the
+unsupported `$facet` aggregation.
 
 ##### CosmosDB
 
-When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all fields that may be sorted in the admin UI use the <a href="/docs/configuration/overview">indexSortableFields</a> configuration option.
+When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all
+fields that may be sorted in the admin UI use the <a href="/docs/configuration/overview">indexSortableFields</a>
+configuration option.
 
 ## File storage
 
-If you are using Payload to [manage file uploads](/docs/upload/overview), you need to consider where your uploaded files will be permanently stored. If you do not use Payload for file uploads, then this section does not impact your app whatsoever.
+If you are using Payload to [manage file uploads](/docs/upload/overview), you need to consider where your uploaded files
+will be permanently stored. If you do not use Payload for file uploads, then this section does not impact your app
+whatsoever.
 
 #### Persistent vs Ephemeral Filesystems
 
-Some cloud app hosts such as [Heroku](https://heroku.com) use `ephemeral` file systems, which means that any files uploaded to your server only last until the server restarts or shuts down. Heroku and similar providers schedule restarts and shutdowns without your control, meaning your uploads will accidentally disappear without any way to get them back.
+Some cloud app hosts such as [Heroku](https://heroku.com) use `ephemeral` file systems, which means that any files
+uploaded to your server only last until the server restarts or shuts down. Heroku and similar providers schedule
+restarts and shutdowns without your control, meaning your uploads will accidentally disappear without any way to get
+them back.
 
-Alternatively, persistent filesystems will never delete your files and can be trusted to reliably host uploads perpetually.
+Alternatively, persistent filesystems will never delete your files and can be trusted to reliably host uploads
+perpetually.
 
 **Popular cloud providers with ephemeral filesystems:**
 
@@ -135,21 +168,26 @@ Alternatively, persistent filesystems will never delete your files and can be tr
 
 ##### Using ephemeral filesystem providers like Heroku
 
-If you don't use Payload's `upload` functionality, you can go ahead and use Heroku or similar platform easily. Everything will work exactly as you want it to.
+If you don't use Payload's `upload` functionality, you can go ahead and use Heroku or similar platform easily.
+Everything will work exactly as you want it to.
 
-But, if you do, and you still want to use an ephemeral filesystem provider, you can write a hook-based solution to _copy_ the files your users upload to a more permanent storage solution like Amazon S3 or DigitalOcean Spaces.
+But, if you do, and you still want to use an ephemeral filesystem provider, you can write a hook-based solution to
+_copy_ the files your users upload to a more permanent storage solution like Amazon S3 or DigitalOcean Spaces.
 
 **To automatically send uploaded files to S3 or similar, you could:**
 
-- Write an asynchronous `beforeChange` hook for all Collections that support Uploads, which takes any uploaded `file` from the Express `req` and sends it to an S3 bucket
-- Write an `afterRead` hook to save a `s3URL` field that automatically takes the `filename` stored and formats a full S3 URL
+- Write an asynchronous `beforeChange` hook for all Collections that support Uploads, which takes any uploaded `file`
+  from the Express `req` and sends it to an S3 bucket
+- Write an `afterRead` hook to save a `s3URL` field that automatically takes the `filename` stored and formats a full S3
+  URL
 - Write an `afterDelete` hook that automatically deletes files from the S3 bucket
 
 With the above configuration, deploying to Heroku or similar becomes no problem.
 
 ## DigitalOcean Tutorials
 
-DigitalOcean provides extremely helpful documentation that can walk you through the entire process of creating a production-ready Droplet to host your Payload app:
+DigitalOcean provides extremely helpful documentation that can walk you through the entire process of creating a
+production-ready Droplet to host your Payload app:
 
 1. Create a new Ubuntu 20.04 droplet on [DigitalOcean](https://digitalocean.com)
 1. [Initial server setup](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-20-04)
@@ -160,18 +198,25 @@ DigitalOcean provides extremely helpful documentation that can walk you through 
 
 ### Swap Space
 
-Swap refers to a section of storage on the hard drive that is reserved to temporarily store data that can no longer fit within RAM. This allows for the expansion of your server's working memory, with some limitations. Swap space comes into play when available RAM can no longer accommodate actively used application data, enabling the system to continue functioning.
+Swap refers to a section of storage on the hard drive that is reserved to temporarily store data that can no longer fit
+within RAM. This allows for the expansion of your server's working memory, with some limitations. Swap space comes into
+play when available RAM can no longer accommodate actively used application data, enabling the system to continue
+functioning.
 
-Insufficient space can lead to deployment errors and memory-related issues, resulting in application crashes, sluggish performance, or an unresponsive server.
+Insufficient space can lead to deployment errors and memory-related issues, resulting in application crashes, sluggish
+performance, or an unresponsive server.
 
 Common deployment error due to **space limitations** (as reported by users):
+
 - `Error: Command failed with exit code 1`
 
-To configure swap, we recommend following this tutorial on [How To Add Swap Space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-22-04).
+To configure swap, we recommend following this tutorial
+on [How To Add Swap Space](https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-22-04).
 
 ## Docker
 
-This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.
+This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
+variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.
 
 ```dockerfile
 FROM node:18-alpine as base
