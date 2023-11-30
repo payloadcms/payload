@@ -7,7 +7,7 @@ import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { BlockNode } from './nodes/BlocksNode'
-import { INSERT_BLOCK_COMMAND } from './plugin'
+import { INSERT_BLOCK_COMMAND } from './plugin/commands'
 import { blockPopulationPromiseHOC } from './populationPromise'
 import { blockValidationHOC } from './validate'
 

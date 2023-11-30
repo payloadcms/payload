@@ -4,11 +4,11 @@ import type { FeatureProvider, ResolvedFeatureMap, SanitizedFeatures } from '../
 
 export type EditorConfig = {
   features: FeatureProvider[]
-  lexical?: LexicalEditorConfig
+  lexical?: () => Promise<LexicalEditorConfig>
 }
 
 export type SanitizedEditorConfig = {
   features: SanitizedFeatures
-  lexical: LexicalEditorConfig
+  lexical: () => Promise<LexicalEditorConfig>
   resolvedFeatureMap: ResolvedFeatureMap
 }

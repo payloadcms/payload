@@ -8,11 +8,11 @@ import type { FeatureProvider } from './field/features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
 import type { AdapterProps } from './types'
 
-import { defaultEditorFeatures } from './field/lexical/config/default'
 import {
-  defaultEditorLexicalConfig,
+  defaultEditorConfig,
+  defaultEditorFeatures,
   defaultSanitizedEditorConfig,
-} from './field/lexical/config/defaultClient'
+} from './field/lexical/config/default'
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
@@ -46,11 +46,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       features = cloneDeep(defaultEditorFeatures)
     }
 
-    const lexical: LexicalEditorConfig = props.lexical || cloneDeep(defaultEditorLexicalConfig)
+    const lexical: LexicalEditorConfig = props.lexical
 
     finalSanitizedEditorConfig = sanitizeEditorConfig({
       features,
-      lexical,
+      lexical: props.lexical ? () => Promise.resolve(lexical) : defaultEditorConfig.lexical,
     })
   }
 
@@ -317,15 +317,10 @@ export {
   useEditorConfigContext,
 } from './field/lexical/config/EditorConfigProvider'
 export {
-  defaultEditorFeatures,
-  defaultHeadlessEditorConfig,
-  defaultSanitizedHeadlessEditorConfig,
-} from './field/lexical/config/default'
-export {
   defaultEditorConfig,
-  defaultEditorLexicalConfig,
+  defaultEditorFeatures,
   defaultSanitizedEditorConfig,
-} from './field/lexical/config/defaultClient'
+} from './field/lexical/config/default'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
 export { getEnabledNodes } from './field/lexical/nodes'

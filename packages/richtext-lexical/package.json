@@ -68,6 +68,8 @@
     "types": "./dist/index.d.ts"
   },
   "files": [
-    "dist"
+    "dist",
+    "components.js",
+    "components.d.ts"
   ]
 }

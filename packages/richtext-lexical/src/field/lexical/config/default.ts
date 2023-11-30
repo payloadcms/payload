@@ -43,10 +43,15 @@ export const defaultEditorFeatures: FeatureProvider[] = [
   //BlocksFeature(), // Adding this by default makes no sense if no blocks are defined
 ]
 
-export const defaultHeadlessEditorConfig: EditorConfig = {
+export const defaultEditorConfig: EditorConfig = {
   features: defaultEditorFeatures,
+  lexical: () =>
+    // @ts-expect-error
+    import('./defaultClient').then((module) => {
+      const defaultEditorLexicalConfig = module.defaultEditorLexicalConfig
+      return defaultEditorLexicalConfig
+    }),
 }
 
-export const defaultSanitizedHeadlessEditorConfig: SanitizedEditorConfig = sanitizeEditorConfig(
-  defaultHeadlessEditorConfig,
-)
+export const defaultSanitizedEditorConfig: SanitizedEditorConfig =
+  sanitizeEditorConfig(defaultEditorConfig)
