@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import type { RichTextField } from '../../../../../../../../fields/config/types'
 import type { RichTextAdapter } from '../../../../../../forms/field-types/RichText/types'
@@ -9,11 +9,7 @@ const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   const editor: RichTextAdapter = props.field.editor
   const { CellComponent } = editor
 
-  const CellComponentImpl: React.FC<any> = useMemo(() => {
-    return CellComponent()
-  }, [CellComponent])
-
-  return <CellComponentImpl {...props} />
+  return <CellComponent {...props} />
 }
 
 export default RichTextCell
