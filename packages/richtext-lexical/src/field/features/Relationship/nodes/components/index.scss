@@ -61,6 +61,8 @@
 
   &__swapButton {
     margin: 0;
+    margin-top: 0!important;
+    margin-bottom: 0!important;
   }
 
   &__doc-drawer-toggler,
@@ -84,6 +86,8 @@
 
   &__removeButton {
     margin: 0;
+    margin-top: 0!important;
+    margin-bottom: 0!important;
 
     line {
       stroke-width: $style-stroke-width-m;

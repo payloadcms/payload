@@ -77,6 +77,8 @@
 
   &__removeButton {
     margin: 0;
+    margin-top: 0!important;
+    margin-bottom: 0!important;
   }
 
   &__block-header {
@@ -88,7 +90,7 @@
   }
 
   &__block-header,
-  &__block-header div {
+  &__block-header > div {
     display: flex;
     max-width: 100%;
     overflow: hidden;
