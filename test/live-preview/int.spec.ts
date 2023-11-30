@@ -651,7 +651,7 @@ describe('Collections - Live Preview', () => {
     })
 
     const externallyUpdatedRelationship = {
-      id: updatedTestPost.id.toString(), // TODO: don't cast to string once the types are fixed
+      id: updatedTestPost.id,
       entitySlug: postsSlug,
       updatedAt: updatedTestPost.updatedAt as string,
     }

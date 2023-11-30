@@ -1,14 +1,14 @@
 import type { PaginatedDocs } from 'payload/database'
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import type { PopulationsByCollection, RecentUpdate } from './types'
+import type { PopulationsByCollection, UpdatedDocument } from './types'
 
 import { traverseFields } from './traverseFields'
 
 export const mergeData = async <T>(args: {
   apiRoute?: string
   depth?: number
-  externallyUpdatedRelationship?: RecentUpdate
+  externallyUpdatedRelationship?: UpdatedDocument
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: Partial<T>
   initialData: T

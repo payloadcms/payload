@@ -10,9 +10,9 @@ export type PopulationsByCollection = {
   }>
 }
 
-// TODO: import this from `payload/utilities`
-export type RecentUpdate = {
+// TODO: import this from `payload/admin/components/utilities/DocumentEvents/types.ts`
+export type UpdatedDocument = {
   entitySlug: string
-  id?: string
+  id?: number | string
   updatedAt: string
 }

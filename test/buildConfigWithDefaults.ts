@@ -9,7 +9,7 @@ import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 import { slateEditor } from '../packages/richtext-slate/src'
 
-// process.env.PAYLOAD_DATABASE = 'postgres'
+process.env.PAYLOAD_DATABASE = 'postgres'
 
 const bundlerAdapters = {
   vite: viteBundler(),
