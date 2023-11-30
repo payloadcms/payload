@@ -7,7 +7,7 @@ export const fetchComments = async (args: {
 }): Promise<Comment[]> => {
   const { user, doc } = args || {}
 
-  const docs: Comment[] = await fetch(`${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/graphql`, {
+  const docs: Comment[] = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

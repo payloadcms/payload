@@ -30,6 +30,7 @@ const start = async (): Promise<void> => {
   }
 
   if (process.env.NEXT_BUILD) {
+    process.env.NEXT_PUBLIC_SERVER_URL = `http://127.0.0.1:${PORT}`
     app.listen(PORT, async () => {
       payload.logger.info(`Next.js is now building...`)
       // @ts-expect-error
