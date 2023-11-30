@@ -4,7 +4,7 @@ import type { SanitizedStripeConfig, StripeConfig } from './types'
 
 import { getFields } from './fields/getFields'
 
-export const stripePlugin =
+const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -42,3 +42,5 @@ export const stripePlugin =
       }),
     }
   }
+
+export default stripePlugin

@@ -7,3 +7,7 @@ export const textDoc: Partial<TextField> = {
   text: 'Seeded text document',
   localizedText: 'Localized text',
 }
+
+export const anotherTextDoc: Partial<TextField> = {
+  text: 'Another text document',
+}

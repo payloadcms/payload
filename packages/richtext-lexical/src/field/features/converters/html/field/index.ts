@@ -88,6 +88,16 @@ export const lexicalHTML: (
                 if (result) {
                   return result
                 }
+              } else if ('tabs' in curField) {
+                for (const tab of curField.tabs) {
+                  const result = findFieldPathAndSiblingFields(
+                    tab.fields,
+                    'name' in tab ? [...path, tab.name] : [...path],
+                  )
+                  if (result) {
+                    return result
+                  }
+                }
               }
             }
 

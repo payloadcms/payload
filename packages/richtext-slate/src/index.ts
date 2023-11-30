@@ -13,14 +13,16 @@ export function slateEditor(
   args: AdapterArguments,
 ): RichTextAdapter<any[], AdapterArguments, AdapterArguments> {
   return {
-    CellComponent: withMergedProps({
-      Component: RichTextCell,
-      toMergeIntoProps: args,
-    }),
-    FieldComponent: withMergedProps({
-      Component: RichTextField,
-      toMergeIntoProps: args,
-    }),
+    CellComponent: () =>
+      withMergedProps({
+        Component: RichTextCell,
+        toMergeIntoProps: args,
+      }),
+    FieldComponent: () =>
+      withMergedProps({
+        Component: RichTextField,
+        toMergeIntoProps: args,
+      }),
     outputSchema: ({ isRequired }) => {
       return {
         items: {
@@ -30,10 +32,14 @@ export function slateEditor(
       }
     },
     populationPromise({
+      context,
       currentDepth,
       depth,
       field,
+      findMany,
+      flattenLocales,
       overrideAccess,
+      populationPromises,
       req,
       showHiddenFields,
       siblingDoc,
@@ -45,10 +51,14 @@ export function slateEditor(
         !field?.admin?.elements
       ) {
         return richTextRelationshipPromise({
+          context,
           currentDepth,
           depth,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,

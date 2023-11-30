@@ -46,7 +46,7 @@ export const stripeWebhooks = async (args: {
       }
 
       if (event) {
-        await handleWebhooks({
+        handleWebhooks({
           config,
           event,
           payload: req.payload,

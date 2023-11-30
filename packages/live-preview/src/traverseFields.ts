@@ -1,26 +1,16 @@
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import { promise } from './promise'
+import type { PopulationsByCollection } from './types'
+
 import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
-  apiRoute?: string
-  depth?: number
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
-  populationPromises: Promise<void>[]
+  populationsByCollection: PopulationsByCollection
   result: T
-  serverURL: string
 }): void => {
-  const {
-    apiRoute,
-    depth,
-    fieldSchema: fieldSchemas,
-    incomingData,
-    populationPromises,
-    result,
-    serverURL,
-  } = args
+  const { fieldSchema: fieldSchemas, incomingData, populationsByCollection, result } = args
 
   fieldSchemas.forEach((fieldSchema) => {
     if ('name' in fieldSchema && typeof fieldSchema.name === 'string') {
@@ -29,12 +19,9 @@ export const traverseFields = <T>(args: {
       switch (fieldSchema.type) {
         case 'richText':
           result[fieldName] = traverseRichText({
-            apiRoute,
-            depth,
             incomingData: incomingData[fieldName],
-            populationPromises,
+            populationsByCollection,
             result: result[fieldName],
-            serverURL,
           })
 
           break
@@ -51,13 +38,10 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
-                apiRoute,
-                depth,
                 fieldSchema: fieldSchema.fields,
                 incomingData: incomingRow,
-                populationPromises,
+                populationsByCollection,
                 result: result[fieldName][i],
-                serverURL,
               })
 
               return result[fieldName][i]
@@ -86,13 +70,10 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
-                apiRoute,
-                depth,
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
-                populationPromises,
+                populationsByCollection,
                 result: result[fieldName][i],
-                serverURL,
               })
 
               return result[fieldName][i]
@@ -110,13 +91,10 @@ export const traverseFields = <T>(args: {
           }
 
           traverseFields({
-            apiRoute,
-            depth,
             fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
-            populationPromises,
+            populationsByCollection,
             result: result[fieldName],
-            serverURL,
           })
 
           break
@@ -146,32 +124,28 @@ export const traverseFields = <T>(args: {
                 const newRelation = incomingRelation.relationTo
 
                 if (oldID !== newID || oldRelation !== newRelation) {
-                  populationPromises.push(
-                    promise({
-                      id: incomingRelation.value,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: newRelation,
-                      depth,
-                      ref: result[fieldName][i],
-                      serverURL,
-                    }),
-                  )
+                  if (!populationsByCollection[newRelation]) {
+                    populationsByCollection[newRelation] = []
+                  }
+
+                  populationsByCollection[newRelation].push({
+                    id: incomingRelation.value,
+                    accessor: 'value',
+                    ref: result[fieldName][i],
+                  })
                 }
               } else {
                 // Handle `hasMany` monomorphic
                 if (result[fieldName][i]?.id !== incomingRelation) {
-                  populationPromises.push(
-                    promise({
-                      id: incomingRelation,
-                      accessor: i,
-                      apiRoute,
-                      collection: String(fieldSchema.relationTo),
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                  if (!populationsByCollection[fieldSchema.relationTo]) {
+                    populationsByCollection[fieldSchema.relationTo] = []
+                  }
+
+                  populationsByCollection[fieldSchema.relationTo].push({
+                    id: incomingRelation,
+                    accessor: i,
+                    ref: result[fieldName],
+                  })
                 }
               }
             })
@@ -217,17 +191,15 @@ export const traverseFields = <T>(args: {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  populationPromises.push(
-                    promise({
-                      id: newID,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: newRelation,
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                  if (!populationsByCollection[newRelation]) {
+                    populationsByCollection[newRelation] = []
+                  }
+
+                  populationsByCollection[newRelation].push({
+                    id: newID,
+                    accessor: 'value',
+                    ref: result[fieldName],
+                  })
                 } else {
                   result[fieldName] = null
                 }
@@ -252,17 +224,15 @@ export const traverseFields = <T>(args: {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  populationPromises.push(
-                    promise({
-                      id: newID,
-                      accessor: fieldName,
-                      apiRoute,
-                      collection: String(fieldSchema.relationTo),
-                      depth,
-                      ref: result as Record<string, unknown>,
-                      serverURL,
-                    }),
-                  )
+                  if (!populationsByCollection[fieldSchema.relationTo]) {
+                    populationsByCollection[fieldSchema.relationTo] = []
+                  }
+
+                  populationsByCollection[fieldSchema.relationTo].push({
+                    id: newID,
+                    accessor: fieldName,
+                    ref: result as Record<string, unknown>,
+                  })
                 } else {
                   result[fieldName] = null
                 }

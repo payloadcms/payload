@@ -436,8 +436,13 @@ function buildObjectType({
           // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
           if (editor?.populationPromise) {
             await editor?.populationPromise({
+              context,
               depth,
               field,
+              findMany: false,
+              flattenLocales: false,
+              overrideAccess: false,
+              populationPromises: [],
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
