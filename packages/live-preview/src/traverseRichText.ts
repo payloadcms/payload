@@ -1,4 +1,4 @@
-import type { PopulationsByCollection, RecentUpdate } from './types'
+import type { PopulationsByCollection, UpdatedDocument } from './types'
 
 export const traverseRichText = ({
   externallyUpdatedRelationship,
@@ -6,7 +6,7 @@ export const traverseRichText = ({
   populationsByCollection,
   result,
 }: {
-  externallyUpdatedRelationship?: RecentUpdate
+  externallyUpdatedRelationship?: UpdatedDocument
   incomingData: any
   populationsByCollection: PopulationsByCollection
   result: any
