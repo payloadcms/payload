@@ -307,6 +307,27 @@ describe('Collections - Live Preview', () => {
     expect(merge2.relationshipPolyHasMany).toEqual([])
   })
 
+  it('— relationships - populates within tabs', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        tab: {
+          relationshipInTab: testPost.id,
+        },
+      },
+      initialData,
+      serverURL,
+    })
+
+    expect(merge1.tab.relationshipInTab).toMatchObject(testPost)
+  })
+
   it('— relationships - populates within arrays', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
