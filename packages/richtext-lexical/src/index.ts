@@ -2,14 +2,12 @@ import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
+import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProvider } from './field/features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
 import type { AdapterProps } from './types'
 
-import { RichTextCell } from './cell'
-import { RichTextField } from './field'
 import { defaultEditorFeatures } from './field/lexical/config/default'
 import {
   defaultEditorLexicalConfig,
@@ -58,14 +56,26 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
   return {
     CellComponent: () =>
-      withMergedProps({
-        Component: RichTextCell,
-        toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+      // @ts-expect-error
+      import('./cell').then((module) => {
+        const RichTextCell = module.RichTextCell
+        return import('payload/utilities').then((module2) =>
+          module2.withMergedProps({
+            Component: RichTextCell,
+            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+          }),
+        )
       }),
     FieldComponent: () =>
-      withMergedProps({
-        Component: RichTextField,
-        toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+      // @ts-expect-error
+      import('./field').then((module) => {
+        const RichTextField = module.RichTextField
+        return import('payload/utilities').then((module2) =>
+          module2.withMergedProps({
+            Component: RichTextField,
+            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+          }),
+        )
       }),
     afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
       return new Promise<void>((resolve, reject) => {
@@ -320,8 +330,6 @@ export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/con
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
 export { getEnabledNodes } from './field/lexical/nodes'
 
-export { ToolbarButton } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarButton'
-export { ToolbarDropdown } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarDropdown/index'
 export {
   type FloatingToolbarSection,
   type FloatingToolbarSectionEntry,
@@ -330,8 +338,7 @@ export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/Lex
 // export SanitizedEditorConfig
 export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
-export { RichTextCell }
-export { RichTextField }
+
 export {
   SlashMenuGroup,
   SlashMenuOption,

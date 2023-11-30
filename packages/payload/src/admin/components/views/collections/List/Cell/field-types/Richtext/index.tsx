@@ -9,11 +9,23 @@ const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   const editor: RichTextAdapter = props.field.editor
   const { CellComponent } = editor
 
-  const CellComponentImpl: React.FC<any> = useMemo(() => {
-    return CellComponent()
+  const ImportedCellComponent: React.FC<any> = useMemo(() => {
+    return CellComponent
+      ? React.lazy(() => {
+          return CellComponent().then((resolvedComponent) => ({
+            default: resolvedComponent,
+          }))
+        })
+      : null
   }, [CellComponent])
 
-  return <CellComponentImpl {...props} />
+  return (
+    ImportedCellComponent && (
+      <React.Suspense>
+        <ImportedCellComponent {...props} />
+      </React.Suspense>
+    )
+  )
 }
 
 export default RichTextCell

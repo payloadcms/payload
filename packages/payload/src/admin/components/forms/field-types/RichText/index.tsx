@@ -7,11 +7,23 @@ const RichText: React.FC<RichTextField> = (fieldprops) => {
   const editor: RichTextAdapter = fieldprops.editor
   const { FieldComponent } = editor
 
-  const FieldComponentImpl: React.FC<any> = useMemo(() => {
-    return FieldComponent()
+  const ImportedFieldComponent: React.FC<any> = useMemo(() => {
+    return FieldComponent
+      ? React.lazy(() => {
+          return FieldComponent().then((resolvedComponent) => ({
+            default: resolvedComponent,
+          }))
+        })
+      : null
   }, [FieldComponent])
 
-  return <FieldComponentImpl {...fieldprops} />
+  return (
+    ImportedFieldComponent && (
+      <React.Suspense>
+        <ImportedFieldComponent {...fieldprops} />
+      </React.Suspense>
+    )
+  )
 }
 
 export default RichText
