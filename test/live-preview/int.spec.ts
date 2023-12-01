@@ -73,13 +73,13 @@ describe('Collections - Live Preview', () => {
     const handledMessage = await handleMessage({
       depth: 1,
       event: {
-        data: JSON.stringify({
+        data: {
           data: {
             title: 'Test Page (Changed)',
           },
           fieldSchemaJSON: schemaJSON,
           type: 'payload-live-preview',
-        }),
+        },
         origin: serverURL,
       } as MessageEvent,
       initialData: {
@@ -95,12 +95,12 @@ describe('Collections - Live Preview', () => {
     const handledMessage = await handleMessage({
       depth: 1,
       event: {
-        data: JSON.stringify({
+        data: {
           data: {
             title: 'Test Page (Changed)',
           },
           type: 'payload-live-preview',
-        }),
+        },
         origin: serverURL,
       } as MessageEvent,
       initialData: {
