@@ -55,32 +55,29 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   }
 
   return {
-    CellComponent: {
-      AsyncComponent: () =>
-        // @ts-expect-error
-        import('./cell').then((module) => {
-          const RichTextCell = module.RichTextCell
-          return import('payload/utilities').then((module2) =>
-            module2.withMergedProps({
-              Component: RichTextCell,
-              toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-            }),
-          )
-        }),
-    },
-    FieldComponent: {
-      AsyncComponent: () =>
-        // @ts-expect-error
-        import('./field').then((module) => {
-          const RichTextField = module.RichTextField
-          return import('payload/utilities').then((module2) =>
-            module2.withMergedProps({
-              Component: RichTextField,
-              toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-            }),
-          )
-        }),
-    },
+    LazyCellComponent: () =>
+      // @ts-expect-error
+      import('./cell').then((module) => {
+        const RichTextCell = module.RichTextCell
+        return import('payload/utilities').then((module2) =>
+          module2.withMergedProps({
+            Component: RichTextCell,
+            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+          }),
+        )
+      }),
+
+    LazyFieldComponent: () =>
+      // @ts-expect-error
+      import('./field').then((module) => {
+        const RichTextField = module.RichTextField
+        return import('payload/utilities').then((module2) =>
+          module2.withMergedProps({
+            Component: RichTextField,
+            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+          }),
+        )
+      }),
     afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
       return new Promise<void>((resolve, reject) => {
         const promises: Promise<void>[] = []

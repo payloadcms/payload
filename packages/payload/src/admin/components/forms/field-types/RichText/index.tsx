@@ -5,21 +5,20 @@ import type { RichTextAdapter } from './types'
 const RichText: React.FC<RichTextField> = (fieldprops) => {
   // eslint-disable-next-line react/destructuring-assignment
   const editor: RichTextAdapter = fieldprops.editor
-  const { FieldComponent } = editor
 
-  const isAsync = typeof FieldComponent === 'object' && FieldComponent?.AsyncComponent
+  const isLazy = 'LazyFieldComponent' in editor
 
   const ImportedFieldComponent: React.FC<any> = useMemo(() => {
-    return isAsync
+    return isLazy
       ? React.lazy(() => {
-          return FieldComponent.AsyncComponent().then((resolvedComponent) => ({
+          return editor.LazyFieldComponent().then((resolvedComponent) => ({
             default: resolvedComponent,
           }))
         })
       : null
-  }, [FieldComponent, isAsync])
+  }, [editor, isLazy])
 
-  if (isAsync) {
+  if (isLazy) {
     return (
       ImportedFieldComponent && (
         <React.Suspense>
@@ -29,8 +28,7 @@ const RichText: React.FC<RichTextField> = (fieldprops) => {
     )
   }
 
-  // @ts-ignore
-  return <FieldComponent {...fieldprops} />
+  return <editor.FieldComponent {...fieldprops} />
 }
 
 export default RichText

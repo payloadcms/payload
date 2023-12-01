@@ -13,25 +13,11 @@ export type RichTextFieldProps<
   path?: string
 }
 
-export type RichTextAdapter<
+type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  CellComponent:
-    | {
-        AsyncComponent: () => Promise<
-          React.FC<CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>>
-        >
-      }
-    | React.FC
-  FieldComponent:
-    | {
-        AsyncComponent: () => Promise<
-          React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-        >
-      }
-    | React.FC
   afterReadPromise?: ({
     field,
     incomingEditorState,
@@ -41,7 +27,6 @@ export type RichTextAdapter<
     incomingEditorState: Value
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
-
   outputSchema?: ({
     field,
     isRequired,
@@ -69,3 +54,25 @@ export type RichTextAdapter<
     RichTextField<Value, AdapterProps, ExtraFieldProperties>
   >
 }
+
+export type RichTextAdapter<
+  Value extends object = object,
+  AdapterProps = any,
+  ExtraFieldProperties = {},
+> = RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties> &
+  (
+    | {
+        CellComponent: React.FC<
+          CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>
+        >
+        FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+      }
+    | {
+        LazyCellComponent: () => Promise<
+          React.FC<CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>>
+        >
+        LazyFieldComponent: () => Promise<
+          React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+        >
+      }
+  )

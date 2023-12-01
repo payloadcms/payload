@@ -7,21 +7,20 @@ import type { CellComponentProps } from '../../types'
 const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment
   const editor: RichTextAdapter = props.field.editor
-  const { CellComponent } = editor
 
-  const isAsync = typeof CellComponent === 'object' && CellComponent?.AsyncComponent
+  const isLazy = 'LazyCellComponent' in editor
 
   const ImportedCellComponent: React.FC<any> = useMemo(() => {
-    return isAsync
+    return isLazy
       ? React.lazy(() => {
-          return CellComponent.AsyncComponent().then((resolvedComponent) => ({
+          return editor.LazyCellComponent().then((resolvedComponent) => ({
             default: resolvedComponent,
           }))
         })
       : null
-  }, [CellComponent, isAsync])
+  }, [editor, isLazy])
 
-  if (isAsync) {
+  if (isLazy) {
     return (
       ImportedCellComponent && (
         <React.Suspense>
@@ -31,8 +30,7 @@ const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
     )
   }
 
-  // @ts-ignore
-  return <CellComponent {...fieldprops} />
+  return <editor.CellComponent {...props} />
 }
 
 export default RichTextCell
