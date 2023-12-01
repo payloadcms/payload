@@ -9,14 +9,19 @@ export const uploadPopulationPromiseHOC = (
   props?: UploadFeatureProps,
 ): PopulationPromise<SerializedUploadNode> => {
   const uploadPopulationPromise: PopulationPromise<SerializedUploadNode> = ({
+    context,
     currentDepth,
     depth,
+    editorPopulationPromises,
     field,
+    findMany,
+    flattenLocales,
     node,
     overrideAccess,
     populationPromises,
     req,
     showHiddenFields,
+    siblingDoc,
   }) => {
     const promises: Promise<void>[] = []
 
@@ -41,10 +46,14 @@ export const uploadPopulationPromiseHOC = (
       }
       if (Array.isArray(props?.collections?.[node?.relationTo]?.fields)) {
         recurseNestedFields({
+          context,
           currentDepth,
           data: node.fields || {},
           depth,
+          editorPopulationPromises,
           fields: props?.collections?.[node?.relationTo]?.fields,
+          findMany,
+          flattenLocales,
           overrideAccess,
           populationPromises,
           promises,

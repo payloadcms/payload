@@ -9,6 +9,7 @@ import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
 import { useAuth } from '../../../utilities/Auth'
+import { useDocumentEvents } from '../../../utilities/DocumentEvents'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import { CollectionRoutes } from './Routes'
 import { CustomCollectionComponent } from './Routes/CustomComponent'
@@ -42,12 +43,19 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
     onSave: onSaveFromProps,
   } = props
 
+  const { reportUpdate } = useDocumentEvents()
+
   const { auth } = collection
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
   const onSave = useCallback(
     async (json) => {
+      reportUpdate({
+        id,
+        entitySlug: collection.slug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
       if (auth && id === user.id) {
         await refreshCookieAsync()
       }
@@ -59,7 +67,7 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
         })
       }
     },
-    [id, onSaveFromProps, auth, user, refreshCookieAsync],
+    [id, onSaveFromProps, auth, user, refreshCookieAsync, collection, reportUpdate],
   )
 
   const operation = isEditing ? 'update' : 'create'

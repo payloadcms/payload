@@ -89,6 +89,26 @@ export function generateLexicalRichText() {
           type: 'block',
           version: 2,
           fields: {
+            id: '6565c8668294bf824c24d4a4',
+            blockName: '',
+            blockType: 'relationshipHasManyBlock',
+            rel: [
+              {
+                value: '{{TEXT_DOC_ID}}',
+                relationTo: 'text-fields',
+              },
+              {
+                value: '{{UPLOAD_DOC_ID}}',
+                relationTo: 'uploads',
+              },
+            ],
+          },
+        },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
             id: '65298b1ddb4ef8c744a7faab',
             richText: {
               root: {

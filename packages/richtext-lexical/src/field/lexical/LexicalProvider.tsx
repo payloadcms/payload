@@ -16,11 +16,12 @@ export type LexicalProviderProps = {
   editorConfig: SanitizedEditorConfig
   fieldProps: FieldProps
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
+  path: string
   readOnly: boolean
   value: SerializedEditorState
 }
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, onChange, readOnly } = props
+  const { editorConfig, fieldProps, onChange, path, readOnly } = props
   let { value } = props
 
   if (editorConfig?.features?.hooks?.load?.length) {
@@ -60,7 +61,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   }
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
+    <LexicalComposer initialConfig={initialConfig} key={path}>
       <EditorConfigProvider editorConfig={editorConfig} fieldProps={fieldProps}>
         <div className="editor-shell">
           <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />

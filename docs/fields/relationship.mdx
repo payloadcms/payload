@@ -70,6 +70,43 @@ Set to `true` if you'd like this field to be sortable within the Admin UI using 
 
 Set to `false` if you'd like to disable the ability to create new documents from within the relationship field (hides the "Add new" button in the admin UI).
 
+**`sortOptions`**
+
+The `sortOptions` property allows you to define a default sorting order for the options within a Relationship field's dropdown. This can be particularly useful for ensuring that the most relevant options are presented first to the user.
+
+You can specify `sortOptions` in two ways:
+
+**As a string:**
+
+Provide a string to define a global default sort field for all relationship field dropdowns across different collections. You can prefix the field name with a minus symbol ("-") to sort in descending order.
+
+Example:
+
+```ts
+sortOptions: 'fieldName',
+```
+This configuration will sort all relationship field dropdowns by `"fieldName"` in ascending order.
+
+**As an object :**
+
+Specify an object where keys are collection slugs and values are strings representing the field names to sort by. This allows for different sorting fields for each collection's relationship dropdown.
+
+Example:
+
+```ts
+sortOptions: {
+  "pages": "fieldName1",
+  "posts": "-fieldName2",
+  "categories": "fieldName3"
+}
+```
+In this configuration:
+- Dropdowns related to `pages` will be sorted by `"fieldName1"` in ascending order.
+- Dropdowns for `posts` will use `"fieldName2"` for sorting in descending order (noted by the "-" prefix).
+- Dropdowns associated with `categories` will sort based on `"fieldName3"` in ascending order.
+
+Note: If `sortOptions` is not defined, the default sorting behavior of the Relationship field dropdown will be used.
+
 ### Filtering relationship options
 
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.

@@ -30,10 +30,14 @@ export function slateEditor(
       }
     },
     populationPromise({
+      context,
       currentDepth,
       depth,
       field,
+      findMany,
+      flattenLocales,
       overrideAccess,
+      populationPromises,
       req,
       showHiddenFields,
       siblingDoc,
@@ -45,10 +49,14 @@ export function slateEditor(
         !field?.admin?.elements
       ) {
         return richTextRelationshipPromise({
+          context,
           currentDepth,
           depth,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,

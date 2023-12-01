@@ -121,6 +121,23 @@ export const Pages: CollectionConfig = {
                 },
               ],
             },
+            {
+              label: 'Named Tabs',
+              type: 'tabs',
+              tabs: [
+                {
+                  name: 'tab',
+                  label: 'Tab',
+                  fields: [
+                    {
+                      name: 'relationshipInTab',
+                      type: 'relationship',
+                      relationTo: 'posts',
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
       ],
