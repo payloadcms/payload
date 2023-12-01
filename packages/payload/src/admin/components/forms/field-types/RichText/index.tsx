@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import type { RichTextField } from '../../../../../fields/config/types'
 import type { RichTextAdapter } from './types'
@@ -7,11 +7,7 @@ const RichText: React.FC<RichTextField> = (fieldprops) => {
   const editor: RichTextAdapter = fieldprops.editor
   const { FieldComponent } = editor
 
-  const FieldComponentImpl: React.FC<any> = useMemo(() => {
-    return FieldComponent()
-  }, [FieldComponent])
-
-  return <FieldComponentImpl {...fieldprops} />
+  return <FieldComponent {...fieldprops} />
 }
 
 export default RichText

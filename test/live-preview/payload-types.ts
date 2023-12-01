@@ -152,11 +152,6 @@ export interface Page {
           }
       )[]
     | null
-  meta?: {
-    title?: string | null
-    description?: string | null
-    image?: string | Media | null
-  }
   relationshipInRichText?:
     | {
         [k: string]: unknown
@@ -198,6 +193,14 @@ export interface Page {
         id?: string | null
       }[]
     | null
+  tab: {
+    relationshipInTab?: (string | null) | Post
+  }
+  meta?: {
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
+  }
   updatedAt: string
   createdAt: string
 }
