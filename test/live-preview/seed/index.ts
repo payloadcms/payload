@@ -48,37 +48,38 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   const mediaID = payload.db.defaultIDType === 'number' ? media.id : `"${media.id}"`
+  const tenantID = payload.db.defaultIDType === 'number' ? tenant1Doc.id : `"${tenant1Doc.id}"`
 
   const [post1Doc, post2Doc, post3Doc] = await Promise.all([
     await payload.create({
       collection: postsSlug,
       data: JSON.parse(
         JSON.stringify(post1)
-          .replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())
-          .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
       ),
     }),
     await payload.create({
       collection: postsSlug,
       data: JSON.parse(
         JSON.stringify(post2)
-          .replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())
-          .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
       ),
     }),
     await payload.create({
       collection: postsSlug,
       data: JSON.parse(
         JSON.stringify(post3)
-          .replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())
-          .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
       ),
     }),
   ])
 
   const postsPageDoc = await payload.create({
     collection: pagesSlug,
-    data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
+    data: JSON.parse(JSON.stringify(postsPage).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
   })
 
   let postsPageDocID = postsPageDoc.id
@@ -97,20 +98,18 @@ export const seed: Config['onInit'] = async (payload) => {
     collection: pagesSlug,
     data: JSON.parse(
       JSON.stringify(home)
-        .replace(/"\{\{MEDIA_ID\}\}"/g, mediaID.toString())
-        .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID.toString())
-        .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID.toString())
-        .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID.toString())
-        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID.toString())
-        .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
+        .replace(/"\{\{MEDIA_ID\}\}"/g, mediaID)
+        .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)
+        .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID)
+        .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
+        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID)
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
   })
 
   await payload.updateGlobal({
     slug: 'header',
-    data: JSON.parse(
-      JSON.stringify(header).replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID.toString()),
-    ),
+    data: JSON.parse(JSON.stringify(header).replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)),
   })
 
   await payload.updateGlobal({
