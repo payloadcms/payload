@@ -9,23 +9,30 @@ const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   const editor: RichTextAdapter = props.field.editor
   const { CellComponent } = editor
 
+  const isAsync = typeof CellComponent === 'object' && CellComponent?.AsyncComponent
+
   const ImportedCellComponent: React.FC<any> = useMemo(() => {
-    return CellComponent
+    return isAsync
       ? React.lazy(() => {
-          return CellComponent().then((resolvedComponent) => ({
+          return CellComponent.AsyncComponent().then((resolvedComponent) => ({
             default: resolvedComponent,
           }))
         })
       : null
-  }, [CellComponent])
+  }, [CellComponent, isAsync])
 
-  return (
-    ImportedCellComponent && (
-      <React.Suspense>
-        <ImportedCellComponent {...props} />
-      </React.Suspense>
+  if (isAsync) {
+    return (
+      ImportedCellComponent && (
+        <React.Suspense>
+          <ImportedCellComponent {...props} />
+        </React.Suspense>
+      )
     )
-  )
+  }
+
+  // @ts-ignore
+  return <CellComponent {...fieldprops} />
 }
 
 export default RichTextCell

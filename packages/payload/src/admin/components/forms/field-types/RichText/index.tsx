@@ -7,23 +7,30 @@ const RichText: React.FC<RichTextField> = (fieldprops) => {
   const editor: RichTextAdapter = fieldprops.editor
   const { FieldComponent } = editor
 
+  const isAsync = typeof FieldComponent === 'object' && FieldComponent?.AsyncComponent
+
   const ImportedFieldComponent: React.FC<any> = useMemo(() => {
-    return FieldComponent
+    return isAsync
       ? React.lazy(() => {
-          return FieldComponent().then((resolvedComponent) => ({
+          return FieldComponent.AsyncComponent().then((resolvedComponent) => ({
             default: resolvedComponent,
           }))
         })
       : null
-  }, [FieldComponent])
+  }, [FieldComponent, isAsync])
 
-  return (
-    ImportedFieldComponent && (
-      <React.Suspense>
-        <ImportedFieldComponent {...fieldprops} />
-      </React.Suspense>
+  if (isAsync) {
+    return (
+      ImportedFieldComponent && (
+        <React.Suspense>
+          <ImportedFieldComponent {...fieldprops} />
+        </React.Suspense>
+      )
     )
-  )
+  }
+
+  // @ts-ignore
+  return <FieldComponent {...fieldprops} />
 }
 
 export default RichText

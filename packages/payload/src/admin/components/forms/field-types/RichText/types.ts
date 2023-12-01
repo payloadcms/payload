@@ -18,12 +18,20 @@ export type RichTextAdapter<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  CellComponent: () => Promise<
-    React.FC<CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>>
-  >
-  FieldComponent: () => Promise<
-    React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
-  >
+  CellComponent:
+    | {
+        AsyncComponent: () => Promise<
+          React.FC<CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>>
+        >
+      }
+    | React.FC
+  FieldComponent:
+    | {
+        AsyncComponent: () => Promise<
+          React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+        >
+      }
+    | React.FC
   afterReadPromise?: ({
     field,
     incomingEditorState,

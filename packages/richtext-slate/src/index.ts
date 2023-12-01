@@ -1,38 +1,26 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { withNullableJSONSchemaType } from 'payload/utilities'
+import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { AdapterArguments } from './types'
 
+import RichTextCell from './cell'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
 import { richTextValidate } from './data/validation'
+import RichTextField from './field'
 
 export function slateEditor(
   args: AdapterArguments,
 ): RichTextAdapter<any[], AdapterArguments, AdapterArguments> {
   return {
-    CellComponent: () =>
-      // @ts-expect-error
-      import('./cell').then((module) => {
-        const RichTextCell = module.RichTextCell
-        return import('payload/utilities').then((module2) =>
-          module2.withMergedProps({
-            Component: RichTextCell,
-            toMergeIntoProps: args,
-          }),
-        )
-      }),
-    FieldComponent: () =>
-      // @ts-expect-error
-      import('./field').then((module) => {
-        const RichTextField = module.RichTextField
-        return import('payload/utilities').then((module2) =>
-          module2.withMergedProps({
-            Component: RichTextField,
-            toMergeIntoProps: args,
-          }),
-        )
-      }),
+    CellComponent: withMergedProps({
+      Component: RichTextCell,
+      toMergeIntoProps: args,
+    }),
+    FieldComponent: withMergedProps({
+      Component: RichTextField,
+      toMergeIntoProps: args,
+    }),
     outputSchema: ({ isRequired }) => {
       return {
         items: {
