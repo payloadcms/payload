@@ -28,6 +28,7 @@ const collectionSchema = joi.object().keys({
       AfterListTable: joi.array().items(componentSchema),
       BeforeList: joi.array().items(componentSchema),
       BeforeListTable: joi.array().items(componentSchema),
+      actionsBar: joi.array().items(componentSchema),
       edit: joi.object({
         PreviewButton: componentSchema,
         PublishButton: componentSchema,

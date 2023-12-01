@@ -17,6 +17,7 @@ const globalSchema = joi
     }),
     admin: joi.object({
       components: joi.object({
+        actionsBar: joi.array().items(componentSchema),
         elements: joi.object({
           PreviewButton: componentSchema,
           PublishButton: componentSchema,

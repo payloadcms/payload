@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
 import type { Props } from './types'
 
 import { Hamburger } from '../../elements/Hamburger'
@@ -9,13 +10,16 @@ import { Nav as DefaultNav } from '../../elements/Nav'
 import { NavToggler } from '../../elements/Nav/NavToggler'
 import { useNav } from '../../elements/Nav/context'
 import { useConfig } from '../../utilities/Config'
+import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 import Meta from '../../utilities/Meta'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import './index.scss'
 
 const baseClass = 'template-default'
 
-const Default: React.FC<Props> = ({ children, className }) => {
+const Default: React.FC<
+  Props & { collection?: SanitizedCollectionConfig; global?: SanitizedGlobalConfig }
+> = ({ children, className, collection, global }) => {
   const {
     admin: {
       components: { Nav: CustomNav } = {
@@ -47,7 +51,9 @@ const Default: React.FC<Props> = ({ children, className }) => {
       >
         <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
         <div className={`${baseClass}__wrap`}>
-          <AppHeader />
+          <DocumentInfoProvider collection={collection} global={global}>
+            <AppHeader />
+          </DocumentInfoProvider>
           {children}
         </div>
       </div>

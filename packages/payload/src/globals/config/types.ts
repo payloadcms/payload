@@ -77,6 +77,7 @@ export type GlobalAdminOptions = {
    * Custom admin components
    */
   components?: {
+    actionsBar?: React.ComponentType<any>[]
     elements?: {
       /**
        * Replaces the "Preview" button

@@ -215,6 +215,7 @@ export type CollectionAdminOptions = {
     AfterListTable?: React.ComponentType<ListProps>[]
     BeforeList?: React.ComponentType<ListProps>[]
     BeforeListTable?: React.ComponentType<ListProps>[]
+    actionsBar?: React.ComponentType<any>[]
     /**
      * Components within the edit view
      */

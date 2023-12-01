@@ -394,6 +394,10 @@ export type Config = {
        */
       Nav?: React.ComponentType<any>
       /**
+       * Add custom components to the top right of the Admin Panel
+       */
+      actionsBar?: React.ComponentType<any>[]
+      /**
        * Add custom components after the collection overview
        */
       afterDashboard?: React.ComponentType<any>[]

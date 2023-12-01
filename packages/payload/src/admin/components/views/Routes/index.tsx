@@ -1,6 +1,6 @@
 import React, { Fragment, Suspense, lazy, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Redirect, Route, Switch } from 'react-router-dom'
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
 
 import { requests } from '../../../api'
 import { LoadingOverlayToggle } from '../../elements/Loading'
@@ -55,6 +55,14 @@ export const Routes: React.FC = () => {
   )
 
   const userCollection = collections.find(({ slug }) => slug === userSlug)
+
+  const location = useLocation()
+  const pathSegments = location.pathname.split('/')
+  const collectionSlug = pathSegments[pathSegments.indexOf('collections') + 1]
+  const activeCollection = collections.find((c) => c.slug === collectionSlug)
+
+  const globalSlug = pathSegments[pathSegments.indexOf('globals') + 1]
+  const activeGlobal = globals.find((g) => g.slug === globalSlug)
 
   useEffect(() => {
     if (userCollection && !userCollection?.auth?.disableLocalStrategy) {
@@ -146,7 +154,7 @@ export const Routes: React.FC = () => {
                   {user ? (
                     <Fragment>
                       {canAccessAdmin && (
-                        <DefaultTemplate>
+                        <DefaultTemplate collection={activeCollection} global={activeGlobal}>
                           <Switch>
                             <Route exact path={`${match.url}/`}>
                               <Dashboard />
