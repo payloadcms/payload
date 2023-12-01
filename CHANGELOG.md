@@ -1,3 +1,13 @@
+## [2.3.1](https://github.com/payloadcms/payload/compare/v2.3.0...v2.3.1) (2023-12-01)
+
+
+### Bug Fixes
+
+* ensure doc controls are not hidden behind lexical field ([#4345](https://github.com/payloadcms/payload/issues/4345)) ([bea79fe](https://github.com/payloadcms/payload/commit/bea79feaeaee18bf94dd04262f134483f1468494))
+* query validation on relationship fields ([#4353](https://github.com/payloadcms/payload/issues/4353)) ([fe888b5](https://github.com/payloadcms/payload/commit/fe888b5f6ceaa3969eac759cbdfb109b106dae05))
+* **richtext-lexical:** blocks content may be hidden behind components outside of the editor ([#4325](https://github.com/payloadcms/payload/issues/4325)) ([3e745e9](https://github.com/payloadcms/payload/commit/3e745e91da620a00e3f0f91892ee3ec66ba72bc0))
+* **richtext-lexical:** Blocks node: incorrect conversion from v1 node to v2 node ([ef84a2c](https://github.com/payloadcms/payload/commit/ef84a2cfffbb1be52dd948e59eeec0ce324e9046))
+
 ## [2.3.0](https://github.com/payloadcms/payload/compare/v2.2.2...v2.3.0) (2023-11-30)
 
 
