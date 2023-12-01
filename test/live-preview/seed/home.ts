@@ -136,4 +136,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
       relationshipInArrayPolyHasOne: { relationTo: 'posts', value: '{{POST_1_ID}}' },
     },
   ],
+  tab: {
+    relationshipInTab: '{{POST_1_ID}}',
+  },
 }

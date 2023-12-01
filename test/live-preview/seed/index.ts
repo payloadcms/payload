@@ -52,15 +52,27 @@ export const seed: Config['onInit'] = async (payload) => {
   const [post1Doc, post2Doc, post3Doc] = await Promise.all([
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post1).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
+      data: JSON.parse(
+        JSON.stringify(post1)
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
+      ),
     }),
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post2).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
+      data: JSON.parse(
+        JSON.stringify(post2)
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
+      ),
     }),
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post3).replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())),
+      data: JSON.parse(
+        JSON.stringify(post3)
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID.toString())
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, `"${tenant1Doc.id.toString()}"`),
+      ),
     }),
   ])
 

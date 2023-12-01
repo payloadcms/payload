@@ -9,9 +9,9 @@
 export interface Config {
   collections: {
     users: User
-    tenants: Tenant
     pages: Page
     posts: Post
+    tenants: Tenant
     categories: Category
     media: Media
     'payload-preferences': PayloadPreference
@@ -34,13 +34,6 @@ export interface User {
   loginAttempts?: number | null
   lockUntil?: string | null
   password: string | null
-}
-export interface Tenant {
-  id: string
-  title: string
-  clientURL: string
-  updatedAt: string
-  createdAt: string
 }
 export interface Page {
   id: string
@@ -213,6 +206,13 @@ export interface Page {
   updatedAt: string
   createdAt: string
 }
+export interface Tenant {
+  id: string
+  title: string
+  clientURL: string
+  updatedAt: string
+  createdAt: string
+}
 export interface Media {
   id: string
   alt: string
@@ -233,6 +233,7 @@ export interface Media {
 export interface Post {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
