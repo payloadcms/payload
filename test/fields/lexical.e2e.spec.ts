@@ -206,6 +206,8 @@ describe('lexical', () => {
   })
 
   test('ensure blocks content is not hidden behind components outside of the editor', async () => {
+    // This test expects there to be a TreeView below the editor
+
     // This test makes sure there are no z-index issues here
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
