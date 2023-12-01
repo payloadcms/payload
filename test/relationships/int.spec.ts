@@ -563,6 +563,46 @@ describe('Relationships', () => {
       })
     })
   })
+
+  describe('Polymorphic Relationships', () => {
+    it('should allow REST querying on polymorphic relationships', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: 'polymorphic-relationships',
+        data: {
+          polymorphic: {
+            value: movie.id,
+            relationTo: 'movies',
+          },
+        },
+      })
+
+      const query = await client.find({
+        slug: 'polymorphic-relationships',
+        query: {
+          and: [
+            {
+              'polymorphic.value': {
+                equals: movie.id,
+              },
+            },
+            {
+              'polymorphic.relationTo': {
+                equals: 'movies',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(query.result.docs).toHaveLength(1)
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>) {
