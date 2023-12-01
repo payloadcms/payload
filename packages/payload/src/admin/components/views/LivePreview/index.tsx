@@ -164,15 +164,14 @@ export const LivePreviewView: React.FC<
 
   useEffect(() => {
     const getURL = async () => {
-      let newURL = typeof livePreviewConfig?.url === 'string' ? livePreviewConfig?.url : undefined
-
-      if (typeof livePreviewConfig?.url === 'function') {
-        newURL = await livePreviewConfig.url({
-          data,
-          documentInfo,
-          locale,
-        })
-      }
+      const newURL =
+        typeof livePreviewConfig?.url === 'function'
+          ? await livePreviewConfig.url({
+              data,
+              documentInfo,
+              locale,
+            })
+          : livePreviewConfig?.url
 
       setURL(newURL)
     }
