@@ -76,7 +76,7 @@ export class BlockNode extends DecoratorBlockNode {
       serializedNode = {
         ...serializedNode,
         fields: {
-          ...(serializedNode as any).data.fields,
+          ...(serializedNode as any).fields.data,
         },
         version: 2,
       }

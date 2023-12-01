@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import type { RichTextField } from '../../../../../fields/config/types'
 import type { RichTextAdapter } from './types'

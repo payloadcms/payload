@@ -1,3 +1,51 @@
+## [2.3.0](https://github.com/payloadcms/payload/compare/v2.2.2...v2.3.0) (2023-11-30)
+
+
+### Features
+
+* add serbian (latin and cyrillic) translations ([#4268](https://github.com/payloadcms/payload/issues/4268)) ([40c8909](https://github.com/payloadcms/payload/commit/40c8909ee0003d45a1afa4524ade557268d01067))
+* **db-mongodb:** search for migrations dir intelligently ([530c825](https://github.com/payloadcms/payload/commit/530c825f806708df8672e66c8e9c559c5e625e5e))
+* **db-postgres:** search for migrations dir intelligently ([308979f](https://github.com/payloadcms/payload/commit/308979f31d27979955a52f32be4ea33849b48f30))
+* **live-preview:** batches api requests ([#4315](https://github.com/payloadcms/payload/issues/4315)) ([d49bb43](https://github.com/payloadcms/payload/commit/d49bb4351f22f17f68477c3145594abbb60fab05))
+* relationship sortOptions property ([#4301](https://github.com/payloadcms/payload/issues/4301)) ([224cddd](https://github.com/payloadcms/payload/commit/224cddd04573eff578ea3fa9ea5419f28b66c613))
+* support migrations with js files ([2122242](https://github.com/payloadcms/payload/commit/21222421929ae19728c31bdccc84995ce3951224))
+* support OAuth 2.0 format Authorization: Bearer tokens in headers ([c1eb9d1](https://github.com/payloadcms/payload/commit/c1eb9d1727daf96375e73943882621127b78e593))
+* useDocumentEvents ([#4284](https://github.com/payloadcms/payload/issues/4284)) ([9bb7a88](https://github.com/payloadcms/payload/commit/9bb7a88526569a726de468de6b2010d52169ea77))
+
+
+### Bug Fixes
+
+* **db-postgres:** allow for nested block fields to be queried ([#4237](https://github.com/payloadcms/payload/issues/4237)) ([cd07873](https://github.com/payloadcms/payload/commit/cd07873fc544766b4aeeff873dfb8d6e3e97e9dc))
+* **db-postgres:** error saving nested arrays with versions ([#4302](https://github.com/payloadcms/payload/issues/4302)) ([3514bfb](https://github.com/payloadcms/payload/commit/3514bfbdaee99341ae739d03591cb63bd9415fe3))
+* duplicate documents with required localized fields ([#4236](https://github.com/payloadcms/payload/issues/4236)) ([9da9b1f](https://github.com/payloadcms/payload/commit/9da9b1fc5050d4f29bcf6dce2f22027834aaf698))
+* incorrect key property in Tabs field component ([#4311](https://github.com/payloadcms/payload/issues/4311)) ([3502ce7](https://github.com/payloadcms/payload/commit/3502ce720b3020eed5fc733884b525303faa4c15)), closes [#4282](https://github.com/payloadcms/payload/issues/4282)
+* **live-preview-react:** removes payload from peer deps ([7e1052f](https://github.com/payloadcms/payload/commit/7e1052fd98c88a4d68af08f98ccc8936edb8ebf6))
+* **live-preview:** compounds merge results ([#4306](https://github.com/payloadcms/payload/issues/4306)) ([381c158](https://github.com/payloadcms/payload/commit/381c158b0303b515164ae487b0ce7e555ae1a08d))
+* **live-preview:** property resets rte nodes ([#4313](https://github.com/payloadcms/payload/issues/4313)) ([66679fb](https://github.com/payloadcms/payload/commit/66679fbdd6f804bff8a58d9504c226c9fb8a57a0))
+* **live-preview:** re-populates externally updated relationships ([#4287](https://github.com/payloadcms/payload/issues/4287)) ([57fc211](https://github.com/payloadcms/payload/commit/57fc2116749059bc55161897cf139031926035ec))
+* **live-preview:** removes payload from peer deps ([b4af95f](https://github.com/payloadcms/payload/commit/b4af95f894b5f6614bace38ef79e7148e084bd3b))
+* properly exports useDocumentsEvents hook ([#4314](https://github.com/payloadcms/payload/issues/4314)) ([5420963](https://github.com/payloadcms/payload/commit/542096361f0c13aed9c6a7d971e2c47047d8e2d2))
+* properly sets tabs key in fieldSchemaToJSON ([#4317](https://github.com/payloadcms/payload/issues/4317)) ([9cc88bb](https://github.com/payloadcms/payload/commit/9cc88bb47443ecdf525f4c99d9f13d81c141c471))
+* **richtext-lexical:** HTML Converter field not working inside of tabs ([#4293](https://github.com/payloadcms/payload/issues/4293)) ([5bf6493](https://github.com/payloadcms/payload/commit/5bf64933b4b99a0ac8ef7d1d91d0165a16636a9f))
+* **richtext-lexical:** re-use payload population logic to fix population-related issues ([#4291](https://github.com/payloadcms/payload/issues/4291)) ([094d02c](https://github.com/payloadcms/payload/commit/094d02ce1d85106470a1a8c6ffe9050873f2e57a))
+* **richtext-slate:** add use client to top of tsx files importing from payload core ([#4312](https://github.com/payloadcms/payload/issues/4312)) ([d4f28b1](https://github.com/payloadcms/payload/commit/d4f28b16b4d42f224e9c5e4254f9ec55107a2f97))
+
+
+### BREAKING CHANGES
+
+### ⚠️ @payloadcms/richtext-lexical
+
+The `SlashMenuGroup` and `SlashMenuOption` classes have changed. If you have any custom lexical Features which are adding new slash menu entries, this will be a breaking change for you. If not, no action is required from your side.
+
+Here are the breaking changes and how to migrate:
+
+1. The `SlashMenuOption`'s first argument is now used as a `key` and not as a display name. Additionally, a new, optional `displayName` property is added which will serve as the display name. Make sure your `key` does not contain any spaces or special characters.
+2. The `title` property of `SlashMenuGroup` has been replaced by a new, mandatory `key` and an optional `displayName` property. To migrate, you will have to remove the `title` property and add a `key` property instead - make sure you do not use spaces or special characters in the `key`.
+3. Additionally, if you have custom styles targeting elements inside of slash or floating-select-toolbar menus, you will have to adjust those too, as the CSS classes changed
+
+[This is an example of performing these updates](
+https://github.com/payloadcms/payload/pull/4257/files#diff-dc2e7f503dd7076dff1d810da7ec77b8fc6a9e41127df4a417dece1b6e1587a0L61)
+
 ## [2.2.2](https://github.com/payloadcms/payload/compare/v2.2.1...v2.2.2) (2023-11-27)
 
 
