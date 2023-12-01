@@ -1,6 +1,6 @@
 import path from 'path'
 
-import type { Media, Page, Post } from './payload-types'
+import type { Media, Page, Post, Tenant } from './payload-types'
 
 import { handleMessage } from '../../packages/live-preview/src/handleMessage'
 import { mergeData } from '../../packages/live-preview/src/mergeData'
@@ -13,7 +13,7 @@ import { RESTClient } from '../helpers/rest'
 import { Pages } from './collections/Pages'
 import { postsSlug } from './collections/Posts'
 import configPromise from './config'
-import { pagesSlug } from './shared'
+import { pagesSlug, tenantsSlug } from './shared'
 
 require('isomorphic-fetch')
 
@@ -24,6 +24,7 @@ describe('Collections - Live Preview', () => {
   let serverURL
 
   let testPost: Post
+  let tenant: Tenant
   let media: Media
 
   beforeAll(async () => {
@@ -37,11 +38,20 @@ describe('Collections - Live Preview', () => {
     client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
     await client.login()
 
+    tenant = await payload.create({
+      collection: tenantsSlug,
+      data: {
+        title: 'Tenant 1',
+        clientURL: 'http://localhost:3000',
+      },
+    })
+
     testPost = await payload.create({
       collection: postsSlug,
       data: {
         slug: 'post-1',
         title: 'Test Post',
+        tenant: tenant.id,
       },
     })
 

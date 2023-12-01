@@ -11,6 +11,7 @@ export interface Config {
     users: User
     pages: Page
     posts: Post
+    tenants: Tenant
     categories: Category
     media: Media
     'payload-preferences': PayloadPreference
@@ -37,6 +38,7 @@ export interface User {
 export interface Page {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
@@ -204,6 +206,13 @@ export interface Page {
   updatedAt: string
   createdAt: string
 }
+export interface Tenant {
+  id: string
+  title: string
+  clientURL: string
+  updatedAt: string
+  createdAt: string
+}
 export interface Media {
   id: string
   alt: string
@@ -224,6 +233,7 @@ export interface Media {
 export interface Post {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
