@@ -1436,8 +1436,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /@adobe/css-tools@4.3.1:
-    resolution: {integrity: sha512-/62yikz7NLScCGAAST5SHdnjaDJQBDq0M2muyRTpf2VQhw6StBg2ALiu73zSJQ4fMVLA+0uBhBHAle7Wg+2kSg==}
+  /@adobe/css-tools@4.3.2:
+    resolution: {integrity: sha512-DA5a1C0gD/pLOvhv33YMrbf2FK3oUzwNl9oOJqE4XVjuEtt6XIakRcsd7eLiOSPkp1kTRQGICTA8cKra/vFbjw==}
     dev: true
 
   /@ampproject/remapping@2.2.1:
@@ -5619,7 +5619,7 @@ packages:
     resolution: {integrity: sha512-ynmNeT7asXyH3aSVv4vvX4Rb+0qjOhdNHnO/3vuZNqPmhDpV/+rCSGwQ7bLcmU2cJ4dvoheIO85LQj0IbJHEtg==}
     engines: {node: '>=8', npm: '>=6', yarn: '>=1'}
     dependencies:
-      '@adobe/css-tools': 4.3.1
+      '@adobe/css-tools': 4.3.2
       '@babel/runtime': 7.22.15
       '@types/testing-library__jest-dom': 5.14.8
       aria-query: 5.3.0
@@ -15886,7 +15886,7 @@ packages:
     resolution: {integrity: sha512-UcZnoo+AEM+ipqwOQ4JLxkIDYyWvOT3hvcal/fSL3VFFUKeHoHgC89gltJtekAejj+ji7dTe0TVb5mpj8/kt0g==}
     dependencies:
       process: 0.5.2
-      readable-stream: github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
+      readable-stream: git@github.com+Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
     dev: true
 
   /readable-stream@1.0.34:
@@ -18613,8 +18613,8 @@ packages:
     resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
 
-  github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
-    resolution: {tarball: https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f}
+  git@github.com+Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
+    resolution: {commit: b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f, repo: git@github.com:Raynos/readable-stream.git, type: git}
     name: readable-stream
     version: 0.3.1
     dev: true
