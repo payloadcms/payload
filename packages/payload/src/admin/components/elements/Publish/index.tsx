@@ -1,6 +1,7 @@
 import qs from 'qs'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-toastify'
 
 import { useForm, useFormModified } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
@@ -8,7 +9,6 @@ import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-
 export type CustomPublishButtonProps = React.ComponentType<
   DefaultPublishButtonProps & {
     DefaultButton: React.ComponentType<DefaultPublishButtonProps>
@@ -30,8 +30,33 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
 }) => {
   if (!canPublish) return null
 
+  const testAction = () => {
+    console.log('test')
+    toast.success('Published to ___ locale(s)')
+  }
+
   return (
-    <FormSubmit buttonId={id} disabled={disabled} onClick={publish} size="small" type="button">
+    <FormSubmit
+      buttonId={id}
+      disabled={disabled}
+      onClick={publish}
+      secondaryActions={[
+        {
+          label: 'Publish spanish only',
+          onClick: testAction,
+        },
+        {
+          label: 'Publish english only',
+          onClick: testAction,
+        },
+        {
+          label: 'Publish all locales',
+          onClick: testAction,
+        },
+      ]}
+      size="small"
+      type="button"
+    >
       {label}
     </FormSubmit>
   )

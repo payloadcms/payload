@@ -31,11 +31,11 @@ const DraftPosts: CollectionConfig = {
     readVersions: ({ req: { user } }) => Boolean(user),
   },
   admin: {
-    components: {
-      edit: {
-        PublishButton: CustomPublishButton,
-      },
-    },
+    // components: {
+    //   edit: {
+    //     PublishButton: CustomPublishButton,
+    //   },
+    // },
     defaultColumns: ['title', 'description', 'createdAt', '_status'],
     preview: () => 'https://payloadcms.com',
     useAsTitle: 'title',

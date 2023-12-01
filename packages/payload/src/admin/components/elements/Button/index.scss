@@ -24,6 +24,10 @@ a.btn {
     @include color-svg(currentColor);
   }
 
+  &__wrap {
+    display: flex;
+  }
+
   &--has-tooltip {
     position: relative;
   }
@@ -55,6 +59,11 @@ a.btn {
 
   &--size-small {
     padding: base(0.25) base(0.5);
+  }
+
+  &--has-secondary-actions {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   &--style-primary {
@@ -213,5 +222,33 @@ a.btn {
   &:focus-visible {
     outline: var(--accessibility-outline);
     outline-offset: var(--accessibility-outline-offset);
+  }
+
+  &__chevron {
+    @include color-svg(currentColor);
+    border-radius: $style-radius-m;
+    border-left: 1px solid var(--theme-elevation-600);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    cursor: pointer;
+
+    .icon {
+      vertical-align: middle;
+      transition: all 0.2s ease-in-out;
+
+      & path {
+        stroke-width: 1px;
+      }
+    }
+
+    &--open {
+      .icon {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:focus:not(:focus-visible) {
+      box-shadow: none;
+    }
   }
 }

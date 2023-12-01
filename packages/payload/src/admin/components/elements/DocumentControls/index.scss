@@ -192,8 +192,18 @@
     }
 
     &__controls {
-      padding-left: var(--gutter-h);
+      padding: base(0.25) 0 base(0.25) var(--gutter-h);
       overflow: auto;
+
+      & .popup__content {
+        position: fixed;
+        left: var(--gutter-h);
+        right: var(--gutter-h);
+      }
+
+      & .popup__caret {
+        display: none;
+      }
 
       // do not show scrollbar because the parent container has a static height
       // this container has a gradient overlay as visual indication of `overflow: scroll`

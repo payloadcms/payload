@@ -1,6 +1,11 @@
 import type { ElementType, MouseEvent } from 'react'
 import type React from 'react'
 
+type secondaryAction = {
+  label: string
+  onClick: (event: MouseEvent) => void
+}
+
 export type Props = {
   'aria-label'?: string
   buttonId?: string
@@ -16,6 +21,7 @@ export type Props = {
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   round?: boolean
+  secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'medium' | 'small'
   to?: string
   tooltip?: string
