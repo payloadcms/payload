@@ -125,10 +125,13 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = (props) =
   // Unlike iframe elements which have an `onLoad` handler, there is no way to access `window.open` on popups
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (url?.startsWith(event.origin)) {
-        const data = JSON.parse(event.data)
-
-        if (data.type === 'payload-live-preview' && data.ready) {
+      if (
+        url?.startsWith(event.origin) &&
+        event.data &&
+        typeof event.data === 'object' &&
+        event.data.type === 'payload-live-preview'
+      ) {
+        if (event.data.ready) {
           setAppIsReady(true)
         }
       }

@@ -51,12 +51,12 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
 
       prevWindowType.current = previewWindowType
 
-      const message = JSON.stringify({
+      const message = {
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
         type: 'payload-live-preview',
-      })
+      }
 
       // Post message to external popup window
       if (previewWindowType === 'popup' && popupRef.current) {
