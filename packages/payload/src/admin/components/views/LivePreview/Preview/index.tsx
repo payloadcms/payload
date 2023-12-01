@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 
 import type { EditViewProps } from '../../types'
 
+import { ShimmerEffect } from '../../../elements/ShimmerEffect'
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
 import { useDocumentEvents } from '../../../utilities/DocumentEvents'
@@ -94,7 +95,11 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
           <LivePreviewToolbar {...props} />
           <div className={`${baseClass}__main`}>
             <DeviceContainer>
-              <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
+              {url ? (
+                <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
+              ) : (
+                <ShimmerEffect height="100%" />
+              )}
             </DeviceContainer>
           </div>
         </div>

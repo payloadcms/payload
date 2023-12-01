@@ -195,8 +195,6 @@ export const LivePreviewView: React.FC<
     url,
   })
 
-  if (!url) return null
-
   return (
     <LivePreviewProvider
       {...props}
