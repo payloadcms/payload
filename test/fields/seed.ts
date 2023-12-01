@@ -4,7 +4,7 @@ import { type Payload } from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { devUser } from '../credentials'
 import { seedDB } from '../helpers/seed'
-import { arrayDoc } from './collections/Array/shared'
+import { anotherArrayDoc, arrayDoc } from './collections/Array/shared'
 import { blocksDoc } from './collections/Blocks/shared'
 import { codeDoc } from './collections/Code/shared'
 import { collapsibleDoc } from './collections/Collapsible/shared'
@@ -20,7 +20,7 @@ import { radiosDoc } from './collections/Radio/shared'
 import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data'
 import { selectsDoc } from './collections/Select/shared'
 import { tabsDoc } from './collections/Tabs/shared'
-import { textDoc } from './collections/Text/shared'
+import { anotherTextDoc, textDoc } from './collections/Text/shared'
 import { uploadsDoc } from './collections/Upload/shared'
 import {
   arrayFieldsSlug,
@@ -56,9 +56,17 @@ export async function clearAndSeedEverything(_payload: Payload) {
       // Get both files in parallel
       const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
 
-      const [createdArrayDoc, createdTextDoc, createdPNGDoc] = await Promise.all([
+      const [
+        createdArrayDoc,
+        createdAnotherArrayDoc,
+        createdTextDoc,
+        createdAnotherTextDoc,
+        createdPNGDoc,
+      ] = await Promise.all([
         _payload.create({ collection: arrayFieldsSlug, data: arrayDoc }),
+        _payload.create({ collection: arrayFieldsSlug, data: anotherArrayDoc }),
         _payload.create({ collection: textFieldsSlug, data: textDoc }),
+        _payload.create({ collection: textFieldsSlug, data: anotherTextDoc }),
         _payload.create({ collection: uploadsSlug, data: {}, file: pngFile }),
       ])
 

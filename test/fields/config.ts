@@ -28,6 +28,7 @@ import TextFields from './collections/Text'
 import Uploads from './collections/Upload'
 import Uploads2 from './collections/Upload2'
 import Uploads3 from './collections/Uploads3'
+import TabsWithRichText from './globals/TabsWithRichText'
 import { clearAndSeedEverything } from './seed'
 
 export const collectionSlugs: CollectionConfig[] = [
@@ -85,6 +86,7 @@ export default buildConfigWithDefaults({
     }),
   },
   collections: collectionSlugs,
+  globals: [TabsWithRichText],
   localization: {
     defaultLocale: 'en',
     fallback: true,

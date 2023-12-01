@@ -1666,6 +1666,30 @@ describe('fields', () => {
       await page.click('#action-save', { delay: 100 })
       await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
     })
+
+    test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationship')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Another text document')
+    })
+
+    test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationHasManyPolymorphic')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Seeded text document')
+    })
   })
 
   describe('upload', () => {

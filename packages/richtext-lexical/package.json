@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -47,7 +47,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.2.0"
+    "payload": "^2.3.0"
   },
   "exports": {
     ".": {

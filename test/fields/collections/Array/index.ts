@@ -11,6 +11,11 @@ const ArrayFields: CollectionConfig = {
   },
   fields: [
     {
+      name: 'title',
+      type: 'text',
+      required: false,
+    },
+    {
       name: 'items',
       defaultValue: arrayDefaultValue,
       fields: [

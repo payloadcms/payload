@@ -7,8 +7,9 @@ import type { CellComponentProps } from '../../types'
 const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment
   const editor: RichTextAdapter = props.field.editor
+  const { CellComponent } = editor
 
-  return <editor.CellComponent {...props} />
+  return <CellComponent {...props} />
 }
 
 export default RichTextCell
