@@ -1,46 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
+import { blockFieldsSlug } from '../../slugs'
 import { AddCustomBlocks } from './components/AddCustomBlocks'
-
-export const getBlocksFieldSeedData = (prefix?: string): any => [
-  {
-    blockName: 'First block',
-    blockType: prefix ? `${prefix}Content` : 'content',
-    text: 'first block',
-    richText: [
-      {
-        children: [{ text: '' }],
-      },
-    ],
-  },
-  {
-    blockName: 'Second block',
-    blockType: prefix ? `${prefix}Number` : 'number',
-    number: 342,
-  },
-  {
-    blockName: 'Sub-block demonstration',
-    blockType: prefix ? `${prefix}SubBlocks` : 'subBlocks',
-    subBlocks: [
-      {
-        blockName: 'First sub block',
-        blockType: 'number',
-        number: 123,
-      },
-      {
-        blockName: 'Second sub block',
-        blockType: 'text',
-        text: 'second sub block',
-      },
-    ],
-  },
-  {
-    blockName: 'I18n Block',
-    blockType: 'i18n-text',
-    text: 'first block',
-  },
-]
+import { getBlocksFieldSeedData } from './shared'
 
 export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
@@ -149,7 +112,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
 })
 
 const BlockFields: CollectionConfig = {
-  slug: 'block-fields',
+  slug: blockFieldsSlug,
   fields: [
     getBlocksField(),
     {
@@ -246,6 +209,22 @@ const BlockFields: CollectionConfig = {
       ],
     },
     {
+      name: 'blocksWithMinRows',
+      type: 'blocks',
+      minRows: 2,
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'blockTitle',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'customBlocks',
       type: 'blocks',
       blocks: [
@@ -279,11 +258,6 @@ const BlockFields: CollectionConfig = {
       },
     },
   ],
-}
-
-export const blocksDoc = {
-  blocks: getBlocksFieldSeedData(),
-  localizedBlocks: getBlocksFieldSeedData('localized'),
 }
 
 export default BlockFields

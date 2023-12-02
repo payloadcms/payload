@@ -15,12 +15,13 @@ import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
 import { useLocale } from '../../../utilities/Locale'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import { useFormProcessing } from '../../Form/context'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
 import { findOptionsByValue } from './findOptionsByValue'
@@ -28,7 +29,6 @@ import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
-import { fieldBaseClass } from '../shared'
 
 const maxResultsPerRequest = 10
 
@@ -40,10 +40,12 @@ const Relationship: React.FC<Props> = (props) => {
     admin: {
       allowCreate = true,
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       isSortable = true,
       readOnly,
+      sortOptions,
       style,
       width,
     } = {},
@@ -55,6 +57,9 @@ const Relationship: React.FC<Props> = (props) => {
     required,
     validate = relationship,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const config = useConfig()
 
@@ -135,7 +140,14 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
+            if (!searchArg) {
+              if (typeof sortOptions === 'string') {
+                fieldToSearch = sortOptions
+              } else if (sortOptions?.[relation]) {
+                fieldToSearch = sortOptions[relation]
+              }
+            }
 
             const query: {
               [key: string]: unknown
@@ -232,6 +244,7 @@ const Relationship: React.FC<Props> = (props) => {
       locale,
       filterOptionsResult,
       serverURL,
+      sortOptions,
       api,
       i18n,
       config,
@@ -248,7 +261,7 @@ const Relationship: React.FC<Props> = (props) => {
     (searchArg: string, valueArg: Value | Value[]) => {
       if (search !== searchArg) {
         setLastLoadedPage({})
-        updateSearch(searchArg, valueArg)
+        updateSearch(searchArg, valueArg, searchArg !== '')
       }
     },
     [search, updateSearch],
@@ -391,6 +404,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [])
 
   const valueToRender = findOptionsByValue({ options, value })
+
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
 
   return (
@@ -411,8 +425,8 @@ const Relationship: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={pathOrName} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={pathOrName} label={label} required={required} />
       <GetFilterOptions
         {...{
           filterOptions,

@@ -3,8 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
-import type { PayloadRequest } from '../../packages/payload/src/express/types'
-import type { Post } from './config'
+import type { Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
@@ -13,6 +12,7 @@ import {
   checkBreadcrumb,
   checkPageTitle,
   exactText,
+  initPageConsoleErrorCatch,
   openDocControls,
   openNav,
   saveDocAndAssert,
@@ -20,20 +20,31 @@ import {
 } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
+import { clearAndSeedEverything } from './seed'
 import {
   customEditLabel,
+  customNestedTabViewPath,
+  customNestedTabViewTitle,
+  customNestedViewPath,
+  customNestedViewTitle,
   customTabLabel,
-  customViews2Slug,
+  customTabViewPath,
+  customTabViewTitle,
+  customViewPath,
+  customViewTitle,
+  slugPluralLabel,
+} from './shared'
+import {
+  customViews2CollectionSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
-  noApiViewCollection,
-  noApiViewGlobal,
-  postsSlug,
-  slugPluralLabel,
-} from './shared'
+  noApiViewCollectionSlug,
+  noApiViewGlobalSlug,
+  postsCollectionSlug,
+} from './slugs'
 
-const { afterEach, beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
 const title = 'Title'
 const description = 'Description'
@@ -46,29 +57,22 @@ describe('admin', () => {
 
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
-    await clearDocs() // Clear any seeded data from onInit
-    url = new AdminUrlUtil(serverURL, postsSlug)
-    customViewsURL = new AdminUrlUtil(serverURL, customViews2Slug)
+    url = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
-
-  afterEach(async () => {
-    await clearDocs()
-    // clear preferences
-    await payload.db.deleteMany({
-      collection: 'payload-preferences',
-      req: {} as PayloadRequest,
-      where: {},
-    })
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
   })
 
   describe('Nav', () => {
     test('should nav to collection - nav', async () => {
       await page.goto(url.admin)
       await openNav(page)
-      await page.locator(`#nav-${postsSlug}`).click()
+      await page.locator(`#nav-${postsCollectionSlug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
@@ -82,7 +86,7 @@ describe('admin', () => {
     test('should navigate to collection - card', async () => {
       await page.goto(url.admin)
       await wait(200)
-      await page.locator(`#card-${postsSlug}`).click()
+      await page.locator(`#card-${postsCollectionSlug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
@@ -139,7 +143,7 @@ describe('admin', () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
       const collectionBreadcrumb = page.locator(
-        `.step-nav a[href="/admin/collections/${postsSlug}"]`,
+        `.step-nav a[href="/admin/collections/${postsCollectionSlug}"]`,
       )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
@@ -162,6 +166,44 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toContainText('Nothing found')
       await page.goto(url.global('hidden-global'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
+    })
+
+    test('should render custom view', async () => {
+      await page.goto(`${serverURL}/admin${customViewPath}`)
+      const pageURL = page.url()
+      const pathname = new URL(pageURL).pathname
+      expect(pathname).toEqual(`/admin${customViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
+    })
+
+    test('should render custom nested view', async () => {
+      await page.goto(`${serverURL}/admin${customNestedViewPath}`)
+      const pageURL = page.url()
+      const pathname = new URL(pageURL).pathname
+      expect(pathname).toEqual(`/admin${customNestedViewPath}`)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
+    })
+
+    test('collection - should render custom tab view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customViewURL = `${pageURL}${customTabViewPath}`
+      await page.goto(customViewURL)
+      expect(page.url()).toEqual(customViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
+    })
+
+    test('collection - should render custom nested tab view', async () => {
+      await page.goto(customViewsURL.create)
+      await page.locator('#field-title').fill('Test')
+      await saveDocAndAssert(page)
+      const pageURL = page.url()
+      const customNestedTabViewURL = `${pageURL}${customNestedTabViewPath}`
+      await page.goto(customNestedTabViewURL)
+      expect(page.url()).toEqual(customNestedTabViewURL)
+      await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
     })
 
     test('collection - should render custom tab label', async () => {
@@ -193,35 +235,35 @@ describe('admin', () => {
     })
 
     test('collection - should not show API tab when disabled in config', async () => {
-      await page.goto(url.collection(noApiViewCollection))
+      await page.goto(url.collection(noApiViewCollectionSlug))
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
     test('collection - should not enable API route when disabled in config', async () => {
       const collectionItems = await payload.find({
-        collection: noApiViewCollection,
+        collection: noApiViewCollectionSlug,
         limit: 1,
       })
       expect(collectionItems.docs.length).toBe(1)
-      await page.goto(`${url.collection(noApiViewCollection)}/${collectionItems.docs[0].id}/api`)
+      await page.goto(`${url.collection(noApiViewGlobalSlug)}/${collectionItems.docs[0].id}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
     test('global - should not show API tab when disabled in config', async () => {
-      await page.goto(url.global(noApiViewGlobal))
+      await page.goto(url.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
     test('global - should not enable API route when disabled in config', async () => {
-      await page.goto(`${url.global(noApiViewGlobal)}/api`)
+      await page.goto(`${url.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
   })
 
   describe('ui', () => {
     test('collection - should render preview button when `admin.preview` is set', async () => {
-      const collectionWithPreview = new AdminUrlUtil(serverURL, postsSlug)
+      const collectionWithPreview = new AdminUrlUtil(serverURL, postsCollectionSlug)
       await page.goto(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
@@ -264,6 +306,7 @@ describe('admin', () => {
       await page.goto(url.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
+      await wait(500)
       await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
       expect(true).toBe(true)
@@ -359,9 +402,11 @@ describe('admin', () => {
     })
 
     test('should bulk delete', async () => {
-      await createPost()
-      await createPost()
-      await createPost()
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+
+      await Promise.all([createPost(), createPost(), createPost()])
+
       await page.goto(url.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
@@ -373,9 +418,10 @@ describe('admin', () => {
     })
 
     test('should bulk update', async () => {
-      await createPost()
-      await createPost()
-      await createPost()
+      // First, delete all posts created by the seed
+      await deleteAllPosts()
+
+      await Promise.all([createPost(), createPost(), createPost()])
 
       const bulkTitle = 'Bulk update title'
       await page.goto(url.list)
@@ -444,6 +490,43 @@ describe('admin', () => {
         'Home',
       )
     })
+
+    test('should allow custom translation of locale labels', async () => {
+      const selectOptionClass = '.localizer .popup-button-list__button'
+      const localizorButton = page.locator('.localizer .popup-button')
+      const secondLocale = page.locator(selectOptionClass).nth(1)
+
+      async function checkLocalLabels(firstLabel: string, secondLabel: string) {
+        await localizorButton.click()
+        await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
+        await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
+      }
+
+      await checkLocalLabels('English (en)', 'Spanish (es)')
+
+      // Change locale to Spanish
+      await localizorButton.click()
+      await expect(secondLocale).toContainText('Spanish (es)')
+      await secondLocale.click()
+
+      // Go to account page
+      await page.goto(url.account)
+
+      const languageField = page.locator('.payload-settings__language .react-select')
+      const options = page.locator('.rs__option')
+
+      // Change language to Spanish
+      await languageField.click()
+      await options.locator('text=Español').click()
+
+      await checkLocalLabels('Inglés (en)', 'Español (es)')
+
+      // Change locale and language back to English
+      await languageField.click()
+      await options.locator('text=English').click()
+      await localizorButton.click()
+      await expect(secondLocale).toContainText('Spanish (es)')
+    })
   })
 
   describe('list view', () => {
@@ -455,18 +538,21 @@ describe('admin', () => {
 
     describe('filtering', () => {
       test('should prefill search input from query param', async () => {
-        await createPost({ title: 'a' })
-        await createPost({ title: 'b' })
+        await createPost({ title: 'dennis' })
+        await createPost({ title: 'charlie' })
 
         // prefill search with "a" from the query param
-        await page.goto(`${url.list}?search=a`)
+        await page.goto(`${url.list}?search=dennis`)
 
         // input should be filled out, list should filter
-        await expect(page.locator('.search-filter__input')).toHaveValue('a')
+        await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
       test('search by id', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         const { id } = await createPost()
         await page.locator('.search-filter__input').fill(id)
         const tableItems = page.locator(tableRowLocator)
@@ -487,6 +573,9 @@ describe('admin', () => {
       })
 
       test('toggle columns', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         const columnCountLocator = 'table > thead > tr > th'
         await createPost()
 
@@ -545,6 +634,9 @@ describe('admin', () => {
       })
 
       test('filter rows', async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         const { id } = await createPost({ title: 'post1' })
         await createPost({ title: 'post2' })
 
@@ -592,6 +684,38 @@ describe('admin', () => {
         // Remove filter
         await page.locator('.condition__actions-remove').click()
         await expect(page.locator(tableRowLocator)).toHaveCount(2)
+      })
+
+      test('resets filter value and operator on field update', async () => {
+        const { id } = await createPost({ title: 'post1' })
+        await createPost({ title: 'post2' })
+
+        // open the column controls
+        await page.locator('.list-controls__toggle-columns').click()
+        await page.locator('.list-controls__toggle-where').click()
+        await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const operatorField = page.locator('.condition__operator')
+        await operatorField.click()
+
+        const dropdownOperatorOptions = operatorField.locator('.rs__option')
+        await dropdownOperatorOptions.locator('text=equals').click()
+
+        // execute filter (where ID equals id value)
+        const valueField = page.locator('.condition__value > input')
+        await valueField.fill(id)
+
+        const filterField = page.locator('.condition__field')
+        await filterField.click()
+
+        // select new filter field of Number
+        const dropdownFieldOptions = filterField.locator('.rs__option')
+        await dropdownFieldOptions.locator('text=Number').click()
+
+        // expect operator & value field to reset (be empty)
+        await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
+        await expect(valueField).toHaveValue('')
       })
 
       test('should accept where query from valid URL where parameter', async () => {
@@ -876,6 +1000,9 @@ describe('admin', () => {
 
     describe('multi-select', () => {
       beforeEach(async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
         await mapAsync([...Array(3)], async () => {
           await createPost()
         })
@@ -915,12 +1042,6 @@ describe('admin', () => {
     })
 
     describe('pagination', () => {
-      beforeAll(async () => {
-        await mapAsync([...Array(11)], async () => {
-          await createPost()
-        })
-      })
-
       test('should paginate', async () => {
         const pageInfo = page.locator('.collection-list__page-info')
         const perPage = page.locator('.per-page')
@@ -951,30 +1072,32 @@ describe('admin', () => {
     })
 
     // TODO: Troubleshoot flaky suite
-    describe.skip('sorting', () => {
-      beforeAll(async () => {
-        await createPost()
-        await createPost()
+    describe('sorting', () => {
+      beforeEach(async () => {
+        // delete all posts created by the seed
+        await deleteAllPosts()
+
+        await Promise.all([
+          createPost({
+            number: 1,
+          }),
+          createPost({
+            number: 2,
+          }),
+        ])
       })
 
       test('should sort', async () => {
-        const upChevron = page.locator('#heading-id .sort-column__asc')
-        const downChevron = page.locator('#heading-id .sort-column__desc')
+        const upChevron = page.locator('#heading-number .sort-column__asc')
+        const downChevron = page.locator('#heading-number .sort-column__desc')
 
-        const firstId = await page.locator('.row-1 .cell-id').innerText()
-        const secondId = await page.locator('.row-2 .cell-id').innerText()
+        await upChevron.click()
+        await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
+        await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-        await upChevron.click({ delay: 200 })
-
-        // Order should have swapped
-        await expect(page.locator('.row-1 .cell-id')).toHaveText(secondId)
-        await expect(page.locator('.row-2 .cell-id')).toHaveText(firstId)
-
-        await downChevron.click({ delay: 200 })
-
-        // Swap back
-        await expect(page.locator('.row-1 .cell-id')).toHaveText(firstId)
-        await expect(page.locator('.row-2 .cell-id')).toHaveText(secondId)
+        await downChevron.click()
+        await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
+        await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
       })
     })
 
@@ -1038,18 +1161,26 @@ describe('admin', () => {
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
-    collection: postsSlug,
+    collection: postsCollectionSlug,
     data: {
       description,
       title,
       ...overrides,
     },
-  })
+  }) as unknown as Promise<Post>
 }
 
-async function clearDocs(): Promise<void> {
-  await payload.delete({
-    collection: postsSlug,
-    where: { id: { exists: true } },
+async function deleteAllPosts() {
+  const posts = await payload.find({
+    collection: postsCollectionSlug,
+    limit: 100,
   })
+  await Promise.all([
+    ...posts.docs.map((post) => {
+      return payload.delete({
+        collection: postsCollectionSlug,
+        id: post.id,
+      })
+    }),
+  ])
 }

@@ -2,11 +2,12 @@ import React from 'react'
 
 import type { RichTextField } from '../../../../../fields/config/types'
 import type { RichTextAdapter } from './types'
-
-const RichText: React.FC<RichTextField> = (props) => {
+const RichText: React.FC<RichTextField> = (fieldprops) => {
   // eslint-disable-next-line react/destructuring-assignment
-  const editor: RichTextAdapter = props.editor
-  return <editor.FieldComponent {...props} />
+  const editor: RichTextAdapter = fieldprops.editor
+  const { FieldComponent } = editor
+
+  return <FieldComponent {...fieldprops} />
 }
 
 export default RichText

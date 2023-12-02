@@ -32,6 +32,7 @@ const Customers: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
+              // @ts-expect-error
               Field: (args) =>
                 LinkToDoc({
                   ...args,

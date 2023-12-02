@@ -3,7 +3,16 @@ import type { ElementNode, LexicalEditor, LexicalNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { mergeRegister } from '@lexical/utils'
-import { $createTextNode, $isElementNode, $isLineBreakNode, $isTextNode, TextNode } from 'lexical'
+import {
+  $createTextNode,
+  $getSelection,
+  $isElementNode,
+  $isLineBreakNode,
+  $isNodeSelection,
+  $isRangeSelection,
+  $isTextNode,
+  TextNode,
+} from 'lexical'
 import { useEffect } from 'react'
 
 import { invariant } from '../../../../lexical/utils/invariant'
@@ -33,7 +42,7 @@ export function createLinkMatcherWithRegExp(
       index: match.index,
       length: match[0].length,
       text: match[0],
-      url: urlTransformer(text),
+      url: urlTransformer(match[0]),
     }
   }
 }
@@ -92,29 +101,144 @@ function isContentAroundIsValid(
   matchStart: number,
   matchEnd: number,
   text: string,
-  node: TextNode,
+  nodes: TextNode[],
 ): boolean {
   const contentBeforeIsValid =
-    matchStart > 0 ? isSeparator(text[matchStart - 1]) : isPreviousNodeValid(node)
+    matchStart > 0 ? isSeparator(text[matchStart - 1]) : isPreviousNodeValid(nodes[0])
   if (!contentBeforeIsValid) {
     return false
   }
 
   const contentAfterIsValid =
-    matchEnd < text.length ? isSeparator(text[matchEnd]) : isNextNodeValid(node)
+    matchEnd < text.length ? isSeparator(text[matchEnd]) : isNextNodeValid(nodes[nodes.length - 1])
   return contentAfterIsValid
 }
 
+function extractMatchingNodes(
+  nodes: TextNode[],
+  startIndex: number,
+  endIndex: number,
+): [
+  matchingOffset: number,
+  unmodifiedBeforeNodes: TextNode[],
+  matchingNodes: TextNode[],
+  unmodifiedAfterNodes: TextNode[],
+] {
+  const unmodifiedBeforeNodes: TextNode[] = []
+  const matchingNodes: TextNode[] = []
+  const unmodifiedAfterNodes: TextNode[] = []
+  let matchingOffset = 0
+
+  let currentOffset = 0
+  const currentNodes = [...nodes]
+
+  while (currentNodes.length > 0) {
+    const currentNode = currentNodes[0]
+    const currentNodeText = currentNode.getTextContent()
+    const currentNodeLength = currentNodeText.length
+    const currentNodeStart = currentOffset
+    const currentNodeEnd = currentOffset + currentNodeLength
+
+    if (currentNodeEnd <= startIndex) {
+      unmodifiedBeforeNodes.push(currentNode)
+      matchingOffset += currentNodeLength
+    } else if (currentNodeStart >= endIndex) {
+      unmodifiedAfterNodes.push(currentNode)
+    } else {
+      matchingNodes.push(currentNode)
+    }
+    currentOffset += currentNodeLength
+    currentNodes.shift()
+  }
+  return [matchingOffset, unmodifiedBeforeNodes, matchingNodes, unmodifiedAfterNodes]
+}
+
+function createAutoLinkNode(
+  nodes: TextNode[],
+  startIndex: number,
+  endIndex: number,
+  match: LinkMatcherResult,
+): TextNode | undefined {
+  const fields: LinkFields = {
+    linkType: 'custom',
+    url: match.url,
+    ...match.fields,
+  }
+
+  const linkNode = $createAutoLinkNode({ fields })
+  if (nodes.length === 1) {
+    let remainingTextNode = nodes[0]
+    let linkTextNode
+    if (startIndex === 0) {
+      ;[linkTextNode, remainingTextNode] = remainingTextNode.splitText(endIndex)
+    } else {
+      ;[, linkTextNode, remainingTextNode] = remainingTextNode.splitText(startIndex, endIndex)
+    }
+    const textNode = $createTextNode(match.text)
+    textNode.setFormat(linkTextNode.getFormat())
+    textNode.setDetail(linkTextNode.getDetail())
+    linkNode.append(textNode)
+    linkTextNode.replace(linkNode)
+    return remainingTextNode
+  } else if (nodes.length > 1) {
+    const firstTextNode = nodes[0]
+    let offset = firstTextNode.getTextContent().length
+    let firstLinkTextNode
+    if (startIndex === 0) {
+      firstLinkTextNode = firstTextNode
+    } else {
+      ;[, firstLinkTextNode] = firstTextNode.splitText(startIndex)
+    }
+    const linkNodes = []
+    let remainingTextNode
+    for (let i = 1; i < nodes.length; i++) {
+      const currentNode = nodes[i]
+      const currentNodeText = currentNode.getTextContent()
+      const currentNodeLength = currentNodeText.length
+      const currentNodeStart = offset
+      const currentNodeEnd = offset + currentNodeLength
+      if (currentNodeStart < endIndex) {
+        if (currentNodeEnd <= endIndex) {
+          linkNodes.push(currentNode)
+        } else {
+          const [linkTextNode, endNode] = currentNode.splitText(endIndex - currentNodeStart)
+          linkNodes.push(linkTextNode)
+          remainingTextNode = endNode
+        }
+      }
+      offset += currentNodeLength
+    }
+    const selection = $getSelection()
+    const selectedTextNode = selection ? selection.getNodes().find($isTextNode) : undefined
+    const textNode = $createTextNode(firstLinkTextNode.getTextContent())
+    textNode.setFormat(firstLinkTextNode.getFormat())
+    textNode.setDetail(firstLinkTextNode.getDetail())
+    linkNode.append(textNode, ...linkNodes)
+    // it does not preserve caret position if caret was at the first text node
+    // so we need to restore caret position
+    if (selectedTextNode && selectedTextNode === firstLinkTextNode) {
+      if ($isRangeSelection(selection)) {
+        textNode.select(selection.anchor.offset, selection.focus.offset)
+      } else if ($isNodeSelection(selection)) {
+        textNode.select(0, textNode.getTextContent().length)
+      }
+    }
+    firstLinkTextNode.replace(linkNode)
+    return remainingTextNode
+  }
+  return undefined
+}
+
 function handleLinkCreation(
-  node: TextNode,
+  nodes: TextNode[],
   matchers: LinkMatcher[],
   onChange: ChangeHandler,
 ): void {
-  const nodeText = node.getTextContent()
-  let text = nodeText
-  let invalidMatchEnd = 0
-  let remainingTextNode = node
+  let currentNodes = [...nodes]
+  let text = currentNodes.map((node) => node.getTextContent()).join('')
+
   let match
+  let invalidMatchEnd = 0
 
   while ((match = findFirstMatch(text, matchers)) != null && match !== null) {
     const matchStart: number = match.index
@@ -123,34 +247,28 @@ function handleLinkCreation(
     const isValid = isContentAroundIsValid(
       invalidMatchEnd + matchStart,
       invalidMatchEnd + matchEnd,
-      nodeText,
-      node,
+      text,
+      currentNodes,
     )
 
     if (isValid) {
-      let linkTextNode
-      if (invalidMatchEnd + matchStart === 0) {
-        ;[linkTextNode, remainingTextNode] = remainingTextNode.splitText(
-          invalidMatchEnd + matchLength,
-        )
-      } else {
-        ;[, linkTextNode, remainingTextNode] = remainingTextNode.splitText(
-          invalidMatchEnd + matchStart,
-          invalidMatchEnd + matchStart + matchLength,
-        )
-      }
-      const fields: LinkFields = {
-        linkType: 'custom',
-        url: match.url,
-        ...match.attributes,
-      }
+      const [matchingOffset, , matchingNodes, unmodifiedAfterNodes] = extractMatchingNodes(
+        currentNodes,
+        invalidMatchEnd + matchStart,
+        invalidMatchEnd + matchEnd,
+      )
 
-      const linkNode = $createAutoLinkNode({ fields })
-      const textNode = $createTextNode(match.text)
-      textNode.setFormat(linkTextNode.getFormat())
-      textNode.setDetail(linkTextNode.getDetail())
-      linkNode.append(textNode)
-      linkTextNode.replace(linkNode)
+      const actualMatchStart = invalidMatchEnd + matchStart - matchingOffset
+      const actualMatchEnd = invalidMatchEnd + matchEnd - matchingOffset
+      const remainingTextNode = createAutoLinkNode(
+        matchingNodes,
+        actualMatchStart,
+        actualMatchEnd,
+        match,
+      )
+      currentNodes = remainingTextNode
+        ? [remainingTextNode, ...unmodifiedAfterNodes]
+        : unmodifiedAfterNodes
       onChange(match.url, null)
       invalidMatchEnd = 0
     } else {
@@ -203,7 +321,7 @@ function handleLinkEdit(
   }
 }
 
-// Bad neighbours are edits in neighbor nodes that make AutoLinks incompatible.
+// Bad neighbors are edits in neighbor nodes that make AutoLinks incompatible.
 // Given the creation preconditions, these can only be simple text nodes.
 function handleBadNeighbors(
   textNode: TextNode,
@@ -239,6 +357,20 @@ function replaceWithChildren(node: ElementNode): LexicalNode[] {
   return children.map((child) => child.getLatest())
 }
 
+function getTextNodesToMatch(textNode: TextNode): TextNode[] {
+  // check if next siblings are simple text nodes till a node contains a space separator
+  const textNodesToMatch = [textNode]
+  let nextSibling = textNode.getNextSibling()
+  while (nextSibling !== null && $isTextNode(nextSibling) && nextSibling.isSimpleText()) {
+    textNodesToMatch.push(nextSibling)
+    if (/\s/.test(nextSibling.getTextContent())) {
+      break
+    }
+    nextSibling = nextSibling.getNextSibling()
+  }
+  return textNodesToMatch
+}
+
 function useAutoLink(
   editor: LexicalEditor,
   matchers: LinkMatcher[],
@@ -266,7 +398,8 @@ function useAutoLink(
             textNode.isSimpleText() &&
             (startsWithSeparator(textNode.getTextContent()) || !$isAutoLinkNode(previous))
           ) {
-            handleLinkCreation(textNode, matchers, onChangeWrapped)
+            const textNodesToMatch = getTextNodesToMatch(textNode)
+            handleLinkCreation(textNodesToMatch, matchers, onChangeWrapped)
           }
 
           handleBadNeighbors(textNode, matchers, onChangeWrapped)

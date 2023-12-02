@@ -5,20 +5,28 @@ import type { Props } from './types'
 
 import { checkbox } from '../../../../../fields/validations'
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { CheckboxInput } from './Input'
 import './index.scss'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'checkbox'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, condition, description, readOnly, style, width } = {},
+    admin: {
+      className,
+      components: { Error, Label, afterInput, beforeInput } = {},
+      condition,
+      description,
+      readOnly,
+      style,
+      width,
+    } = {},
     disableFormData,
     label,
     onChange,
@@ -26,6 +34,8 @@ const Checkbox: React.FC<Props> = (props) => {
     required,
     validate = checkbox,
   } = props
+
+  const ErrorComp = Error || DefaultError
 
   const { i18n } = useTranslation()
 
@@ -72,15 +82,19 @@ const Checkbox: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <Error message={errorMessage} showError={showError} />
+        <ErrorComp alignCaret="left" message={errorMessage} showError={showError} />
       </div>
       <CheckboxInput
+        Label={Label}
+        afterInput={afterInput}
+        beforeInput={beforeInput}
         checked={Boolean(value)}
         id={fieldID}
         label={getTranslation(label || name, i18n)}
         name={path}
         onToggle={onToggle}
         readOnly={readOnly}
+        required={required}
       />
       <FieldDescription description={description} value={value} />
     </div>

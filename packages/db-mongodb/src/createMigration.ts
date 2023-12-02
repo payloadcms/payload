@@ -26,8 +26,11 @@ export const createMigration = async function createMigration({ file, migrationN
 
   let migrationFileContent: string | undefined
 
-  // Check for predefined migration
-  if (file) {
+  // Check for predefined migration.
+  // Either passed in via --file or prefixed with @payloadcms/db-mongodb/
+  if (file || migrationName.startsWith('@payloadcms/db-mongodb/')) {
+    if (!file) file = migrationName
+
     const predefinedMigrationName = file.replace('@payloadcms/db-mongodb/', '')
     migrationName = predefinedMigrationName
     const cleanPath = path.join(__dirname, `../predefinedMigrations/${predefinedMigrationName}.js`)

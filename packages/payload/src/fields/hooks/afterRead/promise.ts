@@ -25,12 +25,14 @@ type Args = {
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
+  triggerAccessControl?: boolean
+  triggerHooks?: boolean
 }
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
 // - Flatten locales into requested locale
-// - Sanitize outgoing data (point field, etc)
+// - Sanitize outgoing data (point field, etc.)
 // - Execute field hooks
 // - Execute read access control
 // - Populate relationships
@@ -51,6 +53,8 @@ export const promise = async ({
   req,
   showHiddenFields,
   siblingDoc,
+  triggerAccessControl = true,
+  triggerHooks = true,
 }: Args): Promise<void> => {
   if (
     fieldAffectsData(field) &&
@@ -138,10 +142,14 @@ export const promise = async ({
       // This is run here AND in the GraphQL Resolver
       if (editor?.populationPromise) {
         const populationPromise = editor.populationPromise({
+          context,
           currentDepth,
           depth,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,
@@ -186,7 +194,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // Execute hooks
-    if (field.hooks?.afterRead) {
+    if (triggerHooks && field.hooks?.afterRead) {
       await field.hooks.afterRead.reduce(async (priorHook, currentHook) => {
         await priorHook
 
@@ -241,7 +249,7 @@ export const promise = async ({
     }
 
     // Execute access control
-    if (field.access && field.access.read) {
+    if (triggerAccessControl && field.access && field.access.read) {
       const result = overrideAccess
         ? true
         : await field.access.read({
@@ -293,6 +301,8 @@ export const promise = async ({
         req,
         showHiddenFields,
         siblingDoc: groupDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
 
       break
@@ -319,6 +329,8 @@ export const promise = async ({
             req,
             showHiddenFields,
             siblingDoc: row || {},
+            triggerAccessControl,
+            triggerHooks,
           })
         })
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
@@ -341,6 +353,8 @@ export const promise = async ({
                 req,
                 showHiddenFields,
                 siblingDoc: row || {},
+                triggerAccessControl,
+                triggerHooks,
               })
             })
           }
@@ -375,6 +389,8 @@ export const promise = async ({
               req,
               showHiddenFields,
               siblingDoc: row || {},
+              triggerAccessControl,
+              triggerHooks,
             })
           }
         })
@@ -401,6 +417,8 @@ export const promise = async ({
                   req,
                   showHiddenFields,
                   siblingDoc: row || {},
+                  triggerAccessControl,
+                  triggerHooks,
                 })
               }
             })
@@ -431,6 +449,8 @@ export const promise = async ({
         req,
         showHiddenFields,
         siblingDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
 
       break
@@ -443,7 +463,7 @@ export const promise = async ({
         if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
-      await traverseFields({
+      traverseFields({
         collection,
         context,
         currentDepth,
@@ -459,6 +479,8 @@ export const promise = async ({
         req,
         showHiddenFields,
         siblingDoc: tabDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
 
       break
@@ -481,6 +503,8 @@ export const promise = async ({
         req,
         showHiddenFields,
         siblingDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
       break
     }

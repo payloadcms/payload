@@ -20,7 +20,7 @@ export const Select: React.FC<
   return (
     <Width width={width}>
       <div className={classes.select}>
-        <label htmlFor="name" className={classes.label}>
+        <label htmlFor={name} className={classes.label}>
           {label}
         </label>
         <Controller
@@ -36,6 +36,7 @@ export const Select: React.FC<
               onChange={val => onChange(val.value)}
               className={classes.reactSelect}
               classNamePrefix="rs"
+              inputId={name}
             />
           )}
         />

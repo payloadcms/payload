@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.0.14",
+  "version": "2.3.1",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -106,7 +106,7 @@
     "sharp": "0.32.6",
     "ts-essentials": "7.0.3",
     "use-context-selector": "1.4.1",
-    "uuid": "8.3.2"
+    "uuid": "9.0.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

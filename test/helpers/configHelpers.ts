@@ -40,8 +40,6 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
 
-  const port = await getPort()
-
   if (!initOptions?.local) {
     initOptions.express = express()
   }
@@ -63,6 +61,7 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
 
   await payload.init(initOptions)
 
+  const port = await getPort()
   if (initOptions.express) {
     initOptions.express.listen(port)
   }

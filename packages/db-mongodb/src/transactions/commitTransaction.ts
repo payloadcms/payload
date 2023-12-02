@@ -4,6 +4,7 @@ export const commitTransaction: CommitTransaction = async function commitTransac
   if (!this.sessions[id]?.inTransaction()) {
     return
   }
+
   await this.sessions[id].commitTransaction()
   await this.sessions[id].endSession()
   delete this.sessions[id]

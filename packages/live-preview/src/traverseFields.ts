@@ -1,83 +1,92 @@
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import { promise } from './promise'
+import type { PopulationsByCollection, UpdatedDocument } from './types'
 
-type Args<T> = {
-  apiRoute?: string
-  depth: number
+import { traverseRichText } from './traverseRichText'
+
+export const traverseFields = <T>(args: {
+  externallyUpdatedRelationship?: UpdatedDocument
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
-  populationPromises: Promise<void>[]
+  populationsByCollection: PopulationsByCollection
   result: T
-  serverURL: string
-}
+}): void => {
+  const {
+    externallyUpdatedRelationship,
+    fieldSchema: fieldSchemas,
+    incomingData,
+    populationsByCollection,
+    result,
+  } = args
 
-export const traverseFields = <T>({
-  apiRoute,
-  depth,
-  fieldSchema,
-  incomingData,
-  populationPromises,
-  result,
-  serverURL,
-}: Args<T>): void => {
-  fieldSchema.forEach((fieldJSON) => {
-    if ('name' in fieldJSON && typeof fieldJSON.name === 'string') {
-      const fieldName = fieldJSON.name
+  fieldSchemas.forEach((fieldSchema) => {
+    if ('name' in fieldSchema && typeof fieldSchema.name === 'string') {
+      const fieldName = fieldSchema.name
 
-      switch (fieldJSON.type) {
+      switch (fieldSchema.type) {
+        case 'richText':
+          result[fieldName] = traverseRichText({
+            externallyUpdatedRelationship,
+            incomingData: incomingData[fieldName],
+            populationsByCollection,
+            result: result[fieldName],
+          })
+
+          break
+
         case 'array':
           if (Array.isArray(incomingData[fieldName])) {
-            result[fieldName] = incomingData[fieldName].map((row, i) => {
-              const hasExistingRow =
-                Array.isArray(result[fieldName]) &&
-                typeof result[fieldName][i] === 'object' &&
-                result[fieldName][i] !== null
+            result[fieldName] = incomingData[fieldName].map((incomingRow, i) => {
+              if (!result[fieldName]) {
+                result[fieldName] = []
+              }
 
-              const newRow = hasExistingRow ? { ...result[fieldName][i] } : {}
+              if (!result[fieldName][i]) {
+                result[fieldName][i] = {}
+              }
 
               traverseFields({
-                apiRoute,
-                depth,
-                fieldSchema: fieldJSON.fields,
-                incomingData: row,
-                populationPromises,
-                result: newRow,
-                serverURL,
+                externallyUpdatedRelationship,
+                fieldSchema: fieldSchema.fields,
+                incomingData: incomingRow,
+                populationsByCollection,
+                result: result[fieldName][i],
               })
 
-              return newRow
+              return result[fieldName][i]
             })
           }
+
           break
 
         case 'blocks':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingBlock, i) => {
-              const incomingBlockJSON = fieldJSON.blocks[incomingBlock.blockType]
+              const incomingBlockJSON = fieldSchema.blocks[incomingBlock.blockType]
 
-              // Compare the index and id to determine if this block already exists in the result
-              // If so, we want to use the existing block as the base, otherwise take the incoming block
-              // Either way, we will traverse the fields of the block to populate relationships
-              const isExistingBlock =
-                Array.isArray(result[fieldName]) &&
-                typeof result[fieldName][i] === 'object' &&
-                result[fieldName][i] !== null &&
-                result[fieldName][i].id === incomingBlock.id
+              if (!result[fieldName]) {
+                result[fieldName] = []
+              }
 
-              const block = isExistingBlock ? result[fieldName][i] : incomingBlock
+              if (
+                !result[fieldName][i] ||
+                result[fieldName][i].id !== incomingBlock.id ||
+                result[fieldName][i].blockType !== incomingBlock.blockType
+              ) {
+                result[fieldName][i] = {
+                  blockType: incomingBlock.blockType,
+                }
+              }
 
               traverseFields({
-                apiRoute,
-                depth,
+                externallyUpdatedRelationship,
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
-                populationPromises,
-                result: block,
-                serverURL,
+                populationsByCollection,
+                result: result[fieldName][i],
               })
 
-              return block
+              return result[fieldName][i]
             })
           } else {
             result[fieldName] = []
@@ -92,135 +101,169 @@ export const traverseFields = <T>({
           }
 
           traverseFields({
-            apiRoute,
-            depth,
-            fieldSchema: fieldJSON.fields,
+            externallyUpdatedRelationship,
+            fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
-            populationPromises,
+            populationsByCollection,
             result: result[fieldName],
-            serverURL,
           })
 
           break
 
         case 'upload':
         case 'relationship':
-          if (fieldJSON.hasMany && Array.isArray(incomingData[fieldName])) {
-            const existingValue = Array.isArray(result[fieldName]) ? [...result[fieldName]] : []
-            result[fieldName] = Array.isArray(result[fieldName])
-              ? [...result[fieldName]].slice(0, incomingData[fieldName].length)
-              : []
+          // Handle `hasMany` relationships
+          if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {
+            if (!result[fieldName] || !incomingData[fieldName].length) {
+              result[fieldName] = []
+            }
 
-            incomingData[fieldName].forEach((relation, i) => {
+            incomingData[fieldName].forEach((incomingRelation, i) => {
               // Handle `hasMany` polymorphic
-              if (Array.isArray(fieldJSON.relationTo)) {
-                const existingID = existingValue[i]?.value?.id
-
-                if (
-                  existingID !== relation.value ||
-                  existingValue[i]?.relationTo !== relation.relationTo
-                ) {
+              if (Array.isArray(fieldSchema.relationTo)) {
+                // if the field doesn't exist on the result, create it
+                // the value will be populated later
+                if (!result[fieldName][i]) {
                   result[fieldName][i] = {
-                    relationTo: relation.relationTo,
+                    relationTo: incomingRelation.relationTo,
+                  }
+                }
+
+                const oldID = result[fieldName][i]?.value?.id
+                const oldRelation = result[fieldName][i]?.relationTo
+                const newID = incomingRelation.value
+                const newRelation = incomingRelation.relationTo
+
+                const hasChanged = newID !== oldID || newRelation !== oldRelation
+                const hasUpdated =
+                  newRelation === externallyUpdatedRelationship?.entitySlug &&
+                  newID === externallyUpdatedRelationship?.id
+
+                if (hasChanged || hasUpdated) {
+                  if (!populationsByCollection[newRelation]) {
+                    populationsByCollection[newRelation] = []
                   }
 
-                  populationPromises.push(
-                    promise({
-                      id: relation.value,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: relation.relationTo,
-                      depth,
-                      ref: result[fieldName][i],
-                      serverURL,
-                    }),
-                  )
+                  populationsByCollection[newRelation].push({
+                    id: incomingRelation.value,
+                    accessor: 'value',
+                    ref: result[fieldName][i],
+                  })
                 }
               } else {
                 // Handle `hasMany` monomorphic
-                const existingID = existingValue[i]?.id
+                const hasChanged = incomingRelation !== result[fieldName][i]?.id
+                const hasUpdated =
+                  fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
+                  incomingRelation === externallyUpdatedRelationship?.id
 
-                if (existingID !== relation) {
-                  populationPromises.push(
-                    promise({
-                      id: relation,
-                      accessor: i,
-                      apiRoute,
-                      collection: String(fieldJSON.relationTo),
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                if (hasChanged || hasUpdated) {
+                  if (!populationsByCollection[fieldSchema.relationTo]) {
+                    populationsByCollection[fieldSchema.relationTo] = []
+                  }
+
+                  populationsByCollection[fieldSchema.relationTo].push({
+                    id: incomingRelation,
+                    accessor: i,
+                    ref: result[fieldName],
+                  })
                 }
               }
             })
           } else {
             // Handle `hasOne` polymorphic
-            if (Array.isArray(fieldJSON.relationTo)) {
+            if (Array.isArray(fieldSchema.relationTo)) {
+              // if the field doesn't exist on the result, create it
+              // the value will be populated later
+              if (!result[fieldName]) {
+                result[fieldName] = {
+                  relationTo: incomingData[fieldName]?.relationTo,
+                }
+              }
+
               const hasNewValue =
-                typeof incomingData[fieldName] === 'object' && incomingData[fieldName] !== null
+                incomingData[fieldName] &&
+                typeof incomingData[fieldName] === 'object' &&
+                incomingData[fieldName] !== null
+
               const hasOldValue =
-                typeof result[fieldName] === 'object' && result[fieldName] !== null
+                result[fieldName] &&
+                typeof result[fieldName] === 'object' &&
+                result[fieldName] !== null
 
-              const newValue = hasNewValue ? incomingData[fieldName].value : ''
+              const newID = hasNewValue
+                ? typeof incomingData[fieldName].value === 'object'
+                  ? incomingData[fieldName].value.id
+                  : incomingData[fieldName].value
+                : ''
+
+              const oldID = hasOldValue
+                ? typeof result[fieldName].value === 'object'
+                  ? result[fieldName].value.id
+                  : result[fieldName].value
+                : ''
+
               const newRelation = hasNewValue ? incomingData[fieldName].relationTo : ''
-
-              const oldValue = hasOldValue ? result[fieldName].value : ''
               const oldRelation = hasOldValue ? result[fieldName].relationTo : ''
 
-              if (newValue !== oldValue || newRelation !== oldRelation) {
-                if (newValue) {
-                  if (!result[fieldName]) {
-                    result[fieldName] = {
-                      relationTo: newRelation,
-                    }
+              const hasChanged = newID !== oldID || newRelation !== oldRelation
+              const hasUpdated =
+                newRelation === externallyUpdatedRelationship?.entitySlug &&
+                newID === externallyUpdatedRelationship?.id
+
+              // if the new value/relation is different from the old value/relation
+              // populate the new value, otherwise leave it alone
+              if (hasChanged || hasUpdated) {
+                // if the new value is not empty, populate it
+                // otherwise set the value to null
+                if (newID) {
+                  if (!populationsByCollection[newRelation]) {
+                    populationsByCollection[newRelation] = []
                   }
 
-                  populationPromises.push(
-                    promise({
-                      id: newValue,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: newRelation,
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                  populationsByCollection[newRelation].push({
+                    id: newID,
+                    accessor: 'value',
+                    ref: result[fieldName],
+                  })
+                } else {
+                  result[fieldName] = null
                 }
-              } else {
-                result[fieldName] = null
               }
             } else {
               // Handle `hasOne` monomorphic
-              const newID: string =
-                (typeof incomingData[fieldName] === 'string' && incomingData[fieldName]) ||
-                (typeof incomingData[fieldName] === 'object' &&
-                  incomingData[fieldName] !== null &&
+              const newID: number | string | undefined =
+                (incomingData[fieldName] &&
+                  typeof incomingData[fieldName] === 'object' &&
                   incomingData[fieldName].id) ||
-                ''
+                incomingData[fieldName]
 
-              const oldID: string =
-                (typeof result[fieldName] === 'string' && result[fieldName]) ||
-                (typeof result[fieldName] === 'object' &&
-                  result[fieldName] !== null &&
+              const oldID: number | string | undefined =
+                (result[fieldName] &&
+                  typeof result[fieldName] === 'object' &&
                   result[fieldName].id) ||
-                ''
+                result[fieldName]
 
-              if (newID !== oldID) {
+              const hasChanged = newID !== oldID
+              const hasUpdated =
+                fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
+                newID === externallyUpdatedRelationship?.id
+
+              // if the new value is different from the old value
+              // populate the new value, otherwise leave it alone
+              if (hasChanged || hasUpdated) {
+                // if the new value is not empty, populate it
+                // otherwise set the value to null
                 if (newID) {
-                  populationPromises.push(
-                    promise({
-                      id: newID,
-                      accessor: fieldName,
-                      apiRoute,
-                      collection: String(fieldJSON.relationTo),
-                      depth,
-                      ref: result as Record<string, unknown>,
-                      serverURL,
-                    }),
-                  )
+                  if (!populationsByCollection[fieldSchema.relationTo]) {
+                    populationsByCollection[fieldSchema.relationTo] = []
+                  }
+
+                  populationsByCollection[fieldSchema.relationTo].push({
+                    id: newID,
+                    accessor: fieldName,
+                    ref: result as Record<string, unknown>,
+                  })
                 } else {
                   result[fieldName] = null
                 }
@@ -235,6 +278,4 @@ export const traverseFields = <T>({
       }
     }
   })
-
-  return null
 }

@@ -11,6 +11,7 @@ export interface Config {
     users: User
     pages: Page
     posts: Post
+    tenants: Tenant
     categories: Category
     media: Media
     'payload-preferences': PayloadPreference
@@ -26,249 +27,340 @@ export interface User {
   updatedAt: string
   createdAt: string
   email: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  salt?: string
-  hash?: string
-  loginAttempts?: number
-  lockUntil?: string
-  password: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password: string | null
 }
 export interface Page {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
-    richText?: {
-      [k: string]: unknown
-    }[]
-    media: string | Media
+    richText?:
+      | {
+          [k: string]: unknown
+        }[]
+      | null
+    media?: string | Media | null
   }
-  layout?: (
-    | {
-        invertBackground?: boolean
-        richText?: {
-          [k: string]: unknown
-        }[]
-        links?: {
-          link: {
-            type?: 'reference' | 'custom'
-            newTab?: boolean
-            reference: {
-              relationTo: 'pages'
-              value: string | Page
-            }
-            url: string
-            label: string
-            appearance?: 'primary' | 'secondary'
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null
+            richText?:
+              | {
+                  [k: string]: unknown
+                }[]
+              | null
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('primary' | 'secondary') | null
+                  }
+                  id?: string | null
+                }[]
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'cta'
           }
-          id?: string
-        }[]
-        id?: string
-        blockName?: string
-        blockType: 'cta'
-      }
-    | {
-        invertBackground?: boolean
-        columns?: {
-          size?: 'oneThird' | 'half' | 'twoThirds' | 'full'
-          richText?: {
-            [k: string]: unknown
-          }[]
-          enableLink?: boolean
-          link?: {
-            type?: 'reference' | 'custom'
-            newTab?: boolean
-            reference: {
-              relationTo: 'pages'
-              value: string | Page
-            }
-            url: string
-            label: string
-            appearance?: 'default' | 'primary' | 'secondary'
+        | {
+            invertBackground?: boolean | null
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null
+                  richText?:
+                    | {
+                        [k: string]: unknown
+                      }[]
+                    | null
+                  enableLink?: boolean | null
+                  link?: {
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('default' | 'primary' | 'secondary') | null
+                  }
+                  id?: string | null
+                }[]
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'content'
           }
-          id?: string
-        }[]
-        id?: string
-        blockName?: string
-        blockType: 'content'
-      }
+        | {
+            invertBackground?: boolean | null
+            position?: ('default' | 'fullscreen') | null
+            media: string | Media
+            id?: string | null
+            blockName?: string | null
+            blockType: 'mediaBlock'
+          }
+        | {
+            introContent?:
+              | {
+                  [k: string]: unknown
+                }[]
+              | null
+            populateBy?: ('collection' | 'selection') | null
+            relationTo?: 'posts' | null
+            categories?: (string | Category)[] | null
+            limit?: number | null
+            selectedDocs?:
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }[]
+              | null
+            populatedDocs?:
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }[]
+              | null
+            populatedDocsTotal?: number | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'archive'
+          }
+      )[]
+    | null
+  relationshipInRichText?:
     | {
-        invertBackground?: boolean
-        position?: 'default' | 'fullscreen'
-        media: string | Media
-        id?: string
-        blockName?: string
-        blockType: 'mediaBlock'
-      }
+        [k: string]: unknown
+      }[]
+    | null
+  relationshipAsUpload?: string | Media | null
+  relationshipMonoHasOne?: (string | null) | Post
+  relationshipMonoHasMany?: (string | Post)[] | null
+  relationshipPolyHasOne?: {
+    relationTo: 'posts'
+    value: string | Post
+  } | null
+  relationshipPolyHasMany?:
     | {
-        introContent?: {
-          [k: string]: unknown
-        }[]
-        populateBy?: 'collection' | 'selection'
-        relationTo?: 'posts'
-        categories?: string[] | Category[]
-        limit?: number
-        selectedDocs?:
+        relationTo: 'posts'
+        value: string | Post
+      }[]
+    | null
+  arrayOfRelationships?:
+    | {
+        uploadInArray?: string | Media | null
+        richTextInArray?:
+          | {
+              [k: string]: unknown
+            }[]
+          | null
+        relationshipInArrayMonoHasOne?: (string | null) | Post
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null
+        relationshipInArrayPolyHasOne?: {
+          relationTo: 'posts'
+          value: string | Post
+        } | null
+        relationshipInArrayPolyHasMany?:
           | {
               relationTo: 'posts'
-              value: string
+              value: string | Post
             }[]
-          | {
-              relationTo: 'posts'
-              value: Post
-            }[]
-        populatedDocs?:
-          | {
-              relationTo: 'posts'
-              value: string
-            }[]
-          | {
-              relationTo: 'posts'
-              value: Post
-            }[]
-        populatedDocsTotal?: number
-        id?: string
-        blockName?: string
-        blockType: 'archive'
-      }
-  )[]
+          | null
+        id?: string | null
+      }[]
+    | null
+  tab: {
+    relationshipInTab?: (string | null) | Post
+  }
   meta?: {
-    title?: string
-    description?: string
-    image?: string | Media
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
   }
+  updatedAt: string
+  createdAt: string
+}
+export interface Tenant {
+  id: string
+  title: string
+  clientURL: string
   updatedAt: string
   createdAt: string
 }
 export interface Media {
   id: string
   alt: string
-  caption?: {
-    [k: string]: unknown
-  }[]
+  caption?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
   updatedAt: string
   createdAt: string
-  url?: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
-}
-export interface Category {
-  id: string
-  title?: string
-  updatedAt: string
-  createdAt: string
+  url?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
 }
 export interface Post {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
-    richText?: {
-      [k: string]: unknown
-    }[]
-    media: string | Media
+    richText?:
+      | {
+          [k: string]: unknown
+        }[]
+      | null
+    media?: string | Media | null
   }
-  layout?: (
-    | {
-        invertBackground?: boolean
-        richText?: {
-          [k: string]: unknown
-        }[]
-        links?: {
-          link: {
-            type?: 'reference' | 'custom'
-            newTab?: boolean
-            reference: {
-              relationTo: 'pages'
-              value: string | Page
-            }
-            url: string
-            label: string
-            appearance?: 'primary' | 'secondary'
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null
+            richText?:
+              | {
+                  [k: string]: unknown
+                }[]
+              | null
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('primary' | 'secondary') | null
+                  }
+                  id?: string | null
+                }[]
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'cta'
           }
-          id?: string
-        }[]
-        id?: string
-        blockName?: string
-        blockType: 'cta'
-      }
-    | {
-        invertBackground?: boolean
-        columns?: {
-          size?: 'oneThird' | 'half' | 'twoThirds' | 'full'
-          richText?: {
-            [k: string]: unknown
-          }[]
-          enableLink?: boolean
-          link?: {
-            type?: 'reference' | 'custom'
-            newTab?: boolean
-            reference: {
-              relationTo: 'pages'
-              value: string | Page
-            }
-            url: string
-            label: string
-            appearance?: 'default' | 'primary' | 'secondary'
+        | {
+            invertBackground?: boolean | null
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null
+                  richText?:
+                    | {
+                        [k: string]: unknown
+                      }[]
+                    | null
+                  enableLink?: boolean | null
+                  link?: {
+                    type?: ('reference' | 'custom') | null
+                    newTab?: boolean | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
+                    url?: string | null
+                    label: string
+                    appearance?: ('default' | 'primary' | 'secondary') | null
+                  }
+                  id?: string | null
+                }[]
+              | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'content'
           }
-          id?: string
-        }[]
-        id?: string
-        blockName?: string
-        blockType: 'content'
-      }
-    | {
-        invertBackground?: boolean
-        position?: 'default' | 'fullscreen'
-        media: string | Media
-        id?: string
-        blockName?: string
-        blockType: 'mediaBlock'
-      }
-    | {
-        introContent?: {
-          [k: string]: unknown
-        }[]
-        populateBy?: 'collection' | 'selection'
-        relationTo?: 'posts'
-        categories?: string[] | Category[]
-        limit?: number
-        selectedDocs?:
-          | {
-              relationTo: 'posts'
-              value: string
-            }[]
-          | {
-              relationTo: 'posts'
-              value: Post
-            }[]
-        populatedDocs?:
-          | {
-              relationTo: 'posts'
-              value: string
-            }[]
-          | {
-              relationTo: 'posts'
-              value: Post
-            }[]
-        populatedDocsTotal?: number
-        id?: string
-        blockName?: string
-        blockType: 'archive'
-      }
-  )[]
-  relatedPosts?: string[] | Post[]
+        | {
+            invertBackground?: boolean | null
+            position?: ('default' | 'fullscreen') | null
+            media: string | Media
+            id?: string | null
+            blockName?: string | null
+            blockType: 'mediaBlock'
+          }
+        | {
+            introContent?:
+              | {
+                  [k: string]: unknown
+                }[]
+              | null
+            populateBy?: ('collection' | 'selection') | null
+            relationTo?: 'posts' | null
+            categories?: (string | Category)[] | null
+            limit?: number | null
+            selectedDocs?:
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }[]
+              | null
+            populatedDocs?:
+              | {
+                  relationTo: 'posts'
+                  value: string | Post
+                }[]
+              | null
+            populatedDocsTotal?: number | null
+            id?: string | null
+            blockName?: string | null
+            blockType: 'archive'
+          }
+      )[]
+    | null
+  relatedPosts?: (string | Post)[] | null
   meta?: {
-    title?: string
-    description?: string
-    image?: string | Media
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
   }
+  updatedAt: string
+  createdAt: string
+}
+export interface Category {
+  id: string
+  title?: string | null
   updatedAt: string
   createdAt: string
 }
@@ -278,7 +370,7 @@ export interface PayloadPreference {
     relationTo: 'users'
     value: string | User
   }
-  key?: string
+  key?: string | null
   value?:
     | {
         [k: string]: unknown
@@ -293,48 +385,62 @@ export interface PayloadPreference {
 }
 export interface PayloadMigration {
   id: string
-  name?: string
-  batch?: number
+  name?: string | null
+  batch?: number | null
   updatedAt: string
   createdAt: string
 }
 export interface Header {
   id: string
-  navItems?: {
-    link: {
-      type?: 'reference' | 'custom'
-      newTab?: boolean
-      reference: {
-        relationTo: 'pages'
-        value: string | Page
-      }
-      url: string
-      label: string
-      appearance?: 'default' | 'primary' | 'secondary'
-    }
-    id?: string
-  }[]
-  updatedAt?: string
-  createdAt?: string
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null
+          newTab?: boolean | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
+          url?: string | null
+          label: string
+          appearance?: ('default' | 'primary' | 'secondary') | null
+        }
+        id?: string | null
+      }[]
+    | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 export interface Footer {
   id: string
-  navItems?: {
-    link: {
-      type?: 'reference' | 'custom'
-      newTab?: boolean
-      reference: {
-        relationTo: 'pages'
-        value: string | Page
-      }
-      url: string
-      label: string
-      appearance?: 'default' | 'primary' | 'secondary'
-    }
-    id?: string
-  }[]
-  updatedAt?: string
-  createdAt?: string
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null
+          newTab?: boolean | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
+          url?: string | null
+          label: string
+          appearance?: ('default' | 'primary' | 'secondary') | null
+        }
+        id?: string | null
+      }[]
+    | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
 declare module 'payload' {

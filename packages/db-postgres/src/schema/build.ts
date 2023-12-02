@@ -26,6 +26,7 @@ type Args = {
   adapter: PostgresAdapter
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
+  buildNumbers?: boolean
   buildRelationships?: boolean
   disableNotNull: boolean
   disableUnique: boolean
@@ -39,6 +40,7 @@ type Args = {
 }
 
 type Result = {
+  hasManyNumberField: 'index' | boolean
   relationsToBuild: Map<string, string>
 }
 
@@ -46,6 +48,7 @@ export const buildTable = ({
   adapter,
   baseColumns = {},
   baseExtraConfig = {},
+  buildNumbers,
   buildRelationships,
   disableNotNull,
   disableUnique = false,
@@ -53,10 +56,11 @@ export const buildTable = ({
   rootRelationsToBuild,
   rootRelationships,
   rootTableIDColType,
-  rootTableName,
+  rootTableName: incomingRootTableName,
   tableName,
   timestamps,
 }: Args): Result => {
+  const rootTableName = incomingRootTableName || tableName
   const columns: Record<string, PgColumnBuilder> = baseColumns
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
 
@@ -102,6 +106,7 @@ export const buildTable = ({
     hasManyNumberField,
   } = traverseFields({
     adapter,
+    buildNumbers,
     buildRelationships,
     columns,
     disableNotNull,
@@ -116,7 +121,7 @@ export const buildTable = ({
     relationships,
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
-    rootTableName: rootTableName || tableName,
+    rootTableName,
   }))
 
   if (timestamps) {
@@ -185,8 +190,8 @@ export const buildTable = ({
     adapter.relations[`relations_${localeTableName}`] = localesTableRelations
   }
 
-  if (hasManyNumberField) {
-    const numbersTableName = `${tableName}_numbers`
+  if (hasManyNumberField && buildNumbers) {
+    const numbersTableName = `${rootTableName}_numbers`
     const columns: Record<string, PgColumnBuilder> = {
       id: serial('id').primaryKey(),
       number: numeric('number'),
@@ -327,5 +332,5 @@ export const buildTable = ({
 
   adapter.relations[`relations_${tableName}`] = tableRelations
 
-  return { relationsToBuild }
+  return { hasManyNumberField, relationsToBuild }
 }

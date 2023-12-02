@@ -2,6 +2,7 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import findByID from '../../operations/findByID'
 
 export type Resolver<T> = (
@@ -31,7 +32,7 @@ export default function findByIDResolver<T extends keyof GeneratedTypes['collect
       collection,
       depth: 0,
       draft: args.draft,
-      req,
+      req: isolateTransactionID(context.req),
     }
 
     const result = await findByID(options)

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import type { SanitizedCollectionConfig } from '../../../../exports/types'
 import type { FileSizes, Upload } from '../../../../uploads/types'
@@ -23,9 +23,49 @@ const sortSizes = (sizes: FileSizes, imageSizes: Upload['imageSizes']) => {
   return orderedSizes
 }
 
+type PreviewSizeCardProps = {
+  active: boolean
+  baseURL: string
+  meta: FileSizes[0]
+  name: string
+  onClick?: () => void
+  previewSrc: string
+}
+const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
+  name,
+  active,
+  baseURL,
+  meta,
+  onClick,
+  previewSrc,
+}) => {
+  return (
+    <div
+      className={[`${baseClass}__sizeOption`, active && `${baseClass}--selected`]
+        .filter(Boolean)
+        .join(' ')}
+      onClick={typeof onClick === 'function' ? onClick : undefined}
+      onKeyDown={(e) => {
+        if (typeof onClick !== 'function') return
+        if (e.key === 'Enter') onClick()
+      }}
+      role="button"
+      tabIndex={0}
+    >
+      <div className={`${baseClass}__image`}>
+        <img alt={meta.filename} src={previewSrc} />
+      </div>
+      <div className={`${baseClass}__sizeMeta`}>
+        <div className={`${baseClass}__sizeName`}>{name}</div>
+        <Meta {...meta} staticURL={baseURL} />
+      </div>
+    </div>
+  )
+}
+
 const PreviewSizes: React.FC<{
   collection: SanitizedCollectionConfig
-  doc?: Data & {
+  doc: Data & {
     sizes?: FileSizes
   }
   imageCacheTag?: string
@@ -36,58 +76,70 @@ const PreviewSizes: React.FC<{
   const { sizes } = doc
 
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes))
-  const [selectedSize, setSelectedSize] = useState<null | string>(
-    orderedSizes?.[imageSizes[0]?.name]?.filename ? imageSizes[0]?.name : null,
-  )
+  const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
-  const generateImageUrl = (filename) => {
-    return `${staticURL}/${filename}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+  const generateImageUrl = (doc) => {
+    if (!doc.filename) return null
+    if (doc.url) return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
   }
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
   }, [sizes, imageSizes, imageCacheTag])
 
-  const mainPreviewSrc = generateImageUrl(`${orderedSizes[selectedSize]?.filename}`)
+  const mainPreviewSrc = selectedSize
+    ? generateImageUrl(doc.sizes[selectedSize])
+    : generateImageUrl(doc)
+
+  const originalImage = useMemo(
+    (): FileSizes[0] => ({
+      filename: doc.filename,
+      filesize: doc.filesize,
+      height: doc.height,
+      mimeType: doc.mimeType,
+      width: doc.width,
+    }),
+    [doc],
+  )
+  const originalFilename = 'Original'
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__imageWrap`}>
         <div className={`${baseClass}__meta`}>
-          <div className={`${baseClass}__sizeName`}>{selectedSize}</div>
-          <Meta {...(selectedSize && orderedSizes[selectedSize])} staticURL={staticURL} />
+          <div className={`${baseClass}__sizeName`}>{selectedSize || originalFilename}</div>
+          <Meta
+            {...(selectedSize ? orderedSizes[selectedSize] : originalImage)}
+            staticURL={staticURL}
+          />
         </div>
         <img alt={doc.filename} className={`${baseClass}__preview`} src={mainPreviewSrc} />
       </div>
       <div className={`${baseClass}__listWrap`}>
         <div className={`${baseClass}__list`}>
+          <PreviewSizeCard
+            active={!selectedSize}
+            baseURL={staticURL}
+            meta={originalImage}
+            name={originalFilename}
+            onClick={() => setSelectedSize(null)}
+            previewSrc={generateImageUrl(doc)}
+          />
+
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
-            const previewSrc = generateImageUrl(val.filename)
+            const previewSrc = generateImageUrl(val)
 
             if (previewSrc) {
               return (
-                <div
-                  className={[`${baseClass}__sizeOption`, selected && `${baseClass}--selected`]
-                    .filter(Boolean)
-                    .join(' ')}
+                <PreviewSizeCard
+                  active={selected}
+                  baseURL={staticURL}
                   key={key}
+                  meta={val}
+                  name={key}
                   onClick={() => setSelectedSize(key)}
-                  onKeyDown={(e) => {
-                    if (e.keyCode === 13) {
-                      setSelectedSize(key)
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className={`${baseClass}__image`}>
-                    <img alt={val.filename} src={previewSrc} />
-                  </div>
-                  <div className={`${baseClass}__sizeMeta`}>
-                    <div className={`${baseClass}__sizeName`}>{key}</div>
-                    <Meta {...val} staticURL={staticURL} />
-                  </div>
-                </div>
+                  previewSrc={previewSrc}
+                />
               )
             }
 

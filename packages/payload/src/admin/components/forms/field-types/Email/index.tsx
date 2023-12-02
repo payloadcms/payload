@@ -5,13 +5,13 @@ import type { Props } from './types'
 
 import { email } from '../../../../../fields/validations'
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const Email: React.FC<Props> = (props) => {
   const {
@@ -19,6 +19,7 @@ const Email: React.FC<Props> = (props) => {
     admin: {
       autoComplete,
       className,
+      components: { Error, Label, afterInput, beforeInput } = {},
       condition,
       description,
       placeholder,
@@ -51,6 +52,9 @@ const Email: React.FC<Props> = (props) => {
 
   const { errorMessage, setValue, showError, value } = fieldType
 
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
+
   return (
     <div
       className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
@@ -61,18 +65,22 @@ const Email: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-      <input
-        autoComplete={autoComplete}
-        disabled={Boolean(readOnly)}
-        id={`field-${path.replace(/\./g, '__')}`}
-        name={path}
-        onChange={setValue}
-        placeholder={getTranslation(placeholder, i18n)}
-        type="email"
-        value={(value as string) || ''}
-      />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <div className="input-wrapper">
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
+        <input
+          autoComplete={autoComplete}
+          disabled={Boolean(readOnly)}
+          id={`field-${path.replace(/\./g, '__')}`}
+          name={path}
+          onChange={setValue}
+          placeholder={getTranslation(placeholder, i18n)}
+          type="email"
+          value={(value as string) || ''}
+        />
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+      </div>
       <FieldDescription description={description} value={value} />
     </div>
   )

@@ -2,7 +2,12 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  access: {
+    read: () => true,
+    create: () => true,
+  },
   upload: {
+    staticURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
     imageSizes: [
       {
         height: 400,

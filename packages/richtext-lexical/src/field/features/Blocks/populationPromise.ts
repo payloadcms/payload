@@ -12,16 +12,21 @@ export const blockPopulationPromiseHOC = (
   props: BlocksFeatureProps,
 ): PopulationPromise<SerializedBlockNode> => {
   const blockPopulationPromise: PopulationPromise<SerializedBlockNode> = ({
+    context,
     currentDepth,
     depth,
+    editorPopulationPromises,
+    findMany,
+    flattenLocales,
     node,
     overrideAccess,
     populationPromises,
     req,
     showHiddenFields,
+    siblingDoc,
   }) => {
     const blocks: Block[] = props.blocks
-    const blockFieldData = node.fields.data
+    const blockFieldData = node.fields
 
     const promises: Promise<void>[] = []
 
@@ -43,10 +48,14 @@ export const blockPopulationPromiseHOC = (
     }
 
     recurseNestedFields({
+      context,
       currentDepth,
       data: blockFieldData,
       depth,
+      editorPopulationPromises,
       fields: block.fields,
+      findMany,
+      flattenLocales,
       overrideAccess,
       populationPromises,
       promises,

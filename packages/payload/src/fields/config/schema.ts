@@ -71,6 +71,12 @@ export const text = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
     autoComplete: joi.string(),
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+      afterInput: joi.array().items(componentSchema),
+      beforeInput: joi.array().items(componentSchema),
+    }),
     placeholder: joi
       .alternatives()
       .try(joi.object().pattern(joi.string(), [joi.string()]), joi.string()),
@@ -86,6 +92,18 @@ export const number = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
     autoComplete: joi.string(),
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+      afterInput: joi
+        .array()
+        .items(componentSchema)
+        .when('hasMany', { not: true, otherwise: joi.forbidden() }),
+      beforeInput: joi
+        .array()
+        .items(componentSchema)
+        .when('hasMany', { not: true, otherwise: joi.forbidden() }),
+    }),
     placeholder: joi.string(),
     step: joi.number(),
   }),
@@ -101,6 +119,12 @@ export const number = baseField.keys({
 export const textarea = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+      afterInput: joi.array().items(componentSchema),
+      beforeInput: joi.array().items(componentSchema),
+    }),
     placeholder: joi.string(),
     rows: joi.number(),
     rtl: joi.boolean(),
@@ -115,6 +139,12 @@ export const email = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
     autoComplete: joi.string(),
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+      afterInput: joi.array().items(componentSchema),
+      beforeInput: joi.array().items(componentSchema),
+    }),
     placeholder: joi.string(),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
@@ -126,6 +156,10 @@ export const email = baseField.keys({
 export const code = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+    }),
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
     language: joi.string(),
   }),
@@ -135,6 +169,12 @@ export const code = baseField.keys({
 
 export const json = baseField.keys({
   name: joi.string().required(),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+    }),
+  }),
   defaultValue: joi.alternatives().try(joi.array(), joi.object()),
   type: joi.string().valid('json').required(),
 })
@@ -142,6 +182,10 @@ export const json = baseField.keys({
 export const select = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+    }),
     isClearable: joi.boolean().default(false),
     isSortable: joi.boolean().default(false),
   }),
@@ -170,6 +214,10 @@ export const select = baseField.keys({
 export const radio = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+    }),
     layout: joi.string().valid('vertical', 'horizontal'),
   }),
   defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
@@ -268,6 +316,12 @@ export const array = baseField.keys({
 
 export const upload = baseField.keys({
   name: joi.string().required(),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+    }),
+  }),
   defaultValue: joi.alternatives().try(joi.object(), joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
   maxDepth: joi.number(),
@@ -277,12 +331,28 @@ export const upload = baseField.keys({
 
 export const checkbox = baseField.keys({
   name: joi.string().required(),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+      afterInput: joi.array().items(componentSchema),
+      beforeInput: joi.array().items(componentSchema),
+    }),
+  }),
   defaultValue: joi.alternatives().try(joi.boolean(), joi.func()),
   type: joi.string().valid('checkbox').required(),
 })
 
 export const point = baseField.keys({
   name: joi.string().required(),
+  admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+      afterInput: joi.array().items(componentSchema),
+      beforeInput: joi.array().items(componentSchema),
+    }),
+  }),
   defaultValue: joi.alternatives().try(joi.array().items(joi.number()).max(2).min(2), joi.func()),
   type: joi.string().valid('point').required(),
 })
@@ -291,7 +361,16 @@ export const relationship = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
     allowCreate: joi.boolean().default(true),
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+    }),
     isSortable: joi.boolean().default(false),
+    sortOptions: joi.alternatives().conditional(joi.ref('...relationTo'), {
+      is: joi.string(),
+      otherwise: joi.object().pattern(joi.string(), joi.string()),
+      then: joi.string(),
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
@@ -360,6 +439,7 @@ export const richText = baseField.keys({
       CellComponent: componentSchema.required(),
       FieldComponent: componentSchema.required(),
       afterReadPromise: joi.func().optional(),
+      outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })
@@ -370,6 +450,12 @@ export const richText = baseField.keys({
 export const date = baseField.keys({
   name: joi.string().required(),
   admin: baseAdminFields.keys({
+    components: baseAdminComponentFields.keys({
+      Error: componentSchema,
+      Label: componentSchema,
+      afterInput: joi.array().items(componentSchema),
+      beforeInput: joi.array().items(componentSchema),
+    }),
     date: joi.object({
       displayFormat: joi.string(),
       maxDate: joi.date(),
@@ -377,6 +463,7 @@ export const date = baseField.keys({
       minDate: joi.date(),
       minTime: joi.date(),
       monthsToShow: joi.number(),
+      overrides: joi.object().unknown(),
       pickerAppearance: joi.string(),
       timeFormat: joi.string(),
       timeIntervals: joi.number(),

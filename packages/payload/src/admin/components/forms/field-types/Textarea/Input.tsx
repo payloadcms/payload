@@ -7,13 +7,17 @@ import type { TextareaField } from '../../../../../fields/config/types'
 import type { Description } from '../../FieldDescription/types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
-import './index.scss'
+import DefaultLabel from '../../Label'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
+  afterInput?: React.ComponentType<any>[]
+  beforeInput?: React.ComponentType<any>[]
   className?: string
   description?: Description
   errorMessage?: string
@@ -32,6 +36,10 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
 
 const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
+    Error,
+    Label,
+    afterInput,
+    beforeInput,
     className,
     description,
     errorMessage,
@@ -51,6 +59,9 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
+
   return (
     <div
       className={[
@@ -67,11 +78,12 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
           <div className="textarea-clone" data-value={value || placeholder || ''} />
+          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
           <textarea
             className="textarea-element"
             data-rtl={rtl}
@@ -83,6 +95,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             rows={rows}
             value={value || ''}
           />
+          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
       </label>
       <FieldDescription description={description} value={value} />

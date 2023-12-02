@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import type { User } from '../../payload/payload-types'
 import { ME_QUERY } from '../_graphql/me'
+import { GRAPHQL_API_URL } from './shared'
 
 export const getMe = async (args?: {
   nullUserRedirect?: string
@@ -15,7 +16,7 @@ export const getMe = async (args?: {
   const cookieStore = cookies()
   const token = cookieStore.get('payload-token')?.value
 
-  const meUserReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
+  const meUserReq = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       Authorization: `JWT ${token}`,

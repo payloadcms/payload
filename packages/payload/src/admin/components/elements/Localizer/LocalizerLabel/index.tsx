@@ -1,28 +1,33 @@
 import React from 'react'
-import { Chevron } from '../../..'
-import { useLocale } from '../../../utilities/Locale'
 import { useTranslation } from 'react-i18next'
 
+import { Chevron } from '../../..'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import { useLocale } from '../../../utilities/Locale'
 import './index.scss'
 
 const baseClass = 'localizer-button'
 
 export const LocalizerLabel: React.FC<{
-  className?: string
   ariaLabel?: string
+  className?: string
 }> = (props) => {
-  const { className, ariaLabel } = props
+  const { ariaLabel, className } = props
   const locale = useLocale()
   const { t } = useTranslation('general')
+  const { i18n } = useTranslation()
 
   return (
     <div
-      className={[baseClass, className].filter(Boolean).join(' ')}
       aria-label={ariaLabel || t('locale')}
+      className={[baseClass, className].filter(Boolean).join(' ')}
     >
       <div className={`${baseClass}__label`}>{`${t('locale')}:`}</div>
       &nbsp;&nbsp;
-      <span className={`${baseClass}__current-label`}>{`${locale.label}`}</span>
+      <span className={`${baseClass}__current-label`}>{`${getTranslation(
+        locale.label,
+        i18n,
+      )}`}</span>
       &nbsp;
       <Chevron className={`${baseClass}__chevron`} />
     </div>

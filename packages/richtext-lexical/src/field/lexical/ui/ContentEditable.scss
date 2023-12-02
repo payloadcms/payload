@@ -15,7 +15,6 @@
   & > * {
     transition: transform 0.2s ease-in-out;
     // will-change: transform; // breaks cursor rendering for empty paragraph blocks in safari, and creates other issues
-    position: relative; // makes sure that z-index properties work - for example for the Blocks feature
   }
 }
 

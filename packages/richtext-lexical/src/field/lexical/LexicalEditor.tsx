@@ -51,6 +51,11 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
 
   return (
     <React.Fragment>
+      {editorConfig.features.plugins.map((plugin) => {
+        if (plugin.position === 'top') {
+          return <plugin.Component key={plugin.key} />
+        }
+      })}
       <RichTextPlugin
         ErrorBoundary={LexicalErrorBoundary}
         contentEditable={
@@ -60,7 +65,9 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
             </div>
           </div>
         }
-        placeholder={<p className="editor-placeholder">Start typing...</p>}
+        placeholder={
+          <p className="editor-placeholder">Start typing, or press '/' for commands...</p>
+        }
       />
       <OnChangePlugin
         // Selection changes can be ignore here, reducing the
@@ -108,6 +115,11 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'normal') {
+          return <plugin.Component key={plugin.key} />
+        }
+      })}
+      {editorConfig.features.plugins.map((plugin) => {
+        if (plugin.position === 'bottom') {
           return <plugin.Component key={plugin.key} />
         }
       })}

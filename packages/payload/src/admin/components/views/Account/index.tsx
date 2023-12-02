@@ -60,7 +60,7 @@ const AccountView: React.FC = () => {
 
   const onSave = React.useCallback(
     async (json: any) => {
-      getDocPermissions()
+      await getDocPermissions()
 
       const preferences = await getDocPreferences()
 
