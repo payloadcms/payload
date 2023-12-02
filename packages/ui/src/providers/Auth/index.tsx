@@ -1,3 +1,4 @@
+'use client'
 import { useModal } from '@faceless-ui/modal'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
@@ -5,13 +6,13 @@ import { useTranslation } from 'react-i18next'
 import { useHistory, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
-import type { Permissions, User } from '../../../../auth/types'
+import type { Permissions, User } from 'payload/auth'
 import type { AuthContext } from './types'
 
-import { requests } from '../../../api'
-import useDebounce from '../../../hooks/useDebounce'
+import { requests } from '../../utilities/api'
+import useDebounce from '../../hooks/useDebounce'
 import { useConfig } from '../Config'
-import { useLocale } from '../Locale'
+// import { useLocale } from '../Locale'
 
 const Context = createContext({} as AuthContext)
 
@@ -23,7 +24,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tokenExpiration, setTokenExpiration] = useState<number>()
   const { pathname } = useLocation()
   const { push } = useHistory()
-  const { code } = useLocale()
+  // const { code } = useLocale()
+  const code = 'en' // TODO: re-enable i18n asap
 
   const config = useConfig()
 
