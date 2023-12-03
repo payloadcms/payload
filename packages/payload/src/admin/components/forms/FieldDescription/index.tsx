@@ -10,13 +10,13 @@ import { isComponent } from './types'
 const baseClass = 'field-description'
 
 const FieldDescription: React.FC<Props> = (props) => {
-  const { className, description, value, marginPlacement } = props
+  const { className, path, description, value, marginPlacement } = props
 
   const { i18n } = useTranslation()
 
   if (isComponent(description)) {
     const Description = description
-    return <Description value={value} />
+    return <Description path={path} value={value} />
   }
 
   if (description) {
@@ -31,7 +31,7 @@ const FieldDescription: React.FC<Props> = (props) => {
           .join(' ')}
       >
         {typeof description === 'function'
-          ? description({ value })
+          ? description({ path, value })
           : getTranslation(description, i18n)}
       </div>
     )

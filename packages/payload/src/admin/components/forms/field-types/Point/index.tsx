@@ -134,7 +134,7 @@ const PointField: React.FC<Props> = (props) => {
           </div>
         </li>
       </ul>
-      <FieldDescription description={description} value={value} />
+      <FieldDescription path={path} description={description} value={value} />
     </div>
   )
 }

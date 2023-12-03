@@ -1,8 +1,8 @@
 import React from 'react'
 
-export type DescriptionFunction = (value?: unknown) => string
+export type DescriptionFunction = (value?: unknown, path?: string) => string
 
-export type DescriptionComponent = React.ComponentType<{ value: unknown }>
+export type DescriptionComponent = React.ComponentType<{ path: string; value: unknown }>
 
 export type Description =
   | DescriptionComponent
@@ -14,6 +14,7 @@ export type Props = {
   className?: string
   description?: Description
   value?: unknown
+  path?: string
   marginPlacement?: 'top' | 'bottom'
 }
 

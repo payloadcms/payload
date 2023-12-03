@@ -191,7 +191,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               </div>
             </div>
           )}
-          <FieldDescription description={description} value={file} />
+          <FieldDescription path={path} description={description} value={file} />
         </React.Fragment>
       )}
       {!readOnly && <DocumentDrawer onSave={onSave} />}

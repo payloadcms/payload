@@ -213,6 +213,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         </div>
         <FieldDescription
           className={`field-description-${path.replace(/\./g, '__')}`}
+          path={path}
           description={description}
           value={value}
         />

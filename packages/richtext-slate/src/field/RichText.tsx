@@ -445,7 +445,7 @@ const RichText: React.FC<FieldProps> = (props) => {
             </div>
           </div>
         </Slate>
-        <FieldDescription description={description} value={value} />
+        <FieldDescription path={path} description={description} value={value} />
       </div>
     </div>
   )

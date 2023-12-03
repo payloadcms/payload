@@ -103,7 +103,7 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
           )
         })}
       </ul>
-      <FieldDescription description={description} value={value} />
+      <FieldDescription path={path} description={description} value={value} />
     </div>
   )
 }

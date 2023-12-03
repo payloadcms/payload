@@ -76,6 +76,7 @@ const Group: React.FC<Props> = (props) => {
                 {label && <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>}
                 <FieldDescription
                   className={`field-description-${path.replace(/\./g, '__')}`}
+                  path={path}
                   description={description}
                   value={null}
                 />

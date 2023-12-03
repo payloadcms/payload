@@ -111,7 +111,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         showError={showError}
         value={valueToRender as Option}
       />
-      <FieldDescription description={description} value={value} />
+      <FieldDescription path={path} description={description} value={value} />
     </div>
   )
 }

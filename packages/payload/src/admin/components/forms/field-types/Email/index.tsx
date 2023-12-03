@@ -81,7 +81,7 @@ const Email: React.FC<Props> = (props) => {
         />
         {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
       </div>
-      <FieldDescription description={description} value={value} />
+      <FieldDescription path={path} description={description} value={value} />
     </div>
   )
 }

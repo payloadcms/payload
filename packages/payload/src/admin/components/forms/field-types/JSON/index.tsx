@@ -97,7 +97,7 @@ const JSONField: React.FC<Props> = (props) => {
         readOnly={readOnly}
         value={stringValue}
       />
-      <FieldDescription description={description} value={value} />
+      <FieldDescription path={path} description={description} value={value} />
     </div>
   )
 }

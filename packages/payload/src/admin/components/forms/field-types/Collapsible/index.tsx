@@ -125,7 +125,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           readOnly={readOnly}
         />
       </Collapsible>
-      <FieldDescription description={description} />
+      <FieldDescription path={path} description={description} />
     </div>
   )
 }
