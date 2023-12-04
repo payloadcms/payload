@@ -451,7 +451,7 @@ describe('Collections - Live Preview', () => {
     ])
   })
 
-  it('— relationships - populates within rich text', async () => {
+  it('— relationships - populates within Slate rich text editor', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
     }
@@ -462,11 +462,7 @@ describe('Collections - Live Preview', () => {
       fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
-        relationshipInRichText: [
-          {
-            type: 'paragraph',
-            text: 'Paragraph 1',
-          },
+        richTextSlate: [
           {
             type: 'reference',
             reference: {
@@ -482,8 +478,8 @@ describe('Collections - Live Preview', () => {
     })
 
     expect(merge1._numberOfRequests).toEqual(1)
-    expect(merge1.relationshipInRichText).toHaveLength(2)
-    expect(merge1.relationshipInRichText[1].reference.value).toMatchObject(testPost)
+    expect(merge1.richTextSlate).toHaveLength(1)
+    expect(merge1.richTextSlate[0].reference.value).toMatchObject(testPost)
 
     // Remove the relationship
     const merge2 = await mergeData({
@@ -491,10 +487,14 @@ describe('Collections - Live Preview', () => {
       fieldSchema: schemaJSON,
       incomingData: {
         ...merge1,
-        relationshipInRichText: [
+        richTextSlate: [
           {
             type: 'paragraph',
-            text: 'Paragraph 1',
+            children: [
+              {
+                text: 'Hello, world!',
+              },
+            ],
           },
         ],
       },
@@ -504,14 +504,117 @@ describe('Collections - Live Preview', () => {
     })
 
     expect(merge2._numberOfRequests).toEqual(0)
-    expect(merge2.relationshipInRichText).toHaveLength(1)
-    expect(merge2.relationshipInRichText[0].type).toEqual('paragraph')
+    expect(merge2.richTextSlate).toHaveLength(1)
+    expect(merge2.richTextSlate[0].type).toEqual('paragraph')
+  })
+
+  it('— rich text - populates within Lexical rich text editor', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Add a relationship
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        richTextLexical: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Hello, world!',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+              {
+                format: '',
+                type: 'relationship',
+                version: 1,
+                relationTo: 'posts',
+                value: testPost.id,
+              },
+            ],
+            direction: 'ltr',
+          },
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.richTextLexical.root.children).toHaveLength(2)
+    expect(merge1.richTextLexical.root.children[1].value).toMatchObject(testPost)
+
+    // Remove the relationship
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        richTextLexical: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Hello, world!',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+          },
+        },
+      },
+      initialData: merge1,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2._numberOfRequests).toEqual(0)
+    expect(merge2.richTextLexical.root.children).toHaveLength(1)
+    expect(merge2.richTextLexical.root.children[0].type).toEqual('paragraph')
   })
 
   it('— relationships - does not re-populate existing rich text relationships', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
-      relationshipInRichText: [
+      richTextSlate: [
         {
           type: 'paragraph',
           text: 'Paragraph 1',
@@ -532,7 +635,7 @@ describe('Collections - Live Preview', () => {
       fieldSchema: schemaJSON,
       incomingData: {
         ...initialData,
-        relationshipInRichText: [
+        richTextSlate: [
           {
             type: 'paragraph',
             text: 'Paragraph 1 (Updated)',
@@ -552,9 +655,9 @@ describe('Collections - Live Preview', () => {
     })
 
     expect(merge1._numberOfRequests).toEqual(0)
-    expect(merge1.relationshipInRichText).toHaveLength(2)
-    expect(merge1.relationshipInRichText[0].text).toEqual('Paragraph 1 (Updated)')
-    expect(merge1.relationshipInRichText[1].reference.value).toMatchObject(testPost)
+    expect(merge1.richTextSlate).toHaveLength(2)
+    expect(merge1.richTextSlate[0].text).toEqual('Paragraph 1 (Updated)')
+    expect(merge1.richTextSlate[1].reference.value).toMatchObject(testPost)
   })
 
   it('— relationships - populates within blocks', async () => {

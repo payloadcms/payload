@@ -53,7 +53,7 @@ export const traverseRichText = ({
             ? Array.isArray(incomingData[key])
               ? []
               : {}
-            : incomingData[key]
+            : undefined
       }
 
       const isRelationship = key === 'value' && 'relationTo' in incomingData

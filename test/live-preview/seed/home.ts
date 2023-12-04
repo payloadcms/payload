@@ -139,4 +139,84 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   tab: {
     relationshipInTab: '{{POST_1_ID}}',
   },
+  richTextSlate: [
+    {
+      type: 'paragraph',
+      children: [
+        {
+          type: 'paragraph',
+          children: [
+            {
+              text: 'Hello, world!',
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          children: [
+            {
+              text: '',
+            },
+          ],
+        },
+        {
+          children: [
+            {
+              text: ' ',
+            },
+          ],
+          relationTo: 'posts',
+          type: 'relationship',
+          value: {
+            id: '{{POST_1_ID}}',
+          },
+        },
+        {
+          children: [
+            {
+              text: '',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  richTextLexical: {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      children: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Hello, world!',
+              type: 'text',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+        {
+          format: '',
+          type: 'relationship',
+          version: 1,
+          relationTo: 'posts',
+          value: {
+            id: `{{POST_1_ID}}`,
+          },
+        },
+      ],
+      direction: 'ltr',
+    },
+  },
 }
