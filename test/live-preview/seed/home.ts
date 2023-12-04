@@ -95,7 +95,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
     },
   ],
   relationshipAsUpload: '{{MEDIA_ID}}',
-  relationshipInRichText: [
+  richTextSlate: [
     {
       children: [
         {
@@ -108,7 +108,65 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
         id: '{{POST_1_ID}}',
       },
     },
+    {
+      type: 'paragraph',
+      children: [
+        {
+          text: '',
+        },
+      ],
+    },
+    {
+      children: [
+        {
+          text: '',
+        },
+      ],
+      relationTo: 'media',
+      type: 'upload',
+      value: {
+        id: '{{MEDIA_ID}}',
+      },
+    },
   ],
+  richTextLexical: {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      children: [
+        {
+          format: '',
+          type: 'relationship',
+          version: 1,
+          relationTo: 'posts',
+          value: {
+            id: '{{POST_1_ID}}',
+          },
+        },
+        {
+          children: [],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+        {
+          format: '',
+          type: 'upload',
+          version: 1,
+          fields: null,
+          relationTo: 'media',
+          value: {
+            id: '{{MEDIA_ID}}',
+          },
+        },
+      ],
+      direction: null,
+    },
+  },
   relationshipMonoHasMany: ['{{POST_1_ID}}'],
   relationshipMonoHasOne: '{{POST_1_ID}}',
   relationshipPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],
@@ -138,91 +196,5 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   ],
   tab: {
     relationshipInTab: '{{POST_1_ID}}',
-  },
-  richTextSlate: [
-    {
-      type: 'paragraph',
-      children: [
-        {
-          type: 'paragraph',
-          children: [
-            {
-              text: 'Hello, world!',
-            },
-          ],
-        },
-        {
-          children: [
-            {
-              text: ' ',
-            },
-          ],
-          relationTo: 'posts',
-          type: 'relationship',
-          value: {
-            id: '{{POST_1_ID}}',
-          },
-        },
-        {
-          children: [
-            {
-              text: '',
-            },
-          ],
-          relationTo: 'media',
-          type: 'upload',
-          value: {
-            id: '{{MEDIA_ID}}',
-          },
-        },
-      ],
-    },
-  ],
-  richTextLexical: {
-    root: {
-      type: 'root',
-      format: '',
-      indent: 0,
-      version: 1,
-      children: [
-        {
-          children: [
-            {
-              detail: 0,
-              format: 0,
-              mode: 'normal',
-              style: '',
-              text: 'Hello, world!',
-              type: 'text',
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          type: 'paragraph',
-          version: 1,
-        },
-        {
-          format: '',
-          type: 'relationship',
-          version: 1,
-          relationTo: 'posts',
-          value: {
-            id: `{{POST_1_ID}}`,
-          },
-        },
-        {
-          format: '',
-          type: 'upload',
-          version: 1,
-          relationTo: 'media',
-          value: {
-            id: `{{MEDIA_ID}}`,
-          },
-        },
-      ],
-      direction: 'ltr',
-    },
   },
 }
