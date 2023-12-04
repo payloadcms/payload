@@ -285,7 +285,7 @@ export const getTableColumnFromPath = ({
               adapter.tables[newTableName]._parentID,
             )
           }
-          return result
+          return true
         })
         if (hasBlockField) {
           return {
@@ -294,7 +294,7 @@ export const getTableColumnFromPath = ({
             field: blockTableColumn.field,
             pathSegments: pathSegments.slice(1),
             rawColumn: blockTableColumn.rawColumn,
-            table: adapter.tables[newTableName],
+            table: blockTableColumn.table,
           }
         }
         if (pathSegments[1] === 'blockType') {
