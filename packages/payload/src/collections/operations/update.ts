@@ -35,6 +35,10 @@ export type Arguments<T extends CreateUpdateType> = {
   depth?: number
   disableVerificationEmail?: boolean
   draft?: boolean
+  options?: {
+    new?: boolean
+    upsert?: boolean
+  }
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   req: PayloadRequest
@@ -68,6 +72,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     collection,
     depth,
     draft: draftArg = false,
+    options,
     overrideAccess,
     overwriteExistingFiles = false,
     req: {
@@ -277,6 +282,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
             collection: collectionConfig.slug,
             data: result,
             locale,
+            options,
             req,
           })
         }

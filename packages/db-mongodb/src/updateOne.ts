@@ -11,14 +11,15 @@ import { withSession } from './withSession'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { id, collection, data, locale, req = {} as PayloadRequest, where: whereArg },
+  { id, collection, data, locale, options, req = {} as PayloadRequest, where: whereArg },
 ) {
   const where = id ? { id: { equals: id } } : whereArg
   const Model = this.collections[collection]
-  const options = {
+  const mongooseOptions = {
     ...withSession(this, req.transactionID),
     lean: true,
-    new: true,
+    new: options?.new ?? true,
+    upsert: options?.upsert ?? false,
   }
 
   const query = await Model.buildQuery({
@@ -29,7 +30,7 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result
   try {
-    result = await Model.findOneAndUpdate(query, data, options)
+    result = await Model.findOneAndUpdate(query, data, mongooseOptions)
   } catch (error) {
     // Handle uniqueness error from MongoDB
     throw error.code === 11000 && error.keyValue
