@@ -27,6 +27,7 @@ import tr from './tr.json'
 import ua from './ua.json'
 import vi from './vi.json'
 import zh from './zh.json'
+import zhTw from './zh-tw.json'
 
 export default {
   ar,
@@ -58,4 +59,5 @@ export default {
   ua,
   vi,
   zh,
+  zhTw,
 }
