@@ -94,7 +94,7 @@ const RichText: React.FC<FieldProps> = (props) => {
             value={value}
           />
         </ErrorBoundary>
-        <FieldDescription description={description} value={value} />
+        <FieldDescription description={description} path={path} value={value} />
       </div>
     </div>
   )
