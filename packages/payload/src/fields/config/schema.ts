@@ -58,6 +58,15 @@ export const baseField = joi
     unique: joi.boolean().default(false),
     validate: joi.func(),
   })
+  .when('.admin.condition', {
+    is: joi.exist(),
+    otherwise: joi.object({
+      required: joi.boolean().default(false),
+    }),
+    then: joi.object({
+      required: joi.forbidden(),
+    }),
+  })
   .default()
 
 export const idField = baseField.keys({

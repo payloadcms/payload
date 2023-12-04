@@ -20,7 +20,6 @@ const ConditionalLogic: CollectionConfig = {
     {
       name: 'fieldToToggle',
       type: 'text',
-      required: true,
       admin: {
         condition: ({ toggleField }) => Boolean(toggleField),
       },

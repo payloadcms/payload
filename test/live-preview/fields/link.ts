@@ -77,7 +77,6 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
       label: 'Document to link to',
       type: 'relationship',
       relationTo: ['posts', 'pages'],
-      required: true,
       maxDepth: 1,
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'reference',
@@ -87,7 +86,6 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
       name: 'url',
       label: 'Custom URL',
       type: 'text',
-      required: true,
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'custom',
       },
