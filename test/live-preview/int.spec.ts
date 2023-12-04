@@ -196,6 +196,165 @@ describe('Collections - Live Preview', () => {
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
   })
 
+  it('— uploads - populates within Slate rich text editor', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Add upload
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        richTextSlate: [
+          {
+            type: 'upload',
+            relationTo: 'media',
+            value: media.id,
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1.richTextSlate).toHaveLength(1)
+    expect(merge1.richTextSlate[0].value).toMatchObject(media)
+    expect(merge1._numberOfRequests).toEqual(1)
+
+    // Remove upload
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        richTextSlate: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                text: 'Hello, world!',
+              },
+            ],
+          },
+        ],
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2.richTextSlate).toHaveLength(1)
+    expect(merge2.richTextSlate[0].value).toBeFalsy()
+    expect(merge2.richTextSlate[0].type).toEqual('paragraph')
+    expect(merge2._numberOfRequests).toEqual(0)
+  })
+
+  it('— uploads - populates within Lexical rich text editor', async () => {
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+    }
+
+    // Add upload
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        richTextLexical: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Hello, world!',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+              {
+                format: '',
+                type: 'upload',
+                relationTo: 'media',
+                version: 1,
+                value: media.id,
+              },
+            ],
+            direction: 'ltr',
+          },
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge1.richTextLexical.root.children).toHaveLength(2)
+    expect(merge1.richTextLexical.root.children[1].value).toMatchObject(media)
+    expect(merge1._numberOfRequests).toEqual(1)
+
+    // Remove upload
+    const merge2 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...merge1,
+        richTextLexical: {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Hello, world!',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+          },
+        },
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+    })
+
+    expect(merge2.richTextLexical.root.children).toHaveLength(1)
+    expect(merge2.richTextLexical.root.children[0].value).toBeFalsy()
+    expect(merge2.richTextLexical.root.children[0].type).toEqual('paragraph')
+  })
+
   it('— relationships - populates monomorphic has one relationships', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',

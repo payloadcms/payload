@@ -152,14 +152,6 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
           ],
         },
         {
-          type: 'paragraph',
-          children: [
-            {
-              text: '',
-            },
-          ],
-        },
-        {
           children: [
             {
               text: ' ',
@@ -177,6 +169,11 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
               text: '',
             },
           ],
+          relationTo: 'media',
+          type: 'upload',
+          value: {
+            id: '{{MEDIA_ID}}',
+          },
         },
       ],
     },
@@ -213,6 +210,15 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
           relationTo: 'posts',
           value: {
             id: `{{POST_1_ID}}`,
+          },
+        },
+        {
+          format: '',
+          type: 'upload',
+          version: 1,
+          relationTo: 'media',
+          value: {
+            id: `{{MEDIA_ID}}`,
           },
         },
       ],

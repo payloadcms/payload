@@ -63,6 +63,17 @@ export const Pages: CollectionConfig = {
           label: 'Test',
           fields: [
             {
+              label: 'Rich Text — Slate',
+              type: 'richText',
+              name: 'richTextSlate',
+            },
+            {
+              label: 'Rich Text — Lexical',
+              type: 'richText',
+              name: 'richTextLexical',
+              editor: lexicalEditor({}),
+            },
+            {
               name: 'relationshipAsUpload',
               type: 'upload',
               relationTo: 'media',
@@ -125,17 +136,6 @@ export const Pages: CollectionConfig = {
                   hasMany: true,
                 },
               ],
-            },
-            {
-              label: 'Rich Text Slate',
-              type: 'richText',
-              name: 'richTextSlate',
-            },
-            {
-              label: 'Lexical Rich Text',
-              type: 'richText',
-              name: 'richTextLexical',
-              editor: lexicalEditor({}),
             },
             {
               label: 'Named Tabs',
