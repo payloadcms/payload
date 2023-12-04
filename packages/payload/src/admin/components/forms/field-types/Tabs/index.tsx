@@ -175,9 +175,9 @@ const TabsField: React.FC<Props> = (props) => {
               >
                 <FieldDescription
                   className={`${baseClass}__description`}
-                  path={path}
                   description={activeTabConfig.description}
                   marginPlacement="bottom"
+                  path={path}
                 />
                 <RenderFields
                   fieldSchema={activeTabConfig.fields.map((field) => {

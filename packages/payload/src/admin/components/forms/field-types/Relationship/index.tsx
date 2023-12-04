@@ -527,7 +527,7 @@ const Relationship: React.FC<Props> = (props) => {
         </div>
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-      <FieldDescription path={path} description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

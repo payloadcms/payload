@@ -215,7 +215,7 @@ const BlocksField: React.FC<Props> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription path={path} description={description} value={value} />
+        <FieldDescription description={description} path={path} value={value} />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (

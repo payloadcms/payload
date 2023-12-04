@@ -10,7 +10,7 @@ import { isComponent } from './types'
 const baseClass = 'field-description'
 
 const FieldDescription: React.FC<Props> = (props) => {
-  const { className, path, description, value, marginPlacement } = props
+  const { className, description, marginPlacement, path, value } = props
 
   const { i18n } = useTranslation()
 

@@ -91,7 +91,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
         />
         {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
       </div>
-      <FieldDescription path={path} description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

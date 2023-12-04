@@ -14,6 +14,8 @@ import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
   className?: string
   description?: Description
   errorMessage?: string
@@ -29,12 +31,12 @@ export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> &
   style?: React.CSSProperties
   value?: string | string[]
   width?: string
-  Error?: React.ComponentType<any>
-  Label?: React.ComponentType<any>
 }
 
 const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
+    Error,
+    Label,
     className,
     defaultValue,
     description,
@@ -52,8 +54,6 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     style,
     value,
     width,
-    Error,
-    Label,
   } = props
 
   const { i18n } = useTranslation()
@@ -111,7 +111,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         showError={showError}
         value={valueToRender as Option}
       />
-      <FieldDescription path={path} description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }
