@@ -154,10 +154,7 @@ describe('Collections - Live Preview', () => {
     expect(mergedData._numberOfRequests).toEqual(0)
   })
 
-  // TODO: this test is not working in Postgres
-  // This is because of how relationships are handled in `mergeData`
-  // This test passes in MongoDB, though
-  it.skip('— uploads - adds and removes media', async () => {
+  it('— uploads - adds and removes media', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
     }
@@ -198,6 +195,7 @@ describe('Collections - Live Preview', () => {
 
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
   })
+
   it('— relationships - populates monomorphic has one relationships', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
