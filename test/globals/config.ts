@@ -58,6 +58,17 @@ export default buildConfigWithDefaults({
           defaultValue: 'test',
           type: 'text',
         },
+        {
+          name: 'group',
+          fields: [
+            {
+              name: 'text',
+              defaultValue: 'test',
+              type: 'text',
+            },
+          ],
+          type: 'group',
+        },
       ],
       slug: defaultValueSlug,
     },

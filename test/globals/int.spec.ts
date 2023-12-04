@@ -188,6 +188,8 @@ describe('globals', () => {
       })
 
       expect(defaultValueGlobal.text).toStrictEqual('test')
+      // @ts-ignore
+      expect(defaultValueGlobal.group.text).toStrictEqual('test')
     })
   })
 
