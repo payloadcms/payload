@@ -490,6 +490,9 @@ importers:
       to-snake-case:
         specifier: 1.0.0
         version: 1.0.0
+      uuid:
+        specifier: 9.0.0
+        version: 9.0.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1292,8 +1295,8 @@ importers:
         specifier: ^9.0.0
         version: 9.0.6
       payload:
-        specifier: ^1.8.2
-        version: 1.15.8(@types/react@18.0.21)(typescript@5.2.2)
+        specifier: workspace:*
+        version: link:../payload
       prettier:
         specifier: ^2.7.1
         version: 2.8.8
@@ -1302,7 +1305,7 @@ importers:
         version: 18.2.0
       webpack:
         specifier: ^5.78.0
-        version: 5.88.2(@swc/core@1.3.78)(webpack-cli@4.10.0)
+        version: 5.88.2(@swc/core@1.3.76)(webpack-cli@4.10.0)
 
   packages/richtext-lexical:
     dependencies:

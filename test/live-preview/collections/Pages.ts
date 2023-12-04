@@ -5,7 +5,7 @@ import { CallToAction } from '../blocks/CallToAction'
 import { Content } from '../blocks/Content'
 import { MediaBlock } from '../blocks/MediaBlock'
 import { hero } from '../fields/hero'
-import { pagesSlug } from '../shared'
+import { pagesSlug, tenantsSlug } from '../shared'
 
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
@@ -24,6 +24,14 @@ export const Pages: CollectionConfig = {
       name: 'slug',
       type: 'text',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'tenant',
+      type: 'relationship',
+      relationTo: tenantsSlug,
       admin: {
         position: 'sidebar',
       },
@@ -118,6 +126,23 @@ export const Pages: CollectionConfig = {
                   type: 'relationship',
                   relationTo: ['posts'],
                   hasMany: true,
+                },
+              ],
+            },
+            {
+              label: 'Named Tabs',
+              type: 'tabs',
+              tabs: [
+                {
+                  name: 'tab',
+                  label: 'Tab',
+                  fields: [
+                    {
+                      name: 'relationshipInTab',
+                      type: 'relationship',
+                      relationTo: 'posts',
+                    },
+                  ],
                 },
               ],
             },

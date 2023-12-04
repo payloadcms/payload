@@ -5,6 +5,7 @@ import { CallToAction } from '../blocks/CallToAction'
 import { Content } from '../blocks/Content'
 import { MediaBlock } from '../blocks/MediaBlock'
 import { hero } from '../fields/hero'
+import { tenantsSlug } from '../shared'
 
 export const postsSlug = 'posts'
 
@@ -25,6 +26,14 @@ export const Posts: CollectionConfig = {
       name: 'slug',
       type: 'text',
       required: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'tenant',
+      type: 'relationship',
+      relationTo: tenantsSlug,
       admin: {
         position: 'sidebar',
       },

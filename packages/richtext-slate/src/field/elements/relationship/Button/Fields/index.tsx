@@ -1,3 +1,5 @@
+'use client'
+
 import { RelationshipComponent } from 'payload/components/fields/Relationship'
 import { SelectComponent } from 'payload/components/fields/Select'
 import { useFormFields } from 'payload/components/forms'

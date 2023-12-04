@@ -8,10 +8,10 @@ export const ready = (args: { serverURL: string }): void => {
     const windowToPostTo: Window = window?.opener || window?.parent
 
     windowToPostTo?.postMessage(
-      JSON.stringify({
+      {
         ready: true,
         type: 'payload-live-preview',
-      }),
+      },
       serverURL,
     )
   }

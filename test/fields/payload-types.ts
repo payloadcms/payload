@@ -166,6 +166,7 @@ export interface User {
 }
 export interface ArrayField {
   id: string
+  title?: string | null
   items: {
     text: string
     id?: string | null

@@ -6,6 +6,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   meta: {
     description: 'This is an example of live preview on a page.',
   },
+  tenant: '{{TENANT_1_ID}}',
   hero: {
     type: 'highImpact',
     richText: [
@@ -135,4 +136,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
       relationshipInArrayPolyHasOne: { relationTo: 'posts', value: '{{POST_1_ID}}' },
     },
   ],
+  tab: {
+    relationshipInTab: '{{POST_1_ID}}',
+  },
 }

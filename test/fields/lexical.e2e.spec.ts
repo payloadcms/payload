@@ -184,6 +184,86 @@ describe('lexical', () => {
     expect(textNode2.format).toBe(0)
   })
 
+  test('Make sure highly specific issue does not occur when two richText fields share the same editor prop', async () => {
+    // Reproduces https://github.com/payloadcms/payload/issues/4282
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'tabsWithRichText')
+    await page.goto(url.global('tabsWithRichText'))
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    await richTextField.click() // Use click, because focus does not work
+    await page.keyboard.type('some text')
+
+    await page.locator('.tabs-field__tabs').first().getByText('en tab2').first().click()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const contentEditable = richTextField.locator('.ContentEditable__root').first()
+    const textContent = await contentEditable.textContent()
+
+    expect(textContent).not.toBe('some text')
+    expect(textContent).toBe('')
+  })
+
+  test('ensure blocks content is not hidden behind components outside of the editor', async () => {
+    // This test expects there to be a TreeView below the editor
+
+    // This test makes sure there are no z-index issues here
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    // Find span in contentEditable with text "Some text below relationship node"
+    const contentEditable = richTextField.locator('.ContentEditable__root').first()
+    await expect(contentEditable).toBeVisible()
+    await contentEditable.click() // Use click, because focus does not work
+
+    await page.keyboard.press('/')
+
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    // Heading 2 should be the last, most bottom popover button element which should be initially visible, if not hidden by something (e.g. another block)
+    const popoverSelectButton = slashMenuPopover
+      .locator('button.slash-menu-popup__item-block-select')
+      .first()
+    await expect(popoverSelectButton).toBeVisible()
+    await popoverSelectButton.click()
+
+    const newSelectBlock = richTextField.locator('.lexical-block').first()
+    await newSelectBlock.scrollIntoViewIfNeeded()
+    await expect(newSelectBlock).toBeVisible()
+
+    await page.mouse.wheel(0, 300) // Scroll down so that the future react-select menu popover is displayed below and not above
+
+    const reactSelect = newSelectBlock.locator('.rs__control').first()
+    await reactSelect.click()
+
+    const popover = page.locator('.rs__menu').first()
+    const popoverOption3 = popover.locator('.rs__option').nth(2)
+
+    const popoverOption3BoundingBox = await popoverOption3.boundingBox()
+    expect(popoverOption3BoundingBox).not.toBeNull()
+    expect(popoverOption3BoundingBox).not.toBeUndefined()
+    expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
+    expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
+
+    // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
+    // by using page.mouse and the correct coordinates
+    // .isVisible() and .click() might work fine EVEN if the slash menu is not actually visible by humans
+    // see: https://github.com/microsoft/playwright/issues/9923
+    // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
+    // and usually the only method which works.
+
+    const x = popoverOption3BoundingBox.x
+    const y = popoverOption3BoundingBox.y
+
+    await page.mouse.click(x, y, { button: 'left' })
+
+    await expect(reactSelect.locator('.rs__value-container').first()).toHaveText('Option 3')
+  })
+
   describe('nested lexical editor in block', () => {
     test('should type and save typed text', async () => {
       await navigateToLexicalFields()
@@ -191,7 +271,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -225,7 +305,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
       const textNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1].children[0]
 
       expect(textNodeInBlockNodeRichText.text).toBe(
@@ -239,7 +319,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // second: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -298,7 +378,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[3] as SerializedBlockNode
+      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
       const paragraphNodeInBlockNodeRichText = blockNode.fields.richText.root.children[1]
 
       expect(paragraphNodeInBlockNodeRichText.children).toHaveLength(2)
@@ -319,7 +399,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(1) // secondL: "Block Node, with RichText Field, with Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with RichText Field, with Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -388,7 +468,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const lexicalBlock = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      const lexicalBlock = richTextField.locator('.lexical-block').nth(3) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
       await lexicalBlock.scrollIntoViewIfNeeded()
       await expect(lexicalBlock).toBeVisible()
 
@@ -441,7 +521,7 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const blockNode: SerializedBlockNode = lexicalField.root.children[4] as SerializedBlockNode
+      const blockNode: SerializedBlockNode = lexicalField.root.children[5] as SerializedBlockNode
       const subBlocks = blockNode.fields.subBlocks
 
       expect(subBlocks).toHaveLength(2)
@@ -459,9 +539,9 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(4)
+      const radioButtonBlock1 = richTextField.locator('.lexical-block').nth(5)
 
-      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(5)
+      const radioButtonBlock2 = richTextField.locator('.lexical-block').nth(6)
       await radioButtonBlock2.scrollIntoViewIfNeeded()
       await expect(radioButtonBlock1).toBeVisible()
       await expect(radioButtonBlock2).toBeVisible()
@@ -507,8 +587,8 @@ describe('lexical', () => {
       ).docs[0] as never
 
       const lexicalField: SerializedEditorState = lexicalDoc.lexicalWithBlocks
-      const radio1: SerializedBlockNode = lexicalField.root.children[7] as SerializedBlockNode
-      const radio2: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
+      const radio1: SerializedBlockNode = lexicalField.root.children[8] as SerializedBlockNode
+      const radio2: SerializedBlockNode = lexicalField.root.children[9] as SerializedBlockNode
 
       expect(radio1.fields.radioButtons).toBe('option2')
       expect(radio2.fields.radioButtons).toBe('option3')
@@ -534,7 +614,7 @@ describe('lexical', () => {
 
       await parentEditorParagraph.click() // Click works better than focus
 
-      const blockWithRichTextEditor = richTextField.locator('.lexical-block').nth(1) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
+      const blockWithRichTextEditor = richTextField.locator('.lexical-block').nth(2) // third: "Block Node, with Blocks Field, With RichText Field, With Relationship Node"
       await blockWithRichTextEditor.scrollIntoViewIfNeeded()
       await expect(blockWithRichTextEditor).toBeVisible()
 
@@ -567,7 +647,7 @@ describe('lexical', () => {
       await richTextField.scrollIntoViewIfNeeded()
       await expect(richTextField).toBeVisible()
 
-      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(6)
+      const conditionalArrayBlock = richTextField.locator('.lexical-block').nth(7)
 
       await conditionalArrayBlock.scrollIntoViewIfNeeded()
       await expect(conditionalArrayBlock).toBeVisible()

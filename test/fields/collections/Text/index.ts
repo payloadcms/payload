@@ -10,6 +10,7 @@ const TextFields: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
+  defaultSort: 'id',
   fields: [
     {
       name: 'text',
