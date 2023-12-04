@@ -78,16 +78,17 @@ const PreviewSizes: React.FC<{
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes))
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
-  const generateImageUrl = (filename) => {
-    return `${staticURL}/${filename}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+  const generateImageUrl = (doc) => {
+    if (!doc.filename) return null
+    if (doc.url) return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
   }
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
   }, [sizes, imageSizes, imageCacheTag])
 
   const mainPreviewSrc = selectedSize
-    ? generateImageUrl(`${orderedSizes[selectedSize]?.filename}`)
-    : generateImageUrl(doc.filename)
+    ? generateImageUrl(doc.sizes[selectedSize])
+    : generateImageUrl(doc)
 
   const originalImage = useMemo(
     (): FileSizes[0] => ({
@@ -121,12 +122,12 @@ const PreviewSizes: React.FC<{
             meta={originalImage}
             name={originalFilename}
             onClick={() => setSelectedSize(null)}
-            previewSrc={generateImageUrl(doc.filename)}
+            previewSrc={generateImageUrl(doc)}
           />
 
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
-            const previewSrc = val.filename ? generateImageUrl(val.filename) : undefined
+            const previewSrc = generateImageUrl(val)
 
             if (previewSrc) {
               return (

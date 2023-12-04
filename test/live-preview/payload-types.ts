@@ -11,6 +11,7 @@ export interface Config {
     users: User
     pages: Page
     posts: Post
+    tenants: Tenant
     categories: Category
     media: Media
     'payload-preferences': PayloadPreference
@@ -37,6 +38,7 @@ export interface User {
 export interface Page {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
@@ -152,25 +154,62 @@ export interface Page {
           }
       )[]
     | null
-  meta?: {
-    title?: string | null
-    description?: string | null
-    image?: string | Media | null
-  }
+  relationshipInRichText?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  relationshipAsUpload?: string | Media | null
+  relationshipMonoHasOne?: (string | null) | Post
+  relationshipMonoHasMany?: (string | Post)[] | null
+  relationshipPolyHasOne?: {
+    relationTo: 'posts'
+    value: string | Post
+  } | null
   relationshipPolyHasMany?:
     | {
         relationTo: 'posts'
         value: string | Post
       }[]
     | null
-  relationshipMonoHasMany?: (string | Post)[] | null
-  relationshipMonoHasOne?: (string | null) | Post
   arrayOfRelationships?:
     | {
-        relationshipWithinArray?: (string | null) | Post
+        uploadInArray?: string | Media | null
+        richTextInArray?:
+          | {
+              [k: string]: unknown
+            }[]
+          | null
+        relationshipInArrayMonoHasOne?: (string | null) | Post
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null
+        relationshipInArrayPolyHasOne?: {
+          relationTo: 'posts'
+          value: string | Post
+        } | null
+        relationshipInArrayPolyHasMany?:
+          | {
+              relationTo: 'posts'
+              value: string | Post
+            }[]
+          | null
         id?: string | null
       }[]
     | null
+  tab: {
+    relationshipInTab?: (string | null) | Post
+  }
+  meta?: {
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
+  }
+  updatedAt: string
+  createdAt: string
+}
+export interface Tenant {
+  id: string
+  title: string
+  clientURL: string
   updatedAt: string
   createdAt: string
 }
@@ -194,6 +233,7 @@ export interface Media {
 export interface Post {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'

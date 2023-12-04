@@ -61,10 +61,15 @@ export interface Page {
                   link: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('primary' | 'secondary') | null
@@ -90,10 +95,15 @@ export interface Page {
                   link?: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('default' | 'primary' | 'secondary') | null
@@ -147,17 +157,44 @@ export interface Page {
     description?: string | null
     image?: string | Media | null
   }
+  relationshipInRichText?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  relationshipAsUpload?: string | Media | null
+  relationshipMonoHasOne?: (string | null) | Post
+  relationshipMonoHasMany?: (string | Post)[] | null
+  relationshipPolyHasOne?: {
+    relationTo: 'posts'
+    value: string | Post
+  } | null
   relationshipPolyHasMany?:
     | {
         relationTo: 'posts'
         value: string | Post
       }[]
     | null
-  relationshipMonoHasMany?: (string | Post)[] | null
-  relationshipMonoHasOne?: (string | null) | Post
   arrayOfRelationships?:
     | {
-        relationshipWithinArray?: (string | null) | Post
+        uploadInArray?: string | Media | null
+        richTextInArray?:
+          | {
+              [k: string]: unknown
+            }[]
+          | null
+        relationshipInArrayMonoHasOne?: (string | null) | Post
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null
+        relationshipInArrayPolyHasOne?: {
+          relationTo: 'posts'
+          value: string | Post
+        } | null
+        relationshipInArrayPolyHasMany?:
+          | {
+              relationTo: 'posts'
+              value: string | Post
+            }[]
+          | null
         id?: string | null
       }[]
     | null
@@ -180,12 +217,6 @@ export interface Media {
   filesize?: number | null
   width?: number | null
   height?: number | null
-}
-export interface Category {
-  id: string
-  title?: string | null
-  updatedAt: string
-  createdAt: string
 }
 export interface Post {
   id: string
@@ -214,10 +245,15 @@ export interface Post {
                   link: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('primary' | 'secondary') | null
@@ -243,10 +279,15 @@ export interface Post {
                   link?: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('default' | 'primary' | 'secondary') | null
@@ -304,6 +345,12 @@ export interface Post {
   updatedAt: string
   createdAt: string
 }
+export interface Category {
+  id: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+}
 export interface PayloadPreference {
   id: string
   user: {
@@ -337,10 +384,15 @@ export interface Header {
         link: {
           type?: ('reference' | 'custom') | null
           newTab?: boolean | null
-          reference?: {
-            relationTo: 'pages'
-            value: string | Page
-          } | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
           url?: string | null
           label: string
           appearance?: ('default' | 'primary' | 'secondary') | null
@@ -358,10 +410,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null
           newTab?: boolean | null
-          reference?: {
-            relationTo: 'pages'
-            value: string | Page
-          } | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
           url?: string | null
           label: string
           appearance?: ('default' | 'primary' | 'secondary') | null

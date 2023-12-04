@@ -42,6 +42,8 @@ export const defaultAccessRelSlug = 'strict-access'
 export const chainedRelSlug = 'chained'
 export const customIdSlug = 'custom-id'
 export const customIdNumberSlug = 'custom-id-number'
+export const polymorphicRelationshipsSlug = 'polymorphic-relationships'
+
 export default buildConfigWithDefaults({
   collections: [
     {
@@ -231,6 +233,16 @@ export default buildConfigWithDefaults({
       ],
 
       slug: 'movieReviews',
+    },
+    {
+      slug: polymorphicRelationshipsSlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'polymorphic',
+          relationTo: ['movies'],
+        },
+      ],
     },
   ],
   onInit: async (payload) => {

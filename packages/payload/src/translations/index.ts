@@ -11,12 +11,15 @@ import hr from './hr.json'
 import hu from './hu.json'
 import it from './it.json'
 import ja from './ja.json'
+import ko from './ko.json'
 import my from './my.json'
 import nb from './nb.json'
 import nl from './nl.json'
 import pl from './pl.json'
 import pt from './pt.json'
 import ro from './ro.json'
+import rs from './rs.json'
+import rsLatin from './rs-latin.json'
 import ru from './ru.json'
 import sv from './sv.json'
 import th from './th.json'
@@ -39,12 +42,15 @@ export default {
   hu,
   it,
   ja,
+  ko,
   my,
   nb,
   nl,
   pl,
   pt,
   ro,
+  rs,
+  rsLatin,
   ru,
   sv,
   th,

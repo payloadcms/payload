@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "The official live preview JavaScript SDK for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -19,9 +19,6 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
-  },
-  "peerDependencies": {
-    "payload": "^2.0.0"
   },
   "exports": {
     ".": {

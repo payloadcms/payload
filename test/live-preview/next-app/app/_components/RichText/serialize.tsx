@@ -2,16 +2,14 @@ import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
 import Link from 'next/link'
 import { Text } from 'slate'
+import { CMSLink } from '../Link'
 
 // eslint-disable-next-line no-use-before-define
 type Children = Leaf[]
 
 type Leaf = {
   type: string
-  value?: {
-    url: string
-    alt: string
-  }
+  value?: any
   children?: Children
   url?: string
   [key: string]: unknown
@@ -78,20 +76,25 @@ const serialize = (children?: Children): React.ReactNode[] =>
         return <ol key={i}>{serialize(node.children)}</ol>
       case 'li':
         return <li key={i}>{serialize(node.children)}</li>
+      case 'relationship':
+        return (
+          <span key={i}>
+            {node.value && typeof node.value === 'object'
+              ? node.value.title || node.value.id
+              : node.value}
+          </span>
+        )
       case 'link':
         return (
-          <Link
-            href={escapeHTML(node.url)}
+          <CMSLink
             key={i}
-            {...(node?.newTab
-              ? {
-                  target: '_blank',
-                  rel: 'noopener noreferrer',
-                }
-              : {})}
+            type={node.linkType === 'internal' ? 'reference' : 'custom'}
+            url={node.url}
+            reference={node.doc as any}
+            newTab={Boolean(node?.newTab)}
           >
             {serialize(node?.children)}
-          </Link>
+          </CMSLink>
         )
 
       default:

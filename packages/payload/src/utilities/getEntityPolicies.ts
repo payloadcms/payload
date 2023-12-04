@@ -216,33 +216,33 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     )
   }
 
-  await Promise.all(
-    operations.map(async (operation) => {
-      let entityAccessPromise: Promise<void>
+  await operations.reduce(async (priorOperation, operation) => {
+    await priorOperation
 
-      if (typeof entity.access[operation] === 'function') {
-        entityAccessPromise = createAccessPromise({
-          access: entity.access[operation],
-          accessLevel: 'entity',
-          operation,
-          policiesObj: policies,
-        })
-      } else {
-        policies[operation] = {
-          permission: isLoggedIn,
-        }
-      }
+    let entityAccessPromise: Promise<void>
 
-      await entityAccessPromise
-
-      await executeFieldPolicies({
-        entityPermission: policies[operation].permission,
-        fields: entity.fields,
+    if (typeof entity.access[operation] === 'function') {
+      entityAccessPromise = createAccessPromise({
+        access: entity.access[operation],
+        accessLevel: 'entity',
         operation,
         policiesObj: policies,
       })
-    }),
-  )
+    } else {
+      policies[operation] = {
+        permission: isLoggedIn,
+      }
+    }
+
+    await entityAccessPromise
+
+    await executeFieldPolicies({
+      entityPermission: policies[operation].permission,
+      fields: entity.fields,
+      operation,
+      policiesObj: policies,
+    })
+  }, Promise.resolve())
 
   return policies
 }

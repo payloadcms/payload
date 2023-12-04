@@ -297,6 +297,9 @@ export const getTableColumnFromPath = ({
             table: adapter.tables[newTableName],
           }
         }
+        if (pathSegments[1] === 'blockType') {
+          throw new APIError('Querying on blockType is not supported')
+        }
         break
       }
 
