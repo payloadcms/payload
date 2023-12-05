@@ -51,7 +51,7 @@ const errorHandler =
       )) || { response, status })
     }
 
-    if (typeof config.hooks.afterError === 'function') {
+    if (req.collection && typeof config.hooks.afterError === 'function') {
       ;({ response, status } = (await config.hooks.afterError(
         err,
         response,
