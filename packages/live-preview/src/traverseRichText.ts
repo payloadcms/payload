@@ -59,7 +59,14 @@ export const traverseRichText = ({
       const isRelationship = key === 'value' && 'relationTo' in incomingData
 
       if (isRelationship) {
-        const needsPopulation = !result.value || typeof result.value !== 'object'
+        // or if there are no keys besides id
+        const needsPopulation =
+          !result.value ||
+          typeof result.value !== 'object' ||
+          (typeof result.value === 'object' &&
+            Object.keys(result.value).length === 1 &&
+            'id' in result.value)
+
         const hasChanged =
           result &&
           typeof result === 'object' &&
@@ -71,7 +78,10 @@ export const traverseRichText = ({
           }
 
           populationsByCollection[incomingData.relationTo].push({
-            id: incomingData[key],
+            id:
+              incomingData[key] && typeof incomingData[key] === 'object'
+                ? incomingData[key].id
+                : incomingData[key],
             accessor: 'value',
             ref: result,
           })

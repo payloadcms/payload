@@ -579,7 +579,7 @@ describe('Collections - Live Preview', () => {
           },
         ],
       },
-      initialData,
+      initialData: merge1,
       serverURL,
       returnNumberOfRequests: true,
     })
@@ -613,7 +613,7 @@ describe('Collections - Live Preview', () => {
       title: 'Test Page',
     }
 
-    // Add a relationship
+    // Add a relationship and an upload
     const merge1 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
@@ -621,10 +621,35 @@ describe('Collections - Live Preview', () => {
         ...initialData,
         richTextSlate: [
           {
-            type: 'reference',
-            reference: {
-              relationTo: 'posts',
-              value: testPost.id,
+            children: [
+              {
+                text: ' ',
+              },
+            ],
+            relationTo: 'posts',
+            type: 'relationship',
+            value: {
+              id: testPost.id,
+            },
+          },
+          {
+            type: 'paragraph',
+            children: [
+              {
+                text: '',
+              },
+            ],
+          },
+          {
+            children: [
+              {
+                text: '',
+              },
+            ],
+            relationTo: 'media',
+            type: 'upload',
+            value: {
+              id: media.id,
             },
           },
         ],
@@ -634,11 +659,15 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
-    expect(merge1.richTextSlate).toHaveLength(1)
-    expect(merge1.richTextSlate[0].reference.value).toMatchObject(testPost)
+    expect(merge1._numberOfRequests).toEqual(2)
+    expect(merge1.richTextSlate).toHaveLength(3)
+    expect(merge1.richTextSlate[0].type).toEqual('relationship')
+    expect(merge1.richTextSlate[0].value).toMatchObject(testPost)
+    expect(merge1.richTextSlate[1].type).toEqual('paragraph')
+    expect(merge1.richTextSlate[2].type).toEqual('upload')
+    expect(merge1.richTextSlate[2].value).toMatchObject(media)
 
-    // Remove the relationship
+    // Add a new node between the relationship and the upload
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
@@ -646,26 +675,63 @@ describe('Collections - Live Preview', () => {
         ...merge1,
         richTextSlate: [
           {
+            children: [
+              {
+                text: ' ',
+              },
+            ],
+            relationTo: 'posts',
+            type: 'relationship',
+            value: {
+              id: testPost.id,
+            },
+          },
+          {
             type: 'paragraph',
             children: [
               {
-                text: 'Hello, world!',
+                text: '',
               },
             ],
           },
+          {
+            type: 'paragraph',
+            children: [
+              {
+                text: '',
+              },
+            ],
+          },
+          {
+            children: [
+              {
+                text: '',
+              },
+            ],
+            relationTo: 'media',
+            type: 'upload',
+            value: {
+              id: media.id,
+            },
+          },
         ],
       },
-      initialData,
+      initialData: merge1,
       serverURL,
       returnNumberOfRequests: true,
     })
 
-    expect(merge2._numberOfRequests).toEqual(0)
-    expect(merge2.richTextSlate).toHaveLength(1)
-    expect(merge2.richTextSlate[0].type).toEqual('paragraph')
+    expect(merge2._numberOfRequests).toEqual(1)
+    expect(merge2.richTextSlate).toHaveLength(4)
+    expect(merge2.richTextSlate[0].type).toEqual('relationship')
+    expect(merge2.richTextSlate[0].value).toMatchObject(testPost)
+    expect(merge2.richTextSlate[1].type).toEqual('paragraph')
+    expect(merge2.richTextSlate[2].type).toEqual('paragraph')
+    expect(merge2.richTextSlate[3].type).toEqual('upload')
+    expect(merge2.richTextSlate[3].value).toMatchObject(media)
   })
 
-  it('— rich text - populates within Lexical rich text editor', async () => {
+  it('— relationships - populates within Lexical rich text editor', async () => {
     const initialData: Partial<Page> = {
       title: 'Test Page',
     }
@@ -684,18 +750,17 @@ describe('Collections - Live Preview', () => {
             version: 1,
             children: [
               {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Hello, world!',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
+                format: '',
+                type: 'relationship',
+                version: 1,
+                relationTo: 'posts',
+                value: {
+                  id: testPost.id,
+                },
+              },
+              {
+                children: [],
+                direction: null,
                 format: '',
                 indent: 0,
                 type: 'paragraph',
@@ -703,13 +768,16 @@ describe('Collections - Live Preview', () => {
               },
               {
                 format: '',
-                type: 'relationship',
+                type: 'upload',
                 version: 1,
-                relationTo: 'posts',
-                value: testPost.id,
+                fields: null,
+                relationTo: 'media',
+                value: {
+                  id: media.id,
+                },
               },
             ],
-            direction: 'ltr',
+            direction: null,
           },
         },
       },
@@ -718,11 +786,15 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge1._numberOfRequests).toEqual(1)
-    expect(merge1.richTextLexical.root.children).toHaveLength(2)
-    expect(merge1.richTextLexical.root.children[1].value).toMatchObject(testPost)
+    expect(merge1._numberOfRequests).toEqual(2)
+    expect(merge1.richTextLexical.root.children).toHaveLength(3)
+    expect(merge1.richTextLexical.root.children[0].type).toEqual('relationship')
+    expect(merge1.richTextLexical.root.children[0].value).toMatchObject(testPost)
+    expect(merge1.richTextLexical.root.children[1].type).toEqual('paragraph')
+    expect(merge1.richTextLexical.root.children[2].type).toEqual('upload')
+    expect(merge1.richTextLexical.root.children[2].value).toMatchObject(media)
 
-    // Remove the relationship
+    // Add a node before the populated one
     const merge2 = await mergeData({
       depth: 1,
       fieldSchema: schemaJSON,
@@ -736,25 +808,42 @@ describe('Collections - Live Preview', () => {
             version: 1,
             children: [
               {
-                children: [
-                  {
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Hello, world!',
-                    type: 'text',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
+                format: '',
+                type: 'relationship',
+                version: 1,
+                relationTo: 'posts',
+                value: {
+                  id: testPost.id,
+                },
+              },
+              {
+                children: [],
+                direction: null,
                 format: '',
                 indent: 0,
                 type: 'paragraph',
                 version: 1,
               },
+              {
+                children: [],
+                direction: null,
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+              {
+                format: '',
+                type: 'upload',
+                version: 1,
+                fields: null,
+                relationTo: 'media',
+                value: {
+                  id: media.id,
+                },
+              },
             ],
-            direction: 'ltr',
+            direction: null,
           },
         },
       },
@@ -763,9 +852,14 @@ describe('Collections - Live Preview', () => {
       returnNumberOfRequests: true,
     })
 
-    expect(merge2._numberOfRequests).toEqual(0)
-    expect(merge2.richTextLexical.root.children).toHaveLength(1)
-    expect(merge2.richTextLexical.root.children[0].type).toEqual('paragraph')
+    expect(merge2._numberOfRequests).toEqual(1)
+    expect(merge2.richTextLexical.root.children).toHaveLength(4)
+    expect(merge2.richTextLexical.root.children[0].type).toEqual('relationship')
+    expect(merge2.richTextLexical.root.children[0].value).toMatchObject(testPost)
+    expect(merge2.richTextLexical.root.children[1].type).toEqual('paragraph')
+    expect(merge2.richTextLexical.root.children[2].type).toEqual('paragraph')
+    expect(merge2.richTextLexical.root.children[3].type).toEqual('upload')
+    expect(merge2.richTextLexical.root.children[3].value).toMatchObject(media)
   })
 
   it('— relationships - does not re-populate existing rich text relationships', async () => {
