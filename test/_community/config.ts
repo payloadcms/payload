@@ -1,3 +1,4 @@
+import FormBuilder from '../../packages/plugin-form-builder/src'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { MediaCollection } from './collections/Media'
@@ -18,6 +19,7 @@ export default buildConfigWithDefaults({
   graphQL: {
     schemaOutputFile: './test/_community/schema.graphql',
   },
+  plugins: [FormBuilder({})],
 
   onInit: async (payload) => {
     await payload.create({

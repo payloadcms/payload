@@ -20,5 +20,21 @@ export const PostsCollection: CollectionConfig = {
         update: () => false,
       },
     },
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'formBlock',
+          fields: [
+            {
+              name: 'form',
+              type: 'relationship',
+              relationTo: 'forms',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
