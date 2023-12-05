@@ -146,7 +146,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     let copyOfWhere = { ...(where || {}) }
 
     if (filterOptions) {
-      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOptions[slug])
+      copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOptions[slug] || {})
     }
 
     if (search) {
