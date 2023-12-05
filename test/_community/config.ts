@@ -30,10 +30,24 @@ export default buildConfigWithDefaults({
       },
     })
 
+    const { id: formID } = await payload.create({
+      collection: 'forms',
+      data: {
+        title: 'test',
+        confirmationMessage: 'test',
+      },
+    })
+
     await payload.create({
       collection: postsSlug,
       data: {
         text: 'example post',
+        layout: [
+          {
+            blockType: 'formBlock',
+            form: formID,
+          },
+        ],
       },
     })
   },
