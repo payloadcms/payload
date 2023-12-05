@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom'
 
 import type { Context as ContextType } from './types'
 
-import { IconGraphic } from '../../../../exports/components/graphics'
-import { getTranslation } from '../../../../utilities/getTranslation'
-import { useConfig } from '../../utilities/Config'
+import IconGraphic from '../../graphics/Icon'
+import { getTranslation } from 'payload/utilities'
+import { useConfig } from '../../providers/Config'
 import './index.scss'
 
 const baseClass = 'step-nav'

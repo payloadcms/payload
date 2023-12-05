@@ -7,6 +7,13 @@ import { WindowInfoProvider } from '@faceless-ui/window-info'
 import { ConfigProvider } from '../Config'
 import I18n from '../../elements/I18n'
 import { AuthProvider } from '../Auth'
+import { PreferencesProvider } from '../Preferences'
+import { ThemeProvider } from '../Theme'
+import { LocaleProvider } from '../Locale'
+import StepNav, { StepNavProvider } from '../../elements/StepNav'
+import { LoadingOverlayProvider } from '../../elements/LoadingOverlay'
+import { NavProvider } from '../../elements/Nav/context'
+import '../../scss/app.scss'
 
 type Props = {
   config: ClientConfig
@@ -28,7 +35,17 @@ export const RootProvider: React.FC<Props> = ({ config, children }) => {
         <ScrollInfoProvider>
           <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
             <AuthProvider>
-              {children}
+              <PreferencesProvider>
+                <ThemeProvider>
+                  <LocaleProvider>
+                    <StepNavProvider>
+                      <LoadingOverlayProvider>
+                        <NavProvider>{children}</NavProvider>
+                      </LoadingOverlayProvider>
+                    </StepNavProvider>
+                  </LocaleProvider>
+                </ThemeProvider>
+              </PreferencesProvider>
               <ModalContainer />
             </AuthProvider>
           </ModalProvider>

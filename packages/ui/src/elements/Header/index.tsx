@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import Account from '../../graphics/Account'
 import { useActions } from '../../utilities/ActionsProvider'
-import { useConfig } from '../../utilities/Config'
+import { useConfig } from '../../providers/Config'
 import { Hamburger } from '../Hamburger'
 import Localizer from '../Localizer'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel'

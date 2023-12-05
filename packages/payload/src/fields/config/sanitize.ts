@@ -1,7 +1,6 @@
 import type { Config } from '../../config/types'
 import type { Field } from './types'
 
-import withCondition from '../../admin/components/forms/withCondition'
 import {
   DuplicateFieldName,
   InvalidFieldName,
@@ -132,11 +131,7 @@ export const sanitizeFields = ({
       if (!field.access) field.access = {}
     }
 
-    if (field.admin) {
-      if (field.admin.condition && field.admin.components?.Field) {
-        field.admin.components.Field = withCondition(field.admin.components?.Field)
-      }
-    } else {
+    if (!field.admin) {
       field.admin = {}
     }
 

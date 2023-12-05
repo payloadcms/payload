@@ -1,9 +1,9 @@
 import type i18n from 'i18next'
 
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
-import type { SanitizedConfig } from '../../../../../config/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 import type { RelationshipField } from 'payload/types'
-import type { Where } from '../../../../../types'
+import type { Where } from 'payload/types'
 
 export type Props = Omit<RelationshipField, 'type'> & {
   path?: string

@@ -1,7 +1,6 @@
 'use client'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useHistory, useLocation } from 'react-router-dom'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
@@ -10,12 +9,15 @@ import Email from '../../forms/field-types/Email'
 import Password from '../../forms/field-types/Password'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
+import { useRouter, useSearchParams } from 'next/navigation'
 import './index.scss'
+import Link from 'next/link'
 
 const baseClass = 'login'
 
 export const LoginClient: React.FC = () => {
-  const history = useHistory()
+  const { push } = useRouter()
+  const searchParams = useSearchParams()
   const { t } = useTranslation('authentication')
   const { fetchFullUser, user } = useAuth()
   const config = useConfig()
@@ -26,15 +28,14 @@ export const LoginClient: React.FC = () => {
   } = config
 
   // Fetch 'redirect' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
-  const query = new URLSearchParams(useLocation().search)
-  const redirect = query.get('redirect')
+  const redirect = searchParams.get('redirect')
 
   const onSuccess = async (data) => {
     if (data.token) {
       await fetchFullUser()
 
       // Ensure the redirect always starts with the admin route, and concatenate the redirect path
-      history.push(admin + (redirect || ''))
+      push(admin + (redirect || ''))
     }
   }
 
@@ -62,7 +63,7 @@ export const LoginClient: React.FC = () => {
         <Email admin={{ autoComplete: 'email' }} label={t('general:email')} name="email" required />
         <Password autoComplete="off" label={t('general:password')} name="password" required />
       </div>
-      <Link to={`${admin}/forgot`}>{t('forgotPasswordQuestion')}</Link>
+      <Link href={`${admin}/forgot`}>{t('forgotPasswordQuestion')}</Link>
       <FormSubmit>{t('login')}</FormSubmit>
     </Form>
   )

@@ -43,9 +43,9 @@ export const Login: React.FC<{
           <div className={`${baseClass}__wrap`}>
             <h1>{i18n.t('alreadyLoggedIn')}</h1>
             <p>
-              <Trans i18nKey="loggedIn" t={i18n.t}>
+              {/* <Trans i18nKey="loggedIn" t={i18n.t}>
                 <Link to={`${admin}${logoutRoute}`}>{i18n.t('logOut')}</Link>
-              </Trans>
+              </Trans> */}
             </p>
             <Button buttonStyle="secondary" el="link" to={admin}>
               {i18n.t('general:backToDashboard')}

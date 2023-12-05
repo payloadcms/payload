@@ -17,7 +17,10 @@ import type {
   SubmitOptions,
 } from './types'
 
-import { isNumber, setsAreEqual, splitPathByArrayFields, wait } from 'payload/utilities'
+import { splitPathByArrayFields } from 'payload/dist/utilities/splitPathByArrayFields' // TODO: replace with top-level payload export once available
+import { setsAreEqual } from 'payload/dist/utilities/setsAreEqual' // TODO: replace with top-level payload export once available
+import wait from 'payload/dist/utilities/wait' // TODO: replace with top-level payload export once available
+import { isNumber } from 'payload/dist/utilities/isNumber' // TODO: replace with top-level payload export once available
 import { requests } from '../../utilities/api'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAuth } from '../../providers/Auth'

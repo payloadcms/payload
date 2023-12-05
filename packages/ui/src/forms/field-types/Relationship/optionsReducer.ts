@@ -1,7 +1,7 @@
 import type { Action, Option, OptionGroup } from './types'
 
 import { getTranslation } from 'payload/utilities'
-import { formatUseAsTitle } from '../../../../hooks/useTitle'
+import { formatUseAsTitle } from '../../../hooks/useTitle'
 
 const reduceToIDs = (options) =>
   options.reduce((ids, option) => {

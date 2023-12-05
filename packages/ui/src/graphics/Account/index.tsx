@@ -1,8 +1,8 @@
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { useAuth } from '../../utilities/Auth'
-import { useConfig } from '../../utilities/Config'
+import { useAuth } from '../../providers/Auth'
+import { useConfig } from '../../providers/Config'
 import { DefaultAccountIcon } from './Default'
 import Gravatar from './Gravatar'
 

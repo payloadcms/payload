@@ -1,5 +1,5 @@
 import type { FieldTypes } from '..'
-import type { FieldPermissions } from '../../../../../auth/types'
+import type { FieldPermissions } from 'payload/auth'
 import type { RowField } from 'payload/types'
 
 export type Props = Omit<RowField, 'type'> & {

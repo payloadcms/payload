@@ -3,7 +3,7 @@ import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'bo
 import React, { useEffect, useRef } from 'react'
 import { useHistory } from 'react-router-dom'
 
-import { usePreferences } from '../../utilities/Preferences'
+import { usePreferences } from '../../providers/Preferences'
 
 type NavContextType = {
   navOpen: boolean

@@ -2,8 +2,8 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Banner } from '../../elements/Banner'
-import { useConfig } from '../../utilities/Config'
-import { useLocale } from '../../utilities/Locale'
+import { useConfig } from '../../providers/Config'
+import { useLocale } from '../../providers/Locale'
 import { useForm } from '../Form/context'
 import { CheckboxInput } from '../field-types/Checkbox/Input'
 

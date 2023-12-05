@@ -28,11 +28,11 @@ export const DefaultDashboard: React.FC<{
   return (
     <div className={baseClass}>
       <Gutter className={`${baseClass}__wrap`}>
-        {Array.isArray(beforeDashboard) &&
-          beforeDashboard.map((Component, i) => <Component key={i} />)}
-        <DefaultDashboardClient />
-        {Array.isArray(afterDashboard) &&
-          afterDashboard.map((Component, i) => <Component key={i} />)}
+        {/* {Array.isArray(beforeDashboard) &&
+          beforeDashboard.map((Component, i) => <Component key={i} />)} */}
+        {/* <DefaultDashboardClient /> */}
+        {/* {Array.isArray(afterDashboard) &&
+          afterDashboard.map((Component, i) => <Component key={i} />)} */}
       </Gutter>
     </div>
   )
