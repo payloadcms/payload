@@ -171,14 +171,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     )
 
     // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req.t)
-    }
-
-    // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
@@ -210,6 +202,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       skipValidation: shouldSaveDraft,
     })
+
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req.t)
+    }
 
     // /////////////////////////////////////
     // Create

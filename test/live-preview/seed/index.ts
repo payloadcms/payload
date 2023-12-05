@@ -5,7 +5,7 @@ import type { Config } from '../../../packages/payload/src/config/types'
 import { devUser } from '../../credentials'
 import removeFiles from '../../helpers/removeFiles'
 import { postsSlug } from '../collections/Posts'
-import { pagesSlug } from '../shared'
+import { pagesSlug, tenantsSlug } from '../shared'
 import { footer } from './footer'
 import { header } from './header'
 import { home } from './home'
@@ -13,6 +13,8 @@ import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
 import { postsPage } from './posts-page'
+import { tenant1 } from './tenant-1'
+import { tenant2 } from './tenant-2'
 
 export const seed: Config['onInit'] = async (payload) => {
   const uploadsDir = path.resolve(__dirname, './media')
@@ -26,6 +28,17 @@ export const seed: Config['onInit'] = async (payload) => {
     },
   })
 
+  const [tenant1Doc] = await Promise.all([
+    await payload.create({
+      collection: tenantsSlug,
+      data: tenant1,
+    }),
+    await payload.create({
+      collection: tenantsSlug,
+      data: tenant2,
+    }),
+  ])
+
   const media = await payload.create({
     collection: 'media',
     filePath: path.resolve(__dirname, 'image-1.jpg'),
@@ -35,19 +48,32 @@ export const seed: Config['onInit'] = async (payload) => {
   })
 
   const mediaID = payload.db.defaultIDType === 'number' ? media.id : `"${media.id}"`
+  const tenantID = payload.db.defaultIDType === 'number' ? tenant1Doc.id : `"${tenant1Doc.id}"`
 
   const [post1Doc, post2Doc, post3Doc] = await Promise.all([
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post1).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+      data: JSON.parse(
+        JSON.stringify(post1)
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+      ),
     }),
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post2).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+      data: JSON.parse(
+        JSON.stringify(post2)
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+      ),
     }),
     await payload.create({
       collection: postsSlug,
-      data: JSON.parse(JSON.stringify(post3).replace(/"\{\{IMAGE\}\}"/g, mediaID)),
+      data: JSON.parse(
+        JSON.stringify(post3)
+          .replace(/"\{\{IMAGE\}\}"/g, mediaID)
+          .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
+      ),
     }),
   ])
 
@@ -76,7 +102,8 @@ export const seed: Config['onInit'] = async (payload) => {
         .replace(/"\{\{POSTS_PAGE_ID\}\}"/g, postsPageDocID)
         .replace(/"\{\{POST_1_ID\}\}"/g, post1DocID)
         .replace(/"\{\{POST_2_ID\}\}"/g, post2DocID)
-        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID),
+        .replace(/"\{\{POST_3_ID\}\}"/g, post3DocID)
+        .replace(/"\{\{TENANT_1_ID\}\}"/g, tenantID),
     ),
   })
 

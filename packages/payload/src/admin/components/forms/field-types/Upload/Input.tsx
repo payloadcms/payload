@@ -24,6 +24,8 @@ import './index.scss'
 const baseClass = 'upload'
 
 export type UploadInputProps = Omit<UploadField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
   api?: string
   className?: string
   collection?: SanitizedCollectionConfig
@@ -41,12 +43,12 @@ export type UploadInputProps = Omit<UploadField, 'type'> & {
   style?: React.CSSProperties
   value?: string
   width?: string
-  Error?: React.ComponentType<any>
-  Label?: React.ComponentType<any>
 }
 
 const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
+    Error,
+    Label,
     api = '/api',
     className,
     collection,
@@ -64,8 +66,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     style,
     value,
     width,
-    Error,
-    Label,
   } = props
 
   const { i18n, t } = useTranslation('fields')
@@ -191,7 +191,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               </div>
             </div>
           )}
-          <FieldDescription description={description} value={file} />
+          <FieldDescription description={description} path={path} value={file} />
         </React.Fragment>
       )}
       {!readOnly && <DocumentDrawer onSave={onSave} />}

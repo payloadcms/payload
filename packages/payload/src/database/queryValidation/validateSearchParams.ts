@@ -120,24 +120,28 @@ export async function validateSearchParam({
           if (segments[0] === 'parent' || segments[0] === 'version') {
             segments.shift()
           } else {
-            segments.forEach((segment, pathIndex) => {
-              if (fieldAccess[segment]) {
-                if (pathIndex === segments.length - 1) {
-                  fieldAccess = fieldAccess[segment]
-                } else if ('fields' in fieldAccess[segment]) {
-                  fieldAccess = fieldAccess[segment].fields
-                } else if ('blocks' in fieldAccess[segment]) {
-                  fieldAccess = fieldAccess[segment]
+            if (['json', 'relationship', 'richText'].includes(field.type)) {
+              fieldAccess = fieldAccess[field.name]
+            } else {
+              segments.forEach((segment, pathIndex) => {
+                if (fieldAccess[segment]) {
+                  if (pathIndex === segments.length - 1) {
+                    fieldAccess = fieldAccess[segment]
+                  } else if ('fields' in fieldAccess[segment]) {
+                    fieldAccess = fieldAccess[segment].fields
+                  } else if ('blocks' in fieldAccess[segment]) {
+                    fieldAccess = fieldAccess[segment]
+                  }
                 }
-              }
-            })
+              })
+            }
           }
 
           fieldAccess = fieldAccess.read.permission
         } else {
           fieldAccess = policies[entityType][entitySlug].fields
 
-          if (['json', 'richText'].includes(field.type)) {
+          if (['json', 'relationship', 'richText'].includes(field.type)) {
             fieldAccess = fieldAccess[field.name]
           } else {
             segments.forEach((segment, pathIndex) => {

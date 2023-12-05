@@ -142,7 +142,7 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
                       return `${uploadOptions.staticURL}/${sizeFilename}`
                     }
 
-                    return undefined
+                    return null
                   },
                 ],
               },
