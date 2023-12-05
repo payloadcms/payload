@@ -124,15 +124,16 @@ export async function validateSearchParam({
           fieldAccess = policies[entityType][entitySlug].fields
         }
 
-        segments.forEach((segment) => {
+        segments.forEach((segment, pathIndex) => {
           if (fieldAccess[segment]) {
-            fieldAccess = fieldAccess[segment]
+            const isLastSegment = pathIndex === segments.length - 1
 
-            // Handle nested fields within groups / named-tabs
-            if ('fields' in fieldAccess) {
-              fieldAccess = fieldAccess.fields
-            } else if ('blocks' in fieldAccess) {
-              fieldAccess = fieldAccess.blocks
+            if (isLastSegment) {
+              fieldAccess = fieldAccess[segment]
+            } else if ('fields' in fieldAccess[segment]) {
+              fieldAccess = fieldAccess[segment].fields
+            } else if ('blocks' in fieldAccess[segment]) {
+              fieldAccess = fieldAccess[segment]
             }
           }
         })
