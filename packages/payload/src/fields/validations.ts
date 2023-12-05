@@ -253,6 +253,7 @@ const validateFilterOptions: Validate = async (
       [collection: string]: (number | string)[]
     } = {}
 
+    const falseCollections: string[] = []
     const collections = typeof relationTo === 'string' ? [relationTo] : relationTo
     const values = Array.isArray(value) ? value : [value]
 
@@ -288,6 +289,10 @@ const validateFilterOptions: Validate = async (
 
           if (optionFilter) findWhere.and.push(optionFilter)
 
+          if (optionFilter === false) {
+            falseCollections.push(optionFilter)
+          }
+
           const result = await payload.find({
             collection,
             depth: 0,
@@ -319,6 +324,10 @@ const validateFilterOptions: Validate = async (
       if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
         collection = val.relationTo
         requestedID = val.value
+      }
+
+      if (falseCollections.find((slug) => relationTo === slug)) {
+        return true
       }
 
       return options[collection].indexOf(requestedID) === -1

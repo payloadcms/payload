@@ -138,6 +138,11 @@ const Relationship: React.FC<Props> = (props) => {
           }
           await priorRelation
 
+          if (filterOptionsResult?.[relation] === false) {
+            setLastFullyLoadedRelation(relations.indexOf(relation))
+            return Promise.resolve()
+          }
+
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
             let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
@@ -178,7 +183,7 @@ const Relationship: React.FC<Props> = (props) => {
             }
 
             if (filterOptionsResult?.[relation]) {
-              query.where.and.push(filterOptionsResult[relation])
+              query.where.and.push(filterOptionsResult[relation] as Where)
             }
 
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
