@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 import Account from '../../graphics/Account'
-import { useConfig } from '../../utilities/Config'
+import { useConfig } from '../../providers/Config'
 import { Hamburger } from '../Hamburger'
 import Localizer from '../Localizer'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel'

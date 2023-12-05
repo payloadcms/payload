@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Chevron } from '../..'
+import { Chevron } from '../../icons/Chevron'
 import './index.scss'
 
 const baseClass = 'hamburger'

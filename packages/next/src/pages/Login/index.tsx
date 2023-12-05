@@ -7,3 +7,5 @@ export const Login = async ({ config: configPromise }: { config: Promise<Sanitiz
   const config = await configPromise
   return <LoginView config={config} Link={Link} />
 }
+
+export default Login

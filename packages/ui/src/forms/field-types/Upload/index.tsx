@@ -3,7 +3,7 @@ import React, { useCallback } from 'react'
 import type { Props } from './types'
 
 import { upload } from 'payload/fields/validations'
-import { useConfig } from '../../../utilities/Config'
+import { useConfig } from '../../../providers/Config'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import UploadInput from './Input'

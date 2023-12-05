@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import type { Locale } from 'payload/types'
+import type { Locale } from 'payload/config'
 
-import { findLocaleFromCode } from 'payload/utilities'
+import { findLocaleFromCode } from 'payload/utilities' // TODO: import this from 'payload/utilities' when it's available
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
 import { usePreferences } from '../Preferences'

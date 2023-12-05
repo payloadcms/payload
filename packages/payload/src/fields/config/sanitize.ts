@@ -1,7 +1,6 @@
 import type { Config } from '../../config/types'
 import type { Field } from './types'
 
-import withCondition from '../../admin/components/forms/withCondition'
 import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors'
 import { formatLabels, toWords } from '../../utilities/formatLabels'
 import { baseBlockFields } from '../baseFields/baseBlockFields'
@@ -115,11 +114,7 @@ export const sanitizeFields = ({ config, fields, validRelationships }: Args): Fi
       if (!field.access) field.access = {}
     }
 
-    if (field.admin) {
-      if (field.admin.condition && field.admin.components?.Field) {
-        field.admin.components.Field = withCondition(field.admin.components?.Field)
-      }
-    } else {
+    if (!field.admin) {
       field.admin = {}
     }
 

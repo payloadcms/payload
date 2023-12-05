@@ -8,7 +8,7 @@ import type { ClientConfig, NonPresentationalField } from 'payload/types'
 import type { Data, Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
-import { getValueWithDefault } from 'payload/dist/fields/getDefaultValue' // TODO: replace with 'payload/fields/getDefaultValue'
+import getValueWithDefault from 'payload/dist/fields/getDefaultValue' // TODO: replace with 'payload/fields/getDefaultValue'
 import { iterateFields } from './iterateFields'
 
 type Args = {

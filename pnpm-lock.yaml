@@ -1427,6 +1427,9 @@ importers:
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
+      date-fns:
+        specifier: 2.30.0
+        version: 2.30.0
       deep-equal:
         specifier: 2.2.2
         version: 2.2.2
@@ -1445,6 +1448,9 @@ importers:
       i18next-http-middleware:
         specifier: 3.3.2
         version: 3.3.2
+      next:
+        specifier: ^14.0.0
+        version: 14.0.2(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0)
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1

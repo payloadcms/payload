@@ -1,6 +1,7 @@
 import React from 'react'
 import { RootProvider } from '@payloadcms/ui/providers'
 import { SanitizedConfig } from 'payload/types'
+import { createClientConfig } from '../../createClientConfig'
 
 export const metadata = {
   title: 'Next.js',
@@ -14,12 +15,12 @@ export default async function Root({
   children: React.ReactNode
   config: SanitizedConfig
 }) {
-  const config = await configPromise
+  const clientConfig = await createClientConfig(configPromise)
 
   return (
     <html lang="en">
       <body>
-        <RootProvider config={config}>{children}</RootProvider>
+        <RootProvider config={clientConfig}>{children}</RootProvider>
       </body>
     </html>
   )

@@ -1,9 +1,9 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Chevron } from '../../..'
-import { getTranslation } from '../../../../../utilities/getTranslation'
-import { useLocale } from '../../../utilities/Locale'
+import { Chevron } from '../../../icons/Chevron'
+import { getTranslation } from 'payload/utilities'
+import { useLocale } from '../../../providers/Locale'
 import './index.scss'
 
 const baseClass = 'localizer-button'

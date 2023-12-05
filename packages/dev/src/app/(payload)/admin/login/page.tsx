@@ -3,4 +3,4 @@
 import { Login } from '@payloadcms/next/pages/Login'
 import config from 'payload-config'
 
-export default Login({ config })
+export default () => <Login config={config} />
