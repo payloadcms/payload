@@ -134,6 +134,8 @@ export async function validateSearchParam({
               fieldAccess = fieldAccess[segment].fields
             } else if ('blocks' in fieldAccess[segment]) {
               fieldAccess = fieldAccess[segment]
+            } else {
+              fieldAccess = fieldAccess[segment]
             }
           }
         })
