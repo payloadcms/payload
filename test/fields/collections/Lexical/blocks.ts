@@ -1,6 +1,65 @@
 import type { Block } from '../../../../packages/payload/src/fields/config/types'
 
 import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
+import { textFieldsSlug } from '../Text/shared'
+
+export const BlockColumns: any = {
+  type: 'array',
+  name: 'columns',
+  interfaceName: 'BlockColumns',
+  admin: {
+    initCollapsed: true,
+  },
+  fields: [
+    {
+      name: 'text',
+      type: 'text',
+    },
+  ],
+}
+export const ConditionalLayoutBlock: Block = {
+  fields: [
+    {
+      label: 'Layout',
+      name: 'layout',
+      type: 'select',
+      options: ['1', '2', '3'],
+      defaultValue: '1',
+      required: true,
+    },
+    {
+      ...BlockColumns,
+      admin: {
+        condition: (data, siblingData) => {
+          return ['1'].includes(siblingData.layout)
+        },
+      },
+      minRows: 1,
+      maxRows: 1,
+    },
+    {
+      ...BlockColumns,
+      admin: {
+        condition: (data, siblingData) => {
+          return ['2'].includes(siblingData.layout)
+        },
+      },
+      minRows: 2,
+      maxRows: 2,
+    },
+    {
+      ...BlockColumns,
+      admin: {
+        condition: (data, siblingData) => {
+          return ['3'].includes(siblingData.layout)
+        },
+      },
+      minRows: 3,
+      maxRows: 3,
+    },
+  ],
+  slug: 'conditionalLayout',
+}
 
 export const TextBlock: Block = {
   fields: [
@@ -65,6 +124,18 @@ export const UploadAndRichTextBlock: Block = {
   slug: 'uploadAndRichText',
 }
 
+export const RelationshipHasManyBlock: Block = {
+  fields: [
+    {
+      name: 'rel',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: [textFieldsSlug, 'uploads'],
+      required: true,
+    },
+  ],
+  slug: 'relationshipHasManyBlock',
+}
 export const RelationshipBlock: Block = {
   fields: [
     {

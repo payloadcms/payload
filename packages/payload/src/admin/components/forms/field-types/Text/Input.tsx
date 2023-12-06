@@ -95,6 +95,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
       <FieldDescription
         className={`field-description-${path.replace(/\./g, '__')}`}
         description={description}
+        path={path}
         value={value}
       />
     </div>

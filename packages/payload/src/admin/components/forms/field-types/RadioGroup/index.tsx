@@ -12,13 +12,13 @@ const RadioGroup: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       layout = 'horizontal',
       readOnly,
       style,
       width,
-      components: { Error, Label } = {},
     } = {},
     label,
     options,
@@ -44,6 +44,8 @@ const RadioGroup: React.FC<Props> = (props) => {
 
   return (
     <RadioGroupInput
+      Error={Error}
+      Label={Label}
       className={className}
       description={description}
       errorMessage={errorMessage}
@@ -58,8 +60,6 @@ const RadioGroup: React.FC<Props> = (props) => {
       style={style}
       value={value}
       width={width}
-      Error={Error}
-      Label={Label}
     />
   )
 }

@@ -1,13 +1,16 @@
 const fs = require('fs')
 const path = require('path')
 
+const [baseDirRelativePath] = process.argv.slice(2)
+const [sourceDirRelativePath] = process.argv.slice(3)
+
 // Base directory
-const baseDir = path.resolve(__dirname, '..')
-const sourceDir = path.join(baseDir, 'dist', 'exports')
+const baseDir = path.resolve(__dirname, baseDirRelativePath)
+const sourceDir = path.join(baseDir, sourceDirRelativePath)
 const targetDir = baseDir
 
 // Helper function to read directories recursively and exclude .map files
-function getFiles (dir: string): string[] {
+function getFiles(dir: string): string[] {
   const subDirs = fs.readdirSync(dir, { withFileTypes: true })
   const files = subDirs.map((dirEntry) => {
     const res = path.resolve(dir, dirEntry.name)
@@ -21,7 +24,7 @@ function getFiles (dir: string): string[] {
   return Array.prototype.concat(...files)
 }
 
-function fixImports (fileExtension: string, content: string, depth: number): string {
+function fixImports(fileExtension: string, content: string, depth: number): string {
   const parentDirReference = '../'.repeat(depth + 1) // +1 to account for the original reference
   const replacementPrefix = (depth === 0 ? './' : '../'.repeat(depth)) + 'dist/'
 

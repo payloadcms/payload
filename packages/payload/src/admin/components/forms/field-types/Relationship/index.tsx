@@ -40,13 +40,14 @@ const Relationship: React.FC<Props> = (props) => {
     admin: {
       allowCreate = true,
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       isSortable = true,
       readOnly,
+      sortOptions,
       style,
       width,
-      components: { Error, Label } = {},
     } = {},
     filterOptions,
     hasMany,
@@ -139,7 +140,14 @@ const Relationship: React.FC<Props> = (props) => {
 
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
+            if (!searchArg) {
+              if (typeof sortOptions === 'string') {
+                fieldToSearch = sortOptions
+              } else if (sortOptions?.[relation]) {
+                fieldToSearch = sortOptions[relation]
+              }
+            }
 
             const query: {
               [key: string]: unknown
@@ -236,6 +244,7 @@ const Relationship: React.FC<Props> = (props) => {
       locale,
       filterOptionsResult,
       serverURL,
+      sortOptions,
       api,
       i18n,
       config,
@@ -252,7 +261,7 @@ const Relationship: React.FC<Props> = (props) => {
     (searchArg: string, valueArg: Value | Value[]) => {
       if (search !== searchArg) {
         setLastLoadedPage({})
-        updateSearch(searchArg, valueArg)
+        updateSearch(searchArg, valueArg, searchArg !== '')
       }
     },
     [search, updateSearch],
@@ -518,7 +527,7 @@ const Relationship: React.FC<Props> = (props) => {
         </div>
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

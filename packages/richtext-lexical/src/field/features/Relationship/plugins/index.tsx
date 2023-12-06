@@ -16,7 +16,7 @@ export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = cre
   'INSERT_RELATIONSHIP_COMMAND',
 )
 
-export default function RelationshipPlugin(props?: RelationshipFeatureProps): JSX.Element | null {
+export function RelationshipPlugin(props?: RelationshipFeatureProps): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 
@@ -26,7 +26,7 @@ export default function RelationshipPlugin(props?: RelationshipFeatureProps): JS
     enabledRelations = props?.enabledCollections
   } else if (props?.disabledCollections) {
     enabledRelations = collections
-      .filter(({ slug }) => !(props?.disabledCollections as string[]).includes(slug))
+      .filter(({ slug }) => !(props?.disabledCollections).includes(slug))
       .map(({ slug }) => slug)
   }
 

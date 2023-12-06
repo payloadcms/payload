@@ -3,11 +3,8 @@ import { withMergedProps } from 'payload/utilities'
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { RelationshipIcon } from '../../lexical/ui/icons/Relationship'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer'
-import './index.scss'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { RelationshipNode } from './nodes/RelationshipNode'
-import RelationshipPlugin from './plugins'
 import { relationshipPopulationPromise } from './populationPromise'
 
 export type RelationshipFeatureProps =
@@ -46,10 +43,17 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
         ],
         plugins: [
           {
-            Component: withMergedProps({
-              Component: RelationshipPlugin,
-              toMergeIntoProps: props,
-            }),
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins').then((module) => {
+                const RelationshipPlugin = module.RelationshipPlugin
+                return import('payload/utilities').then((module2) =>
+                  module2.withMergedProps({
+                    Component: RelationshipPlugin,
+                    toMergeIntoProps: props,
+                  }),
+                )
+              }),
             position: 'normal',
           },
         ],
@@ -57,9 +61,16 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
         slashMenu: {
           options: [
             {
+              displayName: 'Basic',
+              key: 'basic',
               options: [
-                new SlashMenuOption('Relationship', {
-                  Icon: RelationshipIcon,
+                new SlashMenuOption('relationship', {
+                  Icon: () =>
+                    // @ts-expect-error
+                    import('../../lexical/ui/icons/Relationship').then(
+                      (module) => module.RelationshipIcon,
+                    ),
+                  displayName: 'Relationship',
                   keywords: ['relationship', 'relation', 'rel'],
                   onSelect: ({ editor }) => {
                     // dispatch INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND
@@ -69,7 +80,6 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
                   },
                 }),
               ],
-              title: 'Basic',
             },
           ],
         },

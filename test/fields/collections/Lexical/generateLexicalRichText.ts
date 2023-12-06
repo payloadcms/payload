@@ -89,6 +89,26 @@ export function generateLexicalRichText() {
           type: 'block',
           version: 2,
           fields: {
+            id: '6565c8668294bf824c24d4a4',
+            blockName: '',
+            blockType: 'relationshipHasManyBlock',
+            rel: [
+              {
+                value: '{{TEXT_DOC_ID}}',
+                relationTo: 'text-fields',
+              },
+              {
+                value: '{{UPLOAD_DOC_ID}}',
+                relationTo: 'uploads',
+              },
+            ],
+          },
+        },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
             id: '65298b1ddb4ef8c744a7faab',
             richText: {
               root: {
@@ -227,6 +247,31 @@ export function generateLexicalRichText() {
             radioButtons: 'option1',
           },
         },
+        {
+          children: [],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+        {
+          format: '',
+          type: 'block',
+          version: 2,
+          fields: {
+            id: '65588bfa80fb5a147a378e74',
+            blockName: '',
+            blockType: 'conditionalLayout',
+            layout: '1',
+            columns: [
+              {
+                id: '65588bfb80fb5a147a378e75',
+                text: 'text in conditionalLayout block',
+              },
+            ],
+          },
+        }, // Do not remove this blocks node. It ensures that validation passes when it's created
         {
           children: [],
           direction: null,

@@ -1,7 +1,7 @@
 import joi from 'joi'
 
 import { adminViewSchema } from './shared/adminViewSchema'
-import { livePreviewSchema } from './shared/componentSchema'
+import { componentSchema, livePreviewSchema } from './shared/componentSchema'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
@@ -94,10 +94,12 @@ export default joi.object({
     .object()
     .required()
     .keys({
-      CellComponent: component.required(),
-      FieldComponent: component.required(),
+      CellComponent: componentSchema.optional(),
+      FieldComponent: componentSchema.optional(),
+      LazyCellComponent: joi.func().optional(),
+      LazyFieldComponent: joi.func().optional(),
       afterReadPromise: joi.func().optional(),
-      outputSchema: joi.func().required(),
+      outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })

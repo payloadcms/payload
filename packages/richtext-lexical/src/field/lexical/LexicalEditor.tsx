@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider'
 
+import { EditorPlugin } from './EditorPlugin'
 import './LexicalEditor.scss'
 import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut'
@@ -51,6 +52,11 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
 
   return (
     <React.Fragment>
+      {editorConfig.features.plugins.map((plugin) => {
+        if (plugin.position === 'top') {
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
+        }
+      })}
       <RichTextPlugin
         ErrorBoundary={LexicalErrorBoundary}
         contentEditable={
@@ -60,7 +66,9 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
             </div>
           </div>
         }
-        placeholder={<p className="editor-placeholder">Start typing...</p>}
+        placeholder={
+          <p className="editor-placeholder">Start typing, or press '/' for commands...</p>
+        }
       />
       <OnChangePlugin
         // Selection changes can be ignored here, reducing the
@@ -87,7 +95,9 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
               plugin.position === 'floatingAnchorElem' &&
               !(plugin.desktopOnly === true && isSmallWidthViewport)
             ) {
-              return <plugin.Component anchorElem={floatingAnchorElem} key={plugin.key} />
+              return (
+                <EditorPlugin anchorElem={floatingAnchorElem} key={plugin.key} plugin={plugin} />
+              )
             }
           })}
           {editor.isEditable() && (
@@ -108,12 +118,12 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'normal') {
-          return <plugin.Component key={plugin.key} />
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
         }
       })}
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'bottom') {
-          return <plugin.Component key={plugin.key} />
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
         }
       })}
     </React.Fragment>

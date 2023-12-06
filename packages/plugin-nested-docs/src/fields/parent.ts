@@ -1,13 +1,13 @@
-import type { RelationshipField } from 'payload/types'
+import type { SingleRelationshipField } from 'payload/types'
 
 const createParentField = (
   relationTo: string,
   overrides?: Partial<
-    RelationshipField & {
+    SingleRelationshipField & {
       hasMany: false
     }
   >,
-): RelationshipField => ({
+): SingleRelationshipField => ({
   name: 'parent',
   relationTo,
   type: 'relationship',

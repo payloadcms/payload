@@ -9,8 +9,10 @@ import {
 } from '../../../../packages/richtext-lexical/src'
 import { lexicalFieldsSlug } from '../../slugs'
 import {
+  ConditionalLayoutBlock,
   RadioButtonsBlock,
   RelationshipBlock,
+  RelationshipHasManyBlock,
   RichTextBlock,
   SelectFieldBlock,
   SubBlockBlock,
@@ -48,8 +50,10 @@ export const LexicalFields: CollectionConfig = {
               UploadAndRichTextBlock,
               SelectFieldBlock,
               RelationshipBlock,
+              RelationshipHasManyBlock,
               SubBlockBlock,
               RadioButtonsBlock,
+              ConditionalLayoutBlock,
             ],
           }),
         ],
@@ -100,8 +104,10 @@ export const LexicalFields: CollectionConfig = {
               UploadAndRichTextBlock,
               SelectFieldBlock,
               RelationshipBlock,
+              RelationshipHasManyBlock,
               SubBlockBlock,
               RadioButtonsBlock,
+              ConditionalLayoutBlock,
             ],
           }),
         ],

@@ -8,7 +8,6 @@ import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { BlockquoteIcon } from '../../lexical/ui/icons/Blockquote'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import { MarkdownTransformer } from './markdownTransformer'
@@ -21,8 +20,12 @@ export const BlockQuoteFeature = (): FeatureProvider => {
           sections: [
             TextDropdownSectionWithEntries([
               {
-                ChildComponent: BlockquoteIcon,
-                isActive: ({ editor, selection }) => false,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/Blockquote').then(
+                    (module) => module.BlockquoteIcon,
+                  ),
+                isActive: () => false,
                 key: 'blockquote',
                 label: `Blockquote`,
                 onClick: ({ editor }) => {
@@ -66,11 +69,18 @@ export const BlockQuoteFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Basic',
+              key: 'basic',
               options: [
-                new SlashMenuOption(`Blockquote`, {
-                  Icon: BlockquoteIcon,
+                new SlashMenuOption(`blockquote`, {
+                  Icon: () =>
+                    // @ts-expect-error
+                    import('../../lexical/ui/icons/Blockquote').then(
+                      (module) => module.BlockquoteIcon,
+                    ),
+                  displayName: `Blockquote`,
                   keywords: ['quote', 'blockquote'],
-                  onSelect: ({ editor }) => {
+                  onSelect: () => {
                     const selection = $getSelection()
                     if ($isRangeSelection(selection)) {
                       $setBlocksType(selection, () => $createQuoteNode())
@@ -78,7 +88,6 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                   },
                 }),
               ],
-              title: 'Basic',
             },
           ],
         },

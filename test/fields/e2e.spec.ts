@@ -805,12 +805,14 @@ describe('fields', () => {
     test('should fill and retain a new value within a tab while switching tabs', async () => {
       const textInRowValue = 'hello'
       const numberInRowValue = '23'
+      const jsonValue = '{ "foo": "bar"}'
 
       await page.goto(url.create)
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('#field-numberInRow').fill(numberInRowValue)
+      await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(300)
 
@@ -821,16 +823,19 @@ describe('fields', () => {
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
       await expect(page.locator('#field-numberInRow')).toHaveValue(numberInRowValue)
+      await expect(page.locator('.json-field .lines-content')).toContainText(jsonValue)
     })
 
     test('should retain updated values within tabs while switching between tabs', async () => {
       const textInRowValue = 'new value'
+      const jsonValue = '{ "new": "value"}'
       await page.goto(url.list)
       await page.locator('.cell-id a').click()
 
       // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
+      await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(250)
 
@@ -839,6 +844,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
+      await expect(page.locator('.json-field .lines-content')).toContainText(jsonValue)
 
       // Go to array tab, save the doc
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
@@ -1659,6 +1665,30 @@ describe('fields', () => {
 
       await page.click('#action-save', { delay: 100 })
       await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+    })
+
+    test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationship')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Another text document')
+    })
+
+    test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationHasManyPolymorphic')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Seeded text document')
     })
   })
 

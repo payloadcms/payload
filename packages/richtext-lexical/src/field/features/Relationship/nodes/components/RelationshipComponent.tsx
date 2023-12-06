@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import type { RelationshipData } from '../RelationshipNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer/commands'
 import './index.scss'
 
 const baseClass = 'lexical-relationship'

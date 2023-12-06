@@ -1,18 +1,16 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
-import { COMMAND_PRIORITY_EDITOR, type LexicalCommand, createCommand } from 'lexical'
+import { COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useEffect } from 'react'
 
 import type { BlockFields } from '../nodes/BlocksNode'
 
 import { BlocksDrawerComponent } from '../drawer'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode'
+import { INSERT_BLOCK_COMMAND } from './commands'
 
 export type InsertBlockPayload = Exclude<BlockFields, 'id'>
-
-export const INSERT_BLOCK_COMMAND: LexicalCommand<InsertBlockPayload> =
-  createCommand('INSERT_BLOCK_COMMAND')
 
 export function BlocksPlugin(): JSX.Element | null {
   const [editor] = useLexicalComposerContext()

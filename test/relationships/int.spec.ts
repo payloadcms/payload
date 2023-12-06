@@ -185,6 +185,73 @@ describe('Relationships', () => {
         expect(status).toEqual(400)
       })
 
+      it('should count totalDocs correctly when using or in where query and relation contains hasMany relationship fields', async () => {
+        const user = (
+          await payload.find({
+            collection: 'users',
+          })
+        ).docs[0]
+
+        const user2 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '1@test.com',
+            password: 'fwefe',
+          },
+        })
+        const user3 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '2@test.com',
+            password: 'fwsefe',
+          },
+        })
+        const user4 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '3@test.com',
+            password: 'fwddsefe',
+          },
+        })
+        await Promise.all([
+          payload.create({
+            collection: 'movieReviews',
+            data: {
+              likes: [user3.id, user2.id, user.id, user4.id],
+              movieReviewer: user.id,
+              visibility: 'public',
+            },
+          }),
+          payload.create({
+            collection: 'movieReviews',
+            data: {
+              movieReviewer: user2.id,
+              visibility: 'public',
+            },
+          }),
+        ])
+
+        const query = await payload.find({
+          collection: 'movieReviews',
+          depth: 1,
+          where: {
+            or: [
+              {
+                visibility: {
+                  equals: 'public',
+                },
+              },
+              {
+                movieReviewer: {
+                  equals: user.id,
+                },
+              },
+            ],
+          },
+        })
+        expect(query.totalDocs).toEqual(2)
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { doc } = await client.findByID<Post>({ id: post.id })
@@ -494,6 +561,46 @@ describe('Relationships', () => {
 
         expect(withRelation.filteredRelation.id).toEqual(related.id)
       })
+    })
+  })
+
+  describe('Polymorphic Relationships', () => {
+    it('should allow REST querying on polymorphic relationships', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: 'polymorphic-relationships',
+        data: {
+          polymorphic: {
+            value: movie.id,
+            relationTo: 'movies',
+          },
+        },
+      })
+
+      const query = await client.find({
+        slug: 'polymorphic-relationships',
+        query: {
+          and: [
+            {
+              'polymorphic.value': {
+                equals: movie.id,
+              },
+            },
+            {
+              'polymorphic.relationTo': {
+                equals: 'movies',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(query.result.docs).toHaveLength(1)
     })
   })
 })

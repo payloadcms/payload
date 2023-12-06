@@ -100,6 +100,10 @@ type Admin = {
     Field?: React.ComponentType<any>
     Filter?: React.ComponentType<any>
   }
+  /**
+   * You can programmatically show / hide fields based on what other fields are doing.
+   * This is also run on the server, to determine if the field should be validated.
+   */
   condition?: Condition
   description?: Description
   disableBulkEdit?: boolean
@@ -426,19 +430,10 @@ export type SelectField = FieldBase & {
   type: 'select'
 }
 
-export type RelationshipField = FieldBase & {
-  admin?: Admin & {
-    allowCreate?: boolean
-    components?: {
-      Error?: React.ComponentType<ErrorProps>
-      Label?: React.ComponentType<LabelProps>
-    }
-    isSortable?: boolean
-  }
+type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
   hasMany?: boolean
   maxDepth?: number
-  relationTo: string | string[]
   type: 'relationship'
 } & (
     | {
@@ -468,6 +463,28 @@ export type RelationshipField = FieldBase & {
         minRows?: undefined
       }
   )
+
+type RelationshipAdmin = Admin & {
+  allowCreate?: boolean
+  components?: {
+    Error?: React.ComponentType<ErrorProps>
+    Label?: React.ComponentType<LabelProps>
+  }
+  isSortable?: boolean
+}
+export type PolymorphicRelationshipField = SharedRelationshipProperties & {
+  admin?: RelationshipAdmin & {
+    sortOptions?: { [collectionSlug: string]: string }
+  }
+  relationTo: string[]
+}
+export type SingleRelationshipField = SharedRelationshipProperties & {
+  admin?: RelationshipAdmin & {
+    sortOptions?: string
+  }
+  relationTo: string
+}
+export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
 
 export type ValueWithRelation = {
   relationTo: string

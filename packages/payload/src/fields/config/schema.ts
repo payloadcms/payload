@@ -366,6 +366,11 @@ export const relationship = baseField.keys({
       Label: componentSchema,
     }),
     isSortable: joi.boolean().default(false),
+    sortOptions: joi.alternatives().conditional(joi.ref('...relationTo'), {
+      is: joi.string(),
+      otherwise: joi.object().pattern(joi.string(), joi.string()),
+      then: joi.string(),
+    }),
   }),
   defaultValue: joi.alternatives().try(joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
@@ -431,10 +436,12 @@ export const richText = baseField.keys({
   editor: joi
     .object()
     .keys({
-      CellComponent: componentSchema.required(),
-      FieldComponent: componentSchema.required(),
+      CellComponent: componentSchema.optional(),
+      FieldComponent: componentSchema.optional(),
+      LazyCellComponent: joi.func().optional(),
+      LazyFieldComponent: joi.func().optional(),
       afterReadPromise: joi.func().optional(),
-      outputSchema: joi.func().required(),
+      outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })

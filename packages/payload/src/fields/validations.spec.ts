@@ -413,6 +413,11 @@ describe('Field Validations', () => {
       const result = number(val, numberOptions)
       expect(result).toBe(true)
     })
+    it('should validate 0', () => {
+      const val = 0
+      const result = number(val, { ...numberOptions, required: true })
+      expect(result).toBe(true)
+    })
     it('should validate 2', () => {
       const val = 1.5
       const result = number(val, numberOptions)

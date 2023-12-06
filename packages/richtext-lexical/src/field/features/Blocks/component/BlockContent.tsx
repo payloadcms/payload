@@ -9,7 +9,7 @@ import { SectionTitle } from 'payload/components/fields/Blocks'
 import { RenderFields, createNestedFieldPath, useFormSubmitted } from 'payload/components/forms'
 import { useDocumentInfo } from 'payload/components/utilities'
 import { getTranslation } from 'payload/utilities'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { FieldProps } from '../../../../types'

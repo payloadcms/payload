@@ -2,17 +2,15 @@ import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
+import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProvider } from './field/features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
 import type { AdapterProps } from './types'
 
-import { RichTextCell } from './cell'
-import { RichTextField } from './field'
 import {
+  defaultEditorConfig,
   defaultEditorFeatures,
-  defaultEditorLexicalConfig,
   defaultSanitizedEditorConfig,
 } from './field/lexical/config/default'
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
@@ -48,23 +46,38 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       features = cloneDeep(defaultEditorFeatures)
     }
 
-    const lexical: LexicalEditorConfig = props.lexical || cloneDeep(defaultEditorLexicalConfig)
+    const lexical: LexicalEditorConfig = props.lexical
 
     finalSanitizedEditorConfig = sanitizeEditorConfig({
       features,
-      lexical,
+      lexical: props.lexical ? () => Promise.resolve(lexical) : defaultEditorConfig.lexical,
     })
   }
 
   return {
-    CellComponent: withMergedProps({
-      Component: RichTextCell,
-      toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-    }),
-    FieldComponent: withMergedProps({
-      Component: RichTextField,
-      toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-    }),
+    LazyCellComponent: () =>
+      // @ts-expect-error
+      import('./cell').then((module) => {
+        const RichTextCell = module.RichTextCell
+        return import('payload/utilities').then((module2) =>
+          module2.withMergedProps({
+            Component: RichTextCell,
+            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+          }),
+        )
+      }),
+
+    LazyFieldComponent: () =>
+      // @ts-expect-error
+      import('./field').then((module) => {
+        const RichTextField = module.RichTextField
+        return import('payload/utilities').then((module2) =>
+          module2.withMergedProps({
+            Component: RichTextField,
+            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+          }),
+        )
+      }),
     afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
       return new Promise<void>((resolve, reject) => {
         const promises: Promise<void>[] = []
@@ -148,10 +161,14 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       }
     },
     populationPromise({
+      context,
       currentDepth,
       depth,
       field,
+      findMany,
+      flattenLocales,
       overrideAccess,
+      populationPromises,
       req,
       showHiddenFields,
       siblingDoc,
@@ -159,11 +176,15 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       // check if there are any features with nodes which have populationPromises for this field
       if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
         return richTextRelationshipPromise({
+          context,
           currentDepth,
           depth,
+          editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
-          populationPromises: finalSanitizedEditorConfig.features.populationPromises,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,
@@ -257,7 +278,7 @@ export { UnderlineTextFeature } from './field/features/format/underline'
 export { IndentFeature } from './field/features/indent'
 export { CheckListFeature } from './field/features/lists/CheckList'
 export { OrderedListFeature } from './field/features/lists/OrderedList'
-export { UnoderedListFeature } from './field/features/lists/UnorderedList'
+export { UnorderedListFeature } from './field/features/lists/UnorderedList'
 export { LexicalPluginToLexicalFeature } from './field/features/migrations/LexicalPluginToLexical'
 export { SlateToLexicalFeature } from './field/features/migrations/SlateToLexical'
 export { SlateHeadingConverter } from './field/features/migrations/SlateToLexical/converter/converters/heading'
@@ -299,15 +320,12 @@ export {
 export {
   defaultEditorConfig,
   defaultEditorFeatures,
-  defaultEditorLexicalConfig,
   defaultSanitizedEditorConfig,
 } from './field/lexical/config/default'
 export { loadFeatures, sortFeaturesForOptimalLoading } from './field/lexical/config/loader'
 export { sanitizeEditorConfig, sanitizeFeatures } from './field/lexical/config/sanitize'
 export { getEnabledNodes } from './field/lexical/nodes'
 
-export { ToolbarButton } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarButton'
-export { ToolbarDropdown } from './field/lexical/plugins/FloatingSelectToolbar/ToolbarDropdown/index'
 export {
   type FloatingToolbarSection,
   type FloatingToolbarSectionEntry,
@@ -316,8 +334,7 @@ export { ENABLE_SLASH_MENU_COMMAND } from './field/lexical/plugins/SlashMenu/Lex
 // export SanitizedEditorConfig
 export type { EditorConfig, SanitizedEditorConfig }
 export type { AdapterProps }
-export { RichTextCell }
-export { RichTextField }
+
 export {
   SlashMenuGroup,
   SlashMenuOption,

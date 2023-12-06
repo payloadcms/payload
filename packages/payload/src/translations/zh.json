@@ -244,7 +244,7 @@
     "submit": "提交",
     "successfullyCreated": "成功创建{{label}}",
     "successfullyDuplicated": "成功复制{{label}}",
-    "thisLanguage": "Chinese",
+    "thisLanguage": "中文 (简体)",
     "titleDeleted": "{{label}} \"{{title}}\"已被成功删除。",
     "unauthorized": "未经授权",
     "unsavedChangesDuplicate": "您有未保存的修改。您确定要继续重复吗？",
