@@ -240,6 +240,7 @@ export const getTableColumnFromPath = ({
         let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
           newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
+          constraintPath = `${constraintPath}${field.name}.%.`
           let result
           const blockConstraints = []
           const blockSelectFields = {}
@@ -247,7 +248,7 @@ export const getTableColumnFromPath = ({
             result = getTableColumnFromPath({
               adapter,
               collectionPath,
-              constraintPath: '',
+              constraintPath,
               constraints: blockConstraints,
               fields: block.fields,
               joinAliases,
