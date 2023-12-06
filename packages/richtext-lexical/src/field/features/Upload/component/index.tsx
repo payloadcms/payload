@@ -18,7 +18,7 @@ import type { UploadData } from '../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
 import { EnabledRelationshipsCondition } from '../../Relationship/utils/EnabledRelationshipsCondition'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands'
 import { ExtraFieldsUploadDrawer } from './ExtraFieldsDrawer'
 import './index.scss'
 

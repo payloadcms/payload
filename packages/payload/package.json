@@ -26,7 +26,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ./scripts/exportPointerFiles.ts",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ../../scripts/exportPointerFiles.ts ../packages/payload dist/exports",
     "build:components": "webpack --config dist/admin/components.config.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",

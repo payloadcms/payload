@@ -98,7 +98,7 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
           {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
       </label>
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

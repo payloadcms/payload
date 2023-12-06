@@ -77,6 +77,7 @@ const Group: React.FC<Props> = (props) => {
                 <FieldDescription
                   className={`field-description-${path.replace(/\./g, '__')}`}
                   description={description}
+                  path={path}
                   value={null}
                 />
               </header>

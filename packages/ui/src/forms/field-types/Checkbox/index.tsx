@@ -96,7 +96,7 @@ const Checkbox: React.FC<Props> = (props) => {
         readOnly={readOnly}
         required={required}
       />
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

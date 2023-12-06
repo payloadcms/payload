@@ -82,7 +82,7 @@ const Code: React.FC<Props> = (props) => {
         readOnly={readOnly}
         value={(value as string) || ''}
       />
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

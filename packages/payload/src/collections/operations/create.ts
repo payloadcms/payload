@@ -1,8 +1,8 @@
 import type { MarkOptional } from 'ts-essentials'
 
 import crypto from 'crypto'
-// import fs from 'fs'
-// import { promisify } from 'util'
+import fs from 'fs'
+import { promisify } from 'util'
 
 import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../express/types'
@@ -22,9 +22,9 @@ import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
-// import { generateFileData } from '../../uploads/generateFileData'
+import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
-// import { uploadFiles } from '../../uploads/uploadFiles'
+import { uploadFiles } from '../../uploads/uploadFiles'
 import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -32,7 +32,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import { saveVersion } from '../../versions/saveVersion'
 import { buildAfterOperation } from './utils'
 
-// const unlinkFile = promisify(fs.unlink)
+const unlinkFile = promisify(fs.unlink)
 
 export type CreateUpdateType = { [field: number | string | symbol]: unknown }
 
@@ -123,17 +123,17 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    // const { data: newFileData, files: filesToUpload } = await generateFileData({
-    //   collection,
-    //   config,
-    //   data,
-    //   overwriteExistingFiles,
-    //   req,
-    //   throwOnMissingFile:
-    //     !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
-    // })
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection,
+      config,
+      data,
+      overwriteExistingFiles,
+      req,
+      throwOnMissingFile:
+        !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
+    })
 
-    // data = newFileData
+    data = newFileData
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -171,14 +171,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     )
 
     // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    // if (!collectionConfig.upload.disableLocalStorage) {
-    //   await uploadFiles(payload, filesToUpload, req.t)
-    // }
-
-    // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
@@ -210,6 +202,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       skipValidation: shouldSaveDraft,
     })
+
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req.t)
+    }
 
     // /////////////////////////////////////
     // Create

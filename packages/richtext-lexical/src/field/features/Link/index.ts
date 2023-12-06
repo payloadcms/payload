@@ -4,25 +4,18 @@ import type { Field } from 'payload/types'
 
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
-import { withMergedProps } from 'payload/utilities'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 import type { SerializedAutoLinkNode } from './nodes/AutoLinkNode'
 import type { LinkFields, SerializedLinkNode } from './nodes/LinkNode'
 
-import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
-import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
-import { AutoLinkPlugin } from './plugins/autoLink'
-import { ClickableLinkPlugin } from './plugins/clickableLink'
-import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
-import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
-import { LinkPlugin } from './plugins/link'
+import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands'
 import { linkPopulationPromiseHOC } from './populationPromise'
 
 export type LinkFeatureProps = {
@@ -38,7 +31,9 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
           sections: [
             FeaturesSectionWithEntries([
               {
-                ChildComponent: LinkIcon,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/Link').then((module) => module.LinkIcon),
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     const selectedNode = getSelectedNode(selection)
@@ -134,22 +129,35 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         ],
         plugins: [
           {
-            Component: LinkPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/link').then((module) => module.LinkPlugin),
             position: 'normal',
           },
           {
-            Component: AutoLinkPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/autoLink').then((module) => module.AutoLinkPlugin),
             position: 'normal',
           },
           {
-            Component: ClickableLinkPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/clickableLink').then((module) => module.ClickableLinkPlugin),
             position: 'normal',
           },
           {
-            Component: withMergedProps({
-              Component: FloatingLinkEditorPlugin,
-              toMergeIntoProps: props,
-            }),
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/floatingLinkEditor').then((module) => {
+                const floatingLinkEditorPlugin = module.FloatingLinkEditorPlugin
+                return import('payload/utilities').then((module) =>
+                  module.withMergedProps({
+                    Component: floatingLinkEditorPlugin,
+                    toMergeIntoProps: props,
+                  }),
+                )
+              }),
             position: 'floatingAnchorElem',
           },
         ],

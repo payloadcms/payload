@@ -1,11 +1,8 @@
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { RelationshipIcon } from '../../lexical/ui/icons/Relationship'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer'
-import './index.scss'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { RelationshipNode } from './nodes/RelationshipNode'
-import RelationshipPlugin from './plugins'
 import { relationshipPopulationPromise } from './populationPromise'
 
 export const RelationshipFeature = (): FeatureProvider => {
@@ -22,7 +19,9 @@ export const RelationshipFeature = (): FeatureProvider => {
         ],
         plugins: [
           {
-            Component: RelationshipPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins').then((module) => module.RelationshipPlugin),
             position: 'normal',
           },
         ],
@@ -34,7 +33,11 @@ export const RelationshipFeature = (): FeatureProvider => {
               key: 'basic',
               options: [
                 new SlashMenuOption('relationship', {
-                  Icon: RelationshipIcon,
+                  Icon: () =>
+                    // @ts-expect-error
+                    import('../../lexical/ui/icons/Relationship').then(
+                      (module) => module.RelationshipIcon,
+                    ),
                   displayName: 'Relationship',
                   keywords: ['relationship', 'relation', 'rel'],
                   onSelect: ({ editor }) => {
