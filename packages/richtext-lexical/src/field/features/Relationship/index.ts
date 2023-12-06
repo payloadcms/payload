@@ -1,5 +1,3 @@
-import { withMergedProps } from 'payload/utilities'
-
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
