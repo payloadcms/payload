@@ -22,8 +22,8 @@ import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
 // import { generateFileData } from '../../uploads/generateFileData'
-import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
-// import { uploadFiles } from '../../uploads/uploadFiles'
+// import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
+// import { uploadFiles } from '../../uploads/uploadFiles' TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
 import { commitTransaction } from '../../utilities/commitTransaction'
 import flattenFields from '../../utilities/flattenTopLevelFields'
 import { initTransaction } from '../../utilities/initTransaction'
@@ -126,6 +126,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
+    // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
     // const { data: newFileData, files: filesToUpload } = await generateFileData({
     //   collection,
     //   config,
@@ -219,7 +220,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req.t)
+      // await uploadFiles(payload, filesToUpload, req.t) // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
     }
 
     // /////////////////////////////////////
@@ -369,7 +370,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       result,
     })
 
-    await unlinkTempFiles({ collectionConfig, config, req })
+    // await unlinkTempFiles({ collectionConfig, config, req }) // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
 
     // /////////////////////////////////////
     // Return results

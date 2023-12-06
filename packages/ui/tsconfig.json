@@ -20,6 +20,7 @@
     "src/**/*.spec.tsx"
   ],
   "include": [
+    "src/scss/app.scss",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.d.ts",
