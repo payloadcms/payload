@@ -1,5 +1,3 @@
-import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
-
 import type { FeatureProvider } from '../../features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
@@ -21,7 +19,6 @@ import { IndentFeature } from '../../features/indent'
 import { CheckListFeature } from '../../features/lists/CheckList'
 import { OrderedListFeature } from '../../features/lists/OrderedList'
 import { UnorderedListFeature } from '../../features/lists/UnorderedList'
-import { LexicalEditorTheme } from '../theme/EditorTheme'
 import { sanitizeEditorConfig } from './sanitize'
 
 export const defaultEditorFeatures: FeatureProvider[] = [
@@ -46,14 +43,14 @@ export const defaultEditorFeatures: FeatureProvider[] = [
   //BlocksFeature(), // Adding this by default makes no sense if no blocks are defined
 ]
 
-export const defaultEditorLexicalConfig: LexicalEditorConfig = {
-  namespace: 'lexical',
-  theme: LexicalEditorTheme,
-}
-
 export const defaultEditorConfig: EditorConfig = {
   features: defaultEditorFeatures,
-  lexical: defaultEditorLexicalConfig,
+  lexical: () =>
+    // @ts-expect-error
+    import('./defaultClient').then((module) => {
+      const defaultEditorLexicalConfig = module.defaultEditorLexicalConfig
+      return defaultEditorLexicalConfig
+    }),
 }
 
 export const defaultSanitizedEditorConfig: SanitizedEditorConfig =

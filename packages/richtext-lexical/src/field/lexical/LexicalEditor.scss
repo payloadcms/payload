@@ -39,3 +39,21 @@
     pointer-events: none;
   }
 }
+
+.floating-select-toolbar-popup__section-dropdown-align {
+  display: flex;
+  gap: 2px;
+}
+.floating-select-toolbar-popup__section-features {
+  display: flex;
+  gap: 2px;
+}
+.floating-select-toolbar-popup__section-dropdown-text {
+  display: flex;
+  gap: 2px;
+}
+
+.floating-select-toolbar-popup__section-format {
+  display: flex;
+  gap: 2px;
+}

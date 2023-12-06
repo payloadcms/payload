@@ -2,9 +2,7 @@ import type { SerializedLexicalNode, Spread } from 'lexical'
 
 import { addClassNamesToElement } from '@lexical/utils'
 import { DecoratorNode, type EditorConfig, type LexicalNode, type NodeKey } from 'lexical'
-import React from 'react'
-
-import './index.scss'
+import * as React from 'react'
 
 export type UnknownConvertedNodeData = {
   nodeData: unknown
@@ -17,6 +15,13 @@ export type SerializedUnknownConvertedNode = Spread<
   },
   SerializedLexicalNode
 >
+
+const Component = React.lazy(() =>
+  // @ts-expect-error TypeScript being dumb
+  import('./Component').then((module) => ({
+    default: module.UnknownConvertedNodeComponent,
+  })),
+)
 
 /** @noInheritDoc */
 export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
@@ -58,11 +63,7 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(): JSX.Element | null {
-    return (
-      <div>
-        Unknown converted payload-plugin-lexical node: <strong>{this.__data?.nodeType}</strong>
-      </div>
-    )
+    return <Component data={this.__data} />
   }
 
   exportJSON(): SerializedUnknownConvertedNode {
