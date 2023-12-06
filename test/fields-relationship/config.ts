@@ -11,6 +11,7 @@ import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
+  relationTrueFilterOptionSlug,
   relationTwoSlug,
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
@@ -120,6 +121,9 @@ export default buildConfigWithDefaults({
             if (relationTo === relationOneSlug) {
               return { name: { equals: 'include' } }
             }
+            if (relationTo === relationTrueFilterOptionSlug) {
+              return true
+            }
             if (relationTo === relationFalseFilterOptionSlug) {
               return false
             }
@@ -129,7 +133,12 @@ export default buildConfigWithDefaults({
             return { and: [] }
           },
           hasMany: true,
-          relationTo: [relationWithTitleSlug, relationFalseFilterOptionSlug, relationOneSlug],
+          relationTo: [
+            relationWithTitleSlug,
+            relationFalseFilterOptionSlug,
+            relationTrueFilterOptionSlug,
+            relationOneSlug,
+          ],
           type: 'relationship',
         },
         {
@@ -153,6 +162,13 @@ export default buildConfigWithDefaults({
       },
       fields: baseRelationshipFields,
       slug: relationFalseFilterOptionSlug,
+    },
+    {
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: baseRelationshipFields,
+      slug: relationTrueFilterOptionSlug,
     },
     {
       fields: baseRelationshipFields,

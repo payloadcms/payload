@@ -20,6 +20,7 @@ import {
   relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
+  relationTrueFilterOptionSlug,
   relationTwoSlug,
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
@@ -339,6 +340,23 @@ describe('fields - relationship', () => {
     const options = page.locator('#field-relationshipManyFiltered .rs__menu')
     await expect(options).toContainText('Relation With Titles')
     await expect(options).not.toContainText('whatever')
+  })
+
+  test('should show a relationship when filterOptions returns true', async () => {
+    await payload.create({
+      collection: relationTrueFilterOptionSlug,
+      data: {
+        name: 'truth',
+      },
+    })
+
+    await page.goto(url.create)
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+    await expect(options).toContainText('truth')
   })
 
   test('should open document drawer from read-only relationships', async () => {

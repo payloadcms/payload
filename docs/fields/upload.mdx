@@ -81,8 +81,8 @@ export const ExampleCollection: CollectionConfig = {
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
 for validating input and filtering available uploads in the UI.
 
-The `filterOptions` property can either be a `Where` query directly, or a function that returning `null` to not alter
-the filter, `false` to avoid querying the relationship or the `Where` query to use. When using a function, it will be
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
+prevent all, or a `Where` query. When using a function, it will be
 called with an argument object with the following properties:
 
 | Property      | Description                                                                          |

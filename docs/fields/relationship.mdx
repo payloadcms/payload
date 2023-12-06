@@ -102,9 +102,15 @@ Example:
 
 ```ts
 sortOptions: {
-  "pages": "fieldName1",
-  "posts": "-fieldName2",
-  "categories": "fieldName3"
+  "pages"
+:
+  "fieldName1",
+    "posts"
+:
+  "-fieldName2",
+    "categories"
+:
+  "fieldName3"
 }
 ```
 
@@ -121,9 +127,9 @@ Note: If `sortOptions` is not defined, the default sorting behavior of the Relat
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
 for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query directly, or a function (synchronous or asynchronous) that
-returns `null` to not filter, `false` to avoid querying the relationship or the `Where` query to use. When using a
-function, it will be called with an argument object containing the following properties:
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
+prevent all, or a `Where` query. When using a function, it will be
+called with an argument object with the following properties:
 
 | Property      | Description                                                                          |
 |---------------|--------------------------------------------------------------------------------------|
@@ -189,7 +195,9 @@ of collection.
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owner', // required
       type: 'relationship', // required
@@ -221,7 +229,9 @@ tells Payload which Collections are valid to reference.
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owner', // required
       type: 'relationship', // required
@@ -260,7 +270,9 @@ The `hasMany` tells Payload that there may be more than one collection saved to 
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owners', // required
       type: 'relationship', // required
@@ -291,7 +303,9 @@ When querying documents, the format does not change for arrays:
 ```ts
 {
   slug: 'example-collection',
-  fields: [
+    fields
+:
+  [
     {
       name: 'owners', // required
       type: 'relationship', // required

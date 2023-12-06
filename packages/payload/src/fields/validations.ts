@@ -259,7 +259,7 @@ const validateFilterOptions: Validate = async (
 
     await Promise.all(
       collections.map(async (collection) => {
-        const optionFilter =
+        let optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
@@ -269,6 +269,10 @@ const validateFilterOptions: Validate = async (
                 user,
               })
             : filterOptions
+
+        if (optionFilter === true) {
+          optionFilter = {}
+        }
 
         const valueIDs: (number | string)[] = []
 
