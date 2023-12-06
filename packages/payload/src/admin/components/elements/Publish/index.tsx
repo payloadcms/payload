@@ -1,7 +1,6 @@
 import qs from 'qs'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'react-toastify'
 
 import { useForm, useFormModified } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
@@ -19,20 +18,25 @@ export type DefaultPublishButtonProps = {
   disabled: boolean
   id?: string
   label: string
+  params: any
   publish: () => void
+  setParams: (params: any) => void
 }
 const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
   id,
   canPublish,
   disabled,
   label,
+  params,
   publish,
+  setParams,
 }) => {
+  const { code, label: localeLabel } = useLocale()
   if (!canPublish) return null
 
-  const testAction = () => {
-    console.log('test')
-    toast.success('Published to ___ locale(s)')
+  const publishSpecificLocale = () => {
+    setParams({ ...params, publishSpecificLocale: code })
+    publish()
   }
 
   return (
@@ -42,17 +46,13 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
       onClick={publish}
       secondaryActions={[
         {
-          label: 'Publish spanish only',
-          onClick: testAction,
+          label: `Publish ${localeLabel} only`,
+          onClick: publishSpecificLocale,
         },
-        {
-          label: 'Publish english only',
-          onClick: testAction,
-        },
-        {
-          label: 'Publish all locales',
-          onClick: testAction,
-        },
+        // {
+        //   label: `Publish es only`,
+        //   onClick: publishSpecificLocale,
+        // },
       ]}
       size="small"
       type="button"
@@ -70,6 +70,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const { code } = useLocale()
   const { id, collection, global, publishedDoc, unpublishedVersions } = useDocumentInfo()
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
+  const [params, setParams] = React.useState<any>({ locale: code || undefined })
   const { getData, submit } = useForm()
   const modified = useFormModified()
   const {
@@ -82,21 +83,27 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const canPublish = modified || hasNewerVersions || !publishedDoc
 
   const publish = useCallback(() => {
+    let action
+    if (collection) {
+      action = `${serverURL}${api}/${collection.slug}/${id}?${qs.stringify(params)}`
+    }
+
+    if (global) {
+      action = `${serverURL}${api}/globals/${global.slug}?${qs.stringify(params)}`
+    }
     void submit({
+      action,
       overrides: {
         _status: 'published',
       },
     })
-  }, [submit])
+  }, [submit, collection, global, serverURL, api, id, params])
 
   React.useEffect(() => {
     const fetchPublishAccess = async () => {
       let docAccessURL: string
       let operation = 'update'
 
-      const params = {
-        locale: code || undefined,
-      }
       if (global) {
         docAccessURL = `/globals/${global.slug}/access`
       } else if (collection) {
@@ -127,7 +134,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
     }
 
     void fetchPublishAccess()
-  }, [api, code, collection, getData, global, id, serverURL])
+  }, [api, code, collection, getData, global, id, serverURL, params])
 
   return (
     <RenderCustomComponent
@@ -139,7 +146,9 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
         canPublish: hasPublishPermission,
         disabled: !canPublish,
         label: t('publishChanges'),
+        params,
         publish,
+        setParams,
       }}
     />
   )

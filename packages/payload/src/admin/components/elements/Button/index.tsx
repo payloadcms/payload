@@ -1,4 +1,4 @@
-import React, { Fragment, forwardRef, isValidElement } from 'react'
+import React, { Fragment, forwardRef, isValidElement, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import type { Props } from './types'
@@ -49,9 +49,13 @@ const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
   )
 }
 
-const SecondaryActions = ({ className, secondaryActions }) => {
+const SecondaryActions = ({ className, disabled, secondaryActions }) => {
   const [showSecondaryActions, setShowSecondaryActions] = React.useState<boolean>(false)
-  const multipleActions = secondaryActions.length > 1
+  const multipleActions = secondaryActions.length >= 1
+
+  useEffect(() => {
+    if (disabled) setShowSecondaryActions(false)
+  }, [disabled])
 
   return (
     <Popup
@@ -67,7 +71,11 @@ const SecondaryActions = ({ className, secondaryActions }) => {
       ]
         .filter(Boolean)
         .join(' ')}
-      onToggleOpen={(active) => setShowSecondaryActions(active)}
+      className={disabled ? `${baseClass}--popup-disabled` : ''}
+      horizontalAlign="right"
+      onToggleOpen={(active) => (!disabled ? setShowSecondaryActions(active) : undefined)}
+      size="large"
+      verticalAlign="bottom"
     >
       <ButtonGroup>
         {multipleActions ? (

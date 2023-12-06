@@ -230,14 +230,18 @@ a.btn {
     border-left: 1px solid var(--theme-elevation-600);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    cursor: pointer;
 
     .icon {
       vertical-align: middle;
-      transition: all 0.2s ease-in-out;
 
       & path {
         stroke-width: 1px;
+      }
+    }
+
+    &--disabled {
+      .popup__trigger-wrap {
+        display: none;
       }
     }
 
@@ -249,6 +253,21 @@ a.btn {
 
     &:focus:not(:focus-visible) {
       box-shadow: none;
+      background: var(--theme-elevation-700);
+    }
+  }
+
+  &--popup-disabled {
+    .popup__content {
+      display: none;
+    }
+
+    & button {
+      border-left: 1px solid var(--theme-elevation-200);
+
+      &:focus:not(:focus-visible) {
+        background: var(--theme-elevation-400);
+      }
     }
   }
 }
