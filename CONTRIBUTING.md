@@ -67,7 +67,7 @@ By default, payload will [automatically log you in](https://payloadcms.com/docs/
 
 The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password. These are used in the auto-login.
 
-### Testing with your own MongoDN database
+### Testing with your own MongoDB database
 
 If you wish to use your own MongoDB database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
 
