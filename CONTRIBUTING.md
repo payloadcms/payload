@@ -14,7 +14,7 @@ If you find a vulnerability within the core Payload repository, and we determine
 
 ## Documentation edits
 
-Payload documentation can be found directly within its codebase and you can feel free to make changes / improvements to any of it through opening a PR. We utilize these files directly in our website and will periodically deploy documentation updates as necessary.
+Payload documentation can be found directly within its codebase, and you can feel free to make changes / improvements to any of it through opening a PR. We utilize these files directly in our website and will periodically deploy documentation updates as necessary.
 
 ## Building additional features
 
@@ -30,9 +30,17 @@ Our design review ensures that proposed changes fit seamlessly with other compon
 
 To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/payload). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.
 
+### Installation & Requirements
+
+Payload is structured as a Monorepo, encompassing not only the core Payload platform but also various plugins and packages. To install all required dependencies, you have to run `pnpm install` once in the root directory. **PNPM IS REQUIRED!** Yarn or npm will not work - you will have to use pnpm to develop in the core repository. In most systems, the easiest way to install pnpm is to run `corepack enable` in your terminal.
+
+If you're coming from a very outdated version of payload, it is recommended to nuke the node_modules folder before running pnpm install. On UNIX systems, you can easily do that using the `pnpm clean:unix` command, which will delete all node_modules folders and build artefacts.
+
+It is also recommended to use at least Node v18 or higher. You can check your current node version by typing `node --version` in your terminal. The easiest way to switch between different node versions is to use [nvm](https://github.com/nvm-sh/nvm#intro).
+
 ### Code
 
-Most new functionality should keep testing in mind. With 1.0, testability of new features has been vastly improved. All top-level directories within the `test/` directory are for testing a specific category: `fields`, `collections`, etc.
+Most new functionality should keep testing in mind. All top-level directories within the `test/` directory are for testing a specific category: `fields`, `collections`, etc.
 
 If it makes sense to add your feature to an existing test directory, please do so.
 
@@ -49,21 +57,35 @@ A typical directory with `test/` will be structured like this:
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
 - `int.spec.ts` - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests. These tests are typically only needed if a large change is being made to the Admin UI.
-- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types my-test-dir`.
+- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types my-test-dir`. Replace `my-test-dir` with the name of your testing directory.
 
-The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config.
+Each test directory is split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config.
 
-The following command will start Payload with your config: `pnpm dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
+The following command will start Payload with your config: `pnpm dev my-test-dir`. Example: `pnpm dev fields` for the test/`fields` test suite. This command will start up Payload using your config and refresh a test database on every restart. If you're using VS Code, the most common run configs are automatically added to your editor - you should be able to find them in your VS Code launch tab.
 
-By default, it will automatically log you in with the default credentials. To disable that, you can either pass in the --no-auto-login flag (example: `pnpm dev my-test-dir --no-auto-login`) or set the `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN` environment variable to `false`.
+By default, payload will [automatically log you in](https://payloadcms.com/docs/authentication/config#admin-autologin) with the default credentials. To disable that, you can either pass in the --no-auto-login flag (example: `pnpm dev my-test-dir --no-auto-login`) or set the `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN` environment variable to `false`.
 
-If you wish to use to your own Mongo database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
+The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password. These are used in the auto-login.
+
+### Testing with your own MongoDB database
+
+If you wish to use your own MongoDB database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
 
 - `process.env.NODE_ENV`
 - `process.env.PAYLOAD_TEST_MONGO_URL`
-- Simply set `process.env.NODE_ENV` to `test` and set `process.env.PAYLOAD_TEST_MONGO_URL` to your mongo url e.g. `mongodb://127.0.0.1/your-test-db`.
+- Simply set `process.env.NODE_ENV` to `test` and set `process.env.PAYLOAD_TEST_MONGO_URL` to your MongoDB URL e.g. `mongodb://127.0.0.1/your-test-db`.
 
-NOTE: It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for `localhost:3000/admin` as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password.
+### Using Postgres
+
+If you have postgres installed on your system, you can also run the test suites using postgres. By default, mongodb is used.
+
+To do that, simply set the `PAYLOAD_DATABASE` environment variable to `postgres`.
+
+### Running the e2e and int tests
+
+You can run the entire test suite using `pnpm test`. If you wish to only run e2e tests, you can use `pnpm test:e2e`. If you wish to only run int tests, you can use `pnpm test:int`.
+
+By default, `pnpm test:int` will only run int test against MongoDB. To run int tests against postgres, you can use `pnpm test:int:postgres`. You will have to have postgres installed on your system for this to work.
 
 ### Commits
 
