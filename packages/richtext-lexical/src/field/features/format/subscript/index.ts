@@ -2,19 +2,22 @@ import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
-import { SubscriptIcon } from '../../../lexical/ui/icons/Subscript'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
 export const SubscriptTextFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: SubscriptIcon,
-                isActive: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/Subscript').then(
+                    (module) => module.SubscriptIcon,
+                  ),
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('subscript')
                   }

@@ -18,8 +18,7 @@ import type { BlocksFeatureProps } from '..'
 
 import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
 import { $createBlockNode } from '../nodes/BlocksNode'
-import { INSERT_BLOCK_COMMAND } from '../plugin'
-import './index.scss'
+import { INSERT_BLOCK_COMMAND } from '../plugin/commands'
 const baseClass = 'lexical-blocks-drawer'
 
 export const INSERT_BLOCK_WITH_DRAWER_COMMAND: LexicalCommand<{
@@ -64,7 +63,7 @@ export const BlocksDrawerComponent: React.FC = () => {
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
   const editDepth = useEditDepth()
   const { t } = useTranslation('fields')
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
 
   const labels = {
     plural: t('blocks') || 'Blocks',

@@ -7,11 +7,8 @@ import type { FeatureProvider } from '../types'
 import type { SerializedUploadNode } from './nodes/UploadNode'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { UploadIcon } from '../../lexical/ui/icons/Upload'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
-import './index.scss'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { UploadNode } from './nodes/UploadNode'
-import { UploadPlugin } from './plugin'
 import { uploadPopulationPromiseHOC } from './populationPromise'
 import { uploadValidation } from './validate'
 
@@ -55,7 +52,9 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
         ],
         plugins: [
           {
-            Component: UploadPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugin').then((module) => module.UploadPlugin),
             position: 'normal',
           },
         ],
@@ -67,7 +66,9 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
               key: 'basic',
               options: [
                 new SlashMenuOption('upload', {
-                  Icon: UploadIcon,
+                  Icon: () =>
+                    // @ts-expect-error
+                    import('../../lexical/ui/icons/Upload').then((module) => module.UploadIcon),
                   displayName: 'Upload',
                   keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],
                   onSelect: ({ editor }) => {

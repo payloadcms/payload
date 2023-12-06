@@ -614,6 +614,14 @@ describe('collections-rest', () => {
         expect(status).toEqual(200)
         expect(result.docs).toHaveLength(1)
       })
+
+      it('should not error when attempting to sort on a field that does not exist', async () => {
+        const { status } = await client.find({
+          sort: 'fake',
+        })
+
+        expect(status).toStrictEqual(200)
+      })
     })
 
     describe('Operators', () => {
