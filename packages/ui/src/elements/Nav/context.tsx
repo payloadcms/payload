@@ -1,7 +1,6 @@
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import React, { useEffect, useRef } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import { usePreferences } from '../../providers/Preferences'
 
@@ -37,7 +36,6 @@ export const NavProvider: React.FC<{
   } = useWindowInfo()
 
   const { getPreference } = usePreferences()
-  const history = useHistory()
   const navRef = useRef(null)
 
   // initialize the nav to be closed
@@ -58,21 +56,8 @@ export const NavProvider: React.FC<{
     }
   }, [largeBreak, getPreference, setNavOpen])
 
-  // on smaller screens where the nav is a modal
+  // TODO: on smaller screens where the nav is a modal
   // close the nav when the user navigates away
-  useEffect(() => {
-    let unlisten: () => void
-
-    if (midBreak) {
-      unlisten = history.listen(() => {
-        setNavOpen(false)
-      })
-    } else if (unlisten) {
-      unlisten()
-    }
-
-    return () => unlisten && unlisten()
-  }, [history, setNavOpen, midBreak])
 
   // on open and close, lock the body scroll
   // do not do this on desktop, the sidebar is not a modal

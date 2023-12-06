@@ -1,6 +1,6 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
-import { Dashboard } from '@payloadcms/next/pages/Dashboard'
+import { Dashboard } from '@payloadcms/next/pages/(auth)/Dashboard'
 import config from 'payload-config'
 
 export default () => Dashboard({ config })
