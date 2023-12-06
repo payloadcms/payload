@@ -20,7 +20,6 @@ import type {
   Validate,
 } from './config/types'
 
-import canUseDOM from '../utilities/canUseDOM'
 import { getIDType } from '../utilities/getIDType'
 import { isNumber } from '../utilities/isNumber'
 import { isValidID } from '../utilities/isValidID'
@@ -53,7 +52,7 @@ export const text: Validate<unknown, unknown, TextField> = (
 
 export const password: Validate<unknown, unknown, TextField> = (
   value: string,
-  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, required, t },
 ) => {
   let maxLength: number
 
@@ -85,7 +84,7 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { r
 
 export const textarea: Validate<unknown, unknown, TextareaField> = (
   value: string,
-  { config, maxLength: fieldMaxLength, minLength, payload, required, t },
+  { config, maxLength: fieldMaxLength, minLength, required, t },
 ) => {
   let maxLength: number
 
@@ -248,7 +247,7 @@ const validateFilterOptions: Validate = async (
   value,
   { id, data, filterOptions, payload, relationTo, req, siblingData, t, user },
 ) => {
-  if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
+  if (typeof filterOptions !== 'undefined' && value) {
     const options: {
       [collection: string]: (number | string)[]
     } = {}
@@ -343,7 +342,7 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
     return options.t('validation:required')
   }
 
-  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
+  if (typeof value !== 'undefined' && value !== null) {
     const idField = options?.config?.collections
       ?.find((collection) => collection.slug === options.relationTo)
       ?.fields?.find((field) => fieldAffectsData(field) && field.name === 'id')
@@ -378,7 +377,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     }
   }
 
-  if (!canUseDOM && typeof value !== 'undefined' && value !== null) {
+  if (typeof value !== 'undefined' && value !== null) {
     const values = Array.isArray(value) ? value : [value]
 
     const invalidRelationships = values.filter((val) => {

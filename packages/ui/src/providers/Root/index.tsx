@@ -13,7 +13,6 @@ import { LocaleProvider } from '../Locale'
 import StepNav, { StepNavProvider } from '../../elements/StepNav'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay'
 import { NavProvider } from '../../elements/Nav/context'
-import '../../scss/app.scss'
 
 type Props = {
   config: ClientConfig

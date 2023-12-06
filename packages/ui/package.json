@@ -15,7 +15,8 @@
       "import": "./src/exports/*.ts",
       "require": "./src/exports/*.ts",
       "types": "./src/exports/*.ts"
-    }
+    },
+    "./scss/app.scss": "./src/scss/app.scss"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -54,7 +55,8 @@
         "import": "./dist/exports/*.ts",
         "require": "./dist/exports/*.ts",
         "types": "./dist/exports/*.d.ts"
-      }
+      },
+      "./scss/app.scss": "./dist/scss/app.scss"
     },
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",

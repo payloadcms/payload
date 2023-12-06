@@ -68,6 +68,12 @@ html {
   @extend %body;
   background: var(--theme-bg);
   -webkit-font-smoothing: antialiased;
+  opacity: 0;
+
+  &[data-theme='dark'],
+  &[data-theme='light'] {
+    opacity: initial;
+  }
 
   &[data-theme='dark'] {
     --theme-bg: var(--theme-elevation-0);
