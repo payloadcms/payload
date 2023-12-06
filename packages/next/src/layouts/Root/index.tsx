@@ -15,7 +15,7 @@ export const RootLayout = async ({
   config: configPromise,
 }: {
   children: React.ReactNode
-  config: SanitizedConfig
+  config: Promise<SanitizedConfig>
 }) => {
   const clientConfig = await createClientConfig(configPromise)
 

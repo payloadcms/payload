@@ -1424,6 +1424,9 @@ importers:
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
+      body-scroll-lock:
+        specifier: 4.0.0-beta.0
+        version: 4.0.0-beta.0
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
