@@ -3,8 +3,6 @@ import type {
   FloatingToolbarSectionEntry,
 } from '../../../lexical/plugins/FloatingSelectToolbar/types'
 
-import './index.scss'
-
 export const FeaturesSectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],
 ): FloatingToolbarSection => {
