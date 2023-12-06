@@ -14,7 +14,6 @@ import type { RelationshipData } from '../RelationshipNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer/commands'
-import { EnabledRelationshipsCondition } from '../../utils/EnabledRelationshipsCondition'
 import './index.scss'
 
 const baseClass = 'lexical-relationship'
@@ -140,9 +139,5 @@ const Component: React.FC<Props> = (props) => {
 }
 
 export const RelationshipComponent = (props: Props): React.ReactNode => {
-  return (
-    <EnabledRelationshipsCondition {...props}>
-      <Component {...props} />
-    </EnabledRelationshipsCondition>
-  )
+  return <Component {...props} />
 }

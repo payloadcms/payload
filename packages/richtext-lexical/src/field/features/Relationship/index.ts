@@ -5,7 +5,29 @@ import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { RelationshipNode } from './nodes/RelationshipNode'
 import { relationshipPopulationPromise } from './populationPromise'
 
-export const RelationshipFeature = (): FeatureProvider => {
+export type RelationshipFeatureProps =
+  | {
+      /**
+       * The collections that should be disabled. Overrides the `enableRichTextRelationship` property in the collection config.
+       * When this property is set, `enabledCollections` will not be available.
+       **/
+      disabledCollections?: string[]
+
+      // Ensures that enabledCollections is not available when disabledCollections is set
+      enabledCollections?: never
+    }
+  | {
+      // Ensures that disabledCollections is not available when enabledCollections is set
+      disabledCollections?: never
+
+      /**
+       * The collections that should be enabled. Overrides the `enableRichTextRelationship` property in the collection config
+       * When this property is set, `disabledCollections` will not be available.
+       **/
+      enabledCollections?: string[]
+    }
+
+export const RelationshipFeature = (props?: RelationshipFeatureProps): FeatureProvider => {
   return {
     feature: () => {
       return {
@@ -21,11 +43,19 @@ export const RelationshipFeature = (): FeatureProvider => {
           {
             Component: () =>
               // @ts-expect-error
-              import('./plugins').then((module) => module.RelationshipPlugin),
+              import('./plugins').then((module) => {
+                const RelationshipPlugin = module.RelationshipPlugin
+                return import('payload/utilities').then((module2) =>
+                  module2.withMergedProps({
+                    Component: RelationshipPlugin,
+                    toMergeIntoProps: props,
+                  }),
+                )
+              }),
             position: 'normal',
           },
         ],
-        props: null,
+        props: props,
         slashMenu: {
           options: [
             {

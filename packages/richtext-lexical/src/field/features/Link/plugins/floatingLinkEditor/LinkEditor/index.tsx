@@ -40,6 +40,8 @@ import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands'
 
 export function LinkEditor({
   anchorElem,
+  disabledCollections,
+  enabledCollections,
   fields: customFieldSchema,
 }: { anchorElem: HTMLElement } & LinkFeatureProps): JSX.Element {
   const [editor] = useLexicalComposerContext()
@@ -61,7 +63,13 @@ export function LinkEditor({
   const [initialState, setInitialState] = useState<Fields>({})
 
   const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
+    const fieldsUnsanitized = transformExtraFields(
+      customFieldSchema,
+      config,
+      i18n,
+      enabledCollections,
+      disabledCollections,
+    )
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fields = sanitizeFields({
