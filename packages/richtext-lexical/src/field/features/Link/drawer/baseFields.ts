@@ -22,6 +22,10 @@ export const getBaseFields = (
 ): Field[] => {
   let enabledRelations: string[]
 
+  /**
+   * Figure out which relations should be enabled (enabledRelations) based on a collection's admin.enableRichTextLink property,
+   * or the Link Feature's enabledCollections and disabledCollections properties which override it.
+   */
   if (enabledCollections) {
     enabledRelations = enabledCollections
   } else if (disabledCollections) {
@@ -79,6 +83,7 @@ export const getBaseFields = (
     },
   ]
 
+  // Only display internal link-specific fields / options / conditions if there are enabled relations
   if (enabledRelations?.length) {
     ;(baseFields[1].fields[0] as RadioField).options.push({
       label: translations['fields:internalLink'],
