@@ -1,7 +1,6 @@
 import type { User } from 'payload/auth'
 import type { Config } from 'payload/config'
-import type { Field } from 'payload/types'
-import type { RadioField, TextField } from 'payload/types'
+import type { Field, RadioField, TextField } from 'payload/types'
 
 import { extractTranslations } from 'payload/utilities'
 
@@ -35,13 +34,13 @@ export const getBaseFields = (
       .map(({ slug }) => slug)
   } else {
     enabledRelations = config.collections
-    .filter(({ admin: { enableRichTextLink, hidden } }) => {
-            if (typeof hidden !== 'function' && hidden) {
-              return false
-            }
-            return enableRichTextLink
-          })
-          .map(({ slug }) => slug)
+      .filter(({ admin: { enableRichTextLink, hidden } }) => {
+        if (typeof hidden !== 'function' && hidden) {
+          return false
+        }
+        return enableRichTextLink
+      })
+      .map(({ slug }) => slug)
   }
 
   const baseFields = [
@@ -105,14 +104,17 @@ export const getBaseFields = (
         condition: ({ fields }) => {
           return fields?.linkType === 'internal'
         },
-        // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
-        filterOptions: (!enabledCollections && !disabledCollections) ? ({ relationTo, user }) => {
-          const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
-          if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
-            return false
-          }
-        } : null
       },
+      // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
+      filterOptions:
+        !enabledCollections && !disabledCollections
+          ? ({ relationTo, user }) => {
+              const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
+              if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+                return false
+              }
+            }
+          : null,
       label: translations['fields:chooseDocumentToLink'],
       relationTo: enabledRelations,
       required: true,
