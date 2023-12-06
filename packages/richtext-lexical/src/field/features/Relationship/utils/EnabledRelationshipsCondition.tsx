@@ -15,10 +15,7 @@ type FilteredCollectionsT = (
 ) => SanitizedCollectionConfig[]
 const filterRichTextCollections: FilteredCollectionsT = (collections, options) => {
   return collections.filter(({ admin: { enableRichTextRelationship, hidden }, upload }) => {
-    if (hidden) {
-      return false
-    }
-    if (typeof hidden === 'function' && hidden({ user: options.user })) {
+    if (hidden === true || (typeof hidden === 'function' && hidden({ user: options.user }))) {
       return false
     }
     if (options?.uploads) {

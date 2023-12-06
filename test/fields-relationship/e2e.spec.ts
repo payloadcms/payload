@@ -337,7 +337,7 @@ describe('fields - relationship', () => {
     await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
     const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await wait(10)
+    await expect(options).toContainText('Relation With Titles')
     await expect(options).not.toContainText('whatever')
   })
 
