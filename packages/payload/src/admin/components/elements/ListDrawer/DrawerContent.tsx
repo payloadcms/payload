@@ -146,7 +146,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     let copyOfWhere = { ...(where || {}) }
     const filterOption = filterOptions?.[slug]
 
-    if (filterOptions && filterOption !== false) {
+    if (filterOptions && typeof filterOption !== 'boolean') {
       copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, filterOption)
     }
 
