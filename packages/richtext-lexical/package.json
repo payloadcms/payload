@@ -47,7 +47,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.3.0"
+    "payload": "^2.4.0"
   },
   "exports": {
     ".": {
