@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
+import { lexicalEditor } from '../../../packages/richtext-lexical/src'
 import { Archive } from '../blocks/ArchiveBlock'
 import { CallToAction } from '../blocks/CallToAction'
 import { Content } from '../blocks/Content'
@@ -62,8 +63,15 @@ export const Pages: CollectionConfig = {
           label: 'Test',
           fields: [
             {
-              name: 'relationshipInRichText',
+              label: 'Rich Text — Slate',
               type: 'richText',
+              name: 'richTextSlate',
+            },
+            {
+              label: 'Rich Text — Lexical',
+              type: 'richText',
+              name: 'richTextLexical',
+              editor: lexicalEditor({}),
             },
             {
               name: 'relationshipAsUpload',

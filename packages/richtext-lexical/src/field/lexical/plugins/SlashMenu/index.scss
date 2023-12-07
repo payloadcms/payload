@@ -48,11 +48,14 @@ html[data-theme='light'] {
 
     &-text {
       margin-left: 6px;
-      text-wrap: nowrap;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .icon {
       color: var(--color-base-500);
+      min-width: fit-content;
     }
   }
 }

@@ -6,7 +6,6 @@ import React from 'react'
 import { PAYLOAD_SERVER_URL } from '@/app/_api/serverURL'
 import { Hero } from '@/app/_components/Hero'
 import { Blocks } from '@/app/_components/Blocks'
-import { RelationshipsBlock } from '@/app/_blocks/Relationships'
 
 export const PageClient: React.FC<{
   page: PageType

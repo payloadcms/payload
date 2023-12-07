@@ -6,7 +6,7 @@ A plugin for [Payload CMS](https://github.com/payloadcms/payload) to easily allo
 
 Core features:
 
-- Allows for [parent/child](#parent) relationships between documents
+- Allows for [parent/child](#parent) relationships between documents within the same Collection
 - Automatically populates [breadcrumbs](#breadcrumbs) data
 
 ## Installation

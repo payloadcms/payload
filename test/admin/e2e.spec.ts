@@ -1157,6 +1157,29 @@ describe('admin', () => {
       })
     })
   })
+
+  describe('Field descriptions', () => {
+    test('should render static field description', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.field-description-descriptionAsString')).toContainText(
+        'Static field description.',
+      )
+    })
+    test('should render functional field description', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-descriptionAsFunction').fill('functional')
+      await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
+        'Function description: descriptionAsFunction - functional',
+      )
+    })
+    test('should render component field description', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-descriptionAsComponent').fill('component')
+      await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
+        'Component description: descriptionAsComponent - component',
+      )
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
