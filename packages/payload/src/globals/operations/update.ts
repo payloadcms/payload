@@ -49,6 +49,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     let { data } = args
 
     const shouldSaveDraft = Boolean(draftArg && globalConfig.versions?.drafts)
+    const publishSpecificLocale = req.query?.publishSpecificLocale
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
@@ -77,6 +78,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       config: globalConfig,
       locale,
       payload,
+      published: publishSpecificLocale !== undefined ? true : false,
       req,
       slug,
       where: query,

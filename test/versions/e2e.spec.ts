@@ -229,6 +229,42 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    test('collection - should show secondary actions on publish button', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('collection - should show current locale in publish specific locale button', async () => {
+      await page.goto(url.create)
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('en')
+    })
+
+    test('global - should show secondary actions on publish button', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(global.global(draftGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      await expect(publishOptions).toBeVisible()
+    })
+
+    test('global - should show current locale in publish specific locale button', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(global.global(draftGlobalSlug))
+      const publishOptions = page.locator('.doc-controls__controls .popup')
+      await publishOptions.click()
+
+      const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
+
+      await expect(publishSpecificLocale).toContainText('en')
+    })
+
     test('global - has versions tab', async () => {
       const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
       await page.goto(global.global(draftGlobalSlug))

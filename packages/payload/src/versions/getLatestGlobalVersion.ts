@@ -8,6 +8,7 @@ type Args = {
   config: SanitizedGlobalConfig
   locale?: string
   payload: Payload
+  published?: boolean
   req?: PayloadRequest
   slug: string
   where: Where
@@ -17,11 +18,14 @@ export const getLatestGlobalVersion = async ({
   config,
   locale,
   payload,
+  published,
   req,
   slug,
   where,
 }: Args): Promise<{ global: Document; globalExists: boolean }> => {
   let latestVersion
+
+  const whereQuery = published ? { 'version._status': { equals: 'published' } } : {}
 
   if (config.versions?.drafts) {
     // eslint-disable-next-line prefer-destructuring
@@ -32,6 +36,7 @@ export const getLatestGlobalVersion = async ({
         locale,
         req,
         sort: '-updatedAt',
+        where: whereQuery,
       })
     ).docs[0]
   }
