@@ -25,11 +25,7 @@ export type LexicalEditorProps = {
   lexical?: LexicalEditorConfig
 }
 
-export type LexicalRichTextAdapter = RichTextAdapter<
-  SerializedEditorState,
-  AdapterProps,
-  AdapterProps
-> & {
+export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
   editorConfig: SanitizedEditorConfig
 }
 
