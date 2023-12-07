@@ -1,3 +1,13 @@
+## @payloadcms/richtext-*
+
+### [@payloadcms/richtext-lexical 0.4.1](https://github.com/payloadcms/payload/compare/richtext-lexical/0.4.0...richtext-lexical/0.4.1) (2023-12-07)
+### [@payloadcms/richtext-slate 1.3.1](https://github.com/payloadcms/payload/compare/richtext-slate/1.3.0...richtext-slate/1.3.1) (2023-12-07)
+
+### Bug Fixes
+
+* **richtext-*:** loosen RichTextAdapter types due to re-occuring ts strict mode errors ([#4416](https://github.com/payloadcms/payload/issues/4416)) ([48f1299](https://github.com/payloadcms/payload/commit/48f1299fcba3e3811c6a7f31499f238537f9a5e3))
+* **richtext-lexical:** lexicalHTML field not working when used inside of Blocks field ([128f9c4](https://github.com/payloadcms/payload/commit/128f9c4e7e6e20dd1ee221f49428a5bce5179c5f))
+
 ## [2.4.0](https://github.com/payloadcms/payload/compare/v2.3.1...v2.4.0) (2023-12-06)
 
 
