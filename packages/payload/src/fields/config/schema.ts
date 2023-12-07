@@ -436,8 +436,10 @@ export const richText = baseField.keys({
   editor: joi
     .object()
     .keys({
-      CellComponent: componentSchema.required(),
-      FieldComponent: componentSchema.required(),
+      CellComponent: componentSchema.optional(),
+      FieldComponent: componentSchema.optional(),
+      LazyCellComponent: joi.func().optional(),
+      LazyFieldComponent: joi.func().optional(),
       afterReadPromise: joi.func().optional(),
       outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),

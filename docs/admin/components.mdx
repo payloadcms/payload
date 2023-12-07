@@ -572,13 +572,15 @@ With these properties you can add multiple components before and after the input
 
 ```tsx
 import React from 'react'
+import { Field } from 'payload/types'
+
 import './style.scss'
 
 const ClearButton: React.FC = () => {
   return <button onClick={() => {/* ... */}}>X</button>
 }
 
-const fieldField: Field = {
+const titleField: Field = {
   name: 'title',
   type: 'text',
   admin: {

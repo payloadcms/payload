@@ -4,32 +4,52 @@ import type { Field } from 'payload/types'
 
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
-import { withMergedProps } from 'payload/utilities'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 import type { SerializedAutoLinkNode } from './nodes/AutoLinkNode'
 import type { LinkFields, SerializedLinkNode } from './nodes/LinkNode'
 
-import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
-import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
-import { AutoLinkPlugin } from './plugins/autoLink'
-import { ClickableLinkPlugin } from './plugins/clickableLink'
-import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
-import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
-import { LinkPlugin } from './plugins/link'
+import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands'
 import { linkPopulationPromiseHOC } from './populationPromise'
 
-export type LinkFeatureProps = {
+type ExclusiveLinkCollectionsProps =
+  | {
+      /**
+       * The collections that should be disabled for internal linking. Overrides the `enableRichTextLink` property in the collection config.
+       * When this property is set, `enabledCollections` will not be available.
+       **/
+      disabledCollections?: string[]
+
+      // Ensures that enabledCollections is not available when disabledCollections is set
+      enabledCollections?: never
+    }
+  | {
+      // Ensures that disabledCollections is not available when enabledCollections is set
+      disabledCollections?: never
+
+      /**
+       * The collections that should be enabled for internal linking. Overrides the `enableRichTextLink` property in the collection config
+       * When this property is set, `disabledCollections` will not be available.
+       **/
+      enabledCollections?: string[]
+    }
+
+export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
+  /**
+   * A function or array defining additional fields for the link feature. These will be
+   * displayed in the link editor drawer.
+   */
   fields?:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
     | Field[]
 }
+
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
   return {
     feature: () => {
@@ -38,7 +58,9 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
           sections: [
             FeaturesSectionWithEntries([
               {
-                ChildComponent: LinkIcon,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/Link').then((module) => module.LinkIcon),
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     const selectedNode = getSelectedNode(selection)
@@ -134,22 +156,35 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         ],
         plugins: [
           {
-            Component: LinkPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/link').then((module) => module.LinkPlugin),
             position: 'normal',
           },
           {
-            Component: AutoLinkPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/autoLink').then((module) => module.AutoLinkPlugin),
             position: 'normal',
           },
           {
-            Component: ClickableLinkPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/clickableLink').then((module) => module.ClickableLinkPlugin),
             position: 'normal',
           },
           {
-            Component: withMergedProps({
-              Component: FloatingLinkEditorPlugin,
-              toMergeIntoProps: props,
-            }),
+            Component: () =>
+              // @ts-expect-error
+              import('./plugins/floatingLinkEditor').then((module) => {
+                const floatingLinkEditorPlugin = module.FloatingLinkEditorPlugin
+                return import('payload/utilities').then((module) =>
+                  module.withMergedProps({
+                    Component: floatingLinkEditorPlugin,
+                    toMergeIntoProps: props,
+                  }),
+                )
+              }),
             position: 'floatingAnchorElem',
           },
         ],

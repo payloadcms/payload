@@ -3,10 +3,8 @@ import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/li
 import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList'
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
-import { LexicalListPlugin } from '../plugin'
 import { ORDERED_LIST } from './markdownTransformer'
 
 export const OrderedListFeature = (): FeatureProvider => {
@@ -17,7 +15,11 @@ export const OrderedListFeature = (): FeatureProvider => {
           sections: [
             TextDropdownSectionWithEntries([
               {
-                ChildComponent: OrderedListIcon,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/OrderedList').then(
+                    (module) => module.OrderedListIcon,
+                  ),
                 isActive: () => false,
                 key: 'orderedList',
                 label: `Ordered List`,
@@ -52,7 +54,9 @@ export const OrderedListFeature = (): FeatureProvider => {
           ? []
           : [
               {
-                Component: LexicalListPlugin,
+                Component: () =>
+                  // @ts-expect-error
+                  import('../plugin').then((module) => module.LexicalListPlugin),
                 position: 'normal',
               },
             ],
@@ -64,7 +68,11 @@ export const OrderedListFeature = (): FeatureProvider => {
               key: 'lists',
               options: [
                 new SlashMenuOption('orderedlist', {
-                  Icon: OrderedListIcon,
+                  Icon: () =>
+                    // @ts-expect-error
+                    import('../../../lexical/ui/icons/OrderedList').then(
+                      (module) => module.OrderedListIcon,
+                    ),
                   displayName: 'Ordered List',
                   keywords: ['ordered list', 'ol'],
                   onSelect: ({ editor }) => {

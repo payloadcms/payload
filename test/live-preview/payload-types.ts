@@ -154,11 +154,6 @@ export interface Page {
           }
       )[]
     | null
-  relationshipInRichText?:
-    | {
-        [k: string]: unknown
-      }[]
-    | null
   relationshipAsUpload?: string | Media | null
   relationshipMonoHasOne?: (string | null) | Post
   relationshipMonoHasMany?: (string | Post)[] | null
@@ -195,6 +190,26 @@ export interface Page {
         id?: string | null
       }[]
     | null
+  richTextSlate?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  richTextLexical?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
   tab: {
     relationshipInTab?: (string | null) | Post
   }

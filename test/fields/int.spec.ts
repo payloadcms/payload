@@ -29,7 +29,14 @@ import {
 import { tabsDoc } from './collections/Tabs/shared'
 import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
-import { arrayFieldsSlug, groupFieldsSlug, relationshipFieldsSlug, tabsFieldsSlug } from './slugs'
+import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
+  groupFieldsSlug,
+  relationshipFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './slugs'
 
 let client: RESTClient
 let graphQLClient: GraphQLClient
@@ -897,6 +904,35 @@ describe('Fields', () => {
 
       const { docs } = blockFields
       expect(docs).toHaveLength(2)
+    })
+
+    it('should query blocks with nested relationship', async () => {
+      const textDoc = await payload.create({
+        collection: textFieldsSlug,
+        data: {
+          text: 'test',
+        },
+      })
+      const blockDoc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          relationshipBlocks: [
+            {
+              blockType: 'relationships',
+              relationship: textDoc.id,
+            },
+          ],
+        },
+      })
+      const result = await payload.find({
+        collection: blockFieldsSlug,
+        where: {
+          'relationshipBlocks.relationship': { equals: textDoc.id },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]).toMatchObject(blockDoc)
     })
   })
 
