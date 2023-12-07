@@ -21,6 +21,8 @@
   ],
   "include": [
     "src/scss/app.scss",
+    "src/**/*.png",
+    "src/**/*.svg",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.d.ts",

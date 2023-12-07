@@ -1,8 +1,10 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
-import { AuthLayout } from '@payloadcms/next/layouts/Auth'
-import configPromise from 'payload-config'
+import { AuthLayout, generateMetadata as generateMeta } from '@payloadcms/next/layouts/Auth'
+import config from 'payload-config'
+
+export const generateMetadata = async () => generateMeta({ config })
 
 export default async ({ children }: { children: React.ReactNode }) => (
-  <AuthLayout config={configPromise}>{children}</AuthLayout>
+  <AuthLayout config={config}>{children}</AuthLayout>
 )
