@@ -439,8 +439,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       mongoose:
-        specifier: 6.12.0
-        version: 6.12.0
+        specifier: 6.12.3
+        version: 6.12.3
       mongoose-aggregate-paginate-v2:
         specifier: 1.0.6
         version: 1.0.6
@@ -460,6 +460,9 @@ importers:
       '@types/mongoose-aggregate-paginate-v2':
         specifier: 1.0.9
         version: 1.0.9
+      mongodb:
+        specifier: 4.17.1
+        version: 4.17.1
       mongodb-memory-server:
         specifier: 8.13.0
         version: 8.13.0
@@ -1889,10 +1892,10 @@ packages:
       '@aws-sdk/credential-provider-sso': 3.414.0
       '@aws-sdk/credential-provider-web-identity': 3.413.0
       '@aws-sdk/types': 3.413.0
-      '@smithy/credential-provider-imds': 2.0.11
-      '@smithy/property-provider': 2.0.9
-      '@smithy/shared-ini-file-loader': 2.0.10
-      '@smithy/types': 2.3.2
+      '@smithy/credential-provider-imds': 2.0.16
+      '@smithy/property-provider': 2.0.12
+      '@smithy/shared-ini-file-loader': 2.2.0
+      '@smithy/types': 2.3.5
       tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
@@ -2260,7 +2263,7 @@ packages:
       '@smithy/middleware-stack': 2.0.5
       '@smithy/node-config-provider': 2.1.1
       '@smithy/node-http-handler': 2.1.7
-      '@smithy/property-provider': 2.0.9
+      '@smithy/property-provider': 2.0.12
       '@smithy/protocol-http': 3.0.7
       '@smithy/shared-ini-file-loader': 2.0.10
       '@smithy/smithy-client': 2.1.11
@@ -6078,7 +6081,7 @@ packages:
   /@types/mongoose-aggregate-paginate-v2@1.0.9:
     resolution: {integrity: sha512-YKDKtSuE1vzMY/SAtlDTWJr52UhTYdrOypCqyx7T2xFYEWfybLnV98m4ZoVgYJH0XowVl7Y2Gnn6p1sF+3NbLA==}
     dependencies:
-      mongoose: 6.12.0
+      mongoose: 6.12.3
     transitivePeerDependencies:
       - aws-crt
       - supports-color
@@ -13449,8 +13452,8 @@ packages:
       - supports-color
     dev: true
 
-  /mongoose@6.12.0:
-    resolution: {integrity: sha512-sd/q83C6TBRPBrrD2A/POSbA/exbCFM2WOuY7Lf2JuIJFlHFG39zYSDTTAEiYlzIfahNOLmXPxBGFxdAch41Mw==}
+  /mongoose@6.12.3:
+    resolution: {integrity: sha512-MNJymaaXali7w7rHBxVUoQ3HzHHMk/7I/+yeeoSa4rUzdjZwIWQznBNvVgc0A8ghuJwsuIkb5LyLV6gSjGjWyQ==}
     engines: {node: '>=12.0.0'}
     dependencies:
       bson: 4.7.2
