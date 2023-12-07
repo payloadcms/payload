@@ -135,8 +135,8 @@ You can also extend the built-in `parent` and `breadcrumbs` fields per collectio
 
 ```js
 import { CollectionConfig } from "payload/types";
-import createParentField from "@payloadcms/plugin-nested-docs/src/fields/parent";
-import createBreadcrumbsField from "@payloadcms/plugin-nested-docs/src/fields/breadcrumbs";
+import createParentField from "@payloadcms/plugin-nested-docs/fields";
+import createBreadcrumbsField from "@payloadcms/plugin-nested-docs/fields";
 
 const examplePageConfig: CollectionConfig = {
   slug: "pages",
