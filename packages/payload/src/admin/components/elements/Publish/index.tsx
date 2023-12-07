@@ -18,26 +18,19 @@ export type DefaultPublishButtonProps = {
   disabled: boolean
   id?: string
   label: string
-  params: any
   publish: () => void
-  setParams: (params: any) => void
+  publishSpecificLocale: () => void
 }
 const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
   id,
   canPublish,
   disabled,
   label,
-  params,
   publish,
-  setParams,
+  publishSpecificLocale,
 }) => {
-  const { code, label: localeLabel } = useLocale()
+  const { label: localeLabel } = useLocale()
   if (!canPublish) return null
-
-  const publishSpecificLocale = () => {
-    setParams({ ...params, publishSpecificLocale: code })
-    publish()
-  }
 
   return (
     <FormSubmit
@@ -49,10 +42,6 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
           label: `Publish ${localeLabel} only`,
           onClick: publishSpecificLocale,
         },
-        // {
-        //   label: `Publish es only`,
-        //   onClick: publishSpecificLocale,
-        // },
       ]}
       size="small"
       type="button"
@@ -70,7 +59,6 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const { code } = useLocale()
   const { id, collection, global, publishedDoc, unpublishedVersions } = useDocumentInfo()
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
-  const [params, setParams] = React.useState<any>({ locale: code || undefined })
   const { getData, submit } = useForm()
   const modified = useFormModified()
   const {
@@ -81,28 +69,40 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0
   const canPublish = modified || hasNewerVersions || !publishedDoc
-
-  const publish = useCallback(() => {
-    let action
-    if (collection) {
-      action = `${serverURL}${api}/${collection.slug}/${id}?${qs.stringify(params)}`
+  const publishSpecificLocale = useCallback(() => {
+    const params = {
+      locale: code,
+      publishSpecificLocale: code,
     }
 
-    if (global) {
-      action = `${serverURL}${api}/globals/${global.slug}?${qs.stringify(params)}`
-    }
+    const action = `${serverURL}${api}${
+      global ? `/globals/${global.slug}` : `/${collection.slug}/${id ? id : ''}`
+    }?${qs.stringify(params)}`
+
     void submit({
       action,
       overrides: {
         _status: 'published',
       },
     })
-  }, [submit, collection, global, serverURL, api, id, params])
+  }, [submit])
+
+  const publish = useCallback(() => {
+    void submit({
+      overrides: {
+        _status: 'published',
+      },
+    })
+  }, [submit])
 
   React.useEffect(() => {
     const fetchPublishAccess = async () => {
       let docAccessURL: string
       let operation = 'update'
+
+      const params = {
+        locale: code || undefined,
+      }
 
       if (global) {
         docAccessURL = `/globals/${global.slug}/access`
@@ -134,7 +134,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
     }
 
     void fetchPublishAccess()
-  }, [api, code, collection, getData, global, id, serverURL, params])
+  }, [api, code, collection, getData, global, id, serverURL])
 
   return (
     <RenderCustomComponent
@@ -146,9 +146,8 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
         canPublish: hasPublishPermission,
         disabled: !canPublish,
         label: t('publishChanges'),
-        params,
         publish,
-        setParams,
+        publishSpecificLocale,
       }}
     />
   )

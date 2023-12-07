@@ -92,6 +92,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     const { password } = data
     const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
     const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
+    const publishSpecificLocale = req.query?.publishSpecificLocale
 
     // /////////////////////////////////////
     // Access
@@ -117,6 +118,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       id,
       config: collectionConfig,
       payload,
+      published: publishSpecificLocale !== undefined ? true : false,
       query: findOneArgs,
       req,
     })

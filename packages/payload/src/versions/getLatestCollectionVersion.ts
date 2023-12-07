@@ -10,6 +10,7 @@ type Args = {
   config: SanitizedCollectionConfig
   id: number | string
   payload: Payload
+  published?: boolean
   query: FindOneArgs
   req?: PayloadRequest
 }
@@ -18,17 +19,22 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   id,
   config,
   payload,
+  published,
   query,
   req,
 }: Args): Promise<T> => {
   let latestVersion: TypeWithVersion<T>
+
+  const whereQuery = published
+    ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
+    : { parent: { equals: id } }
 
   if (config.versions?.drafts) {
     const { docs } = await payload.db.findVersions<T>({
       collection: config.slug,
       req,
       sort: '-updatedAt',
-      where: { parent: { equals: id } },
+      where: whereQuery,
     })
     ;[latestVersion] = docs
   }
