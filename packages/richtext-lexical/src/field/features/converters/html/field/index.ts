@@ -98,13 +98,33 @@ export const lexicalHTML: (
                     return result
                   }
                 }
+              } else if ('blocks' in curField) {
+                for (const block of curField.blocks) {
+                  if (block?.fields?.length) {
+                    const result = findFieldPathAndSiblingFields(block.fields, [
+                      ...path,
+                      curField.name,
+                      block.slug,
+                    ])
+                    if (result) {
+                      return result
+                    }
+                  }
+                }
               }
             }
 
             return null
           }
-          const { path, siblingFields } = findFieldPathAndSiblingFields(fields, [])
 
+          const foundSiblingFields = findFieldPathAndSiblingFields(fields, [])
+
+          if (!foundSiblingFields)
+            throw new Error(
+              `Could not find sibling fields of current lexicalHTML field with name ${field?.name}`,
+            )
+
+          const { siblingFields } = foundSiblingFields
           const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
             siblingFields.find(
               (field) => 'name' in field && field.name === lexicalFieldName,
