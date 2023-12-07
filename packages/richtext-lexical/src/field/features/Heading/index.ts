@@ -2,7 +2,7 @@ import type { HeadingTagType, SerializedHeadingNode } from '@lexical/rich-text'
 
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import { $getSelection, $isRangeSelection, DEPRECATED_$isGridSelection } from 'lexical'
+import { $INTERNAL_isPointSelection, $getSelection } from 'lexical'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
@@ -14,7 +14,7 @@ import { MarkdownTransformer } from './markdownTransformer'
 
 const setHeading = (headingSize: HeadingTagType) => {
   const selection = $getSelection()
-  if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
+  if ($INTERNAL_isPointSelection(selection)) {
     $setBlocksType(selection, () => $createHeadingNode(headingSize))
   }
 }
