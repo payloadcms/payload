@@ -11,6 +11,11 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "exports": {
+    "./utilities/*": {
+      "import": "./src/utilities/*.ts",
+      "require": "./src/utilities/*.ts",
+      "types": "./src/utilities/*.ts"
+    },
     "./layouts/*": {
       "import": "./src/layouts/*.ts",
       "require": "./src/layouts/*.ts",
@@ -39,19 +44,24 @@
   },
   "publishConfig": {
     "exports": {
+      "./utilities/*": {
+        "import": "./dist/utilities/*.js",
+        "require": "./dist/utilities/*.js",
+        "types": "./dist/utilities/*.d.ts"
+      },
       "./layouts/*": {
-        "import": "./dist/layouts/*.ts",
-        "require": "./dist/layouts/*.ts",
+        "import": "./dist/layouts/*.js",
+        "require": "./dist/layouts/*.js",
         "types": "./dist/layouts/*.d.ts"
       },
       "./pages/*": {
-        "import": "./dist/pages/*.ts",
-        "require": "./dist/pages/*.ts",
+        "import": "./dist/pages/*.js",
+        "require": "./dist/pages/*.js",
         "types": "./dist/pages/*.d.ts"
       },
       "./routes/*": {
-        "import": "./dist/routes/*.ts",
-        "require": "./dist/routes/*.ts",
+        "import": "./dist/routes/*.js",
+        "require": "./dist/routes/*.js",
         "types": "./dist/routes/*.d.ts"
       }
     },
