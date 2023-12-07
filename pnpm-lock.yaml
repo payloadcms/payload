@@ -625,6 +625,9 @@ importers:
 
   packages/next:
     dependencies:
+      i18next:
+        specifier: 22.5.1
+        version: 22.5.1
       next:
         specifier: ^14.0.0
         version: 14.0.2(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0)

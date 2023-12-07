@@ -9,7 +9,6 @@ import { Nav as DefaultNav } from '../../elements/Nav'
 import { NavToggler } from '../../elements/Nav/NavToggler'
 import { useNav } from '../../elements/Nav/context'
 import { useConfig } from '../../providers/Config'
-// import Meta from '../../utilities/Meta'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import './index.scss'
 
@@ -30,11 +29,6 @@ export const Default: React.FC<Props> = ({ children, className }) => {
 
   return (
     <Fragment>
-      {/* <Meta
-        description={`${t('dashboard')} Payload`}
-        keywords={`${t('dashboard')}, Payload`}
-        title={t('dashboard')}
-      /> */}
       <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
         <NavToggler className={`${baseClass}__nav-toggler`}>
           <Hamburger closeIcon="collapse" isActive={navOpen} />

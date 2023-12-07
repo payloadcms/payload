@@ -34,7 +34,8 @@
   },
   "peerDependencies": {
     "payload": "^2.0.0",
-    "next": "^14.0.0"
+    "next": "^14.0.0",
+    "i18next": "22.5.1"
   },
   "publishConfig": {
     "exports": {

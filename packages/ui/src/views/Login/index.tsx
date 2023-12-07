@@ -4,7 +4,6 @@ import { Trans } from 'react-i18next'
 import { Button } from '../../elements/Button'
 import { Logo } from '../../graphics/Logo'
 import { Minimal as MinimalTemplate } from '../../templates/Minimal'
-// import Meta from '../../utilities/Meta'
 import './index.scss'
 import { LoginClient } from './index.client'
 import type { SanitizedConfig } from 'payload/types'
@@ -33,11 +32,6 @@ export const Login: React.FC<{
 
   return (
     <MinimalTemplate className={baseClass}>
-      {/* <Meta
-      description={i18n.t('loginUser')}
-      keywords={i18n.t('login')}
-      title={i18n.t('login')}
-    /> */}
       {user ? (
         <Fragment>
           <div className={`${baseClass}__wrap`}>
