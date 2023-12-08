@@ -15,6 +15,7 @@ type Args = {
   global?: SanitizedGlobalConfig
   id?: number | string
   payload: Payload
+  publishSpecificLocale?: string
   req?: PayloadRequest
 }
 
@@ -26,6 +27,7 @@ export const saveVersion = async ({
   draft,
   global,
   payload,
+  publishSpecificLocale,
   req,
 }: Args): Promise<TypeWithID> => {
   let result
@@ -70,7 +72,10 @@ export const saveVersion = async ({
         const data: Record<string, unknown> = {
           createdAt: new Date(latestVersion.createdAt).toISOString(),
           updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-          version: versionData,
+          version: {
+            ...versionData,
+            publishedLocale: publishSpecificLocale,
+          },
         }
 
         const updateVersionArgs = {

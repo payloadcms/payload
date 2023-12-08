@@ -32,6 +32,7 @@ export default async function updateByIDHandler(
   try {
     const draft = req.query.draft === 'true'
     const autosave = req.query.autosave === 'true'
+    const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
     const doc = await updateByID({
       id: req.params.id,
@@ -40,6 +41,7 @@ export default async function updateByIDHandler(
       data: req.body,
       depth: parseInt(String(req.query.depth), 10),
       draft,
+      publishSpecificLocale,
       req,
     })
 

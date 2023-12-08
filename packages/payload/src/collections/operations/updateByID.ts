@@ -5,7 +5,7 @@ import httpStatus from 'http-status'
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../express/types'
 import type { GeneratedTypes } from '../../index'
-import type { Collection } from '../config/types'
+import type { Collection, TypeWithID } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash'
@@ -37,6 +37,7 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
   id: number | string
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
+  publishSpecificLocale?: string
   req: PayloadRequest
   showHiddenFields?: boolean
 }
@@ -71,6 +72,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     draft: draftArg = false,
     overrideAccess,
     overwriteExistingFiles = false,
+    publishSpecificLocale,
     req: {
       locale,
       payload: { config },
@@ -92,7 +94,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     const { password } = data
     const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
     const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
-    const publishSpecificLocale = req.query?.publishSpecificLocale
 
     // /////////////////////////////////////
     // Access
@@ -118,10 +119,21 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       id,
       config: collectionConfig,
       payload,
-      published: publishSpecificLocale !== undefined ? true : false,
       query: findOneArgs,
       req,
     })
+    let publishedDocWithLocales: TypeWithID
+
+    if (publishSpecificLocale) {
+      publishedDocWithLocales = await getLatestCollectionVersion({
+        id,
+        config: collectionConfig,
+        payload,
+        published: true,
+        query: findOneArgs,
+        req,
+      })
+    }
 
     if (!docWithLocales && !hasWherePolicy) throw new NotFound(t)
     if (!docWithLocales && hasWherePolicy) throw new Forbidden(t)
@@ -238,9 +250,28 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       docWithLocales,
       global: null,
       operation: 'update',
+      publishSpecificLocale,
+      publishedDocWithLocales,
       req,
       skipValidation: shouldSaveDraft || data._status === 'draft',
     })
+
+    let versionResult = result
+
+    if (publishSpecificLocale) {
+      versionResult = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+        id,
+        collection: collectionConfig,
+        context: req.context,
+        data,
+        doc: originalDoc,
+        docWithLocales,
+        global: null,
+        operation: 'update',
+        req,
+        skipValidation: shouldSaveDraft || data._status === 'draft',
+      })
+    }
 
     // /////////////////////////////////////
     // Handle potential password update
@@ -280,11 +311,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
         autosave,
         collection: collectionConfig,
         docWithLocales: {
-          ...result,
+          ...versionResult,
           createdAt: docWithLocales.createdAt,
         },
-        draft: shouldSaveDraft,
+        draft: publishSpecificLocale ? true : shouldSaveDraft,
         payload,
+        publishSpecificLocale,
         req,
       })
     }

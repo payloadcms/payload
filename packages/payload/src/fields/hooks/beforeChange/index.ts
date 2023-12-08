@@ -16,6 +16,8 @@ type Args<T> = {
   global: SanitizedGlobalConfig | null
   id?: number | string
   operation: Operation
+  publishSpecificLocale?: string
+  publishedDocWithLocales?: Record<string, unknown>
   req: PayloadRequest
   skipValidation?: boolean
 }
@@ -29,6 +31,8 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   docWithLocales,
   global,
   operation,
+  publishSpecificLocale,
+  publishedDocWithLocales,
   req,
   skipValidation,
 }: Args<T>): Promise<T> => {
@@ -52,7 +56,7 @@ export const beforeChange = async <T extends Record<string, unknown>>({
     req,
     siblingData: data,
     siblingDoc: doc,
-    siblingDocWithLocales: docWithLocales,
+    siblingDocWithLocales: publishSpecificLocale ? publishedDocWithLocales : docWithLocales,
     skipValidation,
   })
 
