@@ -1,3 +1,4 @@
+'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import React, { useEffect, useRef } from 'react'

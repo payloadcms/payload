@@ -26,7 +26,13 @@
       "@payloadcms/next/utilities/*": ["../next/src/utilities/*"]
     }
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "../next/src/pages/Login/action.ts"
+  ],
   "exclude": ["node_modules"],
   "composite": true, // Make sure typescript knows that this module depends on their references
   "references": [{ "path": "../payload" }, { "path": "../next" }]

@@ -1,11 +1,9 @@
-@import '../../scss/styles';
-
 .login {
   &__brand {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-bottom: base(2);
+    margin-bottom: calc(var(--base) * 2);
   }
 
   &__wrap {
@@ -25,7 +23,7 @@
   &__inputWrap {
     display: flex;
     flex-direction: column;
-    gap: base(1);
-    margin-bottom: base(0.25);
+    gap: var(--base);
+    margin-bottom: calc(var(--base) / 4);
   }
 }

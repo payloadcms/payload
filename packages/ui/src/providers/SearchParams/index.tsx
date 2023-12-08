@@ -1,3 +1,4 @@
+'use client'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
 import { useLocation } from 'react-router-dom'

@@ -1,3 +1,4 @@
+'use client'
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import isDeepEqual from 'deep-equal'
 import { serialize } from 'object-to-formdata'

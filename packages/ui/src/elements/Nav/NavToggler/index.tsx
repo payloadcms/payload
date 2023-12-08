@@ -2,7 +2,7 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { usePreferences } from '../../../utilities/Preferences'
+import { usePreferences } from '../../../providers/Preferences'
 import { useNav } from '../context'
 import './index.scss'
 

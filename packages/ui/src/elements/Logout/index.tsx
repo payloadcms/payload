@@ -2,9 +2,9 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import LogOut from '../../icons/LogOut'
-import { useConfig } from '../../utilities/Config'
-import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import { LogOut } from '../../icons/LogOut'
+import { useConfig } from '../../providers/Config'
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 
 const baseClass = 'nav'
 
