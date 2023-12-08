@@ -75,7 +75,6 @@ export const CollectionArchive: React.FC<Props> = props => {
   const isRequesting = useRef(false)
   const [page, setPage] = useState(1)
 
-  // Arrays cannot be memoized, so transform categories into a string ahead of time
   const categories = useMemo(() => catsFromProps.map(cat => cat.id).join(','), [catsFromProps])
 
   const scrollToRef = useCallback(() => {
