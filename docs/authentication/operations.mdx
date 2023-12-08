@@ -77,7 +77,7 @@ Returns either a logged in user with token or null when there is no logged in us
 
 `GET http://localhost:3000/api/[collection-slug]/me`
 
-Example response:
+Example response for logged in user:
 
 ```ts
 {
@@ -92,7 +92,15 @@ Example response:
 }
 ```
 
-**Example GraphQL Query**:
+Example response when there is no logged in user:
+
+```ts
+{
+  user: null
+}
+```
+
+**Example GraphQL Query for logged in user**:
 
 ```graphql
 query {
@@ -101,6 +109,16 @@ query {
       email
     }
     exp
+  }
+}
+```
+
+**Example GraphQL Query when there is no logged in user**:
+
+```graphql
+query {
+  me[collection-singular-label] {
+    user: null
   }
 }
 ```
