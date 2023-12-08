@@ -17,6 +17,7 @@ cp .env.example .env
 ```
 
 2. This example uses the following folder structure:
+
 ```
 root
 └─ /src
@@ -30,53 +31,55 @@ root
 export default {
   email: 'test@test.com',
   password: 'test',
-};
+}
 ```
 
 4. Add the global setup file to your project. This file will be run before any tests are run. It will start a MongoDB server and create a Payload instance for you to use in your tests. Create a file at `src/tests/globalSetup.ts` with the following contents:
 
 ```ts
-import { resolve } from 'path';
-import payload from 'payload';
-import express from 'express';
-import testCredentials from './credentials';
+import { resolve } from 'path'
+import payload from 'payload'
+import express from 'express'
+import testCredentials from './credentials'
 
 require('dotenv').config({
   path: resolve(__dirname, '../../.env'),
-});
+})
 
-const app = express();
+const app = express()
 
 const globalSetup = async () => {
   await payload.init({
     secret: process.env.PAYLOAD_SECRET_KEY,
-    mongoURL: process.env.MONGO_URL,
     express: app,
-  });
+  })
 
   app.listen(process.env.PORT, async () => {
-    console.log(`Express is now listening for incoming connections on port ${process.env.PORT}.`);
-  });
+    console.log(`Express is now listening for incoming connections on port ${process.env.PORT}.`)
+  })
 
-  const response = await fetch(`${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/users/first-register`, {
-    body: JSON.stringify({
-      email: testCredentials.email,
-      password: testCredentials.password,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetch(
+    `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/users/first-register`,
+    {
+      body: JSON.stringify({
+        email: testCredentials.email,
+        password: testCredentials.password,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'post',
     },
-    method: 'post',
-  });
+  )
 
-  const data = await response.json();
+  const data = await response.json()
 
   if (!data.user || !data.user.token) {
-    throw new Error('Failed to register first user');
+    throw new Error('Failed to register first user')
   }
-};
+}
 
-export default globalSetup;
+export default globalSetup
 ```
 
 5. Add a `jest.config.ts` file to the root of your project:
@@ -97,14 +100,14 @@ module.exports = {
       },
     ],
   },
-};
+}
 ```
 
 6. Write your first test. Create a file at `src/tests/login.spec.ts` with the following contents:
 
 ```ts
-import { User } from '../payload-types';
-import testCredentials from './credentials';
+import { User } from '../payload-types'
+import testCredentials from './credentials'
 
 describe('Users', () => {
   it('should allow a user to log in', async () => {
@@ -120,11 +123,11 @@ describe('Users', () => {
         email: testCredentials.email,
         password: testCredentials.password,
       }),
-    }).then((res) => res.json());
+    }).then((res) => res.json())
 
-    expect(result.token).toBeDefined();
-  });
-});
+    expect(result.token).toBeDefined()
+  })
+})
 ```
 
 7. Add a script to run tests via the command line. Add the following to your `package.json` scripts:
