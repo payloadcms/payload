@@ -1,5 +1,5 @@
 import type { CollectionPermission, GlobalPermission } from '../../../auth'
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import { docAccess } from '../../operations/docAccess'

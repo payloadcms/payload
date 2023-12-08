@@ -5,7 +5,7 @@ import crypto from 'crypto'
 // import { promisify } from 'util'
 
 import type { GeneratedTypes } from '../../'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Document } from '../../types'
 import type {
   AfterChangeHook,

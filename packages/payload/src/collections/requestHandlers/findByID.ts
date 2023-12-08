@@ -1,8 +1,11 @@
 import type { NextFunction, Response } from 'express'
 
-import type { PayloadRequest } from '../../express/types'
+import { URL } from 'url'
+
+import type { PayloadRequest } from '../../types'
 import type { Document } from '../../types'
 
+import { isNumber } from '../../utilities/isNumber'
 import findByID from '../operations/findByID'
 
 export type FindByIDResult = {
@@ -16,11 +19,14 @@ export default async function findByIDHandler(
   next: NextFunction,
 ): Promise<Response<FindByIDResult> | void> {
   try {
+    const { searchParams } = new URL(req.url)
+    const depth = searchParams.get('depth')
+
     const doc = await findByID({
       id: req.params.id,
       collection: req.collection,
-      depth: Number(req.query.depth),
-      draft: req.query.draft === 'true',
+      depth: isNumber(depth) ? Number(depth) : undefined,
+      draft: searchParams.get('draft') === 'true',
       req,
     })
     return res.json(doc)

@@ -1,11 +1,13 @@
 import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
+import { URL } from 'url'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Document } from '../../types'
 
 import { NotFound } from '../../errors'
+import { isNumber } from '../../utilities/isNumber'
 import deleteByID from '../operations/deleteByID'
 
 export type DeleteResult = {
@@ -19,10 +21,12 @@ export default async function deleteByIDHandler(
   next: NextFunction,
 ): Promise<Response<DeleteResult> | void> {
   try {
+    const { searchParams } = new URL(req.url)
+    const depth = searchParams.get('depth')
     const doc = await deleteByID({
       id: req.params.id,
       collection: req.collection,
-      depth: parseInt(String(req.query.depth), 10),
+      depth: isNumber(depth) ? depth : undefined,
       req,
     })
 

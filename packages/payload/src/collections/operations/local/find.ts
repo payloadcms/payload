@@ -1,7 +1,6 @@
-import type { GeneratedTypes } from '../../../'
+import type { GeneratedTypes, PayloadT } from '../../../'
 import type { PaginatedDocs } from '../../../database/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document, Where } from '../../../types'
 
 import { APIError } from '../../../errors'
@@ -32,7 +31,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 export default async function findLocal<T extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<T>,
 ): Promise<PaginatedDocs<GeneratedTypes['collections'][T]>> {
   const {

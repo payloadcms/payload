@@ -2,14 +2,13 @@ import type { Collection } from '../../../collections/config/types'
 import type { PayloadRequest } from '../../../express/types'
 
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import getExtractJWT from '../../getExtractJWT'
+import { extractJWT } from '../../getExtractJWT'
 import refresh from '../../operations/refresh'
 
 function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {
     let token
 
-    const extractJWT = getExtractJWT(context.req.payload.config)
     token = extractJWT(context.req)
 
     if (args.token) {

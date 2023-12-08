@@ -1,9 +1,10 @@
 import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
+import { URL } from 'url'
 
 import type { PaginatedDocs } from '../../database/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Where } from '../../types'
 import type { TypeWithID } from '../config/types'
 
@@ -16,25 +17,22 @@ export default async function findVersionsHandler<T extends TypeWithID = any>(
   next: NextFunction,
 ): Promise<Response<PaginatedDocs<T>> | void> {
   try {
-    let page: number | undefined
-
-    if (typeof req.query.page === 'string') {
-      const parsedPage = parseInt(req.query.page, 10)
-
-      if (!Number.isNaN(parsedPage)) {
-        page = parsedPage
-      }
-    }
+    const { searchParams } = new URL(req.url)
+    const page = searchParams.get('page')
+    const depth = searchParams.get('depth')
+    const limit = searchParams.get('limit')
+    const where = searchParams.get('where')
+    const sort = searchParams.get('sort')
 
     const options = {
       collection: req.collection,
-      depth: isNumber(req.query.depth) ? Number(req.query.depth) : undefined,
-      limit: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
-      page,
+      depth: isNumber(depth) ? Number(depth) : undefined,
+      limit: isNumber(limit) ? Number(limit) : undefined,
+      page: isNumber(page) ? Number(page) : undefined,
       payload: req.payload,
       req,
-      sort: req.query.sort as string,
-      where: req.query.where as Where, // This is a little shady,
+      sort: sort,
+      where: where ? (JSON.parse(where) as Where) : undefined,
     }
 
     const result = await findVersions(options)

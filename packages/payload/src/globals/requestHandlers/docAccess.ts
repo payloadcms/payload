@@ -3,7 +3,7 @@ import type { NextFunction, Response } from 'express'
 import httpStatus from 'http-status'
 
 import type { CollectionPermission, GlobalPermission } from '../../auth'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { SanitizedGlobalConfig } from '../config/types'
 
 import { docAccess } from '../operations/docAccess'

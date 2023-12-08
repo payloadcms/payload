@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 
 import type { GeneratedTypes } from '../../'
 import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { User } from '../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'

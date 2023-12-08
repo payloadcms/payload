@@ -3,7 +3,7 @@ import { promisify } from 'util'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 
 import { mapAsync } from '../utilities/mapAsync'
 
@@ -15,6 +15,7 @@ type Args = {
   req: PayloadRequest
 }
 /**
+ * TODO(NATIVE_REQUEST): remove temp files??
  * Remove temp files if enabled, as express-fileupload does not do this automatically
  */
 export const unlinkTempFiles: (args: Args) => Promise<void> = async ({

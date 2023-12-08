@@ -1,9 +1,10 @@
+// TODO(JARROD): remove express Response
 import type { Response } from 'express'
 
 import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import { APIError } from '../../errors'
 import { commitTransaction } from '../../utilities/commitTransaction'
@@ -28,6 +29,7 @@ export type Arguments = {
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
+  // TODO(JARROD): remove express Response
   res?: Response
 }
 

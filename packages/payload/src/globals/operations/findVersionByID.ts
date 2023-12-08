@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import type { FindGlobalVersionsArgs } from '../../database/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { TypeWithVersion } from '../../versions/types'
 import type { SanitizedGlobalConfig } from '../config/types'
 

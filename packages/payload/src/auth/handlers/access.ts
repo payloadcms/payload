@@ -2,7 +2,7 @@ import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Permissions } from '../types'
 
 import access from '../operations/access'

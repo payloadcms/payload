@@ -2,7 +2,7 @@ import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import unlock from '../operations/unlock'
 
@@ -14,6 +14,7 @@ export default async function unlockHandler(
   try {
     await unlock({
       collection: req.collection,
+      // TODO(JARROD): remove reliance on express body parsing
       data: { email: req.body.email },
       req,
     })

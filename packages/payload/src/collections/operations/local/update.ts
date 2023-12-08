@@ -1,9 +1,8 @@
 import type { UploadedFile } from 'express-fileupload'
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { GeneratedTypes, PayloadT } from '../../../'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document, Where } from '../../../types'
 import type { File } from '../../../uploads/types'
 import type { BulkOperationResult } from '../../config/types'
@@ -50,19 +49,19 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> =
   | ManyOptions<TSlug>
 
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: ByIDOptions<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]>
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: ManyOptions<TSlug>,
 ): Promise<BulkOperationResult<TSlug>>
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {

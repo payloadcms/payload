@@ -1,15 +1,15 @@
-import type { GeneratedTypes, RequestContext } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { GeneratedTypes, PayloadT } from '../../../'
+import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 
 import { APIError } from '../../../errors'
+import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import findVersionByID from '../findVersionByID'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
-  context?: RequestContext
   depth?: number
   disableErrors?: boolean
   fallbackLocale?: string
@@ -23,7 +23,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
 }
 
 export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['globals']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<T>,
 ): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> {
   const {
@@ -32,6 +32,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     depth,
     disableErrors = false,
     overrideAccess = true,
+    req: incomingReq,
     showHiddenFields,
   } = options
 

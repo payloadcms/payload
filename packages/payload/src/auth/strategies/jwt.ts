@@ -1,49 +1,41 @@
-import type { StrategyOptions } from 'passport-jwt'
-import type { Strategy as PassportStrategy } from 'passport-strategy'
+import jwt from 'jsonwebtoken'
 
-import passportJwt from 'passport-jwt'
-import url from 'url'
+import type { AuthStrategyFunction, User } from '..'
 
-import type { Payload } from '../../payload'
+import { extractJWT } from '../getExtractJWT'
 
-import getExtractJWT from '../getExtractJWT'
+type JWTToken = {
+  collection: string
+  id: string
+}
 
-const JwtStrategy = passportJwt.Strategy
+export const JWTAuthentication: AuthStrategyFunction = async ({
+  headers,
+  isGraphQL = false,
+  payload,
+}) => {
+  try {
+    const token = extractJWT({ headers, payload })
+    const decodedPayload = jwt.verify(token, payload.secret) as jwt.JwtPayload & JWTToken
 
-export default ({ collections, config, secret }: Payload): PassportStrategy => {
-  const opts: StrategyOptions = {
-    jwtFromRequest: getExtractJWT(config),
-    passReqToCallback: true,
-    secretOrKey: secret,
+    const collection = payload.collections[decodedPayload.collection]
+
+    const user = await payload.findByID({
+      id: decodedPayload.id,
+      collection: decodedPayload.collection,
+      depth: isGraphQL ? 0 : collection.config.auth.depth,
+      // TODO(JAMES)(REVIEW): had to remove with new pattern
+      // req,
+    })
+
+    if (user && (!collection.config.auth.verify || user._verified)) {
+      user.collection = collection.config.slug
+      user._strategy = 'local-jwt'
+      return user as User
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
   }
-
-  return new JwtStrategy(opts, async (req, token, done) => {
-    if (req.user) {
-      done(null, req.user)
-    }
-
-    try {
-      const collection = collections[token.collection]
-
-      const parsedURL = url.parse(req.originalUrl)
-      const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`
-
-      const user = await req.payload.findByID({
-        id: token.id,
-        collection: token.collection,
-        depth: isGraphQL ? 0 : collection.config.auth.depth,
-        req,
-      })
-
-      if (user && (!collection.config.auth.verify || user._verified)) {
-        user.collection = collection.config.slug
-        user._strategy = 'local-jwt'
-        done(null, user)
-      } else {
-        done(null, false)
-      }
-    } catch (err) {
-      done(null, false)
-    }
-  })
 }

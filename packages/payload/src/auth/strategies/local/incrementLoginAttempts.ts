@@ -1,11 +1,11 @@
-import type { Payload } from '../../..'
+import type { PayloadT } from '../../..'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types'
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 
 type Args = {
   collection: SanitizedCollectionConfig
   doc: TypeWithID & Record<string, unknown>
-  payload: Payload
+  payload: PayloadT
   req: PayloadRequest
 }
 

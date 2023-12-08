@@ -1,6 +1,5 @@
-import type { GeneratedTypes, RequestContext } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadT, GeneratedTypes } from '../../../index'
+import type { PayloadRequest } from '../../../types'
 import type { Result } from '../resetPassword'
 
 import { APIError } from '../../../errors'
@@ -9,7 +8,6 @@ import resetPassword from '../resetPassword'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
-  context?: RequestContext
   data: {
     password: string
     token: string
@@ -19,7 +17,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 async function localResetPassword<T extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<T>,
 ): Promise<Result> {
   const { collection: collectionSlug, data, overrideAccess } = options

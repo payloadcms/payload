@@ -1,8 +1,8 @@
 import type { NextFunction, Response } from 'express'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
-import getExtractJWT from '../getExtractJWT'
+import { extractJWT } from '../getExtractJWT'
 import refresh from '../operations/refresh'
 
 export default async function refreshHandler(
@@ -13,11 +13,10 @@ export default async function refreshHandler(
   try {
     let token
 
-    const extractJWT = getExtractJWT(req.payload.config)
     token = extractJWT(req)
 
-    if (req.body.token) {
-      token = req.body.token
+    if (req.body) {
+      token = req.body.data
     }
 
     const result = await refresh({

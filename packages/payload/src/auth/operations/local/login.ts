@@ -1,8 +1,7 @@
 import type { Response } from 'express'
 
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { GeneratedTypes } from '../../../index'
-import type { Payload } from '../../../payload'
+import type { GeneratedTypes, PayloadT } from '../../../index'
+import type { PayloadRequest } from '../../../types'
 import type { Result } from '../login'
 
 import { APIError } from '../../../errors'
@@ -11,7 +10,6 @@ import login from '../login'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
-  context?: RequestContext
   data: {
     email: string
     password: string
@@ -26,7 +24,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
 }
 
 async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   const {

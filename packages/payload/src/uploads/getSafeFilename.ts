@@ -1,6 +1,6 @@
 import sanitize from 'sanitize-filename'
 
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 
 import docWithFilenameExists from './docWithFilenameExists'
 import fileExists from './fileExists'

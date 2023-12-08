@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import { APIError } from '../../errors'
 import { commitTransaction } from '../../utilities/commitTransaction'

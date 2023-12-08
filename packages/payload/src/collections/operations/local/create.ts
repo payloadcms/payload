@@ -1,9 +1,9 @@
 import type { UploadedFile } from 'express-fileupload'
 import type { MarkOptional } from 'ts-essentials'
 
+import type { PayloadT } from '../../..'
 import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document } from '../../../types'
 import type { File } from '../../../uploads/types'
 
@@ -37,7 +37,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
 }
 
 export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   const {

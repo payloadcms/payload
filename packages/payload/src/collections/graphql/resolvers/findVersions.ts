@@ -3,7 +3,7 @@
 import type { Response } from 'express'
 
 import type { PaginatedDocs } from '../../../database/types'
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 

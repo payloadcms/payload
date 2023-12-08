@@ -1,5 +1,5 @@
 import type { User } from '../auth'
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 
 export type PreferenceRequest = {
   key: string

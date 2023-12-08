@@ -2,7 +2,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 import type { TypeWithID } from './config/types'
 
 import { fieldAffectsData } from '../fields/config/types'

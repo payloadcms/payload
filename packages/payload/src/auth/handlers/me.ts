@@ -1,6 +1,6 @@
 import type { NextFunction, Response } from 'express'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import me from '../operations/me'
 

@@ -1,8 +1,9 @@
 /* eslint-disable no-param-reassign */
+// TODO(JAKE): fix RichText import since fields moved
 import type { RichTextAdapter } from '../../../admin/components/forms/field-types/RichText/types'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'

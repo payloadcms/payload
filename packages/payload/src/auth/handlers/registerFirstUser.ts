@@ -1,6 +1,6 @@
 import type { NextFunction, Response } from 'express'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import registerFirstUser from '../operations/registerFirstUser'
 
@@ -12,6 +12,7 @@ export default async function registerFirstUserHandler(
   try {
     const firstUser = await registerFirstUser({
       collection: req.collection,
+      // TODO(JARROD): remove reliance on express body parsing
       data: req.body,
       req,
       res,

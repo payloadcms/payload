@@ -1,10 +1,11 @@
+// TODO(JARROD): remove express Response
 import type { Response } from 'express'
 
 import jwt from 'jsonwebtoken'
 import url from 'url'
 
 import type { BeforeOperationHook, Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Document } from '../../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'

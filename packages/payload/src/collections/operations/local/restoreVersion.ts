@@ -1,6 +1,5 @@
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { GeneratedTypes, PayloadT } from '../../../'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'
@@ -25,7 +24,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 export default async function restoreVersionLocal<T extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
   const { id, collection: collectionSlug, depth, overrideAccess = true, showHiddenFields } = options

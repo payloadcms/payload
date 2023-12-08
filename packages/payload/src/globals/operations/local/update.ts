@@ -1,8 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes, RequestContext } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { GeneratedTypes, PayloadT } from '../../../'
+import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'
@@ -24,7 +23,7 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
 }
 
 export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const { slug: globalSlug, data, depth, draft, overrideAccess = true, showHiddenFields } = options

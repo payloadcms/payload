@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types'
 import type { PaginatedDocs } from '../../database/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Where } from '../../types'
 import type { Collection, TypeWithID } from '../config/types'
 

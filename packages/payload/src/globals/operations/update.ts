@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Where } from '../../types'
 import type { SanitizedGlobalConfig } from '../config/types'
 

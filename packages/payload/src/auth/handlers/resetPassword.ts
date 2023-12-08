@@ -2,7 +2,7 @@ import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import resetPassword from '../operations/resetPassword'
 
@@ -14,6 +14,7 @@ async function resetPasswordHandler(
   try {
     const result = await resetPassword({
       collection: req.collection,
+      // TODO(JARROD): remove reliance on express body parsing
       data: req.body,
       req,
       res,

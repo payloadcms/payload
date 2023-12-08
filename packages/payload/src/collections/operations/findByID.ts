@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import type { FindOneArgs } from '../../database/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Collection, TypeWithID } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'

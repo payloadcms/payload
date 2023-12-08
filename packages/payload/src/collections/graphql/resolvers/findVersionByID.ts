@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Response } from 'express'
 
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 import type { Collection, TypeWithID } from '../../config/types'
 

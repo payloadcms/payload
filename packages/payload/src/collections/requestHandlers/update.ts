@@ -1,12 +1,14 @@
 import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
+import { URL } from 'url'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Document, Where } from '../../types'
 
 import formatSuccessResponse from '../../express/responses/formatSuccess'
 import { getTranslation } from '../../utilities/getTranslation'
+import { isNumber } from '../../utilities/isNumber'
 import update from '../operations/update'
 
 export type UpdateResult = {
@@ -20,15 +22,17 @@ export default async function updateHandler(
   next: NextFunction,
 ): Promise<Response<UpdateResult> | void> {
   try {
-    const draft = req.query.draft === 'true'
+    const { searchParams } = new URL(req.url)
+    const depth = searchParams.get('depth')
+    const where = searchParams.get('where')
 
     const result = await update({
       collection: req.collection,
       data: req.body,
-      depth: parseInt(String(req.query.depth), 10),
-      draft,
+      depth: isNumber(depth) ? Number(depth) : undefined,
+      draft: searchParams.get('draft') === 'true',
       req,
-      where: req.query.where as Where,
+      where: where ? (JSON.parse(where) as Where) : undefined,
     })
 
     if (result.errors.length === 0) {

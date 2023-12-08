@@ -1,5 +1,5 @@
 import type { CollectionPermission } from '../../auth'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { AllOperations } from '../../types'
 
 import { commitTransaction } from '../../utilities/commitTransaction'

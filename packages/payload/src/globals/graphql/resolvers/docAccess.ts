@@ -1,5 +1,5 @@
 import type { CollectionPermission, GlobalPermission } from '../../../auth'
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'

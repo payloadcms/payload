@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
+import type { PayloadRequest } from '../../types'
 import type { EntityPolicies, PathToQuery } from './types'
 
 import { fieldAffectsData } from '../../fields/config/types'

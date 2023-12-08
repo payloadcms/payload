@@ -3,7 +3,7 @@ import type { GraphQLError } from 'graphql'
 
 import { createHandler } from 'graphql-http/lib/use/express'
 
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 
 import errorHandler from './errorHandler'
 

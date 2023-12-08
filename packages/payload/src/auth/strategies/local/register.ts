@@ -1,6 +1,6 @@
-import type { Payload } from '../../..'
+import type { PayloadT } from '../../..'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 
 import { ValidationError } from '../../../errors'
 import { generatePasswordSaltHash } from './generatePasswordSaltHash'
@@ -9,7 +9,7 @@ type Args = {
   collection: SanitizedCollectionConfig
   doc: Record<string, unknown>
   password: string
-  payload: Payload
+  payload: PayloadT
   req: PayloadRequest
 }
 

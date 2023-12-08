@@ -1,9 +1,9 @@
-import type { PayloadRequest } from '../express/types'
-import type { Payload } from '../payload'
+import type { PayloadT } from '..'
+import type { PayloadRequest } from '../types'
 
 type Args = {
   id?: number | string
-  payload: Payload
+  payload: PayloadT
   req?: PayloadRequest
   slug: string
 }
