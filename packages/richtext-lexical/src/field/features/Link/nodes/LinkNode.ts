@@ -7,6 +7,8 @@
  *
  */
 
+import type { BaseSelection } from 'lexical'
+
 import { addClassNamesToElement, isHTMLAnchorElement } from '@lexical/utils'
 import {
   $applyNodeReplacement,
@@ -18,11 +20,9 @@ import {
   type DOMConversionOutput,
   type EditorConfig,
   ElementNode,
-  type GridSelection,
   type LexicalCommand,
   type LexicalNode,
   type NodeKey,
-  type NodeSelection,
   type RangeSelection,
   type SerializedElementNode,
   type Spread,
@@ -146,7 +146,7 @@ export class LinkNode extends ElementNode {
 
   extractWithChild(
     child: LexicalNode,
-    selection: GridSelection | NodeSelection | RangeSelection,
+    selection: BaseSelection,
     destination: 'clone' | 'html',
   ): boolean {
     if (!$isRangeSelection(selection)) {

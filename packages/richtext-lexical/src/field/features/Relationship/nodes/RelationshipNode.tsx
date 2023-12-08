@@ -16,7 +16,12 @@ import {
 } from '@lexical/react/LexicalDecoratorBlockNode'
 import * as React from 'react'
 
-import { RelationshipComponent } from './components/RelationshipComponent'
+const RelationshipComponent = React.lazy(() =>
+  // @ts-expect-error TypeScript being dumb
+  import('./components/RelationshipComponent').then((module) => ({
+    default: module.RelationshipComponent,
+  })),
+)
 
 export type RelationshipData = {
   relationTo: string

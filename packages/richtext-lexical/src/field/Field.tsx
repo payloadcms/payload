@@ -73,11 +73,11 @@ const RichText: React.FC<FieldProps> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <Error message={errorMessage} showError={showError} />
         <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-        <ErrorBoundary fallbackRender={fallbackRender} onReset={(details) => {}}>
+        <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}
             fieldProps={props}
-            onChange={(editorState, editor, tags) => {
+            onChange={(editorState) => {
               let serializedEditorState = editorState.toJSON()
 
               // Transform state through save hooks
