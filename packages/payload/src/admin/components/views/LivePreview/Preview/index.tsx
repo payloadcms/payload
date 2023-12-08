@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 
 import type { EditViewProps } from '../../types'
 
+import { ShimmerEffect } from '../../../elements/ShimmerEffect'
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
 import { useDocumentEvents } from '../../../utilities/DocumentEvents'
@@ -50,12 +51,12 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
 
       prevWindowType.current = previewWindowType
 
-      const message = JSON.stringify({
+      const message = {
         data: values,
         externallyUpdatedRelationship: mostRecentUpdate,
         fieldSchemaJSON: shouldSendSchema ? fieldSchemaJSON : undefined,
         type: 'payload-live-preview',
-      })
+      }
 
       // Post message to external popup window
       if (previewWindowType === 'popup' && popupRef.current) {
@@ -94,7 +95,11 @@ export const LivePreview: React.FC<EditViewProps> = (props) => {
           <LivePreviewToolbar {...props} />
           <div className={`${baseClass}__main`}>
             <DeviceContainer>
-              <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
+              {url ? (
+                <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
+              ) : (
+                <ShimmerEffect height="100%" />
+              )}
             </DeviceContainer>
           </div>
         </div>

@@ -8,6 +8,7 @@ export const post2: Omit<Post, 'createdAt' | 'id' | 'updatedAt'> = {
     description: 'This is the second post.',
     image: '{{IMAGE}}',
   },
+  tenant: '{{TENANT_1_ID}}',
   hero: {
     type: 'lowImpact',
     richText: [

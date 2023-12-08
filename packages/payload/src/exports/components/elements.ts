@@ -22,3 +22,9 @@ export {
   formatListDrawerSlug,
   useListDrawer,
 } from '../../admin/components/elements/ListDrawer'
+
+export {
+  Description,
+  DescriptionComponent,
+  DescriptionFunction,
+} from '../../admin/components/forms/FieldDescription/types'

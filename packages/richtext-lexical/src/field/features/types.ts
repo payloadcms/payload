@@ -99,23 +99,23 @@ export type Feature = {
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        position: 'normal' // Determines at which position the Component will be added.
+        Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
+        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        position: 'top' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
+        Component: () => Promise<React.FC>
         position: 'bottom' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
-        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+        Component: () => Promise<React.FC>
+        position: 'normal' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: () => Promise<React.FC>
+        position: 'top' // Determines at which position the Component will be added.
       }
   >
 
@@ -161,6 +161,33 @@ export type ResolvedFeatureMap = Map<string, ResolvedFeature>
 
 export type FeatureProviderMap = Map<string, FeatureProvider>
 
+export type SanitizedPlugin =
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
+      desktopOnly?: boolean
+      key: string
+      position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'bottom' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'normal' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'top' // Determines at which position the Component will be added.
+    }
+
 export type SanitizedFeatures = Required<
   Pick<ResolvedFeature, 'markdownTransformers' | 'nodes'>
 > & {
@@ -200,33 +227,7 @@ export type SanitizedFeatures = Required<
       }) => SerializedEditorState
     >
   }
-  plugins?: Array<
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        key: string
-        position: 'bottom' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        key: string
-        position: 'normal' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        key: string
-        position: 'top' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
-        desktopOnly?: boolean
-        key: string
-        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-      }
-  >
+  plugins?: Array<SanitizedPlugin>
   /**  The node types mapped to their populationPromises */
   populationPromises: Map<string, Array<PopulationPromise>>
   slashMenu: {

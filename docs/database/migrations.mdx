@@ -48,7 +48,7 @@ export async function down({ payload }: MigrateDownArgs): Promise<void> {
 
 ### Migrations Directory
 
-Each DB adapter has an optional property `migrationDir` where you can override where you want your migrations to be stored/read. If this is not specified, Payload will check the default and possibly make a best effort to find your migrations directory by searching in common locations ie. `./src/migrations`, `./dist/igrations`, `./migrations`, etc.
+Each DB adapter has an optional property `migrationDir` where you can override where you want your migrations to be stored/read. If this is not specified, Payload will check the default and possibly make a best effort to find your migrations directory by searching in common locations ie. `./src/migrations`, `./dist/migrations`, `./migrations`, etc.
 
 All database adapters should implement similar migration patterns, but there will be small differences based on the adapter and its specific needs. Below is a list of all migration commands that should be supported by your database adapter.
 

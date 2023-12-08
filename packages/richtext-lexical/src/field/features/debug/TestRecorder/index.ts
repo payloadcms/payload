@@ -1,14 +1,14 @@
 import type { FeatureProvider } from '../../types'
 
-import { TestRecorderPlugin } from './plugin'
-
 export const TestRecorderFeature = (): FeatureProvider => {
   return {
     feature: () => {
       return {
         plugins: [
           {
-            Component: TestRecorderPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('./plugin').then((module) => module.TestRecorderPlugin),
             position: 'bottom',
           },
         ],

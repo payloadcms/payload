@@ -8,13 +8,15 @@ import { optionIsObject } from '../../../../../fields/config/types'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
+import { fieldBaseClass } from '../shared'
 import RadioInput from './RadioInput'
 import './index.scss'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'radio-group'
 
 export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
   className?: string
   description?: Description
   errorMessage?: string
@@ -28,13 +30,13 @@ export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
   style?: React.CSSProperties
   value?: string
   width?: string
-  Error?: React.ComponentType<any>
-  Label?: React.ComponentType<any>
 }
 
 const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
   const {
     name,
+    Error,
+    Label,
     className,
     description,
     errorMessage,
@@ -49,8 +51,6 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
     style,
     value,
     width,
-    Error,
-    Label,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -103,7 +103,7 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
           )
         })}
       </ul>
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

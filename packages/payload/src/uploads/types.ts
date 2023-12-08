@@ -22,6 +22,7 @@ export type FileData = {
   mimeType: string
   sizes: FileSizes
   tempFilePath?: string
+  url?: string
   width: number
 }
 

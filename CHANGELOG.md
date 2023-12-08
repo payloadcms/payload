@@ -1,3 +1,99 @@
+## @payloadcms/richtext-*
+
+### [@payloadcms/richtext-lexical 0.4.1](https://github.com/payloadcms/payload/compare/richtext-lexical/0.4.0...richtext-lexical/0.4.1) (2023-12-07)
+### [@payloadcms/richtext-slate 1.3.1](https://github.com/payloadcms/payload/compare/richtext-slate/1.3.0...richtext-slate/1.3.1) (2023-12-07)
+
+### Bug Fixes
+
+* **richtext-*:** loosen RichTextAdapter types due to re-occuring ts strict mode errors ([#4416](https://github.com/payloadcms/payload/issues/4416)) ([48f1299](https://github.com/payloadcms/payload/commit/48f1299fcba3e3811c6a7f31499f238537f9a5e3))
+* **richtext-lexical:** lexicalHTML field not working when used inside of Blocks field ([128f9c4](https://github.com/payloadcms/payload/commit/128f9c4e7e6e20dd1ee221f49428a5bce5179c5f))
+
+## [2.4.0](https://github.com/payloadcms/payload/compare/v2.3.1...v2.4.0) (2023-12-06)
+
+
+### Features
+
+* add Chinese Traditional translation ([#4372](https://github.com/payloadcms/payload/issues/4372)) ([50253f6](https://github.com/payloadcms/payload/commit/50253f617c22d0d185bbac7f9d4304cddbc01f06))
+* async live preview urls ([#4339](https://github.com/payloadcms/payload/issues/4339)) ([5f17324](https://github.com/payloadcms/payload/commit/5f173241df6dc316d498767b1c81718e9c2b9a51))
+* pass path to FieldDescription ([#4364](https://github.com/payloadcms/payload/issues/4364)) ([3b8a27d](https://github.com/payloadcms/payload/commit/3b8a27d199b3969cbca6ca750450798cb70f21e8))
+* **richtext-lexical:** lazy import React components to prevent client-only code from leaking into the server ([#4290](https://github.com/payloadcms/payload/issues/4290)) ([5de347f](https://github.com/payloadcms/payload/commit/5de347ffffca3bf38315d3d87d2ccc5c28cd2723))
+* **richtext-lexical:** Link & Relationship Feature: field-level configurable allowed relationships ([#4182](https://github.com/payloadcms/payload/issues/4182)) ([7af8f29](https://github.com/payloadcms/payload/commit/7af8f29b4a8dddf389356e4db142f8d434cdc964))
+
+
+### Bug Fixes
+
+* **db-postgres:** sorting on a not-configured field throws error ([#4382](https://github.com/payloadcms/payload/issues/4382)) ([dbaecda](https://github.com/payloadcms/payload/commit/dbaecda0e92fcb0fa67b4c5ac085e025f02de53a))
+* defaultValues computed on new globals ([#4380](https://github.com/payloadcms/payload/issues/4380)) ([b6cffce](https://github.com/payloadcms/payload/commit/b6cffcea07b9fa21698b00b8bbed6f27197ded41))
+* handles null upload field values ([#4397](https://github.com/payloadcms/payload/issues/4397)) ([cf9a370](https://github.com/payloadcms/payload/commit/cf9a3704df21ce8b32feb0680793cba804cd66f7))
+* **live-preview:** populates rte uploads and relationships ([#4379](https://github.com/payloadcms/payload/issues/4379)) ([4090aeb](https://github.com/payloadcms/payload/commit/4090aebb0e94e776258f0c1c761044a4744a1857))
+* **live-preview:** sends raw js objects through window.postMessage instead of json ([#4354](https://github.com/payloadcms/payload/issues/4354)) ([03a3872](https://github.com/payloadcms/payload/commit/03a387233d1b8876a2fcaa5f3b3fd5ed512c0bc4))
+* simplifies query validation and fixes nested relationship fields ([#4391](https://github.com/payloadcms/payload/issues/4391)) ([4b5453e](https://github.com/payloadcms/payload/commit/4b5453e8e5484f7afcadbf5bccf8369b552969c6))
+* upload editing error with plugin-cloud ([#4170](https://github.com/payloadcms/payload/issues/4170)) ([fcbe574](https://github.com/payloadcms/payload/commit/fcbe5744d945dc43642cdaa2007ddc252ecafafa))
+* uploads files after validation ([#4218](https://github.com/payloadcms/payload/issues/4218)) ([65adfd2](https://github.com/payloadcms/payload/commit/65adfd21ed538b79628dc4f8ce9e1a5a1bba6aed))
+
+### ⚠ BREAKING CHANGES
+
+* **richtext-lexical:** lazy import React components to prevent client-only code from leaking into the server (#4290)
+
+### ⚠️ @payloadcms/richtext-lexical
+
+Most important: If you are updating `@payloadcms/richtext-lexical` to v0.4.0 or higher, you will HAVE to update `payload` to the latest version as well. If you don't update it, payload likely won't start up due to validation errors. It's generally good practice to upgrade packages prefixed with `@payloadcms/` together with `payload` and keep the versions in sync.
+
+`@payloadcms/richtext-slate` is not affected by this.
+
+Every single property in the `Feature` interface which accepts a React component now no longer accepts a React component, but a function which imports a React component instead. This is done to ensure no unnecessary client-only code is leaked to the server when importing Features on a server.
+Here's an example migration:
+
+Old:
+
+```ts
+import { BlockIcon } from '../../lexical/ui/icons/Block'
+...
+Icon: BlockIcon,
+```
+
+New:
+
+```ts
+// import { BlockIcon } from '../../lexical/ui/icons/Block' // <= Remove this import
+...
+Icon: () =>
+  // @ts-expect-error
+  import('../../lexical/ui/icons/Block').then((module) => module.BlockIcon),
+```
+
+Or alternatively, if you're using default exports instead of named exports:
+
+```ts
+// import BlockIcon from '../../lexical/ui/icons/Block' // <= Remove this import
+...
+Icon: () =>
+  // @ts-expect-error
+  import('../../lexical/ui/icons/Block'),
+```
+
+The types for `SanitizedEditorConfig` and `EditorConfig` have changed. Their respective `lexical` property no longer expects the `LexicalEditorConfig`. It now expects a function returning the `LexicalEditorConfig`. You will have to adjust this if you adjusted that property anywhere, e.g. when initializing the lexical field editor property, or when initializing a new headless editor.
+
+The following exports are now exported from the `@payloadcms/richtext-lexical/components` subpath exports instead of `@payloadcms/richtext-lexical`:
+
+- ToolbarButton
+- ToolbarDropdown
+- RichTextCell
+- RichTextField
+- defaultEditorLexicalConfig
+
+You will have to adjust your imports, only if you import any of those properties in your project.
+
+## [2.3.1](https://github.com/payloadcms/payload/compare/v2.3.0...v2.3.1) (2023-12-01)
+
+
+### Bug Fixes
+
+* ensure doc controls are not hidden behind lexical field ([#4345](https://github.com/payloadcms/payload/issues/4345)) ([bea79fe](https://github.com/payloadcms/payload/commit/bea79feaeaee18bf94dd04262f134483f1468494))
+* query validation on relationship fields ([#4353](https://github.com/payloadcms/payload/issues/4353)) ([fe888b5](https://github.com/payloadcms/payload/commit/fe888b5f6ceaa3969eac759cbdfb109b106dae05))
+* **richtext-lexical:** blocks content may be hidden behind components outside of the editor ([#4325](https://github.com/payloadcms/payload/issues/4325)) ([3e745e9](https://github.com/payloadcms/payload/commit/3e745e91da620a00e3f0f91892ee3ec66ba72bc0))
+* **richtext-lexical:** Blocks node: incorrect conversion from v1 node to v2 node ([ef84a2c](https://github.com/payloadcms/payload/commit/ef84a2cfffbb1be52dd948e59eeec0ce324e9046))
+
 ## [2.3.0](https://github.com/payloadcms/payload/compare/v2.2.2...v2.3.0) (2023-11-30)
 
 

@@ -3,10 +3,8 @@ import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/
 import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
-import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList'
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
-import { LexicalListPlugin } from '../plugin'
 import { UNORDERED_LIST } from './markdownTransformer'
 
 export const UnorderedListFeature = (): FeatureProvider => {
@@ -17,7 +15,11 @@ export const UnorderedListFeature = (): FeatureProvider => {
           sections: [
             TextDropdownSectionWithEntries([
               {
-                ChildComponent: UnorderedListIcon,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/UnorderedList').then(
+                    (module) => module.UnorderedListIcon,
+                  ),
                 isActive: () => false,
                 key: 'unorderedList',
                 label: `Unordered List`,
@@ -48,7 +50,9 @@ export const UnorderedListFeature = (): FeatureProvider => {
         ],
         plugins: [
           {
-            Component: LexicalListPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('../plugin').then((module) => module.LexicalListPlugin),
             position: 'normal',
           },
         ],
@@ -60,7 +64,11 @@ export const UnorderedListFeature = (): FeatureProvider => {
               key: 'lists',
               options: [
                 new SlashMenuOption('unorderedlist', {
-                  Icon: UnorderedListIcon,
+                  Icon: () =>
+                    // @ts-expect-error
+                    import('../../../lexical/ui/icons/UnorderedList').then(
+                      (module) => module.UnorderedListIcon,
+                    ),
                   displayName: 'Unordered List',
                   keywords: ['unordered list', 'ul'],
                   onSelect: ({ editor }) => {
