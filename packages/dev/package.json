@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "next": "14.0.2",
-    "react": "^18",
-    "react-dom": "^18"
+    "react": "18.3.0-canary-b36ae8d7a-20231207",
+    "react-dom": "18.3.0-canary-b36ae8d7a-20231207"
   },
   "devDependencies": {
     "@payloadcms/db-mongodb": "workspace:*",

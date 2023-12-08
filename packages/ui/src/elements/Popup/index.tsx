@@ -1,3 +1,4 @@
+'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 

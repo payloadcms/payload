@@ -13,18 +13,19 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import './index.scss'
 import Link from 'next/link'
 
-const baseClass = 'login'
+const baseClass = 'login-form'
 
-export const LoginClient: React.FC = () => {
+export const LoginForm: React.FC<{
+  action: (formData: FormData) => Promise<void>
+}> = ({ action }) => {
   const { push } = useRouter()
   const searchParams = useSearchParams()
   const { t } = useTranslation('authentication')
   const { fetchFullUser, user } = useAuth()
   const config = useConfig()
   const {
-    admin: { autoLogin, user: userSlug },
-    routes: { admin, api },
-    serverURL,
+    admin: { autoLogin },
+    routes: { admin },
   } = config
 
   // Fetch 'redirect' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
@@ -43,7 +44,7 @@ export const LoginClient: React.FC = () => {
 
   return (
     <Form
-      action={`${serverURL}${api}/${userSlug}/login`}
+      action={action}
       className={`${baseClass}__form`}
       disableSuccessStatus
       initialData={
@@ -54,7 +55,7 @@ export const LoginClient: React.FC = () => {
             }
           : undefined
       }
-      method="post"
+      method="POST"
       onSuccess={onSuccess}
       waitForAutocomplete
     >

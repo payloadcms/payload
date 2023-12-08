@@ -36,7 +36,7 @@ export type Preferences = {
 }
 
 export type Props = {
-  action?: string
+  action?: string | ((formData: FormData) => Promise<void>)
   children?: React.ReactNode
   className?: string
   disableSuccessStatus?: boolean
@@ -51,7 +51,7 @@ export type Props = {
   initialData?: Data
   initialState?: Fields
   log?: boolean
-  method?: 'delete' | 'get' | 'patch' | 'post'
+  method?: 'DELETE' | 'GET' | 'PATH' | 'POST'
   onSubmit?: (fields: Fields, data: Data) => void
   onSuccess?: (json: unknown) => void
   redirect?: string

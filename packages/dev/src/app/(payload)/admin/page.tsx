@@ -3,4 +3,4 @@
 import { Dashboard } from '@payloadcms/next/pages/Dashboard'
 import config from 'payload-config'
 
-export default ({ searchParams }) => Dashboard({ searchParams, config })
+export default async ({ searchParams }) => Dashboard({ searchParams, config })

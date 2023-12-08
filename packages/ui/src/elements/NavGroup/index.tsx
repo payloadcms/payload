@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import AnimateHeight from 'react-animate-height'
 
-import Chevron from '../../icons/Chevron'
-import { usePreferences } from '../../utilities/Preferences'
+import { Chevron } from '../../icons/Chevron'
+import { usePreferences } from '../../providers/Preferences'
 import { useNav } from '../Nav/context'
 import './index.scss'
 

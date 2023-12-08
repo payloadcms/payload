@@ -1,3 +1,4 @@
+'use client'
 import isDeepEqual from 'deep-equal'
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
