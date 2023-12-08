@@ -2,8 +2,6 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
 
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
-
 import Account from '../../graphics/Account'
 import { useCollectionGlobalConfigs } from '../../utilities/CollectionGlobalConfigs'
 import { useConfig } from '../../utilities/Config'
@@ -18,14 +16,6 @@ import StepNav from '../StepNav'
 import './index.scss'
 
 const baseClass = 'app-header'
-
-const isSanitizedCollectionConfig = (config): config is SanitizedCollectionConfig => {
-  return config && config.admin && config.admin.components && config.admin.components.views
-}
-
-const isSanitizedGlobalConfig = (config): config is SanitizedGlobalConfig => {
-  return config && config.admin && config.admin.components && config.admin.components.views
-}
 
 const hasActions = (viewConfig): viewConfig is { actions: React.ComponentType<any>[] } => {
   return typeof viewConfig === 'object' && viewConfig !== null && 'actions' in viewConfig
@@ -45,89 +35,47 @@ export const AppHeader: React.FC = () => {
   const location = useLocation()
   const pathSegments = location.pathname.split('/')
 
-  const {
-    isAPIView: isCollectionAPIView,
-    isEditView: isCollectionEditView,
-    isListView: isCollectionListView,
-    isLivePreviewView: isCollectionLivePreviewView,
-    isVersionView: isCollectionVersionView,
-    isVersionsView: isCollectionVersionsView,
-    slug: urlCollectionSlug,
-  } = getPathSegmentInfo(pathSegments, 'collections')
-
-  const {
-    isAPIView: isGlobalAPIView,
-    isEditView: isGlobalEditView,
-    isLivePreviewView: isGlobalLivePreviewView,
-    isVersionView: isGlobalVersionView,
-    isVersionsView: isGlobalVersionsView,
-    slug: urlGlobalSlug,
-  } = getPathSegmentInfo(pathSegments, 'globals')
-
   const { collection, global } = useDocumentInfo()
-  const collectionSlug = collection?.slug
-  const [collectionConfig] = useCollectionGlobalConfigs(collectionSlug, [urlCollectionSlug])
-  let collectionActions = []
+  const [collectionConfig] = useCollectionGlobalConfigs(collection?.slug, [collection?.slug])
+  const [globalConfig] = useCollectionGlobalConfigs(global?.slug, [global?.slug])
 
-  if (isSanitizedCollectionConfig(collectionConfig)) {
-    const editViewsConfig = collectionConfig.admin.components.views.Edit
+  const isSanitizedConfig = (config) => config?.admin?.components?.views
 
-    if (editViewsConfig && typeof editViewsConfig === 'object') {
-      if (isCollectionAPIView && hasActions(editViewsConfig.API)) {
-        collectionActions = editViewsConfig.API?.actions ?? []
-      } else if (isCollectionVersionsView && hasActions(editViewsConfig.Versions)) {
-        collectionActions = editViewsConfig.Versions?.actions ?? []
-      } else if (isCollectionVersionView && hasActions(editViewsConfig.Version)) {
-        collectionActions = editViewsConfig.Version?.actions ?? []
-      } else if (isCollectionLivePreviewView && hasActions(editViewsConfig.LivePreview)) {
-        collectionActions = editViewsConfig.LivePreview?.actions ?? []
-      } else if (isCollectionEditView && hasActions(editViewsConfig.Default)) {
-        collectionActions = editViewsConfig.Default?.actions ?? []
-      } else if (
-        isCollectionListView &&
-        typeof collectionConfig.admin.components.views.List === 'object' &&
-        'actions' in collectionConfig.admin.components.views.List
-      ) {
-        collectionActions = collectionConfig.admin.components.views.List.actions
-      }
+  const getActions = (config, pathType) => {
+    if (!isSanitizedConfig(config)) return []
+    const pathInfo = getPathSegmentInfo(pathSegments, pathType)
+
+    if (
+      pathInfo.isListView &&
+      config.admin.components.views.List &&
+      hasActions(config.admin.components.views.List)
+    ) {
+      return config.admin.components.views.List.actions
     }
+
+    const editViews = config.admin.components.views.Edit
+
+    let actions = []
+    if (pathInfo.isAPIView && hasActions(editViews.API)) {
+      actions = editViews.API.actions
+    } else if (pathInfo.isEditView && hasActions(editViews.Default)) {
+      actions = editViews.Default.actions
+    } else if (pathInfo.isLivePreviewView && hasActions(editViews.LivePreview)) {
+      actions = editViews.LivePreview.actions
+    } else if (pathInfo.isVersionView && hasActions(editViews.Version)) {
+      actions = editViews.Version.actions
+    } else if (pathInfo.isVersionsView && hasActions(editViews.Versions)) {
+      actions = editViews.Versions.actions
+    }
+
+    return actions ?? []
   }
 
-  const globalSlug = global?.slug
-  const [globalConfig] = useCollectionGlobalConfigs(globalSlug, [urlGlobalSlug])
-  let globalActions = []
+  const collectionActions = getActions(collectionConfig, 'collections')
+  const globalActions = getActions(globalConfig, 'globals')
 
-  if (isSanitizedGlobalConfig(globalConfig)) {
-    const globalEditViewsConfig = globalConfig.admin.components.views.Edit
-
-    if (globalEditViewsConfig && typeof globalEditViewsConfig === 'object') {
-      if (isGlobalAPIView && hasActions(globalEditViewsConfig.API)) {
-        globalActions = globalEditViewsConfig.API?.actions ?? []
-      } else if (isGlobalVersionsView && hasActions(globalEditViewsConfig.Versions)) {
-        globalActions = globalEditViewsConfig.Versions?.actions ?? []
-      } else if (isGlobalVersionView && hasActions(globalEditViewsConfig.Version)) {
-        globalActions = globalEditViewsConfig.Version?.actions ?? []
-      } else if (isGlobalLivePreviewView && hasActions(globalEditViewsConfig.LivePreview)) {
-        globalActions = globalEditViewsConfig.LivePreview?.actions ?? []
-      } else if (isGlobalEditView && hasActions(globalEditViewsConfig.Default)) {
-        globalActions = globalEditViewsConfig.Default?.actions ?? []
-      }
-    }
-  }
-
-  const isGlobalView =
-    isGlobalEditView ||
-    isGlobalAPIView ||
-    isGlobalVersionsView ||
-    isGlobalVersionView ||
-    isGlobalLivePreviewView
-  const isCollectionView =
-    isCollectionEditView ||
-    isCollectionAPIView ||
-    isCollectionListView ||
-    isCollectionLivePreviewView ||
-    isCollectionVersionsView ||
-    isCollectionVersionView
+  const isGlobalView = globalActions.length > 0
+  const isCollectionView = collectionActions.length > 0
 
   const { navOpen } = useNav()
 
