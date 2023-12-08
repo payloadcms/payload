@@ -268,6 +268,9 @@ export type EditViewConfig =
       Component: AdminViewComponent
       path: string
     }
+  | {
+      actions?: React.ComponentType<any>[]
+    }
 
 /**
  * Override existing views
@@ -396,7 +399,7 @@ export type Config = {
       /**
        * Add custom components to the top right of the Admin Panel
        */
-      actionsBar?: React.ComponentType<any>[]
+      actions?: React.ComponentType<any>[]
       /**
        * Add custom components after the collection overview
        */

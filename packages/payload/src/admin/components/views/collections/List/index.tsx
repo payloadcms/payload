@@ -202,10 +202,17 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     }
   }, [data, history, resetParams])
 
+  const ListToRender =
+    CustomList && typeof CustomList === 'function'
+      ? CustomList
+      : typeof CustomList === 'object' && typeof CustomList.Component === 'function'
+      ? CustomList.Component
+      : null
+
   return (
     <TableColumnsProvider collection={collection}>
       <RenderCustomComponent
-        CustomComponent={CustomList}
+        CustomComponent={ListToRender}
         DefaultComponent={DefaultList}
         componentProps={{
           collection: { ...collection, fields },
