@@ -1,19 +1,8 @@
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
+import { getAuthenticatedUser } from 'payload/auth'
 import { SanitizedConfig } from 'payload/types'
 import { cache } from 'react'
-
-const getUser = async ({
-  headers,
-  cookies,
-  searchParams,
-  payload,
-}: {
-  headers: any
-  cookies: any
-  searchParams: any
-  payload: any
-}): Promise<{ id: string } | null> => null
 
 const getPermissions = ({ user, payload }: { user: any; payload: any }) => {}
 
@@ -33,9 +22,8 @@ export const auth = cache(
   }) => {
     const payload = await getPayload({ config })
 
-    const user = await getUser({
+    const user = await getAuthenticatedUser({
       headers,
-      cookies,
       searchParams,
       payload,
     })
