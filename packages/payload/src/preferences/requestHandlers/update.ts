@@ -3,7 +3,7 @@ import type { NextFunction, Response } from 'express'
 import httpStatus from 'http-status'
 
 import type { GeneratedTypes } from '../../'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import formatSuccessResponse from '../../express/responses/formatSuccess'
 import update from '../operations/update'

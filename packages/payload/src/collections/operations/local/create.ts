@@ -1,16 +1,16 @@
 import type { UploadedFile } from 'express-fileupload'
 import type { MarkOptional } from 'ts-essentials'
 
+import type { PayloadT } from '../../..'
 import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document } from '../../../types'
 import type { File } from '../../../uploads/types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
 import { i18nInit } from '../../../translations/init'
 import getFileByPath from '../../../uploads/getFileByPath'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
 import create from '../create'
 
@@ -39,7 +39,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
 }
 
 export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
@@ -78,7 +78,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   req.payload = payload
   req.i18n = i18nInit(payload.config.i18n)
   req.files = {
-    file: (file ?? (await getFileByPath(filePath))) as UploadedFile,
+    file: (file ?? (await getFileByPath(filePath))) as UploadedFile, // TODO(NATIVE_REQUEST): fix this type
   }
 
   if (typeof user !== 'undefined') req.user = user

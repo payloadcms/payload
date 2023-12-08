@@ -1,9 +1,9 @@
 import type { CollectionPermission, GlobalPermission } from '../auth/types'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
 import type { Access } from '../config/types'
-import type { PayloadRequest } from '../express/types'
 import type { FieldAccess } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
+import type { PayloadRequest } from '../types'
 import type { AllOperations, Document, Where } from '../types'
 
 import { tabHasName } from '../fields/config/types'

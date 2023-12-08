@@ -1,11 +1,11 @@
 import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadT } from '../../../'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
 import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
 import findByID from '../findByID'
 
@@ -29,7 +29,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
   const {

@@ -1,14 +1,14 @@
 import type { DeepPartial } from 'ts-essentials'
 
+import type { PayloadT } from '../../..'
 import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
 import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import update from '../update'
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
@@ -25,7 +25,7 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
 }
 
 export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {

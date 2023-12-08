@@ -1,6 +1,8 @@
 import type { NextFunction, Response } from 'express'
 
-import type { PayloadRequest } from '../../express/types'
+import { URL } from 'url'
+
+import type { PayloadRequest } from '../../types'
 import type { Document } from '../../types'
 import type { SanitizedGlobalConfig } from '../config/types'
 
@@ -13,9 +15,12 @@ export default function findVersionByIDHandler(globalConfig: SanitizedGlobalConf
     res: Response,
     next: NextFunction,
   ): Promise<Response<Document> | void> {
+    const { searchParams } = new URL(req.url)
+    const depth = searchParams.get('depth')
+
     const options = {
       id: req.params.id,
-      depth: isNumber(req.query?.depth) ? Number(req.query.depth) : undefined,
+      depth: isNumber(depth) ? Number(depth) : undefined,
       globalConfig,
       req,
     }

@@ -1,4 +1,7 @@
+export { getAuthenticatedUser } from '../auth/getAuthenticatedUser'
+
 export type {
+  AuthStrategyFunctionArgs,
   CollectionPermission,
   FieldPermissions,
   GlobalPermission,

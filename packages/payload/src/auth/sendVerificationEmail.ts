@@ -1,7 +1,9 @@
+import { URL } from 'url'
+
+import type { PayloadT } from '..'
 import type { Collection } from '../collections/config/types'
 import type { EmailOptions, SanitizedConfig } from '../config/types'
-import type { PayloadRequest } from '../express/types'
-import type { Payload } from '../payload'
+import type { PayloadRequest } from '../types'
 import type { User, VerifyConfig } from './types'
 
 type Args = {
@@ -10,7 +12,7 @@ type Args = {
   disableEmail: boolean
   emailOptions: EmailOptions
   req: PayloadRequest
-  sendEmail: Payload['sendEmail']
+  sendEmail: PayloadT['sendEmail']
   token: string
   user: User
 }
@@ -29,10 +31,11 @@ async function sendVerificationEmail(args: Args): Promise<void> {
   } = args
 
   if (!disableEmail) {
+    const protocol = new URL(req.url).protocol
     const serverURL =
       config.serverURL !== null && config.serverURL !== ''
         ? config.serverURL
-        : `${req.protocol}://${req.get('host')}`
+        : `${protocol}://${req.headers.get('host')}`
 
     const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`
 

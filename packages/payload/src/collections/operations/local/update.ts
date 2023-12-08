@@ -1,16 +1,15 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { GeneratedTypes, PayloadT } from '../../../'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document, Where } from '../../../types'
 import type { File } from '../../../uploads/types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
 import { i18nInit } from '../../../translations/init'
 import getFileByPath from '../../../uploads/getFileByPath'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
 import update from '../update'
 import updateByID from '../updateByID'
@@ -51,19 +50,19 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> =
   | ManyOptions<TSlug>
 
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: ByIDOptions<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]>
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: ManyOptions<TSlug>,
 ): Promise<BulkOperationResult<TSlug>>
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
 async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {
@@ -109,7 +108,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     payloadAPI: 'local',
     transactionID: incomingReq?.transactionID,
     user,
-  } as PayloadRequest
+  } as unknown as PayloadRequest
   setRequestContext(req, context)
 
   if (!req.t) req.t = req.i18n.t

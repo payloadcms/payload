@@ -1,6 +1,6 @@
+import type { PayloadT } from '..'
 import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { PayloadRequest } from '../express/types'
-import type { Payload } from '../index'
+import type { PayloadRequest } from '../types'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -8,7 +8,7 @@ type Args = {
    * User IDs to delete
    */
   ids: (number | string)[]
-  payload: Payload
+  payload: PayloadT
   req: PayloadRequest
 }
 export const deleteUserPreferences = async ({ collectionConfig, ids, payload, req }: Args) => {

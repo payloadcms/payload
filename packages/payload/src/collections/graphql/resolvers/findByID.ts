@@ -1,5 +1,5 @@
 import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'

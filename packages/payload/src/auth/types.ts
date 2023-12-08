@@ -1,9 +1,7 @@
-import type { Strategy } from 'passport'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { PayloadRequest } from '../express/types'
-import type { Payload } from '../payload'
-import type { Where } from '../types'
+import type { PayloadT } from '../'
+import type { PayloadRequest, Where } from '../types'
 
 export type Permission = {
   permission: boolean
@@ -91,7 +89,22 @@ type GenerateForgotPasswordEmailSubject = (args?: {
   user?: any
 }) => Promise<string> | string
 
-type AuthStrategy = ((ctx: Payload) => Strategy) | Strategy
+export type AuthStrategyFunctionArgs = {
+  headers: Request['headers']
+  isGraphQL?: boolean
+  payload: PayloadT
+  searchParams: URLSearchParams
+}
+export type AuthStrategyFunction = ({
+  headers,
+  isGraphQL,
+  payload,
+  searchParams,
+}: AuthStrategyFunctionArgs) => Promise<User | null> | User | null
+export type AuthStrategy = {
+  authenticate: AuthStrategyFunction
+  name: string
+}
 
 export interface IncomingAuthType {
   cookies?: {
@@ -108,10 +121,7 @@ export interface IncomingAuthType {
   lockTime?: number
   maxLoginAttempts?: number
   removeTokenFromResponses?: true
-  strategies?: {
-    name?: string
-    strategy: AuthStrategy
-  }[]
+  strategies?: AuthStrategy[]
   tokenExpiration?: number
   useAPIKey?: boolean
   verify?:

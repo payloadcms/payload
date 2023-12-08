@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 
 /**
  * complete a transaction calling adapter db.commitTransaction and delete the transactionID from req

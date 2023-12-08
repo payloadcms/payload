@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'

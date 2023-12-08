@@ -1,12 +1,12 @@
 import type { GeneratedTypes } from '../../..'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadT } from '../../..'
+import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
 import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import findOne from '../findOne'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
@@ -22,7 +22,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
 }
 
 export default async function findOneLocal<T extends keyof GeneratedTypes['globals']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {

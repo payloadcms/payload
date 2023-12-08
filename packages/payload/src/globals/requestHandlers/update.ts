@@ -1,11 +1,13 @@
 import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
+import { URL } from 'url'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Document } from '../../types'
 import type { SanitizedGlobalConfig } from '../config/types'
 
+import { isNumber } from '../../utilities/isNumber'
 import update from '../operations/update'
 
 export type UpdateGlobalResult = Promise<Response<Document> | void>
@@ -19,13 +21,15 @@ export default function updateHandler(globalConfig: SanitizedGlobalConfig): Upda
   return async function handler(req: PayloadRequest, res: Response, next: NextFunction) {
     try {
       const { slug } = globalConfig
-      const draft = req.query.draft === 'true'
-      const autosave = req.query.autosave === 'true'
+      const { searchParams } = new URL(req.url)
+      const depth = searchParams.get('depth')
+      const draft = searchParams.get('draft') === 'true'
+      const autosave = searchParams.get('autosave') === 'true'
 
       const result = await update({
         autosave,
         data: req.body,
-        depth: Number(req.query.depth),
+        depth: isNumber(depth) ? Number(depth) : undefined,
         draft,
         globalConfig,
         req,

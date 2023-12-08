@@ -1,40 +1,35 @@
-import type { Request } from 'express'
-
-import type { SanitizedConfig } from '../config/types'
+import type { AuthStrategyFunctionArgs } from '.'
 
 import parseCookies from '../utilities/parseCookies'
 
-const getExtractJWT =
-  (config: SanitizedConfig) =>
-  (req: Request): null | string => {
-    if (!req?.get) {
-      return null
-    }
+export const extractJWT = (
+  args: Pick<AuthStrategyFunctionArgs, 'headers' | 'payload'>,
+): null | string => {
+  const { headers, payload } = args
 
-    const jwtFromHeader = req.get('Authorization')
-    const origin = req.get('Origin')
+  const jwtFromHeader = headers.get('Authorization')
+  const origin = headers.get('Origin')
 
-    if (jwtFromHeader?.indexOf('JWT ') === 0) {
-      return jwtFromHeader.replace('JWT ', '')
-    }
-    // allow RFC6750 OAuth 2.0 compliant Bearer tokens
-    // in addition to the payload default JWT format
-    if (jwtFromHeader?.indexOf('Bearer ') === 0) {
-      return jwtFromHeader.replace('Bearer ', '')
-    }
+  if (jwtFromHeader?.startsWith('JWT ')) {
+    return jwtFromHeader.replace('JWT ', '')
+  }
+  // allow RFC6750 OAuth 2.0 compliant Bearer tokens
+  // in addition to the payload default JWT format
+  if (jwtFromHeader?.startsWith('Bearer ')) {
+    return jwtFromHeader.replace('Bearer ', '')
+  }
 
-    const cookies = parseCookies(req)
-    const tokenCookieName = `${config.cookiePrefix}-token`
+  const cookies = parseCookies(headers)
+  const tokenCookieName = `${payload.config.cookiePrefix}-token`
+  const cookieToken = cookies.get(tokenCookieName)
 
-    if (!cookies?.[tokenCookieName]) {
-      return null
-    }
-
-    if (!origin || config.csrf.length === 0 || config.csrf.indexOf(origin) > -1) {
-      return cookies[tokenCookieName]
-    }
-
+  if (!cookieToken) {
     return null
   }
 
-export default getExtractJWT
+  if (!origin || payload.config.csrf.length === 0 || payload.config.csrf.indexOf(origin) > -1) {
+    return cookieToken
+  }
+
+  return null
+}

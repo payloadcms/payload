@@ -1,7 +1,9 @@
 import type { NextFunction, Response } from 'express'
 
+import { URL } from 'url'
+
 import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 import type { Where } from '../types'
 
 import { Forbidden } from '../errors'
@@ -15,14 +17,15 @@ const getExecuteStaticAccess =
     }
 
     try {
-      if (req.path) {
+      const { pathname } = new URL(req.url)
+      if (pathname) {
         const accessResult = await executeAccess(
           { isReadingStaticFile: true, req },
           config.access.read,
         )
 
         if (typeof accessResult === 'object') {
-          const filename = decodeURI(req.path).replace(/^\/|\/$/g, '')
+          const filename = decodeURI(pathname).replace(/^\/|\/$/g, '')
 
           const queryToBuild: Where = {
             and: [

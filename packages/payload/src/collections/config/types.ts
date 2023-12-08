@@ -21,8 +21,8 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
-import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
+import type { PayloadRequest, RequestContext } from '../../types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
 import type { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types'
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils'

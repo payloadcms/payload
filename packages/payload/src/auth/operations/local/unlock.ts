@@ -1,11 +1,11 @@
+import type { PayloadT } from '../../..'
 import type { GeneratedTypes } from '../../../'
-import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadRequest } from '../../../types'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
 import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import unlock from '../unlock'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -18,7 +18,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 async function localUnlock<T extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<T>,
 ): Promise<boolean> {
   const {

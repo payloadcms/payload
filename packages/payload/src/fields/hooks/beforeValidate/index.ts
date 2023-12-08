@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types'
-import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types'
+import type { PayloadRequest, RequestContext } from '../../../types'
 
 import { deepCopyObject } from '../../../utilities/deepCopyObject'
 import { traverseFields } from './traverseFields'

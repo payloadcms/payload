@@ -6,6 +6,7 @@ import type pino from 'pino'
 
 import crypto from 'crypto'
 
+import type { AuthStrategy } from './auth'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword'
 import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword'
 import type { Options as LoginOptions } from './auth/operations/local/login'
@@ -35,7 +36,6 @@ import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types'
 import type { PaginatedDocs } from './database/types'
 import type { BuildEmailResult } from './email/types'
 import type { ErrorHandler } from './express/middleware/errorHandler'
-import type { RequestContext } from './express/types'
 import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID'
@@ -45,6 +45,8 @@ import type { Options as UpdateGlobalOptions } from './globals/operations/local/
 import type { TypeWithVersion } from './versions/types'
 
 import { decrypt, encrypt } from './auth/crypto'
+import { APIKeyAuthentication } from './auth/strategies/apiKey'
+import { JWTAuthentication } from './auth/strategies/jwt'
 import localOperations from './collections/operations/local'
 import buildEmail from './email/build'
 import { defaults as emailDefaults } from './email/defaults'
@@ -61,6 +63,8 @@ export class Payload<TGeneratedTypes extends GeneratedTypes> {
   Mutation: { fields: { [key: string]: any }; name: string } = { name: 'Mutation', fields: {} }
 
   Query: { fields: { [key: string]: any }; name: string } = { name: 'Query', fields: {} }
+
+  authStrategies: AuthStrategy[]
 
   collections: {
     [slug: number | string | symbol]: Collection
@@ -358,6 +362,39 @@ export class Payload<TGeneratedTypes extends GeneratedTypes> {
 
     serverInitTelemetry(this)
 
+    // 1. loop over collections, if collection has auth strategy, initialize and push to array
+    let jwtStrategyEnabled = false
+    this.authStrategies = this.config.collections.reduce((authStrategies, collection) => {
+      if (collection?.auth) {
+        if (collection.auth.strategies.length > 0) {
+          authStrategies.push(...collection.auth.strategies)
+        }
+
+        // 2. if api key enabled, push api key strategy into the array
+        if (collection.auth?.useAPIKey) {
+          authStrategies.push({
+            name: `${collection.slug}-api-key`,
+            authenticate: APIKeyAuthentication(collection),
+          })
+        }
+
+        // 3. if localStrategy flag is true
+        if (!collection.auth.disableLocalStrategy && !jwtStrategyEnabled) {
+          jwtStrategyEnabled = true
+        }
+      }
+
+      return authStrategies
+    }, [] as AuthStrategy[])
+
+    // 4. if enabled, push jwt strategy into authStrategies last
+    if (jwtStrategyEnabled) {
+      this.authStrategies.push({
+        name: 'local-jwt',
+        authenticate: JWTAuthentication,
+      })
+    }
+
     if (!options.disableOnInit) {
       if (typeof options.onInit === 'function') await options.onInit(this)
       if (typeof this.config.onInit === 'function') await this.config.onInit(this)
@@ -426,6 +463,12 @@ type GeneratedTypes = {
   }
 }
 
+type PayloadT = Payload<GeneratedTypes>
+
+interface RequestContext {
+  [key: string]: unknown
+}
+
 // type DatabaseAdapter = BaseDatabaseAdapter
 
-export type { GeneratedTypes, RequestContext }
+export type { GeneratedTypes, PayloadT, RequestContext }

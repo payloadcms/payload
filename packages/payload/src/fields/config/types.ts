@@ -6,6 +6,8 @@ import type { CSSProperties } from 'react'
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type React from 'react'
 
+import type { PayloadT } from '../../'
+// TODO(JAKE): fix admin component imports since fields moved
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
 import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
 import type { Description } from '../../admin/components/forms/FieldDescription/types'
@@ -15,9 +17,8 @@ import type { RichTextAdapter } from '../../admin/components/forms/field-types/R
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
-import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
-import type { Payload } from '../../payload'
+import type { PayloadRequest, RequestContext } from '../../types'
 import type { Operation, Where } from '../../types'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
@@ -125,7 +126,7 @@ export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
   data: Partial<TData>
   id?: number | string
   operation?: Operation
-  payload?: Payload
+  payload?: PayloadT
   req?: PayloadRequest
   siblingData: Partial<TSiblingData>
   t: TFunction

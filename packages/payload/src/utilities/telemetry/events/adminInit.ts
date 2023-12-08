@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 
 import { sendEvent } from '..'
 import { oneWayHash } from '../oneWayHash'
@@ -11,7 +11,7 @@ export type AdminInitEvent = {
 
 export const adminInit = (req: PayloadRequest): void => {
   const { payload, user } = req
-  const { host } = req.headers
+  const host = req.headers.get('host')
 
   let domainID: string
   let userID: string

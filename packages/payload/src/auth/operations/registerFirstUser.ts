@@ -1,9 +1,10 @@
+// TODO(JARROD): remove express Response
 import type { Response } from 'express'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../'
 import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import { Forbidden } from '../../errors'
 import { commitTransaction } from '../../utilities/commitTransaction'
@@ -17,6 +18,7 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
     password: string
   }
   req: PayloadRequest
+  // TODO(JARROD): remove express Response
   res: Response
 }
 

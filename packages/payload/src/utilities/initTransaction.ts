@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 
 /**
  * Starts a new transaction using the db adapter with a random id and then assigns it to the req.transaction

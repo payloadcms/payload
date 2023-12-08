@@ -1,7 +1,7 @@
+import type { PayloadT } from '..'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
-import type { PayloadRequest } from '../express/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { Payload } from '../payload'
+import type { PayloadRequest } from '../types'
 
 import { deepCopyObject } from '../utilities/deepCopyObject'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields'
@@ -14,7 +14,7 @@ type Args = {
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
-  payload: Payload
+  payload: PayloadT
   req?: PayloadRequest
 }
 

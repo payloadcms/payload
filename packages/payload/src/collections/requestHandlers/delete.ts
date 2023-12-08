@@ -1,12 +1,14 @@
 import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
+import { URL } from 'url'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Document, Where } from '../../types'
 
 import formatSuccessResponse from '../../express/responses/formatSuccess'
 import { getTranslation } from '../../utilities/getTranslation'
+import { isNumber } from '../../utilities/isNumber'
 import deleteOperation from '../operations/delete'
 
 export type DeleteResult = {
@@ -20,11 +22,15 @@ export default async function deleteHandler(
   next: NextFunction,
 ): Promise<Response<DeleteResult> | void> {
   try {
+    const { searchParams } = new URL(req.url)
+    const depth = searchParams.get('depth')
+    const where = searchParams.get('where')
+
     const result = await deleteOperation({
       collection: req.collection,
-      depth: parseInt(String(req.query.depth), 10),
+      depth: isNumber(depth) ? depth : undefined,
       req,
-      where: req.query.where as Where,
+      where: where ? (JSON.parse(where) as Where) : {},
     })
 
     if (result.errors.length === 0) {

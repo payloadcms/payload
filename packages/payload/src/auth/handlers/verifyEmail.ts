@@ -1,8 +1,9 @@
+// TODO(JARROD): remove reliance on express
 import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import verifyEmail from '../operations/verifyEmail'
 

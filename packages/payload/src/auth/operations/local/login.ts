@@ -1,14 +1,14 @@
 import type { Response } from 'express'
 
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadT } from '../../..'
 import type { GeneratedTypes } from '../../../index'
-import type { Payload } from '../../../payload'
+import type { PayloadRequest } from '../../../types'
 import type { Result } from '../login'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
 import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
 import login from '../login'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
@@ -27,7 +27,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
 }
 
 async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: Payload,
+  payload: PayloadT,
   options: Options<TSlug>,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   const {

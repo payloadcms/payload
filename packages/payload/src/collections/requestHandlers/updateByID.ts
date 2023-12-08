@@ -1,10 +1,12 @@
 import type { NextFunction, Response } from 'express'
 
 import httpStatus from 'http-status'
+import { URL } from 'url'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import formatSuccessResponse from '../../express/responses/formatSuccess'
+import { isNumber } from '../../utilities/isNumber'
 import updateByID from '../operations/updateByID'
 
 export type UpdateResult = {
@@ -30,15 +32,17 @@ export default async function updateByIDHandler(
   next: NextFunction,
 ): Promise<Response<UpdateResult> | void> {
   try {
-    const draft = req.query.draft === 'true'
-    const autosave = req.query.autosave === 'true'
+    const { searchParams } = new URL(req.url)
+    const depth = searchParams.get('depth')
+    const autosave = searchParams.get('autosave') === 'true'
+    const draft = searchParams.get('draft') === 'true'
 
     const doc = await updateByID({
       id: req.params.id,
       autosave,
       collection: req.collection,
       data: req.body,
-      depth: parseInt(String(req.query.depth), 10),
+      depth: isNumber(depth) ? Number(depth) : undefined,
       draft,
       req,
     })

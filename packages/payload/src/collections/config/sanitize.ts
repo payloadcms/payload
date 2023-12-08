@@ -137,6 +137,10 @@ const sanitizeCollection = (
       }
     }
 
+    if (!sanitized.auth.strategies) {
+      sanitized.auth.strategies = []
+    }
+
     sanitized.fields = mergeBaseFields(sanitized.fields, authFields)
   }
 

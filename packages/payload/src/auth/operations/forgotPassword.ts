@@ -1,7 +1,8 @@
 import crypto from 'crypto'
+import { URL } from 'url'
 
 import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
 import { APIError } from '../../errors'
@@ -97,10 +98,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
     })
 
     if (!disableEmail) {
+      const protocol = new URL(req.url).protocol
       const serverURL =
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
-          : `${req.protocol}://${req.get('host')}`
+          : `${protocol}://${req.headers.get('host')}`
 
       let html = `${t('authentication:youAreReceivingResetPassword')}
     <a href="${serverURL}${config.routes.admin}/reset/${token}">

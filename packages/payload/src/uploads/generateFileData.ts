@@ -7,10 +7,11 @@ import mkdirp from 'mkdirp'
 import path from 'path'
 import sanitize from 'sanitize-filename'
 import sharp from 'sharp'
+import { URL } from 'url'
 
 import type { Collection } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 import type { FileData, FileToSave, ProbedImageSize } from './types'
 
 import { FileUploadError, MissingFile } from '../errors'
@@ -53,7 +54,9 @@ export const generateFileData = async <T>({
   }
 
   let file = req.files?.file || undefined
-  const { uploadEdits } = req.query || {}
+
+  const { searchParams } = new URL(req.url)
+  const uploadEdits = searchParams.get('uploadEdits') || {}
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload

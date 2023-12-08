@@ -35,5 +35,25 @@
   "eslint.rules.customizations": [{ "rule": "*", "severity": "warn" }],
   "typescript.tsdk": "node_modules/typescript/lib",
   // Load .git-blame-ignore-revs file
-  "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"]
+  "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#ea59b2",
+    "activityBar.background": "#ea59b2",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#96e21d",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#e7e7e799",
+    "sash.hoverBorder": "#ea59b2",
+    "statusBar.background": "#e42c9d",
+    "statusBar.foreground": "#e7e7e7",
+    "statusBarItem.hoverBackground": "#ea59b2",
+    "statusBarItem.remoteBackground": "#e42c9d",
+    "statusBarItem.remoteForeground": "#e7e7e7",
+    "titleBar.activeBackground": "#e42c9d",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#e42c9d99",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  "peacock.color": "#e42c9d"
 }

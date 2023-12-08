@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { AllOperations } from '../../types'
 import type { Permissions } from '../types'
 

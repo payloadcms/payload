@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { TypeWithVersion } from '../../versions/types'
 import type { Collection, TypeWithID } from '../config/types'
 

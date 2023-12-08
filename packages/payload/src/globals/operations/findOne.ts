@@ -1,5 +1,5 @@
 import type { AccessResult } from '../../config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { Where } from '../../types'
 import type { SanitizedGlobalConfig } from '../config/types'
 

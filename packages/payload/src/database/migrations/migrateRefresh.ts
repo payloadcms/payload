@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { BaseDatabaseAdapter } from '../types'
 
 import { getMigrations } from './getMigrations'

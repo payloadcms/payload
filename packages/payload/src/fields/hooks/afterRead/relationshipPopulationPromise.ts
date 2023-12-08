@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 import type { RelationshipField, UploadField } from '../../config/types'
 
 import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types'

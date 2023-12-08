@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../types'
 
 /**
  * Creates a proxy for the given request that has its own TransactionID

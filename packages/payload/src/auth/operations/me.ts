@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken'
-import url from 'url'
+import { URL } from 'url'
 
 import type { Collection } from '../../collections/config/types'
-import type { PayloadRequest } from '../../express/types'
+import type { PayloadRequest } from '../../types'
 import type { User } from '../types'
 
-import getExtractJWT from '../getExtractJWT'
+import { extractJWT } from '../getExtractJWT'
 
 export type Result = {
   collection?: string
@@ -20,13 +20,12 @@ export type Arguments = {
 }
 
 async function me({ collection, req }: Arguments): Promise<Result> {
-  const extractJWT = getExtractJWT(req.payload.config)
   let response: Result = {
     user: null,
   }
 
   if (req.user) {
-    const parsedURL = url.parse(req.originalUrl)
+    const parsedURL = new URL(req.url)
     const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`
 
     const user = (await req.payload.findByID({

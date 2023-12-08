@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 

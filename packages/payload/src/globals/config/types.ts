@@ -17,9 +17,8 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
-import type { PayloadRequest } from '../../express/types'
-import type { RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
+import type { PayloadRequest, RequestContext } from '../../types'
 import type { Where } from '../../types'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
 

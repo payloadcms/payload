@@ -11,6 +11,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
+import type { PayloadT } from '..'
 import type {
   DocumentTab,
   DocumentTabComponent,
@@ -26,10 +27,9 @@ import type {
   SanitizedCollectionConfig,
 } from '../collections/config/types'
 import type { BaseDatabaseAdapter } from '../database/types'
-import type { PayloadRequest } from '../express/types'
 import type { ClientConfigField, Field } from '../fields/config/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
-import type { Payload } from '../payload'
+import type { PayloadRequest } from '../types'
 import type { Where } from '../types'
 
 type Prettify<T> = {
@@ -114,7 +114,7 @@ export function hasTransportOptions(
 
 export type GraphQLExtension = (
   graphQL: typeof GraphQL,
-  payload: Payload,
+  payload: PayloadT,
 ) => Record<string, unknown>
 
 export type InitOptions = {
@@ -163,7 +163,7 @@ export type InitOptions = {
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
-  onInit?: (payload: Payload) => Promise<void> | void
+  onInit?: (payload: PayloadT) => Promise<void> | void
 }
 
 /**
@@ -517,7 +517,7 @@ export type Config = {
   custom?: Record<string, any>
 
   /** Pass in a database adapter for use on this project. */
-  db: (args: { payload: Payload }) => BaseDatabaseAdapter
+  db: (args: { payload: PayloadT }) => BaseDatabaseAdapter
   /** Enable to expose more detailed error information. */
   debug?: boolean
   /**
@@ -634,7 +634,7 @@ export type Config = {
    */
   maxDepth?: number
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
-  onInit?: (payload: Payload) => Promise<void> | void
+  onInit?: (payload: PayloadT) => Promise<void> | void
   /**
    * An array of Payload plugins.
    *
