@@ -64,6 +64,7 @@ export function LinkEditor({
 
   const [fieldSchema] = useState(() => {
     const fieldsUnsanitized = transformExtraFields(
+      uuid,
       customFieldSchema,
       config,
       i18n,

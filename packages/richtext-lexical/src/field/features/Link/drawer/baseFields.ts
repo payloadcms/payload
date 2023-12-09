@@ -16,6 +16,7 @@ const translations = extractTranslations([
 ])
 
 export const getBaseFields = (
+  uuid: string,
   config: Config,
   enabledCollections: false | string[],
   disabledCollections: false | string[],
@@ -38,6 +39,10 @@ export const getBaseFields = (
       .map(({ slug }) => slug)
   }
 
+  // Appending the uuid to the field group name ensures that the field group name is unique if two
+  // Link drawers are open at the same time (e.g. you open a link drawer from a link drawer in some higher editor depth)
+  const fieldGroupName = `fields_${uuid}`
+
   const baseFields = [
     {
       name: 'text',
@@ -46,7 +51,7 @@ export const getBaseFields = (
       type: 'text',
     },
     {
-      name: 'fields',
+      name: fieldGroupName,
       admin: {
         style: {
           borderBottom: 0,
@@ -79,6 +84,7 @@ export const getBaseFields = (
           type: 'text',
         },
       ] as Field[],
+      label: '',
       type: 'group',
     },
   ]
@@ -90,14 +96,16 @@ export const getBaseFields = (
       value: 'internal',
     })
     ;(baseFields[1].fields[1] as TextField).admin = {
-      condition: ({ fields }) => fields?.linkType !== 'internal',
+      condition: (data) => {
+        return data[fieldGroupName]?.linkType !== 'internal'
+      },
     }
 
     baseFields[1].fields.push({
       name: 'doc',
       admin: {
-        condition: ({ fields }) => {
-          return fields?.linkType === 'internal'
+        condition: (data) => {
+          return data[fieldGroupName]?.linkType === 'internal'
         },
       },
       label: translations['fields:chooseDocumentToLink'],
