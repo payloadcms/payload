@@ -41,7 +41,7 @@ export const getBaseFields = (
 
   // Appending the uuid to the field group name ensures that the field group name is unique if two
   // Link drawers are open at the same time (e.g. you open a link drawer from a link drawer in some higher editor depth)
-  const fieldGroupName = `fields_${uuid}`
+  const fieldGroupName = `linkDrawer_fields_${uuid}`
 
   const baseFields = [
     {

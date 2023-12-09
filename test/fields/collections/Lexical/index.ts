@@ -42,6 +42,103 @@ export const LexicalFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           //TestRecorderFeature(),
+          UploadFeature({
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'linkType',
+                    defaultValue: 'custom',
+                    options: [
+                      {
+                        label: 'Custom',
+                        value: 'custom',
+                      },
+                      {
+                        label: 'AA',
+                        value: 'aa',
+                      },
+                    ],
+                    required: true,
+                    type: 'radio',
+                  },
+                  {
+                    name: 'doc',
+                    admin: {
+                      condition: (data) => {
+                        return data?.linkType === 'custom'
+                      },
+                    },
+                    required: true,
+                    type: 'text',
+                  },
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                    editor: lexicalEditor({
+                      features: ({ defaultFeatures }) => [
+                        ...defaultFeatures,
+                        //TestRecorderFeature(),
+                        UploadFeature({
+                          collections: {
+                            uploads: {
+                              fields: [
+                                {
+                                  name: 'linkType',
+                                  defaultValue: 'custom',
+                                  options: [
+                                    {
+                                      label: 'Custom',
+                                      value: 'custom',
+                                    },
+                                    {
+                                      label: 'AA',
+                                      value: 'aa',
+                                    },
+                                  ],
+                                  required: true,
+                                  type: 'radio',
+                                },
+                                {
+                                  name: 'doc',
+                                  admin: {
+                                    condition: (data) => {
+                                      return data?.linkType === 'custom'
+                                    },
+                                  },
+                                  required: true,
+                                  type: 'text',
+                                },
+                                {
+                                  name: 'caption',
+                                  type: 'richText',
+                                  editor: lexicalEditor(),
+                                },
+                              ],
+                            },
+                          },
+                        }),
+                        TreeviewFeature(),
+                        BlocksFeature({
+                          blocks: [
+                            RichTextBlock,
+                            TextBlock,
+                            UploadAndRichTextBlock,
+                            SelectFieldBlock,
+                            RelationshipBlock,
+                            RelationshipHasManyBlock,
+                            SubBlockBlock,
+                            RadioButtonsBlock,
+                            ConditionalLayoutBlock,
+                          ],
+                        }),
+                      ],
+                    }),
+                  },
+                ],
+              },
+            },
+          }),
           TreeviewFeature(),
           BlocksFeature({
             blocks: [

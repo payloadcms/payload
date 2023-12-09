@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { GroupField, SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -34,33 +34,25 @@ export const ExtraFieldsUploadDrawer: React.FC<
   }
 > = (props) => {
   const {
-    data: { fields, relationTo, value },
+    data: { fields },
     drawerSlug,
     nodeKey,
     relatedCollection,
   } = props
 
   const [editor] = useLexicalComposerContext()
-  const { editorConfig, field } = useEditorConfigContext()
+  const { editorConfig, uuid } = useEditorConfigContext()
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
   const { user } = useAuth()
   const { closeModal } = useModal()
   const { getDocPreferences } = useDocumentInfo()
-  const [initialState, setInitialState] = useState({})
-  const fieldSchemaUnsanitized = (
-    editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps
-  )?.collections?.[relatedCollection.slug]?.fields
-  const config = useConfig()
+  const [initialState, setInitialState] = useState(null)
+  const [sanitizedFieldSchema, setSanitizedFieldSchema] = useState(null)
+  const [groupFieldName, setGroupFieldName] = useState(null)
 
-  // Sanitize custom fields here
-  const validRelationships = config.collections.map((c) => c.slug) || []
-  const fieldSchema = sanitizeFields({
-    config: config,
-    fields: fieldSchemaUnsanitized,
-    validRelationships,
-  })
+  const config = useConfig()
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
@@ -68,9 +60,10 @@ export const ExtraFieldsUploadDrawer: React.FC<
       editor.update(() => {
         const uploadNode: UploadNode | null = $getNodeByKey(nodeKey)
         if (uploadNode) {
+          console.log('uploadNodedata', data[groupFieldName])
           const newData: UploadData = {
             ...uploadNode.getData(),
-            fields: data,
+            fields: groupFieldName ? data[groupFieldName] : null,
           }
           uploadNode.setData(newData)
         }
@@ -78,23 +71,48 @@ export const ExtraFieldsUploadDrawer: React.FC<
 
       closeModal(drawerSlug)
     },
-    [closeModal, editor, drawerSlug, nodeKey],
+    [closeModal, editor, drawerSlug, nodeKey, groupFieldName],
   )
 
   useEffect(() => {
+    const newGroupFieldName = `uploadDrawer_fields_${uuid}`
+    setGroupFieldName(newGroupFieldName)
+    const groupField: GroupField = {
+      name: newGroupFieldName,
+      admin: {
+        style: {
+          borderBottom: 0,
+          borderTop: 0,
+          margin: 0,
+          padding: 0,
+        },
+      },
+      fields: [],
+      label: '',
+      type: 'group',
+    }
+
+    groupField.fields = (
+      editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps
+    )?.collections?.[relatedCollection.slug]?.fields
+
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fieldSchema = sanitizeFields({
       config: config,
-      fields: fieldSchemaUnsanitized,
+      fields: [groupField],
       validRelationships,
     })
+
+    setSanitizedFieldSchema(fieldSchema)
 
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         config,
-        data: deepCopyObject(fields || {}),
+        data: {
+          [newGroupFieldName]: deepCopyObject(fields || {}),
+        },
         fieldSchema,
         locale,
         operation: 'update',
@@ -102,11 +120,21 @@ export const ExtraFieldsUploadDrawer: React.FC<
         t,
         user,
       })
-      setInitialState(state)
+      setInitialState(state || {})
     }
 
     void awaitInitialState()
-  }, [user, locale, t, getDocPreferences, fields, fieldSchemaUnsanitized, config])
+  }, [
+    user,
+    locale,
+    t,
+    getDocPreferences,
+    fields,
+    uuid,
+    config,
+    relatedCollection.slug,
+    editorConfig?.resolvedFeatureMap,
+  ])
 
   return (
     <Drawer
@@ -115,10 +143,20 @@ export const ExtraFieldsUploadDrawer: React.FC<
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
     >
-      <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
-        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-      </Form>
+      {sanitizedFieldSchema && initialState && (
+        <Form
+          fields={sanitizedFieldSchema}
+          initialState={initialState}
+          onSubmit={handleUpdateEditData}
+        >
+          <RenderFields
+            fieldSchema={sanitizedFieldSchema}
+            fieldTypes={fieldTypes}
+            readOnly={false}
+          />
+          <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+        </Form>
+      )}
     </Drawer>
   )
 }

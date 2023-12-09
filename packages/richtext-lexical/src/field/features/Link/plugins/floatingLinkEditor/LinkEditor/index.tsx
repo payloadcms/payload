@@ -22,7 +22,7 @@ import {
   useLocale,
 } from 'payload/components/utilities'
 import { sanitizeFields } from 'payload/config'
-import { getTranslation } from 'payload/utilities'
+import { deepCopyObject, getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -108,8 +108,8 @@ export function LinkEditor({
       }
 
       // Initial state:
-      const data: LinkPayload = {
-        fields: {
+      const data: any = {
+        [`linkDrawer_fields_${uuid}`]: {
           doc: undefined,
           linkType: undefined,
           newTab: undefined,
@@ -190,7 +190,7 @@ export function LinkEditor({
     }
 
     return true
-  }, [anchorElem, editor, fieldSchema, config, getDocPreferences, locale, t, user, i18n])
+  }, [anchorElem, editor, fieldSchema, config, getDocPreferences, locale, t, user, i18n, uuid])
 
   useEffect(() => {
     return mergeRegister(
@@ -324,11 +324,15 @@ export function LinkEditor({
         handleModalSubmit={(fields: Fields, data: Data) => {
           closeModal(drawerSlug)
 
+          data.fields = deepCopyObject(data[`linkDrawer_fields_${uuid}`])
+          delete data[`linkDrawer_fields_${uuid}`]
+
           if (data?.fields?.doc?.value) {
             data.fields.doc.value = {
-              id: data.fields.doc.value,
+              id: data?.fields?.doc.value,
             }
           }
+
           const newLinkPayload: LinkPayload = data as LinkPayload
 
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)
