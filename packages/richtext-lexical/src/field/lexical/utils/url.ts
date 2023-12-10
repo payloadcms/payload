@@ -26,7 +26,12 @@ const urlRegExp =
   /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z\d.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z\d.-]+)((?:\/[+~%/.\w-]*)?\??[-+=&;%@.\w]*#?\w*)?)/
 
 export function validateUrl(url: string): boolean {
+  console.log('validateUrl testing URL', urlRegExp.test(url), 'for URL', url)
   // TODO Fix UI for link insertion; it should never default to an invalid URL such as https://.
   // Maybe show a dialog where they user can type the URL before inserting it.
-  return url === 'https://' || urlRegExp.test(url)
+  return (
+    url === 'https://' ||
+    urlRegExp.test(url) ||
+    (url.startsWith('tel:+') && !!url.split('tel:+')[1].match(/^\d+$/))
+  )
 }
