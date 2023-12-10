@@ -1,7 +1,13 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
-import { COMMAND_PRIORITY_EDITOR } from 'lexical'
+import {
+  $getPreviousSelection,
+  $getSelection,
+  $isParagraphNode,
+  $isRangeSelection,
+  COMMAND_PRIORITY_EDITOR,
+} from 'lexical'
 import React, { useEffect } from 'react'
 
 import type { BlockFields } from '../nodes/BlocksNode'
@@ -27,7 +33,19 @@ export function BlocksPlugin(): JSX.Element | null {
           editor.update(() => {
             const blockNode = $createBlockNode(payload)
 
-            $insertNodeToNearestRoot(blockNode)
+            const selection = $getSelection() || $getPreviousSelection()
+
+            if ($isRangeSelection(selection)) {
+              const { focus } = selection
+              const focusNode = focus.getNode()
+
+              // First, delete currently selected node if it's an empty paragraph
+              if ($isParagraphNode(focusNode) && focusNode.getTextContentSize() === 0) {
+                focusNode.remove()
+              }
+
+              $insertNodeToNearestRoot(blockNode)
+            }
           })
 
           return true
