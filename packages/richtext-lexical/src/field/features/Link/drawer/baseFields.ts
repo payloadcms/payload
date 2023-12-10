@@ -4,6 +4,8 @@ import type { RadioField, TextField } from 'payload/types'
 
 import { extractTranslations } from 'payload/utilities'
 
+import { validateUrl } from '../../../lexical/utils/url'
+
 const translations = extractTranslations([
   'fields:textToDisplay',
   'fields:linkType',
@@ -77,6 +79,11 @@ export const getBaseFields = (
           label: translations['fields:enterURL'],
           required: true,
           type: 'text',
+          validate: (value: string) => {
+            if (value && !validateUrl(value)) {
+              return 'Invalid URL'
+            }
+          },
         },
       ] as Field[],
       type: 'group',
