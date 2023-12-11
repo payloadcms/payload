@@ -102,11 +102,7 @@ export const sanitizeFields = ({
       }))
     }
 
-    if (
-      field.type === 'array' &&
-      field.fields &&
-      !field.fields.some((field) => 'name' in field && field?.name === 'id')
-    ) {
+    if (field.type === 'array' && field.fields) {
       field.fields.push(baseIDField)
     }
 
@@ -117,7 +113,7 @@ export const sanitizeFields = ({
     if (fieldAffectsData(field)) {
       if (existingFieldNames.has(field.name)) {
         throw new DuplicateFieldName(field.name)
-      } else {
+      } else if (!['id', 'blockName'].includes(field.name)) {
         existingFieldNames.add(field.name)
       }
 
