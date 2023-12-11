@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
-import Link from 'next/link'
 import { Text } from 'slate'
 import { CMSLink } from '../Link'
+import { Media } from '../Media'
 
 // eslint-disable-next-line no-use-before-define
 type Children = Leaf[]
@@ -15,7 +15,10 @@ type Leaf = {
   [key: string]: unknown
 }
 
-const serialize = (children?: Children): React.ReactNode[] =>
+const serializeSlate = (
+  children?: Children,
+  renderUploadFilenameOnly?: boolean,
+): React.ReactNode[] =>
   children?.map((node, i) => {
     if (Text.isText(node)) {
       let text = <span dangerouslySetInnerHTML={{ __html: escapeHTML(node.text) }} />
@@ -57,25 +60,39 @@ const serialize = (children?: Children): React.ReactNode[] =>
 
     switch (node.type) {
       case 'h1':
-        return <h1 key={i}>{serialize(node?.children)}</h1>
+        return <h1 key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</h1>
+
       case 'h2':
-        return <h2 key={i}>{serialize(node?.children)}</h2>
+        return <h2 key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</h2>
+
       case 'h3':
-        return <h3 key={i}>{serialize(node?.children)}</h3>
+        return <h3 key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</h3>
+
       case 'h4':
-        return <h4 key={i}>{serialize(node?.children)}</h4>
+        return <h4 key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</h4>
+
       case 'h5':
-        return <h5 key={i}>{serialize(node?.children)}</h5>
+        return <h5 key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</h5>
+
       case 'h6':
-        return <h6 key={i}>{serialize(node?.children)}</h6>
+        return <h6 key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</h6>
+
       case 'quote':
-        return <blockquote key={i}>{serialize(node?.children)}</blockquote>
+        return (
+          <blockquote key={i}>
+            {serializeSlate(node?.children, renderUploadFilenameOnly)}
+          </blockquote>
+        )
+
       case 'ul':
-        return <ul key={i}>{serialize(node?.children)}</ul>
+        return <ul key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</ul>
+
       case 'ol':
-        return <ol key={i}>{serialize(node.children)}</ol>
+        return <ol key={i}>{serializeSlate(node.children, renderUploadFilenameOnly)}</ol>
+
       case 'li':
-        return <li key={i}>{serialize(node.children)}</li>
+        return <li key={i}>{serializeSlate(node.children, renderUploadFilenameOnly)}</li>
+
       case 'relationship':
         return (
           <span key={i}>
@@ -84,6 +101,7 @@ const serialize = (children?: Children): React.ReactNode[] =>
               : node.value}
           </span>
         )
+
       case 'link':
         return (
           <CMSLink
@@ -93,13 +111,20 @@ const serialize = (children?: Children): React.ReactNode[] =>
             reference={node.doc as any}
             newTab={Boolean(node?.newTab)}
           >
-            {serialize(node?.children)}
+            {serializeSlate(node?.children, renderUploadFilenameOnly)}
           </CMSLink>
         )
 
+      case 'upload':
+        if (renderUploadFilenameOnly) {
+          return <span key={i}>{node.value.filename}</span>
+        }
+
+        return <Media key={i} resource={node?.value} />
+
       default:
-        return <p key={i}>{serialize(node?.children)}</p>
+        return <p key={i}>{serializeSlate(node?.children, renderUploadFilenameOnly)}</p>
     }
   }) || []
 
-export default serialize
+export default serializeSlate
