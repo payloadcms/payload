@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
 export function sanitizeUrl(url: string): string {
   /** A pattern that matches safe  URLs. */
   const SAFE_URL_PATTERN = /^(?:(?:https?|mailto|ftp|tel|file|sms):|[^&:/?#]*(?:[/?#]|$))/gi
@@ -28,9 +20,19 @@ const urlRegExp =
 export function validateUrl(url: string): boolean {
   // TODO Fix UI for link insertion; it should never default to an invalid URL such as https://.
   // Maybe show a dialog where they user can type the URL before inserting it.
-  return (
-    url === 'https://' ||
-    urlRegExp.test(url) ||
-    (url.startsWith('tel:+') && !!url.split('tel:+')[1].match(/^\d+$/))
-  )
+
+  if (url === 'https://') return true
+
+  // This makes sure URLs starting with www. instead of https are valid too
+  if (urlRegExp.test(url)) return true
+
+  // While this doesn't allow URLs starting with www (which is why we use the regex above), it does properly handle tel: URLs
+  try {
+    new URL(url)
+    return true
+  } catch {
+    /* empty */
+  }
+
+  return false
 }
