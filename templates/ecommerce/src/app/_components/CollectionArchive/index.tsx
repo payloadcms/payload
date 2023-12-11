@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import qs from 'qs'
 
 import type { Product } from '../../../payload/payload-types'
@@ -75,7 +75,7 @@ export const CollectionArchive: React.FC<Props> = props => {
   const isRequesting = useRef(false)
   const [page, setPage] = useState(1)
 
-  const categories = useMemo(() => catsFromProps.map(cat => cat.id).join(','), [catsFromProps])
+  const categories = catsFromProps.map(cat => cat.id).join(',')
 
   const scrollToRef = useCallback(() => {
     const { current } = scrollRef
@@ -102,7 +102,7 @@ export const CollectionArchive: React.FC<Props> = props => {
       // don't show loader unless the request takes longer than x ms
       // and don't show it during initial hydration
       timer = setTimeout(() => {
-        if (!hasHydrated.current) {
+        if (hasHydrated.current) {
           setIsLoading(true)
         }
       }, 500)
@@ -134,7 +134,6 @@ export const CollectionArchive: React.FC<Props> = props => {
 
           const json = await req.json()
           clearTimeout(timer)
-          hasHydrated.current = true
 
           const { docs } = json as { docs: Product[] }
 
@@ -152,6 +151,7 @@ export const CollectionArchive: React.FC<Props> = props => {
         }
 
         isRequesting.current = false
+        hasHydrated.current = true
       }
 
       void makeRequest()
