@@ -251,6 +251,22 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('data from local API')
     })
 
+    it('should pass context from local API to global hooks', async () => {
+      const globalDocument = await payload.findGlobal({
+        slug: dataHooksGlobalSlug,
+      })
+
+      expect(globalDocument.field_globalAndField).not.toEqual('data from local API context')
+
+      const globalDocumentWithContext = await payload.findGlobal({
+        slug: dataHooksGlobalSlug,
+        context: {
+          field_beforeChange_GlobalAndField_override: 'data from local API context',
+        },
+      })
+      expect(globalDocumentWithContext.field_globalAndField).toEqual('data from local API context')
+    })
+
     it('should pass context from rest API to hooks', async () => {
       const params = new URLSearchParams({
         context_secretValue: 'data from rest API',
