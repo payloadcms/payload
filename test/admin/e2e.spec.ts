@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
-import type { Post } from './payload-types'
+import type { Geo, Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
@@ -36,6 +36,7 @@ import {
 } from './shared'
 import {
   customViews2CollectionSlug,
+  geoCollectionSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
@@ -52,12 +53,14 @@ const description = 'Description'
 describe('admin', () => {
   let page: Page
   let url: AdminUrlUtil
+  let geoUrl: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
 
     const context = await browser.newContext()
@@ -258,6 +261,68 @@ describe('admin', () => {
     test('global - should not enable API route when disabled in config', async () => {
       await page.goto(`${url.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
+    })
+  })
+
+  describe('app-header', () => {
+    test('should show admin level action in admin panel', async () => {
+      await page.goto(url.admin)
+      // Check if the element with the class .admin-button exists
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show admin level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show admin level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show collection list view level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+    })
+
+    test('should show collection edit view level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .collection-edit-button')).toHaveCount(1)
+    })
+
+    test('should show collection api view level action in collection api view', async () => {
+      const { id } = await createGeo()
+      await page.goto(`${geoUrl.edit(id)}/api`)
+      await expect(page.locator('.app-header .collection-api-button')).toHaveCount(1)
+    })
+
+    test('should show collection versions view level action in collection versions view', async () => {
+      const { id } = await createGeo()
+      await page.goto(`${geoUrl.edit(id)}/versions`)
+      await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
+    })
+
+    // TODO: Check versions/:version-id view
+
+    test('should show global edit view level action in globals edit view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(globalWithPreview.global(globalSlug))
+      await expect(page.locator('.app-header .global-edit-button')).toHaveCount(1)
+    })
+
+    test('should show global api view level action in globals api view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
+      await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
+    })
+
+    test('should show global versions view level action in globals versions view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(`${globalWithPreview.global(globalSlug)}/versions`)
+      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
     })
   })
 
@@ -1191,6 +1256,16 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
   }) as unknown as Promise<Post>
+}
+
+async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
+  return payload.create({
+    collection: geoCollectionSlug,
+    data: {
+      point: [4, -4],
+      ...overrides,
+    },
+  }) as unknown as Promise<Geo>
 }
 
 async function deleteAllPosts() {
