@@ -277,7 +277,7 @@ export function DropDown({
         type="button"
       >
         <Icon />
-        <i className={`${buttonClassName}-caret`} />
+        <i className="floating-select-toolbar-popup__dropdown-caret" />
       </button>
 
       {showDropDown &&
