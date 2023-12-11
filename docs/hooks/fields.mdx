@@ -145,21 +145,27 @@ The `afterChange` hook is executed after a field's value has been changed and sa
 ```ts
 import { Field } from 'payload/types'
 
-const passwordField: Field = {
-  name: 'password',
-  type: 'text',
+const membershipStatusField: Field = {
+  name: 'membershipStatus',
+  type: 'select',
+  options: [
+    { label: 'Standard', value: 'standard' },
+    { label: 'Premium', value: 'premium' },
+    { label: 'VIP', value: 'vip' }
+  ],
   hooks: {
     afterChange: [({ value, previousValue, req }) => {
       if (value !== previousValue) {
-        // Log or perform an action due to the password change
-        console.log(`Password for user ${req.user.id} has been changed.`)
+        // Log or perform an action when the membership status changes
+        console.log(`User ID ${req.user.id} changed their membership status from ${previousValue} to ${value}.`)
+        // Here, you can implement actions that could track conversions from one tier to another
       }
     }],
   }
 }
 ```
 
-In this example, the `afterChange` hook is attached to the `passwordField`. The hook compares the current `value` of the field with the `previousValue`. If there's a change in the password, it logs a message indicating that the user's password has been changed. This can be particularly useful for audit trails, security monitoring, or triggering additional actions like sending a password change confirmation email to the user.
+In this example, the `afterChange` hook is used with a `membershipStatusField`, which allows users to select their membership level (Standard, Premium, VIP). The hook monitors changes in the membership status. When a change occurs, it logs the update and can be used to trigger further actions, such as tracking conversion from one tier to another or notifying them about changes in their membership benefits.
 
 ### afterRead
 
