@@ -102,7 +102,11 @@ export const sanitizeFields = ({
       }))
     }
 
-    if (field.type === 'array' && field.fields) {
+    if (
+      field.type === 'array' &&
+      field.fields &&
+      !field.fields.some((field) => 'name' in field && field?.name === 'id')
+    ) {
       field.fields.push(baseIDField)
     }
 
@@ -141,12 +145,9 @@ export const sanitizeFields = ({
     }
 
     if ('fields' in field && field.fields) {
-      if (fieldAffectsData(field)) {
-        existingFieldNames = new Set()
-      }
       field.fields = sanitizeFields({
         config,
-        existingFieldNames,
+        existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
         validRelationships,
       })
@@ -157,12 +158,11 @@ export const sanitizeFields = ({
         const unsanitizedTab = { ...tab }
         if (tabHasName(tab) && typeof tab.label === 'undefined') {
           unsanitizedTab.label = toWords(tab.name)
-          existingFieldNames = new Set()
         }
 
         unsanitizedTab.fields = sanitizeFields({
           config,
-          existingFieldNames,
+          existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
           validRelationships,
         })
@@ -182,6 +182,7 @@ export const sanitizeFields = ({
           config,
           fields: block.fields,
           validRelationships,
+          existingFieldNames: new Set(),
         })
 
         return unsanitizedBlock
