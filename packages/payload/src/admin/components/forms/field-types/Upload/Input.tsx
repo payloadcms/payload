@@ -88,7 +88,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   })
 
   useEffect(() => {
-    if (typeof value !== 'undefined' && value !== '') {
+    if (value !== null && typeof value !== 'undefined' && value !== '') {
       const fetchFile = async () => {
         const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
           credentials: 'include',

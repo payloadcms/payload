@@ -10,9 +10,11 @@ import {
   COMMAND_PRIORITY_LOW,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
+
+import type { FloatingToolbarSection, FloatingToolbarSectionEntry } from './types'
 
 import { useEditorConfigContext } from '../../config/EditorConfigProvider'
 import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
@@ -20,6 +22,123 @@ import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
 import { ToolbarButton } from './ToolbarButton'
 import { ToolbarDropdown } from './ToolbarDropdown'
 import './index.scss'
+
+function ButtonSectionEntry({
+  anchorElem,
+  editor,
+  entry,
+}: {
+  anchorElem: HTMLElement
+  editor: LexicalEditor
+  entry: FloatingToolbarSectionEntry
+}): JSX.Element {
+  const Component = useMemo(() => {
+    return entry?.Component
+      ? React.lazy(() =>
+          entry.Component().then((resolvedComponent) => ({
+            default: resolvedComponent,
+          })),
+        )
+      : null
+  }, [entry])
+
+  const ChildComponent = useMemo(() => {
+    return entry?.ChildComponent
+      ? React.lazy(() =>
+          entry.ChildComponent().then((resolvedChildComponent) => ({
+            default: resolvedChildComponent,
+          })),
+        )
+      : null
+  }, [entry])
+
+  if (entry.Component) {
+    return (
+      Component && (
+        <React.Suspense>
+          <Component anchorElem={anchorElem} editor={editor} entry={entry} key={entry.key} />{' '}
+        </React.Suspense>
+      )
+    )
+  }
+
+  return (
+    <ToolbarButton entry={entry} key={entry.key}>
+      {ChildComponent && (
+        <React.Suspense>
+          <ChildComponent />
+        </React.Suspense>
+      )}
+    </ToolbarButton>
+  )
+}
+
+function ToolbarSection({
+  anchorElem,
+  editor,
+  index,
+  section,
+}: {
+  anchorElem: HTMLElement
+  editor: LexicalEditor
+  index: number
+  section: FloatingToolbarSection
+}): JSX.Element {
+  const { editorConfig } = useEditorConfigContext()
+
+  const Icon = useMemo(() => {
+    return section?.type === 'dropdown' && section.entries.length && section.ChildComponent
+      ? React.lazy(() =>
+          section.ChildComponent().then((resolvedComponent) => ({
+            default: resolvedComponent,
+          })),
+        )
+      : null
+  }, [section])
+
+  return (
+    <div
+      className={`floating-select-toolbar-popup__section floating-select-toolbar-popup__section-${section.key}`}
+      key={section.key}
+    >
+      {section.type === 'dropdown' &&
+        section.entries.length &&
+        (Icon ? (
+          <React.Suspense>
+            <ToolbarDropdown
+              Icon={Icon}
+              anchorElem={anchorElem}
+              editor={editor}
+              entries={section.entries}
+              sectionKey={section.key}
+            />
+          </React.Suspense>
+        ) : (
+          <ToolbarDropdown
+            anchorElem={anchorElem}
+            editor={editor}
+            entries={section.entries}
+            sectionKey={section.key}
+          />
+        ))}
+      {section.type === 'buttons' &&
+        section.entries.length &&
+        section.entries.map((entry) => {
+          return (
+            <ButtonSectionEntry
+              anchorElem={anchorElem}
+              editor={editor}
+              entry={entry}
+              key={entry.key}
+            />
+          )
+        })}
+      {index < editorConfig.features.floatingSelectToolbar?.sections.length - 1 && (
+        <div className="divider" />
+      )}
+    </div>
+  )
+}
 
 function FloatingSelectToolbar({
   anchorElem,
@@ -176,41 +295,13 @@ function FloatingSelectToolbar({
           {editorConfig?.features &&
             editorConfig.features?.floatingSelectToolbar?.sections.map((section, i) => {
               return (
-                <div
-                  className={`floating-select-toolbar-popup__section floating-select-toolbar-popup__section-${section.key}`}
+                <ToolbarSection
+                  anchorElem={anchorElem}
+                  editor={editor}
+                  index={i}
                   key={section.key}
-                >
-                  {section.type === 'dropdown' && section.entries.length && (
-                    <ToolbarDropdown
-                      Icon={section.ChildComponent}
-                      anchorElem={anchorElem}
-                      editor={editor}
-                      entries={section.entries}
-                    />
-                  )}
-                  {section.type === 'buttons' &&
-                    section.entries.length &&
-                    section.entries.map((entry) => {
-                      if (entry.Component) {
-                        return (
-                          <entry.Component
-                            anchorElem={anchorElem}
-                            editor={editor}
-                            entry={entry}
-                            key={entry.key}
-                          />
-                        )
-                      }
-                      return (
-                        <ToolbarButton entry={entry} key={entry.key}>
-                          <entry.ChildComponent />
-                        </ToolbarButton>
-                      )
-                    })}
-                  {i < editorConfig.features.floatingSelectToolbar?.sections.length - 1 && (
-                    <div className="divider" />
-                  )}
-                </div>
+                  section={section}
+                />
               )
             })}
         </React.Fragment>

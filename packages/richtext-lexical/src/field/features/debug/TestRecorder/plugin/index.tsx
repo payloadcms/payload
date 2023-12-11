@@ -1,5 +1,5 @@
 'use client'
-import type { GridSelection, LexicalEditor, NodeSelection, RangeSelection } from 'lexical'
+import type { BaseSelection, LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical'
@@ -141,7 +141,7 @@ function useTestRecorder(editor: LexicalEditor): [JSX.Element, JSX.Element | nul
   const [isRecording, setIsRecording] = useState(false)
   const [, setCurrentInnerHTML] = useState('')
   const [templatedTest, setTemplatedTest] = useState('')
-  const previousSelectionRef = useRef<GridSelection | NodeSelection | RangeSelection | null>(null)
+  const previousSelectionRef = useRef<BaseSelection | null>(null)
   const skipNextSelectionChangeRef = useRef(false)
   const preRef = useRef<HTMLPreElement>(null)
 

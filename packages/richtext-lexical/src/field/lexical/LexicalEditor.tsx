@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider'
 
+import { EditorPlugin } from './EditorPlugin'
 import './LexicalEditor.scss'
 import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut'
@@ -53,7 +54,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
     <React.Fragment>
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'top') {
-          return <plugin.Component key={plugin.key} />
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
         }
       })}
       <RichTextPlugin
@@ -65,10 +66,12 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
             </div>
           </div>
         }
-        placeholder={<p className="editor-placeholder">Start typing, or press '/' for commands...</p>}
+        placeholder={
+          <p className="editor-placeholder">Start typing, or press '/' for commands...</p>
+        }
       />
       <OnChangePlugin
-        // Selection changes can be ignore here, reducing the
+        // Selection changes can be ignored here, reducing the
         // frequency that the FieldComponent and Payload receive updates.
         // Selection changes are only needed if you are saving selection state
         ignoreSelectionChange
@@ -92,7 +95,9 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
               plugin.position === 'floatingAnchorElem' &&
               !(plugin.desktopOnly === true && isSmallWidthViewport)
             ) {
-              return <plugin.Component anchorElem={floatingAnchorElem} key={plugin.key} />
+              return (
+                <EditorPlugin anchorElem={floatingAnchorElem} key={plugin.key} plugin={plugin} />
+              )
             }
           })}
           {editor.isEditable() && (
@@ -113,12 +118,12 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'normal') {
-          return <plugin.Component key={plugin.key} />
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
         }
       })}
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'bottom') {
-          return <plugin.Component key={plugin.key} />
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
         }
       })}
     </React.Fragment>

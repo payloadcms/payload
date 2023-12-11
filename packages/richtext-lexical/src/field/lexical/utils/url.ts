@@ -28,5 +28,9 @@ const urlRegExp =
 export function validateUrl(url: string): boolean {
   // TODO Fix UI for link insertion; it should never default to an invalid URL such as https://.
   // Maybe show a dialog where they user can type the URL before inserting it.
-  return url === 'https://' || urlRegExp.test(url)
+  return (
+    url === 'https://' ||
+    urlRegExp.test(url) ||
+    (url.startsWith('tel:+') && !!url.split('tel:+')[1].match(/^\d+$/))
+  )
 }

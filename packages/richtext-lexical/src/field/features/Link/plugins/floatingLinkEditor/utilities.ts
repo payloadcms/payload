@@ -13,8 +13,10 @@ export function transformExtraFields(
     | Field[],
   config: SanitizedConfig,
   i18n: i18n,
+  enabledCollections?: false | string[],
+  disabledCollections?: false | string[],
 ): Field[] {
-  const baseFields: Field[] = getBaseFields(config)
+  const baseFields: Field[] = getBaseFields(config, enabledCollections, disabledCollections)
 
   const fields =
     typeof customFieldSchema === 'function'

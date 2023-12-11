@@ -14,7 +14,7 @@ html[data-theme='light'] {
   list-style: none;
   font-family: var(--font-body);
   max-height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
   z-index: 10;
   position: absolute;
 
@@ -48,11 +48,14 @@ html[data-theme='light'] {
 
     &-text {
       margin-left: 6px;
-      text-wrap: nowrap;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .icon {
       color: var(--color-base-500);
+      min-width: fit-content;
     }
   }
 }
