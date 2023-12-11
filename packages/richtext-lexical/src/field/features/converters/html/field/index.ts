@@ -80,11 +80,11 @@ export const lexicalHTML: (
                 }
               }
 
-              if ('fields' in curField && 'name' in curField) {
-                const result = findFieldPathAndSiblingFields(curField.fields, [
-                  ...path,
-                  curField.name,
-                ])
+              if ('fields' in curField) {
+                const result = findFieldPathAndSiblingFields(
+                  curField.fields,
+                  'name' in curField ? [...path, curField.name] : [...path],
+                )
                 if (result) {
                   return result
                 }

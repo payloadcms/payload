@@ -1,7 +1,15 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
-import { COMMAND_PRIORITY_EDITOR, type LexicalCommand, createCommand } from 'lexical'
+import {
+  $getPreviousSelection,
+  $getSelection,
+  $isParagraphNode,
+  $isRangeSelection,
+  COMMAND_PRIORITY_EDITOR,
+  type LexicalCommand,
+  createCommand,
+} from 'lexical'
 import { useConfig } from 'payload/components/utilities'
 import { useEffect } from 'react'
 import React from 'react'
@@ -39,7 +47,20 @@ export function RelationshipPlugin(props?: RelationshipFeatureProps): JSX.Elemen
       INSERT_RELATIONSHIP_COMMAND,
       (payload) => {
         const relationshipNode = $createRelationshipNode(payload)
-        $insertNodeToNearestRoot(relationshipNode)
+
+        const selection = $getSelection() || $getPreviousSelection()
+
+        if ($isRangeSelection(selection)) {
+          const { focus } = selection
+          const focusNode = focus.getNode()
+
+          // First, delete currently selected node if it's an empty paragraph
+          if ($isParagraphNode(focusNode) && focusNode.getTextContentSize() === 0) {
+            focusNode.remove()
+          }
+
+          $insertNodeToNearestRoot(relationshipNode)
+        }
 
         return true
       },
