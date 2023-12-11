@@ -61,7 +61,6 @@ const PayloadApp = (
       Remove these comments when the issue is resolved
       See more here: https://github.com/facebook/react/issues/24304
       */}
-      {/* @ts-expect-error */}
       <Component {...pageProps} />
     </CookiesProvider>
   )
