@@ -20,7 +20,7 @@
     "jest": "^29.7.0",
     "mongodb-memory-server": "^8.15.1",
     "nodemon": "^3.0.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "10.9.1",
     "typescript": "^5.2.2"
   },
   "scripts": {
