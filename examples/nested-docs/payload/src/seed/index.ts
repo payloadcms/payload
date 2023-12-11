@@ -15,11 +15,12 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   const [parentDoc, childDoc, grandchildDoc] = await Promise.all(
-    Array.from(Array(3).keys()).map(() =>
+    Array.from(Array(3).keys()).map(key =>
       payload.create({
         collection: 'pages',
         data: {
           title: 'Page',
+          slug: `temp-${key}`,
           richText: [],
         },
       }),

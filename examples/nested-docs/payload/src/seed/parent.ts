@@ -13,7 +13,7 @@ export const parent: Partial<Page> = {
     {
       children: [
         {
-          text: 'This is the parent page. Navigate to the ',
+          text: 'This is the parent page. From here you can navigate to the ',
         },
         {
           type: 'link',

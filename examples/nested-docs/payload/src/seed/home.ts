@@ -39,7 +39,7 @@ export const home: Partial<Page> = {
           ],
         },
         {
-          text: '. This example demonstrates how to implement nested docs into Payload using the official ',
+          text: '. This example demonstrates how to achieve nested docs in Payload using the official ',
         },
         {
           type: 'link',
@@ -59,7 +59,7 @@ export const home: Partial<Page> = {
     {
       children: [
         {
-          text: 'Navigate to ',
+          text: 'Navigate to the ',
         },
         {
           type: 'link',
@@ -70,7 +70,7 @@ export const home: Partial<Page> = {
           },
           children: [
             {
-              text: 'the parent page',
+              text: 'parent',
             },
           ],
         },
@@ -86,7 +86,7 @@ export const home: Partial<Page> = {
           },
           children: [
             {
-              text: 'the child page',
+              text: 'child',
             },
           ],
         },
@@ -102,12 +102,12 @@ export const home: Partial<Page> = {
           },
           children: [
             {
-              text: 'the grandchild page',
+              text: 'grandchild',
             },
           ],
         },
         {
-          text: ' to see how the nested docs are rendered.',
+          text: ' page to see how nested docs are rendered and how their URLs behave.',
         },
       ],
     },

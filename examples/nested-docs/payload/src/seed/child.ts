@@ -14,7 +14,7 @@ export const child: Partial<Page> = {
     {
       children: [
         {
-          text: 'This is the child page. Navigate to the ',
+          text: 'This is the child page. From here you can navigate to the ',
         },
         {
           type: 'link',

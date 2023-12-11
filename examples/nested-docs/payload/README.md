@@ -1,6 +1,6 @@
 # Payload Nested Docs Example
 
-This example demonstrates how to nest docs in Payload using the official [Nested Docs Plugin](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs).
+This example demonstrates how to achieve nested docs in Payload using the official [Nested Docs Plugin](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs).
 
 There are various fully working front-ends made explicitly for this example, including:
 
@@ -22,9 +22,9 @@ To spin up this example locally, follow these steps:
 
 ## How it works
 
-The [Nested Docs Plugin](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs) automatically adds a `parent` field onto each enabled collection. Each parent is a reference to another document of the same collection, used to recursively create the hierarchy.
+The [Nested Docs Plugin](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs) automatically adds a `parent` field onto each enabled collection. Each parent is a reference to another document of the same collection and is used to create the document hierarchy.
 
-The plugin also adds a `breadcrumbs` field to each document, which is an array of references to each parent document in the tree. This is used to generate the URL for each document.
+The plugin also adds a `breadcrumbs` field to each document, which is an array of references to each parent document in the tree. This field is automatically populated by the plugin, and can used to generate the full titles, URLs, etc.
 
 See the official [Nested Docs Plugin](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs) for full details.
 
@@ -34,7 +34,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to create a user, and the following pages:
+On boot, a seed script is included to create a user and the following pages:
 
 - Home
   - Slug: `home`

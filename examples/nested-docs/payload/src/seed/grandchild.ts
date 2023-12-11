@@ -14,7 +14,7 @@ export const grandchild: Partial<Page> = {
     {
       children: [
         {
-          text: 'This is the grandchild page. Navigate to the ',
+          text: 'This is the grandchild page. From here you can navigate to the ',
         },
         {
           type: 'link',
