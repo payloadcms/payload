@@ -110,10 +110,16 @@ function ToolbarSection({
               anchorElem={anchorElem}
               editor={editor}
               entries={section.entries}
+              sectionKey={section.key}
             />
           </React.Suspense>
         ) : (
-          <ToolbarDropdown anchorElem={anchorElem} editor={editor} entries={section.entries} />
+          <ToolbarDropdown
+            anchorElem={anchorElem}
+            editor={editor}
+            entries={section.entries}
+            sectionKey={section.key}
+          />
         ))}
       {section.type === 'buttons' &&
         section.entries.length &&

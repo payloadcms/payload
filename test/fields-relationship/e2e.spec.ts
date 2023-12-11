@@ -8,7 +8,7 @@ import type {
   RelationRestricted,
   RelationTwo,
   RelationWithTitle,
-} from './config'
+} from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
@@ -55,37 +55,37 @@ describe('fields - relationship', () => {
     await clearAllDocs()
 
     // Create docs to relate to
-    relationOneDoc = await payload.create({
+    relationOneDoc = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
-    })
+    })) as any
 
-    anotherRelationOneDoc = await payload.create({
+    anotherRelationOneDoc = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
-    })
+    })) as any
 
-    relationTwoDoc = await payload.create({
+    relationTwoDoc = (await payload.create({
       collection: relationTwoSlug,
       data: {
         name: 'second-relation',
       },
-    })
+    })) as any
 
     // Create restricted doc
-    restrictedRelation = await payload.create({
+    restrictedRelation = (await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'restricted',
       },
-    })
+    })) as any
 
     // Doc with useAsTitle
-    relationWithTitle = await payload.create({
+    relationWithTitle = (await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'relation-title',
@@ -93,7 +93,7 @@ describe('fields - relationship', () => {
           title: 'relation-title',
         },
       },
-    })
+    })) as any
 
     // Doc with useAsTitle for word boundary test
     await payload.create({
@@ -107,7 +107,7 @@ describe('fields - relationship', () => {
     })
 
     // Add restricted doc as relation
-    docWithExistingRelations = await payload.create({
+    docWithExistingRelations = (await payload.create({
       collection: slug,
       data: {
         name: 'with-existing-relations',
@@ -116,7 +116,7 @@ describe('fields - relationship', () => {
         relationshipWithTitle: relationWithTitle.id,
         relationshipReadOnly: relationOneDoc.id,
       },
-    })
+    })) as any
   })
 
   test('should create relationship', async () => {
@@ -279,18 +279,18 @@ describe('fields - relationship', () => {
   })
 
   test('should allow usage of relationTo in filterOptions', async () => {
-    const { id: include } = await payload.create({
+    const { id: include } = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'include',
       },
-    })
-    const { id: exclude } = await payload.create({
+    })) as any
+    const { id: exclude } = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'exclude',
       },
-    })
+    })) as any
 
     await page.goto(url.create)
 
