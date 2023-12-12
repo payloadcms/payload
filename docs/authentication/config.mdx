@@ -45,6 +45,13 @@ To enable API keys on a collection, set the `useAPIKey` auth option to `true`. F
   your API keys will not be.
 </Banner>
 
+<Banner type"warning">
+  <strong>Important:</strong>
+  If you change your `PAYLOAD_SECRET`, you will need to regenerate your API keys.
+  <br />
+  The secret key is used to encrypt the API keys, so if you change the secret, existing API keys will no longer be valid.
+</Banner>
+
 #### Authenticating via API Key
 
 To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper access control. By doing this, Payload recognizes the request being made as a request by the user associated with that API key.
