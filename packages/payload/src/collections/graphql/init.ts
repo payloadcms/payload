@@ -120,19 +120,26 @@ function initCollectionsGraphQL(payload: Payload): void {
       })
     }
 
-    collection.graphQL.mutationInputType = new GraphQLNonNull(
-      buildMutationInputType(payload, singularName, fields, singularName),
+    const createMutationInputType = buildMutationInputType(
+      payload,
+      singularName,
+      fields,
+      singularName,
     )
+    if (createMutationInputType) {
+      collection.graphQL.mutationInputType = new GraphQLNonNull(createMutationInputType)
+    }
 
-    collection.graphQL.updateMutationInputType = new GraphQLNonNull(
-      buildMutationInputType(
-        payload,
-        `${singularName}Update`,
-        fields.filter((field) => !(fieldAffectsData(field) && field.name === 'id')),
-        `${singularName}Update`,
-        true,
-      ),
+    const updateMutationInputType = buildMutationInputType(
+      payload,
+      `${singularName}Update`,
+      fields.filter((field) => !(fieldAffectsData(field) && field.name === 'id')),
+      `${singularName}Update`,
+      true,
     )
+    if (updateMutationInputType) {
+      collection.graphQL.updateMutationInputType = new GraphQLNonNull(updateMutationInputType)
+    }
 
     payload.Query.fields[singularName] = {
       args: {
@@ -182,7 +189,9 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     payload.Mutation.fields[`create${singularName}`] = {
       args: {
-        data: { type: collection.graphQL.mutationInputType },
+        ...(createMutationInputType
+          ? { data: { type: collection.graphQL.mutationInputType } }
+          : {}),
         draft: { type: GraphQLBoolean },
         ...(payload.config.localization
           ? {
@@ -198,7 +207,9 @@ function initCollectionsGraphQL(payload: Payload): void {
       args: {
         id: { type: new GraphQLNonNull(idType) },
         autosave: { type: GraphQLBoolean },
-        data: { type: collection.graphQL.updateMutationInputType },
+        ...(updateMutationInputType
+          ? { data: { type: collection.graphQL.updateMutationInputType } }
+          : {}),
         draft: { type: GraphQLBoolean },
         ...(payload.config.localization
           ? {
