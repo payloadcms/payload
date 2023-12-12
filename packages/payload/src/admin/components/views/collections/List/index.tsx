@@ -107,13 +107,16 @@ const ListView: React.FC<ListIndexProps> = (props) => {
       if (search) {
         let copyOfWhere = { ...((where as Where) || {}) }
 
-        const searchAsConditions = (listSearchableFields || [titleField?.name]).map((fieldName) => {
-          return {
-            [fieldName]: {
-              like: search,
-            },
-          }
-        }, [])
+        const searchAsConditions = (listSearchableFields || [titleField?.name || 'id']).map(
+          (fieldName) => {
+            return {
+              [fieldName]: {
+                like: search,
+              },
+            }
+          },
+          [],
+        )
 
         if (searchAsConditions.length > 0) {
           const conditionalSearchFields = {

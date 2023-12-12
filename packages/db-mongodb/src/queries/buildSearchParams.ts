@@ -92,7 +92,7 @@ export async function buildSearchParam({
   const [{ field, path }] = paths
 
   if (path) {
-    const formattedValue = sanitizeQueryValue({
+    const { operator: formattedOperator, val: formattedValue } = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
@@ -125,7 +125,7 @@ export async function buildSearchParam({
               payload,
               where: {
                 [subPath]: {
-                  [operator]: val,
+                  [formattedOperator]: val,
                 },
               },
             })
@@ -183,8 +183,8 @@ export async function buildSearchParam({
       return relationshipQuery
     }
 
-    if (operator && validOperators.includes(operator as Operator)) {
-      const operatorKey = operatorMap[operator]
+    if (formattedOperator && validOperators.includes(formattedOperator as Operator)) {
+      const operatorKey = operatorMap[formattedOperator]
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
@@ -227,7 +227,7 @@ export async function buildSearchParam({
         }
       }
 
-      if (operator === 'like' && typeof formattedValue === 'string') {
+      if (formattedOperator === 'like' && typeof formattedValue === 'string') {
         const words = formattedValue.split(' ')
 
         const result = {
