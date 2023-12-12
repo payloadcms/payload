@@ -22,36 +22,35 @@ Core features:
 In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
 
 ```js
-import { buildConfig } from "payload/config";
-import nestedDocs from "@payloadcms/plugin-nested-docs";
+import { buildConfig } from 'payload/config'
+import nestedDocs from '@payloadcms/plugin-nested-docs'
 
 const config = buildConfig({
   collections: [
     {
-      slug: "pages",
+      slug: 'pages',
       fields: [
         {
-          name: "title",
-          type: "text",
+          name: 'title',
+          type: 'text',
         },
         {
-          name: "slug",
-          type: "text",
+          name: 'slug',
+          type: 'text',
         },
       ],
     },
   ],
   plugins: [
     nestedDocs({
-      collections: ["pages"],
+      collections: ['pages'],
       generateLabel: (_, doc) => doc.title,
-      generateURL: (docs) =>
-        docs.reduce((url, doc) => `${url}/${doc.slug}`, ""),
+      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
     }),
   ],
-});
+})
 
-export default config;
+export default config
 ```
 
 ### Fields
@@ -135,8 +134,8 @@ You can also extend the built-in `parent` and `breadcrumbs` fields per collectio
 
 ```js
 import { CollectionConfig } from "payload/types";
-import createParentField from "@payloadcms/plugin-nested-docs/fields/parent";
-import createBreadcrumbsField from "@payloadcms/plugin-nested-docs/fields/breadcrumbs";
+import { createParentField } from "@payloadcms/plugin-nested-docs/fields";
+import { createBreadcrumbsField } from "@payloadcms/plugin-nested-docs/fields";
 
 const examplePageConfig: CollectionConfig = {
   slug: "pages",
@@ -181,11 +180,7 @@ This plugin supports localization by default. If the `localization` property is 
 All types can be directly imported:
 
 ```js
-import {
-  PluginConfig,
-  GenerateURL,
-  GenerateLabel,
-} from "@payloadcms/plugin-nested-docs/types";
+import { PluginConfig, GenerateURL, GenerateLabel } from '@payloadcms/plugin-nested-docs/types'
 ```
 
 ## Development
@@ -219,7 +214,7 @@ To actively develop or debug this plugin you can either work directly within the
    You might also need to alias these modules in your Webpack config. To do this, open your project's Payload config and add the following:
 
    ```js
-   import { buildConfig } from "payload/config";
+   import { buildConfig } from 'payload/config'
 
    export default buildConfig({
      admin: {
@@ -229,18 +224,18 @@ To actively develop or debug this plugin you can either work directly within the
            ...config.resolve,
            alias: {
              ...config.resolve.alias,
-             react: path.join(__dirname, "../node_modules/react"),
-             "react-dom": path.join(__dirname, "../node_modules/react-dom"),
-             payload: path.join(__dirname, "../node_modules/payload"),
-             "@payloadcms/plugin-nested-docs": path.join(
+             react: path.join(__dirname, '../node_modules/react'),
+             'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+             payload: path.join(__dirname, '../node_modules/payload'),
+             '@payloadcms/plugin-nested-docs': path.join(
                __dirname,
-               "../../payload/plugin-nested-docs/src"
+               '../../payload/plugin-nested-docs/src',
              ),
            },
          },
        }),
      },
-   });
+   })
    ```
 
 ## Screenshots
