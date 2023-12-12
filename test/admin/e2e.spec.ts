@@ -54,7 +54,6 @@ describe('admin', () => {
   let page: Page
   let geoUrl: AdminUrlUtil
   let url: AdminUrlUtil
-  let geoUrl: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
   let serverURL: string
 
@@ -62,7 +61,6 @@ describe('admin', () => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
-    geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
 
     const context = await browser.newContext()
@@ -1262,16 +1260,6 @@ async function createPost(overrides?: Partial<Post>): Promise<Post> {
       ...overrides,
     },
   }) as unknown as Promise<Post>
-}
-
-async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
-  return payload.create({
-    collection: geoCollectionSlug,
-    data: {
-      point: [4, -4],
-      ...overrides,
-    },
-  }) as unknown as Promise<Geo>
 }
 
 async function deleteAllPosts() {
