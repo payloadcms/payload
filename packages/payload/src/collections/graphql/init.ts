@@ -189,6 +189,9 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     payload.Mutation.fields[`create${singularName}`] = {
       args: {
+        ...(createMutationInputType
+          ? { data: { type: collection.graphQL.mutationInputType } }
+          : {}),
         draft: { type: GraphQLBoolean },
         ...(payload.config.localization
           ? {
@@ -199,16 +202,14 @@ function initCollectionsGraphQL(payload: Payload): void {
       resolve: createResolver(collection),
       type: collection.graphQL.type,
     }
-    if (createMutationInputType) {
-      payload.Mutation.fields[`create${singularName}`].args.data = {
-        type: collection.graphQL.mutationInputType,
-      }
-    }
 
     payload.Mutation.fields[`update${singularName}`] = {
       args: {
         id: { type: new GraphQLNonNull(idType) },
         autosave: { type: GraphQLBoolean },
+        ...(updateMutationInputType
+          ? { data: { type: collection.graphQL.updateMutationInputType } }
+          : {}),
         draft: { type: GraphQLBoolean },
         ...(payload.config.localization
           ? {
@@ -218,11 +219,6 @@ function initCollectionsGraphQL(payload: Payload): void {
       },
       resolve: updateResolver(collection),
       type: collection.graphQL.type,
-    }
-    if (updateMutationInputType) {
-      payload.Mutation.fields[`update${singularName}`].args.data = {
-        type: collection.graphQL.updateMutationInputType,
-      }
     }
 
     payload.Mutation.fields[`delete${singularName}`] = {

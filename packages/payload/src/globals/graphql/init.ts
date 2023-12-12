@@ -71,6 +71,9 @@ function initGlobalsGraphQL(payload: Payload): void {
 
     payload.Mutation.fields[`update${formattedName}`] = {
       args: {
+        ...(updateMutationInputType
+          ? { data: { type: payload.globals.graphQL[slug].mutationInputType } }
+          : {}),
         draft: { type: GraphQLBoolean },
         ...(payload.config.localization
           ? {
@@ -80,12 +83,6 @@ function initGlobalsGraphQL(payload: Payload): void {
       },
       resolve: updateResolver(global),
       type: payload.globals.graphQL[slug].type,
-    }
-
-    if (payload.globals.graphQL[slug]?.mutationInputType) {
-      payload.Mutation.fields[`update${formattedName}`].args.data = {
-        type: payload.globals.graphQL[slug].mutationInputType,
-      }
     }
 
     payload.Query.fields[`docAccess${formattedName}`] = {
