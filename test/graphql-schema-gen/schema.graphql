@@ -452,7 +452,8 @@ type Collection1DeleteDocAccess {
 
 type Collection2 {
   id: String
-  meta: SharedMeta
+  metaArray: [SharedMetaArray!]
+  metaGroup: SharedMeta
   nestedGroup: Collection2_NestedGroup
   updatedAt: DateTime
   createdAt: DateTime
@@ -482,9 +483,11 @@ type Collection2s {
 }
 
 input Collection2_where {
-  meta__title: Collection2_meta__title_operator
-  meta__description: Collection2_meta__description_operator
-  meta__id: Collection2_meta__id_operator
+  metaArray__title: Collection2_metaArray__title_operator
+  metaArray__description: Collection2_metaArray__description_operator
+  metaArray__id: Collection2_metaArray__id_operator
+  metaGroup__title: Collection2_metaGroup__title_operator
+  metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   updatedAt: Collection2_updatedAt_operator
@@ -494,7 +497,7 @@ input Collection2_where {
   OR: [Collection2_where_or]
 }
 
-input Collection2_meta__title_operator {
+input Collection2_metaArray__title_operator {
   equals: String
   not_equals: String
   like: String
@@ -505,7 +508,7 @@ input Collection2_meta__title_operator {
   exists: Boolean
 }
 
-input Collection2_meta__description_operator {
+input Collection2_metaArray__description_operator {
   equals: String
   not_equals: String
   like: String
@@ -516,7 +519,29 @@ input Collection2_meta__description_operator {
   exists: Boolean
 }
 
-input Collection2_meta__id_operator {
+input Collection2_metaArray__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Collection2_metaGroup__title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Collection2_metaGroup__description_operator {
   equals: String
   not_equals: String
   like: String
@@ -583,9 +608,11 @@ input Collection2_id_operator {
 }
 
 input Collection2_where_and {
-  meta__title: Collection2_meta__title_operator
-  meta__description: Collection2_meta__description_operator
-  meta__id: Collection2_meta__id_operator
+  metaArray__title: Collection2_metaArray__title_operator
+  metaArray__description: Collection2_metaArray__description_operator
+  metaArray__id: Collection2_metaArray__id_operator
+  metaGroup__title: Collection2_metaGroup__title_operator
+  metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   updatedAt: Collection2_updatedAt_operator
@@ -596,9 +623,11 @@ input Collection2_where_and {
 }
 
 input Collection2_where_or {
-  meta__title: Collection2_meta__title_operator
-  meta__description: Collection2_meta__description_operator
-  meta__id: Collection2_meta__id_operator
+  metaArray__title: Collection2_metaArray__title_operator
+  metaArray__description: Collection2_metaArray__description_operator
+  metaArray__id: Collection2_metaArray__id_operator
+  metaGroup__title: Collection2_metaGroup__title_operator
+  metaGroup__description: Collection2_metaGroup__description_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
   updatedAt: Collection2_updatedAt_operator
@@ -617,84 +646,184 @@ type collection2DocAccess {
 }
 
 type Collection2DocAccessFields {
-  meta: Collection2DocAccessFields_meta
+  metaArray: Collection2DocAccessFields_metaArray
+  metaGroup: Collection2DocAccessFields_metaGroup
   nestedGroup: Collection2DocAccessFields_nestedGroup
   updatedAt: Collection2DocAccessFields_updatedAt
   createdAt: Collection2DocAccessFields_createdAt
 }
 
-type Collection2DocAccessFields_meta {
-  create: Collection2DocAccessFields_meta_Create
-  read: Collection2DocAccessFields_meta_Read
-  update: Collection2DocAccessFields_meta_Update
-  delete: Collection2DocAccessFields_meta_Delete
-  fields: Collection2DocAccessFields_meta_Fields
+type Collection2DocAccessFields_metaArray {
+  create: Collection2DocAccessFields_metaArray_Create
+  read: Collection2DocAccessFields_metaArray_Read
+  update: Collection2DocAccessFields_metaArray_Update
+  delete: Collection2DocAccessFields_metaArray_Delete
+  fields: Collection2DocAccessFields_metaArray_Fields
 }
 
-type Collection2DocAccessFields_meta_Create {
+type Collection2DocAccessFields_metaArray_Create {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Read {
+type Collection2DocAccessFields_metaArray_Read {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Update {
+type Collection2DocAccessFields_metaArray_Update {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Delete {
+type Collection2DocAccessFields_metaArray_Delete {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_Fields {
-  title: Collection2DocAccessFields_meta_title
-  description: Collection2DocAccessFields_meta_description
+type Collection2DocAccessFields_metaArray_Fields {
+  title: Collection2DocAccessFields_metaArray_title
+  description: Collection2DocAccessFields_metaArray_description
+  id: Collection2DocAccessFields_metaArray_id
 }
 
-type Collection2DocAccessFields_meta_title {
-  create: Collection2DocAccessFields_meta_title_Create
-  read: Collection2DocAccessFields_meta_title_Read
-  update: Collection2DocAccessFields_meta_title_Update
-  delete: Collection2DocAccessFields_meta_title_Delete
+type Collection2DocAccessFields_metaArray_title {
+  create: Collection2DocAccessFields_metaArray_title_Create
+  read: Collection2DocAccessFields_metaArray_title_Read
+  update: Collection2DocAccessFields_metaArray_title_Update
+  delete: Collection2DocAccessFields_metaArray_title_Delete
 }
 
-type Collection2DocAccessFields_meta_title_Create {
+type Collection2DocAccessFields_metaArray_title_Create {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_title_Read {
+type Collection2DocAccessFields_metaArray_title_Read {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_title_Update {
+type Collection2DocAccessFields_metaArray_title_Update {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_title_Delete {
+type Collection2DocAccessFields_metaArray_title_Delete {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description {
-  create: Collection2DocAccessFields_meta_description_Create
-  read: Collection2DocAccessFields_meta_description_Read
-  update: Collection2DocAccessFields_meta_description_Update
-  delete: Collection2DocAccessFields_meta_description_Delete
+type Collection2DocAccessFields_metaArray_description {
+  create: Collection2DocAccessFields_metaArray_description_Create
+  read: Collection2DocAccessFields_metaArray_description_Read
+  update: Collection2DocAccessFields_metaArray_description_Update
+  delete: Collection2DocAccessFields_metaArray_description_Delete
 }
 
-type Collection2DocAccessFields_meta_description_Create {
+type Collection2DocAccessFields_metaArray_description_Create {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description_Read {
+type Collection2DocAccessFields_metaArray_description_Read {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description_Update {
+type Collection2DocAccessFields_metaArray_description_Update {
   permission: Boolean!
 }
 
-type Collection2DocAccessFields_meta_description_Delete {
+type Collection2DocAccessFields_metaArray_description_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id {
+  create: Collection2DocAccessFields_metaArray_id_Create
+  read: Collection2DocAccessFields_metaArray_id_Read
+  update: Collection2DocAccessFields_metaArray_id_Update
+  delete: Collection2DocAccessFields_metaArray_id_Delete
+}
+
+type Collection2DocAccessFields_metaArray_id_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaArray_id_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup {
+  create: Collection2DocAccessFields_metaGroup_Create
+  read: Collection2DocAccessFields_metaGroup_Read
+  update: Collection2DocAccessFields_metaGroup_Update
+  delete: Collection2DocAccessFields_metaGroup_Delete
+  fields: Collection2DocAccessFields_metaGroup_Fields
+}
+
+type Collection2DocAccessFields_metaGroup_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_Fields {
+  title: Collection2DocAccessFields_metaGroup_title
+  description: Collection2DocAccessFields_metaGroup_description
+}
+
+type Collection2DocAccessFields_metaGroup_title {
+  create: Collection2DocAccessFields_metaGroup_title_Create
+  read: Collection2DocAccessFields_metaGroup_title_Read
+  update: Collection2DocAccessFields_metaGroup_title_Update
+  delete: Collection2DocAccessFields_metaGroup_title_Delete
+}
+
+type Collection2DocAccessFields_metaGroup_title_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_title_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_title_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_title_Delete {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description {
+  create: Collection2DocAccessFields_metaGroup_description_Create
+  read: Collection2DocAccessFields_metaGroup_description_Read
+  update: Collection2DocAccessFields_metaGroup_description_Update
+  delete: Collection2DocAccessFields_metaGroup_description_Delete
+}
+
+type Collection2DocAccessFields_metaGroup_description_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_metaGroup_description_Delete {
   permission: Boolean!
 }
 
@@ -1664,84 +1793,184 @@ type collection2Access {
 }
 
 type Collection2Fields {
-  meta: Collection2Fields_meta
+  metaArray: Collection2Fields_metaArray
+  metaGroup: Collection2Fields_metaGroup
   nestedGroup: Collection2Fields_nestedGroup
   updatedAt: Collection2Fields_updatedAt
   createdAt: Collection2Fields_createdAt
 }
 
-type Collection2Fields_meta {
-  create: Collection2Fields_meta_Create
-  read: Collection2Fields_meta_Read
-  update: Collection2Fields_meta_Update
-  delete: Collection2Fields_meta_Delete
-  fields: Collection2Fields_meta_Fields
+type Collection2Fields_metaArray {
+  create: Collection2Fields_metaArray_Create
+  read: Collection2Fields_metaArray_Read
+  update: Collection2Fields_metaArray_Update
+  delete: Collection2Fields_metaArray_Delete
+  fields: Collection2Fields_metaArray_Fields
 }
 
-type Collection2Fields_meta_Create {
+type Collection2Fields_metaArray_Create {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Read {
+type Collection2Fields_metaArray_Read {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Update {
+type Collection2Fields_metaArray_Update {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Delete {
+type Collection2Fields_metaArray_Delete {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_Fields {
-  title: Collection2Fields_meta_title
-  description: Collection2Fields_meta_description
+type Collection2Fields_metaArray_Fields {
+  title: Collection2Fields_metaArray_title
+  description: Collection2Fields_metaArray_description
+  id: Collection2Fields_metaArray_id
 }
 
-type Collection2Fields_meta_title {
-  create: Collection2Fields_meta_title_Create
-  read: Collection2Fields_meta_title_Read
-  update: Collection2Fields_meta_title_Update
-  delete: Collection2Fields_meta_title_Delete
+type Collection2Fields_metaArray_title {
+  create: Collection2Fields_metaArray_title_Create
+  read: Collection2Fields_metaArray_title_Read
+  update: Collection2Fields_metaArray_title_Update
+  delete: Collection2Fields_metaArray_title_Delete
 }
 
-type Collection2Fields_meta_title_Create {
+type Collection2Fields_metaArray_title_Create {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_title_Read {
+type Collection2Fields_metaArray_title_Read {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_title_Update {
+type Collection2Fields_metaArray_title_Update {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_title_Delete {
+type Collection2Fields_metaArray_title_Delete {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description {
-  create: Collection2Fields_meta_description_Create
-  read: Collection2Fields_meta_description_Read
-  update: Collection2Fields_meta_description_Update
-  delete: Collection2Fields_meta_description_Delete
+type Collection2Fields_metaArray_description {
+  create: Collection2Fields_metaArray_description_Create
+  read: Collection2Fields_metaArray_description_Read
+  update: Collection2Fields_metaArray_description_Update
+  delete: Collection2Fields_metaArray_description_Delete
 }
 
-type Collection2Fields_meta_description_Create {
+type Collection2Fields_metaArray_description_Create {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description_Read {
+type Collection2Fields_metaArray_description_Read {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description_Update {
+type Collection2Fields_metaArray_description_Update {
   permission: Boolean!
 }
 
-type Collection2Fields_meta_description_Delete {
+type Collection2Fields_metaArray_description_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id {
+  create: Collection2Fields_metaArray_id_Create
+  read: Collection2Fields_metaArray_id_Read
+  update: Collection2Fields_metaArray_id_Update
+  delete: Collection2Fields_metaArray_id_Delete
+}
+
+type Collection2Fields_metaArray_id_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaArray_id_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup {
+  create: Collection2Fields_metaGroup_Create
+  read: Collection2Fields_metaGroup_Read
+  update: Collection2Fields_metaGroup_Update
+  delete: Collection2Fields_metaGroup_Delete
+  fields: Collection2Fields_metaGroup_Fields
+}
+
+type Collection2Fields_metaGroup_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_Fields {
+  title: Collection2Fields_metaGroup_title
+  description: Collection2Fields_metaGroup_description
+}
+
+type Collection2Fields_metaGroup_title {
+  create: Collection2Fields_metaGroup_title_Create
+  read: Collection2Fields_metaGroup_title_Read
+  update: Collection2Fields_metaGroup_title_Update
+  delete: Collection2Fields_metaGroup_title_Delete
+}
+
+type Collection2Fields_metaGroup_title_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_title_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_title_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_title_Delete {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description {
+  create: Collection2Fields_metaGroup_description_Create
+  read: Collection2Fields_metaGroup_description_Read
+  update: Collection2Fields_metaGroup_description_Update
+  delete: Collection2Fields_metaGroup_description_Delete
+}
+
+type Collection2Fields_metaGroup_description_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_metaGroup_description_Delete {
   permission: Boolean!
 }
 
@@ -2251,13 +2480,20 @@ input mutationCollection1Update_MetaInput {
 }
 
 input mutationCollection2Input {
-  meta: mutationCollection2_MetaInput
+  metaArray: [mutationCollection2_MetaArrayInput]
+  metaGroup: mutationCollection2_MetaGroupInput
   nestedGroup: mutationCollection2_NestedGroupInput
   updatedAt: String
   createdAt: String
 }
 
-input mutationCollection2_MetaInput {
+input mutationCollection2_MetaArrayInput {
+  title: String
+  description: String
+  id: String
+}
+
+input mutationCollection2_MetaGroupInput {
   title: String
   description: String
 }
@@ -2272,13 +2508,20 @@ input mutationCollection2_NestedGroup_MetaInput {
 }
 
 input mutationCollection2UpdateInput {
-  meta: mutationCollection2Update_MetaInput
+  metaArray: [mutationCollection2Update_MetaArrayInput]
+  metaGroup: mutationCollection2Update_MetaGroupInput
   nestedGroup: mutationCollection2Update_NestedGroupInput
   updatedAt: String
   createdAt: String
 }
 
-input mutationCollection2Update_MetaInput {
+input mutationCollection2Update_MetaArrayInput {
+  title: String
+  description: String
+  id: String
+}
+
+input mutationCollection2Update_MetaGroupInput {
   title: String
   description: String
 }

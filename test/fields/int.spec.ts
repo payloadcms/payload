@@ -29,6 +29,7 @@ import {
 import { tabsDoc } from './collections/Tabs/shared'
 import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
+import { GroupField } from './payload-types'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -587,10 +588,10 @@ describe('Fields', () => {
     })
 
     it('should create with ids and nested ids', async () => {
-      const docWithIDs = await payload.create({
+      const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
-      })
+      })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
 

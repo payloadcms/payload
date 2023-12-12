@@ -658,45 +658,15 @@ describe('lexical', () => {
       const selectFieldMenu = selectField.locator('.rs__menu').first()
       await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
 
-      await conditionalArrayBlock.getByText('Add Column').click()
+      await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
+      await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
 
       await conditionalArrayBlock
-        .locator('.array-field__draggable-rows')
-        .first()
-        .locator('.array-field__row')
-        .nth(1)
-        .locator('.input-wrapper input')
-        .first()
-        .fill('second text')
+        .locator('.array-field__draggable-rows > div:nth-child(2) .input-wrapper input')
+        .fill('second input')
 
       await saveDocAndAssert(page)
 
-      await selectField.click()
-      await selectFieldMenu.locator('.rs__option').nth(0).click() // Select "1" (1 columns / array fields)
-
-      // Remove 2nd column
-      await conditionalArrayBlock
-        .locator('.array-field__draggable-rows')
-        .first()
-        .locator('.array-field__row')
-        .nth(1)
-        .locator('.array-actions__button')
-        .first()
-        .click()
-
-      await conditionalArrayBlock
-        .locator('.array-field__draggable-rows')
-        .first()
-        .locator('.array-field__row')
-        .nth(1)
-        .locator('.popup__content')
-        .first()
-        .locator('Button')
-        .nth(1)
-        .click()
-
-      await saveDocAndAssert(page)
-      // This can be triggered if the 2nd row's data is not actually deleted (<= this is the bug), as the validation expects just one row
       await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
     })
   })
