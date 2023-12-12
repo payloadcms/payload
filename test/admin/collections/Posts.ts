@@ -15,7 +15,7 @@ export const Posts: CollectionConfig = {
   },
   admin: {
     description: 'Description',
-    listSearchableFields: ['title', 'description', 'number'],
+    listSearchableFields: ['id', 'title', 'description', 'number'],
     group: 'One',
     useAsTitle: 'title',
     defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],

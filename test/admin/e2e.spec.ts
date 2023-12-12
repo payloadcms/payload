@@ -52,6 +52,7 @@ const description = 'Description'
 
 describe('admin', () => {
   let page: Page
+  let geoUrl: AdminUrlUtil
   let url: AdminUrlUtil
   let geoUrl: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
@@ -59,6 +60,7 @@ describe('admin', () => {
 
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
+    geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
@@ -614,12 +616,16 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
-      test('search by id', async () => {
-        // delete all posts created by the seed
-        await deleteAllPosts()
-
+      test('search by id with listSearchableFields', async () => {
         const { id } = await createPost()
-        await page.locator('.search-filter__input').fill(id)
+        await page.goto(`${url.list}?limit=10&page=1&search=${id}`)
+        const tableItems = page.locator(tableRowLocator)
+        await expect(tableItems).toHaveCount(1)
+      })
+
+      test('search by id without listSearchableFields', async () => {
+        const { id } = await createGeo()
+        await page.goto(`${geoUrl.list}?limit=10&page=1&search=${id}`)
         const tableItems = page.locator(tableRowLocator)
         await expect(tableItems).toHaveCount(1)
       })
@@ -1281,4 +1287,14 @@ async function deleteAllPosts() {
       })
     }),
   ])
+}
+
+async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
+  return payload.create({
+    collection: geoCollectionSlug,
+    data: {
+      point: [4, -4],
+      ...overrides,
+    },
+  }) as unknown as Promise<Geo>
 }
