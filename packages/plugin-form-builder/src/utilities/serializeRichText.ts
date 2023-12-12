@@ -1,5 +1,4 @@
 import escapeHTML from 'escape-html'
-import { Text } from 'slate'
 
 import { replaceDoubleCurlys } from './replaceDoubleCurlys'
 
@@ -8,14 +7,19 @@ interface Node {
   children?: Node[]
   code?: boolean
   italic?: boolean
+  text?: string
   type?: string
   url?: string
+}
+
+const isTextNode = (node: Node): node is Node & { text: string } => {
+  return 'text' in node
 }
 
 export const serialize = (children?: Node[], submissionData?: any): string | undefined =>
   children
     ?.map((node: Node) => {
-      if (Text.isText(node)) {
+      if (isTextNode(node)) {
         let text = `<span>${escapeHTML(replaceDoubleCurlys(node.text, submissionData))}</span>`
 
         if (node.bold) {
@@ -104,7 +108,7 @@ export const serialize = (children?: Node[], submissionData?: any): string | und
         <p>
           ${serialize(node.children, submissionData)}
         </p>
-     `
+      `
       }
     })
     .filter(Boolean)
