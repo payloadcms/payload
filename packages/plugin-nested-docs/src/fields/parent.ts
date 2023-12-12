@@ -1,6 +1,6 @@
 import type { SingleRelationshipField } from 'payload/types'
 
-const createParentField = (
+export const createParentField = (
   relationTo: string,
   overrides?: Partial<
     SingleRelationshipField & {

@@ -1,6 +1,6 @@
 import type { ArrayField, Field } from 'payload/types'
 
-const createBreadcrumbsField = (
+export const createBreadcrumbsField = (
   relationTo: string,
   overrides: Partial<ArrayField> = {},
 ): Field => ({
