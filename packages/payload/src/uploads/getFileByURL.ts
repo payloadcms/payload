@@ -3,9 +3,9 @@ import path from 'path'
 import type { File } from './types'
 
 const getFileByURL = async (url: string): Promise<File> => {
-  const { default: fetch } = (await import('node-fetch')) as any
-
   if (typeof url === 'string') {
+    const { default: fetch } = (await import('node-fetch')) as any
+
     const res = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
