@@ -1,3 +1,5 @@
+import { deepMerge } from 'payload/utilities'
+
 import type { ResolvedFeatureMap, SanitizedFeatures } from '../../features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
@@ -32,16 +34,10 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
 
   features.forEach((feature) => {
     if (feature.i18nClient) {
-      sanitized.i18nClient = {
-        ...sanitized.i18nClient,
-        ...feature.i18nClient,
-      }
+      sanitized.i18nClient = deepMerge(sanitized.i18nClient, feature.i18nClient)
     }
     if (feature.i18nServer) {
-      sanitized.i18nServer = {
-        ...sanitized.i18nServer,
-        ...feature.i18nServer,
-      }
+      sanitized.i18nServer = deepMerge(sanitized.i18nServer, feature.i18nServer)
     }
 
     if (feature.hooks) {

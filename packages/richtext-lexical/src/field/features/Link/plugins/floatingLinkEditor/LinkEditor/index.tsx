@@ -290,7 +290,7 @@ export function LinkEditor({
           {editor.isEditable() && (
             <React.Fragment>
               <button
-                aria-label="Edit link"
+                aria-label={t('lexical:link:editLink')}
                 className="link-edit"
                 onClick={() => {
                   toggleModal(drawerSlug)
@@ -302,7 +302,7 @@ export function LinkEditor({
                 type="button"
               />
               <button
-                aria-label="Remove link"
+                aria-label={t('lexical:link:removeLink')}
                 className="link-trash"
                 onClick={() => {
                   editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)

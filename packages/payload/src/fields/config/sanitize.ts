@@ -8,6 +8,7 @@ import {
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors'
+import { deepMerge } from '../../utilities/deepMerge'
 import { formatLabels, toWords } from '../../utilities/formatLabels'
 import { baseBlockFields } from '../baseFields/baseBlockFields'
 import { baseIDField } from '../baseFields/baseIDField'
@@ -78,20 +79,14 @@ export const sanitizeFields = ({
 
       if (isServer && i18nServerToUse && !addedRichTextI18ns.includes(stringifiedI18nServerToUse)) {
         addedRichTextI18ns.push(stringifiedI18nServerToUse)
-        config.i18n.resources = {
-          ...config.i18n.resources,
-          ...i18nServerToUse,
-        }
+        config.i18n.resources = deepMerge(config.i18n.resources, i18nServerToUse)
       } else if (
         !isServer &&
         i18nClientToUse &&
         !addedRichTextI18ns.includes(stringifiedI18nClientToUse)
       ) {
         addedRichTextI18ns.push(stringifiedI18nClientToUse)
-        config.i18n.resources = {
-          ...config.i18n.resources,
-          ...i18nClientToUse,
-        }
+        config.i18n.resources = deepMerge(config.i18n.resources, i18nClientToUse)
       }
     }
 

@@ -92,6 +92,8 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   )
   checkDuplicateCollections(config.collections)
 
+  config.i18n = configWithDefaults.i18n as any // TODO: Review if this is ok. Without this, the richText translations set in the fields sanitization will not work
+
   if (config.globals.length > 0) {
     config.globals = sanitizeGlobals(config as SanitizedConfig)
   }

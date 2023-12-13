@@ -79,9 +79,9 @@ export const getBaseFields = (
           label: translations['fields:enterURL'],
           required: true,
           type: 'text',
-          validate: (value: string) => {
+          validate: (value: string, options) => {
             if (value && !validateUrl(value)) {
-              return 'Invalid URL'
+              return options?.t('lexical:link:invalidURL') //
             }
           },
         },

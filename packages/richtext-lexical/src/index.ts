@@ -2,7 +2,7 @@ import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
 
-import { withNullableJSONSchemaType } from 'payload/utilities'
+import { deepMerge, withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { FeatureProvider } from './field/features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './field/lexical/config/types'
@@ -98,22 +98,20 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       })
     },
     editorConfig: finalSanitizedEditorConfig,
-    i18nClient: {
-      ...finalSanitizedEditorConfig.features.i18nClient,
+    i18nClient: deepMerge(finalSanitizedEditorConfig.features.i18nClient, {
       en: {
         lexical: {
           test: 'hiClient',
         },
       },
-    },
-    i18nServer: {
-      ...finalSanitizedEditorConfig.features.i18nServer,
+    }),
+    i18nServer: deepMerge(finalSanitizedEditorConfig.features.i18nServer, {
       en: {
         lexical: {
           test: 'hiServer',
         },
       },
-    },
+    }),
     outputSchema: ({ isRequired }) => {
       return {
         // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.

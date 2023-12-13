@@ -1,4 +1,4 @@
-import type { i18n } from 'i18next'
+import type { Resource, i18n } from 'i18next'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 
@@ -10,6 +10,7 @@ import type { FeatureProvider } from '../types'
 import type { SerializedAutoLinkNode } from './nodes/AutoLinkNode'
 import type { LinkFields, SerializedLinkNode } from './nodes/LinkNode'
 
+import { translateObject } from '../../../translator'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
@@ -17,6 +18,7 @@ import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands'
 import { linkPopulationPromiseHOC } from './populationPromise'
+import { translationsClient } from './translations'
 
 type ExclusiveLinkCollectionsProps =
   | {
@@ -50,7 +52,27 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
     | Field[]
 }
 
+const enTranslationClient: Resource = {
+  lexical: {
+    link: {
+      editLink: 'Edit link',
+      invalidURL: 'Invalid URL',
+      removeLink: 'Remove link',
+    },
+  },
+}
+export const linkTranslationsClient: Resource = {
+  en: {
+    ...enTranslationClient,
+  },
+  ...translationsClient,
+}
+
+//translateObject(enTranslationClient)
+
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
+  // freeze app until translation is done
+
   return {
     feature: () => {
       return {
@@ -97,6 +119,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             ]),
           ],
         },
+        i18nClient: linkTranslationsClient,
         nodes: [
           {
             converters: {
