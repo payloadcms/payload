@@ -188,7 +188,7 @@ export const translationsClient = {
       },
     },
   },
-  'rs-latin': {
+  rsLatin: {
     lexical: {
       link: {
         editLink: 'Uredi link',
@@ -197,7 +197,7 @@ export const translationsClient = {
       },
     },
   },
-  su: {
+  ru: {
     lexical: {
       link: {
         editLink: 'Édit tumbu',
@@ -260,7 +260,7 @@ export const translationsClient = {
       },
     },
   },
-  'zh-tw': {
+  zhTw: {
     lexical: {
       link: {
         editLink: '編輯連結',

@@ -81,15 +81,15 @@ export async function translateObject(obj: object, languages?: string[]) {
       'pt',
       'ro',
       'rs',
-      'rs-latin',
-      'su',
+      'rsLatin',
+      'ru',
       'sv',
       'th',
       'tr',
       'ua',
       'vi',
       'zh',
-      'zh-tw',
+      'zhTw',
     ]
   }
   const translatedObject = {}
