@@ -2,13 +2,8 @@ import path from 'path'
 
 import type { File } from './types'
 
-const importDynamic = (modulePath: string) => import(modulePath)
-
 const getFileByURL = async (url: string): Promise<File> => {
-  async function fetch(...args) {
-    const { default: fetch } = await importDynamic('node-fetch')
-    return fetch(...args)
-  }
+  const { default: fetch } = (await import('node-fetch')) as any
 
   if (typeof url === 'string') {
     const res = await fetch(url, {
