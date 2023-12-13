@@ -163,6 +163,7 @@ Each field represents a form input. To override default settings pass either a b
   - `width`: string
   - `options`: array
   - `required`: checkbox
+  - `multiple`: checkbox
 - `email`
   - `name`: string
   - `label`: string
