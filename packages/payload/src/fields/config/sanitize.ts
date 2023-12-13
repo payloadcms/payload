@@ -25,6 +25,8 @@ type Args = {
   validRelationships: null | string[]
 }
 
+const addedRichTextI18ns = []
+
 export const sanitizeFields = ({
   config,
   existingFieldNames = new Set(),
@@ -44,8 +46,27 @@ export const sanitizeFields = ({
     }
 
     // Make sure that the richText field has an editor
-    if (field.type === 'richText' && !field.editor && config.editor) {
-      field.editor = config.editor
+    if (field.type === 'richText') {
+      if (!field.editor && config.editor) {
+        field.editor = config.editor
+      }
+      if (field.editor && field.editor.i18n) {
+        if (!addedRichTextI18ns.includes(field.editor.i18n)) {
+          addedRichTextI18ns.push(field.editor.i18n)
+          config.i18n = {
+            ...config.i18n,
+            ...(field.editor.i18n || {}),
+          }
+        }
+      } else if (config.editor && config.editor.i18n) {
+        if (!addedRichTextI18ns.includes(config.editor.i18n)) {
+          addedRichTextI18ns.push(config.editor.i18n)
+          config.i18n = {
+            ...config.i18n,
+            ...(config.editor.i18n || {}),
+          }
+        }
+      }
     }
 
     // Auto-label
@@ -113,7 +134,7 @@ export const sanitizeFields = ({
     if (fieldAffectsData(field)) {
       if (existingFieldNames.has(field.name)) {
         throw new DuplicateFieldName(field.name)
-      } else if (!['id', 'blockName'].includes(field.name)) {
+      } else if (!['blockName', 'id'].includes(field.name)) {
         existingFieldNames.add(field.name)
       }
 
@@ -176,9 +197,9 @@ export const sanitizeFields = ({
 
         unsanitizedBlock.fields = sanitizeFields({
           config,
+          existingFieldNames: new Set(),
           fields: block.fields,
           validRelationships,
-          existingFieldNames: new Set(),
         })
 
         return unsanitizedBlock
