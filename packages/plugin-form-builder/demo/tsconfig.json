@@ -10,7 +10,6 @@
     "jsx": "react"
   },
   "ts-node": {
-    "transpileOnly": true,
-    "swc": true
+    "transpileOnly": true
   }
 }

@@ -1,37 +1,34 @@
-import type { Block } from 'payload/types'
-
-import { webpackBundler } from '@payloadcms/bundler-webpack'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload/config'
+import type { Block } from 'payload/types'
 
 // import formBuilderPlugin from '../../dist';
+// eslint-disable-next-line import/no-relative-packages
 import formBuilderPlugin, { fields } from '../../src'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 
 const colorField: Block = {
+  slug: 'color',
+  labels: {
+    singular: 'Color',
+    plural: 'Colors',
+  },
   fields: [
     {
       name: 'value',
       type: 'text',
     },
   ],
-  labels: {
-    plural: 'Colors',
-    singular: 'Color',
-  },
-  slug: 'color',
 }
 
 export default buildConfig({
+  serverURL: 'http://localhost:3000',
+  localization: {
+    locales: ['en', 'it'],
+    defaultLocale: 'en',
+  },
   admin: {
-    autoLogin: {
-      email: 'dev@payloadcms.com',
-      password: 'test',
-    },
-    bundler: webpackBundler(),
     user: Users.slug,
     webpack: (config) => {
       const newConfig = {
@@ -40,9 +37,9 @@ export default buildConfig({
           ...config.resolve,
           alias: {
             ...config.resolve.alias,
-            payload: path.join(__dirname, '../node_modules/payload'),
             react: path.join(__dirname, '../node_modules/react'),
             'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+            payload: path.join(__dirname, '../node_modules/payload'),
           },
         },
       }
@@ -51,26 +48,31 @@ export default buildConfig({
     },
   },
   collections: [Users, Pages],
-  db: mongooseAdapter({
-    url: process.env.MONGODB_URI,
-  }),
-  editor: lexicalEditor(),
-  localization: {
-    defaultLocale: 'en',
-    locales: ['en', 'it'],
-  },
   plugins: [
     formBuilderPlugin({
       // handlePayment: handleFormPayments,
       // beforeEmail: prepareFormEmails,
+      redirectRelationships: ['pages'],
+      formOverrides: {
+        // labels: {
+        //   singular: 'Contact Form',
+        //   plural: 'Contact Forms'
+        // },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
       fields: {
-        colorField,
         payment: true,
+        colorField,
         text: {
           ...fields.text,
           labels: {
-            plural: 'Custom Text Fields',
             singular: 'Custom Text Field',
+            plural: 'Custom Text Fields',
           },
         },
         // payment: {
@@ -85,22 +87,8 @@ export default buildConfig({
         //     },
         // },
       },
-      formOverrides: {
-        // labels: {
-        //   singular: 'Contact Form',
-        //   plural: 'Contact Forms'
-        // },
-        fields: [
-          {
-            name: 'name',
-            type: 'text',
-          },
-        ],
-      },
-      redirectRelationships: ['pages'],
     }),
   ],
-  serverURL: 'http://localhost:3000',
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
