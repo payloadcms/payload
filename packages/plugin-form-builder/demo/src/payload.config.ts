@@ -1,5 +1,8 @@
 import type { Block } from 'payload/types'
 
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
@@ -24,6 +27,11 @@ const colorField: Block = {
 
 export default buildConfig({
   admin: {
+    autoLogin: {
+      email: 'dev@payloadcms.com',
+      password: 'test',
+    },
+    bundler: webpackBundler(),
     user: Users.slug,
     webpack: (config) => {
       const newConfig = {
@@ -43,6 +51,10 @@ export default buildConfig({
     },
   },
   collections: [Users, Pages],
+  db: mongooseAdapter({
+    url: process.env.MONGODB_URI,
+  }),
+  editor: lexicalEditor(),
   localization: {
     defaultLocale: 'en',
     locales: ['en', 'it'],

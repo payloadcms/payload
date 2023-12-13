@@ -8,15 +8,18 @@
     "dev": "cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
-    "build": "pnpm build:payload && pnpm build:server",
+    "build": "yarn build:payload && yarn build:server",
     "serve": "cross-env PAYLOAD_CONFIG_PATH=dist/payload.config.js NODE_ENV=production node dist/server.js",
     "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types"
   },
   "dependencies": {
+    "@payloadcms/bundler-webpack": "^1.0.5",
+    "@payloadcms/db-mongodb": "^1.1.0",
+    "@payloadcms/richtext-lexical": "^0.4.1",
     "deepmerge": "^4.2.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "workspace:*"
+    "payload": "^2.4.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
