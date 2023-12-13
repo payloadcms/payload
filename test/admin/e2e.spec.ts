@@ -299,14 +299,6 @@ describe('admin', () => {
       await expect(page.locator('.app-header .collection-api-button')).toHaveCount(1)
     })
 
-    test('should show collection versions view level action in collection versions view', async () => {
-      const { id } = await createGeo()
-      await page.goto(`${geoUrl.edit(id)}/versions`)
-      await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
-    })
-
-    // TODO: Check versions/:version-id view
-
     test('should show global edit view level action in globals edit view', async () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(globalWithPreview.global(globalSlug))
@@ -317,12 +309,6 @@ describe('admin', () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
       await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
-    })
-
-    test('should show global versions view level action in globals versions view', async () => {
-      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
-      await page.goto(`${globalWithPreview.global(globalSlug)}/versions`)
-      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
     })
   })
 

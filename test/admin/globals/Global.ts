@@ -2,8 +2,6 @@ import type { GlobalConfig } from '../../../packages/payload/src/globals/config/
 
 import GlobalAPIButton from '../components/GlobalAPIButton'
 import GlobalEditButton from '../components/GlobalEditButton'
-import GlobalVersionButton from '../components/GlobalVersionButton'
-import GlobalVersionsButton from '../components/GlobalVersionsButton'
 import { globalSlug } from '../slugs'
 
 export const Global: GlobalConfig = {
@@ -20,12 +18,6 @@ export const Global: GlobalConfig = {
           },
           API: {
             actions: [GlobalAPIButton],
-          },
-          Version: {
-            actions: [GlobalVersionButton],
-          },
-          Versions: {
-            actions: [GlobalVersionsButton],
           },
         },
       },

@@ -3,15 +3,10 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 import CollectionAPIButton from '../components/CollectionAPIButton'
 import CollectionEditButton from '../components/CollectionEditButton'
 import CollectionListButton from '../components/CollectionListButton'
-import CollectionVersionButton from '../components/CollectionVersionButton'
-import CollectionVersionsButton from '../components/CollectionVersionsButton'
 import { geoCollectionSlug } from '../slugs'
 
 export const Geo: CollectionConfig = {
   slug: geoCollectionSlug,
-  versions: {
-    drafts: true,
-  },
   admin: {
     components: {
       views: {
@@ -21,12 +16,6 @@ export const Geo: CollectionConfig = {
           },
           API: {
             actions: [CollectionAPIButton],
-          },
-          Version: {
-            actions: [CollectionVersionButton],
-          },
-          Versions: {
-            actions: [CollectionVersionsButton],
           },
         },
         List: {
