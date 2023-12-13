@@ -1,6 +1,6 @@
 'use client'
 
-import type { TextField } from 'payload/types'
+import type { TextField } from 'payload/dist/fields/config/types'
 
 import { Select, useForm } from 'payload/components/forms'
 import React, { useEffect, useState } from 'react'
