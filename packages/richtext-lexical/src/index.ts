@@ -98,6 +98,20 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       })
     },
     editorConfig: finalSanitizedEditorConfig,
+    i18nClient: {
+      en: {
+        lexical: {
+          test: 'hiClient',
+        },
+      },
+    },
+    i18nServer: {
+      en: {
+        lexical: {
+          test: 'hiServer',
+        },
+      },
+    },
     outputSchema: ({ isRequired }) => {
       return {
         // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.

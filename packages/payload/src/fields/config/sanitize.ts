@@ -56,19 +56,40 @@ export const sanitizeFields = ({
       if (!field.editor && config.editor) {
         field.editor = config.editor
       }
-      const i18nServerToUse = field?.editor?.i18nServer || config?.editor?.i18nServer
-      const i18nClientToUse = field?.editor?.i18nClient || config?.editor?.i18nClient
 
-      if (isServer && i18nServerToUse && !addedRichTextI18ns.includes(i18nServerToUse)) {
-        addedRichTextI18ns.push(i18nServerToUse)
-        config.i18n = {
-          ...config.i18n,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { i18nServerToUse, serverEditor } = field?.editor?.i18nServer
+        ? { i18nServerToUse: field?.editor?.i18nServer, serverEditor: field?.editor }
+        : { i18nServerToUse: config?.editor?.i18nServer, serverEditor: config?.editor }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { clientEditor, i18nClientToUse } = field?.editor?.i18nClient
+        ? { clientEditor: field?.editor, i18nClientToUse: field?.editor?.i18nClient }
+        : { clientEditor: config?.editor, i18nClientToUse: config?.editor?.i18nClient }
+
+      if (!config.i18n) {
+        config.i18n = {}
+      }
+      if (!config.i18n.resources) {
+        config.i18n.resources = {}
+      }
+
+      const stringifiedI18nServerToUse = JSON.stringify(i18nServerToUse)
+      const stringifiedI18nClientToUse = JSON.stringify(i18nClientToUse)
+
+      if (isServer && i18nServerToUse && !addedRichTextI18ns.includes(stringifiedI18nServerToUse)) {
+        addedRichTextI18ns.push(stringifiedI18nServerToUse)
+        config.i18n.resources = {
+          ...config.i18n.resources,
           ...i18nServerToUse,
         }
-      } else if (!isServer && i18nClientToUse && !addedRichTextI18ns.includes(i18nClientToUse)) {
-        addedRichTextI18ns.push(i18nClientToUse)
-        config.i18n = {
-          ...config.i18n,
+      } else if (
+        !isServer &&
+        i18nClientToUse &&
+        !addedRichTextI18ns.includes(stringifiedI18nClientToUse)
+      ) {
+        addedRichTextI18ns.push(stringifiedI18nClientToUse)
+        config.i18n.resources = {
+          ...config.i18n.resources,
           ...i18nClientToUse,
         }
       }
