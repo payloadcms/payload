@@ -2,20 +2,29 @@ import path from 'path'
 
 import type { File } from './types'
 
-const getFileByURL = async (url: string): Promise<File> => {
-  if (typeof url === 'string') {
-    const res = await fetch(url)
-    const blob = await res.blob()
-    const arrayBuffer = await blob.arrayBuffer()
+const importDynamic = (modulePath: string) => import(modulePath)
 
-    const data = Buffer.from(arrayBuffer)
+const getFileByURL = async (url: string): Promise<File> => {
+  async function fetch(...args) {
+    const { default: fetch } = await importDynamic('node-fetch')
+    return fetch(...args)
+  }
+
+  if (typeof url === 'string') {
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'GET',
+    })
+    const data = await res.buffer()
     const name = path.basename(url)
 
     return {
       name,
       data,
-      mimetype: blob.type || undefined,
-      size: blob.size || 0,
+      mimetype: res.headers.get('content-type') || undefined,
+      size: Number(res.headers.get('content-length')) || 0,
     }
   }
 }
