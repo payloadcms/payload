@@ -17,6 +17,8 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
       load: [],
       save: [],
     },
+    i18nClient: {},
+    i18nServer: {},
     markdownTransformers: [],
     nodes: [],
     plugins: [],
@@ -29,6 +31,19 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
   }
 
   features.forEach((feature) => {
+    if (feature.i18nClient) {
+      sanitized.i18nClient = {
+        ...sanitized.i18nClient,
+        ...feature.i18nClient,
+      }
+    }
+    if (feature.i18nServer) {
+      sanitized.i18nServer = {
+        ...sanitized.i18nServer,
+        ...feature.i18nServer,
+      }
+    }
+
     if (feature.hooks) {
       if (feature.hooks.afterReadPromise) {
         sanitized.hooks.afterReadPromises = sanitized.hooks.afterReadPromises.concat(

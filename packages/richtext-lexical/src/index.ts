@@ -99,6 +99,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     },
     editorConfig: finalSanitizedEditorConfig,
     i18nClient: {
+      ...finalSanitizedEditorConfig.features.i18nClient,
       en: {
         lexical: {
           test: 'hiClient',
@@ -106,6 +107,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       },
     },
     i18nServer: {
+      ...finalSanitizedEditorConfig.features.i18nServer,
       en: {
         lexical: {
           test: 'hiServer',
