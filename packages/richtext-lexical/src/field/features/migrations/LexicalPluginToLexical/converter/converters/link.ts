@@ -17,9 +17,7 @@ export const LinkConverter: LexicalPluginNodeConverter = {
         doc: (lexicalPluginNode as any).attributes?.doc
           ? {
               relationTo: (lexicalPluginNode as any).attributes?.doc?.relationTo,
-              value: {
-                id: (lexicalPluginNode as any).attributes?.doc?.value,
-              },
+              value: (lexicalPluginNode as any).attributes?.doc?.value,
             }
           : undefined,
         linkType: (lexicalPluginNode as any).attributes?.linkType || 'custom',
@@ -29,7 +27,7 @@ export const LinkConverter: LexicalPluginNodeConverter = {
       format: (lexicalPluginNode as any).format || '',
       indent: (lexicalPluginNode as any).indent || 0,
       type: 'link',
-      version: 1,
+      version: 2,
     } as const as SerializedLinkNode
   },
   nodeTypes: ['link'],
