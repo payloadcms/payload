@@ -71,8 +71,6 @@ export const linkTranslationsClient: Resource = {
 //translateObject(enTranslationClient)
 
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
-  // freeze app until translation is done
-
   return {
     feature: () => {
       return {
