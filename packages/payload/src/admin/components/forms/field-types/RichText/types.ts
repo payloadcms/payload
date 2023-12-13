@@ -28,7 +28,8 @@ type RichTextAdapterBase<
     incomingEditorState: Value
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
-  i18n?: Resource
+  i18nClient?: Resource
+  i18nServer?: Resource
   outputSchema?: ({
     field,
     isRequired,

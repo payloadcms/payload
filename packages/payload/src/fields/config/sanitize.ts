@@ -27,6 +27,10 @@ type Args = {
 
 const addedRichTextI18ns = []
 
+function isOnServer() {
+  return !(typeof window != 'undefined' && window.document)
+}
+
 export const sanitizeFields = ({
   config,
   existingFieldNames = new Set(),
@@ -34,6 +38,8 @@ export const sanitizeFields = ({
   validRelationships,
 }: Args): Field[] => {
   if (!fields) return []
+
+  const isServer = isOnServer()
 
   return fields.map((unsanitizedField) => {
     const field: Field = { ...unsanitizedField }
@@ -50,21 +56,20 @@ export const sanitizeFields = ({
       if (!field.editor && config.editor) {
         field.editor = config.editor
       }
-      if (field.editor && field.editor.i18n) {
-        if (!addedRichTextI18ns.includes(field.editor.i18n)) {
-          addedRichTextI18ns.push(field.editor.i18n)
-          config.i18n = {
-            ...config.i18n,
-            ...(field.editor.i18n || {}),
-          }
+      const i18nServerToUse = field?.editor?.i18nServer || config?.editor?.i18nServer
+      const i18nClientToUse = field?.editor?.i18nClient || config?.editor?.i18nClient
+
+      if (isServer && i18nServerToUse && !addedRichTextI18ns.includes(i18nServerToUse)) {
+        addedRichTextI18ns.push(i18nServerToUse)
+        config.i18n = {
+          ...config.i18n,
+          ...i18nServerToUse,
         }
-      } else if (config.editor && config.editor.i18n) {
-        if (!addedRichTextI18ns.includes(config.editor.i18n)) {
-          addedRichTextI18ns.push(config.editor.i18n)
-          config.i18n = {
-            ...config.i18n,
-            ...(config.editor.i18n || {}),
-          }
+      } else if (!isServer && i18nClientToUse && !addedRichTextI18ns.includes(i18nClientToUse)) {
+        addedRichTextI18ns.push(i18nClientToUse)
+        config.i18n = {
+          ...config.i18n,
+          ...i18nClientToUse,
         }
       }
     }
