@@ -1,3 +1,4 @@
+import type { Resource } from 'i18next'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { PayloadRequest } from '../../../../../express/types'
@@ -27,6 +28,7 @@ type RichTextAdapterBase<
     incomingEditorState: Value
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
+  i18n?: Resource
   outputSchema?: ({
     field,
     isRequired,
