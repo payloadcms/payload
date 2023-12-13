@@ -125,7 +125,7 @@ export function LinkEditor({
         // internal link
         setLinkUrl(
           `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${linkParent.getFields()
-            ?.doc?.value?.id}`,
+            ?.doc?.value}`,
         )
 
         const relatedField = config.collections.find(
@@ -323,11 +323,6 @@ export function LinkEditor({
         handleModalSubmit={(fields: Fields, data: Data) => {
           closeModal(drawerSlug)
 
-          if (data?.fields?.doc?.value) {
-            data.fields.doc.value = {
-              id: data.fields.doc.value,
-            }
-          }
           const newLinkPayload: LinkPayload = data as LinkPayload
 
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)

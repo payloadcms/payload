@@ -90,9 +90,7 @@ export function generateLexicalRichText() {
               fields: {
                 url: 'https://',
                 doc: {
-                  value: {
-                    id: '{{ARRAY_DOC_ID}}',
-                  },
+                  value: '{{ARRAY_DOC_ID}}',
                   relationTo: 'array-fields',
                 },
                 newTab: false,

@@ -114,7 +114,9 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
                   const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
 
                   const href: string =
-                    node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
+                    node.fields.linkType === 'custom'
+                      ? node.fields.url
+                      : (node.fields.doc?.value as string)
 
                   return `<a href="${href}"${rel}>${childrenText}</a>`
                 },
