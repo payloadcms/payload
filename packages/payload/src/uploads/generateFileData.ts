@@ -67,7 +67,7 @@ export const generateFileData = async <T>({
     const { filename, url } = data as FileData
 
     try {
-      if (url && url.startsWith('/')) {
+      if (url && url.startsWith('/') && !disableLocalStorage) {
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response as UploadedFile
