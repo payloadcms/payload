@@ -1,12 +1,11 @@
-import path from 'path'
-import { buildConfig } from 'payload/config'
-import type { Block } from 'payload/types'
+import type { Block } from '../../packages/payload/src/fields/config/types'
 
-// import formBuilderPlugin from '../../dist';
-// eslint-disable-next-line import/no-relative-packages
-import formBuilderPlugin, { fields } from '../../src'
+import formBuilder, { fields as formFields } from '../../packages/plugin-form-builder/src'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
+import { seed } from './seed'
 
 const colorField: Block = {
   slug: 'color',
@@ -22,34 +21,26 @@ const colorField: Block = {
   ],
 }
 
-export default buildConfig({
-  serverURL: 'http://localhost:3000',
+export default buildConfigWithDefaults({
+  collections: [Pages, Users],
   localization: {
-    locales: ['en', 'it'],
     defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es', 'de'],
   },
-  admin: {
-    user: Users.slug,
-    webpack: (config) => {
-      const newConfig = {
-        ...config,
-        resolve: {
-          ...config.resolve,
-          alias: {
-            ...config.resolve.alias,
-            react: path.join(__dirname, '../node_modules/react'),
-            'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-            payload: path.join(__dirname, '../node_modules/payload'),
-          },
-        },
-      }
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
 
-      return newConfig
-    },
+    await seed(payload)
   },
-  collections: [Users, Pages],
   plugins: [
-    formBuilderPlugin({
+    formBuilder({
       // handlePayment: handleFormPayments,
       // beforeEmail: prepareFormEmails,
       redirectRelationships: ['pages'],
@@ -60,7 +51,7 @@ export default buildConfig({
         // },
         fields: [
           {
-            name: 'name',
+            name: 'custom',
             type: 'text',
           },
         ],
@@ -69,7 +60,7 @@ export default buildConfig({
         payment: true,
         colorField,
         text: {
-          ...fields.text,
+          ...formFields.text,
           labels: {
             singular: 'Custom Text Field',
             plural: 'Custom Text Fields',
@@ -89,7 +80,4 @@ export default buildConfig({
       },
     }),
   ],
-  typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
-  },
 })
