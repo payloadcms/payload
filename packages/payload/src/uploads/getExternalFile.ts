@@ -18,7 +18,7 @@ export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
       credentials: 'include',
       method: 'GET',
       headers: {
-        cookie: req.headers.cookie,
+        ...req.headers,
       },
     })
 
