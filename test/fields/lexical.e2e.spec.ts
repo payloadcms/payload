@@ -68,6 +68,41 @@ describe('lexical', () => {
     await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
   })
 
+  test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
+    // Relevant issue: https://github.com/payloadcms/payload/issues/4115
+    await navigateToLexicalFields()
+    const thirdBlock = page.locator('.rich-text-lexical').nth(1).locator('.lexical-block').nth(2)
+    await thirdBlock.scrollIntoViewIfNeeded()
+    await expect(thirdBlock).toBeVisible()
+
+    const spanInBlock = thirdBlock
+      .locator('span')
+      .getByText('Some text below relationship node 1')
+      .first()
+    await spanInBlock.scrollIntoViewIfNeeded()
+    await expect(spanInBlock).toBeVisible()
+
+    await spanInBlock.click() // Click works better than focus
+
+    await page.keyboard.type('moretext')
+    const newSpanInBlock = thirdBlock
+      .locator('span')
+      .getByText('Some text below rmoretextelationship node 1')
+      .first()
+    await expect(newSpanInBlock).toBeVisible()
+    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+
+    // Save
+    await saveDocAndAssert(page)
+    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+
+    // Navigate to some different page, away from the current document
+    await page.locator('.app-header__step-nav').first().locator('a').first().click()
+
+    // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
+    await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
+  })
+
   test('should type and save typed text', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').nth(1) // second
