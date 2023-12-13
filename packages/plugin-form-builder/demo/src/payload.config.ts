@@ -1,33 +1,28 @@
-import path from 'path'
-import { buildConfig } from 'payload/config'
 import type { Block } from 'payload/types'
 
+import path from 'path'
+import { buildConfig } from 'payload/config'
+
 // import formBuilderPlugin from '../../dist';
-// eslint-disable-next-line import/no-relative-packages
 import formBuilderPlugin, { fields } from '../../src'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 
 const colorField: Block = {
-  slug: 'color',
-  labels: {
-    singular: 'Color',
-    plural: 'Colors',
-  },
   fields: [
     {
       name: 'value',
       type: 'text',
     },
   ],
+  labels: {
+    plural: 'Colors',
+    singular: 'Color',
+  },
+  slug: 'color',
 }
 
 export default buildConfig({
-  serverURL: 'http://localhost:3000',
-  localization: {
-    locales: ['en', 'it'],
-    defaultLocale: 'en',
-  },
   admin: {
     user: Users.slug,
     webpack: (config) => {
@@ -37,9 +32,9 @@ export default buildConfig({
           ...config.resolve,
           alias: {
             ...config.resolve.alias,
+            payload: path.join(__dirname, '../node_modules/payload'),
             react: path.join(__dirname, '../node_modules/react'),
             'react-dom': path.join(__dirname, '../node_modules/react-dom'),
-            payload: path.join(__dirname, '../node_modules/payload'),
           },
         },
       }
@@ -48,31 +43,22 @@ export default buildConfig({
     },
   },
   collections: [Users, Pages],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'it'],
+  },
   plugins: [
     formBuilderPlugin({
       // handlePayment: handleFormPayments,
       // beforeEmail: prepareFormEmails,
-      redirectRelationships: ['pages'],
-      formOverrides: {
-        // labels: {
-        //   singular: 'Contact Form',
-        //   plural: 'Contact Forms'
-        // },
-        fields: [
-          {
-            name: 'name',
-            type: 'text',
-          },
-        ],
-      },
       fields: {
-        payment: true,
         colorField,
+        payment: true,
         text: {
           ...fields.text,
           labels: {
-            singular: 'Custom Text Field',
             plural: 'Custom Text Fields',
+            singular: 'Custom Text Field',
           },
         },
         // payment: {
@@ -87,8 +73,22 @@ export default buildConfig({
         //     },
         // },
       },
+      formOverrides: {
+        // labels: {
+        //   singular: 'Contact Form',
+        //   plural: 'Contact Forms'
+        // },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+        ],
+      },
+      redirectRelationships: ['pages'],
     }),
   ],
+  serverURL: 'http://localhost:3000',
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },

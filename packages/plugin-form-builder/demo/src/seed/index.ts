@@ -14,35 +14,35 @@ export const seed = async (payload: Payload): Promise<any> => {
   const { id: formID } = await payload.create({
     collection: 'forms',
     data: {
-      title: 'Contact Form',
       confirmationMessage: [
         {
-          type: 'paragraph',
           text: 'Confirmed',
+          type: 'paragraph',
         },
       ],
       fields: [
         {
+          name: 'name',
           blockType: 'text',
           label: 'Name',
-          name: 'name',
           required: true,
         },
         {
+          name: 'email',
           blockType: 'email',
           label: 'Email',
-          name: 'email',
           required: true,
         },
       ],
+      title: 'Contact Form',
     },
   })
 
   await payload.create({
     collection: 'pages',
     data: {
-      title: 'Contact',
       form: formID,
+      title: 'Contact',
     },
   })
 }

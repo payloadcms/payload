@@ -1,11 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
 export const Pages: CollectionConfig = {
-  slug: 'pages',
-  labels: {
-    singular: 'Page',
-    plural: 'Pages',
-  },
   admin: {
     useAsTitle: 'title',
   },
@@ -13,14 +8,19 @@ export const Pages: CollectionConfig = {
     {
       name: 'title',
       label: 'Title',
-      type: 'text',
       required: true,
+      type: 'text',
     },
     {
       name: 'form',
       label: 'Form',
-      type: 'relationship',
       relationTo: 'forms',
+      type: 'relationship',
     },
   ],
+  labels: {
+    plural: 'Pages',
+    singular: 'Page',
+  },
+  slug: 'pages',
 }
