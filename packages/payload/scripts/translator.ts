@@ -1,4 +1,5 @@
 const OPENAI_API_KEY = 'sk-YOURKEYHERE' // Remember to replace with your actual key
+import { deepMerge } from 'payload/utilities'
 
 async function translateText(text: string, targetLang: string) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -28,36 +29,78 @@ async function translateText(text: string, targetLang: string) {
   return data.choices[0].message.content.trim()
 }
 
-async function recursivelyTranslate(obj, targetLanguage) {
-  if (typeof obj === 'object' && obj !== null) {
-    const translated = Array.isArray(obj) ? [] : {}
-    for (const key in obj) {
-      translated[key] = await recursivelyTranslate(obj[key], targetLanguage)
+function findMissingKeys(baseObj: any, targetObj: any, prefix = ''): string[] {
+  let missingKeys = []
+
+  for (const key in baseObj) {
+    if (typeof baseObj[key] === 'object') {
+      missingKeys = missingKeys.concat(
+        findMissingKeys(baseObj[key], targetObj[key] || {}, `${prefix}${key}.`),
+      )
+    } else if (!(key in targetObj)) {
+      missingKeys.push(`${prefix}${key}`)
     }
-    return translated
-  } else if (typeof obj === 'string') {
-    return await translateText(obj, targetLanguage)
-  } else {
-    return obj
   }
+
+  return missingKeys
+}
+
+const findKeysWhichDontExistInEnglish = (baseObj: any, targetObj: any, prefix = ''): string[] => {
+  let keysWhichDoNotExistInBaseObj = []
+  for (const key in targetObj) {
+    if (typeof targetObj[key] === 'object') {
+      keysWhichDoNotExistInBaseObj = keysWhichDoNotExistInBaseObj.concat(
+        findKeysWhichDontExistInEnglish(baseObj[key], targetObj[key] || {}, `${prefix}${key}.`),
+      )
+    } else if (!(key in baseObj)) {
+      keysWhichDoNotExistInBaseObj.push(`${prefix}${key}`)
+    }
+  }
+
+  return keysWhichDoNotExistInBaseObj
+}
+
+function sortKeys(obj: any): any {
+  if (typeof obj !== 'object' || obj === null) return obj
+
+  if (Array.isArray(obj)) {
+    return obj.map(sortKeys)
+  }
+
+  const sortedKeys = Object.keys(obj).sort()
+  const sortedObj: { [key: string]: any } = {}
+
+  for (const key of sortedKeys) {
+    sortedObj[key] = sortKeys(obj[key])
+  }
+
+  return sortedObj
 }
 
 /**
  *
- * @param obj Object of type "Resource" but without the language as first property. English is assumed. Example:
+ * @param obj Object of type "Resource" with all the languages
  * {
- *   lexical: {
- *     link: {
- *       editLink: 'Edit link',
- *       invalidURL: 'Invalid URL',
- *       removeLink: 'Remove link',
+ *   en: {
+ *     lexical: {
+ *       link: {
+ *         editLink: 'Edit link',
+ *         invalidURL: 'Invalid URL',
+ *         removeLink: 'Remove link',
+ *       },
  *     },
  *   },
+ *   de: {
+ *     lexical: {
+ *       ...
+ *     }
+ *   },
+ *   ...
  * }
  *
  * @param languages Full Resource object without en language
  */
-export async function translateObject(obj: object, languages?: string[]) {
+export async function translateObject(obj: any, languages?: string[]) {
   if (!languages) {
     languages = [
       'ar',
@@ -93,51 +136,58 @@ export async function translateObject(obj: object, languages?: string[]) {
     ]
   }
   const translatedObject = {}
-  for (const lang of languages) {
-    const translationPromises = []
+  const translationPromises: Promise<any>[] = []
 
-    // Function to add promises to the array, maintaining a maximum of 12 concurrent translations
-    async function addTranslationPromise(key, value) {
+  for (const lang of languages) {
+    const keysWhichDoNotExistInEnglish = findKeysWhichDontExistInEnglish(obj?.en, obj?.[lang])
+    console.log('Keys which do not exist in English:', keysWhichDoNotExistInEnglish)
+    for (const key of keysWhichDoNotExistInEnglish) {
+      // Delete those keys in the target language object obj[lang]
+      const keys = key.split('.')
+      let targetObj = obj?.[lang]
+      for (let i = 0; i < keys.length - 1; i += 1) {
+        targetObj = targetObj[keys[i]]
+      }
+      delete targetObj[keys[keys.length - 1]]
+    }
+
+    const missingKeys = findMissingKeys(obj?.en, obj?.[lang])
+
+    console.log('Missing keys for lang', lang, ':', missingKeys)
+
+    for (const missingKey of missingKeys) {
+      const keys = missingKey.split('.')
+      const sourceText = keys.reduce((acc, key) => acc[key], obj['en'])
       if (translationPromises.length >= 12) {
         // Wait for one of the promises to resolve before adding a new one
         await Promise.race(translationPromises)
       }
-      const translationPromise = recursivelyTranslate(value, lang).then((translatedValue) => {
-        return { key, translatedValue }
-      })
-      translationPromises.push(translationPromise)
+
+      translationPromises.push(
+        translateText(sourceText, lang).then((translated) => {
+          if (!translatedObject[lang]) {
+            translatedObject[lang] = {}
+          }
+          let targetObj = translatedObject?.[lang]
+          for (let i = 0; i < keys.length - 1; i += 1) {
+            if (!targetObj[keys[i]]) {
+              targetObj[keys[i]] = {}
+            }
+            targetObj = targetObj[keys[i]]
+          }
+          targetObj[keys[keys.length - 1]] = translated
+        }),
+      )
     }
-
-    // Collect all translation promises
-    async function collectTranslations(currentObj, path = []) {
-      if (typeof currentObj === 'object' && currentObj !== null) {
-        for (const key in currentObj) {
-          await collectTranslations(currentObj[key], path.concat(key))
-        }
-      } else if (typeof currentObj === 'string') {
-        await addTranslationPromise(path, currentObj)
-      }
-    }
-
-    await collectTranslations(obj)
-
-    // Wait for all translations to complete
-    const results = await Promise.all(translationPromises)
-
-    // Construct the translated object
-    results.forEach(({ key, translatedValue }) => {
-      const target = translatedObject[lang] || {}
-      let current = target
-      key.slice(0, -1).forEach((k) => {
-        current[k] = current[k] || {}
-        current = current[k]
-      })
-      current[key[key.length - 1]] = translatedValue
-      translatedObject[lang] = target
-    })
   }
 
-  console.log('Translated object:', translatedObject)
+  await Promise.all(translationPromises)
+
+  // merge with existing translation.json
+  const mergedObject = deepMerge(obj, translatedObject)
+  console.log('Merged object:', mergedObject)
+
+  console.log('New translations:', translatedObject)
 
   // save to translation.json (create if not exists
   const fs = require('fs')
@@ -145,8 +195,8 @@ export async function translateObject(obj: object, languages?: string[]) {
 
   const filePath = path.resolve(__dirname, '../translation.json')
   // now save translatedObject
-  const json = JSON.stringify(translatedObject)
+  const json = JSON.stringify(mergedObject, null, 2)
   fs.writeFileSync(filePath, json, 'utf8')
 
-  return translatedObject
+  return mergedObject
 }

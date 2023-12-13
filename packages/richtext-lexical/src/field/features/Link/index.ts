@@ -1,4 +1,4 @@
-import type { Resource, i18n } from 'i18next'
+import type { i18n } from 'i18next'
 import type { SanitizedConfig } from 'payload/config'
 import type { Field } from 'payload/types'
 
@@ -52,23 +52,7 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
     | Field[]
 }
 
-const enTranslationClient: Resource = {
-  lexical: {
-    link: {
-      editLink: 'Edit link',
-      invalidURL: 'Invalid URL',
-      removeLink: 'Remove link',
-    },
-  },
-}
-export const linkTranslationsClient: Resource = {
-  en: {
-    ...enTranslationClient,
-  },
-  ...translationsClient,
-}
-
-//translateObject(enTranslationClient)
+//translateObject(translationsClient)
 
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
   return {
@@ -117,7 +101,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             ]),
           ],
         },
-        i18nClient: linkTranslationsClient,
+        i18nClient: translationsClient,
         nodes: [
           {
             converters: {

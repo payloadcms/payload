@@ -1,4 +1,6 @@
-export const translationsClient = {
+import type { Resource } from 'i18next'
+
+export const translationsClient: Resource = {
   ar: {
     lexical: {
       link: {
