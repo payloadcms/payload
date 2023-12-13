@@ -14,7 +14,8 @@ export const SlateLinkConverter: SlateNodeConverter = {
       }),
       direction: 'ltr',
       fields: {
-        doc: slateNode.doc || undefined,
+        ...(slateNode.fields || {}),
+        doc: slateNode.doc || null,
         linkType: slateNode.linkType || 'custom',
         newTab: slateNode.newTab || false,
         url: slateNode.url || undefined,
