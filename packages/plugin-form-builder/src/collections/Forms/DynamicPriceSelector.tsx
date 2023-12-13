@@ -1,7 +1,7 @@
 'use client'
 
-import type { Data } from 'payload/dist/admin/components/forms/Form/types'
-import type { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types'
+import type { Props as TextFieldType } from 'payload/components/fields/Text'
+import type { Data } from 'payload/types'
 
 import { Text, useWatchForm } from 'payload/components/forms'
 import { useLocale } from 'payload/components/utilities'
@@ -49,8 +49,10 @@ export const DynamicPriceSelector: React.FC<TextFieldType> = (props) => {
     return <Text {...props} />
   }
 
-  const localLabels = typeof label === 'object' ? label : { [locale]: label }
-  const labelValue = localLabels[locale] || localLabels['en'] || ''
+  const localeCode = typeof locale === 'object' && 'code' in locale ? locale.code : locale
+
+  const localLabels = typeof label === 'object' ? label : { [localeCode]: label }
+  const labelValue = localLabels[localeCode] || localLabels['en'] || ''
 
   if (valueType === 'valueOfField' && !isNumberField) {
     return (
