@@ -8,7 +8,6 @@
   height: 100vh;
   width: var(--nav-width);
   border-right: 1px solid var(--theme-elevation-100);
-  overflow-x: hidden;
   opacity: 0;
   transition: opacity var(--nav-trans-time) ease-in-out;
 
@@ -140,10 +139,6 @@
     nav a {
       font-size: base(0.875);
       line-height: base(1.5);
-    }
-
-    &--nav-open {
-      width: 100%;
     }
 
     &__mobile-close {

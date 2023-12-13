@@ -45,9 +45,9 @@
       display: block;
       position: absolute;
       inset: 0;
-      background-color: black;
+      background-color: inherit;
       opacity: 0;
-      z-index: 32;
+      z-index: var(--z-status);
       visibility: hidden;
       transition: all var(--nav-trans-time) linear;
     }
