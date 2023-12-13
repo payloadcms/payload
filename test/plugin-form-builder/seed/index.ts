@@ -1,6 +1,8 @@
 import type { Payload } from '../../../packages/payload/src'
 import type { PayloadRequest } from '../../../packages/payload/src/express/types'
 
+import { formsSlug, pagesSlug } from '../shared'
+
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
   const req = {} as PayloadRequest
@@ -16,7 +18,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     await payload.create({
-      collection: 'pages',
+      collection: pagesSlug,
       data: {
         slug: 'home',
         title: 'Home page',
@@ -25,7 +27,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     const { id: formID } = await payload.create({
-      collection: 'forms',
+      collection: formsSlug,
       data: {
         title: 'Contact Form',
         confirmationMessage: [
@@ -52,7 +54,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     })
 
     await payload.create({
-      collection: 'pages',
+      collection: pagesSlug,
       data: {
         title: 'Contact',
         slug: 'contact',
