@@ -38,6 +38,9 @@
     { "path": "./packages/richtext-lexical" },
     { "path": "./packages/payload" },
     { "path": "./packages/plugin-nested-docs" },
+    { "path": "./packages/plugin-form-builder" },
+    { "path": "./packages/plugin-cloud-storage" },
+    { "path": "./packages/plugin-cloud" },
     { "path": "./packages/live-preview" },
     { "path": "./packages/live-preview-react" }
   ]
