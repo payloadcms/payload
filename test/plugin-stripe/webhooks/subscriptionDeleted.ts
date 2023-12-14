@@ -1,7 +1,12 @@
-import { APIError } from 'payload/errors'
+import { APIError } from '../../../packages/payload/src/errors'
 
 export const subscriptionDeleted = async (args) => {
-  const { event, payload, stripe, stripeConfig } = args
+  const {
+    event,
+    payload,
+    // stripe,
+    // stripeConfig
+  } = args
 
   const customerStripeID = event.data.object.customer
 
@@ -9,7 +14,10 @@ export const subscriptionDeleted = async (args) => {
     `🪝 A new subscription was deleted in Stripe on customer ID: ${customerStripeID}, deleting from Payload...`,
   )
 
-  const { id: eventID, plan } = event.data.object
+  const {
+    id: eventID,
+    // plan
+  } = event.data.object
 
   // Now look up the customer in Payload
   try {
