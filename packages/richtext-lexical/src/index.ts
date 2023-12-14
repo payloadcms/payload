@@ -30,8 +30,6 @@ export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, Adap
   editorConfig: SanitizedEditorConfig
 }
 
-//translateObject(translationsClient)
-
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
   let finalSanitizedEditorConfig: SanitizedEditorConfig
   if (!props || (!props.features && !props.lexical)) {

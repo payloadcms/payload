@@ -9,8 +9,6 @@ import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { translationsClient } from '../translations'
 import { CHECK_LIST } from './markdownTransformers'
 
-// 345
-// carbs 7
 export const CheckListFeature = (): FeatureProvider => {
   return {
     feature: ({ featureProviderMap }) => {
