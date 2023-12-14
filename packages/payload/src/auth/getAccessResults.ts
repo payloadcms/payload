@@ -2,7 +2,7 @@ import type { PayloadT } from '..'
 import type { AllOperations } from '../types'
 import type { Permissions, User } from './types'
 
-import { getEntityPolicies2 } from '../utilities/getEntityPolicies2'
+import { getEntityPolicies } from '../utilities/getEntityPolicies'
 
 type GetAccessResultsArgs = {
   data?: Record<string, unknown>
@@ -51,7 +51,7 @@ export async function getAccessResults({
         collectionOperations.push('readVersions')
       }
 
-      const collectionPolicy = await getEntityPolicies2({
+      const collectionPolicy = await getEntityPolicies({
         id: searchParams.get('id') || undefined,
         data,
         entity: collection,
@@ -75,7 +75,7 @@ export async function getAccessResults({
         globalOperations.push('readVersions')
       }
 
-      const globalPolicy = await getEntityPolicies2({
+      const globalPolicy = await getEntityPolicies({
         data,
         entity: global,
         operations: globalOperations,

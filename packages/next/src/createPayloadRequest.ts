@@ -95,8 +95,8 @@ export const createPayloadRequest = async ({
     data: requestData,
     locale: requestLocale,
     fallbackLocale: requestFallbackLocale,
-    i18n: i18n, // TODO(REVIEW): is this correct?
-    t: i18n.t, // TODO(REVIEW): is this correct?
+    i18n: i18n,
+    t: i18n.t,
 
     // need to add:
     // ------------

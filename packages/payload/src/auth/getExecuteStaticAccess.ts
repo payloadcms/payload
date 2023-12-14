@@ -19,10 +19,7 @@ const getExecuteStaticAccess =
     try {
       const { pathname } = new URL(req.url)
       if (pathname) {
-        const accessResult = await executeAccess(
-          { isReadingStaticFile: true, req },
-          config.access.read,
-        )
+        const accessResult = await executeAccess({ req }, config.access.read)
 
         if (typeof accessResult === 'object') {
           const filename = decodeURI(pathname).replace(/^\/|\/$/g, '')
