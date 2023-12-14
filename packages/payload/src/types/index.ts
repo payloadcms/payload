@@ -14,6 +14,8 @@ export type CustomPayloadRequest<U = any> = {
    */
   collection?: Collection
   context: RequestContext
+  /** Data from the request body */
+  data?: Record<string, unknown>
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string
   /**
