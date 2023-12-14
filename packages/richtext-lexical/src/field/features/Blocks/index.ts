@@ -9,6 +9,7 @@ import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeahea
 import { BlockNode } from './nodes/BlocksNode'
 import { INSERT_BLOCK_COMMAND } from './plugin/commands'
 import { blockPopulationPromiseHOC } from './populationPromise'
+import { translationsClient } from './translations'
 import { blockValidationHOC } from './validate'
 
 export type BlocksFeatureProps = {
@@ -31,6 +32,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
   return {
     feature: () => {
       return {
+        i18nClient: translationsClient,
         nodes: [
           {
             node: BlockNode,
@@ -52,7 +54,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
           options: [
             {
               key: 'blocks',
-              label: 'Blocks',
+              label: ({ i18n }) => i18n.t('lexical:blocks:slashMenuGroupLabel'),
               options: [
                 ...props.blocks.map((block) => {
                   return new SlashMenuOption('block-' + block.slug, {

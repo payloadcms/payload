@@ -6,6 +6,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "ابدأ بالكتابة ، أو اضغط على '/' للأوامر ...",
+        slashMenuGroupBasic: 'أساسي',
+        slashMenuGroupLists: 'قوائم',
       },
     },
   },
@@ -13,6 +15,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Yazmağa başlayın və ya əmrlər üçün '/' düyməsini basın...",
+        slashMenuGroupBasic: 'Əsas',
+        slashMenuGroupLists: 'Siyahılar',
       },
     },
   },
@@ -20,6 +24,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Започнете да пишете или натиснете '/' за команди...",
+        slashMenuGroupBasic: 'Основен',
+        slashMenuGroupLists: 'Списъци',
       },
     },
   },
@@ -27,6 +33,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Začněte psát nebo stiskněte '/' pro příkazy...",
+        slashMenuGroupBasic: 'Základní',
+        slashMenuGroupLists: 'Seznamy',
       },
     },
   },
@@ -34,6 +42,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Beginnen mit dem Tippen oder drücke '/' für Befehle...",
+        slashMenuGroupBasic: 'Basis',
+        slashMenuGroupLists: 'Listen',
       },
     },
   },
@@ -41,6 +51,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Start typing, or press '/' for commands...",
+        slashMenuGroupBasic: 'Basic',
+        slashMenuGroupLists: 'Lists',
       },
     },
   },
@@ -48,6 +60,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Comienza a escribir o presiona '/' para los comandos...",
+        slashMenuGroupBasic: 'Básico',
+        slashMenuGroupLists: 'Listas',
       },
     },
   },
@@ -55,6 +69,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "شروع به تایپ کنید ، یا برای دستورات '/' را فشار دهید...",
+        slashMenuGroupBasic: 'پایه ای',
+        slashMenuGroupLists: 'لیست ها',
       },
     },
   },
@@ -62,6 +78,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Commencez à taper, ou appuyez sur '/' pour les commandes...",
+        slashMenuGroupBasic: 'De base',
+        slashMenuGroupLists: 'Listes',
       },
     },
   },
@@ -69,6 +87,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Počnite tipkati ili pritisnite '/' za naredbe...",
+        slashMenuGroupBasic: 'Osnovno',
+        slashMenuGroupLists: 'Popisi',
       },
     },
   },
@@ -77,6 +97,8 @@ export const translationsClient: Resource = {
       general: {
         emptyEditorPlaceholder:
           "Kezdjen el gépelni, vagy nyomja meg a '/' gombot a parancsokhoz...",
+        slashMenuGroupBasic: 'Alapvető',
+        slashMenuGroupLists: 'Listák',
       },
     },
   },
@@ -84,6 +106,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Inizia a digitare, o premi '/' per i comandi...",
+        slashMenuGroupBasic: 'Base',
+        slashMenuGroupLists: 'Elenchi',
       },
     },
   },
@@ -91,6 +115,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "入力を開始するか、コマンドには '/' を押してください...",
+        slashMenuGroupBasic: '基本的な',
+        slashMenuGroupLists: 'リスト',
       },
     },
   },
@@ -98,6 +124,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "입력을 시작하거나 '/'를 눌러 명령을 시작하세요...",
+        slashMenuGroupBasic: '기본적인',
+        slashMenuGroupLists: '목록',
       },
     },
   },
@@ -105,6 +133,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "စတင်ရေးပါ၊ သို့မဟုတ် ချက်ချင်းများအတွက် '/' ကိုနှိပ်ပါ...",
+        slashMenuGroupBasic: 'Asas',
+        slashMenuGroupLists: 'စာရင်းများ',
       },
     },
   },
@@ -112,6 +142,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Begynn å skrive, eller trykk på '/' for kommandoer...",
+        slashMenuGroupBasic: 'Grunnleggende',
+        slashMenuGroupLists: 'Lister',
       },
     },
   },
@@ -119,6 +151,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Begin met typen, of druk op '/' voor commando's...",
+        slashMenuGroupBasic: 'Basis',
+        slashMenuGroupLists: 'Lijsten',
       },
     },
   },
@@ -126,6 +160,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Zacznij pisać lub naciśnij '/' dla poleceń...",
+        slashMenuGroupBasic: 'Podstawowy',
+        slashMenuGroupLists: 'Listy',
       },
     },
   },
@@ -133,6 +169,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Comece a digitar, ou pressione '/' para comandos...",
+        slashMenuGroupBasic: 'Básico',
+        slashMenuGroupLists: 'Listas',
       },
     },
   },
@@ -140,6 +178,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Începeți să tastați sau apăsați '/' pentru comenzi...",
+        slashMenuGroupBasic: 'De bază',
+        slashMenuGroupLists: 'Liste',
       },
     },
   },
@@ -147,6 +187,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Počnite da kucate ili pritisnite '/' za komande...",
+        slashMenuGroupBasic: 'Osnovno',
+        slashMenuGroupLists: 'Liste',
       },
     },
   },
@@ -154,6 +196,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Počnite kucati ili pritisnite '/' za komande...",
+        slashMenuGroupBasic: 'Osnovni',
+        slashMenuGroupLists: 'Liste',
       },
     },
   },
@@ -161,6 +205,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Начните печатать или нажмите '/' для команд...",
+        slashMenuGroupBasic: 'Базовый',
+        slashMenuGroupLists: 'Списки',
       },
     },
   },
@@ -168,6 +214,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Börja skriva, eller tryck på '/' för kommandon...",
+        slashMenuGroupBasic: 'Grundläggande',
+        slashMenuGroupLists: 'Listor',
       },
     },
   },
@@ -175,6 +223,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "เริ่มพิมพ์ หรือกด '/' สำหรับคำสั่ง...",
+        slashMenuGroupBasic: 'พื้นฐาน',
+        slashMenuGroupLists: 'รายการ',
       },
     },
   },
@@ -182,6 +232,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Yazmaya başlayın veya komutlar için '/' tuşuna basın...",
+        slashMenuGroupBasic: 'Temel',
+        slashMenuGroupLists: 'Listeler',
       },
     },
   },
@@ -189,6 +241,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Почніть набирати, або натисніть '/' для команд ...",
+        slashMenuGroupBasic: 'Базовий',
+        slashMenuGroupLists: 'Списки',
       },
     },
   },
@@ -196,6 +250,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "Bắt đầu gõ, hoặc nhấn '/' để có các lệnh...",
+        slashMenuGroupBasic: 'Cơ bản',
+        slashMenuGroupLists: 'Danh sách',
       },
     },
   },
@@ -203,6 +259,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "开始输入，或按'/'输入命令...",
+        slashMenuGroupBasic: '基本的',
+        slashMenuGroupLists: '列表',
       },
     },
   },
@@ -210,6 +268,8 @@ export const translationsClient: Resource = {
     lexical: {
       general: {
         emptyEditorPlaceholder: "開始打字，或按'/'键输入命令...",
+        slashMenuGroupBasic: '基本的',
+        slashMenuGroupLists: '清單',
       },
     },
   },

@@ -4,6 +4,7 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
+import { listsSlashMenuGroup } from '../common/listsSlashMenuGroup'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { UNORDERED_LIST } from './markdownTransformer'
 
@@ -60,8 +61,7 @@ export const UnorderedListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              key: 'lists',
-              label: 'Lists',
+              ...listsSlashMenuGroup,
               options: [
                 new SlashMenuOption('unorderedlist', {
                   Icon: () =>

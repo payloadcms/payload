@@ -1,6 +1,7 @@
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { basicSlashMenuGroup } from '../common/basicSlashMenuGroup'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { RelationshipNode } from './nodes/RelationshipNode'
 import { relationshipPopulationPromise } from './populationPromise'
@@ -59,8 +60,7 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
         slashMenu: {
           options: [
             {
-              key: 'basic',
-              label: 'Basic',
+              ...basicSlashMenuGroup,
               options: [
                 new SlashMenuOption('relationship', {
                   Icon: () =>

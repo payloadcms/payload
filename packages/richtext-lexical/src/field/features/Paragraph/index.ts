@@ -4,6 +4,7 @@ import { $INTERNAL_isPointSelection, $createParagraphNode, $getSelection } from 
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { basicSlashMenuGroup } from '../common/basicSlashMenuGroup'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 import { translationsClient } from './translations'
 
@@ -39,8 +40,7 @@ export const ParagraphFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              key: 'basic',
-              label: 'Basic',
+              ...basicSlashMenuGroup,
               options: [
                 new SlashMenuOption('paragraph', {
                   Icon: () =>

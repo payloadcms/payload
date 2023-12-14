@@ -4,6 +4,7 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
+import { listsSlashMenuGroup } from '../common/listsSlashMenuGroup'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { CHECK_LIST } from './markdownTransformers'
 
@@ -65,8 +66,7 @@ export const CheckListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              key: 'lists',
-              label: 'Lists',
+              ...listsSlashMenuGroup,
               options: [
                 new SlashMenuOption('checklist', {
                   Icon: () =>

@@ -8,6 +8,7 @@ import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { basicSlashMenuGroup } from '../common/basicSlashMenuGroup'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import { MarkdownTransformer } from './markdownTransformer'
@@ -69,8 +70,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              key: 'basic',
-              label: 'Basic',
+              ...basicSlashMenuGroup,
               options: [
                 new SlashMenuOption(`blockquote`, {
                   Icon: () =>

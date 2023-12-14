@@ -7,6 +7,7 @@ import type { FeatureProvider } from '../types'
 import type { SerializedUploadNode } from './nodes/UploadNode'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { basicSlashMenuGroup } from '../common/basicSlashMenuGroup'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { UploadNode } from './nodes/UploadNode'
 import { uploadPopulationPromiseHOC } from './populationPromise'
@@ -108,8 +109,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              key: 'basic',
-              label: 'Basic',
+              ...basicSlashMenuGroup,
               options: [
                 new SlashMenuOption('upload', {
                   Icon: () =>
