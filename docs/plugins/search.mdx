@@ -8,14 +8,14 @@ keywords: plugins, search, search plugin, search engine, search index, search re
 
 [![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-search)](https://www.npmjs.com/package/@payloadcms/plugin-search)
 
-This plugin generates records of your documents that are extremely fast to search on. It does this by creating a new `search` collection that is indexed in the database using only search-critical data that you define. Records are automatically created, synced, and deleted behind-the-scenes as you manage your application's documents.
+This plugin generates records of your documents that are extremely fast to search on. It does so by creating a new `search` collection that is indexed in the database using only search-critical data that you define. Records are automatically created, synced, and deleted behind-the-scenes as you manage your application's documents.
 
-You can then use all the normal Payload APIs like [REST](https://payloadcms.com/docs/rest-api), [Local API](https://payloadcms.com/docs/local-api), or [GraphQL](https://payloadcms.com/docs/graphql) to query search results just as you would any other document. You can even prioritize search results by defining a custom priority for each collection. For example, you may want to prioritize blog posts over pages.
+You can then use all the normal Payload APIs like to query search results just as you would any other document. You can even prioritize search results by defining a custom priority for each collection. For example, you may want to prioritize blog posts over pages. Or you may want one specific post to always take precedence.
 
 This is a great way to implement a fast, immersive search experience for something like a search bar in a front-end application. Many applications may not need the power and complexity of a third-party service like Algolia or ElasticSearch. This plugin provides a first-party alternative that is easy to set up and runs entirely on your own database.
 
 <Banner type="info">
-  This plugin is completely open-source and its the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-search). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20search&template=bug_report.md&title=plugin-search%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-search). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20search&template=bug_report.md&title=plugin-search%3A) with as much detail as possible.
 </Banner>
 
 ##### Core Features
@@ -71,11 +71,11 @@ export default config
 
 #### `collections`
 
-The `collections` property is an array of collections slugs to enable sync-to-search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, syncs, and deleted the document to its related search document as it changes over time, and also an `afterDelete` hook that deletes.
+The `collections` property is an array of collections slugs to enable syncing to search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, updates, and deletes the record as its related document changes over time.
 
 #### `defaultPriorities`
 
-The default priorities first set on `create` operations. Send an object of collection slugs, and set them to either a number or a function.
+The `defaultPriorities` property is used to set a fallback `priority` on search records during the `create` operation. Send an object of collection slugs, and set them to either a number or a function.
 
 ```ts
 // payload.config.ts
@@ -94,7 +94,7 @@ The default priorities first set on `create` operations. Send an object of colle
 
 #### `searchOverrides`
 
-Override anything on the search collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections).
+Use the `searchOverrides` property to override anything on the search collection. You can override any of the properties found in the [Payload Collection Config](https://payloadcms.com/docs/configuration/collections).
 
 ```ts
 // payload.config.ts
@@ -110,7 +110,7 @@ Override anything on the search collection by sending a [Payload Collection Conf
 
 #### `beforeSync`
 
-An [afterChange](<[afterChange](https://payloadcms.com/docs/hooks/globals#afterchange)>) hook that is called before creating or syncing the document to search. This allows you to modify the data in any way before doing so.
+The `beforeSync` property is an [afterChange](<[afterChange](https://payloadcms.com/docs/hooks/globals#afterchange)>) hook that is called before creating or syncing the document to search. This allows you to modify the data in any way before its search record is created or updated.
 
 ```ts
 // payload.config.ts
@@ -128,11 +128,11 @@ An [afterChange](<[afterChange](https://payloadcms.com/docs/hooks/globals#afterc
 
 #### `syncDrafts`
 
-If true, will sync draft documents to search. By default, this plugin will only sync published documents. False by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
+When `syncDrafts` is true, draft documents will be synced to search. This is false by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
 
 #### `deleteDrafts`
 
-If true, will delete documents from search that change to draft status. True by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
+If true, will delete documents from search whose status changes to draft. This is true by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
 
 ## TypeScript
 
