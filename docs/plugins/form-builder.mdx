@@ -1,0 +1,395 @@
+---
+title: Form Builder Plugin
+label: Form Builder
+order: 20
+desc: Easily build and manage forms from the admin panel. Send dynamic, personalized emails and even accept and process payments.
+keywords: plugins, plugin, form, forms, form builder
+---
+
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-form-builder)](https://www.npmjs.com/package/@payloadcms/plugin-form-builder)
+
+A plugin to easily allow your editors to build and manage forms from within the admin panel. You can render these forms on your frontend to match your brand's design system and then submit them to the your database. Easily send dynamic, personalized emails upon form submission then manage form submissions directly from within the admin panel.
+
+<Banner type="info">
+  This plugin is completely open-source and its the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-form-builder). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20form-builder&template=bug_report.md&title=plugin-form-builder%3A) with as much detail as possible.
+</Banner>
+
+##### Core Features
+
+- Build completely dynamic forms directly from the admin panel for a variety of use cases
+- Render forms on your front-end using your own stack and match your brand's design system
+- Display a custom confirmation message using rich text or automatically redirect upon form submission
+- Send dynamic, personalized emails upon form submission (optional)
+- Build dynamic prices based on form input to use for payment processing (optional)
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+
+```bash
+yarn add @payloadcms/plugin-form-builder
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload/config'
+import formBuilder from '@payloadcms/plugin-form-builder'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      fields: [],
+    },
+  ],
+  plugins: [
+    formBuilder({
+      // see below for a list of available options
+    })
+  ],
+})
+
+export default config
+```
+
+### Options
+
+When you instantiate the plugin, you can pass in an object of options to customize the plugin's behavior:
+
+#### Fields (option)
+
+The `fields` property is an object of field types to allow your admin editors to build forms with. To override default settings pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) keyed to the block slug. See [Fields](#fields) for more details.
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  fields: {
+    text: true,
+    textarea: true,
+    select: true,
+    email: true,
+    state: true,
+    country: true,
+    checkbox: true,
+    number: true,
+    message: true,
+    payment: false
+  }
+})
+```
+
+#### Redirects
+
+The `redirectRelationships` property is an array of collection slugs that, when enabled, are populated as options in form redirect fields.
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  redirectRelationships: ['pages']
+})
+```
+
+#### Payment Handling
+
+The `handlePayment` property is a [beforeChange](<[beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)>) hook that is called upon form submissions. You can integrate into any third-party payment processing API here. There is a `getPaymentTotal` function that will calculate the total cost after all conditions have been applied. This is only applicable if the form has enabled the `payment` field.
+
+First import the utility function. This will execute all of the price conditions that you have set in your form's `payment` field and return the total price.
+
+```ts
+// payload.config.ts
+import { getPaymentTotal } from '@payloadcms/plugin-form-builder';
+```
+
+Then in your plugin's config:
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  handlePayment: async ({ form, submissionData }) => {
+    // first calculate the price
+    const paymentField =  form.fields?.find((field) => field.blockType === 'payment');
+    const price = getPaymentTotal({
+      basePrice: paymentField.basePrice,
+      priceConditions: paymentField.priceConditions,
+      fieldValues: submissionData,
+    });
+    // then asynchronously process the payment here
+  }
+})
+```
+
+#### Email Formatting
+
+The `beforeEmail` property is a [beforeChange](<[beforeChange](https://payloadcms.com/docs/hooks/globals#beforechange)>) hook that is called just after emails are prepared, but before they are sent. This is a great place to inject your own HTML template to add custom styles.
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  beforeEmail: (emailsToSend) => {
+    // modify the emails in any way before they are sent
+    return emails.map((email) => ({
+      ...email,
+      html: email.html, // transform the html in any way you'd like (maybe wrap it in an html template?)
+    }))
+  }
+})
+```
+
+#### Form Overrides
+
+Override anything on the form collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) to the `formOverrides` property. Your overrides will be merged into the default `forms` collection.
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  formOverrides: {
+    slug: "contact-forms",
+    access: {
+      read: () => true,
+      update: () => false,
+    },
+    fields: [
+      {
+        name: "custom-field",
+        type: "text"
+      }
+    ]
+  }
+})
+```
+
+#### Form Submission Overrides
+
+By default, this plugin relies on [Payload access control](https://payloadcms.com/docs/access-control/collections) to restrict the `update` and `read` operations. This is because anyone should be able to create a form submission, even from a public-facing website—but no one should be able to update a submission one it has been created, or read a submission unless they have permission.
+
+You can override access control and anything else on the form submission collection by sending a [Payload Collection Config](https://payloadcms.com/docs/configuration/collections). Your overrides will be merged into the default `formSubmissions` collection.
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  formSubmissionOverrides: {
+    slug: "leads",
+  }
+})
+```
+
+## Fields
+
+Each field represents a form input. To override default settings pass either a boolean value or a partial [Payload Block](https://payloadcms.com/docs/fields/blocks) _keyed to the block's slug_. See [Field Overrides](#field-overrides) for more details on how to do this.
+
+<Banner type="warning">
+  Note: "fields" here are in reference to the _fields to build forms with_, not to be confused with the _fields of a collection_ which are set via `formOverrides.fields`.
+</Banner>
+
+#### Text
+
+Used to collect a single line of text.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | string | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+
+#### Textarea
+
+Used to collect multiple lines of text.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | string | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+
+#### Select
+
+Used to collect a single option from a list of options.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | string | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+| `options` | array | An array of objects with `label` and `value` properties. |
+
+#### Email (field)
+
+Used to collect an email address.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | string | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+
+#### State
+
+Used to collect a state.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | string | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+
+#### Country
+
+Used to collect a country.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | string | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+
+#### Checkbox
+
+Used to collect a boolean value.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | checkbox | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+
+#### Number
+
+Used to collect a number.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | string | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. || `defaultValue` | number | The default value of the field. |
+
+#### Message
+
+Used to display a message on the form.
+
+| property | type | description |
+| --- | --- | --- |
+| `message` | richText | The message to display on the form. |
+
+#### Payment
+
+Add this field to your form if it should collect payment. Upon submission, the `handlePayment` callback is executed with the form and submission data. You can use this to integrate with any third-party payment processing API.
+
+| property | type | description |
+| --- | --- | --- |
+| `name` | string | The name of the field. This is used to reference the field in the form submission data. |
+| `label` | string | The label of the field. This is used in the admin panel to describe the field. |
+| `defaultValue` | number | The default value of the field. |
+| `width` | string | The width of the field on the front-end. |
+| `required` | checkbox | Whether or not the field is required when submitted. |
+| `priceConditions` | array | An array of objects that define the price conditions. See below for more details. |
+
+##### Price Conditions
+
+Each of the `priceConditions` are executed by the `getPaymentTotal` utility that this plugin provides. You can call this function in your `handlePayment` callback to dynamically calculate the total price of a form upon submission based on the user's input. For example, you could create a price condition that says "if the user selects 'yes' for this checkbox, add $10 to the total price".
+
+| property | type | description |
+| --- | --- | --- |
+| `fieldToUse` | relationship | The field to use to determine the price. |
+| `condition` | string | The condition to use to determine the price. |
+| `valueForOperator` | string | The value to use for the operator. |
+| `operator` | string | The operator to use to determine the price. |
+| `valueType` | string | The type of value to use to determine the price. |
+| `value` | string | The value to use to determine the price. |
+
+#### Field Overrides
+
+You can provide your own custom field definitions by passing a new [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) object into `fields`. You can override or extend any existing fields by first importing the `fields` from the plugin:
+
+```ts
+import { fields } from '@payloadcms/plugin-form-builder'
+```
+
+Then merging it into your own custom field:
+
+```ts
+// payload.config.ts
+formBuilder({
+  // ...
+  fields: {
+    text: {
+      ...fields.text,
+      labels: {
+        singular: "Custom Text Field",
+        plural: "Custom Text Fields",
+      }
+    }
+  }
+})
+```
+
+## Email
+
+This plugin relies on the [email configuration](https://payloadcms.com/docs/email/overview) defined in your `payload.init()`. It will read from your config and attempt to send your emails using the credentials provided.
+
+## TypeScript
+
+All types can be directly imported:
+
+```js
+import {
+  PluginConfig,
+  Form,
+  FormSubmission,
+  FieldsConfig,
+  BeforePayment,
+  BeforeEmail,
+  HandlePayment,
+  ...
+} from "@payloadcms/plugin-form-builder/types";
+```
+
+## Examples
+
+The [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) contains an official [Form Builder Plugin Example](https://github.com/payloadcms/payload/tree/main/examples/form-builder) which demonstrates exactly how to configure this plugin into your Payload instance and implement it on your front-end. We've also included an in-depth walk-through of how to build a form from scratch in our [Form Builder Plugin Blog Post](https://payloadcms.com/blog/create-custom-forms-with-the-official-form-builder-plugin).
+
+## Troubleshooting
+
+Below are some common troubleshooting tips. To help other developers, please contribute to this section as you troubleshoot your own application.
+
+##### SendGrid 403 Forbidden Error
+
+- If you are using [SendGrid Link Branding](https://docs.sendgrid.com/ui/account-and-settings/how-to-set-up-link-branding) to remove the "via sendgrid.net" part of your email, you must also setup [Domain Authentication](https://docs.sendgrid.com/ui/account-and-settings/how-to-set-up-domain-authentication). This means you can only send emails from an address on this domain — so the `from` addresses in your form submission emails **_cannot_** be anything other than `something@your_domain.com`. This means that from `{{email}}` will not work, but `website@your_domain.com` will. You can still send the form's email address in the body of the email.
+
+## Screenshots
+
+![screenshot 1](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-1.jpg?raw=true)
+<br />
+![screenshot 2](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-2.jpg?raw=true)
+<br />
+![screenshot 3](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-3.jpg?raw=true)
+<br />
+![screenshot 4](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-4.jpg?raw=true)
+<br />
+![screenshot 5](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-5.jpg?raw=true)
+<br />
+![screenshot 6](https://github.com/payloadcms/plugin-form-builder/blob/main/images/screenshot-6.jpg?raw=true)
