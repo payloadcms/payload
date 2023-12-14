@@ -4,7 +4,7 @@ export const translationsClient: Resource = {
   ar: {
     lexical: {
       heading: {
-        label: 'العنوان {{مستوى العنوان}}',
+        label: 'العنوان {{headingLevel}}',
       },
     },
   },
@@ -53,7 +53,7 @@ export const translationsClient: Resource = {
   fa: {
     lexical: {
       heading: {
-        label: 'عنوان {{سطح عنوان}}',
+        label: 'عنوان {{headingLevel}}',
       },
     },
   },
