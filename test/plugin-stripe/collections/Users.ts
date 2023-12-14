@@ -1,6 +1,6 @@
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-const Users: CollectionConfig = {
+export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   admin: {
@@ -16,5 +16,3 @@ const Users: CollectionConfig = {
     },
   ],
 }
-
-export default Users

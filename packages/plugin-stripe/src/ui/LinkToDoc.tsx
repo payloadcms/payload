@@ -1,7 +1,8 @@
 import type { UIField } from 'payload/dist/fields/config/types'
 
 import { useFormFields } from 'payload/components/forms'
-import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
+// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
+// import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 import React from 'react'
 
 export const LinkToDoc: React.FC<
@@ -32,7 +33,7 @@ export const LinkToDoc: React.FC<
             View in Stripe
           </span>
           {/* @ts-ignore */}
-          <CopyToClipboard value={href} />
+          {/* <CopyToClipboard value={href} /> */}
         </div>
         <div
           style={{

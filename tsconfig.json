@@ -31,18 +31,19 @@
   },
   "composite": true, // Required for references to work
   "references": [
-    { "path": "./packages/db-mongodb" },
     // if your tsconfig is something different
+    { "path": "./packages/db-mongodb" },
     { "path": "./packages/db-postgres" },
-    { "path": "./packages/richtext-slate" },
-    { "path": "./packages/richtext-lexical" },
+    { "path": "./packages/live-preview" },
+    { "path": "./packages/live-preview-react" },
     { "path": "./packages/payload" },
-    { "path": "./packages/plugin-nested-docs" },
-    { "path": "./packages/plugin-form-builder" },
     { "path": "./packages/plugin-cloud-storage" },
     { "path": "./packages/plugin-cloud" },
+    { "path": "./packages/plugin-form-builder" },
+    { "path": "./packages/plugin-nested-docs" },
     { "path": "./packages/plugin-search" },
-    { "path": "./packages/live-preview" },
-    { "path": "./packages/live-preview-react" }
+    { "path": "./packages/plugin-stripe" },
+    { "path": "./packages/richtext-slate" },
+    { "path": "./packages/richtext-lexical" }
   ]
 }

@@ -1,36 +1,39 @@
-import path from 'path'
-import { buildConfig } from 'payload/config'
-import { viteBundler } from '@payloadcms/bundler-vite'
-// import { webpackBundler } from '@payloadcms/bundler-webpack'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-
-import stripePlugin from '../../src'
-import Customers from './collections/Customers'
-import Products from './collections/Products'
-import Users from './collections/Users'
+import stripePlugin from '../../packages/plugin-stripe/src'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { Customers } from './collections/Customers'
+import { Products } from './collections/Products'
+import { Users } from './collections/Users'
+import { seed } from './seed'
 import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated'
 import { subscriptionDeleted } from './webhooks/subscriptionDeleted'
 import { syncPriceJSON } from './webhooks/syncPriceJSON'
 
-export default buildConfig({
-  serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
-  admin: {
-    user: Users.slug,
-    bundler: viteBundler(),
-    // bundler: webpackBundler(),
-  },
-  collections: [Users, Customers, Products],
-  editor: lexicalEditor({}),
+process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET = 'whsec_123'
+process.env.STRIPE_SECRET_KEY = 'sk_test_123'
+
+export default buildConfigWithDefaults({
+  collections: [Users, Products, Customers],
   localization: {
-    locales: ['en', 'es', 'de'],
     defaultLocale: 'en',
     fallback: true,
+    locales: ['en', 'es', 'de'],
+  },
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+
+    await seed(payload)
   },
   plugins: [
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-      isTestKey: process.env.PAYLOAD_PUBLIC_IS_STRIPE_TEST_KEY === 'true',
+      isTestKey: true,
       logs: true,
       sync: [
         {
@@ -82,10 +85,4 @@ export default buildConfig({
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
     }),
   ],
-  typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts'),
-  },
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
-  }),
 })
