@@ -11,6 +11,7 @@ import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeahea
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import { MarkdownTransformer } from './markdownTransformer'
+import { translationsClient } from './translations'
 
 const setHeading = (headingSize: HeadingTagType) => {
   const selection = $getSelection()
@@ -52,7 +53,8 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
                   ChildComponent: iconImports[headingSize],
                   isActive: () => false,
                   key: headingSize,
-                  label: `Heading ${headingSize.charAt(1)}`,
+                  label: ({ i18n }) =>
+                    i18n.t('lexical:heading:label', { headingLevel: headingSize.charAt(1) }),
                   onClick: ({ editor }) => {
                     editor.update(() => {
                       setHeading(headingSize)
@@ -64,6 +66,7 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
             ),
           ],
         },
+        i18nClient: translationsClient,
         markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
         nodes: [
           {
@@ -99,7 +102,8 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
                   new SlashMenuOption(`heading-${headingSize.charAt(1)}`, {
                     Icon: iconImports[headingSize],
                     keywords: ['heading', headingSize],
-                    label: `Heading ${headingSize.charAt(1)}`,
+                    label: ({ i18n }) =>
+                      i18n.t('lexical:heading:label', { headingLevel: headingSize.charAt(1) }),
                     onSelect: () => {
                       setHeading(headingSize)
                     },
