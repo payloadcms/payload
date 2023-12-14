@@ -3,6 +3,7 @@ import { FORMAT_ELEMENT_COMMAND } from 'lexical'
 import type { FeatureProvider } from '../types'
 
 import { AlignDropdownSectionWithEntries } from './floatingSelectToolbarAlignDropdownSection'
+import { translationsClient } from './translations'
 
 export const AlignFeature = (): FeatureProvider => {
   return {
@@ -17,7 +18,7 @@ export const AlignFeature = (): FeatureProvider => {
                   import('../../lexical/ui/icons/AlignLeft').then((module) => module.AlignLeftIcon),
                 isActive: () => false,
                 key: 'align-left',
-                label: `Align Left`,
+                label: ({ i18n }) => i18n.t('lexical:align:alignLeft'),
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')
                 },
@@ -33,7 +34,7 @@ export const AlignFeature = (): FeatureProvider => {
                   ),
                 isActive: () => false,
                 key: 'align-center',
-                label: `Align Center`,
+                label: ({ i18n }) => i18n.t('lexical:align:alignCenter'),
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')
                 },
@@ -49,7 +50,7 @@ export const AlignFeature = (): FeatureProvider => {
                   ),
                 isActive: () => false,
                 key: 'align-right',
-                label: `Align Right`,
+                label: ({ i18n }) => i18n.t('lexical:align:alignRight'),
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')
                 },
@@ -58,6 +59,7 @@ export const AlignFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        i18nClient: translationsClient,
         props: null,
       }
     },
