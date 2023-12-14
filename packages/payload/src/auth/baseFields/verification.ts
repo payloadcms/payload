@@ -1,5 +1,9 @@
 import type { Field, FieldHook } from '../../fields/config/types'
 
+import { extractTranslations } from '../../translations/extractTranslations'
+
+const labels = extractTranslations(['authentication:verified'])
+
 const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, value }) => {
   // If a user manually sets `_verified` to true,
   // and it was `false`, set _verificationToken to `null`.
@@ -28,6 +32,7 @@ export default [
         Field: () => null,
       },
     },
+    label: labels['authentication:verified'],
     type: 'checkbox',
   },
   {
