@@ -22,7 +22,7 @@ export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
       },
     })
 
-    if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`)
+    if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
 
     const data = await res.buffer()
 
@@ -33,4 +33,6 @@ export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
       size: Number(res.headers.get('content-length')) || 0,
     }
   }
+
+  throw new APIError('Invalid file url', 400)
 }
