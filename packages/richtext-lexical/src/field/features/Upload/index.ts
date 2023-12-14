@@ -11,6 +11,7 @@ import { basicSlashMenuGroup } from '../common/basicSlashMenuGroup'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands'
 import { UploadNode } from './nodes/UploadNode'
 import { uploadPopulationPromiseHOC } from './populationPromise'
+import { translationsClient } from './translations'
 import { uploadValidation } from './validate'
 
 export type UploadFeatureProps = {
@@ -32,6 +33,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
   return {
     feature: () => {
       return {
+        i18nClient: translationsClient,
         nodes: [
           {
             converters: {
@@ -116,7 +118,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
                     // @ts-expect-error
                     import('../../lexical/ui/icons/Upload').then((module) => module.UploadIcon),
                   keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],
-                  label: 'Upload',
+                  label: ({ i18n }) => i18n.t('lexical:upload:label'),
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
                       replace: false,
