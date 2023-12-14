@@ -41,6 +41,7 @@
     { "path": "./packages/plugin-form-builder" },
     { "path": "./packages/plugin-cloud-storage" },
     { "path": "./packages/plugin-cloud" },
+    { "path": "./packages/plugin-search" },
     { "path": "./packages/live-preview" },
     { "path": "./packages/live-preview-react" }
   ]
