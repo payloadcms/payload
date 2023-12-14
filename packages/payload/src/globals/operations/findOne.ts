@@ -27,7 +27,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     draft: draftEnabled = false,
     globalConfig,
     overrideAccess = false,
-    req: { locale, payload },
+    req: { locale },
     req,
     showHiddenFields,
     slug,

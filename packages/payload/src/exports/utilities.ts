@@ -21,4 +21,5 @@ export { formatLabels, formatNames, toWords } from '../utilities/formatLabels'
 export { getIDType } from '../utilities/getIDType'
 export { getTranslation } from '../utilities/getTranslation'
 
+export { isNumber } from '../utilities/isNumber'
 export { isValidID } from '../utilities/isValidID'

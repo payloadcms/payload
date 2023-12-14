@@ -4,7 +4,17 @@ import { getAuthenticatedUser } from 'payload/auth'
 import { SanitizedConfig } from 'payload/types'
 import { cache } from 'react'
 
-const getPermissions = ({ user, payload, headers }: { user: any; payload: any; headers: any }) => {}
+const getPermissions = ({
+  user,
+  payload,
+  headers,
+  searchParams,
+}: {
+  user: any
+  payload: any
+  headers: any
+  searchParams: any
+}) => {}
 
 export const auth = cache(
   async ({
@@ -33,6 +43,7 @@ export const auth = cache(
     const permissions = await getPermissions({
       user,
       payload,
+      searchParams,
       headers,
     })
 
