@@ -12,6 +12,7 @@ import { basicSlashMenuGroup } from '../common/basicSlashMenuGroup'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
 import { MarkdownTransformer } from './markdownTransformer'
+import { translationsClient } from './translations'
 
 export const BlockQuoteFeature = (): FeatureProvider => {
   return {
@@ -28,7 +29,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                   ),
                 isActive: () => false,
                 key: 'blockquote',
-                label: `Blockquote`,
+                label: ({ i18n }) => i18n.t('lexical:blockquote:label'),
                 onClick: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
@@ -42,6 +43,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        i18nClient: translationsClient,
         markdownTransformers: [MarkdownTransformer],
         nodes: [
           {
@@ -79,7 +81,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                       (module) => module.BlockquoteIcon,
                     ),
                   keywords: ['quote', 'blockquote'],
-                  label: `Blockquote`,
+                  label: ({ i18n }) => i18n.t('lexical:blockquote:label'),
                   onSelect: () => {
                     const selection = $getSelection()
                     if ($INTERNAL_isPointSelection(selection)) {
