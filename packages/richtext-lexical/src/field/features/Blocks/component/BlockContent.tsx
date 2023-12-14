@@ -40,7 +40,7 @@ export const BlockContent: React.FC<Props> = (props) => {
     formSchema,
     nodeKey,
   } = props
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [editor] = useLexicalComposerContext()
   // Used for saving collapsed to preferences (and gettin' it from there again)
   // Remember, these preferences are scoped to the whole document, not just this form. This
@@ -180,18 +180,20 @@ export const BlockContent: React.FC<Props> = (props) => {
               {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}
             </div>
             {editor.isEditable() && (
-              <Button
-                buttonStyle="icon-label"
-                className={`${baseClass}__removeButton`}
-                disabled={field?.admin?.readOnly}
-                icon="x"
-                onClick={(e) => {
-                  e.preventDefault()
-                  removeBlock()
-                }}
-                round
-                tooltip="Remove Block"
-              />
+              <div>
+                <Button
+                  buttonStyle="icon-label"
+                  className={`${baseClass}__removeButton`}
+                  disabled={field?.admin?.readOnly}
+                  icon="x"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    removeBlock()
+                  }}
+                  round
+                  tooltip={t('general:remove')}
+                />
+              </div>
             )}
           </div>
         }
