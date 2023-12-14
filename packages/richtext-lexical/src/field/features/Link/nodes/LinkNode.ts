@@ -27,11 +27,13 @@ export type LinkFields = {
   [key: string]: unknown
   doc: {
     relationTo: string
-    value: {
-      // Actual doc data, populated in afterRead hook
-      [key: string]: unknown
-      id: string
-    }
+    value:
+      | {
+          // Actual doc data, populated in afterRead hook
+          [key: string]: unknown
+          id: string
+        }
+      | string
   } | null
   linkType: 'custom' | 'internal'
   newTab: boolean
@@ -88,6 +90,15 @@ export class LinkNode extends ElementNode {
   }
 
   static importJSON(serializedNode: SerializedLinkNode): LinkNode {
+    if (
+      serializedNode.version === 1 &&
+      typeof serializedNode.fields?.doc?.value === 'object' &&
+      serializedNode.fields?.doc?.value?.id
+    ) {
+      serializedNode.fields.doc.value = serializedNode.fields.doc.value.id
+      serializedNode.version = 2
+    }
+
     const node = $createLinkNode({
       fields: serializedNode.fields,
     })
@@ -131,7 +142,7 @@ export class LinkNode extends ElementNode {
       ...super.exportJSON(),
       fields: this.getFields(),
       type: this.getType(),
-      version: 1,
+      version: 2,
     }
   }
 

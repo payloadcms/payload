@@ -51,6 +51,21 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 's3') {
   })
 }
 
+if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'r2') {
+  adapter = s3Adapter({
+    config: {
+      endpoint: process.env.R2_ENDPOINT,
+      forcePathStyle: process.env.R2_FORCE_PATH_STYLE === 'true',
+      region: process.env.R2_REGION,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+      },
+    },
+    bucket: process.env.R2_BUCKET,
+  })
+}
+
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
   adapter = gcsAdapter({
     options: {
