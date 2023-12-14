@@ -56,7 +56,7 @@ export interface Args {
   url: false | string
 }
 
-export type MongooseAdapter = BaseDatabaseAdapter &
+export type MongooseAdapter = Omit<BaseDatabaseAdapter, 'sessions'> &
   Args & {
     collections: {
       [slug: string]: CollectionModel
@@ -64,7 +64,14 @@ export type MongooseAdapter = BaseDatabaseAdapter &
     connection: Connection
     globals: GlobalModel
     mongoMemoryServer: any
-    sessions: Record<number | string, ClientSession>
+    sessions: {
+      [id: string]: {
+        clientSession: ClientSession
+        reject: () => void
+        resolve: () => void
+      }
+    }
+
     versions: {
       [slug: string]: CollectionModel
     }
