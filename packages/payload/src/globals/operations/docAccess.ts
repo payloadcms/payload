@@ -27,8 +27,9 @@ export async function docAccess(args: Arguments): Promise<GlobalPermission> {
     const result = await getEntityPolicies({
       entity: globalConfig,
       operations: globalOperations,
-      req,
+      payload: req.payload,
       type: 'global',
+      user: req.user,
     })
     if (shouldCommit) await commitTransaction(req)
     return result

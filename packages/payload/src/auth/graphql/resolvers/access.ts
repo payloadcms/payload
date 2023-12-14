@@ -1,5 +1,5 @@
 import type { PayloadRequest } from '../../../express/types'
-import type { Payload } from '../../../payload'
+import type { PayloadT } from '../../..'
 
 import formatName from '../../../graphql/utilities/formatName'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
@@ -17,7 +17,7 @@ const formatConfigNames = (results, configs) => {
   return formattedResults
 }
 
-function accessResolver(payload: Payload) {
+function accessResolver(payload: PayloadT) {
   async function resolver(_, args, context) {
     const options = {
       req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),

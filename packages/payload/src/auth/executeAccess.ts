@@ -1,23 +1,38 @@
 import type { Access, AccessResult } from '../config/types'
+import type { PayloadRequest } from '../exports/types'
 
 import { Forbidden } from '../errors'
 
-const executeAccess = async (operation, access: Access): Promise<AccessResult> => {
+type OperationArgs = {
+  data?: Record<string, unknown>
+  disableErrors?: boolean
+  id?: number | string
+  req: PayloadRequest
+}
+const executeAccess = async (
+  { id, data, disableErrors, req }: OperationArgs,
+  access: Access,
+): Promise<AccessResult> => {
   if (access) {
-    const result = await access(operation)
+    const result = await access({
+      id,
+      data,
+      payload: req.payload,
+      user: req.user,
+    })
 
     if (!result) {
-      if (!operation.disableErrors) throw new Forbidden(operation.req.t)
+      if (!disableErrors) throw new Forbidden(req.t)
     }
 
     return result
   }
 
-  if (operation.req.user) {
+  if (req.user) {
     return true
   }
 
-  if (!operation.disableErrors) throw new Forbidden(operation.req.t)
+  if (!disableErrors) throw new Forbidden(req.t)
   return false
 }
 

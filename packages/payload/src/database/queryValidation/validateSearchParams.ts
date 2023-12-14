@@ -57,8 +57,9 @@ export async function validateSearchParam({
     policies.globals[slug] = await getEntityPolicies({
       entity: globalConfig,
       operations: ['read'],
-      req,
+      payload: req.payload,
       type: 'global',
+      user: req.user,
     })
   }
 
@@ -88,8 +89,9 @@ export async function validateSearchParam({
             policies.collections[collectionSlug] = await getEntityPolicies({
               entity: req.payload.collections[collectionSlug].config,
               operations: ['read'],
-              req,
+              payload: req.payload,
               type: 'collection',
+              user: req.user,
             })
           }
 
