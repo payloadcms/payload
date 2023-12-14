@@ -16,6 +16,7 @@ import {
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
+import { translationsClient, translationsServer } from './translations'
 import { richTextValidateHOC } from './validate'
 
 export type LexicalEditorProps = {
@@ -28,6 +29,8 @@ export type LexicalEditorProps = {
 export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps, any> & {
   editorConfig: SanitizedEditorConfig
 }
+
+//translateObject(translationsClient)
 
 export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapter {
   let finalSanitizedEditorConfig: SanitizedEditorConfig
@@ -98,20 +101,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       })
     },
     editorConfig: finalSanitizedEditorConfig,
-    i18nClient: deepMerge(finalSanitizedEditorConfig.features.i18nClient, {
-      en: {
-        lexical: {
-          test: 'hiClient',
-        },
-      },
-    }),
-    i18nServer: deepMerge(finalSanitizedEditorConfig.features.i18nServer, {
-      en: {
-        lexical: {
-          test: 'hiServer',
-        },
-      },
-    }),
+    i18nClient: deepMerge(finalSanitizedEditorConfig.features.i18nClient, translationsClient),
+    i18nServer: deepMerge(finalSanitizedEditorConfig.features.i18nServer, translationsServer),
     outputSchema: ({ isRequired }) => {
       return {
         // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.

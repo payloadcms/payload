@@ -10,7 +10,6 @@ import type { FeatureProvider } from '../types'
 import type { SerializedAutoLinkNode } from './nodes/AutoLinkNode'
 import type { LinkFields, SerializedLinkNode } from './nodes/LinkNode'
 
-import { translateObject } from '../../../translator'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
 import { convertLexicalNodesToHTML } from '../converters/html/converter'
@@ -51,8 +50,6 @@ export type LinkFeatureProps = ExclusiveLinkCollectionsProps & {
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
     | Field[]
 }
-
-//translateObject(translationsClient)
 
 export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
   return {

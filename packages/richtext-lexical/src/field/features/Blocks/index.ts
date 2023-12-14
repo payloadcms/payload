@@ -51,18 +51,18 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              displayName: 'Blocks',
               key: 'blocks',
+              label: 'Blocks',
               options: [
                 ...props.blocks.map((block) => {
                   return new SlashMenuOption('block-' + block.slug, {
                     Icon: () =>
                       // @ts-expect-error
                       import('../../lexical/ui/icons/Block').then((module) => module.BlockIcon),
-                    displayName: ({ i18n }) => {
+                    keywords: ['block', 'blocks', block.slug],
+                    label: ({ i18n }) => {
                       return getTranslation(block.labels.singular, i18n)
                     },
-                    keywords: ['block', 'blocks', block.slug],
                     onSelect: ({ editor }) => {
                       editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
                         id: null,

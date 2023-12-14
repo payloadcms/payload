@@ -36,9 +36,8 @@ function SlashMenuItem({
   }
 
   let title = option.key
-  if (option.displayName) {
-    title =
-      typeof option.displayName === 'function' ? option.displayName({ i18n }) : option.displayName
+  if (option.label) {
+    title = typeof option.label === 'function' ? option.label({ i18n }) : option.label
   }
   // Crop title to max. 50 characters
   if (title.length > 25) {
@@ -117,17 +116,19 @@ export function SlashMenuPlugin({
       // Filter current groups first
       groupsWithOptions = groupsWithOptions.map((group) => {
         const filteredOptions = group.options.filter((option) => {
-          let optionTitle = option.key
-          if (option.displayName) {
-            optionTitle =
-              typeof option.displayName === 'function'
-                ? option.displayName({ i18n })
-                : option.displayName
+          let optionLabel = option.key
+          if (option.label) {
+            optionLabel = typeof option.label === 'function' ? option.label({ i18n }) : option.label
           }
 
-          return new RegExp(queryString, 'gi').exec(optionTitle) || option.keywords != null
-            ? option.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
-            : false
+          if (optionLabel && new RegExp(queryString, 'gi').exec(optionLabel)) {
+            return true
+          }
+
+          return (
+            option.keywords != null &&
+            option.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
+          )
         })
         if (filteredOptions.length) {
           return {
@@ -199,11 +200,9 @@ export function SlashMenuPlugin({
                 <div className={baseClass}>
                   {groups.map((group) => {
                     let groupTitle = group.key
-                    if (group.displayName) {
+                    if (group.label) {
                       groupTitle =
-                        typeof group.displayName === 'function'
-                          ? group.displayName({ i18n })
-                          : group.displayName
+                        typeof group.label === 'function' ? group.label({ i18n }) : group.label
                     }
 
                     return (

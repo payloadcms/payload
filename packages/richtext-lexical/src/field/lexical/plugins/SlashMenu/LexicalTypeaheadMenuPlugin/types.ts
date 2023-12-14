@@ -7,13 +7,13 @@ export class SlashMenuOption {
   // Icon for display
   Icon: () => Promise<React.FC>
 
-  displayName?: (({ i18n }: { i18n: i18n }) => string) | string
-  // Used for class names and, if displayName is not provided, for display.
+  // Used for class names and, if label is not provided, for display.
   key: string
   // TBD
   keyboardShortcut?: string
   // For extra searching.
   keywords: Array<string>
+  label?: (({ i18n }: { i18n: i18n }) => string) | string
   // What happens when you select this option?
   onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
 
@@ -23,9 +23,9 @@ export class SlashMenuOption {
     key: string,
     options: {
       Icon: () => Promise<React.FC>
-      displayName?: (({ i18n }: { i18n: i18n }) => string) | string
       keyboardShortcut?: string
       keywords?: Array<string>
+      label?: (({ i18n }: { i18n: i18n }) => string) | string
       onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
     },
   ) {
@@ -33,7 +33,7 @@ export class SlashMenuOption {
     this.ref = { current: null }
     this.setRefElement = this.setRefElement.bind(this)
 
-    this.displayName = options.displayName
+    this.label = options.label
     this.keywords = options.keywords || []
     this.Icon = options.Icon
     this.keyboardShortcut = options.keyboardShortcut
@@ -46,8 +46,8 @@ export class SlashMenuOption {
 }
 
 export class SlashMenuGroup {
-  // Used for class names and, if displayName is not provided, for display.
-  displayName?: (({ i18n }: { i18n: i18n }) => string) | string
   key: string
+  // Used for class names and, if label is not provided, for display.
+  label?: (({ i18n }: { i18n: i18n }) => string) | string
   options: Array<SlashMenuOption>
 }

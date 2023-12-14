@@ -1,3 +1,4 @@
+import type { i18n } from 'i18next'
 import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
 
@@ -36,7 +37,7 @@ export type FloatingToolbarSectionEntry = {
   }) => boolean
   key: string
   /** The label is displayed as text if the entry is part of a dropdown section */
-  label?: string
+  label?: (({ i18n }: { i18n: i18n }) => string) | string
   onClick?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }

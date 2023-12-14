@@ -93,13 +93,13 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
           options: [
             ...enabledHeadingSizes.map((headingSize) => {
               return {
-                displayName: 'Basic',
                 key: 'basic',
+                label: 'Basic',
                 options: [
                   new SlashMenuOption(`heading-${headingSize.charAt(1)}`, {
                     Icon: iconImports[headingSize],
-                    displayName: `Heading ${headingSize.charAt(1)}`,
                     keywords: ['heading', headingSize],
+                    label: `Heading ${headingSize.charAt(1)}`,
                     onSelect: () => {
                       setHeading(headingSize)
                     },

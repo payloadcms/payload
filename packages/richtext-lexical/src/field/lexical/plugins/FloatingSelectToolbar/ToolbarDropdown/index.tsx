@@ -5,6 +5,8 @@ const baseClass = 'floating-select-toolbar-popup__dropdown'
 
 import type { LexicalEditor } from 'lexical'
 
+import { useTranslation } from 'react-i18next'
+
 import type { FloatingToolbarSectionEntry } from '../types'
 
 import { DropDown, DropDownItem } from './DropDown'
@@ -19,6 +21,13 @@ export const ToolbarEntry = ({
   editor: LexicalEditor
   entry: FloatingToolbarSectionEntry
 }) => {
+  const { i18n } = useTranslation('lexical')
+
+  let label = entry.key
+  if (entry.label) {
+    label = typeof entry.label === 'function' ? entry.label({ i18n }) : entry.label
+  }
+
   const Component = useMemo(() => {
     return entry?.Component
       ? React.lazy(() =>
@@ -56,7 +65,7 @@ export const ToolbarEntry = ({
           <ChildComponent />
         </React.Suspense>
       )}
-      <span className="text">{entry.label}</span>
+      <span className="text">{label}</span>
     </DropDownItem>
   )
 }

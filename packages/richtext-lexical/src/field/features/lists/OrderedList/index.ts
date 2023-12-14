@@ -64,8 +64,8 @@ export const OrderedListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              displayName: 'Lists',
               key: 'lists',
+              label: 'Lists',
               options: [
                 new SlashMenuOption('orderedlist', {
                   Icon: () =>
@@ -73,8 +73,8 @@ export const OrderedListFeature = (): FeatureProvider => {
                     import('../../../lexical/ui/icons/OrderedList').then(
                       (module) => module.OrderedListIcon,
                     ),
-                  displayName: 'Ordered List',
                   keywords: ['ordered list', 'ol'],
+                  label: 'Ordered List',
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
                   },

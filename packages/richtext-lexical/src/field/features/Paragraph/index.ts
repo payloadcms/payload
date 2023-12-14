@@ -5,6 +5,7 @@ import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
+import { translationsClient } from './translations'
 
 export const ParagraphFeature = (): FeatureProvider => {
   return {
@@ -19,7 +20,7 @@ export const ParagraphFeature = (): FeatureProvider => {
                   import('../../lexical/ui/icons/Text').then((module) => module.TextIcon),
                 isActive: () => false,
                 key: 'normal-text',
-                label: 'Normal Text',
+                label: ({ i18n }) => i18n.t('lexical:paragraph:labelSelectToolbar'),
                 onClick: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
@@ -33,19 +34,20 @@ export const ParagraphFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        i18nClient: translationsClient,
         props: null,
         slashMenu: {
           options: [
             {
-              displayName: 'Basic',
               key: 'basic',
+              label: 'Basic',
               options: [
                 new SlashMenuOption('paragraph', {
                   Icon: () =>
                     // @ts-expect-error
                     import('../../lexical/ui/icons/Text').then((module) => module.TextIcon),
-                  displayName: 'Paragraph',
                   keywords: ['normal', 'paragraph', 'p', 'text'],
+                  label: ({ i18n }) => i18n.t('lexical:paragraph:labelSlashMenu'),
                   onSelect: ({ editor }) => {
                     editor.update(() => {
                       const selection = $getSelection()

@@ -59,8 +59,8 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
         slashMenu: {
           options: [
             {
-              displayName: 'Basic',
               key: 'basic',
+              label: 'Basic',
               options: [
                 new SlashMenuOption('relationship', {
                   Icon: () =>
@@ -68,8 +68,8 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
                     import('../../lexical/ui/icons/Relationship').then(
                       (module) => module.RelationshipIcon,
                     ),
-                  displayName: 'Relationship',
                   keywords: ['relationship', 'relation', 'rel'],
+                  label: 'Relationship',
                   onSelect: ({ editor }) => {
                     // dispatch INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND
                     editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {

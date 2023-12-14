@@ -60,8 +60,8 @@ export const UnorderedListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              displayName: 'Lists',
               key: 'lists',
+              label: 'Lists',
               options: [
                 new SlashMenuOption('unorderedlist', {
                   Icon: () =>
@@ -69,8 +69,8 @@ export const UnorderedListFeature = (): FeatureProvider => {
                     import('../../../lexical/ui/icons/UnorderedList').then(
                       (module) => module.UnorderedListIcon,
                     ),
-                  displayName: 'Unordered List',
                   keywords: ['unordered list', 'ul'],
+                  label: 'Unordered List',
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
                   },

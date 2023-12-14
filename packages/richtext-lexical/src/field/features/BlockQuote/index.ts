@@ -69,8 +69,8 @@ export const BlockQuoteFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              displayName: 'Basic',
               key: 'basic',
+              label: 'Basic',
               options: [
                 new SlashMenuOption(`blockquote`, {
                   Icon: () =>
@@ -78,8 +78,8 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                     import('../../lexical/ui/icons/Blockquote').then(
                       (module) => module.BlockquoteIcon,
                     ),
-                  displayName: `Blockquote`,
                   keywords: ['quote', 'blockquote'],
+                  label: `Blockquote`,
                   onSelect: () => {
                     const selection = $getSelection()
                     if ($INTERNAL_isPointSelection(selection)) {

@@ -65,8 +65,8 @@ export const CheckListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
-              displayName: 'Lists',
               key: 'lists',
+              label: 'Lists',
               options: [
                 new SlashMenuOption('checklist', {
                   Icon: () =>
@@ -74,8 +74,8 @@ export const CheckListFeature = (): FeatureProvider => {
                     import('../../../lexical/ui/icons/Checklist').then(
                       (module) => module.ChecklistIcon,
                     ),
-                  displayName: 'Check List',
                   keywords: ['check list', 'check', 'checklist', 'cl'],
+                  label: 'Check List',
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
                   },

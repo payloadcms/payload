@@ -7,6 +7,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { LexicalProviderProps } from './LexicalProvider'
 
@@ -24,6 +25,8 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
 ) => {
   const { editorConfig, onChange } = props
   const [editor] = useLexicalComposerContext()
+
+  const { i18n, t } = useTranslation()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -67,7 +70,7 @@ export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' |
           </div>
         }
         placeholder={
-          <p className="editor-placeholder">Start typing, or press '/' for commands...</p>
+          <p className="editor-placeholder">{t('lexical:general:emptyEditorPlaceholder')}</p>
         }
       />
       <OnChangePlugin
