@@ -1,5 +1,6 @@
-const OPENAI_API_KEY = 'sk-YOURKEYHERE' // Remember to replace with your actual key
 import { deepMerge } from 'payload/utilities'
+
+const OPENAI_API_KEY = 'sk-YOURKEYHERE' // Remember to replace with your actual key
 
 async function translateText(text: string, targetLang: string) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -151,6 +152,9 @@ export async function translateObject(obj: any, languages?: string[]) {
       delete targetObj[keys[keys.length - 1]]
     }
 
+    if (!obj?.[lang]) {
+      obj[lang] = {}
+    }
     const missingKeys = findMissingKeys(obj?.en, obj?.[lang])
 
     console.log('Missing keys for lang', lang, ':', missingKeys)
