@@ -41,6 +41,7 @@
     { "path": "./packages/plugin-cloud" },
     { "path": "./packages/plugin-form-builder" },
     { "path": "./packages/plugin-nested-docs" },
+    { "path": "./packages/plugin-search" },
     { "path": "./packages/plugin-stripe" },
     { "path": "./packages/richtext-slate" },
     { "path": "./packages/richtext-lexical" }

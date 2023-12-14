@@ -67,7 +67,14 @@
     {
       "command": "pnpm run test:int live-preview",
       "cwd": "${workspaceFolder}",
-      "name": "Live Preview Integration",
+      "name": "Live Preview Int Tests",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run test:int plugin-search",
+      "cwd": "${workspaceFolder}",
+      "name": "Search Plugin Int Tests",
       "request": "launch",
       "type": "node-terminal"
     },
