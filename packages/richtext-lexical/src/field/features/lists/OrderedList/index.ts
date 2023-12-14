@@ -6,6 +6,7 @@ import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypea
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
 import { listsSlashMenuGroup } from '../common/listsSlashMenuGroup'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
+import { translationsClient } from '../translations'
 import { ORDERED_LIST } from './markdownTransformer'
 
 export const OrderedListFeature = (): FeatureProvider => {
@@ -23,7 +24,7 @@ export const OrderedListFeature = (): FeatureProvider => {
                   ),
                 isActive: () => false,
                 key: 'orderedList',
-                label: `Ordered List`,
+                label: ({ i18n }) => i18n.t('lexical:lists:orderedListLabel'),
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
                 },
@@ -32,6 +33,7 @@ export const OrderedListFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        i18nClient: featureProviderMap.has('unorderedList') ? null : translationsClient,
         markdownTransformers: [ORDERED_LIST],
         nodes: featureProviderMap.has('unorderedList')
           ? []
@@ -74,7 +76,7 @@ export const OrderedListFeature = (): FeatureProvider => {
                       (module) => module.OrderedListIcon,
                     ),
                   keywords: ['ordered list', 'ol'],
-                  label: 'Ordered List',
+                  label: ({ i18n }) => i18n.t('lexical:lists:orderedListLabel'),
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
                   },

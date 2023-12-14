@@ -6,6 +6,7 @@ import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypea
 import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
 import { listsSlashMenuGroup } from '../common/listsSlashMenuGroup'
 import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
+import { translationsClient } from '../translations'
 import { CHECK_LIST } from './markdownTransformers'
 
 // 345
@@ -25,7 +26,7 @@ export const CheckListFeature = (): FeatureProvider => {
                   ),
                 isActive: () => false,
                 key: 'checkList',
-                label: `Check List`,
+                label: ({ i18n }) => i18n.t('lexical:lists:checkListLabel'),
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
                 },
@@ -34,6 +35,10 @@ export const CheckListFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        i18nClient:
+          featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
+            ? null
+            : translationsClient,
         markdownTransformers: [CHECK_LIST],
         nodes:
           featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
@@ -75,7 +80,7 @@ export const CheckListFeature = (): FeatureProvider => {
                       (module) => module.ChecklistIcon,
                     ),
                   keywords: ['check list', 'check', 'checklist', 'cl'],
-                  label: 'Check List',
+                  label: ({ i18n }) => i18n.t('lexical:lists:checkListLabel'),
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
                   },
