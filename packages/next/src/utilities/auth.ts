@@ -1,20 +1,8 @@
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
-import { getAuthenticatedUser } from 'payload/auth'
+import { getAuthenticatedUser, getAccessResults } from 'payload/auth'
 import { SanitizedConfig } from 'payload/types'
 import { cache } from 'react'
-
-const getPermissions = ({
-  user,
-  payload,
-  headers,
-  searchParams,
-}: {
-  user: any
-  payload: any
-  headers: any
-  searchParams: any
-}) => {}
 
 export const auth = cache(
   async ({
@@ -40,11 +28,10 @@ export const auth = cache(
       redirect(`${payload.config.routes.admin}/unauthorized`)
     }
 
-    const permissions = await getPermissions({
+    const permissions = await getAccessResults({
       user,
       payload,
       searchParams,
-      headers,
     })
 
     return {
