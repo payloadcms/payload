@@ -92,14 +92,16 @@ export const AppHeader: React.FC = () => {
               <StepNav className={`${baseClass}__step-nav`} />
             </div>
             <div className={`${baseClass}__controls`}>
-              {Boolean(isGlobalView) &&
-                Array.isArray(globalActions) &&
-                globalActions.map((Component, i) => <Component key={i} />)}
-              {Boolean(isCollectionView) &&
-                Array.isArray(collectionActions) &&
-                collectionActions.map((Component, i) => <Component key={i} />)}
-              {Array.isArray(adminActions) &&
-                adminActions.map((Component, i) => <Component key={i} />)}
+              <div className={`${baseClass}__custom-controls`}>
+                {Boolean(isGlobalView) &&
+                  Array.isArray(globalActions) &&
+                  globalActions.map((Component, i) => <Component key={i} />)}
+                {Boolean(isCollectionView) &&
+                  Array.isArray(collectionActions) &&
+                  collectionActions.map((Component, i) => <Component key={i} />)}
+                {Array.isArray(adminActions) &&
+                  adminActions.map((Component, i) => <Component key={i} />)}
+              </div>
               {localization && (
                 <LocalizerLabel
                   ariaLabel="invisible"

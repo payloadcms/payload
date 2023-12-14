@@ -105,6 +105,34 @@
     gap: calc(var(--base) / 2);
   }
 
+  &__custom-controls {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+
+    flex-shrink: 0;
+    max-width: 600px;
+    overflow: auto;
+    white-space: nowrap;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  @include large-break {
+    &__custom-controls {
+      max-width: 500px;
+    }
+  }
+
+  @include mid-break {
+    &__custom-controls {
+      max-width: 300px;
+      margin-right: var(--base);
+    }
+  }
+
   @include small-break {
     &__localizer {
       right: base(2);
@@ -128,6 +156,11 @@
     &__step-header {
       // TODO: overflow the step header instead of hide it
       display: none;
+    }
+
+    &__custom-controls {
+      max-width: 150px;
+      margin-right: 0;
     }
   }
 }
