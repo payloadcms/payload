@@ -60,7 +60,7 @@
     position: absolute;
     background: var(--color-base-0);
     border-radius: 4px;
-    width: 132.5px;
+    min-width: 132.5px;
     z-index: 100;
 
     .floating-select-toolbar-popup__dropdown-item {
