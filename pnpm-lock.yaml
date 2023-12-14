@@ -435,6 +435,9 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
+      http-status:
+        specifier: 1.6.2
+        version: 1.6.2
       mongoose:
         specifier: 6.12.0
         version: 6.12.0
