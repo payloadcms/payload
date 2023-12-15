@@ -16,7 +16,7 @@ import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
 
 import { usePreferences } from '../../utilities/Preferences'
-import formatFields from '../../views/collections/List/formatFields'
+import formatColumnFields from '../../views/collections/List/formatColumnFields'
 import buildColumns from './buildColumns'
 import { columnReducer } from './columnReducer'
 import getInitialColumnState from './getInitialColumns'
@@ -49,8 +49,7 @@ export const TableColumnsProvider: React.FC<{
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>()
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
-  const [formattedFields] = useState<Field[]>(() => formatFields(collection))
-
+  const [formattedFields] = useState<Field[]>(() => formatColumnFields(collection))
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
     const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
 
@@ -83,7 +82,7 @@ export const TableColumnsProvider: React.FC<{
         dispatchTableColumns({
           payload: {
             cellProps,
-            collection: { ...collection, fields: formatFields(collection) },
+            collection: { ...collection, fields: formattedFields },
             columns: newCols.map((column) => {
               // 'string' is for backwards compatibility
               // the preference used to be stored as an array of strings
@@ -136,7 +135,7 @@ export const TableColumnsProvider: React.FC<{
         payload: {
           // onSelect,
           cellProps,
-          collection: { ...collection, fields: formatFields(collection) },
+          collection: { ...collection, fields: formattedFields },
           columns: columns.map((column) => ({
             accessor: column,
             active: true,
@@ -155,7 +154,7 @@ export const TableColumnsProvider: React.FC<{
       dispatchTableColumns({
         payload: {
           cellProps,
-          collection: { ...collection, fields: formatFields(collection) },
+          collection: { ...collection, fields: formattedFields },
           fromIndex,
           toIndex,
         },
@@ -170,7 +169,7 @@ export const TableColumnsProvider: React.FC<{
       dispatchTableColumns({
         payload: {
           cellProps,
-          collection: { ...collection, fields: formatFields(collection) },
+          collection: { ...collection, fields: formattedFields },
           column,
         },
         type: 'toggle',

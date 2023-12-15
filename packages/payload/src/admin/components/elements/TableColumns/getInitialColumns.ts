@@ -1,32 +1,6 @@
 import type { Field } from '../../../../fields/config/types'
 
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types'
-
-const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] =>
-  fields.reduce((remaining, field) => {
-    if (fieldAffectsData(field) && field.name === useAsTitle) {
-      return remaining
-    }
-
-    if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
-      return [...remaining, ...getRemainingColumns(field.fields, useAsTitle)]
-    }
-
-    if (field.type === 'tabs') {
-      return [
-        ...remaining,
-        ...field.tabs.reduce(
-          (tabFieldColumns, tab) => [
-            ...tabFieldColumns,
-            ...(tabHasName(tab) ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
-          ],
-          [],
-        ),
-      ]
-    }
-
-    return [...remaining, field.name]
-  }, [])
+import flattenFields from '../../../../utilities/flattenTopLevelFields'
 
 const getInitialColumnState = (
   fields: Field[],
@@ -43,11 +17,17 @@ const getInitialColumnState = (
     initialColumns.push(useAsTitle)
   }
 
-  const remainingColumns = getRemainingColumns(fields, useAsTitle)
+  const flattenedFields = flattenFields(fields)
+  const remainingColumns = flattenedFields
+    .map((field) => {
+      if (field.name !== useAsTitle) {
+        return field.name
+      }
+    })
+    .filter(Boolean)
 
   initialColumns = initialColumns.concat(remainingColumns)
   initialColumns = initialColumns.slice(0, 4)
-
   return initialColumns
 }
 

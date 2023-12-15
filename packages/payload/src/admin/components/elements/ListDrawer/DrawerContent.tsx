@@ -19,7 +19,7 @@ import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 import { usePreferences } from '../../utilities/Preferences'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import DefaultList from '../../views/collections/List/Default'
-import formatFields from '../../views/collections/List/formatFields'
+import formatColumnFields from '../../views/collections/List/formatColumnFields'
 import { useDocumentDrawer } from '../DocumentDrawer'
 import Pill from '../Pill'
 import ReactSelect from '../ReactSelect'
@@ -87,12 +87,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       : undefined,
   )
 
-  const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
+  const [fields, setFields] = useState<Field[]>(() => formatColumnFields(selectedCollectionConfig))
 
   const titleField = useUseTitleField(selectedCollectionConfig)
 
   useEffect(() => {
-    setFields(formatFields(selectedCollectionConfig))
+    setFields(formatColumnFields(selectedCollectionConfig))
   }, [selectedCollectionConfig])
 
   // allow external control of selected collection, same as the initial state logic above

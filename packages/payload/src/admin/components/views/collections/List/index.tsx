@@ -18,7 +18,7 @@ import { usePreferences } from '../../../utilities/Preferences'
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
 import { useSearchParams } from '../../../utilities/SearchParams'
 import DefaultList from './Default'
-import formatFields from './formatFields'
+import formatColumnFields from './formatColumnFields'
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -68,7 +68,7 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const history = useHistory()
   const { t } = useTranslation('general')
   const [fetchURL, setFetchURL] = useState<string>('')
-  const [fields] = useState<Field[]>(() => formatFields(collection))
+  const [fields] = useState<Field[]>(() => formatColumnFields(collection))
   const collectionPermissions = permissions?.collections?.[slug]
   const hasCreatePermission = collectionPermissions?.create?.permission
   const newDocumentURL = `${admin}/collections/${slug}/create`

@@ -3,21 +3,21 @@ import type { Field } from '../../../../../fields/config/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types'
 
-const formatFields = (config: SanitizedCollectionConfig): Field[] => {
+const defaultIDField: Field = {
+  name: 'id',
+  admin: {
+    disableBulkEdit: true,
+  },
+  label: 'ID',
+  type: 'text',
+}
+
+const shouldSkipField = (field: Field): boolean =>
+  !fieldIsPresentationalOnly(field) && (field.hidden === true || field.admin?.disabled === true)
+
+const formatColumnFields = (config: SanitizedCollectionConfig): Field[] => {
   const hasID =
     config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1
-
-  const defaultIDField: Field = {
-    name: 'id',
-    admin: {
-      disableBulkEdit: true,
-    },
-    label: 'ID',
-    type: 'text',
-  }
-
-  const shouldSkipField = (field: Field): boolean =>
-    !fieldIsPresentationalOnly(field) && (field.hidden === true || field.admin?.disabled === true)
 
   const fields: Field[] = config.fields.reduce(
     (formatted, field) => {
@@ -44,4 +44,4 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   return fields
 }
 
-export default formatFields
+export default formatColumnFields
