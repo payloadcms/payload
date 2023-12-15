@@ -1,3 +1,4 @@
+import type { User } from 'payload/auth'
 import type { Config } from 'payload/config'
 import type { Field } from 'payload/types'
 
@@ -57,9 +58,21 @@ export const getBaseFields = (config: Config): Field[] => [
         return linkType === 'internal'
       },
     },
+    // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown
+    filterOptions: ({ relationTo, user }) => {
+      const hidden = config.collections.find(({ slug }) => slug === relationTo).admin.hidden
+      if (typeof hidden === 'function' && hidden({ user } as { user: User })) {
+        return false
+      }
+    },
     label: translations['fields:chooseDocumentToLink'],
     relationTo: config.collections
-      .filter(({ admin: { enableRichTextLink } }) => enableRichTextLink)
+      .filter(({ admin: { enableRichTextLink, hidden } }) => {
+        if (typeof hidden !== 'function' && hidden) {
+          return false
+        }
+        return enableRichTextLink
+      })
       .map(({ slug }) => slug),
     required: true,
     type: 'relationship',
