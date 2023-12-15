@@ -177,9 +177,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n])
 
   useEffect(() => {
-    const editConfig = (collection || global).admin.components.views.Edit
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
     const versionActions =
-      'Version' in editConfig && 'actions' in editConfig.Version ? editConfig.Version.actions : []
+      editConfig && 'Version' in editConfig && 'actions' in editConfig.Version
+        ? editConfig.Version.actions
+        : []
 
     setViewActions(versionActions)
 

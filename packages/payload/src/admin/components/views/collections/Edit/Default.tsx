@@ -76,16 +76,18 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   const operation = isEditing ? 'update' : 'create'
 
   useEffect(() => {
-    const editConfig = collection.admin.components.views.Edit
+    const editConfig = collection?.admin?.components?.views?.Edit
     const defaultActions =
-      'Default' in editConfig && 'actions' in editConfig.Default ? editConfig.Default.actions : []
+      editConfig && 'Default' in editConfig && 'actions' in editConfig.Default
+        ? editConfig.Default.actions
+        : []
 
     setViewActions(defaultActions)
 
     return () => {
       setViewActions([])
     }
-  }, [collection.admin.components.views.Edit, setViewActions])
+  }, [collection?.admin?.components?.views?.Edit, setViewActions])
 
   return (
     <main className={classes}>

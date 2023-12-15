@@ -129,9 +129,9 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   }, [setParams, page, sort, limit, serverURL, api, id, global, collection])
 
   useEffect(() => {
-    const editConfig = (collection || global).admin.components.views.Edit
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
     const versionsActions =
-      'Versions' in editConfig && 'actions' in editConfig.Versions
+      editConfig && 'Versions' in editConfig && 'actions' in editConfig.Versions
         ? editConfig.Versions.actions
         : []
 

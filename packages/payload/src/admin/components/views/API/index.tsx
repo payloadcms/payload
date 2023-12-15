@@ -214,9 +214,9 @@ export const API: React.FC<EditViewProps> = (props) => {
   }, [i18n.language, fetchURL, authenticated])
 
   React.useEffect(() => {
-    const editConfig = (collection || global).admin.components.views.Edit
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
     const apiActions =
-      'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
+      editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
 
     setViewActions(apiActions)
 

@@ -186,9 +186,9 @@ export const LivePreviewView: React.FC<
   }, [data, documentInfo, locale, livePreviewConfig])
 
   useEffect(() => {
-    const editConfig = (collection || global).admin.components.views.Edit
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
     const livePreviewActions =
-      'LivePreview' in editConfig && 'actions' in editConfig.LivePreview
+      editConfig && 'LivePreview' in editConfig && 'actions' in editConfig.LivePreview
         ? editConfig.LivePreview.actions
         : []
 
