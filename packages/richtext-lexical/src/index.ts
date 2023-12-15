@@ -261,7 +261,7 @@ export { consolidateHTMLConverters } from './field/features/converters/html/fiel
 export { lexicalHTML } from './field/features/converters/html/field'
 
 export { TestRecorderFeature } from './field/features/debug/TestRecorder'
-export { TreeviewFeature } from './field/features/debug/TreeView'
+export { TreeViewFeature } from './field/features/debug/TreeView'
 
 export { BoldTextFeature } from './field/features/format/Bold'
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
