@@ -14,6 +14,7 @@ import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { formatDate } from '../../../utilities/formatDate'
 import { Gutter } from '../../elements/Gutter'
 import { useStepNav } from '../../elements/StepNav'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -30,6 +31,17 @@ import { mostRecentVersionOption } from './shared'
 
 const baseClass = 'view-version'
 
+const hasVersionActions = (
+  viewComponent: any,
+): viewComponent is { Version: { actions: React.ComponentType<any>[] } } => {
+  return (
+    typeof viewComponent === 'object' &&
+    viewComponent !== null &&
+    'Version' in viewComponent &&
+    'actions' in viewComponent.Version
+  )
+}
+
 const VersionView: React.FC<Props> = ({ collection, global }) => {
   const {
     admin: { dateFormat },
@@ -38,6 +50,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     serverURL,
   } = useConfig()
   const { setStepNav } = useStepNav()
+
+  const { setViewActions } = useActions()
 
   const {
     params: { id, versionID },
@@ -172,6 +186,22 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
     setStepNav(nav)
   }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n])
+
+  useEffect(() => {
+    let versionActions = []
+
+    if (collection && hasVersionActions(collection.admin.components.views.Edit)) {
+      versionActions = collection.admin.components.views.Edit.Version.actions
+    } else if (global && hasVersionActions(global.admin.components.views.Edit)) {
+      versionActions = global.admin.components.views.Edit.Version.actions
+    }
+
+    setViewActions(versionActions || [])
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
 
   let metaTitle: string
   let metaDesc: string

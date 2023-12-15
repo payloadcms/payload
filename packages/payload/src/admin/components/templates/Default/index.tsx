@@ -10,7 +10,6 @@ import { Nav as DefaultNav } from '../../elements/Nav'
 import { NavToggler } from '../../elements/Nav/NavToggler'
 import { useNav } from '../../elements/Nav/context'
 import { useConfig } from '../../utilities/Config'
-import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 import Meta from '../../utilities/Meta'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import './index.scss'
@@ -19,7 +18,7 @@ const baseClass = 'template-default'
 
 const Default: React.FC<
   Props & { collection?: SanitizedCollectionConfig; global?: SanitizedGlobalConfig }
-> = ({ children, className, collection, global }) => {
+> = ({ children, className }) => {
   const {
     admin: {
       components: { Nav: CustomNav } = {
@@ -51,9 +50,7 @@ const Default: React.FC<
       >
         <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
         <div className={`${baseClass}__wrap`}>
-          <DocumentInfoProvider collection={collection} global={global}>
-            <AppHeader />
-          </DocumentInfoProvider>
+          <AppHeader />
           {children}
         </div>
       </div>

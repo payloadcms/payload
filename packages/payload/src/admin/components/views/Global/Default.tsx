@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { FieldTypes } from '../../forms/field-types'
@@ -8,6 +8,7 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
+import { useActions } from '../../utilities/ActionsProvider'
 import { OperationContext } from '../../utilities/OperationProvider'
 import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { GlobalRoutes } from './Routes'
@@ -15,6 +16,17 @@ import { CustomGlobalComponent } from './Routes/CustomComponent'
 import './index.scss'
 
 const baseClass = 'global-edit'
+
+const hasDefaultActions = (
+  globalEditComponent: any,
+): globalEditComponent is { Default: { actions: React.ComponentType<any>[] } } => {
+  return (
+    typeof globalEditComponent === 'object' &&
+    globalEditComponent !== null &&
+    'Default' in globalEditComponent &&
+    'actions' in globalEditComponent.Default
+  )
+}
 
 export type DefaultGlobalViewProps = GlobalEditViewProps & {
   disableRoutes?: boolean
@@ -37,9 +49,24 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
     permissions,
   } = props
 
+  const { setViewActions } = useActions()
+
   const { label } = global
 
   const hasSavePermission = permissions?.update?.permission
+
+  useEffect(() => {
+    if (hasDefaultActions(global.admin.components?.views?.Edit)) {
+      const defaultActions = global.admin.components.views.Edit.Default?.actions
+      if (defaultActions) {
+        setViewActions(defaultActions || [])
+      }
+    }
+
+    return () => {
+      setViewActions([])
+    }
+  }, [global.admin.components.views.Edit, setViewActions])
 
   return (
     <main className={baseClass}>

@@ -12,6 +12,7 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
@@ -132,6 +133,17 @@ const PreviewView: React.FC<
   )
 }
 
+const hasLivePreviewActions = (
+  viewComponent: any,
+): viewComponent is { LivePreview: { actions: React.ComponentType<any>[] } } => {
+  return (
+    typeof viewComponent === 'object' &&
+    viewComponent !== null &&
+    'LivePreview' in viewComponent &&
+    'actions' in viewComponent.LivePreview
+  )
+}
+
 export const LivePreviewView: React.FC<
   EditViewProps & {
     fieldTypes: FieldTypes
@@ -141,6 +153,11 @@ export const LivePreviewView: React.FC<
   const config = useConfig()
   const documentInfo = useDocumentInfo()
   const locale = useLocale()
+
+  const { setViewActions } = useActions()
+
+  const collection = documentInfo.collection
+  const global = documentInfo.global
 
   let livePreviewConfig: LivePreviewConfig = config?.admin?.livePreview
 
@@ -178,6 +195,22 @@ export const LivePreviewView: React.FC<
 
     getURL() // eslint-disable-line @typescript-eslint/no-floating-promises
   }, [data, documentInfo, locale, livePreviewConfig])
+
+  useEffect(() => {
+    let livePreviewActions = []
+
+    if (collection && hasLivePreviewActions(collection.admin.components.views.Edit)) {
+      livePreviewActions = collection.admin.components.views.Edit.LivePreview.actions
+    } else if (global && hasLivePreviewActions(global.admin.components.views.Edit)) {
+      livePreviewActions = global.admin.components.views.Edit.LivePreview.actions
+    }
+
+    setViewActions(livePreviewActions || [])
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
 
   const breakpoints: LivePreviewConfig['breakpoints'] = [
     ...(livePreviewConfig?.breakpoints || []),

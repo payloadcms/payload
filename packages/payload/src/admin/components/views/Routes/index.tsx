@@ -1,11 +1,12 @@
 import React, { Fragment, Suspense, lazy, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom'
+import { Redirect, Route, Switch } from 'react-router-dom'
 
 import { requests } from '../../../api'
 import { LoadingOverlayToggle } from '../../elements/Loading'
 import StayLoggedIn from '../../modals/StayLoggedIn'
 import DefaultTemplate from '../../templates/Default'
+import { ActionsProvider } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
@@ -55,14 +56,6 @@ export const Routes: React.FC = () => {
   )
 
   const userCollection = collections.find(({ slug }) => slug === userSlug)
-
-  const location = useLocation()
-  const pathSegments = location.pathname.split('/')
-  const collectionSlug = pathSegments[pathSegments.indexOf('collections') + 1]
-  const activeCollection = collections.find((c) => c.slug === collectionSlug)
-
-  const globalSlug = pathSegments[pathSegments.indexOf('globals') + 1]
-  const activeGlobal = globals.find((g) => g.slug === globalSlug)
 
   useEffect(() => {
     if (userCollection && !userCollection?.auth?.disableLocalStrategy) {
@@ -154,37 +147,39 @@ export const Routes: React.FC = () => {
                   {user ? (
                     <Fragment>
                       {canAccessAdmin && (
-                        <DefaultTemplate collection={activeCollection} global={activeGlobal}>
-                          <Switch>
-                            <Route exact path={`${match.url}/`}>
-                              <Dashboard />
-                            </Route>
-                            <Route path={`${match.url}/account`}>
-                              <DocumentInfoProvider
-                                collection={collections.find(({ slug }) => slug === userSlug)}
-                                id={user.id}
-                              >
-                                <Account />
-                              </DocumentInfoProvider>
-                            </Route>
-                            {collectionRoutes({
-                              collections,
-                              match,
-                              permissions,
-                              user,
-                            })}
-                            {globalRoutes({
-                              globals,
-                              locale,
-                              match,
-                              permissions,
-                              user,
-                            })}
-                            <Route path={`${match.url}*`}>
-                              <NotFound />
-                            </Route>
-                          </Switch>
-                        </DefaultTemplate>
+                        <ActionsProvider>
+                          <DefaultTemplate>
+                            <Switch>
+                              <Route exact path={`${match.url}/`}>
+                                <Dashboard />
+                              </Route>
+                              <Route path={`${match.url}/account`}>
+                                <DocumentInfoProvider
+                                  collection={collections.find(({ slug }) => slug === userSlug)}
+                                  id={user.id}
+                                >
+                                  <Account />
+                                </DocumentInfoProvider>
+                              </Route>
+                              {collectionRoutes({
+                                collections,
+                                match,
+                                permissions,
+                                user,
+                              })}
+                              {globalRoutes({
+                                globals,
+                                locale,
+                                match,
+                                permissions,
+                                user,
+                              })}
+                              <Route path={`${match.url}*`}>
+                                <NotFound />
+                              </Route>
+                            </Switch>
+                          </DefaultTemplate>
+                        </ActionsProvider>
                       )}
                       {canAccessAdmin === false && <Unauthorized />}
                     </Fragment>

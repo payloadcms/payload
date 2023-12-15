@@ -5,6 +5,7 @@ import type { IndexProps } from './types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { EditDepthContext } from '../../utilities/EditDepth'
@@ -12,12 +13,25 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import { useSearchParams } from '../../utilities/SearchParams'
 import { DefaultVersionsView } from './Default'
 
+const hasVersionsActions = (
+  viewComponent: any,
+): viewComponent is { Versions: { actions: React.ComponentType<any>[] } } => {
+  return (
+    typeof viewComponent === 'object' &&
+    viewComponent !== null &&
+    'Versions' in viewComponent &&
+    'actions' in viewComponent.Versions
+  )
+}
+
 const VersionsView: React.FC<IndexProps> = (props) => {
   const { id, collection, global } = props
 
   const { permissions, user } = useAuth()
 
   const [fetchURL, setFetchURL] = useState('')
+
+  const { setViewActions } = useActions()
 
   const {
     routes: { admin, api },
@@ -51,12 +65,12 @@ const VersionsView: React.FC<IndexProps> = (props) => {
       typeof Edit === 'function'
         ? Edit
         : typeof Edit === 'object' && typeof Edit.Versions === 'function'
-        ? Edit.Versions
-        : typeof Edit?.Versions === 'object' &&
-          'Component' in Edit.Versions &&
-          typeof Edit.Versions.Component === 'function'
-        ? Edit.Versions.Component
-        : undefined
+          ? Edit.Versions
+          : typeof Edit?.Versions === 'object' &&
+              'Component' in Edit.Versions &&
+              typeof Edit.Versions.Component === 'function'
+            ? Edit.Versions.Component
+            : undefined
   }
 
   if (global) {
@@ -72,12 +86,12 @@ const VersionsView: React.FC<IndexProps> = (props) => {
       typeof Edit === 'function'
         ? Edit
         : typeof Edit === 'object' && typeof Edit.Versions === 'function'
-        ? Edit.Versions
-        : typeof Edit?.Versions === 'object' &&
-          'Component' in Edit.Versions &&
-          typeof Edit.Versions.Component === 'function'
-        ? Edit.Versions.Component
-        : undefined
+          ? Edit.Versions
+          : typeof Edit?.Versions === 'object' &&
+              'Component' in Edit.Versions &&
+              typeof Edit.Versions.Component === 'function'
+            ? Edit.Versions.Component
+            : undefined
   }
 
   const [{ data, isLoading }] = usePayloadAPI(docURL, { initialParams: { draft: 'true' } })
@@ -119,6 +133,22 @@ const VersionsView: React.FC<IndexProps> = (props) => {
 
     setParams(params)
   }, [setParams, page, sort, limit, serverURL, api, id, global, collection])
+
+  useEffect(() => {
+    let versionsActions = []
+
+    if (collection && hasVersionsActions(collection.admin.components.views.Edit)) {
+      versionsActions = collection.admin.components.views.Edit.Versions.actions
+    } else if (global && hasVersionsActions(global.admin.components.views.Edit)) {
+      versionsActions = global.admin.components.views.Edit.Versions.actions
+    }
+
+    setViewActions(versionsActions || [])
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
 
   return (
     <EditDepthContext.Provider value={1}>

@@ -10,6 +10,7 @@ import { Gutter } from '../../elements/Gutter'
 import { CheckboxInput } from '../../forms/field-types/Checkbox/Input'
 import SelectInput from '../../forms/field-types/Select/Input'
 import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
@@ -123,7 +124,13 @@ const RecursivelyRenderObjectData = ({
               )
             }
 
-            if (type === 'date' || type === 'string' || type === 'null' || type === 'number' || type === 'boolean') {
+            if (
+              type === 'date' ||
+              type === 'string' ||
+              type === 'null' ||
+              type === 'number' ||
+              type === 'boolean'
+            ) {
               const parentHasKey = Boolean(parentType === 'object' && key)
 
               const rowClasses = [
@@ -164,6 +171,17 @@ function createURL(url: string) {
   }
 }
 
+const hasAPIActions = (
+  component: any,
+): component is { API: { actions: React.ComponentType<any>[] } } => {
+  return (
+    typeof component === 'object' &&
+    component !== null &&
+    'API' in component &&
+    'actions' in component.API
+  )
+}
+
 export const API: React.FC<EditViewProps> = (props) => {
   const { apiURL } = props
   const { i18n } = useTranslation()
@@ -175,6 +193,8 @@ export const API: React.FC<EditViewProps> = (props) => {
   const { id, collection, global } = useDocumentInfo()
   const { code } = useLocale()
   const url = createURL(apiURL)
+
+  const { setViewActions } = useActions()
 
   const draftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
   const docEndpoint = global ? `/globals/${global.slug}` : `/${collection.slug}/${id}`
@@ -203,6 +223,22 @@ export const API: React.FC<EditViewProps> = (props) => {
 
     fetchData()
   }, [i18n.language, fetchURL, authenticated])
+
+  React.useEffect(() => {
+    let apiActions = []
+
+    if (collection && hasAPIActions(collection.admin.components.views.Edit)) {
+      apiActions = collection.admin.components.views.Edit.API.actions
+    } else if (global && hasAPIActions(global.admin.components.views.Edit)) {
+      apiActions = global.admin.components.views.Edit.API.actions
+    }
+
+    setViewActions(apiActions || [])
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
 
   const localeOptions =
     localization &&

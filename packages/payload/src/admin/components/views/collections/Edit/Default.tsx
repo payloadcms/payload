@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { FieldTypes } from '../../../forms/field-types'
@@ -8,6 +8,7 @@ import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
+import { useActions } from '../../../utilities/ActionsProvider'
 import { useAuth } from '../../../utilities/Auth'
 import { useDocumentEvents } from '../../../utilities/DocumentEvents'
 import { OperationContext } from '../../../utilities/OperationProvider'
@@ -16,6 +17,17 @@ import { CustomCollectionComponent } from './Routes/CustomComponent'
 import './index.scss'
 
 const baseClass = 'collection-edit'
+
+const hasDefaultActions = (
+  editComponent: any,
+): editComponent is { Default: { actions: React.ComponentType<any>[] } } => {
+  return (
+    typeof editComponent === 'object' &&
+    editComponent !== null &&
+    'Default' in editComponent &&
+    'actions' in editComponent.Default
+  )
+}
 
 export type DefaultEditViewProps = CollectionEditViewProps & {
   customHeader?: React.ReactNode
@@ -42,6 +54,8 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
     isLoading,
     onSave: onSaveFromProps,
   } = props
+
+  const { setViewActions } = useActions()
 
   const { reportUpdate } = useDocumentEvents()
 
@@ -71,6 +85,19 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   )
 
   const operation = isEditing ? 'update' : 'create'
+
+  useEffect(() => {
+    if (hasDefaultActions(collection.admin.components?.views?.Edit)) {
+      const defaultActions = collection.admin.components.views.Edit.Default?.actions
+      if (defaultActions) {
+        setViewActions(defaultActions || [])
+      }
+    }
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection.admin.components.views.Edit, setViewActions])
 
   return (
     <main className={classes}>
