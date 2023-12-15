@@ -5,7 +5,7 @@ import {
   LexicalPluginToLexicalFeature,
   LinkFeature,
   SlateToLexicalFeature,
-  TreeviewFeature,
+  TreeViewFeature,
   UploadFeature,
   lexicalEditor,
   lexicalHTML,
@@ -35,7 +35,7 @@ export const LexicalMigrateFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           LexicalPluginToLexicalFeature(),
-          TreeviewFeature(),
+          TreeViewFeature(),
           HTMLConverterFeature(),
           LinkFeature({
             fields: [
@@ -75,7 +75,7 @@ export const LexicalMigrateFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           SlateToLexicalFeature(),
-          TreeviewFeature(),
+          TreeViewFeature(),
           HTMLConverterFeature(),
           LinkFeature({
             fields: [

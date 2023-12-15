@@ -1,7 +1,12 @@
-import { APIError } from 'payload/errors'
+import { APIError } from '../../../packages/payload/errors'
 
 export const subscriptionCreatedOrUpdated = async (args) => {
-  const { event, payload, stripe, stripeConfig } = args
+  const {
+    event,
+    payload,
+    // stripe,
+    // stripeConfig
+  } = args
 
   const customerStripeID = event.data.object.customer
 

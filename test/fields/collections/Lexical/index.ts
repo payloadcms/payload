@@ -3,7 +3,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 import {
   BlocksFeature,
   LinkFeature,
-  TreeviewFeature,
+  TreeViewFeature,
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
@@ -42,7 +42,7 @@ export const LexicalFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           //TestRecorderFeature(),
-          TreeviewFeature(),
+          TreeViewFeature(),
           BlocksFeature({
             blocks: [
               RichTextBlock,
@@ -67,7 +67,7 @@ export const LexicalFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           //TestRecorderFeature(),
-          TreeviewFeature(),
+          TreeViewFeature(),
           //HTMLConverterFeature(),
           LinkFeature({
             fields: [

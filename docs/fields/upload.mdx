@@ -20,10 +20,10 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 </Banner>
 
 <LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/upload.png"
-  srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
-  alt="Shows an upload field in the Payload admin panel"
-  caption="Admin panel screenshot of an Upload field"
+srcLight="https://payloadcms.com/images/docs/fields/upload.png"
+srcDark="https://payloadcms.com/images/docs/fields/upload-dark.png"
+alt="Shows an upload field in the Payload admin panel"
+caption="Admin panel screenshot of an Upload field"
 />
 
 **Example uses:**
@@ -34,25 +34,25 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 
 ### Config
 
-| Option               | Description                                                                                                                                                                                         |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** \*        | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
-| **`*relationTo`** \* | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>                                |
-| **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                                           |
-| **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                                                      |
-| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
-| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
-| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                                        |
+| Option               | Description                                                                                                                                                                 |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`name`** \*        | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
+| **`*relationTo`** \* | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>        |
+| **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                   |
+| **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                              |
+| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                     |
+| **`unique`**         | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
+| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)                                |
 | **`index`**          | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                                                       |
-| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                                          |
-| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                                             |
-| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                                                    |
-| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                |
-| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
-| **`required`**       | Require this field to have a value.                                                                                                                                                                 |
-| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
-| **`custom`**         | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
+| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.                               |
+| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                                                  |
+| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control)                     |
+| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.                            |
+| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
+| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
+| **`required`**       | Require this field to have a value.                                                                                                                                         |
+| **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                    |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 
 _\* An asterisk denotes that a property is required._
 
@@ -78,12 +78,15 @@ export const ExampleCollection: CollectionConfig = {
 
 ### Filtering upload options
 
-Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available uploads in the UI.
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
+for validating input and filtering available uploads in the UI.
 
-The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
+prevent all, or a `Where` query. When using a function, it will be
+called with an argument object with the following properties:
 
 | Property      | Description                                                                          |
-| ------------- | ------------------------------------------------------------------------------------ |
+|---------------|--------------------------------------------------------------------------------------|
 | `relationTo`  | The `relationTo` to filter against (as defined on the field)                         |
 | `data`        | An object of the full collection or global document currently being edited           |
 | `siblingData` | An object of the document data limited to fields within the same parent to the field |

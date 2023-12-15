@@ -17,8 +17,10 @@ import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '..
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
+  relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
+  relationTrueFilterOptionSlug,
   relationTwoSlug,
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
@@ -112,9 +114,9 @@ describe('fields - relationship', () => {
       data: {
         name: 'with-existing-relations',
         relationship: relationOneDoc.id,
+        relationshipReadOnly: relationOneDoc.id,
         relationshipRestricted: restrictedRelation.id,
         relationshipWithTitle: relationWithTitle.id,
-        relationshipReadOnly: relationOneDoc.id,
       },
     })) as any
   })
@@ -322,6 +324,41 @@ describe('fields - relationship', () => {
     await expect(options).not.toContainText('exclude')
   })
 
+  test('should not query for a relationship when filterOptions returns false', async () => {
+    await payload.create({
+      collection: relationFalseFilterOptionSlug,
+      data: {
+        name: 'whatever',
+      },
+    })
+
+    await page.goto(url.create)
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+    await expect(options).toContainText('Relation With Titles')
+    await expect(options).not.toContainText('whatever')
+  })
+
+  test('should show a relationship when filterOptions returns true', async () => {
+    await payload.create({
+      collection: relationTrueFilterOptionSlug,
+      data: {
+        name: 'truth',
+      },
+    })
+
+    await page.goto(url.create)
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+    await expect(options).toContainText('truth')
+  })
+
   test('should open document drawer from read-only relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
 
@@ -492,6 +529,6 @@ async function clearCollectionDocs(collectionSlug: string): Promise<void> {
     (doc) => doc.id,
   )
   await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: collectionSlug, id })
+    await payload.delete({ id, collection: collectionSlug })
   })
 }

@@ -1,8 +1,10 @@
-import { CollectionConfig } from 'payload/types'
-import { LinkToDoc } from '../../../src/ui/LinkToDoc'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-const Customers: CollectionConfig = {
-  slug: 'customers',
+import { LinkToDoc } from '../../../packages/plugin-stripe/src/ui/LinkToDoc'
+import { customersSlug } from '../shared'
+
+export const Customers: CollectionConfig = {
+  slug: customersSlug,
   timestamps: true,
   admin: {
     useAsTitle: 'email',
@@ -32,7 +34,6 @@ const Customers: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
-              // @ts-expect-error
               Field: (args) =>
                 LinkToDoc({
                   ...args,
@@ -109,5 +110,3 @@ const Customers: CollectionConfig = {
     },
   ],
 }
-
-export default Customers

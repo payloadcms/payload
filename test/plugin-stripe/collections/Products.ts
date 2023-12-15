@@ -1,7 +1,9 @@
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-const Products: CollectionConfig = {
-  slug: 'products',
+import { productsSlug } from '../shared'
+
+export const Products: CollectionConfig = {
+  slug: productsSlug,
   timestamps: true,
   admin: {
     defaultColumns: ['name'],
@@ -35,5 +37,3 @@ const Products: CollectionConfig = {
     },
   ],
 }
-
-export default Products

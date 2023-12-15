@@ -1,7 +1,9 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+
+import { postsSlug } from '../../_community/collections/Posts'
 
 export const Posts: CollectionConfig = {
-  slug: 'posts',
+  slug: postsSlug,
   labels: {
     singular: 'Post',
     plural: 'Posts',
