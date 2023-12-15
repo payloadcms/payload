@@ -130,6 +130,7 @@ const Relationship: React.FC<Props> = (props) => {
 
       if (!errorLoading) {
         relationsToFetch.reduce(async (priorRelation, relation) => {
+          const relationFilterOption = filterOptionsResult?.[relation]
           let lastLoadedPageToUse
           if (search !== searchArg) {
             lastLoadedPageToUse = 1
@@ -138,7 +139,7 @@ const Relationship: React.FC<Props> = (props) => {
           }
           await priorRelation
 
-          if (filterOptionsResult?.[relation] === false) {
+          if (relationFilterOption === false) {
             setLastFullyLoadedRelation(relations.indexOf(relation))
             return Promise.resolve()
           }
@@ -182,8 +183,8 @@ const Relationship: React.FC<Props> = (props) => {
               })
             }
 
-            if (filterOptionsResult?.[relation]) {
-              query.where.and.push(filterOptionsResult[relation] as Where)
+            if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
+              query.where.and.push(relationFilterOption)
             }
 
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {

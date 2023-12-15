@@ -271,7 +271,7 @@ const validateFilterOptions: Validate = async (
             : filterOptions
 
         if (optionFilter === true) {
-          optionFilter = {}
+          optionFilter = null
         }
 
         const valueIDs: (number | string)[] = []
