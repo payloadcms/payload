@@ -189,7 +189,7 @@ For a working demonstration of this, check out the official [Live Preview Exampl
 
 ## Troubleshooting
 
-### Relationships and/or uploads are not populating
+#### Relationships and/or uploads are not populating
 
 If you are using relationships or uploads in your front-end application, and your front-end application runs on a different domain than your Payload server, you may need to configure [CORS](../configuration/overview) to allow requests to be made between the two domains. This includes sites that are running on a different port or subdomain. Similarly, if you are protecting resources behind user authentication, you may also need to configure [CSRF](../authentication/overview#csrf-protection) to allow cookies to be sent between the two domains. For example:
 
@@ -214,7 +214,7 @@ If you are using relationships or uploads in your front-end application, and you
 }
 ```
 
-### Relationships and/or uploads disappear after editing a document
+#### Relationships and/or uploads disappear after editing a document
 
 It is possible that either you are setting an improper [`depth`](../getting-started/concepts#depth) in your initial request and/or your `useLivePreview` hook, or they're mismatched. Ensure that the `depth` parameter is set to the correct value, and that it matches exactly in both places. For example:
 
