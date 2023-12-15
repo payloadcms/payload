@@ -15,9 +15,7 @@ const Dashboard: React.FC = () => {
   const [filteredGlobals, setFilteredGlobals] = useState<SanitizedGlobalConfig[]>([])
 
   const {
-    admin: {
-      components: { actions, views: { Dashboard: CustomDashboardComponent } = {} } = {},
-    } = {},
+    admin: { components: { views: { Dashboard: CustomDashboardComponent } = {} } = {} } = {},
     collections,
     globals,
   } = useConfig()
@@ -35,10 +33,8 @@ const Dashboard: React.FC = () => {
   }, [setStepNav])
 
   useEffect(() => {
-    if (actions) {
-      setViewActions([])
-    }
-  }, [actions, setViewActions])
+    setViewActions([])
+  }, [setViewActions])
 
   return (
     <RenderCustomComponent

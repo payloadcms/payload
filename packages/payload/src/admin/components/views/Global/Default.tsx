@@ -17,17 +17,6 @@ import './index.scss'
 
 const baseClass = 'global-edit'
 
-const hasDefaultActions = (
-  globalEditComponent: any,
-): globalEditComponent is { Default: { actions: React.ComponentType<any>[] } } => {
-  return (
-    typeof globalEditComponent === 'object' &&
-    globalEditComponent !== null &&
-    'Default' in globalEditComponent &&
-    'actions' in globalEditComponent.Default
-  )
-}
-
 export type DefaultGlobalViewProps = GlobalEditViewProps & {
   disableRoutes?: boolean
   fieldTypes: FieldTypes
@@ -56,12 +45,11 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
   const hasSavePermission = permissions?.update?.permission
 
   useEffect(() => {
-    if (hasDefaultActions(global.admin.components?.views?.Edit)) {
-      const defaultActions = global.admin.components.views.Edit.Default?.actions
-      if (defaultActions) {
-        setViewActions(defaultActions || [])
-      }
-    }
+    const editConfig = global.admin.components.views.Edit
+    const defaultActions =
+      'Default' in editConfig && 'actions' in editConfig.Default ? editConfig.Default.actions : []
+
+    setViewActions(defaultActions)
 
     return () => {
       setViewActions([])

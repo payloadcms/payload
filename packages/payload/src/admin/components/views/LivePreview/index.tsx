@@ -133,17 +133,6 @@ const PreviewView: React.FC<
   )
 }
 
-const hasLivePreviewActions = (
-  viewComponent: any,
-): viewComponent is { LivePreview: { actions: React.ComponentType<any>[] } } => {
-  return (
-    typeof viewComponent === 'object' &&
-    viewComponent !== null &&
-    'LivePreview' in viewComponent &&
-    'actions' in viewComponent.LivePreview
-  )
-}
-
 export const LivePreviewView: React.FC<
   EditViewProps & {
     fieldTypes: FieldTypes
@@ -197,15 +186,13 @@ export const LivePreviewView: React.FC<
   }, [data, documentInfo, locale, livePreviewConfig])
 
   useEffect(() => {
-    let livePreviewActions = []
+    const editConfig = (collection || global).admin.components.views.Edit
+    const livePreviewActions =
+      'LivePreview' in editConfig && 'actions' in editConfig.LivePreview
+        ? editConfig.LivePreview.actions
+        : []
 
-    if (collection && hasLivePreviewActions(collection.admin.components.views.Edit)) {
-      livePreviewActions = collection.admin.components.views.Edit.LivePreview.actions
-    } else if (global && hasLivePreviewActions(global.admin.components.views.Edit)) {
-      livePreviewActions = global.admin.components.views.Edit.LivePreview.actions
-    }
-
-    setViewActions(livePreviewActions || [])
+    setViewActions(livePreviewActions)
 
     return () => {
       setViewActions([])

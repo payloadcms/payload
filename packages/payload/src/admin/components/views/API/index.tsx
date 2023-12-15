@@ -171,17 +171,6 @@ function createURL(url: string) {
   }
 }
 
-const hasAPIActions = (
-  component: any,
-): component is { API: { actions: React.ComponentType<any>[] } } => {
-  return (
-    typeof component === 'object' &&
-    component !== null &&
-    'API' in component &&
-    'actions' in component.API
-  )
-}
-
 export const API: React.FC<EditViewProps> = (props) => {
   const { apiURL } = props
   const { i18n } = useTranslation()
@@ -225,15 +214,11 @@ export const API: React.FC<EditViewProps> = (props) => {
   }, [i18n.language, fetchURL, authenticated])
 
   React.useEffect(() => {
-    let apiActions = []
+    const editConfig = (collection || global).admin.components.views.Edit
+    const apiActions =
+      'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
 
-    if (collection && hasAPIActions(collection.admin.components.views.Edit)) {
-      apiActions = collection.admin.components.views.Edit.API.actions
-    } else if (global && hasAPIActions(global.admin.components.views.Edit)) {
-      apiActions = global.admin.components.views.Edit.API.actions
-    }
-
-    setViewActions(apiActions || [])
+    setViewActions(apiActions)
 
     return () => {
       setViewActions([])

@@ -216,13 +216,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }
 
   const listComponent = selectedCollectionConfig?.admin?.components?.views?.List
+  let ListToRender = null
 
-  const ListToRender =
-    listComponent && typeof listComponent === 'function'
-      ? listComponent
-      : typeof listComponent === 'object' && typeof listComponent.Component === 'function'
-        ? listComponent.Component
-        : null
+  if (listComponent && typeof listComponent === 'function') {
+    ListToRender = listComponent
+  } else if (typeof listComponent === 'object' && typeof listComponent.Component === 'function') {
+    ListToRender = listComponent.Component
+  }
 
   return (
     <TableColumnsProvider

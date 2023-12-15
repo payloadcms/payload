@@ -31,17 +31,6 @@ import { mostRecentVersionOption } from './shared'
 
 const baseClass = 'view-version'
 
-const hasVersionActions = (
-  viewComponent: any,
-): viewComponent is { Version: { actions: React.ComponentType<any>[] } } => {
-  return (
-    typeof viewComponent === 'object' &&
-    viewComponent !== null &&
-    'Version' in viewComponent &&
-    'actions' in viewComponent.Version
-  )
-}
-
 const VersionView: React.FC<Props> = ({ collection, global }) => {
   const {
     admin: { dateFormat },
@@ -188,15 +177,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n])
 
   useEffect(() => {
-    let versionActions = []
+    const editConfig = (collection || global).admin.components.views.Edit
+    const versionActions =
+      'Version' in editConfig && 'actions' in editConfig.Version ? editConfig.Version.actions : []
 
-    if (collection && hasVersionActions(collection.admin.components.views.Edit)) {
-      versionActions = collection.admin.components.views.Edit.Version.actions
-    } else if (global && hasVersionActions(global.admin.components.views.Edit)) {
-      versionActions = global.admin.components.views.Edit.Version.actions
-    }
-
-    setViewActions(versionActions || [])
+    setViewActions(versionActions)
 
     return () => {
       setViewActions([])

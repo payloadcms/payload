@@ -18,17 +18,6 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 
-const hasDefaultActions = (
-  editComponent: any,
-): editComponent is { Default: { actions: React.ComponentType<any>[] } } => {
-  return (
-    typeof editComponent === 'object' &&
-    editComponent !== null &&
-    'Default' in editComponent &&
-    'actions' in editComponent.Default
-  )
-}
-
 export type DefaultEditViewProps = CollectionEditViewProps & {
   customHeader?: React.ReactNode
   disableRoutes?: boolean
@@ -87,12 +76,11 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   const operation = isEditing ? 'update' : 'create'
 
   useEffect(() => {
-    if (hasDefaultActions(collection.admin.components?.views?.Edit)) {
-      const defaultActions = collection.admin.components.views.Edit.Default?.actions
-      if (defaultActions) {
-        setViewActions(defaultActions || [])
-      }
-    }
+    const editConfig = collection.admin.components.views.Edit
+    const defaultActions =
+      'Default' in editConfig && 'actions' in editConfig.Default ? editConfig.Default.actions : []
+
+    setViewActions(defaultActions)
 
     return () => {
       setViewActions([])

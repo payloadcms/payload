@@ -65,7 +65,7 @@ export const AppHeader: React.FC = () => {
                   actions.map((Component, i) => (
                     <div
                       className={
-                        isScrollable && i === actions.length - 1 && `${baseClass}__last-action`
+                        isScrollable && i === actions.length - 1 ? `${baseClass}__last-action` : ''
                       }
                       key={i}
                     >

@@ -219,12 +219,13 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     }
   }, [data, history, resetParams])
 
-  const ListToRender =
-    CustomList && typeof CustomList === 'function'
-      ? CustomList
-      : typeof CustomList === 'object' && typeof CustomList.Component === 'function'
-        ? CustomList.Component
-        : null
+  let ListToRender = null
+
+  if (CustomList && typeof CustomList === 'function') {
+    ListToRender = CustomList
+  } else if (typeof CustomList === 'object' && typeof CustomList.Component === 'function') {
+    ListToRender = CustomList.Component
+  }
 
   return (
     <TableColumnsProvider collection={collection}>
