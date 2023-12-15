@@ -193,10 +193,6 @@ export const LivePreviewView: React.FC<
         : []
 
     setViewActions(livePreviewActions)
-
-    return () => {
-      setViewActions([])
-    }
   }, [collection, global, setViewActions])
 
   const breakpoints: LivePreviewConfig['breakpoints'] = [

@@ -83,10 +83,6 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     if (CustomList && typeof CustomList === 'object' && 'actions' in CustomList) {
       setViewActions(CustomList.actions || [])
     }
-
-    return () => {
-      setViewActions([])
-    }
   }, [CustomList, setViewActions])
 
   useEffect(() => {

@@ -45,6 +45,12 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
   const hasSavePermission = permissions?.update?.permission
 
   useEffect(() => {
+    const path = location.pathname
+
+    if (!(path.endsWith(global.slug) || path.endsWith('/create'))) {
+      return
+    }
+
     const editConfig = global?.admin?.components?.views?.Edit
     const defaultActions =
       editConfig && 'Default' in editConfig && 'actions' in editConfig.Default
@@ -52,11 +58,7 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
         : []
 
     setViewActions(defaultActions)
-
-    return () => {
-      setViewActions([])
-    }
-  }, [global?.admin?.components?.views?.Edit, setViewActions])
+  }, [global.slug, location.pathname, global?.admin?.components?.views?.Edit, setViewActions])
 
   return (
     <main className={baseClass}>

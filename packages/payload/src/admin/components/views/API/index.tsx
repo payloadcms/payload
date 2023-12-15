@@ -219,10 +219,6 @@ export const API: React.FC<EditViewProps> = (props) => {
       editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
 
     setViewActions(apiActions)
-
-    return () => {
-      setViewActions([])
-    }
   }, [collection, global, setViewActions])
 
   const localeOptions =

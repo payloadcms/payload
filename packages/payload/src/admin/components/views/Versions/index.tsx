@@ -136,10 +136,6 @@ const VersionsView: React.FC<IndexProps> = (props) => {
         : []
 
     setViewActions(versionsActions)
-
-    return () => {
-      setViewActions([])
-    }
   }, [collection, global, setViewActions])
 
   return (

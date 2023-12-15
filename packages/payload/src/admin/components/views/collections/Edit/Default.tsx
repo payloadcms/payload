@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 
 import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
@@ -52,6 +53,8 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
+  const location = useLocation()
+
   const onSave = useCallback(
     async (json) => {
       reportUpdate({
@@ -76,6 +79,11 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   const operation = isEditing ? 'update' : 'create'
 
   useEffect(() => {
+    const path = location.pathname
+
+    if (!(path.endsWith(id) || path.endsWith('/create'))) {
+      return
+    }
     const editConfig = collection?.admin?.components?.views?.Edit
     const defaultActions =
       editConfig && 'Default' in editConfig && 'actions' in editConfig.Default
@@ -83,11 +91,7 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
         : []
 
     setViewActions(defaultActions)
-
-    return () => {
-      setViewActions([])
-    }
-  }, [collection?.admin?.components?.views?.Edit, setViewActions])
+  }, [id, location.pathname, collection?.admin?.components?.views?.Edit, setViewActions])
 
   return (
     <main className={classes}>
