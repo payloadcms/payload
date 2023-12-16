@@ -21,6 +21,10 @@ export const NestedToArrayAndBlock: CollectionConfig = {
                   type: 'text',
                   localized: true,
                 },
+                {
+                  name: 'textNotLocalized',
+                  type: 'text',
+                },
               ],
             },
           ],

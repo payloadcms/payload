@@ -819,6 +819,7 @@ describe('Localization', () => {
               array: [
                 {
                   text: 'english',
+                  textNotLocalized: 'test',
                 },
               ],
             },
@@ -826,7 +827,10 @@ describe('Localization', () => {
         },
       })
 
-      expect(x.blocks[0].array[0].text).toEqual('english')
+      const row = x.blocks[0].array[0].text
+
+      expect(row.text).toEqual('english')
+      expect(row.textNotLocalized).toEqual('test')
     })
   })
 })
