@@ -809,9 +809,9 @@ describe('Localization', () => {
 
   describe('Nested To Array And Block', () => {
     it('should be equal to the created document', async () => {
-      const x = await payload.create({
+      const { id, blocks } = await payload.create({
         collection: nestedToArrayAndBlockCollectionSlug,
-        locale: 'en',
+        locale: defaultLocale,
         data: {
           blocks: [
             {
@@ -827,10 +827,37 @@ describe('Localization', () => {
         },
       })
 
-      const row = x.blocks[0].array[0].text
+      await payload.update({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: spanishLocale,
+        id,
+        data: {
+          blocks: (blocks as { array: { text: string }[] }[]).map((block) => ({
+            ...block,
+            array: block.array.map((item) => ({ ...item, text: 'spanish' })),
+          })),
+        },
+      })
 
-      expect(row.text).toEqual('english')
-      expect(row.textNotLocalized).toEqual('test')
+      const docDefaultLocale = await payload.findByID({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: defaultLocale,
+        id,
+      })
+
+      const docSpanishLocale = await payload.findByID({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: spanishLocale,
+        id,
+      })
+
+      const rowDefault = docDefaultLocale.blocks[0].array[0]
+      const rowSpanish = docSpanishLocale.blocks[0].array[0]
+
+      expect(rowDefault.text).toEqual('english')
+      expect(rowDefault.textNotLocalized).toEqual('test')
+      expect(rowSpanish.text).toEqual('spanish')
+      expect(rowSpanish.textNotLocalized).toEqual('test')
     })
   })
 })
