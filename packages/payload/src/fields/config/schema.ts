@@ -209,6 +209,7 @@ export const select = baseField.keys({
       ),
     )
     .required(),
+  tableName: joi.string(),
   type: joi.string().valid('select').required(),
 })
 

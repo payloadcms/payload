@@ -431,6 +431,10 @@ export type SelectField = FieldBase & {
   enumName?: string
   hasMany?: boolean
   options: Option[]
+  /**
+   * Customize the SQL table name when using `hasMany: true`
+   */
+  tableName?: string
   type: 'select'
 }
 
