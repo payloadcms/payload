@@ -90,7 +90,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   const i18n = i18nInit(payload.config.i18n)
   const localizationConfig = payload?.config?.localization
   const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
-  const locale = localeArg || incomingReq.locale || defaultLocale
+  const locale = localeArg || incomingReq?.locale || defaultLocale
   const fallbackLocale = localizationConfig
     ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
     : null
