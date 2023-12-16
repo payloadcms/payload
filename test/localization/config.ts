@@ -58,6 +58,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'users',
       auth: true,
+      tableName: 'c_users',
       fields: [
         {
           name: 'relation',
@@ -69,6 +70,7 @@ export default buildConfigWithDefaults({
     {
       slug: localizedPostsSlug,
       access: openAccess,
+      tableName: 'c_localized_posts',
       admin: {
         useAsTitle: 'title',
       },
@@ -109,6 +111,7 @@ export default buildConfigWithDefaults({
     ArrayCollection,
     {
       slug: withRequiredLocalizedFields,
+      tableName: 'c_required_localized',
       fields: [
         {
           name: 'title',
@@ -121,9 +124,11 @@ export default buildConfigWithDefaults({
           type: 'blocks',
           required: true,
           localized: true,
+          tableName: 'c_blocks',
           blocks: [
             {
               slug: 'text',
+              tableName: 'c_text',
               fields: [
                 {
                   name: 'text',

@@ -1,12 +1,12 @@
 import type { UpdateOne } from 'payload/database'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { ChainedMethods } from './find/chainMethods'
-import { chainMethods } from './find/chainMethods'
 import type { PostgresAdapter } from './types'
+
+import { chainMethods } from './find/chainMethods'
 import buildQuery from './queries/buildQuery'
 import { upsertRow } from './upsertRow'
+import { getTableName } from './utilities/getTableName'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: PostgresAdapter,
@@ -14,7 +14,7 @@ export const updateOne: UpdateOne = async function updateOne(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = toSnakeCase(collectionSlug)
+  const tableName = getTableName(collection)
   const whereToUse = whereArg || { id: { equals: id } }
 
   const { joinAliases, joins, selectFields, where } = await buildQuery({
@@ -70,8 +70,8 @@ export const updateOne: UpdateOne = async function updateOne(
     db,
     fields: collection.fields,
     operation: 'update',
-    tableName: toSnakeCase(collectionSlug),
     req,
+    tableName,
   })
 
   return result

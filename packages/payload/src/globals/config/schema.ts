@@ -65,6 +65,7 @@ const globalSchema = joi
     }),
     label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
     slug: joi.string().required(),
+    tableName: joi.string(),
     typescript: joi.object().keys({
       interface: joi.string(),
     }),

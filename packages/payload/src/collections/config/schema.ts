@@ -153,6 +153,7 @@ const collectionSchema = joi.object().keys({
       .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
   }),
   slug: joi.string().required(),
+  tableName: joi.string(),
   timestamps: joi.boolean(),
   typescript: joi.object().keys({
     interface: joi.string(),

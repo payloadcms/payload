@@ -1,11 +1,10 @@
 import type { CreateGlobalArgs } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { PostgresAdapter } from './types'
 
 import { upsertRow } from './upsertRow'
+import { getTableName } from './utilities/getTableName'
 
 export async function createGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -20,8 +19,8 @@ export async function createGlobal<T extends TypeWithID>(
     db,
     fields: globalConfig.fields,
     operation: 'create',
-    tableName: toSnakeCase(slug),
     req,
+    tableName: getTableName(globalConfig),
   })
 
   return result

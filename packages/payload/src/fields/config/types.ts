@@ -427,6 +427,10 @@ export type SelectField = FieldBase & {
   }
   hasMany?: boolean
   options: Option[]
+  /**
+   * Customize the SQL table name
+   */
+  tableName?: string
   type: 'select'
 }
 
@@ -529,6 +533,10 @@ export type ArrayField = FieldBase & {
   labels?: Labels
   maxRows?: number
   minRows?: number
+  /**
+   * Customize the SQL table name
+   */
+  tableName?: string
   type: 'array'
 }
 
@@ -541,6 +549,10 @@ export type RadioField = FieldBase & {
     layout?: 'horizontal' | 'vertical'
   }
   options: Option[]
+  /**
+   * Customize the SQL table name
+   */
+  tableName?: string
   type: 'radio'
 }
 
@@ -561,6 +573,10 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
+  /**
+   * Customize the SQL table name
+   */
+  tableName?: string
 }
 
 export type BlockField = FieldBase & {
@@ -572,6 +588,10 @@ export type BlockField = FieldBase & {
   labels?: Labels
   maxRows?: number
   minRows?: number
+  /**
+   * Customize the SQL table name
+   */
+  tableName?: string
   type: 'blocks'
 }
 

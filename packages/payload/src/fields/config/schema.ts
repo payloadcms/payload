@@ -208,6 +208,7 @@ export const select = baseField.keys({
       ),
     )
     .required(),
+  tableName: joi.string(),
   type: joi.string().valid('select').required(),
 })
 
@@ -237,6 +238,7 @@ export const radio = baseField.keys({
       ),
     )
     .required(),
+  tableName: joi.string(),
   type: joi.string().valid('radio').required(),
 })
 
@@ -311,6 +313,7 @@ export const array = baseField.keys({
   }),
   maxRows: joi.number(),
   minRows: joi.number(),
+  tableName: joi.string(),
   type: joi.string().valid('array').required(),
 })
 
@@ -412,6 +415,7 @@ export const blocks = baseField.keys({
             .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
         }),
         slug: joi.string().required(),
+        tableName: joi.string(),
       }),
     )
     .required(),
@@ -426,6 +430,7 @@ export const blocks = baseField.keys({
   }),
   maxRows: joi.number(),
   minRows: joi.number(),
+  tableName: joi.string(),
   type: joi.string().valid('blocks').required(),
 })
 

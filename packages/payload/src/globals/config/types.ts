@@ -187,6 +187,10 @@ export type GlobalConfig = {
   label?: Record<string, string> | string
   slug: string
   /**
+   * Customize the SQL table name
+   */
+  tableName?: string
+  /**
    * Options used in typescript generation
    */
   typescript?: {

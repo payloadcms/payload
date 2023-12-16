@@ -2,12 +2,12 @@ import type { TypeWithVersion, UpdateVersionArgs } from 'payload/database'
 import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
 
 import { buildVersionCollectionFields } from 'payload/versions'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
 import buildQuery from './queries/buildQuery'
 import { upsertRow } from './upsertRow'
+import { getTableName } from './utilities/getTableName'
 
 export async function updateVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -23,7 +23,7 @@ export async function updateVersion<T extends TypeWithID>(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${toSnakeCase(collection)}_v`
+  const tableName = `_${getTableName(collectionConfig)}_v`
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { where } = await buildQuery({
@@ -41,9 +41,9 @@ export async function updateVersion<T extends TypeWithID>(
     db,
     fields,
     operation: 'update',
+    req,
     tableName,
     where,
-    req,
   })
 
   return result

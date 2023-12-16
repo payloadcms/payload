@@ -23,6 +23,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, PostgresAdapter } from '../types'
 
+import { getTableName } from '../utilities/getTableName'
 import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
 import { createIndex } from './createIndex'
@@ -187,7 +188,7 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = `enum_${newTableName}_${toSnakeCase(field.name)}`
+        const enumName = `enum_${newTableName}_${getTableName(field)}`
 
         adapter.enums[enumName] = pgEnum(
           enumName,
@@ -201,7 +202,7 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
-          const selectTableName = `${newTableName}_${toSnakeCase(field.name)}`
+          const selectTableName = `${newTableName}_${getTableName(field)}`
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
             parent: parentIDColumnMap[parentIDColType]('parent_id')
@@ -265,7 +266,7 @@ export const traverseFields = ({
       case 'array': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
+        const arrayTableName = `${newTableName}_${getTableName(field)}`
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
           _parentID: parentIDColumnMap[parentIDColType]('_parent_id')
@@ -336,7 +337,7 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {
-          const blockTableName = `${rootTableName}_blocks_${toSnakeCase(block.slug)}`
+          const blockTableName = `${rootTableName}_blocks_${getTableName(block)}`
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
               _order: integer('_order').notNull(),

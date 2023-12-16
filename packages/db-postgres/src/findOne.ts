@@ -1,13 +1,12 @@
 import type { FindOneArgs } from 'payload/database'
 import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { PostgresAdapter } from './types'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs'
 import buildQuery from './queries/buildQuery'
 import { transform } from './transform/read'
+import { getTableName } from './utilities/getTableName'
 
 export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -15,7 +14,7 @@ export async function findOne<T extends TypeWithID>(
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = toSnakeCase(collection)
+  const tableName = getTableName(collectionConfig)
 
   const { where } = await buildQuery({
     adapter: this,

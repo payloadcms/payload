@@ -3,11 +3,11 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
 import { upsertRow } from './upsertRow'
+import { getTableName } from './utilities/getTableName'
 
 export async function createVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -21,7 +21,7 @@ export async function createVersion<T extends TypeWithID>(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const collectionTableName = toSnakeCase(collectionSlug)
+  const collectionTableName = getTableName(collection)
   const tableName = `_${collectionTableName}_v`
 
   const result = await upsertRow<TypeWithVersion<T>>({
@@ -35,8 +35,8 @@ export async function createVersion<T extends TypeWithID>(
     db,
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
-    tableName,
     req,
+    tableName,
   })
 
   const table = this.tables[tableName]

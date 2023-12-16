@@ -7,6 +7,7 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../../types'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
+import { getTableName } from '../../utilities/getTableName'
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { transformArray } from './array'
 import { transformBlocks } from './blocks'
@@ -85,7 +86,7 @@ export const traverseFields = ({
     let fieldData: unknown
 
     if (fieldAffectsData(field)) {
-      columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
+      columnName = `${columnPrefix || ''}${getTableName(field)}`
       fieldName = `${fieldPrefix || ''}${field.name}`
       fieldData = data[field.name]
     }
@@ -142,8 +143,8 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks') {
-      field.blocks.forEach(({ slug }) => {
-        blocksToDelete.add(toSnakeCase(slug))
+      field.blocks.forEach((block) => {
+        blocksToDelete.add(getTableName(block))
       })
 
       if (field.localized) {

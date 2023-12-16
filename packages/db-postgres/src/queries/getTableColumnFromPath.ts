@@ -13,6 +13,8 @@ import { v4 as uuid } from 'uuid'
 import type { GenericColumn, GenericTable, PostgresAdapter } from '../types'
 import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
+import { getTableName } from '../utilities/getTableName'
+
 type Constraint = {
   columnName: string
   table: GenericTable
@@ -199,7 +201,7 @@ export const getTableColumnFromPath = ({
       }
 
       case 'array': {
-        newTableName = `${tableName}_${toSnakeCase(field.name)}`
+        newTableName = `${tableName}_${getTableName(field)}`
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
@@ -239,7 +241,7 @@ export const getTableColumnFromPath = ({
         let blockTableColumn: TableColumn
         let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
-          newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
+          newTableName = `${tableName}_blocks_${getTableName(block)}`
           constraintPath = `${constraintPath}${field.name}.%.`
           let result
           const blockConstraints = []
@@ -335,9 +337,10 @@ export const getTableColumnFromPath = ({
         let newAliasTable
 
         if (typeof field.relationTo === 'string') {
-          newTableName = `${toSnakeCase(field.relationTo)}`
+          const relationshipConfig = adapter.payload.collections[field.relationTo].config
+          newTableName = getTableName(relationshipConfig)
           // parent to relationship join table
-          relationshipFields = adapter.payload.collections[field.relationTo].config.fields
+          relationshipFields = relationshipConfig.fields
 
           newAliasTable = alias(adapter.tables[newTableName], toSnakeCase(uuid()))
 

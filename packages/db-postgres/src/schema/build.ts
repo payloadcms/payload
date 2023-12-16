@@ -15,10 +15,10 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
-import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, PostgresAdapter } from '../types'
 
+import { getTableName } from '../utilities/getTableName'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { traverseFields } from './traverseFields'
 
@@ -250,11 +250,12 @@ export const buildTable = ({
       }
 
       relationships.forEach((relationTo) => {
-        const formattedRelationTo = toSnakeCase(relationTo)
+        const relationshipConfig = adapter.payload.collections[relationTo].config
+        const formattedRelationTo = getTableName(relationshipConfig)
         let colType = 'integer'
-        const relatedCollectionCustomID = adapter.payload.collections[
-          relationTo
-        ].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+        const relatedCollectionCustomID = relationshipConfig.fields.find(
+          (field) => fieldAffectsData(field) && field.name === 'id',
+        )
         if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
         if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
 
@@ -291,7 +292,7 @@ export const buildTable = ({
         }
 
         relationships.forEach((relationTo) => {
-          const relatedTableName = toSnakeCase(relationTo)
+          const relatedTableName = getTableName(adapter.payload.collections[relationTo].config)
           const idColumnName = `${relationTo}ID`
           result[idColumnName] = one(adapter.tables[relatedTableName], {
             fields: [relationshipsTable[idColumnName]],

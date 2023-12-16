@@ -7,6 +7,8 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../types'
 import type { Result } from './buildFindManyArgs'
 
+import { getTableName } from '../utilities/getTableName'
+
 type TraverseFieldArgs = {
   _locales: Record<string, unknown>
   adapter: PostgresAdapter
@@ -78,7 +80,7 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`
+          const arrayTableName = `${currentTableName}_${getTableName(field)}`
 
           if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray
@@ -128,7 +130,7 @@ export const traverseFields = ({
                 with: {},
               }
 
-              if (adapter.tables[`${topLevelTableName}_blocks_${toSnakeCase(block.slug)}_locales`])
+              if (adapter.tables[`${topLevelTableName}_blocks_${getTableName(block)}_locales`])
                 withBlock.with._locales = _locales
               topLevelArgs.with[blockKey] = withBlock
 

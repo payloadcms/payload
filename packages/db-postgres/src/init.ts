@@ -4,11 +4,11 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { pgEnum } from 'drizzle-orm/pg-core'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
 import { buildTable } from './schema/build'
+import { getTableName } from './utilities/getTableName'
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
@@ -19,7 +19,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const tableName = toSnakeCase(collection.slug)
+    const tableName = getTableName(collection)
 
     buildTable({
       adapter: this,
@@ -50,7 +50,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
   })
 
   this.payload.config.globals.forEach((global) => {
-    const tableName = toSnakeCase(global.slug)
+    const tableName = getTableName(global)
 
     buildTable({
       adapter: this,

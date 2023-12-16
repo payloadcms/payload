@@ -6,6 +6,7 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from '../../types'
 import type { BlockRowToInsert, RelationshipToDelete } from './types'
 
+import { getTableName } from '../../utilities/getTableName'
 import { traverseFields } from './traverseFields'
 
 type Args = {
@@ -44,7 +45,7 @@ export const transformBlocks = ({
     if (typeof blockRow.blockType !== 'string') return
     const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
     if (!matchedBlock) return
-    const blockType = toSnakeCase(blockRow.blockType)
+    const blockType = getTableName(matchedBlock)
 
     if (!blocks[blockType]) blocks[blockType] = []
 

@@ -401,6 +401,10 @@ export type CollectionConfig = {
   }
   slug: string
   /**
+   * Customize the SQL table name
+   */
+  tableName?: string
+  /**
    * Add `createdAt` and `updatedAt` fields
    *
    * @default true
@@ -421,6 +425,7 @@ export type CollectionConfig = {
    * @default false // disable uploads
    */
   upload?: IncomingUploadType | boolean
+
   /**
    * Customize the handling of incoming file uploads
    *
