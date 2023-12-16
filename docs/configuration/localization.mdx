@@ -6,11 +6,13 @@ desc: Add and maintain as many locales as you need by adding Localization to you
 keywords: localization, internationalization, i18n, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Payload features deep field-based localization support. Maintaining as many locales as you need is easy. All localization support is opt-in by default. To do so, follow the two steps below.
+Payload features deep field-based localization support. Maintaining as many locales as you need is easy. All
+localization support is opt-in by default. To do so, follow the two steps below.
 
 ### Enabling in the Payload config
 
-Add the `localization` property to your Payload config to enable localization project-wide. You'll need to provide a list of all locales that you'd like to support as well as set a few other options.
+Add the `localization` property to your Payload config to enable localization project-wide. You'll need to provide a
+list of all locales that you'd like to support as well as set a few other options.
 
 **Example Payload config set up for localization:**
 
@@ -57,7 +59,8 @@ export default buildConfig({
 })
 ```
 
-**Example Payload config set up for localization with full locales objects (including [internationalization](/docs/configuration/i18n) support):**
+**Example Payload config set up for localization with full locales objects (
+including [internationalization](/docs/configuration/i18n) support):**
 
 ```ts
 import { buildConfig } from 'payload/config'
@@ -93,35 +96,48 @@ export default buildConfig({
 
 **`locales`**
 
-Array-based list of all locales that you would like to support. These can be strings of locale codes or objects with a `label`, a locale `code`, and the `rtl` (right-to-left) property. The locale codes do not need to be in any specific format. It's up to you to define how to represent your locales. Common patterns are to use two-letter ISO 639 language codes or four-letter language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
+Array-based list of all locales that you would like to support. These can be strings of locale codes or objects with
+a `label`, a locale `code`, `rtl` (right-to-left), and `fallbackLocale` property. The locale codes do not need to be in
+any specific format. It's up to you to define how to represent your locales. Common patterns are to use two-letter ISO
+639 language codes or four-letter language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
 
 **`defaultLocale`**
 
-Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale.
+Required string that matches one of the locale codes from the array provided. By default, if no locale is specified,
+documents will be returned in this locale.
 
 **`fallback`**
 
-Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated.
+Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a
+localized value corresponding to the requested locale, then if this property is enabled, the document will automatically
+fall back to the fallback locale value. If this property is not enabled, the value will not be populated.
 
 ### Field by field localization
 
-Payload localization works on a **field** level—not a document level. In addition to configuring the base Payload config to support localization, you need to specify each field that you would like to localize.
+Payload localization works on a **field** level—not a document level. In addition to configuring the base Payload config
+to support localization, you need to specify each field that you would like to localize.
 
 **Here is an example of how to enable localization for a field:**
 
 ```js
 {
   name: 'title',
-  type: 'text',
-  // highlight-start
-  localized: true,
+    type
+:
+  'text',
+    // highlight-start
+    localized
+:
+  true,
   // highlight-end
 }
 ```
 
-With the above configuration, the `title` field will now be saved in the database as an object of all locales instead of a single string.
+With the above configuration, the `title` field will now be saved in the database as an object of all locales instead of
+a single string.
 
-All field types with a `name` property support the `localized` property—even the more complex field types like `array`s and `block`s.
+All field types with a `name` property support the `localized` property—even the more complex field types like `array`s
+and `block`s.
 
 <Banner>
   <strong>Note:</strong>
@@ -143,7 +159,8 @@ All field types with a `name` property support the `localized` property—even t
 
 ### Retrieving localized docs
 
-When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be used.
+When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be
+used.
 
 ##### REST API
 
@@ -155,7 +172,8 @@ Specify your desired locale by providing the `locale` query parameter directly i
 
 **`?fallback-locale=`**
 
-Specify fallback locale to be used by providing the `fallback-locale` query parameter. This can be provided as either a valid locale as provided to your base Payload config, or `'null'`, `'false'`, or `'none'` to disable falling back.
+Specify fallback locale to be used by providing the `fallback-locale` query parameter. This can be provided as either a
+valid locale as provided to your base Payload config, or `'null'`, `'false'`, or `'none'` to disable falling back.
 
 **Example:**
 
@@ -167,7 +185,9 @@ fetch('https://localhost:3000/api/pages?locale=es&fallback-locale=none');
 
 In the GraphQL API, you can specify `locale` and `fallbackLocale` args to all relevant queries and mutations.
 
-The `locale` arg will only accept valid locales, but locales will be formatted automatically as valid GraphQL enum values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
+The `locale` arg will only accept valid locales, but locales will be formatted automatically as valid GraphQL enum
+values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious
+to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
 
 The `fallbackLocale` arg will accept valid locales as well as `none` to disable falling back.
 
@@ -191,7 +211,9 @@ query {
 
 ##### Local API
 
-You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options` argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid locale as well as `'null'`, `'false'`, `false`, and `'none'`.
+You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options`
+argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid
+locale as well as `'null'`, `'false'`, `false`, and `'none'`.
 
 **Example:**
 

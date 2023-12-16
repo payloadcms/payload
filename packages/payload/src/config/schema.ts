@@ -138,6 +138,7 @@ export default joi.object({
         joi.array().items(
           joi.object().keys({
             code: joi.string(),
+            fallbackLocale: joi.string(),
             label: joi
               .alternatives()
               .try(

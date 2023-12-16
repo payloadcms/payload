@@ -74,10 +74,10 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     data,
     depth,
     draft,
-    fallbackLocale,
+    fallbackLocale: fallbackLocaleArg,
     file,
     filePath,
-    locale = null,
+    locale: localeArg = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
     req: incomingReq,
@@ -88,8 +88,11 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
 
   const collection = payload.collections[collectionSlug]
   const i18n = i18nInit(payload.config.i18n)
-  const defaultLocale = payload.config.localization
-    ? payload.config.localization?.defaultLocale
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
+  const locale = localeArg || incomingReq.locale || defaultLocale
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
     : null
 
   if (!collection) {
@@ -99,7 +102,10 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   const req = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     files: {
       file: file ?? (await getFileByPath(filePath)),
     },
