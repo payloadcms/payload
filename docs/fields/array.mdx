@@ -45,6 +45,7 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 | **`admin`**         | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                                                                                          |
 | **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
 | **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                |
+| **`tableName`**     | Custom table name for the field when using SQL database adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.
 
 _\* An asterisk denotes that a property is required._
 

@@ -26,6 +26,7 @@ As with Collection configs, it's often best practice to write your Globals in se
 | **`graphQL.name`** | Text used in schema generation. Auto-generated from slug if not defined.                                                                                                                                             |
 | **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
+| **`tableName`**    | Custom table name for this global when using SQL database adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.
 
 _\* An asterisk denotes that a property is required._
 
