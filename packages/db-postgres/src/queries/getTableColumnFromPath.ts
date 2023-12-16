@@ -359,7 +359,10 @@ export const getTableColumnFromPath = ({
           }
         } else if (newCollectionPath === 'value') {
           const tableColumnsNames = field.relationTo.map(
-            (relationTo) => `"${aliasRelationshipTableName}"."${toSnakeCase(relationTo)}_id"`,
+            (relationTo) =>
+              `"${aliasRelationshipTableName}"."${getTableName(
+                adapter.payload.collections[relationTo].config,
+              )}_id"`,
           )
           return {
             constraints,

@@ -1,8 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { BlockField } from 'payload/types'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { PostgresAdapter } from '../../types'
 import type { BlockRowToInsert, RelationshipToDelete } from './types'
 
