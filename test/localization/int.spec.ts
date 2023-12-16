@@ -16,6 +16,7 @@ import { defaultLocale } from './shared'
 import {
   englishTitle,
   localizedPostsSlug,
+  portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationSpanishTitle,
@@ -149,7 +150,6 @@ describe('Localization', () => {
 
       beforeAll(async () => {
         englishData = {
-          description: 'english description',
           localizedCheckbox: false,
         }
         spanishData = {
@@ -169,17 +169,23 @@ describe('Localization', () => {
           data: spanishData,
           locale: spanishLocale,
         })
+        await payload.update({
+          id: localizedDoc.id,
+          collection: localizedPostsSlug,
+          data: { localizedCheckbox: true },
+          locale: portugueseLocale,
+        })
       })
 
       it('should return localized fields using fallbackLocale specified in the requested locale config', async () => {
-        const englishDoc = await payload.findByID({
+        const portugueseDoc = await payload.findByID({
           id: localizedDoc.id,
           collection: localizedPostsSlug,
-          locale: englishLocale,
+          locale: portugueseLocale,
         })
 
-        expect(englishDoc.title).toStrictEqual(spanishData.title)
-        expect(englishDoc.localizedCheckbox).toStrictEqual(englishData.localizedCheckbox)
+        expect(portugueseDoc.title).toStrictEqual(spanishData.title)
+        expect(portugueseDoc.localizedCheckbox).toStrictEqual(true)
       })
     })
 

@@ -8,6 +8,7 @@ import {
   defaultLocale,
   englishTitle,
   localizedPostsSlug,
+  portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationSpanishTitle,
@@ -237,7 +238,6 @@ export default buildConfigWithDefaults({
     locales: [
       {
         code: defaultLocale,
-        fallbackLocale: spanishLocale,
         label: 'English',
         rtl: false,
       },
@@ -245,6 +245,11 @@ export default buildConfigWithDefaults({
         code: spanishLocale,
         label: 'Spanish',
         rtl: false,
+      },
+      {
+        code: portugueseLocale,
+        fallbackLocale: spanishLocale,
+        label: 'Portuguese',
       },
       {
         code: 'ar',
