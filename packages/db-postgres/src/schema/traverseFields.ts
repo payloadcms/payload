@@ -188,7 +188,7 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = `enum_${newTableName}_${getTableName({ ...field, prefer: 'enumName' })}`
+        const enumName = `enum_${newTableName}_${getTableName(field, { prefer: 'enumName' })}`
 
         adapter.enums[enumName] = pgEnum(
           enumName,
@@ -202,10 +202,7 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
-          const selectTableName = `${newTableName}_${getTableName({
-            ...field,
-            prefer: 'tableName',
-          })}`
+          const selectTableName = `${newTableName}_${getTableName(field, { prefer: 'tableName' })}`
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
             parent: parentIDColumnMap[parentIDColType]('parent_id')
