@@ -9,9 +9,10 @@ import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
+import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
 import configPromise from './config'
+import { defaultLocale } from './shared'
 import {
-  defaultLocale,
   englishTitle,
   localizedPostsSlug,
   relationEnglishTitle,
@@ -803,6 +804,29 @@ describe('Localization', () => {
       })
 
       expect(nestedFieldRes.docs.map(({ id }) => id)).toContain(post1.id)
+    })
+  })
+
+  describe('Nested To Array And Block', () => {
+    it('should be equal to the created document', async () => {
+      const x = await payload.create({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: 'en',
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              array: [
+                {
+                  text: 'english',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      expect(x.blocks[0].array[0].text).toEqual('english')
     })
   })
 })

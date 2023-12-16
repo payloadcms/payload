@@ -305,6 +305,7 @@ export const upsertRow = async <T extends TypeWithID>({
   findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
   const doc = await db.query[tableName].findFirst(findManyArgs)
+  console.log(JSON.stringify(doc))
 
   // //////////////////////////////////
   // TRANSFORM DATA
