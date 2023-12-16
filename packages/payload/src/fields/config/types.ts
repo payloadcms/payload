@@ -425,12 +425,12 @@ export type SelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
   }
+  /**
+   * Customize the SQL enum name
+   */
+  enumName?: string
   hasMany?: boolean
   options: Option[]
-  /**
-   * Customize the SQL table name
-   */
-  tableName?: string
   type: 'select'
 }
 
@@ -548,11 +548,11 @@ export type RadioField = FieldBase & {
     }
     layout?: 'horizontal' | 'vertical'
   }
-  options: Option[]
   /**
-   * Customize the SQL table name
+   * Customize the SQL enum name
    */
-  tableName?: string
+  enumName?: string
+  options: Option[]
   type: 'radio'
 }
 
