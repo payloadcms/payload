@@ -49,10 +49,10 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     depth,
     disableVerificationEmail,
     draft,
-    fallbackLocale,
+    fallbackLocale: fallbackLocaleArg,
     file,
     filePath,
-    locale = null,
+    locale: localeArg = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
     req = {} as PayloadRequest,
@@ -62,8 +62,11 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
+  const locale = localeArg || req.locale || defaultLocale
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
     : null
 
   if (!collection) {
@@ -73,8 +76,9 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   }
 
   req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale
+  req.locale = locale
+  req.fallbackLocale =
+    typeof fallbackLocaleArg !== 'undefined' ? fallbackLocaleArg : fallbackLocale || defaultLocale
   req.payload = payload
   req.i18n = i18nInit(payload.config.i18n)
   req.files = {

@@ -31,8 +31,12 @@ export default function localizationMiddleware(localization: SanitizedLocalizati
         req.locale = requestedLocale
       }
 
+      const fallbackLocale =
+        localization.locales.find(({ code }) => req.locale === code)?.fallbackLocale ||
+        localization.defaultLocale
+
       if (validFallbackLocales.find((locale) => locale === requestedFallbackLocale)) {
-        req.fallbackLocale = requestedFallbackLocale
+        req.fallbackLocale = requestedFallbackLocale || fallbackLocale
       }
     }
 
