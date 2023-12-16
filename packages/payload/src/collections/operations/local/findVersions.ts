@@ -54,7 +54,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   const collection = payload.collections[collectionSlug]
   const localizationConfig = payload?.config?.localization
   const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
-  const locale = localeArg || incomingReq.locale || defaultLocale
+  const locale = localeArg || incomingReq?.locale || defaultLocale
   const fallbackLocale = localizationConfig
     ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
     : null
