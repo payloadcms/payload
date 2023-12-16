@@ -588,10 +588,6 @@ export type BlockField = FieldBase & {
   labels?: Labels
   maxRows?: number
   minRows?: number
-  /**
-   * Customize the SQL table name
-   */
-  tableName?: string
   type: 'blocks'
 }
 
