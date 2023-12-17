@@ -160,7 +160,7 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
-export type GlobalConfig = {
+export type BaseGlobalConfig = {
   access?: {
     read?: Access
     readDrafts?: Access
@@ -187,10 +187,6 @@ export type GlobalConfig = {
   label?: Record<string, string> | string
   slug: string
   /**
-   * Customize the SQL table name
-   */
-  tableName?: string
-  /**
    * Options used in typescript generation
    */
   typescript?: {
@@ -201,6 +197,8 @@ export type GlobalConfig = {
   }
   versions?: IncomingGlobalVersions | boolean
 }
+
+export type GlobalConfig = BaseGlobalConfig
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'versions'> {

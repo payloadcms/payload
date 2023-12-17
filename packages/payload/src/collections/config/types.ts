@@ -327,8 +327,7 @@ export type CollectionAdminOptions = {
   useAsTitle?: string
 }
 
-/** Manage all aspects of a data collection */
-export type CollectionConfig = {
+export type BaseCollectionConfig = {
   /**
    * Access control
    */
@@ -401,10 +400,6 @@ export type CollectionConfig = {
   }
   slug: string
   /**
-   * Customize the SQL table name
-   */
-  tableName?: string
-  /**
    * Add `createdAt` and `updatedAt` fields
    *
    * @default true
@@ -433,6 +428,9 @@ export type CollectionConfig = {
    */
   versions?: IncomingCollectionVersions | boolean
 }
+
+/** Manage all aspects of a data collection */
+export type CollectionConfig = BaseCollectionConfig
 
 export interface SanitizedCollectionConfig
   extends Omit<

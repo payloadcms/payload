@@ -9,6 +9,14 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type { PgColumn, PgEnum, PgTableWithColumns, PgTransaction } from 'drizzle-orm/pg-core'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
+import type { BaseCollectionConfig } from 'payload/dist/collections/config/types'
+import type {
+  BaseArrayField,
+  BaseBlock,
+  BaseRadioField,
+  BaseSelectField,
+} from 'payload/dist/fields/config/types'
+import type { BaseGlobalConfig } from 'payload/dist/globals/config/types'
 import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
@@ -48,6 +56,11 @@ export type DrizzleTransaction = PgTransaction<
 export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
+  /**
+   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
+   * Used for returning properly formed errors from unique fields
+   */
+  fieldConstraints: Record<string, Record<string, string>>
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -61,11 +74,6 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
     }
   }
   tables: Record<string, GenericTable>
-  /**
-   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
-   * Used for returning properly formed errors from unique fields
-   */
-  fieldConstraints: Record<string, Record<string, string>>
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
@@ -79,6 +87,7 @@ declare module 'payload' {
       BaseDatabaseAdapter {
     drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
+    fieldConstraints: Record<string, Record<string, string>>
     pool: Pool
     push: boolean
     relations: Record<string, GenericRelation>
@@ -91,6 +100,53 @@ declare module 'payload' {
       }
     }
     tables: Record<string, GenericTable>
-    fieldConstraints: Record<string, Record<string, string>>
+  }
+}
+
+declare module 'payload/types' {
+  export interface CollectionConfig extends BaseCollectionConfig {
+    /**
+     * Customize the SQL table name
+     */
+    tableName?: string
+  }
+
+  export interface GlobalConfig extends BaseGlobalConfig {
+    /**
+     * Customize the SQL table name
+     */
+    tableName?: string
+  }
+
+  export interface ArrayField extends BaseArrayField {
+    /**
+     * Customize the SQL table name
+     */
+    tableName?: string
+  }
+
+  export interface RadioField extends BaseRadioField {
+    /**
+     * Customize the SQL enum name
+     */
+    enumName?: string
+  }
+
+  export interface Block extends BaseBlock {
+    /**
+     * Customize the SQL table name
+     */
+    tableName?: string
+  }
+
+  export interface SelectField extends BaseSelectField {
+    /**
+     * Customize the SQL enum name
+     */
+    enumName?: string
+    /**
+     * Customize the SQL table name when using `hasMany: true`
+     */
+    tableName?: string
   }
 }

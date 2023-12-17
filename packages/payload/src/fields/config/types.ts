@@ -416,7 +416,7 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
   type: 'json'
 }
 
-export type SelectField = FieldBase & {
+export type BaseSelectField = FieldBase & {
   admin?: Admin & {
     components?: {
       Error?: React.ComponentType<ErrorProps>
@@ -425,18 +425,12 @@ export type SelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
   }
-  /**
-   * Customize the SQL enum name
-   */
-  enumName?: string
   hasMany?: boolean
   options: Option[]
-  /**
-   * Customize the SQL table name when using `hasMany: true`
-   */
-  tableName?: string
   type: 'select'
 }
+
+export type SelectField = BaseSelectField
 
 type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
@@ -519,7 +513,7 @@ export type RichTextField<
   type: 'richText'
 } & ExtraProperties
 
-export type ArrayField = FieldBase & {
+export type BaseArrayField = FieldBase & {
   admin?: Admin & {
     components?: {
       RowLabel?: RowLabel
@@ -537,14 +531,12 @@ export type ArrayField = FieldBase & {
   labels?: Labels
   maxRows?: number
   minRows?: number
-  /**
-   * Customize the SQL table name
-   */
-  tableName?: string
   type: 'array'
 }
 
-export type RadioField = FieldBase & {
+export type ArrayField = BaseArrayField
+
+export type BaseRadioField = FieldBase & {
   admin?: Admin & {
     components?: {
       Error?: React.ComponentType<ErrorProps>
@@ -552,12 +544,29 @@ export type RadioField = FieldBase & {
     }
     layout?: 'horizontal' | 'vertical'
   }
-  /**
-   * Customize the SQL enum name
-   */
-  enumName?: string
   options: Option[]
   type: 'radio'
+}
+
+export type RadioField = BaseRadioField
+
+export type BaseBlock = {
+  fields: Field[]
+  /** @deprecated - please migrate to the interfaceName property instead. */
+  graphQL?: {
+    singularName?: string
+  }
+  imageAltText?: string
+  imageURL?: string
+  /** Customize generated GraphQL and Typescript schema names.
+   * The slug is used by default.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
+  labels?: Labels
+  slug: string
 }
 
 export type Block = {
@@ -577,10 +586,6 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
-  /**
-   * Customize the SQL table name
-   */
-  tableName?: string
 }
 
 export type BlockField = FieldBase & {
