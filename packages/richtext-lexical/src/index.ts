@@ -1,3 +1,4 @@
+import type { JSONSchema4 } from 'json-schema'
 import type { SerializedEditorState } from 'lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 import type { RichTextAdapter } from 'payload/types'
@@ -98,8 +99,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       })
     },
     editorConfig: finalSanitizedEditorConfig,
-    outputSchema: ({ isRequired }) => {
-      return {
+    outputSchema: ({ field, interfaceNameDefinitions, isRequired }) => {
+      let outputSchema: JSONSchema4 = {
         // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
         // In the future, we should
         // 1) allow recursive children
@@ -155,6 +156,17 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         required: ['root'],
         type: withNullableJSONSchemaType('object', isRequired),
       }
+      for (const modifyOutputSchema of finalSanitizedEditorConfig.features.generatedTypes
+        .modifyOutputSchemas) {
+        outputSchema = modifyOutputSchema({
+          currentSchema: outputSchema,
+          field,
+          interfaceNameDefinitions,
+          isRequired,
+        })
+      }
+
+      return outputSchema
     },
     populationPromise({
       context,

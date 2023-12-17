@@ -78,9 +78,12 @@ export function withNullableJSONSchemaType(
   return fieldTypes
 }
 
-function fieldsToJSONSchema(
+export function fieldsToJSONSchema(
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
   fields: Field[],
+  /**
+   * Allows you to define new top-level interfaces that can be re-used in the output schema.
+   */
   interfaceNameDefinitions: Map<string, JSONSchema4>,
 ): {
   properties: {
@@ -135,6 +138,7 @@ function fieldsToJSONSchema(
             if (field.editor.outputSchema) {
               fieldSchema = field.editor.outputSchema({
                 field,
+                interfaceNameDefinitions,
                 isRequired,
               })
             } else {
@@ -515,8 +519,11 @@ export function configToJSONSchema(
   config: SanitizedConfig,
   defaultIDType?: 'number' | 'text',
 ): JSONSchema4 {
-  // a mutable Map to store custom top-level `interfaceName` types
+  // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
+
+  // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
+  // types to be inlined inside the `Config` type
   const entityDefinitions: { [k: string]: JSONSchema4 } = [
     ...config.globals,
     ...config.collections,
@@ -528,6 +535,7 @@ export function configToJSONSchema(
   return {
     additionalProperties: false,
     definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
+    // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     properties: {
       collections: generateEntitySchemas(config.collections || []),
       globals: generateEntitySchemas(config.globals || []),
