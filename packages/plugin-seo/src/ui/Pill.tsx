@@ -6,20 +6,20 @@ export const Pill: React.FC<{
   backgroundColor: string
   color: string
   label: string
-}> = props => {
+}> = (props) => {
   const { backgroundColor, color, label } = props
 
   return (
     <div
       style={{
-        padding: '4px 6px',
         backgroundColor,
-        color,
         borderRadius: '2px',
-        marginRight: '10px',
-        whiteSpace: 'nowrap',
+        color,
         flexShrink: 0,
         lineHeight: 1,
+        marginRight: '10px',
+        padding: '4px 6px',
+        whiteSpace: 'nowrap',
       }}
     >
       <small>{label}</small>

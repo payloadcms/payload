@@ -5,15 +5,15 @@ import React, { Fragment, useEffect, useState } from 'react'
 import { Pill } from './Pill'
 
 export const LengthIndicator: React.FC<{
-  text?: string
-  minLength?: number
   maxLength?: number
-}> = props => {
-  const { text, minLength = 0, maxLength = 0 } = props
+  minLength?: number
+  text?: string
+}> = (props) => {
+  const { maxLength = 0, minLength = 0, text } = props
 
   const [labelStyle, setLabelStyle] = useState({
-    color: '',
     backgroundColor: '',
+    color: '',
   })
 
   const [label, setLabel] = useState('')
@@ -80,18 +80,18 @@ export const LengthIndicator: React.FC<{
   return (
     <div
       style={{
-        width: '100%',
-        display: 'flex',
         alignItems: 'center',
+        display: 'flex',
+        width: '100%',
       }}
     >
-      <Pill label={label} color={labelStyle.color} backgroundColor={labelStyle.backgroundColor} />
+      <Pill backgroundColor={labelStyle.backgroundColor} color={labelStyle.color} label={label} />
       <div
         style={{
-          marginRight: '10px',
-          whiteSpace: 'nowrap',
           flexShrink: 0,
           lineHeight: 1,
+          marginRight: '10px',
+          whiteSpace: 'nowrap',
         }}
       >
         <small>
@@ -107,20 +107,20 @@ export const LengthIndicator: React.FC<{
       </div>
       <div
         style={{
-          height: '2px',
-          width: '100%',
           backgroundColor: '#F3F3F3',
+          height: '2px',
           position: 'relative',
+          width: '100%',
         }}
       >
         <div
           style={{
-            height: '100%',
-            width: `${barWidth * 100}%`,
             backgroundColor: labelStyle.backgroundColor,
-            position: 'absolute',
+            height: '100%',
             left: 0,
+            position: 'absolute',
             top: 0,
+            width: `${barWidth * 100}%`,
           }}
         />
       </div>
