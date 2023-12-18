@@ -38,6 +38,7 @@
     { "path": "./packages/richtext-lexical" },
     { "path": "./packages/payload" },
     { "path": "./packages/live-preview" },
-    { "path": "./packages/live-preview-react" }
+    { "path": "./packages/live-preview-react" },
+    { "path": "./packages/plugin-seo" }
   ]
 }

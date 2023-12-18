@@ -1,10 +1,12 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import { useAllFormFields, useField } from 'payload/components/forms'
+// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
+// import TextInput from 'payload/dist/admin/components/forms/field-types/Text/Input'
+import { TextInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
-import TextInputField from 'payload/dist/admin/components/forms/field-types/Text/Input'
-import { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types'
+import { TextField as TextFieldType } from 'payload/types'
+
 import { FieldType as FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 
 import { defaults } from '../defaults'
@@ -41,7 +43,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = props => {
       generatedTitle = await generateTitle({
         ...docInfo,
         doc: { ...fields },
-        locale,
+        locale: typeof locale === 'object' ? locale?.code : locale,
       })
     }
 
@@ -105,7 +107,7 @@ export const MetaTitle: React.FC<TextFieldWithProps | {}> = props => {
           marginBottom: '10px',
         }}
       >
-        <TextInputField
+        <TextInput
           path={name}
           name={name}
           onChange={setValue}

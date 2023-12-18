@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useAllFormFields } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
-import { Field } from 'payload/dist/admin/components/forms/Form/types'
+import type { Field } from 'payload/types'
 
 import { PluginConfig } from '../types'
 
