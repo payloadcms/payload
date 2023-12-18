@@ -74,7 +74,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     data,
     depth,
     draft,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     file,
     filePath,
     locale: localeArg = null,

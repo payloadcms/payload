@@ -35,7 +35,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     locale: localeArg = null,
     overrideAccess = true,
     req: incomingReq,

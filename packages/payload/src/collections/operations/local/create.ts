@@ -49,7 +49,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     depth,
     disableVerificationEmail,
     draft,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     file,
     filePath,
     locale: localeArg = null,
