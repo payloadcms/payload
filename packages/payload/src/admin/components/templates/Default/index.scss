@@ -2,17 +2,18 @@
 
 .template-default {
   min-height: 100vh;
-  display: flex;
+  display: grid;
   position: relative;
-  width: calc(100% + var(--nav-width));
-  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+  grid-template-columns: 0 auto;
+  transition: grid-template-columns var(--nav-trans-time) linear;
+  isolation: isolate;
+  @media (prefers-reduced-motion) {
+    transition: none;
+  }
 
   &--nav-open {
     width: 100%;
-    transition:
-      width var(--nav-trans-time) linear,
-      transform var(--nav-trans-time) linear;
-    transform: translate3d(0, 0, 0);
+    grid-template-columns: var(--nav-width) auto;
 
     .template-default {
       &__nav-overlay {
@@ -21,7 +22,7 @@
     }
   }
 
-  &__nav-toggler {
+  &__nav-toggler-wrapper {
     position: fixed;
     z-index: var(--z-modal);
     top: 0;
@@ -38,114 +39,50 @@
     width: 100%;
     flex-grow: 1;
     position: relative;
-  }
-
-  &__nav-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    background: var(--theme-overlay);
-    padding: 0;
-    border: 0;
-    z-index: var(--z-modal);
-    cursor: pointer;
-    pointer-events: none;
-    display: none;
-  }
-
-  // on large break, push the document off the screen
-  // show an overlay to prevent clicking on the document
-  @include large-break {
-    width: calc(100% + var(--nav-width));
-    transform: translate3d(0, 0, 0);
-
-    &__wrap {
-      transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
-    }
-
-    &__nav-overlay {
+    background-color: var(--theme-bg);
+    &:before {
+      content: '';
       display: block;
-    }
-
-    &--nav-open {
-      transform: translate3d(0, 0, 0);
-
-      .template-default {
-        &__wrap {
-          pointer-events: none;
-          transform: translate3d(0, 0, 0);
-          transition: transform var(--nav-trans-time) linear;
-        }
-
-        &__nav-overlay {
-          opacity: 1;
-          pointer-events: auto;
-        }
-      }
-    }
-
-    &__nav-toggler {
-      .hamburger {
-        left: calc(var(--base) * 1.25);
-      }
+      position: absolute;
+      inset: 0;
+      background-color: inherit;
+      opacity: 0;
+      z-index: var(--z-status);
+      visibility: hidden;
+      transition: all var(--nav-trans-time) linear;
     }
   }
 
   @include mid-break {
-    &__nav-toggler {
+    &__nav-toggler-wrapper {
       .hamburger {
-        left: calc(var(--base) * 0.75);
+        left: unset;
       }
     }
   }
 
   @include small-break {
-    &__nav-toggler {
-      .hamburger {
-        left: calc(var(--base) * 0.5);
-      }
-      &.nav-toggler--is-open .hamburger {
-        display: flex;
-        display: inline;
+    &--nav-open {
+      .template-default__wrap {
+        &:before {
+          opacity: 0.7;
+          visibility: visible;
+        }
       }
     }
-  }
 
-  @include small-break {
-    &__nav-toggler {
+    &__nav-toggler-wrapper {
       width: unset;
       justify-content: unset;
 
       .hamburger {
-        opacity: none;
+        display: none;
       }
-    }
-
-    &__nav-toggler.nav-toggler--is-open .hamburger {
-      display: flex;
-      display: inline;
-    }
-  }
-
-  @include extra-small-break {
-    &--nav-open {
-      transition: none;
-    }
-
-    &__nav-toggler.nav-toggler--is-open .hamburger {
-      display: none;
     }
 
     .template-default {
       &__wrap {
-        transition: none;
-      }
-
-      &__nav-overlay {
-        transition: none;
+        min-width: 100vw;
       }
     }
   }

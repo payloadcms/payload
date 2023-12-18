@@ -60,6 +60,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     where,
   })
 
+  // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
+  const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
   const paginationOptions: PaginateOptions = {
     forceCountFn: hasNearConstraint,
     lean: true,
@@ -69,7 +71,18 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     page,
     pagination,
     sort,
-    useEstimatedCount: hasNearConstraint,
+    useEstimatedCount,
+  }
+
+  if (!useEstimatedCount && this.disableIndexHints !== true) {
+    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding a hint.
+    paginationOptions.useCustomCountFn = () => {
+      return Promise.resolve(
+        Model.countDocuments(query, {
+          hint: { _id: 1 },
+        }),
+      )
+    }
   }
 
   if (limit > 0) {

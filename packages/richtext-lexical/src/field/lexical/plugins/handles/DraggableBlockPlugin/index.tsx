@@ -1,10 +1,4 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+'use client'
 import type { LexicalEditor } from 'lexical'
 import type { DragEvent as ReactDragEvent } from 'react'
 
@@ -62,6 +56,7 @@ function hideTargetLine(
   }
   if (lastTargetBlockElem) {
     lastTargetBlockElem.style.opacity = '1'
+    lastTargetBlockElem.style.transform = 'translate(0, 0)'
     //lastTargetBlockElem.style.border = 'none'
   }
 }

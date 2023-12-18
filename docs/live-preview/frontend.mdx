@@ -10,13 +10,14 @@ While using Live Preview, the Admin panel emits a new `window.postMessage` event
 
 Wiring your front-end into Live Preview is easy. If your front-end application is built with React or Next.js, use the [`useLivePreview`](#react) React hook that Payload provides. In the future, all other major frameworks like Vue, Svelte, etc will be officially supported. If you are using any of these frameworks today, you can still integrate with Live Preview yourself using the underlying tooling that Payload provides. See [building your own hook](#building-your-own-hook) for more information.
 
-By default, all hooks require the following args:
+By default, all hooks accept the following args:
 
 | Path                  | Description                                                                                                                                                                                 |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`serverURL`** \*    | The URL of your Payload server.                                                                                                                                                             |
 | **`initialData`**     | The initial data of the document. The live data will be merged in as changes are made.                                                                                                      |
 | **`depth`**           | The depth of the relationships to fetch. Defaults to `0`.                                                                                                                                   |
+| **`apiRoute`**        | The path of your API route as defined in `routes.api`. Defaults to `/api`.                                                                                                                              |
 
 _\* An asterisk denotes that a property is required._
 
@@ -186,3 +187,55 @@ For a working demonstration of this, check out the official [Live Preview Exampl
 - [Next.js App Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-app)
 - [Next.js Pages Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-pages)
 
+## Troubleshooting
+
+#### Relationships and/or uploads are not populating
+
+If you are using relationships or uploads in your front-end application, and your front-end application runs on a different domain than your Payload server, you may need to configure [CORS](../configuration/overview) to allow requests to be made between the two domains. This includes sites that are running on a different port or subdomain. Similarly, if you are protecting resources behind user authentication, you may also need to configure [CSRF](../authentication/overview#csrf-protection) to allow cookies to be sent between the two domains. For example:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  // If your site is running on a different domain than your Payload server,
+  // This will allows requests to be made between the two domains
+  cors: {
+    [
+      'http://localhost:3001' // Your front-end application
+    ],
+  },
+  // If you are protecting resources behind user authentication,
+  // This will allow cookies to be sent between the two domains
+  csrf: {
+    [
+      'http://localhost:3001' // Your front-end application
+    ],
+  },
+}
+```
+
+#### Relationships and/or uploads disappear after editing a document
+
+It is possible that either you are setting an improper [`depth`](../getting-started/concepts#depth) in your initial request and/or your `useLivePreview` hook, or they're mismatched. Ensure that the `depth` parameter is set to the correct value, and that it matches exactly in both places. For example:
+
+```tsx
+// Your initial request
+const { docs } = await payload.find({
+  collection: 'pages',
+  depth: 1, // Ensure this is set to the proper depth for your application
+  where: {
+    slug: {
+      equals: 'home',
+    }
+  }
+})
+```
+
+```tsx
+// Your hook
+const { data } = useLivePreview<PageType>({
+  initialData: initialPage,
+  serverURL: PAYLOAD_SERVER_URL,
+  depth: 1, // Ensure this matches the depth of your initial request
+})
+```

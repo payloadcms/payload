@@ -1,10 +1,7 @@
 import type { Media } from '../payload-types'
 
-export const image1: Media = {
+export const image1: Omit<Media, 'id' | 'createdAt' | 'updatedAt'> = {
   alt: 'Shirts',
-  id: '',
-  createdAt: '',
-  updatedAt: '',
   caption: [
     {
       children: [

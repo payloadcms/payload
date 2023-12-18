@@ -20,6 +20,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
   })
 
 export const Select: React.FC<Props> = ({
+  disabled,
   onChange,
   operator,
   options: optionsFromProps,
@@ -79,6 +80,7 @@ export const Select: React.FC<Props> = ({
 
   return (
     <ReactSelect
+      disabled={disabled}
       isMulti={isMulti}
       onChange={onSelect}
       options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}

@@ -1,23 +1,25 @@
 import type { SlateNodeConverter } from './types'
 
-import { HeadingConverter } from './converters/heading'
-import { IndentConverter } from './converters/indent'
-import { LinkConverter } from './converters/link'
-import { ListItemConverter } from './converters/listItem'
-import { OrderedListConverter } from './converters/orderedList'
-import { RelationshipConverter } from './converters/relationship'
-import { UnknownConverter } from './converters/unknown'
-import { UnorderedListConverter } from './converters/unorderedList'
-import { UploadConverter } from './converters/upload'
+import { SlateBlockquoteConverter } from './converters/blockquote'
+import { SlateHeadingConverter } from './converters/heading'
+import { SlateIndentConverter } from './converters/indent'
+import { SlateLinkConverter } from './converters/link'
+import { SlateListItemConverter } from './converters/listItem'
+import { SlateOrderedListConverter } from './converters/orderedList'
+import { SlateRelationshipConverter } from './converters/relationship'
+import { SlateUnknownConverter } from './converters/unknown'
+import { SlateUnorderedListConverter } from './converters/unorderedList'
+import { SlateUploadConverter } from './converters/upload'
 
-export const defaultConverters: SlateNodeConverter[] = [
-  UnknownConverter,
-  UploadConverter,
-  UnorderedListConverter,
-  OrderedListConverter,
-  RelationshipConverter,
-  ListItemConverter,
-  LinkConverter,
-  HeadingConverter,
-  IndentConverter,
+export const defaultSlateConverters: SlateNodeConverter[] = [
+  SlateUnknownConverter,
+  SlateUploadConverter,
+  SlateUnorderedListConverter,
+  SlateOrderedListConverter,
+  SlateRelationshipConverter,
+  SlateListItemConverter,
+  SlateLinkConverter,
+  SlateBlockquoteConverter,
+  SlateHeadingConverter,
+  SlateIndentConverter,
 ]

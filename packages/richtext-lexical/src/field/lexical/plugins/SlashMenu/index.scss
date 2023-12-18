@@ -1,12 +1,12 @@
 @import 'payload/scss';
 
 html[data-theme='light'] {
-  .slash-menu {
+  .slash-menu-popup {
     @include shadow-m;
   }
 }
 
-.slash-menu {
+.slash-menu-popup {
   background: var(--color-base-0);
   width: 200px;
   color: var(--color-base-800);
@@ -14,21 +14,21 @@ html[data-theme='light'] {
   list-style: none;
   font-family: var(--font-body);
   max-height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
   z-index: 10;
   position: absolute;
 
-  .group {
+  &__group {
     padding-bottom: 8px;
   }
 
-  .group-title {
+  &__group-title {
     padding-left: 10px;
     color: var(--color-base-600);
     font-size: 10px;
   }
 
-  .item {
+  &__item {
     all: unset;
     padding-left: 12px;
     font-size: 13px;
@@ -42,17 +42,20 @@ html[data-theme='light'] {
     width: 100%;
     cursor: pointer;
 
-    &.selected {
+    &--selected {
       background: var(--color-base-100);
     }
 
-    .text {
+    &-text {
       margin-left: 6px;
-      text-wrap: nowrap;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .icon {
       color: var(--color-base-500);
+      min-width: fit-content;
     }
   }
 }

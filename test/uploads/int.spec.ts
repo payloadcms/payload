@@ -3,6 +3,8 @@ import fs from 'fs'
 import path from 'path'
 import { promisify } from 'util'
 
+import type { Enlarge, Media } from './payload-types'
+
 import payload from '../../packages/payload/src'
 import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { initPayloadTest } from '../helpers/configHelpers'
@@ -82,6 +84,22 @@ describe('Collections - Uploads', () => {
       })
     })
 
+    it('should have valid image url', async () => {
+      const formData = new FormData()
+      formData.append('file', fs.createReadStream(path.join(__dirname, './image.png')))
+
+      const { status, doc } = await client.create({
+        file: true,
+        data: formData,
+      })
+
+      expect(status).toBe(201)
+      const expectedPath = path.join(__dirname, './media')
+      expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+
+      expect(doc.url).not.toContain('undefined')
+    })
+
     it('creates images that do not require all sizes', async () => {
       const formData = new FormData()
       formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
@@ -133,7 +151,7 @@ describe('Collections - Uploads', () => {
 
     it('creates media without storing a file', async () => {
       const formData = new FormData()
-      formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
+      formData.append('file', fs.createReadStream(path.join(__dirname, './unstored.png')))
 
       // unstored media
       const { status, doc } = await client.create({
@@ -145,7 +163,7 @@ describe('Collections - Uploads', () => {
       expect(status).toBe(201)
 
       // Check for files
-      expect(await !fileExists(path.join(__dirname, './media', doc.filename))).toBe(false)
+      expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(false)
 
       // Check api response
       expect(doc.filename).toBeDefined()
@@ -162,7 +180,7 @@ describe('Collections - Uploads', () => {
 
       expect(result).toBeTruthy()
 
-      const { sizes } = result
+      const { sizes } = result as unknown as Enlarge
       const expectedPath = path.join(__dirname, './media/enlarge')
 
       // Check for files
@@ -199,11 +217,11 @@ describe('Collections - Uploads', () => {
     it('should resize images if one desired dimension is smaller and the other is larger', async () => {
       const small = await getFileByPath(path.resolve(__dirname, './small.png'))
 
-      const result = await payload.create({
+      const result = (await payload.create({
         collection: enlargeSlug,
         data: {},
         file: small,
-      })
+      })) as unknown as Enlarge
 
       expect(result).toBeTruthy()
 
@@ -236,7 +254,7 @@ describe('Collections - Uploads', () => {
 
       expect(result).toBeTruthy()
 
-      const { sizes } = result
+      const { sizes } = result as unknown as Enlarge
       const expectedPath = path.join(__dirname, './media/reduce')
 
       // Check for files
@@ -271,11 +289,11 @@ describe('Collections - Uploads', () => {
     const file = await getFileByPath(filePath)
     file.name = 'renamed.png'
 
-    const mediaDoc = await payload.create({
+    const mediaDoc = (await payload.create({
       collection: mediaSlug,
       data: {},
       file,
-    })
+    })) as unknown as Media
 
     const formData = new FormData()
     formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
@@ -300,11 +318,11 @@ describe('Collections - Uploads', () => {
     const file = await getFileByPath(filePath)
     file.name = 'renamed.png'
 
-    const mediaDoc = await payload.create({
+    const mediaDoc = (await payload.create({
       collection: mediaSlug,
       data: {},
       file,
-    })
+    })) as unknown as Media
 
     const formData = new FormData()
     formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')))
@@ -332,11 +350,11 @@ describe('Collections - Uploads', () => {
     const file = await getFileByPath(filePath)
     file.name = 'temp.png'
 
-    const mediaDoc = await payload.create({
+    const mediaDoc = (await payload.create({
       collection: mediaSlug,
       data: {},
       file,
-    })
+    })) as unknown as Media
 
     const expectedPath = path.join(__dirname, './media')
 
@@ -348,12 +366,12 @@ describe('Collections - Uploads', () => {
     const newFile = await getFileByPath(newFilePath)
     newFile.name = 'temp-renamed.png'
 
-    const updatedMediaDoc = await payload.update({
+    const updatedMediaDoc = (await payload.update({
       collection: mediaSlug,
       id: mediaDoc.id,
       file: newFile,
       data: {},
-    })
+    })) as unknown as Media
 
     // Check that the replacement file was created and the old one was removed
     expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
@@ -366,11 +384,11 @@ describe('Collections - Uploads', () => {
     const file = await getFileByPath(filePath)
     file.name = 'temp.png'
 
-    const mediaDoc = await payload.create({
+    const mediaDoc = (await payload.create({
       collection: mediaSlug,
       data: {},
       file,
-    })
+    })) as unknown as Media
 
     const expectedPath = path.join(__dirname, './media')
 
@@ -382,14 +400,14 @@ describe('Collections - Uploads', () => {
     const newFile = await getFileByPath(newFilePath)
     newFile.name = 'temp-renamed.png'
 
-    const updatedMediaDoc = await payload.update({
+    const updatedMediaDoc = (await payload.update({
       collection: mediaSlug,
       where: {
         id: { equals: mediaDoc.id },
       },
       file: newFile,
       data: {},
-    })
+    })) as unknown as { docs: Media[] }
 
     // Check that the replacement file was created and the old one was removed
     expect(await fileExists(path.join(expectedPath, updatedMediaDoc.docs[0].filename))).toBe(true)
@@ -407,12 +425,12 @@ describe('Collections - Uploads', () => {
       file,
     })
 
-    const doc = await payload.update({
+    const doc = (await payload.update({
       collection: mediaSlug,
       id,
       data: {},
       file: small,
-    })
+    })) as unknown as Media
 
     expect(doc.sizes.icon).toBeDefined()
     expect(doc.sizes.tablet.width).toBeNull()
@@ -429,14 +447,14 @@ describe('Collections - Uploads', () => {
       file,
     })
 
-    const doc = await payload.update({
+    const doc = (await payload.update({
       collection: mediaSlug,
       where: {
         id: { equals: id },
       },
       data: {},
       file: small,
-    })
+    })) as unknown as { docs: Media[] }
 
     expect(doc.docs[0].sizes.icon).toBeDefined()
     expect(doc.docs[0].sizes.tablet.width).toBeNull()
@@ -539,6 +557,48 @@ describe('Collections - Uploads', () => {
     expect(errors).toHaveLength(0)
 
     expect(await fileExists(path.join(__dirname, doc.filename))).toBe(false)
+  })
+
+  describe('filesRequiredOnCreate', () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    it('should allow file to be optional if filesRequiredOnCreate is false', async () => {
+      expect(
+        async () =>
+          await payload.create({
+            // @ts-ignore
+            collection: 'optional-file',
+            data: {},
+          }),
+      ).not.toThrow()
+    })
+
+    it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
+      await expect(async () =>
+        payload.create({
+          // @ts-ignore
+          collection: 'required-file',
+          data: {},
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({
+          name: 'MissingFile',
+          message: 'No files were uploaded.',
+        }),
+      )
+    })
+    it('should throw an error if no file and filesRequiredOnCreate is not defined', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: mediaSlug,
+          data: {},
+        }),
+      ).rejects.toThrow(
+        expect.objectContaining({
+          name: 'MissingFile',
+          message: 'No files were uploaded.',
+        }),
+      )
+    })
   })
 })
 

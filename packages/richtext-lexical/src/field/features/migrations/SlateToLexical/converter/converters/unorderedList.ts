@@ -4,7 +4,7 @@ import type { SlateNodeConverter } from '../types'
 
 import { convertSlateNodesToLexical } from '..'
 
-export const UnorderedListConverter: SlateNodeConverter = {
+export const SlateUnorderedListConverter: SlateNodeConverter = {
   converter({ converters, slateNode }) {
     return {
       children: convertSlateNodesToLexical({

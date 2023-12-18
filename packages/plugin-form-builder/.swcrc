@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "sourceMaps": "inline",
+  "exclude": ["/**/mocks"],
+  "jsc": {
+    "target": "esnext",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "dts": true
+    }
+  },
+  "module": {
+    "type": "commonjs"
+  }
+}

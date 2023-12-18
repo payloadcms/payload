@@ -1,13 +1,17 @@
 /* eslint-disable no-param-reassign */
 import type { RichTextAdapter } from '../../../admin/components/forms/field-types/RichText/types'
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'
+import getValueWithDefault from '../../getDefaultValue'
 import relationshipPopulationPromise from './relationshipPopulationPromise'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   currentDepth: number
   depth: number
@@ -16,22 +20,26 @@ type Args = {
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
+  global: SanitizedGlobalConfig | null
   overrideAccess: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
+  triggerAccessControl?: boolean
+  triggerHooks?: boolean
 }
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response
 // - Flatten locales into requested locale
-// - Sanitize outgoing data (point field, etc)
+// - Sanitize outgoing data (point field, etc.)
 // - Execute field hooks
 // - Execute read access control
 // - Populate relationships
 
 export const promise = async ({
+  collection,
   context,
   currentDepth,
   depth,
@@ -40,11 +48,14 @@ export const promise = async ({
   fieldPromises,
   findMany,
   flattenLocales,
+  global,
   overrideAccess,
   populationPromises,
   req,
   showHiddenFields,
   siblingDoc,
+  triggerAccessControl = true,
+  triggerHooks = true,
 }: Args): Promise<void> => {
   if (
     fieldAffectsData(field) &&
@@ -129,14 +140,32 @@ export const promise = async ({
 
     case 'richText': {
       const editor: RichTextAdapter = field?.editor
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor.afterReadPromise({
+      // This is run here AND in the GraphQL Resolver
+      if (editor?.populationPromise) {
+        const populationPromise = editor.populationPromise({
+          context,
           currentDepth,
           depth,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
+          siblingDoc,
+        })
+
+        if (populationPromise) {
+          populationPromises.push(populationPromise)
+        }
+      }
+
+      // This is only run here, independent of depth
+      if (editor?.afterReadPromise) {
+        const afterReadPromise = editor?.afterReadPromise({
+          field,
+          incomingEditorState: siblingDoc[field.name] as object,
           siblingDoc,
         })
 
@@ -166,7 +195,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // Execute hooks
-    if (field.hooks?.afterRead) {
+    if (triggerHooks && field.hooks?.afterRead) {
       await field.hooks.afterRead.reduce(async (priorHook, currentHook) => {
         await priorHook
 
@@ -179,8 +208,11 @@ export const promise = async ({
           const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
             (async () => {
               const hookedValue = await currentHook({
+                collection,
                 context,
                 data: doc,
+                field,
+                global,
                 operation: 'read',
                 originalDoc: doc,
                 req,
@@ -197,9 +229,12 @@ export const promise = async ({
           await Promise.all(hookPromises)
         } else {
           const hookedValue = await currentHook({
+            collection,
             context,
             data: doc,
+            field,
             findMany,
+            global,
             operation: 'read',
             originalDoc: doc,
             req,
@@ -215,7 +250,8 @@ export const promise = async ({
     }
 
     // Execute access control
-    if (field.access && field.access.read) {
+    let allowDefaultValue = true
+    if (triggerAccessControl && field.access && field.access.read) {
       const result = overrideAccess
         ? true
         : await field.access.read({
@@ -227,8 +263,24 @@ export const promise = async ({
           })
 
       if (!result) {
+        allowDefaultValue = false
         delete siblingDoc[field.name]
       }
+    }
+
+    // Set defaultValue on the field for globals being returned without being first created
+    // or collection documents created prior to having a default
+    if (
+      allowDefaultValue &&
+      typeof siblingDoc[field.name] === 'undefined' &&
+      typeof field.defaultValue !== 'undefined'
+    ) {
+      siblingDoc[field.name] = await getValueWithDefault({
+        defaultValue: field.defaultValue,
+        locale: req.locale,
+        user: req.user,
+        value: siblingDoc[field.name],
+      })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -252,6 +304,7 @@ export const promise = async ({
       if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
 
       traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -260,11 +313,14 @@ export const promise = async ({
         fields: field.fields,
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
         showHiddenFields,
         siblingDoc: groupDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
 
       break
@@ -276,6 +332,7 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         rows.forEach((row) => {
           traverseFields({
+            collection,
             context,
             currentDepth,
             depth,
@@ -284,11 +341,14 @@ export const promise = async ({
             fields: field.fields,
             findMany,
             flattenLocales,
+            global,
             overrideAccess,
             populationPromises,
             req,
             showHiddenFields,
             siblingDoc: row || {},
+            triggerAccessControl,
+            triggerHooks,
           })
         })
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
@@ -296,6 +356,7 @@ export const promise = async ({
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row) => {
               traverseFields({
+                collection,
                 context,
                 currentDepth,
                 depth,
@@ -304,11 +365,14 @@ export const promise = async ({
                 fields: field.fields,
                 findMany,
                 flattenLocales,
+                global,
                 overrideAccess,
                 populationPromises,
                 req,
                 showHiddenFields,
                 siblingDoc: row || {},
+                triggerAccessControl,
+                triggerHooks,
               })
             })
           }
@@ -328,6 +392,7 @@ export const promise = async ({
 
           if (block) {
             traverseFields({
+              collection,
               context,
               currentDepth,
               depth,
@@ -336,11 +401,14 @@ export const promise = async ({
               fields: block.fields,
               findMany,
               flattenLocales,
+              global,
               overrideAccess,
               populationPromises,
               req,
               showHiddenFields,
               siblingDoc: row || {},
+              triggerAccessControl,
+              triggerHooks,
             })
           }
         })
@@ -352,6 +420,7 @@ export const promise = async ({
 
               if (block) {
                 traverseFields({
+                  collection,
                   context,
                   currentDepth,
                   depth,
@@ -360,11 +429,14 @@ export const promise = async ({
                   fields: block.fields,
                   findMany,
                   flattenLocales,
+                  global,
                   overrideAccess,
                   populationPromises,
                   req,
                   showHiddenFields,
                   siblingDoc: row || {},
+                  triggerAccessControl,
+                  triggerHooks,
                 })
               }
             })
@@ -380,6 +452,7 @@ export const promise = async ({
     case 'row':
     case 'collapsible': {
       traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -388,11 +461,14 @@ export const promise = async ({
         fields: field.fields,
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
         showHiddenFields,
         siblingDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
 
       break
@@ -405,7 +481,8 @@ export const promise = async ({
         if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
-      await traverseFields({
+      traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -414,11 +491,14 @@ export const promise = async ({
         fields: field.fields,
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
         showHiddenFields,
         siblingDoc: tabDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
 
       break
@@ -426,6 +506,7 @@ export const promise = async ({
 
     case 'tabs': {
       traverseFields({
+        collection,
         context,
         currentDepth,
         depth,
@@ -434,11 +515,14 @@ export const promise = async ({
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         findMany,
         flattenLocales,
+        global,
         overrideAccess,
         populationPromises,
         req,
         showHiddenFields,
         siblingDoc,
+        triggerAccessControl,
+        triggerHooks,
       })
       break
     }

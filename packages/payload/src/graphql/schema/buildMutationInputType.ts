@@ -39,7 +39,7 @@ import type {
 } from '../../fields/config/types'
 import type { Payload } from '../../payload'
 
-import { fieldAffectsData, tabHasName } from '../../fields/config/types'
+import { fieldAffectsData, optionIsObject, tabHasName } from '../../fields/config/types'
 import { toWords } from '../../utilities/formatLabels'
 import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield'
 import combineParentName from '../utilities/combineParentName'
@@ -74,7 +74,7 @@ function buildMutationInputType(
   fields: Field[],
   parentName: string,
   forceNullable = false,
-): GraphQLInputObjectType {
+): GraphQLInputObjectType | null {
   const fieldToSchemaMap = {
     array: (inputObjectTypeConfig: InputObjectTypeConfig, field: ArrayField) => {
       const fullName = combineParentName(parentName, toWords(field.name, true))
@@ -84,6 +84,9 @@ function buildMutationInputType(
         field.fields,
         fullName,
       )
+
+      if (!type) return inputObjectTypeConfig
+
       type = new GraphQLList(withNullableType(field, type, forceNullable))
       return {
         ...inputObjectTypeConfig,
@@ -120,6 +123,9 @@ function buildMutationInputType(
       const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
       const fullName = combineParentName(parentName, toWords(field.name, true))
       let type: GraphQLType = buildMutationInputType(payload, fullName, field.fields, fullName)
+
+      if (!type) return inputObjectTypeConfig
+
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type)
       return {
         ...inputObjectTypeConfig,
@@ -208,7 +214,7 @@ function buildMutationInputType(
       let type: GraphQLType = new GraphQLEnumType({
         name: formattedName,
         values: field.options.reduce((values, option) => {
-          if (typeof option === 'object' && option.value) {
+          if (optionIsObject(option)) {
             return {
               ...values,
               [formatName(option.value)]: {
@@ -217,16 +223,12 @@ function buildMutationInputType(
             }
           }
 
-          if (typeof option === 'string') {
-            return {
-              ...values,
-              [option]: {
-                value: option,
-              },
-            }
+          return {
+            ...values,
+            [formatName(option)]: {
+              value: option,
+            },
           }
-
-          return values
         }, {}),
       })
 
@@ -244,10 +246,12 @@ function buildMutationInputType(
           const fullName = combineParentName(parentName, toWords(tab.name, true))
           const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
           let type: GraphQLType = buildMutationInputType(payload, fullName, tab.fields, fullName)
-          if (requiresAtLeastOneField) type = new GraphQLNonNull(type)
 
+          if (!type) return acc
+
+          if (requiresAtLeastOneField) type = new GraphQLNonNull(type)
           return {
-            ...inputObjectTypeConfig,
+            ...acc,
             [tab.name]: { type },
           }
         }
@@ -278,20 +282,31 @@ function buildMutationInputType(
 
   const fieldName = formatName(name)
 
+  const fieldSchemas = fields.reduce((inputObjectTypeConfig, field) => {
+    const fieldSchema = fieldToSchemaMap[field.type]
+
+    if (typeof fieldSchema !== 'function') {
+      return inputObjectTypeConfig
+    }
+
+    const schema = fieldSchema(inputObjectTypeConfig, field)
+    if (Object.keys(schema).length === 0) {
+      return inputObjectTypeConfig
+    }
+
+    return {
+      ...inputObjectTypeConfig,
+      ...fieldSchema(inputObjectTypeConfig, field),
+    }
+  }, {})
+
+  if (Object.keys(fieldSchemas).length === 0) {
+    return null
+  }
+
   return new GraphQLInputObjectType({
     name: `mutation${fieldName}Input`,
-    fields: fields.reduce((inputObjectTypeConfig, field) => {
-      const fieldSchema = fieldToSchemaMap[field.type]
-
-      if (typeof fieldSchema !== 'function') {
-        return inputObjectTypeConfig
-      }
-
-      return {
-        ...inputObjectTypeConfig,
-        ...fieldSchema(inputObjectTypeConfig, field),
-      }
-    }, {}),
+    fields: fieldSchemas,
   })
 }
 

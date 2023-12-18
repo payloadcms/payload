@@ -14,6 +14,7 @@ import initGlobals from '../globals/graphql/init'
 import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType'
 import buildLocaleInputType from './schema/buildLocaleInputType'
 import buildPoliciesType from './schema/buildPoliciesType'
+import { wrapCustomFields } from './utilities/wrapCustomResolver'
 
 export default function registerGraphQLSchema(payload: Payload): void {
   payload.types = {
@@ -55,7 +56,7 @@ export default function registerGraphQLSchema(payload: Payload): void {
       ...payload.Query,
       fields: {
         ...payload.Query.fields,
-        ...(customQueries || {}),
+        ...wrapCustomFields((customQueries || {}) as never),
       },
     }
   }
@@ -66,7 +67,7 @@ export default function registerGraphQLSchema(payload: Payload): void {
       ...payload.Mutation,
       fields: {
         ...payload.Mutation.fields,
-        ...(customMutations || {}),
+        ...wrapCustomFields((customMutations || {}) as never),
       },
     }
   }

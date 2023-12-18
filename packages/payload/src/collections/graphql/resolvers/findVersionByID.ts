@@ -5,6 +5,7 @@ import type { PayloadRequest } from '../../../express/types'
 import type { TypeWithVersion } from '../../../versions/types'
 import type { Collection, TypeWithID } from '../../config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import findVersionByID from '../../operations/findVersionByID'
 
 export type Resolver<T extends TypeWithID = any> = (
@@ -31,7 +32,7 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
       collection,
       depth: 0,
       draft: args.draft,
-      req: context.req,
+      req: isolateTransactionID(context.req),
     }
 
     const result = await findVersionByID(options)

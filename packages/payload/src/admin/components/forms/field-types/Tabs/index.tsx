@@ -18,9 +18,9 @@ import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { TabsProvider } from './provider'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'tabs-field'
 
@@ -72,6 +72,7 @@ const TabsField: React.FC<Props> = (props) => {
   const {
     admin: { className, readOnly },
     fieldTypes,
+    forceRender = false,
     indexPath,
     path,
     permissions,
@@ -94,7 +95,7 @@ const TabsField: React.FC<Props> = (props) => {
         : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
       setActiveTabIndex(initialIndex || 0)
     }
-    getInitialPref()
+    void getInitialPref()
   }, [path, indexPath, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
@@ -165,7 +166,9 @@ const TabsField: React.FC<Props> = (props) => {
                 className={[
                   `${baseClass}__tab`,
                   activeTabConfig.label &&
-                    `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
+                    `${baseClass}__tabConfigLabel-${toKebabCase(
+                      getTranslation(activeTabConfig.label, i18n),
+                    )}`,
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -174,6 +177,7 @@ const TabsField: React.FC<Props> = (props) => {
                   className={`${baseClass}__description`}
                   description={activeTabConfig.description}
                   marginPlacement="bottom"
+                  path={path}
                 />
                 <RenderFields
                   fieldSchema={activeTabConfig.fields.map((field) => {
@@ -188,12 +192,16 @@ const TabsField: React.FC<Props> = (props) => {
                     }
                   })}
                   fieldTypes={fieldTypes}
-                  forceRender
+                  forceRender={forceRender}
                   indexPath={indexPath}
-                  key={String(activeTabConfig.label)}
+                  key={
+                    activeTabConfig.label
+                      ? getTranslation(activeTabConfig.label, i18n)
+                      : activeTabConfig['name']
+                  }
                   margins="small"
                   permissions={
-                    tabHasName(activeTabConfig)
+                    tabHasName(activeTabConfig) && permissions?.[activeTabConfig.name]
                       ? permissions[activeTabConfig.name].fields
                       : permissions
                   }

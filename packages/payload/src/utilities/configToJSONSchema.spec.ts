@@ -10,6 +10,8 @@ describe('configToJSONSchema', () => {
         {
           fields: [
             {
+              name: 'someRequiredField',
+              type: 'array',
               fields: [
                 {
                   name: 'someRequiredField',
@@ -17,8 +19,6 @@ describe('configToJSONSchema', () => {
                   type: 'text',
                 },
               ],
-              name: 'someRequiredField',
-              type: 'array',
             },
           ],
           slug: 'test',
@@ -29,6 +29,7 @@ describe('configToJSONSchema', () => {
 
     const sanitizedConfig = sanitizeConfig(config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
+
     expect(schema?.definitions?.test).toStrictEqual({
       additionalProperties: false,
       properties: {
@@ -40,7 +41,7 @@ describe('configToJSONSchema', () => {
             additionalProperties: false,
             properties: {
               id: {
-                type: 'string',
+                type: ['string', 'null'],
               },
               someRequiredField: {
                 type: 'string',
@@ -49,7 +50,7 @@ describe('configToJSONSchema', () => {
             required: ['someRequiredField'],
             type: 'object',
           },
-          type: 'array',
+          type: ['array', 'null'],
         },
       },
       required: ['id'],

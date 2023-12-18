@@ -35,7 +35,7 @@ const errorHandler = async (
   }
 
   if (afterErrorHook) {
-    ;({ response } = (await afterErrorHook(err, response, null)) || { response })
+    ;({ response } = (await afterErrorHook(err, response, null, null)) || { response })
   }
 
   return response

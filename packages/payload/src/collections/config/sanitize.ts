@@ -61,6 +61,8 @@ const sanitizeCollection = (
           disableBulkEdit: true,
           hidden: true,
         },
+        // The default sort for list view is createdAt. Thus, enabling indexing by default, is a major performance improvement, especially for large or a large amount of collections.
+        index: true,
         label: translations['general:createdAt'],
         type: 'date',
       })

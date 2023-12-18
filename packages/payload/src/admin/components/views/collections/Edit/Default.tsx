@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
@@ -8,6 +9,7 @@ import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
 import { useAuth } from '../../../utilities/Auth'
+import { useDocumentEvents } from '../../../utilities/DocumentEvents'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import { CollectionRoutes } from './Routes'
 import { CustomCollectionComponent } from './Routes/CustomComponent'
@@ -15,12 +17,13 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 
-const DefaultEditView: React.FC<
-  CollectionEditViewProps & {
-    customHeader?: React.ReactNode
-    disableRoutes?: boolean
-  }
-> = (props) => {
+export type DefaultEditViewProps = CollectionEditViewProps & {
+  customHeader?: React.ReactNode
+  disableRoutes?: boolean
+  fieldTypes: FieldTypes
+}
+
+const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   const { i18n } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
@@ -32,6 +35,7 @@ const DefaultEditView: React.FC<
     customHeader,
     data,
     disableRoutes,
+    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,
@@ -39,12 +43,19 @@ const DefaultEditView: React.FC<
     onSave: onSaveFromProps,
   } = props
 
+  const { reportUpdate } = useDocumentEvents()
+
   const { auth } = collection
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
   const onSave = useCallback(
     async (json) => {
+      reportUpdate({
+        id,
+        entitySlug: collection.slug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
       if (auth && id === user.id) {
         await refreshCookieAsync()
       }
@@ -56,7 +67,7 @@ const DefaultEditView: React.FC<
         })
       }
     },
-    [id, onSaveFromProps, auth, user, refreshCookieAsync],
+    [id, onSaveFromProps, auth, user, refreshCookieAsync, collection, reportUpdate],
   )
 
   const operation = isEditing ? 'update' : 'create'
@@ -96,7 +107,7 @@ const DefaultEditView: React.FC<
               {disableRoutes ? (
                 <CustomCollectionComponent view="Default" {...props} />
               ) : (
-                <CollectionRoutes {...props} />
+                <CollectionRoutes {...props} fieldTypes={fieldTypes} />
               )}
             </React.Fragment>
           )}

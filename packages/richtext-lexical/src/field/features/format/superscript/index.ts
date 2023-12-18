@@ -2,19 +2,22 @@ import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
-import { SuperscriptIcon } from '../../../lexical/ui/icons/Superscript'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
 export const SuperscriptTextFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: SuperscriptIcon,
-                isActive: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/Superscript').then(
+                    (module) => module.SuperscriptIcon,
+                  ),
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('superscript')
                   }

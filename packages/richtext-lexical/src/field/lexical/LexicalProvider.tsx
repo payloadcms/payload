@@ -1,6 +1,8 @@
+'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer'
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { LexicalEditor } from 'lexical'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import * as React from 'react'
@@ -14,28 +16,48 @@ import { getEnabledNodes } from './nodes'
 export type LexicalProviderProps = {
   editorConfig: SanitizedEditorConfig
   fieldProps: FieldProps
-  initialState: SerializedEditorState
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
+  path: string
   readOnly: boolean
-  setValue: (value: SerializedEditorState) => void
   value: SerializedEditorState
 }
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, onChange, readOnly, setValue } = props
-  let { initialState, value } = props
+  const { editorConfig, fieldProps, onChange, path, readOnly } = props
+  let { value } = props
 
-  // Transform initialState through load hooks
+  const [initialConfig, setInitialConfig] = React.useState<InitialConfigType | null>(null)
+
+  // set lexical config in useffect async:
+  React.useEffect(() => {
+    void editorConfig.lexical().then((lexicalConfig: LexicalEditorConfig) => {
+      const newInitialConfig: InitialConfigType = {
+        editable: readOnly !== true,
+        editorState: value != null ? JSON.stringify(value) : undefined,
+        namespace: lexicalConfig.namespace,
+        nodes: [...getEnabledNodes({ editorConfig })],
+        onError: (error: Error) => {
+          throw error
+        },
+        theme: lexicalConfig.theme,
+      }
+      setInitialConfig(newInitialConfig)
+    })
+  }, [editorConfig, readOnly, value])
+
   if (editorConfig?.features?.hooks?.load?.length) {
     editorConfig.features.hooks.load.forEach((hook) => {
-      initialState = hook({ incomingEditorState: initialState })
       value = hook({ incomingEditorState: value })
     })
   }
 
-  if (
-    (value && Array.isArray(value) && !('root' in value)) ||
-    (initialState && Array.isArray(initialState) && !('root' in initialState))
-  ) {
+  if (value && typeof value !== 'object') {
+    throw new Error(
+      'The value passed to the Lexical editor is not an object. This is not supported. Please remove the data from the field and start again. This is the value that was passed in: ' +
+        JSON.stringify(value),
+    )
+  }
+
+  if (value && Array.isArray(value) && !('root' in value)) {
     throw new Error(
       'You have tried to pass in data from the old, Slate editor, to the new, Lexical editor. This is not supported. There is no automatic conversion from Slate to Lexical data available yet (coming soon). Please remove the data from the field and start again.',
     )
@@ -47,30 +69,15 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     )
   }
 
-  const initialConfig: InitialConfigType = {
-    editable: readOnly === true ? false : true,
-    editorState: initialState != null ? JSON.stringify(initialState) : undefined,
-    namespace: editorConfig.lexical.namespace,
-    nodes: [...getEnabledNodes({ editorConfig })],
-    onError: (error: Error) => {
-      throw error
-    },
-    theme: editorConfig.lexical.theme,
+  if (!initialConfig) {
+    return <p>Loading...</p>
   }
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
+    <LexicalComposer initialConfig={initialConfig} key={path}>
       <EditorConfigProvider editorConfig={editorConfig} fieldProps={fieldProps}>
         <div className="editor-shell">
-          <LexicalEditorComponent
-            editorConfig={editorConfig}
-            fieldProps={fieldProps}
-            initialState={initialState}
-            onChange={onChange}
-            readOnly={readOnly}
-            setValue={setValue}
-            value={value}
-          />
+          <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />
         </div>
       </EditorConfigProvider>
     </LexicalComposer>

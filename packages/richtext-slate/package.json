@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "1.0.5",
+  "version": "1.3.1",
   "description": "The officially supported Slate richtext adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -34,7 +34,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.0.6"
+    "payload": "^2.3.0"
   },
   "exports": {
     ".": {

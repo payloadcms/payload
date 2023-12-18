@@ -7,7 +7,37 @@ on:
     branches: ['main']
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      needs_build: ${{ steps.filter.outputs.needs_build }}
+      templates: ${{ steps.filter.outputs.templates }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 25
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          needs_build:
+            - '.github/workflows/**'
+            - 'packages/**'
+            - 'test/**'
+            - 'pnpm-lock.yaml'
+            - 'package.json'
+          templates:
+            - 'templates/**'
+    - name: Log all filter results
+      run: |
+        echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+        echo "templates: ${{ steps.filter.outputs.templates }}"
+
   core-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.needs_build == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -102,6 +132,7 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int
         env:
+          NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
@@ -111,7 +142,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        part: [1/4, 2/4, 3/4, 4/4]
+        part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
 
     steps:
       - name: Use Node.js 18
@@ -132,7 +163,12 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: E2E Tests
-        run: pnpm test:e2e --part ${{ matrix.part }} --bail
+        uses: nick-fields/retry@v2
+        with:
+          retry_on: error
+          max_attempts: 2
+          timeout_minutes: 15
+          command: pnpm test:e2e --part ${{ matrix.part }} --bail
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -213,8 +249,13 @@ jobs:
       fail-fast: false
       matrix:
         pkg:
-          - plugin-cloud
           - create-payload-app
+          - plugin-cloud
+          - plugin-cloud-storage
+          - plugin-form-builder
+          - plugin-nested-docs
+          - plugin-search
+          - plugin-sentry
 
     steps:
       - name: Use Node.js 18
@@ -240,3 +281,34 @@ jobs:
       - name: Test ${{ matrix.pkg }}
         run: pnpm --filter ${{ matrix.pkg }} run test
         if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions
+
+  templates:
+    needs: changes
+    if: ${{ needs.changes.outputs.templates == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [blank, website, ecommerce]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
+
+      - name: Build Website
+        run: |
+          cd templates/${{ matrix.template }}
+          cp .env.example .env
+          yarn install
+          yarn build

@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Collection } from '../../../collections/config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import resetPassword from '../../operations/resetPassword'
 
 function resetPasswordResolver(collection: Collection) {
@@ -13,7 +14,7 @@ function resetPasswordResolver(collection: Collection) {
       collection,
       data: args,
       depth: 0,
-      req: context.req,
+      req: isolateTransactionID(context.req),
       res: context.res,
     }
 

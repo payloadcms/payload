@@ -8,17 +8,19 @@ import type {
   RelationRestricted,
   RelationTwo,
   RelationWithTitle,
-} from './config'
+} from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { openDocControls, saveDocAndAssert } from '../helpers'
+import { initPageConsoleErrorCatch, openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
+  relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
+  relationTrueFilterOptionSlug,
   relationTwoSlug,
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
@@ -47,43 +49,45 @@ describe('fields - relationship', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
 
   beforeEach(async () => {
     await clearAllDocs()
 
     // Create docs to relate to
-    relationOneDoc = await payload.create({
+    relationOneDoc = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
-    })
+    })) as any
 
-    anotherRelationOneDoc = await payload.create({
+    anotherRelationOneDoc = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'relation',
       },
-    })
+    })) as any
 
-    relationTwoDoc = await payload.create({
+    relationTwoDoc = (await payload.create({
       collection: relationTwoSlug,
       data: {
         name: 'second-relation',
       },
-    })
+    })) as any
 
     // Create restricted doc
-    restrictedRelation = await payload.create({
+    restrictedRelation = (await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'restricted',
       },
-    })
+    })) as any
 
     // Doc with useAsTitle
-    relationWithTitle = await payload.create({
+    relationWithTitle = (await payload.create({
       collection: relationWithTitleSlug,
       data: {
         name: 'relation-title',
@@ -91,7 +95,7 @@ describe('fields - relationship', () => {
           title: 'relation-title',
         },
       },
-    })
+    })) as any
 
     // Doc with useAsTitle for word boundary test
     await payload.create({
@@ -105,16 +109,16 @@ describe('fields - relationship', () => {
     })
 
     // Add restricted doc as relation
-    docWithExistingRelations = await payload.create({
+    docWithExistingRelations = (await payload.create({
       collection: slug,
       data: {
         name: 'with-existing-relations',
         relationship: relationOneDoc.id,
+        relationshipReadOnly: relationOneDoc.id,
         relationshipRestricted: restrictedRelation.id,
         relationshipWithTitle: relationWithTitle.id,
-        relationshipReadOnly: relationOneDoc.id,
       },
-    })
+    })) as any
   })
 
   test('should create relationship', async () => {
@@ -277,18 +281,18 @@ describe('fields - relationship', () => {
   })
 
   test('should allow usage of relationTo in filterOptions', async () => {
-    const { id: include } = await payload.create({
+    const { id: include } = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'include',
       },
-    })
-    const { id: exclude } = await payload.create({
+    })) as any
+    const { id: exclude } = (await payload.create({
       collection: relationOneSlug,
       data: {
         name: 'exclude',
       },
-    })
+    })) as any
 
     await page.goto(url.create)
 
@@ -318,6 +322,41 @@ describe('fields - relationship', () => {
 
     const options = page.locator('#field-relationshipManyFiltered .rs__menu')
     await expect(options).not.toContainText('exclude')
+  })
+
+  test('should not query for a relationship when filterOptions returns false', async () => {
+    await payload.create({
+      collection: relationFalseFilterOptionSlug,
+      data: {
+        name: 'whatever',
+      },
+    })
+
+    await page.goto(url.create)
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+    await expect(options).toContainText('Relation With Titles')
+    await expect(options).not.toContainText('whatever')
+  })
+
+  test('should show a relationship when filterOptions returns true', async () => {
+    await payload.create({
+      collection: relationTrueFilterOptionSlug,
+      data: {
+        name: 'truth',
+      },
+    })
+
+    await page.goto(url.create)
+
+    // select relationshipMany field that relies on siblingData field above
+    await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+    await expect(options).toContainText('truth')
   })
 
   test('should open document drawer from read-only relationships', async () => {
@@ -445,7 +484,7 @@ describe('fields - relationship', () => {
       await expect(relationship).toContainText('Untitled - ID: ')
     })
 
-    test('should show useAsTitle on relation in list view', async () => {
+    test('x in list view', async () => {
       await page.goto(url.list)
       await wait(110)
       const relationship = page.locator('.row-1 .cell-relationshipWithTitle')
@@ -490,6 +529,6 @@ async function clearCollectionDocs(collectionSlug: string): Promise<void> {
     (doc) => doc.id,
   )
   await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: collectionSlug, id })
+    await payload.delete({ id, collection: collectionSlug })
   })
 }

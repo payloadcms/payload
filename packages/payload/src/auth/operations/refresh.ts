@@ -39,6 +39,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
       args =
         (await hook({
           args,
+          collection: args.collection?.config,
           context: args.req.context,
           operation: 'refresh',
         })) || args
@@ -57,7 +58,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     },
   } = args
 
-  if (typeof args.token !== 'string') throw new Forbidden(args.req.t)
+  if (typeof args.token !== 'string' || !args.req.user) throw new Forbidden(args.req.t)
 
   const parsedURL = url.parse(args.req.url)
   const isGraphQL = parsedURL.pathname === config.routes.graphQL
@@ -112,6 +113,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
     result =
       (await hook({
+        collection: args.collection?.config,
         context: args.req.context,
         exp,
         req: args.req,
@@ -126,6 +128,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
   result = await buildAfterOperation({
     args,
+    collection: args.collection?.config,
     operation: 'refresh',
     result,
   })

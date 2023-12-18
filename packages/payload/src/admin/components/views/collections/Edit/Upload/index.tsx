@@ -161,7 +161,7 @@ export const Upload: React.FC<Props> = (props) => {
                   value={value.name}
                 />
 
-                {isImage(value.type) && (
+                {isImage(value.type) && value.type !== 'image/svg+xml' && (
                   <UploadActions
                     canEdit={showCrop || showFocalPoint}
                     showSizePreviews={hasImageSizes && doc.filename && !replacingFile}
@@ -201,7 +201,7 @@ export const Upload: React.FC<Props> = (props) => {
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: doc?.filename })}
         >
-          <PreviewSizes collection={collection} doc={doc} updatedAt={updatedAt} />
+          <PreviewSizes collection={collection} doc={doc} />
         </Drawer>
       )}
     </div>

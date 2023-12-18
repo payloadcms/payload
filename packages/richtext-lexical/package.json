@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "0.1.10",
+  "version": "0.4.1",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && ts-node -T ../../scripts/exportPointerFiles.ts ../packages/richtext-lexical dist/exports",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
@@ -19,30 +19,21 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
-    "@lexical/clipboard": "0.12.2",
-    "@lexical/code": "0.12.2",
-    "@lexical/file": "0.12.2",
-    "@lexical/hashtag": "0.12.2",
-    "@lexical/headless": "0.12.2",
-    "@lexical/html": "0.12.2",
-    "@lexical/link": "0.12.2",
-    "@lexical/list": "0.12.2",
-    "@lexical/mark": "0.12.2",
-    "@lexical/markdown": "0.12.2",
-    "@lexical/overflow": "0.12.2",
-    "@lexical/plain-text": "0.12.2",
-    "@lexical/react": "0.12.2",
-    "@lexical/rich-text": "0.12.2",
-    "@lexical/selection": "0.12.2",
-    "@lexical/table": "0.12.2",
-    "@lexical/utils": "0.12.2",
+    "@lexical/headless": "0.12.5",
+    "@lexical/link": "0.12.5",
+    "@lexical/list": "0.12.5",
+    "@lexical/mark": "0.12.5",
+    "@lexical/markdown": "0.12.5",
+    "@lexical/react": "0.12.5",
+    "@lexical/rich-text": "0.12.5",
+    "@lexical/selection": "0.12.5",
+    "@lexical/utils": "0.12.5",
     "bson-objectid": "2.0.4",
     "classnames": "^2.3.2",
+    "deep-equal": "2.2.3",
     "i18next": "22.5.1",
-    "katex": "0.16.8",
-    "lexical": "0.12.2",
+    "lexical": "0.12.5",
     "lodash": "4.17.21",
-    "openai": "4.7.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "^4.0.11",
@@ -56,12 +47,18 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "^2.0.6"
+    "payload": "^2.4.0"
   },
   "exports": {
     ".": {
-      "default": "./src/index.ts",
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
       "types": "./src/index.ts"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
     }
   },
   "publishConfig": {
@@ -71,6 +68,8 @@
     "types": "./dist/index.d.ts"
   },
   "files": [
-    "dist"
+    "dist",
+    "components.js",
+    "components.d.ts"
   ]
 }

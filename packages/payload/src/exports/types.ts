@@ -15,6 +15,8 @@ export type {
 
 export type { CellComponentProps } from '../admin/components/views/collections/List/Cell/types'
 
+export { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
+
 export type {
   CustomPublishButtonProps,
   CustomSaveButtonProps,
@@ -78,6 +80,7 @@ export type {
   Option,
   OptionObject,
   PointField,
+  PolymorphicRelationshipField,
   RadioField,
   RelationshipField,
   RelationshipValue,
@@ -85,6 +88,7 @@ export type {
   RowAdmin,
   RowField,
   SelectField,
+  SingleRelationshipField,
   Tab,
   TabAsField,
   TabsAdmin,

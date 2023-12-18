@@ -8,12 +8,13 @@ import { Hamburger } from '../Hamburger'
 import Localizer from '../Localizer'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel'
 import { NavToggler } from '../Nav/NavToggler'
+import { useNav } from '../Nav/context'
 import StepNav from '../StepNav'
 import './index.scss'
 
 const baseClass = 'app-header'
 
-export const AppHeader: React.FC = (props) => {
+export const AppHeader: React.FC = () => {
   const { t } = useTranslation()
 
   const {
@@ -21,12 +22,14 @@ export const AppHeader: React.FC = (props) => {
     routes: { admin: adminRoute },
   } = useConfig()
 
+  const { navOpen } = useNav()
+
   return (
-    <header className={[baseClass].filter(Boolean).join(' ')}>
+    <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__bg`} />
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
-          <NavToggler className={`${baseClass}__mobile-nav-toggler`}>
+          <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1}>
             <Hamburger />
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
@@ -43,6 +46,7 @@ export const AppHeader: React.FC = (props) => {
               <Link
                 aria-label={t('authentication:account')}
                 className={`${baseClass}__account`}
+                tabIndex={0}
                 to={`${adminRoute}/account`}
               >
                 <Account />

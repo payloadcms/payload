@@ -1,6 +1,6 @@
 # Redirects Example Front-End
 
-This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Redirects Example](https://github.com/payloadcms/payload/tree/master/examples/redireects/payload).
+This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Redirects Example](https://github.com/payloadcms/payload/tree/main/examples/redireects/payload).
 
 > This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/app), we will soon add a new example for you to use soon.
 
@@ -8,7 +8,7 @@ This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nex
 
 ### Payload
 
-First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/master/examples/redirects/payload). If you have not done so already, clone it down and follow the setup instructions there.
+First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/main/examples/redirects/payload). If you have not done so already, clone it down and follow the setup instructions there.
 
 ### Next.js App
 

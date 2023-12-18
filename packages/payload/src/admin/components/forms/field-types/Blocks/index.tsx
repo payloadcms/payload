@@ -37,6 +37,7 @@ const BlocksField: React.FC<Props> = (props) => {
     admin: { className, condition, description, readOnly },
     blocks,
     fieldTypes,
+    forceRender = false,
     indexPath,
     label,
     labels: labelsFromProps,
@@ -214,7 +215,7 @@ const BlocksField: React.FC<Props> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription description={description} value={value} />
+        <FieldDescription description={description} path={path} value={value} />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -238,6 +239,7 @@ const BlocksField: React.FC<Props> = (props) => {
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       fieldTypes={fieldTypes}
+                      forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}
                       labels={labels}
@@ -297,7 +299,7 @@ const BlocksField: React.FC<Props> = (props) => {
           </DrawerToggler>
           <BlocksDrawer
             addRow={addRow}
-            addRowIndex={value || 0}
+            addRowIndex={rows?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
             labels={labels}

@@ -4,23 +4,34 @@ import type { TFunction } from 'i18next'
 import type { CSSProperties } from 'react'
 
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
+import type React from 'react'
+
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
+import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
 import type { Description } from '../../admin/components/forms/FieldDescription/types'
+import type { Props as LabelProps } from '../../admin/components/forms/Label/types'
 import type { RowLabel } from '../../admin/components/forms/RowLabel/types'
 import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
 import type { User } from '../../auth'
-import type { TypeWithID } from '../../collections/config/types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
+import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { Payload } from '../../payload'
 import type { Operation, Where } from '../../types'
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+  /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<T>
+  /** The field which the hook is running against. */
+  field: FieldAffectingData
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
+  /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
+  global: SanitizedGlobalConfig | null
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
@@ -43,10 +54,23 @@ export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (
 ) => P | Promise<P>
 
 export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
+  /**
+   * The incoming data used to `create` or `update` the document with. `data` is undefined during the `read` operation.
+   */
   data?: Partial<T>
+  /**
+   * The original data of the document before the `update` is applied. `doc` is undefined during the `create` operation.
+   */
   doc?: T
+  /**
+   * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
+   */
   id?: number | string
+  /** The `Express` request object containing the currently authenticated `user` */
   req: PayloadRequest<U>
+  /**
+   * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
+   */
   siblingData?: Partial<P>
 }) => Promise<boolean> | boolean
 
@@ -65,8 +89,9 @@ export type FilterOptionsProps<T = any> = {
 }
 
 export type FilterOptions<T = any> =
-  | ((options: FilterOptionsProps<T>) => Promise<Where> | Where)
+  | ((options: FilterOptionsProps<T>) => Promise<Where | boolean> | Where | boolean)
   | Where
+  | null
 
 type Admin = {
   className?: string
@@ -75,6 +100,10 @@ type Admin = {
     Field?: React.ComponentType<any>
     Filter?: React.ComponentType<any>
   }
+  /**
+   * You can programmatically show / hide fields based on what other fields are doing.
+   * This is also run on the server, to determine if the field should be validated.
+   */
   condition?: Condition
   description?: Description
   disableBulkEdit?: boolean
@@ -97,6 +126,7 @@ export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
   id?: number | string
   operation?: Operation
   payload?: Payload
+  req?: PayloadRequest
   siblingData: Partial<TSiblingData>
   t: TFunction
   user?: Partial<User>
@@ -146,6 +176,12 @@ export type NumberField = FieldBase & {
   admin?: Admin & {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
+    }
     /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
     /** Set a value for the number field to increment / decrement using browser controls. */
@@ -178,6 +214,12 @@ export type NumberField = FieldBase & {
 export type TextField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
+    }
     placeholder?: Record<string, string> | string
     rtl?: boolean
   }
@@ -189,6 +231,12 @@ export type TextField = FieldBase & {
 export type EmailField = FieldBase & {
   admin?: Admin & {
     autoComplete?: string
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
+    }
     placeholder?: Record<string, string> | string
   }
   type: 'email'
@@ -196,6 +244,12 @@ export type EmailField = FieldBase & {
 
 export type TextareaField = FieldBase & {
   admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
+    }
     placeholder?: Record<string, string> | string
     rows?: number
     rtl?: boolean
@@ -206,11 +260,25 @@ export type TextareaField = FieldBase & {
 }
 
 export type CheckboxField = FieldBase & {
+  admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
+    }
+  }
   type: 'checkbox'
 }
 
 export type DateField = FieldBase & {
   admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+      afterInput?: React.ComponentType<any>[]
+      beforeInput?: React.ComponentType<any>[]
+    }
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
   }
@@ -307,6 +375,12 @@ export type UIField = {
 }
 
 export type UploadField = FieldBase & {
+  admin?: {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
+  }
   filterOptions?: FilterOptions
   maxDepth?: number
   relationTo: string
@@ -314,6 +388,10 @@ export type UploadField = FieldBase & {
 }
 
 type CodeAdmin = Admin & {
+  components?: {
+    Error?: React.ComponentType<ErrorProps>
+    Label?: React.ComponentType<LabelProps>
+  }
   editorOptions?: EditorProps['options']
   language?: string
 }
@@ -326,6 +404,10 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
 }
 
 type JSONAdmin = Admin & {
+  components?: {
+    Error?: React.ComponentType<ErrorProps>
+    Label?: React.ComponentType<LabelProps>
+  }
   editorOptions?: EditorProps['options']
 }
 
@@ -336,6 +418,10 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
 
 export type SelectField = FieldBase & {
   admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
     isClearable?: boolean
     isSortable?: boolean
   }
@@ -344,15 +430,10 @@ export type SelectField = FieldBase & {
   type: 'select'
 }
 
-export type RelationshipField = FieldBase & {
-  admin?: Admin & {
-    allowCreate?: boolean
-    isSortable?: boolean
-  }
+type SharedRelationshipProperties = FieldBase & {
   filterOptions?: FilterOptions
   hasMany?: boolean
   maxDepth?: number
-  relationTo: string | string[]
   type: 'relationship'
 } & (
     | {
@@ -383,6 +464,28 @@ export type RelationshipField = FieldBase & {
       }
   )
 
+type RelationshipAdmin = Admin & {
+  allowCreate?: boolean
+  components?: {
+    Error?: React.ComponentType<ErrorProps>
+    Label?: React.ComponentType<LabelProps>
+  }
+  isSortable?: boolean
+}
+export type PolymorphicRelationshipField = SharedRelationshipProperties & {
+  admin?: RelationshipAdmin & {
+    sortOptions?: { [collectionSlug: string]: string }
+  }
+  relationTo: string[]
+}
+export type SingleRelationshipField = SharedRelationshipProperties & {
+  admin?: RelationshipAdmin & {
+    sortOptions?: string
+  }
+  relationTo: string
+}
+export type RelationshipField = PolymorphicRelationshipField | SingleRelationshipField
+
 export type ValueWithRelation = {
   relationTo: string
   value: number | string
@@ -398,13 +501,15 @@ export type RelationshipValue =
   | ValueWithRelation[]
   | (number | string)
 
-type IsAny<T> = 0 extends 1 & T ? true : false
-
-export type RichTextField<Value extends object = any, AdapterProps = any> = FieldBase & {
+export type RichTextField<
+  Value extends object = any,
+  AdapterProps = any,
+  ExtraProperties = {},
+> = FieldBase & {
   admin?: Admin
-  editor?: RichTextAdapter<Value, AdapterProps>
+  editor?: RichTextAdapter<Value, AdapterProps, AdapterProps>
   type: 'richText'
-} & (IsAny<AdapterProps> extends true ? {} : AdapterProps)
+} & ExtraProperties
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
@@ -429,6 +534,10 @@ export type ArrayField = FieldBase & {
 
 export type RadioField = FieldBase & {
   admin?: Admin & {
+    components?: {
+      Error?: React.ComponentType<ErrorProps>
+      Label?: React.ComponentType<LabelProps>
+    }
     layout?: 'horizontal' | 'vertical'
   }
   options: Option[]

@@ -46,6 +46,7 @@ async function logout(incomingArgs: Arguments): Promise<string> {
 
     args =
       (await hook({
+        collection: args.collection?.config,
         context: req.context,
         req,
         res,

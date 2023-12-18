@@ -9,7 +9,7 @@ import { MediaBlock } from '../../blocks/MediaBlock'
 import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
-import { populatePublishedDate } from '../../hooks/populatePublishedDate'
+import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { revalidatePage } from './hooks/revalidatePage'
 
 export const Pages: CollectionConfig = {
@@ -24,7 +24,7 @@ export const Pages: CollectionConfig = {
     },
   },
   hooks: {
-    beforeChange: [populatePublishedDate],
+    beforeChange: [populatePublishedAt],
     afterChange: [revalidatePage],
     afterRead: [populateArchiveBlock],
   },
@@ -44,7 +44,7 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
-      name: 'publishedDate',
+      name: 'publishedAt',
       type: 'date',
       admin: {
         position: 'sidebar',

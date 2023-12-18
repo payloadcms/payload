@@ -10,18 +10,18 @@ body:
     id: reproduction-link
     attributes:
       label: Link to reproduction
-      description: Please add a link to a reproduction. See the fork [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+      description: Want us to look into your issue faster? Follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Describe the Bug
     validations:
       required: true
   - type: textarea
     attributes:
       label: To Reproduce
       description: Steps to reproduce the behavior, please provide a clear description of how to reproduce the issue, based on the linked minimal reproduction. Screenshots can be provided in the issue body below. If using code blocks, make sure that [syntax highlighting is correct](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks#syntax-highlighting) and double check that the rendered preview is not broken.
-    validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: Describe the Bug
     validations:
       required: true
   - type: input

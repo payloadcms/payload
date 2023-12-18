@@ -11,13 +11,14 @@ import type { User } from '../../auth/types'
 import type {
   Access,
   AdminViewComponent,
-  EditView,
+  EditViewConfig,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
+import type { RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { Where } from '../../types'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
@@ -27,20 +28,46 @@ export type TypeWithID = {
 }
 
 export type BeforeValidateHook = (args: {
+  context: RequestContext
   data?: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
   originalDoc?: any
   req?: PayloadRequest
 }) => any
 
-export type BeforeChangeHook = (args: { data: any; originalDoc?: any; req: PayloadRequest }) => any
+export type BeforeChangeHook = (args: {
+  context: RequestContext
+  data: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  originalDoc?: any
+  req: PayloadRequest
+}) => any
 
-export type AfterChangeHook = (args: { doc: any; previousDoc: any; req: PayloadRequest }) => any
+export type AfterChangeHook = (args: {
+  context: RequestContext
+  doc: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  previousDoc: any
+  req: PayloadRequest
+}) => any
 
-export type BeforeReadHook = (args: { doc: any; req: PayloadRequest }) => any
+export type BeforeReadHook = (args: {
+  context: RequestContext
+  doc: any
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
+  req: PayloadRequest
+}) => any
 
 export type AfterReadHook = (args: {
+  context: RequestContext
   doc: any
   findMany?: boolean
+  /** The global which this hook is being run on */
+  global: SanitizedGlobalConfig
   query?: Where
   req: PayloadRequest
 }) => any
@@ -78,28 +105,32 @@ export type GlobalAdminOptions = {
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?:
-        | {
-            [name: string]: EditView
-            API?: EditView
-            /**
-             * Replace or modify individual nested routes, or add new ones:
-             * + `Default` - `/admin/globals/:slug`
-             * + `API` - `/admin/globals/:id/api`
-             * + `LivePreview` - `/admin/globals/:id/preview`
-             * + `References` - `/admin/globals/:id/references`
-             * + `Relationships` - `/admin/globals/:id/relationships`
-             * + `Versions` - `/admin/globals/:id/versions`
-             * + `Version` - `/admin/globals/:id/versions/:version`
-             * + `:path` - `/admin/globals/:id/:path`
-             */
-            Default?: EditView
-            LivePreview?: EditView
-            Version?: EditView
-            Versions?: EditView
-            // TODO: uncomment these as they are built
-            // References?: EditView
-            // Relationships?: EditView
-          }
+        | (
+            | {
+                /**
+                 * Replace or modify individual nested routes, or add new ones:
+                 * + `Default` - `/admin/globals/:slug`
+                 * + `API` - `/admin/globals/:id/api`
+                 * + `LivePreview` - `/admin/globals/:id/preview`
+                 * + `References` - `/admin/globals/:id/references`
+                 * + `Relationships` - `/admin/globals/:id/relationships`
+                 * + `Versions` - `/admin/globals/:id/versions`
+                 * + `Version` - `/admin/globals/:id/versions/:version`
+                 * + `CustomView` - `/admin/globals/:id/:path`
+                 */
+                API?: AdminViewComponent | Partial<EditViewConfig>
+                Default?: AdminViewComponent | Partial<EditViewConfig>
+                LivePreview?: AdminViewComponent | Partial<EditViewConfig>
+                Version?: AdminViewComponent | Partial<EditViewConfig>
+                Versions?: AdminViewComponent | Partial<EditViewConfig>
+                // TODO: uncomment these as they are built
+                // References?: EditView
+                // Relationships?: EditView
+              }
+            | {
+                [name: string]: EditViewConfig
+              }
+          )
         | AdminViewComponent
     }
   }

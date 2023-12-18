@@ -1,32 +1,46 @@
 import type { Transformer } from '@lexical/markdown'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
+import type { LexicalNodeReplacement } from 'lexical'
+import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
 
 import type { AdapterProps } from '../../types'
-import type { EditorConfig } from '..//lexical/config/types'
+import type { EditorConfig } from '../lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
-import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import type { HTMLConverter } from './converters/html/converter/types'
 
-export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
-  afterReadPromises,
+export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
+  context,
   currentDepth,
   depth,
+  editorPopulationPromises,
   field,
+  findMany,
+  flattenLocales,
   node,
   overrideAccess,
+  populationPromises,
   req,
   showHiddenFields,
   siblingDoc,
 }: {
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
+  context: RequestContext
   currentDepth: number
   depth: number
+  /**
+   * This maps all population promises to the node type
+   */
+  editorPopulationPromises: Map<string, Array<PopulationPromise>>
   field: RichTextField<SerializedEditorState, AdapterProps>
+  findMany: boolean
+  flattenLocales: boolean
   node: T
   overrideAccess: boolean
+  populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
@@ -52,6 +66,15 @@ export type Feature = {
     sections: FloatingToolbarSection[]
   }
   hooks?: {
+    afterReadPromise?: ({
+      field,
+      incomingEditorState,
+      siblingDoc,
+    }: {
+      field: RichTextField<SerializedEditorState, AdapterProps>
+      incomingEditorState: SerializedEditorState
+      siblingDoc: Record<string, unknown>
+    }) => Promise<void> | null
     load?: ({
       incomingEditorState,
     }: {
@@ -65,21 +88,34 @@ export type Feature = {
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<{
-    afterReadPromises?: Array<AfterReadPromise>
-    node: Klass<LexicalNode>
+    converters?: {
+      html?: HTMLConverter
+    }
+    node: Klass<LexicalNode> | LexicalNodeReplacement
+    populationPromises?: Array<PopulationPromise>
     type: string
     validations?: Array<NodeValidation>
   }>
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
+        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: () => Promise<React.FC>
+        position: 'bottom' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: () => Promise<React.FC>
         position: 'normal' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
-        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+        Component: () => Promise<React.FC>
+        position: 'top' // Determines at which position the Component will be added.
       }
   >
 
@@ -125,17 +161,57 @@ export type ResolvedFeatureMap = Map<string, ResolvedFeature>
 
 export type FeatureProviderMap = Map<string, FeatureProvider>
 
+export type SanitizedPlugin =
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
+      desktopOnly?: boolean
+      key: string
+      position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'bottom' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'normal' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'top' // Determines at which position the Component will be added.
+    }
+
 export type SanitizedFeatures = Required<
   Pick<ResolvedFeature, 'markdownTransformers' | 'nodes'>
 > & {
-  /**  The node types mapped to their afterReadPromises */
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
+  /**  The node types mapped to their converters */
+  converters: {
+    html: HTMLConverter[]
+  }
   /** The keys of all enabled features */
   enabledFeatures: string[]
   floatingSelectToolbar: {
     sections: FloatingToolbarSection[]
   }
   hooks: {
+    afterReadPromises: Array<
+      ({
+        field,
+        incomingEditorState,
+        siblingDoc,
+      }: {
+        field: RichTextField<SerializedEditorState, AdapterProps>
+        incomingEditorState: SerializedEditorState
+        siblingDoc: Record<string, unknown>
+      }) => Promise<void> | null
+    >
     load: Array<
       ({
         incomingEditorState,
@@ -151,21 +227,9 @@ export type SanitizedFeatures = Required<
       }) => SerializedEditorState
     >
   }
-  plugins?: Array<
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        key: string
-        position: 'normal' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
-        desktopOnly?: boolean
-        key: string
-        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-      }
-  >
+  plugins?: Array<SanitizedPlugin>
+  /**  The node types mapped to their populationPromises */
+  populationPromises: Map<string, Array<PopulationPromise>>
   slashMenu: {
     dynamicOptions: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]

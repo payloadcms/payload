@@ -1,17 +1,28 @@
 /* eslint-disable no-param-reassign */
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { getBlocksField, getBlocksFieldSeedData } from '../Blocks'
+import { tabsFieldsSlug } from '../../slugs'
+import { getBlocksField } from '../Blocks'
 import { UIField } from './UIField'
-import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsSlug } from './constants'
+import { namedTabDefaultValue } from './constants'
 
 const TabsFields: CollectionConfig = {
-  slug: tabsSlug,
+  slug: tabsFieldsSlug,
   access: {
     read: () => true,
   },
   versions: true,
   fields: [
+    {
+      name: 'sidebarField',
+      type: 'text',
+      label: 'Sidebar Field',
+      admin: {
+        position: 'sidebar',
+        description:
+          'This should not collapse despite there being many tabs pushing the main fields open.',
+      },
+    },
     {
       type: 'tabs',
       tabs: [
@@ -94,6 +105,10 @@ const TabsFields: CollectionConfig = {
                   },
                 },
               ],
+            },
+            {
+              name: 'json',
+              type: 'json',
             },
           ],
         },
@@ -263,58 +278,6 @@ const TabsFields: CollectionConfig = {
       ],
     },
   ],
-}
-
-export const tabsDoc = {
-  array: [
-    {
-      text: "Hello, I'm the first row",
-    },
-    {
-      text: 'Second row here',
-    },
-    {
-      text: 'Here is some data for the third row',
-    },
-  ],
-  blocks: getBlocksFieldSeedData(),
-  group: {
-    number: 12,
-  },
-  nestedTab: {
-    text: 'Some text in a nested, named tab',
-  },
-  tab: {
-    array: [
-      {
-        text: "Hello, I'm the first row, in a named tab",
-      },
-      {
-        text: 'Second row here, in a named tab',
-      },
-      {
-        text: 'Here is some data for the third row, in a named tab',
-      },
-    ],
-    text: namedTabText,
-  },
-  text: 'localized',
-  localizedTab: {
-    text: localizedTextValue,
-  },
-  accessControlTab: {
-    text: 'cannot be read',
-  },
-  hooksTab: {
-    beforeValidate: false,
-    beforeChange: false,
-    afterChange: false,
-    afterRead: false,
-  },
-  textarea: 'Here is some text that goes in a textarea',
-  anotherText: 'Super tired of writing this text',
-  textInRow: 'hello',
-  numberInRow: 235,
 }
 
 export default TabsFields

@@ -1,30 +1,143 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { LivePreviewConfig } from '../../../../exports/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
+import type { Field } from '../../../../fields/config/types'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
+import type { FieldTypes } from '../../forms/field-types'
 import type { EditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
-import { Gutter } from '../../elements/Gutter'
-import RenderFields from '../../forms/RenderFields'
-import { filterFields } from '../../forms/RenderFields/filterFields'
-import { fieldTypes } from '../../forms/field-types'
+import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import Meta from '../../utilities/Meta'
 import { SetStepNav } from '../collections/Edit/SetStepNav'
+import { LivePreviewProvider } from './Context'
+import { useLivePreviewContext } from './Context/context'
 import { LivePreview } from './Preview'
 import './index.scss'
 import { usePopupWindow } from './usePopupWindow'
 
 const baseClass = 'live-preview'
 
-export const LivePreviewView: React.FC<EditViewProps> = (props) => {
+const PreviewView: React.FC<
+  EditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { i18n, t } = useTranslation('general')
+  const { previewWindowType } = useLivePreviewContext()
+
+  const { apiURL, data, fieldTypes, permissions } = props
+
+  let collection: SanitizedCollectionConfig
+  let global: SanitizedGlobalConfig
+  let disableActions: boolean
+  let disableLeaveWithoutSaving: boolean
+  let hasSavePermission: boolean
+  let isEditing: boolean
+  let id: string
+  let fields: Field[] = []
+  let label: SanitizedGlobalConfig['label']
+  let description: SanitizedGlobalConfig['admin']['description']
+
+  if ('collection' in props) {
+    collection = props?.collection
+    disableActions = props?.disableActions
+    disableLeaveWithoutSaving = props?.disableLeaveWithoutSaving
+    hasSavePermission = props?.hasSavePermission
+    isEditing = props?.isEditing
+    id = props?.id
+    fields = props?.collection?.fields
+  }
+
+  if ('global' in props) {
+    global = props?.global
+    fields = props?.global?.fields
+    label = props?.global?.label
+    description = props?.global?.admin?.description
+    hasSavePermission = permissions?.update?.permission
+  }
+
+  return (
+    <Fragment>
+      {collection && (
+        <Meta
+          description={t('editing')}
+          keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
+          title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+            collection.labels.singular,
+            i18n,
+          )}`}
+        />
+      )}
+      {global && (
+        <Meta
+          description={getTranslation(label, i18n)}
+          keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
+          title={getTranslation(label, i18n)}
+        />
+      )}
+      {((collection && !(collection.versions?.drafts && collection.versions?.drafts?.autosave)) ||
+        (global && !(global.versions?.drafts && global.versions?.drafts?.autosave))) &&
+        !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
+      <SetStepNav
+        collection={collection}
+        global={global}
+        id={id}
+        isEditing={isEditing}
+        view={t('livePreview')}
+      />
+      <DocumentControls
+        apiURL={apiURL}
+        collection={collection}
+        data={data}
+        disableActions={disableActions}
+        global={global}
+        hasSavePermission={hasSavePermission}
+        id={id}
+        isEditing={isEditing}
+        permissions={permissions}
+      />
+      <div
+        className={[baseClass, previewWindowType === 'popup' && `${baseClass}--detached`]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <div
+          className={[
+            `${baseClass}__main`,
+            previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <DocumentFields
+            description={description}
+            fieldTypes={fieldTypes}
+            fields={fields}
+            forceSidebarWrap
+            hasSavePermission={hasSavePermission}
+            permissions={permissions}
+          />
+        </div>
+        <LivePreview {...props} />
+      </div>
+    </Fragment>
+  )
+}
+
+export const LivePreviewView: React.FC<
+  EditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
+  const { data } = props
   const config = useConfig()
   const documentInfo = useDocumentInfo()
   const locale = useLocale()
@@ -45,116 +158,52 @@ export const LivePreviewView: React.FC<EditViewProps> = (props) => {
     }
   }
 
-  const url =
-    typeof livePreviewConfig?.url === 'function'
-      ? livePreviewConfig?.url({
-          data: props?.data,
-          documentInfo,
-          locale,
-        })
-      : livePreviewConfig?.url
+  const [url, setURL] = React.useState<string | undefined>(() => {
+    if (typeof livePreviewConfig?.url === 'string') return livePreviewConfig?.url
+  })
 
-  const popupState = usePopupWindow({
+  useEffect(() => {
+    const getURL = async () => {
+      const newURL =
+        typeof livePreviewConfig?.url === 'function'
+          ? await livePreviewConfig.url({
+              data,
+              documentInfo,
+              locale,
+            })
+          : livePreviewConfig?.url
+
+      setURL(newURL)
+    }
+
+    getURL() // eslint-disable-line @typescript-eslint/no-floating-promises
+  }, [data, documentInfo, locale, livePreviewConfig])
+
+  const breakpoints: LivePreviewConfig['breakpoints'] = [
+    ...(livePreviewConfig?.breakpoints || []),
+    {
+      name: 'responsive',
+      height: '100%',
+      label: 'Responsive',
+      width: '100%',
+    },
+  ]
+
+  const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
     url,
   })
 
-  const { apiURL, data, permissions } = props
-
-  let collection: SanitizedCollectionConfig
-  let global: SanitizedGlobalConfig
-  let disableActions: boolean
-  let disableLeaveWithoutSaving: boolean
-  let hasSavePermission: boolean
-  let isEditing: boolean
-  let id: string
-
-  if ('collection' in props) {
-    collection = props?.collection
-    disableActions = props?.disableActions
-    disableLeaveWithoutSaving = props?.disableLeaveWithoutSaving
-    hasSavePermission = props?.hasSavePermission
-    isEditing = props?.isEditing
-    id = props?.id
-  }
-
-  if ('global' in props) {
-    global = props?.global
-  }
-
-  const { fields } = collection
-
-  const sidebarFields = filterFields({
-    fieldSchema: fields,
-    fieldTypes,
-    filter: (field) => field?.admin?.position === 'sidebar',
-    permissions: permissions.fields,
-    readOnly: !hasSavePermission,
-  })
-
   return (
-    <Fragment>
-      <SetStepNav
-        collection={collection}
-        global={global}
-        id={id}
-        isEditing={isEditing}
-        view={t('livePreview')}
-      />
-      <DocumentControls
-        apiURL={apiURL}
-        collection={collection}
-        data={data}
-        disableActions={disableActions}
-        global={global}
-        hasSavePermission={hasSavePermission}
-        id={id}
-        isEditing={isEditing}
-        permissions={permissions}
-      />
-      <div
-        className={[baseClass, popupState?.isPopupOpen && `${baseClass}--detached`]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <div
-          className={[
-            `${baseClass}__main`,
-            popupState?.isPopupOpen && `${baseClass}__main--popup-open`,
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          <Meta
-            description={t('editing')}
-            keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-            title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-              collection.labels.singular,
-              i18n,
-            )}`}
-          />
-          {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
-            !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <Gutter className={`${baseClass}__edit`}>
-            <RenderFields
-              fieldSchema={fields}
-              fieldTypes={fieldTypes}
-              filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
-              permissions={permissions.fields}
-              readOnly={!hasSavePermission}
-            />
-            {sidebarFields && sidebarFields.length > 0 && (
-              <RenderFields fieldTypes={fieldTypes} fields={sidebarFields} />
-            )}
-          </Gutter>
-        </div>
-        <LivePreview
-          {...props}
-          livePreviewConfig={livePreviewConfig}
-          popupState={popupState}
-          url={url}
-        />
-      </div>
-    </Fragment>
+    <LivePreviewProvider
+      {...props}
+      breakpoints={breakpoints}
+      isPopupOpen={isPopupOpen}
+      openPopupWindow={openPopupWindow}
+      popupRef={popupRef}
+      url={url}
+    >
+      <PreviewView {...props} />
+    </LivePreviewProvider>
   )
 }

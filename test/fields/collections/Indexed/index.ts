@@ -4,6 +4,8 @@ import type {
 } from '../../../../packages/payload/src/collections/config/types'
 import type { IndexedField } from '../../payload-types'
 
+import { indexedFieldsSlug } from '../../slugs'
+
 const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
   return {
     ...data,
@@ -15,14 +17,12 @@ const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
       ...(data.group || {}),
       localizedUnique: data.group?.localizedUnique ? `${data.group?.localizedUnique}-copy` : '',
     },
-    partOne: data.partOne ? `${data.partOne}-copy` : '',
-    partTwo: data.partTwo ? `${data.partTwo}-copy` : '',
     uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
   }
 }
 
 const IndexedFields: CollectionConfig = {
-  slug: 'indexed-fields',
+  slug: indexedFieldsSlug,
   // used to assert that versions also get indexes
   admin: {
     hooks: {
@@ -51,6 +51,11 @@ const IndexedFields: CollectionConfig = {
         {
           name: 'localizedUnique',
           localized: true,
+          type: 'text',
+          unique: true,
+        },
+        {
+          name: 'unique',
           type: 'text',
           unique: true,
         },

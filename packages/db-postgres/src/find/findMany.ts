@@ -33,7 +33,7 @@ export const findMany = async function find({
   const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
   const table = adapter.tables[tableName]
 
-  let limit = limitArg
+  const limit = limitArg ?? 10
   let totalDocs: number
   let totalPages: number
   let hasPrevPage: boolean
@@ -51,6 +51,7 @@ export const findMany = async function find({
   })
 
   const orderedIDMap: Record<number | string, number> = {}
+  let orderedIDs: (number | string)[]
 
   const selectDistinctMethods: ChainedMethods = []
 
@@ -116,10 +117,15 @@ export const findMany = async function find({
     selectDistinctResult.forEach(({ id }, i) => {
       orderedIDMap[id as number | string] = i
     })
-    findManyArgs.where = inArray(adapter.tables[tableName].id, Object.keys(orderedIDMap))
+    orderedIDs = Object.keys(orderedIDMap)
+    findManyArgs.where = inArray(adapter.tables[tableName].id, orderedIDs)
   } else {
     findManyArgs.limit = limitArg === 0 ? undefined : limitArg
-    findManyArgs.offset = skip || (page - 1) * limitArg
+
+    const offset = skip || (page - 1) * limitArg
+
+    if (!Number.isNaN(offset)) findManyArgs.offset = offset
+
     if (where) {
       findManyArgs.where = where
     }
@@ -128,7 +134,7 @@ export const findMany = async function find({
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
-  if (pagination !== false || selectDistinctResult?.length > limit) {
+  if (pagination !== false && (orderedIDs ? orderedIDs?.length >= limit : true)) {
     const selectCountMethods: ChainedMethods = []
 
     joinAliases.forEach(({ condition, table }) => {
@@ -170,9 +176,8 @@ export const findMany = async function find({
     rawDocs.sort((a, b) => orderedIDMap[a.id] - orderedIDMap[b.id])
   }
 
-  if (pagination === false) {
+  if (pagination === false || !totalDocs) {
     totalDocs = rawDocs.length
-    limit = totalDocs
     totalPages = 1
     pagingCounter = 1
     hasPrevPage = false
