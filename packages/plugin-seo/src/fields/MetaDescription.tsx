@@ -1,11 +1,13 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import { useAllFormFields, useField } from 'payload/components/forms'
+// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
+// import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
+import { TextareaInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
-import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
-import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
-import { TextareaField } from 'payload/dist/fields/config/types'
+import type { TextareaField } from 'payload/types'
+
+import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 
 import { defaults } from '../defaults'
 import { PluginConfig } from '../types'
@@ -45,7 +47,7 @@ export const MetaDescription: React.FC<
       generatedDescription = await generateDescription({
         ...docInfo,
         doc: { ...fields },
-        locale,
+        locale: typeof locale === 'object' ? locale?.code : locale,
       })
     }
 

@@ -12,7 +12,6 @@
     "skipLibCheck": true,
     "strict": true,
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "references": [{ "path": "../payload" }]
 }

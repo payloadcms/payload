@@ -1,16 +1,18 @@
 'use client'
 
 import React, { useCallback } from 'react'
-import { useAllFormFields, useField } from 'payload/components/forms'
+// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
+// import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input'
+import { UploadInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'
-import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input'
-import { Props as UploadFieldType } from 'payload/dist/admin/components/forms/field-types/Upload/types'
+
 import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
+import type { UploadInputProps } from 'payload/src/admin/components/forms/field-types/Upload/Input'
 
 import { PluginConfig } from '../types'
 import { Pill } from '../ui/Pill'
 
-type UploadFieldWithProps = UploadFieldType & {
+type UploadFieldWithProps = UploadInputProps & {
   path: string
   pluginConfig: PluginConfig
 }
@@ -35,7 +37,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
       generatedImage = await generateImage({
         ...docInfo,
         doc: { ...fields },
-        locale,
+        locale: typeof locale === 'object' ? locale?.code : locale,
       })
     }
 
