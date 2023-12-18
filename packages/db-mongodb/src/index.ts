@@ -2,6 +2,7 @@ import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
 
+import fs from 'fs'
 import mongoose from 'mongoose'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
@@ -46,6 +47,8 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   }
+  /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
+  disableIndexHints?: boolean
   migrationDir?: string
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
@@ -87,11 +90,12 @@ declare module 'payload' {
 export function mongooseAdapter({
   autoPluralization = true,
   connectOptions,
+  disableIndexHints = false,
   migrationDir: migrationDirArg,
   url,
 }: Args): MongooseAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
-    const migrationDir = migrationDirArg || path.resolve(process.cwd(), 'src/migrations')
+    const migrationDir = findMigrationDir(migrationDirArg)
     mongoose.set('strictQuery', false)
 
     extendWebpackConfig(payload.config)
@@ -105,6 +109,7 @@ export function mongooseAdapter({
       collections: {},
       connectOptions: connectOptions || {},
       connection: undefined,
+      disableIndexHints,
       globals: undefined,
       mongoMemoryServer: undefined,
       sessions: {},
@@ -144,4 +149,43 @@ export function mongooseAdapter({
   }
 
   return adapter
+}
+
+/**
+ * Attempt to find migrations directory.
+ *
+ * Checks for the following directories in order:
+ * - `migrationDir` argument from Payload config
+ * - `src/migrations`
+ * - `dist/migrations`
+ * - `migrations`
+ *
+ * Defaults to `src/migrations`
+ *
+ * @param migrationDir
+ * @returns
+ */
+function findMigrationDir(migrationDir?: string): string {
+  const cwd = process.cwd()
+  const srcDir = path.resolve(cwd, 'src/migrations')
+  const distDir = path.resolve(cwd, 'dist/migrations')
+  const relativeMigrations = path.resolve(cwd, 'migrations')
+
+  // Use arg if provided
+  if (migrationDir) return migrationDir
+
+  // Check other common locations
+  if (fs.existsSync(srcDir)) {
+    return srcDir
+  }
+
+  if (fs.existsSync(distDir)) {
+    return distDir
+  }
+
+  if (fs.existsSync(relativeMigrations)) {
+    return relativeMigrations
+  }
+
+  return srcDir
 }

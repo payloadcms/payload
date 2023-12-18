@@ -12,6 +12,7 @@ import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './s
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
 
 export default buildConfigWithDefaults({
+  serverURL: undefined,
   admin: {
     webpack: (config) => ({
       ...config,
@@ -92,6 +93,41 @@ export default buildConfigWithDefaults({
           width: 200,
           height: 200,
         },
+      },
+      fields: [],
+    },
+    {
+      slug: 'object-fit',
+      upload: {
+        staticURL: '/object-fit',
+        staticDir: './object-fit',
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        imageSizes: [
+          {
+            name: 'fitContain',
+            width: 400,
+            height: 300,
+            fit: 'contain',
+          },
+          {
+            name: 'fitInside',
+            width: 300,
+            height: 400,
+            fit: 'inside',
+          },
+          {
+            name: 'fitCover',
+            width: 900,
+            height: 300,
+            fit: 'cover',
+          },
+          {
+            name: 'fitOutside',
+            width: 900,
+            height: 200,
+            fit: 'outside',
+          },
+        ],
       },
       fields: [],
     },
@@ -329,7 +365,6 @@ export default buildConfigWithDefaults({
             height: 80,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
             withoutReduction: true,
-            fit: 'contain',
           },
           {
             name: 'resizedLarger',
@@ -340,9 +375,7 @@ export default buildConfigWithDefaults({
             name: 'resizedSmaller',
             width: 180,
             height: 50,
-            // Why fit `contain` should also be set to https://github.com/lovell/sharp/issues/3595
             withoutReduction: true,
-            fit: 'contain',
           },
         ],
       },
@@ -401,6 +434,24 @@ export default buildConfigWithDefaults({
     Uploads1,
     Uploads2,
     AdminThumbnailCol,
+    {
+      slug: 'optional-file',
+      upload: {
+        staticURL: '/optional',
+        staticDir: './optional',
+        filesRequiredOnCreate: false,
+      },
+      fields: [],
+    },
+    {
+      slug: 'required-file',
+      upload: {
+        staticURL: '/required',
+        staticDir: './required',
+        filesRequiredOnCreate: true,
+      },
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media')

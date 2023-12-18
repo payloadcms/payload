@@ -3,38 +3,48 @@ import type { IndexDirection, IndexOptions } from 'mongoose'
 import { GraphQLClient } from 'graphql-request'
 
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
+import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
+import { isMongoose } from '../helpers/isMongoose'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
-import { arrayDefaultValue, arrayFieldsSlug } from './collections/Array'
-import { blocksDoc } from './collections/Blocks'
-import { dateDoc } from './collections/Date'
-import {
-  groupDefaultChild,
-  groupDefaultValue,
-  groupDoc,
-  groupFieldsSlug,
-} from './collections/Group'
-import { defaultNumber, numberDoc } from './collections/Number'
-import { pointDoc } from './collections/Point'
-import { tabsDoc } from './collections/Tabs'
+import { arrayDefaultValue } from './collections/Array'
+import { blocksDoc } from './collections/Blocks/shared'
+import { dateDoc } from './collections/Date/shared'
+import { groupDefaultChild, groupDefaultValue } from './collections/Group'
+import { groupDoc } from './collections/Group/shared'
+import { defaultNumber } from './collections/Number'
+import { numberDoc } from './collections/Number/shared'
+import { pointDoc } from './collections/Point/shared'
 import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
-  tabsSlug,
 } from './collections/Tabs/constants'
-import { defaultText } from './collections/Text'
+import { tabsDoc } from './collections/Tabs/shared'
+import { defaultText } from './collections/Text/shared'
+import { clearAndSeedEverything } from './seed'
+import { GroupField } from './payload-types'
+import {
+  arrayFieldsSlug,
+  blockFieldsSlug,
+  groupFieldsSlug,
+  relationshipFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './slugs'
 
-let client
+let client: RESTClient
 let graphQLClient: GraphQLClient
-let serverURL
-let config
-let token
+let serverURL: string
+let config: SanitizedConfig
+let token: string
+let user: any
 
 describe('Fields', () => {
   beforeAll(async () => {
@@ -45,12 +55,26 @@ describe('Fields', () => {
     const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`
     graphQLClient = new GraphQLClient(graphQLURL)
     token = await client.login()
+
+    user = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+  })
+
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+    client = new RESTClient(config, { defaultSlug: 'point-fields', serverURL })
+    await client.login()
   })
 
   describe('text', () => {
     let doc
     const text = 'text field'
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'text-fields',
         data: { text },
@@ -73,10 +97,126 @@ describe('Fields', () => {
     })
   })
 
+  describe('relationship', () => {
+    let textDoc
+    let otherTextDoc
+    let selfReferencing
+    let parent
+    let child
+    let grandChild
+    let relationshipInArray
+    const textDocText = 'text document'
+    const otherTextDocText = 'alt text'
+    const relationshipText = 'relationship text'
+
+    beforeEach(async () => {
+      textDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: textDocText,
+        },
+      })
+      otherTextDoc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: otherTextDocText,
+        },
+      })
+      const relationship = { relationTo: 'text-fields', value: textDoc.id }
+      parent = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      child = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationToSelf: parent.id,
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      grandChild = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationToSelf: child.id,
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      selfReferencing = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          relationship,
+          text: relationshipText,
+        },
+      })
+
+      relationshipInArray = await payload.create({
+        collection: relationshipFieldsSlug,
+        data: {
+          array: [
+            {
+              relationship: otherTextDoc.id,
+            },
+          ],
+          relationship,
+        },
+      })
+    })
+
+    it('should query parent self-reference', async () => {
+      const childResult = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationToSelf: { equals: parent.id },
+        },
+      })
+
+      const grandChildResult = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          relationToSelf: { equals: child.id },
+        },
+      })
+
+      const anyChildren = await payload.find({
+        collection: relationshipFieldsSlug,
+      })
+      const allChildren = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          'relationToSelf.text': { equals: relationshipText },
+        },
+      })
+
+      expect(childResult.docs[0].id).toStrictEqual(child.id)
+      expect(grandChildResult.docs[0].id).toStrictEqual(grandChild.id)
+      expect(allChildren.docs).toHaveLength(2)
+    })
+
+    it('should query relationship inside array', async () => {
+      const result = await payload.find({
+        collection: relationshipFieldsSlug,
+        where: {
+          'array.relationship.text': { equals: otherTextDocText },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]).toMatchObject(relationshipInArray)
+    })
+  })
+
   describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
     let doc
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'date-fields',
         data: dateDoc,
@@ -114,7 +254,7 @@ describe('Fields', () => {
 
   describe('select', () => {
     let doc
-    beforeAll(async () => {
+    beforeEach(async () => {
       const { id } = await payload.create({
         collection: 'select-fields',
         data: {
@@ -156,7 +296,7 @@ describe('Fields', () => {
 
   describe('number', () => {
     let doc
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection: 'number-fields',
         data: numberDoc,
@@ -258,13 +398,13 @@ describe('Fields', () => {
     })
   })
 
-  if (['mongoose'].includes(process.env.PAYLOAD_DATABASE)) {
+  if (isMongoose(payload) || !['postgres'].includes(process.env.PAYLOAD_DATABASE)) {
     describe('indexes', () => {
       let indexes
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeAll(() => {
+      beforeEach(() => {
         indexes = (payload.db as MongooseAdapter).collections[
           'indexed-fields'
         ].schema.indexes() as [Record<string, IndexDirection>, IndexOptions]
@@ -317,7 +457,7 @@ describe('Fields', () => {
       const definitions: Record<string, IndexDirection> = {}
       const options: Record<string, IndexOptions> = {}
 
-      beforeAll(() => {
+      beforeEach(() => {
         indexes = (payload.db as MongooseAdapter).versions['indexed-fields'].schema.indexes() as [
           Record<string, IndexDirection>,
           IndexOptions,
@@ -341,7 +481,7 @@ describe('Fields', () => {
       const localized = [5, -2]
       const group = { point: [1, 9] }
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         const findDoc = await payload.find({
           collection: 'point-fields',
           pagination: false,
@@ -378,6 +518,17 @@ describe('Fields', () => {
       })
 
       it('should not create duplicate point when unique', async () => {
+        // first create the point field
+        doc = await payload.create({
+          collection: 'point-fields',
+          data: {
+            group,
+            localized,
+            point,
+          },
+        })
+
+        // Now make sure we can't create a duplicate (since 'localized' is a unique field)
         await expect(() =>
           payload.create({
             collection: 'point-fields',
@@ -429,7 +580,7 @@ describe('Fields', () => {
     let doc
     const collection = arrayFieldsSlug
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       doc = await payload.create({
         collection,
         data: {},
@@ -437,16 +588,42 @@ describe('Fields', () => {
     })
 
     it('should create with ids and nested ids', async () => {
-      const docWithIDs = await payload.create({
+      const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
-      })
+      })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
 
     it('should create with defaultValue', async () => {
       expect(doc.items).toMatchObject(arrayDefaultValue)
       expect(doc.localized).toMatchObject(arrayDefaultValue)
+    })
+
+    it('should create with nested array', async () => {
+      const subArrayText = 'something expected'
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              subArray: [
+                {
+                  text: subArrayText,
+                },
+              ],
+              text: 'test',
+            },
+          ],
+        },
+      })
+
+      const result = await payload.findByID({
+        id: doc.id,
+        collection,
+      })
+
+      expect(result.items[0].subArray[0].text).toStrictEqual(subArrayText)
     })
 
     it('should update without overwriting other locales with defaultValue', async () => {
@@ -494,7 +671,7 @@ describe('Fields', () => {
   describe('group', () => {
     let document
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
@@ -510,9 +687,9 @@ describe('Fields', () => {
   describe('tabs', () => {
     let document
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       document = await payload.create({
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         data: tabsDoc,
       })
     })
@@ -532,7 +709,7 @@ describe('Fields', () => {
     it('should create with localized text inside a named tab', async () => {
       document = await payload.findByID({
         id: document.id,
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         locale: 'all',
       })
       expect(document.localizedTab.en.text).toStrictEqual(localizedTextValue)
@@ -541,7 +718,7 @@ describe('Fields', () => {
     it('should allow access control on a named tab', async () => {
       document = await payload.findByID({
         id: document.id,
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         overrideAccess: false,
       })
       expect(document.accessControlTab).toBeUndefined()
@@ -549,7 +726,7 @@ describe('Fields', () => {
 
     it('should allow hooks on a named tab', async () => {
       const newDocument = await payload.create({
-        collection: tabsSlug,
+        collection: tabsFieldsSlug,
         data: tabsDoc,
       })
       expect(newDocument.hooksTab.beforeValidate).toBe(true)
@@ -657,6 +834,106 @@ describe('Fields', () => {
       })
 
       expect(blockFieldsFail.docs).toHaveLength(0)
+    })
+
+    it('should create when existing block ids are used', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        limit: 1,
+      })
+      const [doc] = blockFields.docs
+
+      const result = await payload.create({
+        collection: 'block-fields',
+        data: {
+          ...doc,
+        },
+      })
+
+      expect(result.id).toBeDefined()
+    })
+
+    it('should filter based on nested block fields', async () => {
+      await payload.create({
+        collection: 'block-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text: 'green',
+            },
+          ],
+        },
+      })
+      await payload.create({
+        collection: 'block-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text: 'pink',
+            },
+          ],
+        },
+      })
+      await payload.create({
+        collection: 'block-fields',
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text: 'green',
+            },
+          ],
+        },
+      })
+
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        overrideAccess: false,
+        user,
+        where: {
+          and: [
+            {
+              'blocks.text': {
+                equals: 'green',
+              },
+            },
+          ],
+        },
+      })
+
+      const { docs } = blockFields
+      expect(docs).toHaveLength(2)
+    })
+
+    it('should query blocks with nested relationship', async () => {
+      const textDoc = await payload.create({
+        collection: textFieldsSlug,
+        data: {
+          text: 'test',
+        },
+      })
+      const blockDoc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          relationshipBlocks: [
+            {
+              blockType: 'relationships',
+              relationship: textDoc.id,
+            },
+          ],
+        },
+      })
+      const result = await payload.find({
+        collection: blockFieldsSlug,
+        where: {
+          'relationshipBlocks.relationship': { equals: textDoc.id },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]).toMatchObject(blockDoc)
     })
   })
 
@@ -794,6 +1071,21 @@ describe('Fields', () => {
       const { docs }: PaginatedDocs<RichTextField> = response.RichTextFields
       const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any
       expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
+    })
+  })
+
+  describe('relationships', () => {
+    it('should not crash if querying with empty in operator', async () => {
+      const query = await payload.find({
+        collection: 'relationship-fields',
+        where: {
+          'relationship.value': {
+            in: [],
+          },
+        },
+      })
+
+      expect(query.docs).toBeDefined()
     })
   })
 })

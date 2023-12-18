@@ -1,3 +1,4 @@
+'use client'
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -6,18 +7,16 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
-import type { SlashMenuGroup } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
-import type { SlashMenuOption } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
+import type { SlashMenuGroup, SlashMenuOption } from './LexicalTypeaheadMenuPlugin/types'
 
 import { useEditorConfigContext } from '../../config/EditorConfigProvider'
-import {
-  LexicalTypeaheadMenuPlugin,
-  useBasicTypeaheadTriggerMatch,
-} from './LexicalTypeaheadMenuPlugin'
+import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin'
 import './index.scss'
+import { useMenuTriggerMatch } from './useMenuTriggerMatch'
+
+const baseClass = 'slash-menu-popup'
 
 function SlashMenuItem({
-  index,
   isSelected,
   onClick,
   onMouseEnter,
@@ -31,25 +30,36 @@ function SlashMenuItem({
 }) {
   const { i18n } = useTranslation('fields')
 
-  let className = 'item'
+  let className = `${baseClass}__item ${baseClass}__item-${option.key}`
   if (isSelected) {
-    className += ' selected'
+    className += ` ${baseClass}__item--selected`
   }
 
-  let title = option.title
-  if (option.displayName && typeof option.displayName === 'function') {
-    title = option.displayName({ i18n })
+  let title = option.key
+  if (option.displayName) {
+    title =
+      typeof option.displayName === 'function' ? option.displayName({ i18n }) : option.displayName
   }
   // Crop title to max. 50 characters
   if (title.length > 25) {
     title = title.substring(0, 25) + '...'
   }
 
+  const LazyIcon = useMemo(() => {
+    return option?.Icon
+      ? React.lazy(() =>
+          option.Icon().then((resolvedIcon) => ({
+            default: resolvedIcon,
+          })),
+        )
+      : null
+  }, [option])
+
   return (
     <button
       aria-selected={isSelected}
       className={className}
-      id={'typeahead-item-' + index}
+      id={baseClass + '__item-' + option.key}
       key={option.key}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
@@ -58,8 +68,13 @@ function SlashMenuItem({
       tabIndex={-1}
       type="button"
     >
-      <option.Icon />
-      <span className="text">{title}</span>
+      {LazyIcon && (
+        <React.Suspense>
+          <LazyIcon />
+        </React.Suspense>
+      )}
+
+      <span className={`${baseClass}__item-text`}>{title}</span>
     </button>
   )
 }
@@ -72,15 +87,16 @@ export function SlashMenuPlugin({
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
+  const { i18n } = useTranslation('fields')
 
-  const checkForTriggerMatch = useBasicTypeaheadTriggerMatch('/', {
+  const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,
   })
 
   const getDynamicOptions = useCallback(() => {
     let groupWithOptions: Array<SlashMenuGroup> = []
 
-    for (const dynamicOption of editorConfig?.features.slashMenu.dynamicOptions) {
+    for (const dynamicOption of editorConfig.features.slashMenu.dynamicOptions) {
       const dynamicGroupWithOptions = dynamicOption({
         editor,
         queryString,
@@ -101,7 +117,15 @@ export function SlashMenuPlugin({
       // Filter current groups first
       groupsWithOptions = groupsWithOptions.map((group) => {
         const filteredOptions = group.options.filter((option) => {
-          return new RegExp(queryString, 'gi').exec(option.title) || option.keywords != null
+          let optionTitle = option.key
+          if (option.displayName) {
+            optionTitle =
+              typeof option.displayName === 'function'
+                ? option.displayName({ i18n })
+                : option.displayName
+          }
+
+          return new RegExp(queryString, 'gi').exec(optionTitle) || option.keywords != null
             ? option.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
             : false
         })
@@ -122,16 +146,14 @@ export function SlashMenuPlugin({
       // merge dynamic options into groups
       for (const dynamicGroup of dynamicOptionGroups) {
         // 1. find the group with the same name or create new one
-        let group = groupsWithOptions.find((group) => group.title === dynamicGroup.title)
+        let group = groupsWithOptions.find((group) => group.key === dynamicGroup.key)
         if (!group) {
           group = {
             ...dynamicGroup,
             options: [],
           }
         } else {
-          groupsWithOptions = groupsWithOptions.filter(
-            (group) => group.title !== dynamicGroup.title,
-          )
+          groupsWithOptions = groupsWithOptions.filter((group) => group.key !== dynamicGroup.key)
         }
 
         // 2. Add options to group options array and add to sanitized.slashMenu.groupsWithOptions
@@ -143,7 +165,7 @@ export function SlashMenuPlugin({
     }
 
     return groupsWithOptions
-  }, [getDynamicOptions, queryString, editorConfig?.features])
+  }, [getDynamicOptions, queryString, editorConfig?.features, i18n])
 
   const onSelectOption = useCallback(
     (
@@ -174,27 +196,40 @@ export function SlashMenuPlugin({
         ) =>
           anchorElementRef.current && groups.length
             ? ReactDOM.createPortal(
-                <div className="typeahead-popover slash-menu">
-                  {groups.map((group) => (
-                    <div className="group" key={group.title}>
-                      <div className="group-title">{group.title}</div>
-                      {group.options.map((option, oi: number) => (
-                        <SlashMenuItem
-                          index={oi}
-                          isSelected={selectedOptionKey === option.key}
-                          key={option.key}
-                          onClick={() => {
-                            setSelectedOptionKey(option.key)
-                            selectOptionAndCleanUp(option)
-                          }}
-                          onMouseEnter={() => {
-                            setSelectedOptionKey(option.key)
-                          }}
-                          option={option}
-                        />
-                      ))}
-                    </div>
-                  ))}
+                <div className={baseClass}>
+                  {groups.map((group) => {
+                    let groupTitle = group.key
+                    if (group.displayName) {
+                      groupTitle =
+                        typeof group.displayName === 'function'
+                          ? group.displayName({ i18n })
+                          : group.displayName
+                    }
+
+                    return (
+                      <div
+                        className={`${baseClass}__group ${baseClass}__group-${group.key}`}
+                        key={group.key}
+                      >
+                        <div className={`${baseClass}__group-title`}>{groupTitle}</div>
+                        {group.options.map((option, oi: number) => (
+                          <SlashMenuItem
+                            index={oi}
+                            isSelected={selectedOptionKey === option.key}
+                            key={option.key}
+                            onClick={() => {
+                              setSelectedOptionKey(option.key)
+                              selectOptionAndCleanUp(option)
+                            }}
+                            onMouseEnter={() => {
+                              setSelectedOptionKey(option.key)
+                            }}
+                            option={option}
+                          />
+                        ))}
+                      </div>
+                    )
+                  })}
                 </div>,
                 anchorElementRef.current,
               )

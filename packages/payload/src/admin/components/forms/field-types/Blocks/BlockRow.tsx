@@ -24,6 +24,7 @@ type BlockFieldProps = UseDraggableSortableReturn &
     addRow: (rowIndex: number, blockType: string) => void
     blockToRender: Block
     duplicateRow: (rowIndex: number) => void
+    forceRender?: boolean
     hasMaxRows?: boolean
     moveRow: (fromIndex: number, toIndex: number) => void
     readOnly: boolean
@@ -40,6 +41,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   blocks,
   duplicateRow,
   fieldTypes,
+  forceRender,
   hasMaxRows,
   indexPath,
   labels,
@@ -130,6 +132,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             path: createNestedFieldPath(path, field),
           }))}
           fieldTypes={fieldTypes}
+          forceRender={forceRender}
           indexPath={indexPath}
           margins="small"
           permissions={permissions?.blocks?.[row.blockType]?.fields}

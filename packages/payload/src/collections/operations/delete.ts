@@ -13,6 +13,7 @@ import { APIError } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions'
@@ -49,6 +50,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       args =
         (await hook({
           args,
+          collection: args.collection.config,
           context: args.req.context,
           operation: 'delete',
         })) || args
@@ -126,6 +128,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
           return hook({
             id,
+            collection: collectionConfig,
             context: req.context,
             req,
           })
@@ -171,10 +174,11 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         // /////////////////////////////////////
 
         result = await afterRead({
+          collection: collectionConfig,
           context: req.context,
           depth,
           doc: result || doc,
-          entityConfig: collectionConfig,
+          global: null,
           overrideAccess,
           req,
           showHiddenFields,
@@ -189,6 +193,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
           result =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               doc: result || doc,
               req,
@@ -205,6 +210,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           result =
             (await hook({
               id,
+              collection: collectionConfig,
               context: req.context,
               doc: result,
               req,
@@ -249,11 +255,12 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'delete',
       result,
     })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

@@ -1,18 +1,24 @@
-import type { Field, PayloadRequest, RichTextAdapter } from 'payload/types'
+import type { RequestContext } from 'payload'
+import type { Field, PayloadRequest } from 'payload/types'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
+import { afterReadTraverseFields } from 'payload/utilities'
 
-import type { AfterReadPromise } from '../field/features/types'
-
-import { populate } from './populate'
+import type { PopulationPromise } from '../field/features/types'
 
 type NestedRichTextFieldsArgs = {
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
+  context: RequestContext
   currentDepth?: number
   data: unknown
   depth: number
+  /**
+   * This maps all the population promises to the node types
+   */
+  editorPopulationPromises: Map<string, Array<PopulationPromise>>
   fields: Field[]
+  findMany: boolean
+  flattenLocales: boolean
   overrideAccess: boolean
+  populationPromises: Promise<void>[]
   promises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
@@ -20,201 +26,37 @@ type NestedRichTextFieldsArgs = {
 }
 
 export const recurseNestedFields = ({
-  afterReadPromises,
+  context,
   currentDepth = 0,
   data,
   depth,
   fields,
+  findMany,
+  flattenLocales,
   overrideAccess = false,
+  populationPromises,
   promises,
   req,
   showHiddenFields,
   siblingDoc,
 }: NestedRichTextFieldsArgs): void => {
-  fields.forEach((field) => {
-    if (field.type === 'relationship' || field.type === 'upload') {
-      if (field.type === 'relationship') {
-        if (field.hasMany && Array.isArray(data[field.name])) {
-          if (Array.isArray(field.relationTo)) {
-            data[field.name].forEach(({ relationTo, value }, i) => {
-              const collection = req.payload.collections[relationTo]
-              if (collection) {
-                promises.push(
-                  populate({
-                    id: value,
-                    collection,
-                    currentDepth,
-                    data: data[field.name],
-                    depth,
-                    field,
-                    key: i,
-                    overrideAccess,
-                    req,
-                    showHiddenFields,
-                  }),
-                )
-              }
-            })
-          } else {
-            data[field.name].forEach((id, i) => {
-              const collection = req.payload.collections[field.relationTo as string]
-              if (collection) {
-                promises.push(
-                  populate({
-                    id,
-                    collection,
-                    currentDepth,
-                    data: data[field.name],
-                    depth,
-                    field,
-                    key: i,
-                    overrideAccess,
-                    req,
-                    showHiddenFields,
-                  }),
-                )
-              }
-            })
-          }
-        } else if (
-          Array.isArray(field.relationTo) &&
-          data[field.name]?.value &&
-          data[field.name]?.relationTo
-        ) {
-          const collection = req.payload.collections[data[field.name].relationTo]
-          promises.push(
-            populate({
-              id: data[field.name].value,
-              collection,
-              currentDepth,
-              data: data[field.name],
-              depth,
-              field,
-              key: 'value',
-              overrideAccess,
-              req,
-              showHiddenFields,
-            }),
-          )
-        }
-      }
-      if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
-        const collection = req.payload.collections[field.relationTo]
-        promises.push(
-          populate({
-            id: data[field.name],
-            collection,
-            currentDepth,
-            data,
-            depth,
-            field,
-            key: field.name,
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }),
-        )
-      }
-    } else if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
-      if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
-        recurseNestedFields({
-          afterReadPromises,
-          currentDepth,
-          data: data[field.name],
-          depth,
-          fields: field.fields,
-          overrideAccess,
-          promises,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
-      } else {
-        recurseNestedFields({
-          afterReadPromises,
-          currentDepth,
-          data,
-          depth,
-          fields: field.fields,
-          overrideAccess,
-          promises,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
-      }
-    } else if (field.type === 'tabs') {
-      field.tabs.forEach((tab) => {
-        recurseNestedFields({
-          afterReadPromises,
-          currentDepth,
-          data,
-          depth,
-          fields: tab.fields,
-          overrideAccess,
-          promises,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
-      })
-    } else if (Array.isArray(data[field.name])) {
-      if (field.type === 'blocks') {
-        data[field.name].forEach((row, i) => {
-          const block = field.blocks.find(({ slug }) => slug === row?.blockType)
-          if (block) {
-            recurseNestedFields({
-              afterReadPromises,
-              currentDepth,
-              data: data[field.name][i],
-              depth,
-              fields: block.fields,
-              overrideAccess,
-              promises,
-              req,
-              showHiddenFields,
-              siblingDoc: data[field.name][i], // This has to be scoped to the blocks's fields, otherwise there may be population issues, e.g. for a relationship field with Blocks Node, with a Blocks Field, with a RichText Field, With Relationship Node. The last richtext field would try to find itself using siblingDoc[field.nane], which only works if the siblingDoc is scoped to the blocks's fields
-            })
-          }
-        })
-      }
-
-      if (field.type === 'array') {
-        data[field.name].forEach((_, i) => {
-          recurseNestedFields({
-            afterReadPromises,
-            currentDepth,
-            data: data[field.name][i],
-            depth,
-            fields: field.fields,
-            overrideAccess,
-            promises,
-            req,
-            showHiddenFields,
-            siblingDoc, // TODO: if there's any population issues, this might have to be data[field.name][i] as well
-          })
-        })
-      }
-    }
-
-    if (field.type === 'richText') {
-      const editor: RichTextAdapter = field?.editor
-
-      if (editor?.afterReadPromise) {
-        const afterReadPromise = editor.afterReadPromise({
-          currentDepth,
-          depth,
-          field,
-          overrideAccess,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
-
-        if (afterReadPromise) {
-          promises.push(afterReadPromise)
-        }
-      }
-    }
+  afterReadTraverseFields({
+    collection: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
+    context,
+    currentDepth,
+    depth,
+    doc: data as any, // Looks like it's only needed for hooks and access control, so doesn't matter what we pass here right now
+    fieldPromises: promises, // Not sure if what I pass in here makes sense. But it doesn't seem like it's used at all anyways
+    fields,
+    findMany,
+    flattenLocales,
+    global: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
+    overrideAccess,
+    populationPromises, // This is not the same as populationPromises passed into this recurseNestedFields. These are just promises resolved at the very end.
+    req,
+    showHiddenFields,
+    siblingDoc,
+    triggerAccessControl: false, // TODO: Enable this to support access control
+    triggerHooks: false, // TODO: Enable this to support hooks
   })
 }

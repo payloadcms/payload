@@ -1,4 +1,4 @@
-import type { GeneratedTypes } from '../../../'
+import type { GeneratedTypes, RequestContext } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 
@@ -10,6 +10,7 @@ import unlock from '../unlock'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
+  context?: RequestContext
   data: {
     email
   }
@@ -23,11 +24,12 @@ async function localUnlock<T extends keyof GeneratedTypes['collections']>(
 ): Promise<boolean> {
   const {
     collection: collectionSlug,
+    context,
     data,
     overrideAccess = true,
     req = {} as PayloadRequest,
   } = options
-  setRequestContext(options.req)
+  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
 

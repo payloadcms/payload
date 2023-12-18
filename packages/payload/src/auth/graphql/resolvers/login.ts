@@ -1,5 +1,6 @@
 import type { Collection } from '../../../collections/config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import login from '../../operations/login'
 
 function loginResolver(collection: Collection) {
@@ -11,7 +12,7 @@ function loginResolver(collection: Collection) {
         password: args.password,
       },
       depth: 0,
-      req: context.req,
+      req: isolateTransactionID(context.req),
       res: context.res,
     }
 

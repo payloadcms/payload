@@ -1,3 +1,5 @@
+'use client'
+
 import type { Fields } from 'payload/types'
 import type { HTMLAttributes } from 'react'
 

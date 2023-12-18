@@ -1,12 +1,13 @@
 import type { Collection } from '../../../collections/config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import logout from '../../operations/logout'
 
 function logoutResolver(collection: Collection): any {
   async function resolver(_, args, context) {
     const options = {
       collection,
-      req: context.req,
+      req: isolateTransactionID(context.req),
       res: context.res,
     }
 

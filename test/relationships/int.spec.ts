@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 
+import type { PayloadRequest } from '../../packages/payload/src/express/types'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -182,6 +183,73 @@ describe('Relationships', () => {
           data: expect.anything(),
         })
         expect(status).toEqual(400)
+      })
+
+      it('should count totalDocs correctly when using or in where query and relation contains hasMany relationship fields', async () => {
+        const user = (
+          await payload.find({
+            collection: 'users',
+          })
+        ).docs[0]
+
+        const user2 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '1@test.com',
+            password: 'fwefe',
+          },
+        })
+        const user3 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '2@test.com',
+            password: 'fwsefe',
+          },
+        })
+        const user4 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '3@test.com',
+            password: 'fwddsefe',
+          },
+        })
+        await Promise.all([
+          payload.create({
+            collection: 'movieReviews',
+            data: {
+              likes: [user3.id, user2.id, user.id, user4.id],
+              movieReviewer: user.id,
+              visibility: 'public',
+            },
+          }),
+          payload.create({
+            collection: 'movieReviews',
+            data: {
+              movieReviewer: user2.id,
+              visibility: 'public',
+            },
+          }),
+        ])
+
+        const query = await payload.find({
+          collection: 'movieReviews',
+          depth: 1,
+          where: {
+            or: [
+              {
+                visibility: {
+                  equals: 'public',
+                },
+              },
+              {
+                movieReviewer: {
+                  equals: user.id,
+                },
+              },
+            ],
+          },
+        })
+        expect(query.totalDocs).toEqual(2)
       })
 
       describe('Custom ID', () => {
@@ -464,6 +532,75 @@ describe('Relationships', () => {
 
         expect(stanleyNeverMadeMovies.movies).toHaveLength(0)
       })
+    })
+  })
+
+  describe('Creating', () => {
+    describe('With transactions', () => {
+      it('should be able to create filtered relations within a transaction', async () => {
+        const req = {} as PayloadRequest
+        req.transactionID = await payload.db.beginTransaction?.()
+        const related = await payload.create({
+          req,
+          collection: relationSlug,
+          data: {
+            name: 'parent',
+          },
+        })
+        const withRelation = await payload.create({
+          req,
+          collection: slug,
+          data: {
+            filteredRelation: related.id,
+          },
+        })
+
+        if (req.transactionID) {
+          await payload.db.commitTransaction?.(req.transactionID)
+        }
+
+        expect(withRelation.filteredRelation.id).toEqual(related.id)
+      })
+    })
+  })
+
+  describe('Polymorphic Relationships', () => {
+    it('should allow REST querying on polymorphic relationships', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: 'polymorphic-relationships',
+        data: {
+          polymorphic: {
+            value: movie.id,
+            relationTo: 'movies',
+          },
+        },
+      })
+
+      const query = await client.find({
+        slug: 'polymorphic-relationships',
+        query: {
+          and: [
+            {
+              'polymorphic.value': {
+                equals: movie.id,
+              },
+            },
+            {
+              'polymorphic.relationTo': {
+                equals: 'movies',
+              },
+            },
+          ],
+        },
+      })
+
+      expect(query.result.docs).toHaveLength(1)
     })
   })
 })

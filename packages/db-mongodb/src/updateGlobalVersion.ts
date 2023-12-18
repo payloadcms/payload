@@ -7,9 +7,17 @@ import { withSession } from './withSession'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: MongooseAdapter,
-  { global, locale, req = {} as PayloadRequest, versionData, where }: UpdateGlobalVersionArgs<T>,
+  {
+    id,
+    global,
+    locale,
+    req = {} as PayloadRequest,
+    versionData,
+    where,
+  }: UpdateGlobalVersionArgs<T>,
 ) {
   const VersionModel = this.versions[global]
+  const whereToUse = where || { id: { equals: id } }
   const options = {
     ...withSession(this, req.transactionID),
     lean: true,
@@ -19,7 +27,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   const query = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
-    where,
+    where: whereToUse,
   })
 
   const doc = await VersionModel.findOneAndUpdate(query, versionData, options)

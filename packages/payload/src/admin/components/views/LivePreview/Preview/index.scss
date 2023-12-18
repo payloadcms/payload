@@ -1,6 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 .live-preview-window {
+  background-color: var(--theme-bg);
   width: 60%;
   flex-shrink: 0;
   flex-grow: 0;

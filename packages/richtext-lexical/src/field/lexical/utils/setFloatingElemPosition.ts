@@ -1,13 +1,9 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
 const VERTICAL_GAP = 10
 const HORIZONTAL_OFFSET = 5
 
+// TODO: This works fine with some dirty fixes (looking at you, specialHandlingForCaret). But this definitely needs refactoring and documentation, to be easier to understand and maintain.
+// This is supposed to position the floatingElem based on the parent (anchorElem) and the target (targetRect) which is usually the selected text.
+// So basically, it positions the floatingElem either below or above the target (targetRect) and aligns it to the left or center of the target (targetRect).
 export function setFloatingElemPosition(
   targetRect: ClientRect | null,
   floatingElem: HTMLElement,
@@ -15,6 +11,7 @@ export function setFloatingElemPosition(
   horizontalPosition: 'center' | 'left' = 'left',
   verticalGap: number = VERTICAL_GAP,
   horizontalOffset: number = HORIZONTAL_OFFSET,
+  specialHandlingForCaret = false,
 ): void {
   const scrollerElem = anchorElem.parentElement
 
@@ -56,5 +53,18 @@ export function setFloatingElemPosition(
   left -= anchorElementRect.left
 
   floatingElem.style.opacity = '1'
-  floatingElem.style.transform = `translate(${left}px, ${top}px)`
+
+  if (specialHandlingForCaret && top == 0 /* 0 Happens when selecting 1st line */) {
+    top -= 44 // Especially this arbitrary number needs refactoring (this is for the caret)
+    // rotate too
+    floatingElem.style.transform = `translate(${left}px, ${top}px) rotate(180deg)`
+  } else if (
+    specialHandlingForCaret &&
+    top === -63 /* -63 Happens when selecting 2nd line in multi-line paragraph */
+  ) {
+    top += 18 // Especially this arbitrary number needs refactoring (this is for the caret)
+    floatingElem.style.transform = `translate(${left}px, ${top}px) rotate(180deg)`
+  } else {
+    floatingElem.style.transform = `translate(${left}px, ${top}px)`
+  }
 }

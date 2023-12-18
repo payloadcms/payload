@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-react",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "The official live preview React SDK for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -17,7 +17,7 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "@payloadcms/live-preview": "workspace:*"
+    "@payloadcms/live-preview": "workspace:^0.x"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

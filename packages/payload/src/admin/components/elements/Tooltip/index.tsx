@@ -6,10 +6,19 @@ import useIntersect from '../../../hooks/useIntersect'
 import './index.scss'
 
 const Tooltip: React.FC<Props> = (props) => {
-  const { boundingRef, children, className, delay = 350, show: showFromProps = true } = props
+  const {
+    alignCaret = 'center',
+    boundingRef,
+    children,
+    className,
+    delay = 350,
+    show: showFromProps = true,
+  } = props
 
   const [show, setShow] = React.useState(showFromProps)
   const [position, setPosition] = React.useState<'bottom' | 'top'>('top')
+
+  const getTitleAttribute = (content) => (typeof content === 'string' ? content : '')
 
   const [ref, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,
@@ -42,18 +51,28 @@ const Tooltip: React.FC<Props> = (props) => {
     <React.Fragment>
       <aside
         aria-hidden="true"
-        className={['tooltip', className, 'tooltip--position-top'].filter(Boolean).join(' ')}
+        className={['tooltip', className, `tooltip--caret-${alignCaret}`, 'tooltip--position-top']
+          .filter(Boolean)
+          .join(' ')}
         ref={ref}
+        title={getTitleAttribute(children)}
       >
-        {children}
+        <div className="tooltip-content">{children}</div>
       </aside>
 
       <aside
-        className={['tooltip', className, show && 'tooltip--show', `tooltip--position-${position}`]
+        className={[
+          'tooltip',
+          className,
+          show && 'tooltip--show',
+          `tooltip--caret-${alignCaret}`,
+          `tooltip--position-${position}`,
+        ]
           .filter(Boolean)
           .join(' ')}
+        title={getTitleAttribute(children)}
       >
-        {children}
+        <div className="tooltip-content">{children}</div>
       </aside>
     </React.Fragment>
   )

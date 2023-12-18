@@ -26,11 +26,13 @@ import type { GenericColumns, PostgresAdapter } from '../types'
 import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
 import { createIndex } from './createIndex'
+import { idToUUID } from './idToUUID'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical'
 
 type Args = {
   adapter: PostgresAdapter
+  buildNumbers: boolean
   buildRelationships: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
@@ -60,6 +62,7 @@ type Result = {
 
 export const traverseFields = ({
   adapter,
+  buildNumbers,
   buildRelationships,
   columnPrefix,
   columns,
@@ -100,7 +103,7 @@ export const traverseFields = ({
       columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
         field.name,
       )}`
-      fieldName = `${fieldPrefix || ''}${field.name}`
+      fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
       // If field is localized,
       // add the column to the locale table instead of main table
@@ -115,10 +118,18 @@ export const traverseFields = ({
         !['array', 'blocks', 'group', 'point', 'relationship', 'upload'].includes(field.type) &&
         !(field.type === 'number' && field.hasMany === true)
       ) {
+        const unique = disableUnique !== true && field.unique
+        if (unique) {
+          const constraintValue = `${fieldPrefix || ''}${field.name}`
+          if (!adapter.fieldConstraints?.[rootTableName]) {
+            adapter.fieldConstraints[rootTableName] = {}
+          }
+          adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
+        }
         targetIndexes[`${field.name}Idx`] = createIndex({
           name: fieldName,
           columnName,
-          unique: disableUnique !== true && field.unique,
+          unique,
         })
       }
     }
@@ -275,19 +286,25 @@ export const traverseFields = ({
           baseExtraConfig._localeIdx = (cols) => index('_locale_idx').on(cols._locale)
         }
 
-        const { relationsToBuild: subRelationsToBuild } = buildTable({
-          adapter,
-          baseColumns,
-          baseExtraConfig,
-          disableNotNull: disableNotNullFromHere,
-          disableUnique,
-          fields: field.fields,
-          rootRelationsToBuild,
-          rootRelationships: relationships,
-          rootTableIDColType,
-          rootTableName,
-          tableName: arrayTableName,
-        })
+        const { hasManyNumberField: subHasManyNumberField, relationsToBuild: subRelationsToBuild } =
+          buildTable({
+            adapter,
+            baseColumns,
+            baseExtraConfig,
+            disableNotNull: disableNotNullFromHere,
+            disableUnique,
+            fields: disableUnique ? idToUUID(field.fields) : field.fields,
+            rootRelationsToBuild,
+            rootRelationships: relationships,
+            rootTableIDColType,
+            rootTableName,
+            tableName: arrayTableName,
+          })
+
+        if (subHasManyNumberField) {
+          if (!hasManyNumberField || subHasManyNumberField === 'index')
+            hasManyNumberField = subHasManyNumberField
+        }
 
         relationsToBuild.set(fieldName, arrayTableName)
 
@@ -343,19 +360,27 @@ export const traverseFields = ({
               baseExtraConfig._localeIdx = (cols) => index('locale_idx').on(cols._locale)
             }
 
-            const { relationsToBuild: subRelationsToBuild } = buildTable({
+            const {
+              hasManyNumberField: subHasManyNumberField,
+              relationsToBuild: subRelationsToBuild,
+            } = buildTable({
               adapter,
               baseColumns,
               baseExtraConfig,
               disableNotNull: disableNotNullFromHere,
               disableUnique,
-              fields: block.fields,
+              fields: disableUnique ? idToUUID(block.fields) : block.fields,
               rootRelationsToBuild,
               rootRelationships: relationships,
               rootTableIDColType,
               rootTableName,
               tableName: blockTableName,
             })
+
+            if (subHasManyNumberField) {
+              if (!hasManyNumberField || subHasManyNumberField === 'index')
+                hasManyNumberField = subHasManyNumberField
+            }
 
             const blockTableRelations = relations(
               adapter.tables[blockTableName],
@@ -405,6 +430,7 @@ export const traverseFields = ({
             hasManyNumberField: groupHasManyNumberField,
           } = traverseFields({
             adapter,
+            buildNumbers,
             buildRelationships,
             columnPrefix,
             columns,
@@ -441,12 +467,13 @@ export const traverseFields = ({
           hasManyNumberField: groupHasManyNumberField,
         } = traverseFields({
           adapter,
+          buildNumbers,
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
           disableNotNull: disableNotNullFromHere,
           disableUnique,
-          fieldPrefix: `${fieldName}_`,
+          fieldPrefix: `${fieldName}.`,
           fields: field.fields,
           forceLocalized: field.localized,
           indexes,
@@ -478,6 +505,7 @@ export const traverseFields = ({
           hasManyNumberField: tabHasManyNumberField,
         } = traverseFields({
           adapter,
+          buildNumbers,
           buildRelationships,
           columnPrefix,
           columns,
@@ -516,6 +544,7 @@ export const traverseFields = ({
           hasManyNumberField: rowHasManyNumberField,
         } = traverseFields({
           adapter,
+          buildNumbers,
           buildRelationships,
           columnPrefix,
           columns,

@@ -11,6 +11,7 @@ import { combineQueries } from '../../database/combineQueries'
 import { APIError, Forbidden, NotFound } from '../../errors'
 import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion'
@@ -135,10 +136,11 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -153,6 +155,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -164,10 +167,11 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     // /////////////////////////////////////
 
     result = await afterChange({
+      collection: collectionConfig,
       context: req.context,
       data: result,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       previousDoc: prevDocWithLocales,
       req,
@@ -182,6 +186,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           operation: 'update',
@@ -190,7 +195,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

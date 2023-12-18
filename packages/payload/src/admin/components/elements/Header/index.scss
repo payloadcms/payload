@@ -24,7 +24,6 @@
   }
 
   &__bg {
-    @include blur-bg;
     opacity: 0;
     position: absolute;
     left: 0;
@@ -58,8 +57,27 @@
   }
 
   &__account {
+    position: relative;
+
     &:focus:not(:focus-visible) {
       opacity: 1;
+    }
+
+    // Use a pseudo element for the accessability so that it doesn't take up DOM space
+    // Also because the parent element has `overflow: hidden` which would clip an outline
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        content: '';
+        border: var(--accessibility-outline);
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        pointer-events: none;
+      }
     }
   }
 
@@ -90,6 +108,12 @@
   @include small-break {
     &__localizer {
       right: base(2);
+    }
+
+    &--nav-open {
+      .app-header__localizer {
+        display: none;
+      }
     }
 
     &__mobile-nav-toggler {

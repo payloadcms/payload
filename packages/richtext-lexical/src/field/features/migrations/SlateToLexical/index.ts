@@ -2,7 +2,7 @@ import type { FeatureProvider } from '../../types'
 import type { SlateNodeConverter } from './converter/types'
 
 import { convertSlateToLexical } from './converter'
-import { defaultConverters } from './converter/defaultConverters'
+import { defaultSlateConverters } from './converter/defaultConverters'
 import { UnknownConvertedNode } from './nodes/unknownConvertedNode'
 
 type Props = {
@@ -18,11 +18,11 @@ export const SlateToLexicalFeature = (props?: Props): FeatureProvider => {
 
   props.converters =
     props?.converters && typeof props?.converters === 'function'
-      ? props.converters({ defaultConverters: defaultConverters })
-      : (props?.converters as SlateNodeConverter[]) || defaultConverters
+      ? props.converters({ defaultConverters: defaultSlateConverters })
+      : (props?.converters as SlateNodeConverter[]) || defaultSlateConverters
 
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         hooks: {
           load({ incomingEditorState }) {

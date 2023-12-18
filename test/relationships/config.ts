@@ -42,6 +42,8 @@ export const defaultAccessRelSlug = 'strict-access'
 export const chainedRelSlug = 'chained'
 export const customIdSlug = 'custom-id'
 export const customIdNumberSlug = 'custom-id-number'
+export const polymorphicRelationshipsSlug = 'polymorphic-relationships'
+
 export default buildConfigWithDefaults({
   collections: [
     {
@@ -196,6 +198,49 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'movies',
           hasMany: true,
+        },
+      ],
+    },
+    {
+      fields: [
+        {
+          name: 'movieReviewer',
+          relationTo: 'users',
+          required: true,
+          type: 'relationship',
+        },
+        {
+          name: 'likes',
+          hasMany: true,
+          relationTo: 'users',
+          type: 'relationship',
+        },
+        {
+          name: 'visibility',
+          options: [
+            {
+              label: 'followers',
+              value: 'followers',
+            },
+            {
+              label: 'public',
+              value: 'public',
+            },
+          ],
+          required: true,
+          type: 'radio',
+        },
+      ],
+
+      slug: 'movieReviews',
+    },
+    {
+      slug: polymorphicRelationshipsSlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'polymorphic',
+          relationTo: ['movies'],
         },
       ],
     },

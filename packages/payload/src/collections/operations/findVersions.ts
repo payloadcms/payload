@@ -8,6 +8,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
@@ -19,6 +20,7 @@ export type Arguments = {
   limit?: number
   overrideAccess?: boolean
   page?: number
+  pagination?: boolean
   req?: PayloadRequest
   showHiddenFields?: boolean
   sort?: string
@@ -34,6 +36,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     limit,
     overrideAccess,
     page,
+    pagination = true,
     req: { locale, payload },
     req,
     showHiddenFields,
@@ -75,6 +78,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       limit: limit ?? 10,
       locale,
       page: page || 1,
+      pagination,
       req,
       sort,
       where: fullWhere,
@@ -94,6 +98,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
             docRef.version =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: docRef.version,
                 query: fullWhere,
@@ -116,11 +121,12 @@ async function findVersions<T extends TypeWithVersion<T>>(
         result.docs.map(async (data) => ({
           ...data,
           version: await afterRead({
+            collection: collectionConfig,
             context: req.context,
             depth,
             doc: data.version,
-            entityConfig: collectionConfig,
             findMany: true,
+            global: null,
             overrideAccess,
             req,
             showHiddenFields,
@@ -144,6 +150,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
             docRef.version =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: doc.version,
                 findMany: true,
@@ -166,7 +173,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

@@ -1,4 +1,4 @@
-import type { FileData } from 'payload/dist/uploads/types'
+import type { FileData } from 'payload/types'
 import type { PayloadRequest } from 'payload/types'
 
 import type { File } from '../types'

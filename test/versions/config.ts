@@ -1,78 +1,37 @@
+import path from 'path'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
 import AutosavePosts from './collections/Autosave'
+import DisablePublish from './collections/DisablePublish'
 import DraftPosts from './collections/Drafts'
 import Posts from './collections/Posts'
 import VersionPosts from './collections/Versions'
 import AutosaveGlobal from './globals/Autosave'
+import DisablePublishGlobal from './globals/DisablePublish'
 import DraftGlobal from './globals/Draft'
-import { draftSlug, titleToDelete } from './shared'
+import { clearAndSeedEverything } from './seed'
 
 export default buildConfigWithDefaults({
-  collections: [Posts, AutosavePosts, DraftPosts, VersionPosts],
-  globals: [AutosaveGlobal, DraftGlobal],
+  admin: {
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config?.resolve?.alias,
+          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+        },
+      },
+    }),
+  },
+  collections: [DisablePublish, Posts, AutosavePosts, DraftPosts, VersionPosts],
+  globals: [AutosaveGlobal, DraftGlobal, DisablePublishGlobal],
   indexSortableFields: true,
   localization: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    const { id: draftID } = await payload.create({
-      collection: draftSlug,
-      data: {
-        id: 1,
-        description: 'draft description',
-        radio: 'test',
-        title: 'draft title',
-      },
-      draft: true,
-    })
-
-    await payload.create({
-      collection: draftSlug,
-      data: {
-        id: 2,
-        _status: 'published',
-        description: 'published description',
-        radio: 'test',
-        title: 'published title',
-      },
-      draft: false,
-    })
-
-    await payload.create({
-      collection: draftSlug,
-      data: {
-        description: 'published description',
-        title: titleToDelete,
-      },
-      draft: true,
-    })
-
-    await payload.update({
-      id: draftID,
-      collection: draftSlug,
-      data: {
-        title: 'draft title 2',
-      },
-      draft: true,
-    })
-
-    await payload.update({
-      id: draftID,
-      collection: draftSlug,
-      data: {
-        title: 'draft title 3',
-      },
-      draft: true,
-    })
+    await clearAndSeedEverything(payload)
   },
 })

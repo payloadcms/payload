@@ -13,7 +13,17 @@ import TextInput from './Input'
 const Text: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, condition, description, placeholder, readOnly, rtl, style, width } = {},
+    admin: {
+      className,
+      components: { Error, Label, afterInput, beforeInput } = {},
+      condition,
+      description,
+      placeholder,
+      readOnly,
+      rtl,
+      style,
+      width,
+    } = {},
     inputRef,
     label,
     localized,
@@ -50,6 +60,10 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <TextInput
+      Error={Error}
+      Label={Label}
+      afterInput={afterInput}
+      beforeInput={beforeInput}
       className={className}
       description={description}
       errorMessage={errorMessage}

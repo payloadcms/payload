@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
@@ -84,4 +84,52 @@ export async function changeLocale(page: Page, newLocale: string) {
 
 export function exactText(text: string) {
   return new RegExp(`^${text}$`)
+}
+
+export const checkPageTitle = async (page: Page, title: string) =>
+  expect(await page.locator('.doc-header__title.render-title')?.first()?.innerText()).toBe(title)
+
+export const checkBreadcrumb = async (page: Page, text: string) =>
+  expect(await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText()).toBe(
+    text,
+  )
+
+export const selectTableRow = async (page: Page, title: string): Promise<void> => {
+  const selector = `tbody tr:has-text("${title}") .select-row__checkbox input[type=checkbox]`
+  await page.locator(selector).check()
+  expect(await page.locator(selector).isChecked()).toBe(true)
+}
+
+export const findTableCell = async (
+  page: Page,
+  fieldName: string,
+  rowTitle?: string,
+): Promise<Locator> => {
+  const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
+  const cell = parentEl.locator(`td.cell-${fieldName}`)
+  expect(cell).toBeTruthy()
+  return cell
+}
+
+export const findTableRow = async (page: Page, title: string): Promise<Locator> => {
+  const row = page.locator(`tbody tr:has-text("${title}")`)
+  expect(row).toBeTruthy()
+  return row
+}
+
+/**
+ * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
+ * in the e2e test failing.
+ *
+ * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
+ * @param page
+ */
+export function initPageConsoleErrorCatch(page: Page) {
+  page.on('console', (msg) => {
+    if (msg.type() === 'error' && !msg.text().includes('the server responded with a status of')) {
+      // the the server responded with a status of error happens frequently. Will ignore it for now.
+      // Most importantly, this should catch react errors.
+      throw new Error(`Browser console error: ${msg.text()}`)
+    }
+  })
 }

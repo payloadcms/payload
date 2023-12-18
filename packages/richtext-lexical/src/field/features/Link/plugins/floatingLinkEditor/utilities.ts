@@ -13,8 +13,10 @@ export function transformExtraFields(
     | Field[],
   config: SanitizedConfig,
   i18n: i18n,
+  enabledCollections?: false | string[],
+  disabledCollections?: false | string[],
 ): Field[] {
-  const baseFields: Field[] = getBaseFields(config)
+  const baseFields: Field[] = getBaseFields(config, enabledCollections, disabledCollections)
 
   const fields =
     typeof customFieldSchema === 'function'
@@ -23,7 +25,9 @@ export function transformExtraFields(
 
   // Wrap fields which are not part of the base schema in a group named 'fields' - otherwise they will be rendered but not saved
   const extraFields = []
-  fields.forEach((field) => {
+  for (let i = fields.length - 1; i >= 0; i--) {
+    const field = fields[i]
+
     if ('name' in field) {
       if (
         !baseFields.find((baseField) => !('name' in baseField) || baseField.name === field.name)
@@ -35,7 +39,7 @@ export function transformExtraFields(
         }
       }
     }
-  })
+  }
 
   if (Array.isArray(customFieldSchema) || fields.length > 0) {
     // find field with name 'fields' and add the extra fields to it
