@@ -123,7 +123,13 @@ const RecursivelyRenderObjectData = ({
               )
             }
 
-            if (type === 'date' || type === 'string' || type === 'null' || type === 'number' || type === 'boolean') {
+            if (
+              type === 'date' ||
+              type === 'string' ||
+              type === 'null' ||
+              type === 'number' ||
+              type === 'boolean'
+            ) {
               const parentHasKey = Boolean(parentType === 'object' && key)
 
               const rowClasses = [
