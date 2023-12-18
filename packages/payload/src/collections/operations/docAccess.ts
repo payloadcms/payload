@@ -44,9 +44,11 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
       id,
       entity: config,
       operations: collectionOperations,
-      payload: req.payload,
+      req: {
+        payload: req.payload,
+        user: req.user,
+      },
       type: 'collection',
-      user: req.user,
     })
 
     if (shouldCommit) await commitTransaction(req)

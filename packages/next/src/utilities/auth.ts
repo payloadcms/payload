@@ -29,9 +29,11 @@ export const auth = cache(
     }
 
     const permissions = await getAccessResults({
-      user,
-      payload,
       searchParams,
+      req: {
+        user,
+        payload,
+      },
     })
 
     return {
