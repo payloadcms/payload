@@ -1,25 +1,26 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
 // import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input'
+import type { Props as UploadInputProps } from 'payload/components/fields/Upload'
+
 import { UploadInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'
+import React, { useCallback } from 'react'
 
-import { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
-import type { UploadInputProps } from 'payload/src/admin/components/forms/field-types/Upload/Input'
+import type { PluginConfig } from '../types'
 
-import { PluginConfig } from '../types'
 import { Pill } from '../ui/Pill'
 
-type UploadFieldWithProps = UploadInputProps & {
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+type MetaImageProps = UploadInputProps & {
   path: string
   pluginConfig: PluginConfig
 }
 
-export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
-  const { label, relationTo, fieldTypes, name, pluginConfig } =
-    (props as UploadFieldWithProps) || {} // TODO: this typing is temporary until payload types are updated for custom field props
+export const MetaImage: React.FC<MetaImageProps> = (props) => {
+  const { name, fieldTypes, label, pluginConfig, relationTo } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
 
@@ -27,7 +28,7 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
-  const { value, setValue, showError } = field
+  const { setValue, showError, value } = field
 
   const regenerateImage = useCallback(async () => {
     const { generateImage } = pluginConfig
@@ -48,9 +49,9 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
 
   const config = useConfig()
 
-  const { collections, serverURL, routes: { api } = {} } = config
+  const { collections, routes: { api } = {}, serverURL } = config
 
-  const collection = collections?.find(coll => coll.slug === relationTo) || undefined
+  const collection = collections?.find((coll) => coll.slug === relationTo) || undefined
 
   return (
     <div
@@ -67,24 +68,24 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
         <div>
           {label && typeof label === 'string' && label}
           {typeof pluginConfig.generateImage === 'function' && (
-            <>
+            <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
                 onClick={regenerateImage}
-                type="button"
                 style={{
-                  padding: 0,
                   background: 'none',
-                  border: 'none',
                   backgroundColor: 'transparent',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
+                  border: 'none',
                   color: 'currentcolor',
+                  cursor: 'pointer',
+                  padding: 0,
+                  textDecoration: 'underline',
                 }}
+                type="button"
               >
                 Auto-generate
               </button>
-            </>
+            </React.Fragment>
           )}
         </div>
         {typeof pluginConfig.generateImage === 'function' && (
@@ -104,12 +105,13 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
         }}
       >
         <UploadInput
-          path={name}
+          api={api}
+          collection={collection}
           fieldTypes={fieldTypes}
+          filterOptions={{}}
+          label={undefined}
           name={name}
-          relationTo={relationTo}
-          value={value}
-          onChange={incomingImage => {
+          onChange={(incomingImage) => {
             if (incomingImage !== null) {
               const { id: incomingID } = incomingImage
               setValue(incomingID)
@@ -117,21 +119,20 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
               setValue(null)
             }
           }}
-          label={undefined}
-          showError={showError}
-          api={api}
-          collection={collection}
+          path={name}
+          relationTo={relationTo}
           serverURL={serverURL}
-          filterOptions={{}}
+          showError={showError}
           style={{
             marginBottom: 0,
           }}
+          value={value}
         />
       </div>
       <div
         style={{
-          display: 'flex',
           alignItems: 'center',
+          display: 'flex',
           width: '100%',
         }}
       >
@@ -145,4 +146,4 @@ export const MetaImage: React.FC<UploadFieldWithProps | {}> = props => {
   )
 }
 
-export const getMetaImageField = (props: any) => <MetaImage {...props} />
+export const getMetaImageField = (props: MetaImageProps) => <MetaImage {...props} />
