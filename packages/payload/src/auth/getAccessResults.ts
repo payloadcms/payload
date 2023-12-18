@@ -1,22 +1,22 @@
 import type { PayloadT } from '..'
-import type { AllOperations } from '../types'
+import type { AllOperations, PayloadRequest } from '../types'
 import type { Permissions, User } from './types'
 
 import { getEntityPolicies } from '../utilities/getEntityPolicies'
 
 type GetAccessResultsArgs = {
-  data?: Record<string, unknown>
-  payload: PayloadT
+  req: Partial<PayloadRequest> & {
+    payload: PayloadT
+    user: User | null
+  }
   searchParams: URLSearchParams
-  user: User | null
 }
 export async function getAccessResults({
-  data,
-  payload,
+  req,
   searchParams,
-  user,
 }: GetAccessResultsArgs): Promise<Permissions> {
   const results = {} as Permissions
+  const { data, payload, user } = req
 
   const isLoggedIn = !!user
   const userCollectionConfig =
@@ -53,12 +53,14 @@ export async function getAccessResults({
 
       const collectionPolicy = await getEntityPolicies({
         id: searchParams.get('id') || undefined,
-        data,
         entity: collection,
         operations: collectionOperations,
-        payload,
+        req: {
+          data,
+          payload: req.payload,
+          user,
+        },
         type: 'collection',
-        user,
       })
       results.collections = {
         ...results.collections,
@@ -76,12 +78,14 @@ export async function getAccessResults({
       }
 
       const globalPolicy = await getEntityPolicies({
-        data,
         entity: global,
         operations: globalOperations,
-        payload,
+        req: {
+          data,
+          payload,
+          user,
+        },
         type: 'global',
-        user,
       })
       results.globals = {
         ...results.globals,

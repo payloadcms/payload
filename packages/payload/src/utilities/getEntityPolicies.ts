@@ -4,18 +4,20 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../collections/confi
 import type { Access } from '../config/types'
 import type { FieldAccess } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { AllOperations, Document, Where } from '../types'
+import type { AllOperations, Document, PayloadRequest, Where } from '../types'
 
 import { tabHasName } from '../fields/config/types'
 
 type Args = {
-  data?: Record<string, unknown>
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: number | string
   operations: AllOperations[]
-  payload: PayloadT
+  req: Partial<PayloadRequest> & {
+    data?: Record<string, unknown>
+    payload: PayloadT
+    user: User | null
+  }
   type: 'collection' | 'global'
-  user: User | null
 }
 
 type ReturnType<T extends Args> = T['type'] extends 'global'
@@ -33,7 +35,8 @@ type CreateAccessPromise = (args: {
 }) => Promise<void>
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { id, data, entity, operations, payload, type, user } = args
+  const { id, entity, operations, req, type } = args
+  const { data, payload, user } = req
   const isLoggedIn = !!user
 
   const policies = {
@@ -58,7 +61,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             collection: entity.slug,
             limit: 1,
             overrideAccess: true,
-            // req, (REMOVED)
+            // TODO: should we type find as a partial?
+            req,
             where: {
               ...where,
               and: [
@@ -79,7 +83,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           id,
           collection: entity.slug,
           overrideAccess: true,
-          // req, (REMOVED)
+          // TODO: should we type findByID as a partial?
+          req,
         })
       }
     }

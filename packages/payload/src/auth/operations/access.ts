@@ -25,10 +25,12 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
   try {
     const shouldCommit = await initTransaction(req)
     const results = getAccessResults({
-      data: req.data,
-      payload,
+      req: {
+        data: req.data,
+        payload,
+        user,
+      },
       searchParams,
-      user,
     })
     if (shouldCommit) await commitTransaction(req)
     return results
