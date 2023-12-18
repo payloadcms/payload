@@ -28,7 +28,7 @@
     "@payloadcms/plugin-nested-docs": "^1.0.8",
     "@payloadcms/plugin-redirects": "^1.0.0",
     "@payloadcms/plugin-seo": "^1.0.10",
-    "@payloadcms/plugin-stripe": "^0.0.14",
+    "@payloadcms/plugin-stripe": "^0.0.19",
     "@payloadcms/richtext-slate": "^1.0.0",
     "@stripe/react-stripe-js": "^1.16.3",
     "@stripe/stripe-js": "^1.46.0",
