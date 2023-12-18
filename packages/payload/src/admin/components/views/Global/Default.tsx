@@ -47,7 +47,7 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
   useEffect(() => {
     const path = location.pathname
 
-    if (!(path.endsWith(global.slug) || path.endsWith('/create'))) {
+    if (!path.endsWith(global.slug)) {
       return
     }
 
