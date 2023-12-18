@@ -1,43 +1,41 @@
 'use client'
 
-import React, { useCallback } from 'react'
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
 // import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
-import { TextareaInput, useAllFormFields, useField } from 'payload/components/forms'
-import { useDocumentInfo, useLocale } from 'payload/components/utilities'
+import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 import type { TextareaField } from 'payload/types'
 
-import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
+import { TextareaInput, useAllFormFields, useField } from 'payload/components/forms'
+import { useDocumentInfo, useLocale } from 'payload/components/utilities'
+import React, { useCallback } from 'react'
+
+import type { PluginConfig } from '../types'
 
 import { defaults } from '../defaults'
-import { PluginConfig } from '../types'
 import { LengthIndicator } from '../ui/LengthIndicator'
 
-const { minLength, maxLength } = defaults.description
+const { maxLength, minLength } = defaults.description
 
-type TextareaFieldWithProps = TextareaField & {
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+type MetaDescriptionProps = TextareaField & {
   path: string
   pluginConfig: PluginConfig
 }
 
-export const MetaDescription: React.FC<
-  (TextareaFieldWithProps | {}) & {
-    pluginConfig: PluginConfig
-  }
-> = props => {
-  const { path, label, name, pluginConfig } = (props as TextareaFieldWithProps) || {} // TODO: this typing is temporary until payload types are updated for custom field props
+export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
+  const { name, label, path, pluginConfig } = props
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
   const field: FieldType<string> = useField({
-    label,
     name,
+    label,
     path,
   } as Options)
 
-  const { value, setValue, showError } = field
+  const { setValue, showError, value } = field
 
   const regenerateDescription = useCallback(async () => {
     const { generateDescription } = pluginConfig
@@ -69,24 +67,24 @@ export const MetaDescription: React.FC<
         <div>
           {label && typeof label === 'string' && label}
           {typeof pluginConfig.generateDescription === 'function' && (
-            <>
+            <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
                 onClick={regenerateDescription}
-                type="button"
                 style={{
-                  padding: 0,
                   background: 'none',
-                  border: 'none',
                   backgroundColor: 'transparent',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
+                  border: 'none',
                   color: 'currentcolor',
+                  cursor: 'pointer',
+                  padding: 0,
+                  textDecoration: 'underline',
                 }}
+                type="button"
               >
                 Auto-generate
               </button>
-            </>
+            </React.Fragment>
           )}
         </div>
         <div
@@ -111,27 +109,29 @@ export const MetaDescription: React.FC<
         }}
       >
         <TextareaInput
-          path={name}
           name={name}
           onChange={setValue}
-          value={value}
+          path={name}
           showError={showError}
           style={{
             marginBottom: 0,
           }}
+          value={value}
         />
       </div>
       <div
         style={{
-          display: 'flex',
           alignItems: 'center',
+          display: 'flex',
           width: '100%',
         }}
       >
-        <LengthIndicator text={value as string} minLength={minLength} maxLength={maxLength} />
+        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value as string} />
       </div>
     </div>
   )
 }
 
-export const getMetaDescriptionField = (props: any) => <MetaDescription {...props} />
+export const getMetaDescriptionField = (props: MetaDescriptionProps) => (
+  <MetaDescription {...props} />
+)

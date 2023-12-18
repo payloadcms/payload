@@ -1,24 +1,28 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import type { FormField } from 'payload/types'
+
 import { useAllFormFields, useForm } from 'payload/components/forms'
-import type { Field } from 'payload/types'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { defaults } from '../defaults'
 
 const {
-  title: { minLength: minTitle, maxLength: maxTitle },
-  description: { minLength: minDesc, maxLength: maxDesc },
+  description: { maxLength: maxDesc, minLength: minDesc },
+  title: { maxLength: maxTitle, minLength: minTitle },
 } = defaults
 
 export const Overview: React.FC = () => {
-  const { dispatchFields, getFields } = useForm()
+  const {
+    //  dispatchFields,
+    getFields,
+  } = useForm()
 
   const [
     {
-      'meta.title': { value: metaTitle } = {} as Field,
-      'meta.description': { value: metaDesc } = {} as Field,
-      'meta.image': { value: metaImage } = {} as Field,
+      'meta.description': { value: metaDesc } = {} as FormField,
+      'meta.image': { value: metaImage } = {} as FormField,
+      'meta.title': { value: metaTitle } = {} as FormField,
     },
   ] = useAllFormFields()
 
@@ -26,6 +30,7 @@ export const Overview: React.FC = () => {
   const [descIsValid, setDescIsValid] = useState<boolean | undefined>()
   const [imageIsValid, setImageIsValid] = useState<boolean | undefined>()
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const resetAll = useCallback(() => {
     const fields = getFields()
     const fieldsWithoutMeta = fields

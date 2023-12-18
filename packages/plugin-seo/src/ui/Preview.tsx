@@ -1,28 +1,30 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import type { FormField, UIField } from 'payload/types'
+
 import { useAllFormFields } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
-import type { Field } from 'payload/types'
+import React, { useEffect, useState } from 'react'
 
-import { PluginConfig } from '../types'
+import type { PluginConfig } from '../types'
 
-type PreviewFieldWithProps = Field & {
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+type PreviewProps = UIField & {
   pluginConfig: PluginConfig
 }
 
-export const Preview: React.FC<PreviewFieldWithProps | {}> = props => {
+export const Preview: React.FC<PreviewProps> = (props) => {
   const {
     pluginConfig: { generateURL },
-  } = (props as PreviewFieldWithProps) || {} // TODO: this typing is temporary until payload types are updated for custom field props;
+  } = props || {}
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
   const {
-    'meta.title': { value: metaTitle } = {} as Field,
-    'meta.description': { value: metaDescription } = {} as Field,
+    'meta.description': { value: metaDescription } = {} as FormField,
+    'meta.title': { value: metaTitle } = {} as FormField,
   } = fields
 
   const [href, setHref] = useState<string>()
@@ -33,13 +35,14 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = props => {
         const newHref = await generateURL({
           ...docInfo,
           doc: { fields },
-          locale,
+          locale: typeof locale === 'object' ? locale?.code : locale,
         })
 
         setHref(newHref)
       }
     }
-    getHref()
+
+    getHref() // eslint-disable-line @typescript-eslint/no-floating-promises
   }, [generateURL, fields, href, locale, docInfo])
 
   return (
@@ -47,21 +50,21 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = props => {
       <div>Preview</div>
       <div
         style={{
-          marginBottom: '5px',
           color: '#9A9A9A',
+          marginBottom: '5px',
         }}
       >
         Exact result listings may vary based on content and search relevancy.
       </div>
       <div
         style={{
-          padding: '20px',
+          background: 'var(--theme-elevation-50)',
           borderRadius: '5px',
           boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
-          pointerEvents: 'none',
           maxWidth: '600px',
+          padding: '20px',
+          pointerEvents: 'none',
           width: '100%',
-          background: 'var(--theme-elevation-50)',
         }}
       >
         <div>
@@ -100,4 +103,4 @@ export const Preview: React.FC<PreviewFieldWithProps | {}> = props => {
   )
 }
 
-export const getPreviewField = (props: any) => <Preview {...props} />
+export const getPreviewField = (props: PreviewProps) => <Preview {...props} />
