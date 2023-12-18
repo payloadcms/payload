@@ -38,7 +38,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     context,
     depth,
     disableErrors = false,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     locale: localeArg = null,
     overrideAccess = true,
     req = {} as PayloadRequest,

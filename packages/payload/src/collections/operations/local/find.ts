@@ -44,7 +44,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     depth,
     disableErrors,
     draft = false,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     limit,
     locale: localeArg = null,
     overrideAccess = true,

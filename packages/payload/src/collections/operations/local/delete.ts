@@ -61,7 +61,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     locale: localeArg = null,
     overrideAccess = true,
     req: incomingReq = {} as PayloadRequest,

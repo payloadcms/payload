@@ -40,7 +40,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     depth,
     disableErrors = false,
     draft = false,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     locale: localeArg = null,
     overrideAccess = true,
     req = {} as PayloadRequest,

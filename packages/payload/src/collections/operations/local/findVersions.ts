@@ -39,7 +39,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale: fallbackLocaleArg,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     limit,
     locale: localeArg = null,
     overrideAccess = true,
