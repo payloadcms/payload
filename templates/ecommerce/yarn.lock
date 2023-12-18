@@ -1521,10 +1521,10 @@
   resolved "https://registry.yarnpkg.com/@payloadcms/plugin-seo/-/plugin-seo-1.0.15.tgz#ca794897d1e8c3291a8dd74339b7f28f10bba815"
   integrity sha512-7nU0DD3UZOOHsV2UIkOWL2JNCX+u1WNbEvZOiGpO6lB6YekuVIMqxHKbTdVR73UeW44lApvS9LTgif3XLQ5HDA==
 
-"@payloadcms/plugin-stripe@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-stripe/-/plugin-stripe-0.0.14.tgz#c74609ddc193e5e40b07a36ea7f5e485566b9c45"
-  integrity sha512-KFeyDNvt1Xvhp9mzxGqeQo9GjW52R1boyO1kYD+1c+4DAWWF9oXmf2OXXi1mbt2arSn+IBxcLnGE1EYPwT1nTA==
+"@payloadcms/plugin-stripe@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-stripe/-/plugin-stripe-0.0.19.tgz#ea08493ed9eb4c747799c7a8dbb429bc20aedcda"
+  integrity sha512-5eB2ae38dDEUfVgWs5qkB3feQuuYV8t5R0Jn4qhNPBx11sdxhPGVcNyrK3KJizUSIkt/B9T9q31PfWBc0NT7kA==
   dependencies:
     "@types/uuid" "^9.0.0"
     lodash.get "^4.4.2"
