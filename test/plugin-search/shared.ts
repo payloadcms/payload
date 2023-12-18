@@ -1,3 +1,3 @@
 export const pagesSlug = 'pages'
 
-export const productsSlug = 'posts'
+export const postsSlug = 'posts'

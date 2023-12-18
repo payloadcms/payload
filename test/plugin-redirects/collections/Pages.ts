@@ -1,12 +1,12 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload/dist/collections/config/types'
 
-import { postsSlug } from '../shared'
+import { pagesSlug } from '../shared'
 
-export const Posts: CollectionConfig = {
-  slug: postsSlug,
+export const Pages: CollectionConfig = {
+  slug: pagesSlug,
   labels: {
-    singular: 'Post',
-    plural: 'Posts',
+    singular: 'Page',
+    plural: 'Pages',
   },
   admin: {
     useAsTitle: 'title',
