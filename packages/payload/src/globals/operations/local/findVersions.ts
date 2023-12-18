@@ -1,4 +1,4 @@
-import type { GeneratedTypes } from '../../../'
+import type { GeneratedTypes, RequestContext } from '../../../'
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
@@ -12,12 +12,14 @@ import { i18nInit } from '../../../translations/init'
 import findVersions from '../findVersions'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  context?: RequestContext
   depth?: number
   fallbackLocale?: string
   limit?: number
   locale?: string
   overrideAccess?: boolean
   page?: number
+  req?: PayloadRequest
   showHiddenFields?: boolean
   slug: T
   sort?: string
@@ -30,12 +32,14 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
   const {
+    context,
     depth,
     fallbackLocale = null,
     limit,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     page,
+    req: incomingReq,
     showHiddenFields,
     slug: globalSlug,
     sort,
@@ -57,9 +61,10 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     payload,
     payloadAPI: 'local',
     t: i18n.t,
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 

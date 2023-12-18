@@ -2,7 +2,8 @@ import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 
 import { formatDate } from '../../../utilities/formatDate'
 import { useConfig } from '../../utilities/Config'
@@ -55,7 +56,12 @@ export const DocumentControls: React.FC<{
 
   const { i18n, t } = useTranslation('general')
 
-  const showDotMenu = Boolean(collection && id && !disableActions)
+  const hasCreatePermission = 'create' in permissions && permissions.create?.permission
+  const hasDeletePermission = 'delete' in permissions && permissions.delete?.permission
+
+  const showDotMenu = Boolean(
+    collection && id && !disableActions && (hasCreatePermission || hasDeletePermission),
+  )
 
   return (
     <Gutter className={baseClass}>
@@ -202,7 +208,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
-                {'create' in permissions && permissions?.create?.permission && (
+                {hasCreatePermission && (
                   <React.Fragment>
                     <PopupList.Button
                       id="action-create"
@@ -216,7 +222,7 @@ export const DocumentControls: React.FC<{
                     )}
                   </React.Fragment>
                 )}
-                {'delete' in permissions && permissions?.delete?.permission && id && (
+                {hasDeletePermission && (
                   <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
                 )}
               </PopupList.ButtonGroup>
@@ -224,6 +230,7 @@ export const DocumentControls: React.FC<{
           )}
         </div>
       </div>
+      <div className={`${baseClass}__divider`} />
     </Gutter>
   )
 }

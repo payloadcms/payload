@@ -8,84 +8,128 @@
 
 export interface Config {
   collections: {
+    posts: Post
     users: User
     'hidden-collection': HiddenCollection
-    posts: Post
+    'collection-no-api-view': CollectionNoApiView
+    'custom-views-one': CustomViewsOne
+    'custom-views-two': CustomViewsTwo
     'group-one-collection-ones': GroupOneCollectionOne
     'group-one-collection-twos': GroupOneCollectionTwo
     'group-two-collection-ones': GroupTwoCollectionOne
     'group-two-collection-twos': GroupTwoCollectionTwo
+    geo: Geo
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
   globals: {
     'hidden-global': HiddenGlobal
+    'global-no-api-view': GlobalNoApiView
     global: Global
+    'custom-global-views-one': CustomGlobalViewsOne
+    'custom-global-views-two': CustomGlobalViewsTwo
     'group-globals-one': GroupGlobalsOne
     'group-globals-two': GroupGlobalsTwo
   }
 }
+export interface Post {
+  id: string
+  title?: string | null
+  description?: string | null
+  number?: number | null
+  richText?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  group?: {
+    title?: string | null
+  }
+  relationship?: (string | null) | Post
+  sidebarField?: string | null
+  updatedAt: string
+  createdAt: string
+  _status?: ('draft' | 'published') | null
+}
 export interface User {
   id: string
+  textField?: string | null
+  sidebarField?: string | null
   updatedAt: string
   createdAt: string
   email: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  salt?: string
-  hash?: string
-  loginAttempts?: number
-  lockUntil?: string
-  password?: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
+  password: string | null
 }
 export interface HiddenCollection {
   id: string
-  title?: string
+  title?: string | null
   updatedAt: string
   createdAt: string
 }
-export interface Post {
+export interface CollectionNoApiView {
   id: string
-  title?: string
-  description?: string
-  number?: number
-  richText?: {
-    [k: string]: unknown
-  }[]
+  updatedAt: string
+  createdAt: string
+}
+export interface CustomViewsOne {
+  id: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+}
+export interface CustomViewsTwo {
+  id: string
+  title?: string | null
   updatedAt: string
   createdAt: string
 }
 export interface GroupOneCollectionOne {
   id: string
-  title?: string
+  title?: string | null
   updatedAt: string
   createdAt: string
 }
 export interface GroupOneCollectionTwo {
   id: string
-  title?: string
+  title?: string | null
   updatedAt: string
   createdAt: string
 }
 export interface GroupTwoCollectionOne {
   id: string
-  title?: string
+  title?: string | null
   updatedAt: string
   createdAt: string
 }
 export interface GroupTwoCollectionTwo {
   id: string
-  title?: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+}
+export interface Geo {
+  id: string
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null
   updatedAt: string
   createdAt: string
 }
 export interface PayloadPreference {
   id: string
   user: {
-    value: string | User
     relationTo: 'users'
+    value: string | User
   }
-  key?: string
+  key?: string | null
   value?:
     | {
         [k: string]: unknown
@@ -100,41 +144,55 @@ export interface PayloadPreference {
 }
 export interface PayloadMigration {
   id: string
-  name?: string
-  batch?: number
-  schema?:
-    | {
-        [k: string]: unknown
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null
+  name?: string | null
+  batch?: number | null
   updatedAt: string
   createdAt: string
 }
 export interface HiddenGlobal {
   id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
+  title?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
+}
+export interface GlobalNoApiView {
+  id: string
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 export interface Global {
   id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
+  title?: string | null
+  sidebarField?: string | null
+  _status?: ('draft' | 'published') | null
+  updatedAt?: string | null
+  createdAt?: string | null
+}
+export interface CustomGlobalViewsOne {
+  id: string
+  title?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
+}
+export interface CustomGlobalViewsTwo {
+  id: string
+  title?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 export interface GroupGlobalsOne {
   id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
+  title?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 export interface GroupGlobalsTwo {
   id: string
-  title?: string
-  updatedAt?: string
-  createdAt?: string
+  title?: string | null
+  updatedAt?: string | null
+  createdAt?: string | null
+}
+
+declare module 'payload' {
+  export interface GeneratedTypes extends Config {}
 }

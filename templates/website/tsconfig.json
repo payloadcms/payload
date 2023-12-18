@@ -17,12 +17,16 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "sourceMap": true,
     "isolatedModules": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "react": ["./node_modules/@types/react"],
+    }
   },
   "include": [
     "**/*.ts",

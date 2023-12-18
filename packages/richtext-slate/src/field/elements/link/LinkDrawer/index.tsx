@@ -1,3 +1,5 @@
+'use client'
+
 import { Drawer } from 'payload/components/elements'
 import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
 import { fieldTypes } from 'payload/components/forms'
@@ -22,7 +24,7 @@ export const LinkDrawer: React.FC<Props> = ({
 
   return (
     <Drawer className={baseClass} slug={drawerSlug} title={t('editLink')}>
-      <Form initialState={initialState} onSubmit={handleModalSubmit}>
+      <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
         <RenderFields
           fieldSchema={fieldSchema}
           fieldTypes={fieldTypes}

@@ -6,11 +6,12 @@ import { useHistory, useRouteMatch } from 'react-router-dom'
 import type { CollectionPermission } from '../../../../../auth'
 import type { Fields } from '../../../forms/Form/types'
 import type { QueryParamTypes } from '../../../utilities/FormQueryParams'
-import type { CollectionEditViewProps } from '../../types'
+import type { DefaultEditViewProps } from './Default'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema'
+import { fieldTypes } from '../../../forms/field-types'
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { useDocumentInfo } from '../../../utilities/DocumentInfo'
@@ -149,13 +150,14 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const isLoading = !internalState || !docPermissions || isLoadingData
 
-  const componentProps: CollectionEditViewProps = {
+  const componentProps: DefaultEditViewProps = {
     id,
     action,
     apiURL,
     canAccessAdmin: permissions?.canAccessAdmin,
     collection,
     data,
+    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,

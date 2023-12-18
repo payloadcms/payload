@@ -33,6 +33,7 @@ export default buildConfig({
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `autoPluralization`   | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s.  |
 | `connectOptions`      | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose. |
+| `disableIndexHints`      | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false |
 | `migrationDir`        | Customize the directory that migrations are stored. |
 
 ### Access to Mongoose models

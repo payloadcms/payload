@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps } from 'payload/utilities'
+import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { AdapterArguments } from './types'
 
@@ -9,7 +9,7 @@ import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
 import { richTextValidate } from './data/validation'
 import RichTextField from './field'
 
-export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], AdapterArguments> {
+export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], AdapterArguments, any> {
   return {
     CellComponent: withMergedProps({
       Component: RichTextCell,
@@ -19,11 +19,23 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
       Component: RichTextField,
       toMergeIntoProps: args,
     }),
-    afterReadPromise({
+    outputSchema: ({ isRequired }) => {
+      return {
+        items: {
+          type: 'object',
+        },
+        type: withNullableJSONSchemaType('array', isRequired),
+      }
+    },
+    populationPromise({
+      context,
       currentDepth,
       depth,
       field,
+      findMany,
+      flattenLocales,
       overrideAccess,
+      populationPromises,
       req,
       showHiddenFields,
       siblingDoc,
@@ -35,10 +47,14 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], Adap
         !field?.admin?.elements
       ) {
         return richTextRelationshipPromise({
+          context,
           currentDepth,
           depth,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,

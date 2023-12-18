@@ -59,6 +59,10 @@ export declare type PayloadRequest<U = any> = Request & {
    * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
    */
   transactionID?: number | string
+  /**
+   * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
+   */
+  transactionIDPromise?: Promise<void>
   /** The signed in user */
   user: (U & User) | null
 }

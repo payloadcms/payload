@@ -15,15 +15,17 @@ import { useDocumentDrawer } from '../../../elements/DocumentDrawer'
 import FileDetails from '../../../elements/FileDetails'
 import { useListDrawer } from '../../../elements/ListDrawer'
 import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 const baseClass = 'upload'
 
 export type UploadInputProps = Omit<UploadField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
   api?: string
   className?: string
   collection?: SanitizedCollectionConfig
@@ -45,6 +47,8 @@ export type UploadInputProps = Omit<UploadField, 'type'> & {
 
 const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
+    Error,
+    Label,
     api = '/api',
     className,
     collection,
@@ -66,6 +70,9 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
 
   const { i18n, t } = useTranslation('fields')
 
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
+
   const [file, setFile] = useState(undefined)
   const [missingFile, setMissingFile] = useState(false)
   const [collectionSlugs] = useState([collection?.slug])
@@ -81,7 +88,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
   })
 
   useEffect(() => {
-    if (typeof value !== 'undefined' && value !== '') {
+    if (value !== null && typeof value !== 'undefined' && value !== '') {
       const fetchFile = async () => {
         const response = await fetch(`${serverURL}${api}/${relationTo}/${value}`, {
           credentials: 'include',
@@ -149,8 +156,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           setFilterOptionsResult,
         }}
       />
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {collection?.upload && (
         <React.Fragment>
           {file && !missingFile && (
@@ -184,7 +191,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               </div>
             </div>
           )}
-          <FieldDescription description={description} value={file} />
+          <FieldDescription description={description} path={path} value={file} />
         </React.Fragment>
       )}
       {!readOnly && <DocumentDrawer onSave={onSave} />}

@@ -1,7 +1,7 @@
 import joi from 'joi'
 
 import { adminViewSchema } from './shared/adminViewSchema'
-import { livePreviewSchema } from './shared/componentSchema'
+import { componentSchema, livePreviewSchema } from './shared/componentSchema'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
@@ -90,12 +90,20 @@ export default joi.object({
   debug: joi.boolean(),
   defaultDepth: joi.number().min(0).max(30),
   defaultMaxTextLength: joi.number(),
-  editor: joi.object().required().keys({
-    CellComponent: component.required(),
-    FieldComponent: component.required(),
-    afterReadPromise: joi.func().required(),
-    validate: joi.func().required(),
-  }),
+  editor: joi
+    .object()
+    .required()
+    .keys({
+      CellComponent: componentSchema.optional(),
+      FieldComponent: componentSchema.optional(),
+      LazyCellComponent: joi.func().optional(),
+      LazyFieldComponent: joi.func().optional(),
+      afterReadPromise: joi.func().optional(),
+      outputSchema: joi.func().optional(),
+      populationPromise: joi.func().optional(),
+      validate: joi.func().required(),
+    })
+    .unknown(),
   email: joi.object(),
   endpoints: endpointsSchema,
   express: joi.object().keys({
@@ -129,7 +137,13 @@ export default joi.object({
         joi.array().items(
           joi.object().keys({
             code: joi.string(),
-            label: joi.string(),
+            label: joi
+              .alternatives()
+              .try(
+                joi.object().pattern(joi.string(), [joi.string()]),
+                joi.string(),
+                joi.valid(false),
+              ),
             rtl: joi.boolean(),
             toString: joi.func(),
           }),
@@ -178,6 +192,7 @@ export default joi.object({
     }),
   telemetry: joi.boolean(),
   typescript: joi.object({
+    declare: joi.boolean(),
     outputFile: joi.string(),
   }),
   upload: joi.object(),

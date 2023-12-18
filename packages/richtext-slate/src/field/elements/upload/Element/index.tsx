@@ -1,3 +1,5 @@
+'use client'
+
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { HTMLAttributes } from 'react'
 

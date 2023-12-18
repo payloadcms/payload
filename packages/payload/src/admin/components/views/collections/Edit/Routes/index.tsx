@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
+import type { FieldTypes } from '../../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../../types'
 
 import { useAuth } from '../../../../utilities/Auth'
@@ -13,7 +14,11 @@ import { collectionCustomRoutes } from './custom'
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Unauthorized = lazy(() => import('../../../Unauthorized'))
 
-export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
+export const CollectionRoutes: React.FC<
+  CollectionEditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { collection, permissions } = props
 
   const match = useRouteMatch()
@@ -41,13 +46,19 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
           <Unauthorized />
         )}
       </Route>
-      <Route
-        exact
-        key={`${collection.slug}-api`}
-        path={`${adminRoute}/collections/${collection.slug}/:id/api`}
-      >
-        {permissions?.read ? <CustomCollectionComponent view="API" {...props} /> : <Unauthorized />}
-      </Route>
+      {collection?.admin?.hideAPIURL !== true && (
+        <Route
+          exact
+          key={`${collection.slug}-api`}
+          path={`${adminRoute}/collections/${collection.slug}/:id/api`}
+        >
+          {permissions?.read ? (
+            <CustomCollectionComponent view="API" {...props} />
+          ) : (
+            <Unauthorized />
+          )}
+        </Route>
+      )}
       <Route
         exact
         key={`${collection.slug}-view-version`}

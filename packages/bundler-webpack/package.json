@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-webpack",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "The officially supported Webpack bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -57,6 +57,9 @@
     "@types/webpack-env": "^1.18.0",
     "@types/webpack-hot-middleware": "2.25.6",
     "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "^2.0.0"
   },
   "publishConfig": {
     "main": "./dist/index.js",

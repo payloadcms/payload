@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { closeNav, openNav } from '../helpers'
+import { closeNav, initPageConsoleErrorCatch, openNav } from '../helpers'
 import { initPayloadE2E } from '../helpers/configHelpers'
 
 const { beforeAll, describe } = test
@@ -15,6 +15,8 @@ describe('refresh-permissions', () => {
     ;({ serverURL } = await initPayloadE2E(__dirname))
     const context = await browser.newContext()
     page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
   })
 
   test('should show test global immediately after allowing access', async () => {

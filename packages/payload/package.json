@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.0.6",
+  "version": "2.4.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -31,7 +31,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ./scripts/exportPointerFiles.ts",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ../../scripts/exportPointerFiles.ts ../packages/payload dist/exports",
     "build:components": "webpack --config dist/admin/components.config.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
@@ -45,8 +45,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "prepublishOnly": "pnpm clean && pnpm build",
     "pretest": "pnpm build",
-    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
-    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
+    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.js",
     "release:major": "release-it major",
     "release:minor": "release-it minor",
     "release:patch": "release-it patch",
@@ -133,15 +132,15 @@
     "react-select": "5.7.4",
     "react-toastify": "8.2.0",
     "sanitize-filename": "1.6.3",
-    "sass": "1.64.0",
+    "sass": "1.69.4",
     "scheduler": "0.23.0",
     "scmp": "2.1.0",
-    "sharp": "0.31.3",
+    "sharp": "0.32.6",
     "swc-loader": "0.2.3",
     "terser-webpack-plugin": "5.3.9",
     "ts-essentials": "7.0.3",
     "use-context-selector": "1.4.1",
-    "uuid": "8.3.2"
+    "uuid": "9.0.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -192,7 +191,6 @@
     "file-loader": "6.2.0",
     "form-data": "3.0.1",
     "get-port": "5.1.1",
-    "graphql-request": "6.1.0",
     "mini-css-extract-plugin": "1.6.2",
     "node-fetch": "2.6.12",
     "nodemon": "3.0.1",

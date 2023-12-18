@@ -3,6 +3,7 @@ import type { PayloadRequest } from '../express/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 
+import { deepCopyObject } from '../utilities/deepCopyObject'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields'
 import { enforceMaxVersions } from './enforceMaxVersions'
 
@@ -30,7 +31,7 @@ export const saveVersion = async ({
   let result
   let createNewVersion = true
   const now = new Date().toISOString()
-  const versionData = { ...doc }
+  const versionData = deepCopyObject(doc)
   if (draft) versionData._status = 'draft'
   if (versionData._id) delete versionData._id
 
@@ -38,22 +39,20 @@ export const saveVersion = async ({
     if (autosave) {
       let docs
       const findVersionArgs = {
-        collectionSlug: collection.slug,
-        globalSlug: collection.slug,
         limit: 1,
         req,
         sort: '-updatedAt',
-        where: {
-          parent: {
-            equals: id,
-          },
-        },
       }
       if (collection) {
         ;({ docs } = await payload.db.findVersions({
           ...findVersionArgs,
           collection: collection.slug,
           req,
+          where: {
+            parent: {
+              equals: id,
+            },
+          },
         }))
       } else {
         ;({ docs } = await payload.db.findGlobalVersions({

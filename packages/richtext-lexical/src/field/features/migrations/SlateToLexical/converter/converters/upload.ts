@@ -1,7 +1,7 @@
 import type { SerializedUploadNode } from '../../../../../..'
 import type { SlateNodeConverter } from '../types'
 
-export const UploadConverter: SlateNodeConverter = {
+export const SlateUploadConverter: SlateNodeConverter = {
   converter({ slateNode }) {
     return {
       fields: {

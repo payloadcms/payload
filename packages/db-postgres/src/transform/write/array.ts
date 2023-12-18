@@ -1,17 +1,20 @@
 /* eslint-disable no-param-reassign */
 import type { ArrayField } from 'payload/types'
 
+import type { PostgresAdapter } from '../../types'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  adapter: PostgresAdapter
   arrayTableName: string
   baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
+  blocksToDelete: Set<string>
   data: unknown
   field: ArrayField
   locale?: string
@@ -25,9 +28,11 @@ type Args = {
 }
 
 export const transformArray = ({
+  adapter,
   arrayTableName,
   baseTableName,
   blocks,
+  blocksToDelete,
   data,
   field,
   locale,
@@ -38,6 +43,7 @@ export const transformArray = ({
   selects,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
+  const hasUUID = adapter.tables[arrayTableName]._uuid
 
   if (isArrayOfRows(data)) {
     data.forEach((arrayRow, i) => {
@@ -47,6 +53,16 @@ export const transformArray = ({
         row: {
           _order: i + 1,
         },
+      }
+
+      // If we have declared a _uuid field on arrays,
+      // that means the ID has to be unique,
+      // and our ids within arrays are not unique.
+      // So move the ID to a uuid field for storage
+      // and allow the database to generate a serial id automatically
+      if (hasUUID) {
+        newRow.row._uuid = arrayRow.id
+        delete arrayRow.id
       }
 
       if (locale) {
@@ -60,9 +76,11 @@ export const transformArray = ({
       }
 
       traverseFields({
+        adapter,
         arrays: newRow.arrays,
         baseTableName,
         blocks,
+        blocksToDelete,
         columnPrefix: '',
         data: arrayRow,
         fieldPrefix: '',

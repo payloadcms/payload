@@ -102,6 +102,7 @@ const DefaultNav: React.FC = () => {
                       className={`${baseClass}__link`}
                       id={id}
                       key={i}
+                      tabIndex={!navOpen ? -1 : undefined}
                       to={href}
                     >
                       <span className={`${baseClass}__link-icon`}>
@@ -117,7 +118,7 @@ const DefaultNav: React.FC = () => {
           {Array.isArray(afterNavLinks) &&
             afterNavLinks.map((Component, i) => <Component key={i} />)}
           <div className={`${baseClass}__controls`}>
-            <Logout />
+            <Logout tabIndex={!navOpen ? -1 : undefined} />
           </div>
         </nav>
       </div>
@@ -128,6 +129,7 @@ const DefaultNav: React.FC = () => {
             onClick={() => {
               setNavOpen(false)
             }}
+            tabIndex={!navOpen ? -1 : undefined}
             type="button"
           >
             <Hamburger isActive />

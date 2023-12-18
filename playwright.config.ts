@@ -10,6 +10,9 @@ const config: PlaywrightTestConfig = {
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
-  workers: 999,
+  expect: {
+    timeout: 10000,
+  },
+  workers: 16,
 }
 export default config

@@ -10,6 +10,7 @@ import type { User } from '../types'
 import { buildAfterOperation } from '../../collections/operations/utils'
 import { AuthenticationError, LockedAuth } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import getCookieExpiration from '../../utilities/getCookieExpiration'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -54,6 +55,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args =
       (await hook({
         args,
+        collection: args.collection?.config,
         context: args.req.context,
         operation: 'login',
       })) || args
@@ -138,6 +140,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: args.req.context,
           req: args.req,
           user,
@@ -175,6 +178,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: args.req.context,
           req: args.req,
           token,
@@ -187,10 +191,11 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     user = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: user,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -205,6 +210,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: req.context,
           doc: user,
           req,
@@ -220,6 +226,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       user =
         (await hook({
+          collection: args.collection?.config,
           context: req.context,
           doc: user,
           req,
@@ -238,6 +245,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: args.collection?.config,
       operation: 'login',
       result,
     })
@@ -250,7 +258,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

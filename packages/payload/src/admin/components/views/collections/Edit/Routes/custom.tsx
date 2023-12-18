@@ -54,9 +54,9 @@ export const collectionCustomRoutes = (props: {
     if (typeof ViewComponent === 'function') {
       routesToReturn.push(<ViewComponent key={ViewComponent.name} user={user} />)
     } else {
-      const { Component, path } = ViewComponent
+      if (collection && 'Component' in ViewComponent) {
+        const { Component, path } = ViewComponent
 
-      if (collection) {
         routesToReturn.push(
           <Route exact key={`${collection.slug}-${path}`} path={`${match.url}${path}`}>
             {permissions?.read?.permission ? <Component user={user} /> : <Unauthorized />}

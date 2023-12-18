@@ -1,3 +1,4 @@
+'use client'
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
@@ -17,8 +18,7 @@ import type { BlocksFeatureProps } from '..'
 
 import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
 import { $createBlockNode } from '../nodes/BlocksNode'
-import { INSERT_BLOCK_COMMAND } from '../plugin'
-import './index.scss'
+import { INSERT_BLOCK_COMMAND } from '../plugin/commands'
 const baseClass = 'lexical-blocks-drawer'
 
 export const INSERT_BLOCK_WITH_DRAWER_COMMAND: LexicalCommand<{
@@ -36,10 +36,9 @@ const insertBlock = ({
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
-      data: {
-        blockName: '',
-        blockType: blockType,
-      },
+      id: null,
+      blockName: '',
+      blockType: blockType,
     })
   } else {
     editor.update(() => {
@@ -47,10 +46,9 @@ const insertBlock = ({
       if (node) {
         node.replace(
           $createBlockNode({
-            data: {
-              blockName: '',
-              blockType: blockType,
-            },
+            id: null,
+            blockName: '',
+            blockType: blockType,
           }),
         )
       }
@@ -65,7 +63,7 @@ export const BlocksDrawerComponent: React.FC = () => {
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
   const editDepth = useEditDepth()
   const { t } = useTranslation('fields')
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
 
   const labels = {
     plural: t('blocks') || 'Blocks',

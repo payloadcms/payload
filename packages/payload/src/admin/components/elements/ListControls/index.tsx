@@ -1,13 +1,11 @@
 import { useWindowInfo } from '@faceless-ui/window-info'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import AnimateHeight from 'react-animate-height'
 import { useTranslation } from 'react-i18next'
 
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { Props } from './types'
 
 import { fieldAffectsData } from '../../../../fields/config/types'
-import flattenFields from '../../../../utilities/flattenTopLevelFields'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import Chevron from '../../icons/Chevron'
 import { useSearchParams } from '../../utilities/SearchParams'
@@ -27,22 +25,12 @@ import './index.scss'
 
 const baseClass = 'list-controls'
 
-const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
-  const {
-    admin: { useAsTitle },
-    fields,
-  } = collection
-
-  const topLevelFields = flattenFields(fields)
-  return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle)
-}
-
 /**
  * The ListControls component is used to render the controls (search, filter, where)
  * for a collection's list view. You can find those directly above the table which lists
  * the collection's documents.
  */
-const ListControls: React.FC<Props> = (props) => {
+export const ListControls: React.FC<Props> = (props) => {
   const {
     collection: {
       admin: { listSearchableFields },
@@ -51,21 +39,20 @@ const ListControls: React.FC<Props> = (props) => {
     collection,
     enableColumns = true,
     enableSort = false,
+    handleSearchChange,
     handleSortChange,
     handleWhereChange,
     modifySearchQuery = true,
     resetParams,
+    titleField,
   } = props
 
   const params = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
 
-  const [titleField, setTitleField] = useState(getUseAsTitle(collection))
-  useEffect(() => {
-    setTitleField(getUseAsTitle(collection))
-  }, [collection])
-
-  const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields))
+  const [textFieldsToBeSearched, setFieldsToBeSearched] = useState(
+    getTextFieldsToBeSearched(listSearchableFields, fields),
+  )
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
@@ -74,18 +61,19 @@ const ListControls: React.FC<Props> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
+  React.useEffect(() => {
+    setFieldsToBeSearched(getTextFieldsToBeSearched(listSearchableFields, fields))
+  }, [listSearchableFields, fields])
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
           fieldLabel={
-            (titleField &&
-              fieldAffectsData(titleField) &&
-              getTranslation(titleField.label || titleField.name, i18n)) ??
-            undefined
+            (titleField && getTranslation(titleField.label || titleField.name, i18n)) ?? undefined
           }
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
-          handleChange={handleWhereChange}
+          handleChange={handleSearchChange}
           listSearchableFields={textFieldsToBeSearched}
           modifySearchQuery={modifySearchQuery}
         />
@@ -128,17 +116,16 @@ const ListControls: React.FC<Props> = (props) => {
               {t('filters')}
             </Pill>
             {enableSort && (
-              <Button
+              <Pill
                 aria-controls={`${baseClass}-sort`}
                 aria-expanded={visibleDrawer === 'sort'}
-                buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
                 className={`${baseClass}__toggle-sort`}
-                icon="chevron"
-                iconStyle="none"
+                icon={<Chevron />}
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                pillStyle="light"
               >
                 {t('sort')}
-              </Button>
+              </Pill>
             )}
           </div>
         </div>
@@ -179,5 +166,3 @@ const ListControls: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default ListControls

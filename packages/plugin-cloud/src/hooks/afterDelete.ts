@@ -1,5 +1,5 @@
-import type { TypeWithID } from 'payload/dist/globals/config/types'
-import type { FileData } from 'payload/dist/uploads/types'
+import type { TypeWithID } from 'payload/types'
+import type { FileData } from 'payload/types'
 import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload/types'
 
 import type { TypeWithPrefix } from '../types'

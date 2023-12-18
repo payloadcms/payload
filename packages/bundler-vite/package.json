@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-vite",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "description": "The officially supported Vite bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -36,6 +36,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
+    "payload": "^2.0.0",
     "react-dom": "18.2.0"
   },
   "publishConfig": {

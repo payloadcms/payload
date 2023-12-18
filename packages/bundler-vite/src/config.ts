@@ -63,13 +63,14 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     'module.hot': 'undefined',
     'process.argv': '[]',
     'process.cwd': 'function () { return "/" }',
-    'process.env': '{}',
     'process?.cwd': 'function () { return "/" }',
   }
 
   Object.entries(process.env).forEach(([key, val]) => {
     if (key.indexOf('PAYLOAD_PUBLIC_') === 0) {
       define[`process.env.${key}`] = `'${val}'`
+    } else {
+      define[`process.env.${key}`] = `''`
     }
   })
 
@@ -91,6 +92,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         // Dependencies that need aliases should be excluded
         // from pre-bundling
         '@payloadcms/bundler-vite',
+        ...(Object.keys(absoluteAliases) || []),
       ],
       include: ['payload/components/root', 'react-dom/client'],
     },

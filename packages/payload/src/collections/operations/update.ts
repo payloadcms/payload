@@ -21,6 +21,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
 import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
@@ -56,6 +57,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     args =
       (await hook({
         args,
+        collection: args.collection.config,
         context: args.req.context,
         operation: 'update',
       })) || args
@@ -169,10 +171,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       try {
         const originalDoc = await afterRead({
+          collection: collectionConfig,
           context: req.context,
           depth: 0,
           doc,
-          entityConfig: collectionConfig,
+          global: null,
           overrideAccess: true,
           req,
           showHiddenFields: true,
@@ -193,10 +196,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
           id,
+          collection: collectionConfig,
           context: req.context,
           data,
           doc: originalDoc,
-          entityConfig: collectionConfig,
+          global: null,
           operation: 'update',
           overrideAccess,
           req,
@@ -211,6 +215,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           data =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               data,
               operation: 'update',
@@ -236,6 +241,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           data =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               data,
               operation: 'update',
@@ -250,11 +256,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
           id,
+          collection: collectionConfig,
           context: req.context,
           data,
           doc: originalDoc,
           docWithLocales: doc,
-          entityConfig: collectionConfig,
+          global: null,
           operation: 'update',
           req,
           skipValidation: shouldSaveDraft || data._status === 'draft',
@@ -297,10 +304,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         result = await afterRead({
+          collection: collectionConfig,
           context: req.context,
           depth,
           doc: result,
-          entityConfig: collectionConfig,
+          global: null,
           overrideAccess,
           req,
           showHiddenFields,
@@ -315,6 +323,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           result =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               doc: result,
               req,
@@ -326,10 +335,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+          collection: collectionConfig,
           context: req.context,
           data,
           doc: result,
-          entityConfig: collectionConfig,
+          global: null,
           operation: 'update',
           previousDoc: originalDoc,
           req,
@@ -344,6 +354,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           result =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               doc: result,
               operation: 'update',
@@ -385,11 +396,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'update',
       result,
     })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

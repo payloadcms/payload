@@ -92,14 +92,21 @@ function buildObjectType({
         field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
       if (!payload.types.arrayTypes[interfaceName]) {
-        // eslint-disable-next-line no-param-reassign
-        payload.types.arrayTypes[interfaceName] = buildObjectType({
+        const objectType = buildObjectType({
           name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
           parentName: interfaceName,
           payload,
         })
+
+        if (Object.keys(objectType.getFields()).length) {
+          payload.types.arrayTypes[interfaceName] = objectType
+        }
+      }
+
+      if (!payload.types.arrayTypes[interfaceName]) {
+        return objectTypeConfig
       }
 
       const arrayType = new GraphQLList(new GraphQLNonNull(payload.types.arrayTypes[interfaceName]))
@@ -110,12 +117,12 @@ function buildObjectType({
       }
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
-      const blockTypes = field.blocks.map((block) => {
+      const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, block) => {
         if (!payload.types.blockTypes[block.slug]) {
           const interfaceName =
             block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true)
-          // eslint-disable-next-line no-param-reassign
-          payload.types.blockTypes[block.slug] = buildObjectType({
+
+          const objectType = buildObjectType({
             name: interfaceName,
             fields: [
               ...block.fields,
@@ -128,10 +135,22 @@ function buildObjectType({
             parentName: interfaceName,
             payload,
           })
+
+          if (Object.keys(objectType.getFields()).length) {
+            payload.types.blockTypes[block.slug] = objectType
+          }
         }
 
-        return payload.types.blockTypes[block.slug]
-      })
+        if (payload.types.blockTypes[block.slug]) {
+          acc.push(payload.types.blockTypes[block.slug])
+        }
+
+        return acc
+      }, [])
+
+      if (blockTypes.length === 0) {
+        return objectTypeConfig
+      }
 
       const fullName = combineParentName(parentName, toWords(field.name, true))
 
@@ -177,14 +196,21 @@ function buildObjectType({
         field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
       if (!payload.types.groupTypes[interfaceName]) {
-        // eslint-disable-next-line no-param-reassign
-        payload.types.groupTypes[interfaceName] = buildObjectType({
+        const objectType = buildObjectType({
           name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
           parentName: interfaceName,
           payload,
         })
+
+        if (Object.keys(objectType.getFields()).length) {
+          payload.types.groupTypes[interfaceName] = objectType
+        }
+      }
+
+      if (!payload.types.groupTypes[interfaceName]) {
+        return objectTypeConfig
       }
 
       return {
@@ -429,10 +455,20 @@ function buildObjectType({
           if (typeof args.depth !== 'undefined') depth = args.depth
           const editor: RichTextAdapter = field?.editor
 
-          if (editor?.afterReadPromise) {
-            await editor?.afterReadPromise({
+          // RichText fields have their own depth argument in GraphQL.
+          // This is why the populationPromise (which populates richtext fields like uploads and relationships)
+          // is run here again, with the provided depth.
+          // In the graphql find.ts resolver, the depth is then hard-coded to 0.
+          // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
+          if (editor?.populationPromise) {
+            await editor?.populationPromise({
+              context,
               depth,
               field,
+              findMany: false,
+              flattenLocales: false,
+              overrideAccess: false,
+              populationPromises: [],
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
@@ -473,20 +509,23 @@ function buildObjectType({
             tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true))
 
           if (!payload.types.tabTypes[interfaceName]) {
-            // eslint-disable-next-line no-param-reassign
-            payload.types.tabTypes[interfaceName] = buildObjectType({
+            const objectType = buildObjectType({
               name: interfaceName,
               fields: tab.fields,
               forceNullable,
               parentName: interfaceName,
               payload,
             })
+
+            if (Object.keys(objectType.getFields()).length) {
+              return {
+                ...tabSchema,
+                [tab.name]: { type: objectType },
+              }
+            }
           }
 
-          return {
-            ...tabSchema,
-            [tab.name]: { type: payload.types.tabTypes[interfaceName] },
-          }
+          return tabSchema
         }
 
         return {

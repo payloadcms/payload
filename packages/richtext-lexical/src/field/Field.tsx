@@ -1,3 +1,4 @@
+'use client'
 import type { SerializedEditorState } from 'lexical'
 
 import { Error, FieldDescription, Label, useField, withCondition } from 'payload/components/forms'
@@ -6,7 +7,6 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { FieldProps } from '../types'
 
-import { defaultRichTextValueV2 } from '../populate/defaultValue'
 import { richTextValidateHOC } from '../validate'
 import './index.scss'
 import { LexicalProvider } from './lexical/LexicalProvider'
@@ -24,7 +24,6 @@ const RichText: React.FC<FieldProps> = (props) => {
       style,
       width,
     },
-    defaultValue: defaultValueFromProps,
     editorConfig,
     label,
     path: pathFromProps,
@@ -38,7 +37,10 @@ const RichText: React.FC<FieldProps> = (props) => {
     (value, validationOptions) => {
       return validate(value, { ...validationOptions, props, required })
     },
-    [validate, required, props],
+    // Important: do not add props to the dependencies array.
+    // This would cause an infinite loop and endless re-rendering.
+    // Removing props from the dependencies array fixed this issue: https://github.com/payloadcms/payload/issues/3709
+    [validate, required],
   )
 
   const fieldType = useField<SerializedEditorState>({
@@ -47,20 +49,7 @@ const RichText: React.FC<FieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const { errorMessage, initialValue, setValue, showError, value } = fieldType
-
-  let valueToUse = value
-
-  if (typeof valueToUse === 'string') {
-    try {
-      const parsedJSON = JSON.parse(valueToUse)
-      valueToUse = parsedJSON
-    } catch (err) {
-      valueToUse = null
-    }
-  }
-
-  if (!valueToUse) valueToUse = defaultValueFromProps || defaultRichTextValueV2
+  const { errorMessage, setValue, showError, value } = fieldType
 
   const classes = [
     baseClass,
@@ -75,6 +64,7 @@ const RichText: React.FC<FieldProps> = (props) => {
   return (
     <div
       className={classes}
+      key={path}
       style={{
         ...style,
         width,
@@ -83,12 +73,11 @@ const RichText: React.FC<FieldProps> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <Error message={errorMessage} showError={showError} />
         <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-        <ErrorBoundary fallbackRender={fallbackRender} onReset={(details) => {}}>
+        <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           <LexicalProvider
             editorConfig={editorConfig}
             fieldProps={props}
-            initialState={initialValue}
-            onChange={(editorState, editor, tags) => {
+            onChange={(editorState) => {
               let serializedEditorState = editorState.toJSON()
 
               // Transform state through save hooks
@@ -100,13 +89,12 @@ const RichText: React.FC<FieldProps> = (props) => {
 
               setValue(serializedEditorState)
             }}
+            path={path}
             readOnly={readOnly}
-            setValue={setValue}
             value={value}
           />
-          <FieldDescription description={description} value={value} />
         </ErrorBoundary>
-        <FieldDescription description={description} value={value} />
+        <FieldDescription description={description} path={path} value={value} />
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 # Form Builder Example Front-End
 
-This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Form Builder Example](https://github.com/payloadcms/payload/tree/master/examples/form-builder/payload).
+This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Form Builder Example](https://github.com/payloadcms/payload/tree/main/examples/form-builder/payload).
 
 > This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/app), we will add an example for that soon.
 
@@ -8,7 +8,7 @@ This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nex
 
 ### Payload
 
-First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/master/examples/form-builder/payload). If you have not done so already, clone it down and follow the setup instructions there.
+First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/main/examples/form-builder/payload). If you have not done so already, clone it down and follow the setup instructions there.
 
 ### Next.js App
 
@@ -18,7 +18,7 @@ First you'll need a running Payload app. There is one made explicitly for this e
 4. `yarn dev` or `npm run dev` to start the server
 5. `open http://localhost:3001` to see the result
 
-Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within Payload. See the [Form Builder Example](https://github.com/payloadcms/payload/tree/master/examples/form-builder/payload) for full details.
+Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within Payload. See the [Form Builder Example](https://github.com/payloadcms/payload/tree/main/examples/form-builder/payload) for full details.
 
 ## Learn More
 

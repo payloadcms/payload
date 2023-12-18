@@ -1,3 +1,4 @@
+'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
@@ -6,6 +7,8 @@ import * as React from 'react'
 import { createPortal } from 'react-dom'
 
 import type { FloatingToolbarSectionEntry } from '../types'
+
+const baseClass = 'floating-select-toolbar-popup__dropdown-item'
 
 interface DropDownContextType {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void
@@ -25,7 +28,7 @@ export function DropDownItem({
   const [editor] = useLexicalComposerContext()
   const [enabled, setEnabled] = useState<boolean>(true)
   const [active, setActive] = useState<boolean>(false)
-  const [className, setClassName] = useState<string>('item')
+  const [className, setClassName] = useState<string>(baseClass)
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -66,11 +69,16 @@ export function DropDownItem({
 
   useEffect(() => {
     setClassName(
-      ['item', enabled === false ? 'disabled' : '', active ? 'active' : '']
+      [
+        baseClass,
+        enabled === false ? 'disabled' : '',
+        active ? 'active' : '',
+        entry?.key ? `${baseClass}-${entry.key}` : '',
+      ]
         .filter(Boolean)
         .join(' '),
     )
-  }, [enabled, active, className])
+  }, [enabled, active, className, entry.key])
 
   const ref = useRef<HTMLButtonElement>(null)
 
@@ -177,7 +185,7 @@ function DropDownItems({
   return (
     <DropDownContext.Provider value={contextValue}>
       <div
-        className="floating-select-toolbar-popup__dropdown--items"
+        className="floating-select-toolbar-popup__dropdown-items"
         onKeyDown={handleKeyDown}
         ref={dropDownRef}
       >
@@ -259,11 +267,17 @@ export function DropDown({
           event.preventDefault()
           setShowDropDown(!showDropDown)
         }}
+        onMouseDown={(e) => {
+          // This fixes a bug where you are unable to click the button if you are in a NESTED editor (editor in blocks field in editor).
+          // Thus only happens if you click on the SVG of the button. Clicking on the outside works. Related issue: https://github.com/payloadcms/payload/issues/4025
+          // TODO: Find out why exactly it happens and why e.preventDefault() on the mouseDown fixes it. Write that down here, or potentially fix a root cause, if there is any.
+          e.preventDefault()
+        }}
         ref={buttonRef}
         type="button"
       >
         <Icon />
-        <i className={`${buttonClassName}--caret`} />
+        <i className="floating-select-toolbar-popup__dropdown-caret" />
       </button>
 
       {showDropDown &&

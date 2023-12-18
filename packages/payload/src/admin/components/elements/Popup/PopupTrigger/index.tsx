@@ -36,7 +36,7 @@ export const PopupTrigger: React.FC<Props> = (props) => {
   }
 
   return (
-    <button className={classes} onClick={() => setActive(!active)} type="button">
+    <button className={classes} onClick={() => setActive(!active)} tabIndex={0} type="button">
       {button}
     </button>
   )

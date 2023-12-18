@@ -11,7 +11,11 @@ import type { DeepRequired } from 'ts-essentials'
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
-import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
+import type {
+  DocumentTab,
+  DocumentTabComponent,
+  DocumentTabConfig,
+} from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
 import type { User } from '../auth/types'
@@ -59,7 +63,11 @@ export type LivePreviewConfig = {
    Use the `useLivePreview` hook to get started in React applications.
    */
   url?:
-    | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
+    | ((args: {
+        data: Record<string, any>
+        documentInfo: ContextType
+        locale: Locale
+      }) => Promise<string> | string)
     | string
 }
 
@@ -249,16 +257,29 @@ export type AdminViewComponent = React.ComponentType<AdminViewProps>
 
 export type AdminView = AdminViewComponent | AdminViewConfig
 
-export type EditViewConfig = {
-  /**
-   * The component to render for this view
-   * + Replaces the default component
-   */
-  Component: AdminViewComponent
-  Tab: DocumentTab
-  path: string
-}
+export type EditViewConfig =
+  | {
+      /**
+       * Add a new Edit view to the admin panel
+       * i.e. you can render a custom view that has no tab, if desired
+       * Or override a specific properties of an existing one
+       * i.e. you can customize the `Default` view tab label, if desired
+       */
+      Tab?: DocumentTab
+      path?: string
+    }
+  | {
+      Component: AdminViewComponent
+      path: string
+    }
 
+/**
+ * Override existing views
+ * i.e. Dashboard, Account, API, LivePreview, etc.
+ * Path is not available here
+ * All Tab properties become optional
+ * i.e. you can change just the label, if desired
+ */
 export type EditView = AdminViewComponent | EditViewConfig
 
 export type Locale = {
@@ -271,7 +292,7 @@ export type Locale = {
    * label of supported locale
    * @example "English"
    */
-  label: string
+  label: Record<string, string> | string
   /**
    * if true, defaults textAligmnent on text fields to RTL
    */
@@ -517,7 +538,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any>
+  editor: RichTextAdapter<any, any, any>
   /**
    * Email configuration options. This value is overridden by `email` in Payload.init if passed.
    *
@@ -646,7 +667,7 @@ export type Config = {
     api?: string
     /** @default "/graphql"  */
     graphQL?: string
-    /** @default "/playground" */
+    /** @default "/graphql-playground" */
     graphQLPlayground?: string
   }
   /**
@@ -660,6 +681,8 @@ export type Config = {
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
+    /** Disable declare block in generated types file */
+    declare?: false
     /** Filename to write the generated types to */
     outputFile?: string
   }

@@ -23,6 +23,10 @@ type TraverseFieldsArgs = {
    */
   dataRef: Record<string, unknown>
   /**
+   * Data that needs to be removed from the result after all fields have populated
+   */
+  deletions: (() => void)[]
+  /**
    * Column prefix can be built up by group and named tab fields
    */
   fieldPrefix: string
@@ -54,6 +58,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   blocks,
   config,
   dataRef,
+  deletions,
   fieldPrefix,
   fields,
   numbers,
@@ -69,6 +74,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         blocks,
         config,
         dataRef,
+        deletions,
         fieldPrefix,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         numbers,
@@ -87,6 +93,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         blocks,
         config,
         dataRef,
+        deletions,
         fieldPrefix,
         fields: field.fields,
         numbers,
@@ -99,7 +106,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (fieldAffectsData(field)) {
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
-
       if (field.type === 'array') {
         if (Array.isArray(fieldData)) {
           if (field.localized) {
@@ -109,11 +115,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 const locale = row._locale
                 const data = {}
                 delete row._locale
+                if (row._uuid) {
+                  row.id = row._uuid
+                  delete row._uuid
+                }
 
                 const rowResult = traverseFields<T>({
                   blocks,
                   config,
                   dataRef: data,
+                  deletions,
                   fieldPrefix: '',
                   fields: field.fields,
                   numbers,
@@ -129,10 +140,15 @@ export const traverseFields = <T extends Record<string, unknown>>({
             }, {})
           } else {
             result[field.name] = fieldData.map((row, i) => {
+              if (row._uuid) {
+                row.id = row._uuid
+                delete row._uuid
+              }
               return traverseFields<T>({
                 blocks,
                 config,
                 dataRef: row,
+                deletions,
                 fieldPrefix: '',
                 fields: field.fields,
                 numbers,
@@ -155,6 +171,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
             result[field.name] = {}
 
             blocks[blockFieldPath].forEach((row) => {
+              if (row._uuid) {
+                row.id = row._uuid
+                delete row._uuid
+              }
               if (typeof row._locale === 'string') {
                 if (!result[field.name][row._locale]) result[field.name][row._locale] = []
                 result[field.name][row._locale].push(row)
@@ -171,6 +191,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     blocks,
                     config,
                     dataRef: row,
+                    deletions,
                     fieldPrefix: '',
                     fields: block.fields,
                     numbers,
@@ -189,6 +210,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
           } else {
             result[field.name] = blocks[blockFieldPath].map((row, i) => {
               delete row._order
+              if (row._uuid) {
+                row.id = row._uuid
+                delete row._uuid
+              }
               const block = field.blocks.find(({ slug }) => slug === row.blockType)
 
               if (block) {
@@ -196,6 +221,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   blocks,
                   config,
                   dataRef: row,
+                  deletions,
                   fieldPrefix: '',
                   fields: block.fields,
                   numbers,
@@ -345,6 +371,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   blocks,
                   config,
                   dataRef: groupLocaleData as Record<string, unknown>,
+                  deletions,
                   fieldPrefix: groupFieldPrefix,
                   fields: field.fields,
                   numbers,
@@ -360,6 +387,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 blocks,
                 config,
                 dataRef: groupData as Record<string, unknown>,
+                deletions,
                 fieldPrefix: groupFieldPrefix,
                 fields: field.fields,
                 numbers,
@@ -424,6 +452,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
     return result
   }, dataRef)
+
+  if (Array.isArray(table._locales)) {
+    deletions.push(() => delete table._locales)
+  }
 
   return formatted as T
 }

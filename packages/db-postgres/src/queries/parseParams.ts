@@ -100,7 +100,11 @@ export async function parseParams({
                 const val = where[relationOrPath][operator]
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
-                  constraints.push(operatorMap.equals(constraintTable[col], value))
+                  if (typeof value === 'string' && value.indexOf('%') > -1) {
+                    constraints.push(operatorMap.like(constraintTable[col], value))
+                  } else {
+                    constraints.push(operatorMap.equals(constraintTable[col], value))
+                  }
                 })
 
                 if (['json', 'richText'].includes(field.type) && Array.isArray(pathSegments)) {
@@ -144,12 +148,18 @@ export async function parseParams({
                   break
                 }
 
-                const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
+                const sanitizedQueryValue = sanitizeQueryValue({
                   field,
                   operator,
                   relationOrPath,
                   val,
                 })
+
+                if (sanitizedQueryValue === null) {
+                  break
+                }
+
+                const { operator: queryOperator, value: queryValue } = sanitizedQueryValue
 
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
@@ -159,7 +169,10 @@ export async function parseParams({
                       ne<any>(rawColumn || table[columnName], queryValue),
                     ),
                   )
-                } else if (
+                  break
+                }
+
+                if (
                   (field.type === 'relationship' || field.type === 'upload') &&
                   Array.isArray(queryValue) &&
                   operator === 'not_in'
@@ -170,11 +183,13 @@ export async function parseParams({
                     IS
                     NULL`,
                   )
-                } else {
-                  constraints.push(
-                    operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
-                  )
+
+                  break
                 }
+
+                constraints.push(
+                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                )
               }
             }
           }

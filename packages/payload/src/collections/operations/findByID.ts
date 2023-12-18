@@ -9,6 +9,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable'
@@ -39,6 +40,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     args =
       (await hook({
         args,
+        collection: args.collection.config,
         context: args.req.context,
         operation: 'read',
       })) || args
@@ -52,7 +54,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     disableErrors,
     draft: draftEnabled = false,
     overrideAccess = false,
-    req: { locale, payload, t },
+    req: { locale, t },
     req,
     showHiddenFields,
   } = args
@@ -87,7 +89,11 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    if (!req.findByID) req.findByID = { [transactionID]: {} }
+    if (!req.findByID) {
+      req.findByID = { [transactionID]: {} }
+    } else if (!req.findByID[transactionID]) {
+      req.findByID[transactionID] = {}
+    }
 
     if (!req.findByID[transactionID][collectionConfig.slug]) {
       const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query)
@@ -138,6 +144,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           query: findOneArgs.where,
@@ -150,11 +157,12 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       currentDepth,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       overrideAccess,
       req,
       showHiddenFields,
@@ -169,6 +177,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           query: findOneArgs.where,
@@ -182,6 +191,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     result = await buildAfterOperation<T>({
       args,
+      collection: collectionConfig,
       operation: 'findByID',
       result: result as any,
     }) // TODO: fix this typing
@@ -190,7 +200,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

@@ -4,6 +4,7 @@ import type { BundlerType, CliArgs, DbType, ProjectTemplate } from '../types'
 import { createProject } from './create-project'
 import { bundlerPackages, dbPackages, editorPackages } from './packages'
 import exp from 'constants'
+import { getValidTemplates } from './templates'
 
 const projectDir = path.resolve(__dirname, './tmp')
 describe('createProject', () => {
@@ -78,17 +79,20 @@ describe('createProject', () => {
     })
 
     describe('db adapters and bundlers', () => {
+      const templates = getValidTemplates()
+
       it.each([
-        ['mongodb', 'webpack'],
-        ['postgres', 'webpack'],
-      ])('update config and deps: %s, %s', async (db, bundler) => {
+        ['blank', 'mongodb', 'webpack'],
+        ['blank', 'postgres', 'webpack'],
+        ['website', 'mongodb', 'webpack'],
+        ['website', 'postgres', 'webpack'],
+        ['ecommerce', 'mongodb', 'webpack'],
+        ['ecommerce', 'postgres', 'webpack'],
+      ])('update config and deps: %s, %s, %s', async (templateName, db, bundler) => {
         const projectName = 'starter-project'
-        const template: ProjectTemplate = {
-          name: 'blank',
-          type: 'starter',
-          url: 'https://github.com/payloadcms/payload/templates/blank',
-          description: 'Blank Template',
-        }
+
+        const template = templates.find((t) => t.name === templateName)
+
         await createProject({
           cliArgs: args,
           projectName,
@@ -124,7 +128,12 @@ describe('createProject', () => {
           editorReplacement.version,
         )
 
-        const payloadConfigPath = path.resolve(projectDir, 'src/payload.config.ts')
+        let payloadConfigPath = path.resolve(projectDir, 'src/payload.config.ts')
+
+        // Website and ecommerce templates have payload.config.ts in src/payload
+        if (!fse.existsSync(payloadConfigPath)) {
+          payloadConfigPath = path.resolve(projectDir, 'src/payload/payload.config.ts')
+        }
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 
         // Check payload.config.ts

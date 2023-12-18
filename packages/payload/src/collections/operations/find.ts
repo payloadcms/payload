@@ -8,6 +8,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
@@ -46,6 +47,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     args =
       (await hook({
         args,
+        collection: args.collection.config,
         context: args.req.context,
         operation: 'read',
       })) || args
@@ -166,6 +168,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
             docRef =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
                 query: fullWhere,
@@ -187,12 +190,13 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       docs: await Promise.all(
         result.docs.map(async (doc) =>
           afterRead<T>({
+            collection: collectionConfig,
             context: req.context,
             currentDepth,
             depth,
             doc,
-            entityConfig: collectionConfig,
             findMany: true,
+            global: null,
             overrideAccess,
             req,
             showHiddenFields,
@@ -216,6 +220,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
             docRef =
               (await hook({
+                collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
                 findMany: true,
@@ -235,6 +240,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
     result = await buildAfterOperation<T>({
       args,
+      collection: collectionConfig,
       operation: 'find',
       result,
     })
@@ -243,7 +249,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

@@ -5,6 +5,7 @@ import type { SanitizedGlobalConfig } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable'
@@ -83,7 +84,9 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
       doc =
         (await hook({
+          context: req.context,
           doc,
+          global: globalConfig,
           req,
         })) || doc
     }, Promise.resolve())
@@ -93,10 +96,11 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // /////////////////////////////////////
 
     doc = await afterRead({
+      collection: null,
       context: req.context,
       depth,
       doc,
-      entityConfig: globalConfig,
+      global: globalConfig,
       overrideAccess,
       req,
       showHiddenFields,
@@ -111,7 +115,9 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
       doc =
         (await hook({
+          context: req.context,
           doc,
+          global: globalConfig,
           req,
         })) || doc
     }, Promise.resolve())
@@ -120,7 +126,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     // /////////////////////////////////////
     // Return results

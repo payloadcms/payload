@@ -19,12 +19,13 @@ export const Text: React.FC<
   return (
     <Width width={width}>
       <div className={classes.wrap}>
-        <label htmlFor="name" className={classes.label}>
+        <label htmlFor={name} className={classes.label}>
           {label}
         </label>
         <input
           type="text"
           className={classes.input}
+          id={name}
           {...register(name, { required: requiredFromProps })}
         />
         {requiredFromProps && errors[name] && <Error />}

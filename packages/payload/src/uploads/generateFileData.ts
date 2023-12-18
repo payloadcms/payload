@@ -1,7 +1,8 @@
 import type { UploadedFile } from 'express-fileupload'
-import type { Sharp } from 'sharp'
+import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
+import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import sanitize from 'sanitize-filename'
@@ -16,6 +17,7 @@ import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
 import getFileByPath from './getFileByPath'
+import { getExternalFile } from './getExternalFile'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -62,12 +64,21 @@ export const generateFileData = async <T>({
   }
 
   if (!file && uploadEdits && data) {
-    const { filename } = data as FileData
-    const filePath = `${staticPath}/${filename}`
-    const response = await getFileByPath(filePath)
+    const { filename, url } = data as FileData
 
-    overwriteExistingFiles = true
-    file = response as UploadedFile
+    try {
+      if (url && url.startsWith('/') && !disableLocalStorage) {
+        const filePath = `${staticPath}/${filename}`
+        const response = await getFileByPath(filePath)
+        file = response as UploadedFile
+        overwriteExistingFiles = true
+      } else if (filename && url) {
+        file = (await getExternalFile({ req, data: data as FileData })) as UploadedFile
+        overwriteExistingFiles = true
+      }
+    } catch (err) {
+      throw new FileUploadError(req.t)
+    }
   }
 
   if (!file) {
@@ -95,15 +106,18 @@ export const generateFileData = async <T>({
     let fsSafeName: string
     let sharpFile: Sharp | undefined
     let dimensions: ProbedImageSize | undefined
-    let fileBuffer
+    let fileBuffer: { data: Buffer; info: OutputInfo }
     let ext
     let mime: string
+    const fileHasAdjustments =
+      fileSupportsResize &&
+      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
-    const sharpOptions: sharp.SharpOptions = {}
+    const sharpOptions: SharpOptions = {}
 
     if (fileIsAnimated) sharpOptions.animated = true
 
-    if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
+    if (fileHasAdjustments) {
       if (file.tempFilePath) {
         sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
@@ -186,11 +200,31 @@ export const generateFileData = async <T>({
       fileData.width = info.width
       fileData.height = info.height
       fileData.filesize = info.size
+
+      if (file.tempFilePath) {
+        await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
+      } else {
+        req.files.file = fileForResize
+      }
     } else {
       filesToSave.push({
         buffer: fileBuffer?.data || file.data,
         path: `${staticPath}/${fsSafeName}`,
       })
+
+      // If using temp files and the image is being resized, write the file to the temp path
+      if (fileBuffer?.data || file.data.length > 0) {
+        if (file.tempFilePath) {
+          await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+        } else {
+          // Assign the _possibly modified_ file to the request object
+          req.files.file = {
+            ...file,
+            data: fileBuffer?.data || file.data,
+            size: fileBuffer?.info.size,
+          }
+        }
+      }
     }
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {

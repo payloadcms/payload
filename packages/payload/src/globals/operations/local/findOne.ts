@@ -1,4 +1,4 @@
-import type { GeneratedTypes } from '../../..'
+import type { GeneratedTypes, RequestContext } from '../../..'
 import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Document } from '../../../types'
@@ -10,6 +10,7 @@ import { i18nInit } from '../../../translations/init'
 import findOne from '../findOne'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  context?: RequestContext
   depth?: number
   draft?: boolean
   fallbackLocale?: string
@@ -26,6 +27,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {
+    context,
     depth,
     draft = false,
     fallbackLocale = null,
@@ -56,7 +58,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
     t: i18n.t,
     user,
   } as PayloadRequest
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 

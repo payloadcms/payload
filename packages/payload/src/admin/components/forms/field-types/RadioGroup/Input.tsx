@@ -5,16 +5,18 @@ import type { Description } from '../../FieldDescription/types'
 import type { OnChange } from './types'
 
 import { optionIsObject } from '../../../../../fields/config/types'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
+import { fieldBaseClass } from '../shared'
 import RadioInput from './RadioInput'
 import './index.scss'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'radio-group'
 
 export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
   className?: string
   description?: Description
   errorMessage?: string
@@ -33,6 +35,8 @@ export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
 const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
   const {
     name,
+    Error,
+    Label,
     className,
     description,
     errorMessage,
@@ -48,6 +52,9 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
     value,
     width,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const path = pathFromProps || name
 
@@ -69,9 +76,9 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <Error message={errorMessage} showError={showError} />
+        <ErrorComp message={errorMessage} showError={showError} />
       </div>
-      <Label htmlFor={`field-${path}`} label={label} required={required} />
+      <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
       <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
           let optionValue = ''
@@ -96,7 +103,7 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
           )
         })}
       </ul>
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

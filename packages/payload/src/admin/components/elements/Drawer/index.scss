@@ -1,6 +1,6 @@
 @import '../../../scss/styles.scss';
 
-$transTime: 200ms;
+$transTime: 200;
 
 .drawer {
   display: flex;
@@ -9,7 +9,7 @@ $transTime: 200ms;
   height: 100vh;
 
   &__blur-bg {
-    @include blur-bg();
+    @include blur-bg;
     position: absolute;
     z-index: 1;
     top: 0;
@@ -17,7 +17,7 @@ $transTime: 200ms;
     bottom: 0;
     left: 0;
     opacity: 0;
-    transition: all $transTime linear;
+    transition: all #{$transTime}ms linear;
   }
 
   &__content {
@@ -27,7 +27,8 @@ $transTime: 200ms;
     z-index: 2;
     width: calc(100% - var(--gutter-h));
     overflow: hidden;
-    transition: all $transTime linear;
+    transition: all #{$transTime}ms linear;
+    background-color: var(--theme-bg);
   }
 
   &__content-children {
@@ -40,14 +41,14 @@ $transTime: 200ms;
   &--is-open {
     .drawer {
       &__content,
-      &__blur-bg,
-      &__close {
+      &__blur-bg {
         opacity: 1;
       }
 
       &__close {
-        transition: opacity $transTime linear;
-        transition-delay: $transTime;
+        opacity: 0.1;
+        transition: opacity #{$transTime}ms linear;
+        transition-delay: #{calc($transTime / 2)}ms;
       }
 
       &__content {
@@ -68,7 +69,7 @@ $transTime: 200ms;
     transition: none;
     transition-delay: 0ms;
     flex-grow: 1;
-    background: transparent;
+    background: var(--theme-elevation-800);
 
     &:active,
     &:focus {
@@ -120,7 +121,15 @@ $transTime: 200ms;
 }
 
 html[data-theme='dark'] {
-  .drawer__close {
-    background: rgba(0, 0, 0, 0.2);
+  .drawer {
+    &__close {
+      background: var(--color-base-1000);
+    }
+
+    &--is-open {
+      .drawer__close {
+        opacity: 0.25;
+      }
+    }
   }
 }

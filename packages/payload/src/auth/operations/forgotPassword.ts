@@ -5,6 +5,7 @@ import type { PayloadRequest } from '../../express/types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
 import { APIError } from '../../errors'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -38,6 +39,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
     args =
       (await hook({
         args,
+        collection: args.collection?.config,
         context: args.req.context,
         operation: 'forgotPassword',
       })) || args
@@ -139,7 +141,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
 
     await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
       await priorHook
-      await hook({ args, context: req.context })
+      await hook({ args, collection: args.collection?.config, context: req.context })
     }, Promise.resolve())
 
     // /////////////////////////////////////
@@ -148,11 +150,12 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
 
     token = await buildAfterOperation({
       args,
+      collection: args.collection?.config,
       operation: 'forgotPassword',
       result: token,
     })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return token
   } catch (error: unknown) {

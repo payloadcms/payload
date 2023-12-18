@@ -19,13 +19,14 @@ export const Email: React.FC<
   return (
     <Width width={width}>
       <div className={classes.wrap}>
-        <label htmlFor="name" className={classes.label}>
+        <label htmlFor={name} className={classes.label}>
           {label}
         </label>
         <input
           type="text"
           placeholder="Email"
           className={classes.input}
+          id={name}
           {...register(name, { required: requiredFromProps, pattern: /^\S+@\S+$/i })}
         />
         {requiredFromProps && errors[name] && <Error />}

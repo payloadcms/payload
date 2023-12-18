@@ -5,6 +5,7 @@ import type { PayloadRequest } from '../../../express/types'
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import findVersionByID from '../../operations/findVersionByID'
 
 export type Resolver = (
@@ -31,7 +32,7 @@ export default function findVersionByIDResolver(globalConfig: SanitizedGlobalCon
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: context.req,
+      req: isolateTransactionID(context.req),
     }
 
     const result = await findVersionByID(options)

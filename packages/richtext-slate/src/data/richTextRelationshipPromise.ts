@@ -5,13 +5,13 @@ import type { AdapterArguments } from '../types'
 import { populate } from './populate'
 import { recurseNestedFields } from './recurseNestedFields'
 
-export type Args = Parameters<RichTextAdapter<any[], AdapterArguments>['afterReadPromise']>[0]
+export type Args = Parameters<RichTextAdapter<any[], AdapterArguments>['populationPromise']>[0]
 
 type RecurseRichTextArgs = {
   children: unknown[]
   currentDepth: number
   depth: number
-  field: RichTextField<any[], AdapterArguments>
+  field: RichTextField<any[], AdapterArguments, AdapterArguments>
   overrideAccess: boolean
   promises: Promise<void>[]
   req: PayloadRequest
