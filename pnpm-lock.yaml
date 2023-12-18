@@ -1187,6 +1187,24 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/plugin-redirects:
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      '@types/express':
+        specifier: ^4.17.9
+        version: 4.17.21
+      '@types/react':
+        specifier: 18.0.21
+        version: 18.0.21
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      react:
+        specifier: ^18.0.0
+        version: 18.2.0
+
   packages/plugin-search:
     dependencies:
       ts-deepmerge:

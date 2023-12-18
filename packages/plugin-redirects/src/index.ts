@@ -1,7 +1,8 @@
 import type { Config } from 'payload/config'
 
-import deepMerge from './deepMerge'
 import type { PluginConfig } from './types'
+
+import deepMerge from './deepMerge'
 
 const redirects =
   (pluginConfig: PluginConfig) =>
@@ -11,30 +12,30 @@ const redirects =
       ...(incomingConfig?.collections || []),
       deepMerge(
         {
-          slug: 'redirects',
-          admin: {
-            defaultColumns: ['from', 'to.type', 'createdAt'],
-          },
           access: {
             read: (): boolean => true,
+          },
+          admin: {
+            defaultColumns: ['from', 'to.type', 'createdAt'],
           },
           fields: [
             {
               name: 'from',
-              label: 'From URL',
               index: true,
+              label: 'From URL',
               required: true,
               type: 'text',
             },
             {
               name: 'to',
-              label: false,
-              type: 'group',
               fields: [
                 {
                   name: 'type',
+                  admin: {
+                    layout: 'horizontal',
+                  },
+                  defaultValue: 'reference',
                   label: 'To URL Type',
-                  type: 'radio',
                   options: [
                     {
                       label: 'Internal link',
@@ -45,33 +46,33 @@ const redirects =
                       value: 'custom',
                     },
                   ],
-                  defaultValue: 'reference',
-                  admin: {
-                    layout: 'horizontal',
-                  },
+                  type: 'radio',
                 },
                 {
                   name: 'reference',
-                  label: 'Document to redirect to',
-                  type: 'relationship',
-                  relationTo: pluginConfig?.collections || [],
-                  required: true,
                   admin: {
                     condition: (_, siblingData) => siblingData?.type === 'reference',
                   },
+                  label: 'Document to redirect to',
+                  relationTo: pluginConfig?.collections || [],
+                  required: true,
+                  type: 'relationship',
                 },
                 {
                   name: 'url',
-                  label: 'Custom URL',
-                  type: 'text',
-                  required: true,
                   admin: {
                     condition: (_, siblingData) => siblingData?.type === 'custom',
                   },
+                  label: 'Custom URL',
+                  required: true,
+                  type: 'text',
                 },
               ],
+              label: false,
+              type: 'group',
             },
           ],
+          slug: 'redirects',
         },
         pluginConfig?.overrides || {},
       ),
