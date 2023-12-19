@@ -6,7 +6,7 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import create from '../../operations/create'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
@@ -29,6 +29,9 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
   collection: Collection,
 ): Resolver<TSlug> {
   return async function resolver(_, args, context) {
+    let { req } = context
+    req = isolateObjectProperty(req, 'locale')
+    if (args.locale) req.locale = args.locale
     if (args.locale) {
       context.req.locale = args.locale
     }
@@ -38,7 +41,7 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await create(options)

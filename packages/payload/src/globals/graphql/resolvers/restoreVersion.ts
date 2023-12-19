@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../../../express/types'
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import restoreVersion from '../../operations/restoreVersion'
 
 type Resolver = (
@@ -23,7 +23,7 @@ export default function restoreVersionResolver(globalConfig: SanitizedGlobalConf
       id: args.id,
       depth: 0,
       globalConfig,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
     }
 
     const result = await restoreVersion(options)
