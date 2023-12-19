@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
-import { useConfig } from '../../utilities/Config'
+import { useConfig } from '../Config'
 
 type ActionsContextType = {
   actions: React.ComponentType<any>[]

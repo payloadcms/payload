@@ -4,6 +4,7 @@
     "composite": true, // Make sure typescript knows that this module depends on their references
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
+    "esModuleInterop": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */
   },
