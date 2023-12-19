@@ -286,13 +286,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     [slug: string]: any // TODO: Type this
   } = {}
 
-  delete<T extends keyof TGeneratedTypes['collections']>(
-    options: DeleteOptions<T>,
-  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
-    const { deleteLocal } = localOperations
-    return deleteLocal<T>(this, options)
-  }
-
   /**
    * @description delete one or more documents
    * @param options
@@ -306,11 +299,17 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     options: DeleteManyOptions<T>,
   ): Promise<BulkOperationResult<T>>
 
+  delete<T extends keyof TGeneratedTypes['collections']>(
+    options: DeleteOptions<T>,
+  ): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
+    const { deleteLocal } = localOperations
+    return deleteLocal<T>(this, options)
+  }
+
   /**
    * @description Initializes Payload
    * @param options
    */
-  // @ts-expect-error // TODO: TypeScript hallucinating again. fix later
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 
