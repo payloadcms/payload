@@ -28,10 +28,12 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
 ): Resolver<TSlug> {
   async function resolver(_, args, context) {
     let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
     req = isolateObjectProperty(req, 'locale')
     req = isolateObjectProperty(req, 'fallbackLocale')
-    if (args.locale) req.locale = args.locale
-    if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
 
     const options = {
       id: args.id,
