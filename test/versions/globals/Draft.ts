@@ -1,5 +1,7 @@
 import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
 
+import GlobalVersionButton from '../elements/GlobalVersionButton'
+import GlobalVersionsButton from '../elements/GlobalVersionsButton'
 import { draftGlobalSlug } from '../slugs'
 
 const DraftGlobal: GlobalConfig = {
@@ -7,6 +9,18 @@ const DraftGlobal: GlobalConfig = {
   label: 'Draft Global',
   admin: {
     preview: () => 'https://payloadcms.com',
+    components: {
+      views: {
+        Edit: {
+          Version: {
+            actions: [GlobalVersionButton],
+          },
+          Versions: {
+            actions: [GlobalVersionsButton],
+          },
+        },
+      },
+    },
   },
   versions: {
     max: 20,

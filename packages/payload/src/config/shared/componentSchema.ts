@@ -14,6 +14,7 @@ export const documentTabSchema = {
 export const customViewSchema = joi.object({
   Component: componentSchema,
   Tab: joi.alternatives().try(documentTabSchema, componentSchema),
+  actions: joi.array().items(componentSchema),
   path: joi.string(),
 })
 
