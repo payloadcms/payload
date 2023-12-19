@@ -78,7 +78,7 @@ export async function openDocControls(page: Page): Promise<void> {
 
 export async function changeLocale(page: Page, newLocale: string) {
   await page.locator('.localizer >> button').first().click()
-  await page.locator(`.localizer >> a:has-text("${newLocale}")`).click()
+  await page.locator(`.localizer >> a[href="/?locale=${newLocale}"]`).click()
   expect(page.url()).toContain(`locale=${newLocale}`)
 }
 
