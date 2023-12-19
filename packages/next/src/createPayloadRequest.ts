@@ -115,7 +115,7 @@ export const createPayloadRequest = async ({
 
   const req: PayloadRequest = Object.assign(request, customRequest)
 
-  req.user = getAuthenticatedUser({
+  req.user = await getAuthenticatedUser({
     payload,
     headers: req.headers,
     isGraphQL,
