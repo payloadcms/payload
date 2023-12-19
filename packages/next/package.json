@@ -35,7 +35,8 @@
   "devDependencies": {
     "@payloadcms/ui": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "sass": "^1.69.5"
   },
   "peerDependencies": {
     "payload": "^2.0.0",
