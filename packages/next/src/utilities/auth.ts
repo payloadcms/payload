@@ -12,7 +12,7 @@ export const auth = cache(
     unauthorizedRedirect = true,
   }: {
     headers: any
-    searchParams: any
+    searchParams: { [key: string]: string | undefined }
     config: Promise<SanitizedConfig>
     unauthorizedRedirect?: boolean
   }) => {
@@ -20,16 +20,16 @@ export const auth = cache(
 
     const user = await getAuthenticatedUser({
       headers,
-      searchParams,
       payload,
     })
 
     if (unauthorizedRedirect && !user) {
-      redirect(`${payload.config.routes.admin}/unauthorized`)
+      // TODO: revert to: `redirect(`${payload.config.routes.admin}/unauthorized`)`
+      // once unauthorized page is built out
+      redirect(`${payload.config.routes.admin}/login`)
     }
 
     const permissions = await getAccessResults({
-      searchParams,
       req: {
         user,
         payload,

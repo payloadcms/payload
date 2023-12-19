@@ -5,12 +5,8 @@ import { getEntityPolicies } from '../utilities/getEntityPolicies'
 
 type GetAccessResultsArgs = {
   req: PayloadRequest
-  searchParams: URLSearchParams
 }
-export async function getAccessResults({
-  req,
-  searchParams,
-}: GetAccessResultsArgs): Promise<Permissions> {
+export async function getAccessResults({ req }: GetAccessResultsArgs): Promise<Permissions> {
   const results = {} as Permissions
   const { payload, user } = req
 
@@ -48,7 +44,6 @@ export async function getAccessResults({
       }
 
       const collectionPolicy = await getEntityPolicies({
-        id: searchParams.get('id') || undefined,
         entity: collection,
         operations: collectionOperations,
         req,

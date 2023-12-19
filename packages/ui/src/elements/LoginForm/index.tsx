@@ -44,7 +44,7 @@ export const LoginForm: React.FC<{
 
   return (
     <Form
-      action={action}
+      action="/api/users/login"
       className={`${baseClass}__form`}
       disableSuccessStatus
       initialData={

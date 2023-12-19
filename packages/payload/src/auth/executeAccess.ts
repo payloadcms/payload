@@ -17,8 +17,7 @@ const executeAccess = async (
     const result = await access({
       id,
       data,
-      payload: req.payload,
-      user: req.user,
+      req,
     })
 
     if (!result) {
