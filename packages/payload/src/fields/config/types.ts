@@ -67,12 +67,14 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
    * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
   id?: number | string
-  /** The `Express` request object containing the currently authenticated `user` */
-  req: PayloadRequest<U>
+  /** The `payload` object to interface with the payload API */
+  payload: PayloadT
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<P>
+  /** The `user` object of the currently authenticated user. */
+  user: User
 }) => Promise<boolean> | boolean
 
 export type Condition<T extends TypeWithID = any, P = any> = (

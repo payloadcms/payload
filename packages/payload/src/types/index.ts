@@ -14,6 +14,8 @@ export type CustomPayloadRequest<U = any> = {
    */
   collection?: Collection
   context: RequestContext
+  /** Data from the request body */
+  data?: Record<string, unknown>
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string
   /**
@@ -42,7 +44,7 @@ export type CustomPayloadRequest<U = any> = {
    */
   payloadAPI: 'GraphQL' | 'REST' | 'local'
   /** Optimized document loader */
-  payloadDataLoader: DataLoader<string, TypeWithID>
+  payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
   /** Get a translation for the admin screen */
@@ -58,7 +60,9 @@ export type CustomPayloadRequest<U = any> = {
   /** The signed in user */
   user: (U & User) | null
 }
-export type PayloadRequest<U = any> = Request & CustomPayloadRequest<U>
+export type PayloadRequest<U = any> = Partial<Request> &
+  Required<Pick<Request, 'headers'>> &
+  CustomPayloadRequest<U>
 export interface RequestContext {
   [key: string]: unknown
 }

@@ -1,16 +1,15 @@
-import type { CollectionPermission, GlobalPermission } from '../auth/types'
+import type { CollectionPermission, GlobalPermission, User } from '../auth/types'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
 import type { Access } from '../config/types'
 import type { FieldAccess } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { PayloadRequest } from '../types'
-import type { AllOperations, Document, Where } from '../types'
+import type { AllOperations, Document, PayloadRequest, Where } from '../types'
 
 import { tabHasName } from '../fields/config/types'
 
 type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
-  id?: string
+  id?: number | string
   operations: AllOperations[]
   req: PayloadRequest
   type: 'collection' | 'global'
@@ -32,11 +31,9 @@ type CreateAccessPromise = (args: {
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
   const { id, entity, operations, req, type } = args
-  const isLoggedIn = !!req.user
-  // ---- ---- ---- ---- ---- ---- ---- ---- ----
-  // `policies` and `promises` get mutated in
-  // the functions below, and return in the end
-  // ---- ---- ---- ---- ---- ---- ---- ---- ----
+  const { data, payload, user } = req
+  const isLoggedIn = !!user
+
   const policies = {
     fields: {},
   } as ReturnType<T>
@@ -46,7 +43,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
   async function getEntityDoc({ where }: { where?: Where } = {}): Promise<TypeWithID & Document> {
     if (entity.slug) {
       if (type === 'global') {
-        return req.payload.findGlobal({
+        return payload.findGlobal({
           overrideAccess: true,
           req,
           slug: entity.slug,
@@ -55,7 +52,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
       if (type === 'collection' && id) {
         if (typeof where === 'object') {
-          const paginatedRes = await req.payload.find({
+          const paginatedRes = await payload.find({
             collection: entity.slug,
             limit: 1,
             overrideAccess: true,
@@ -76,7 +73,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           return paginatedRes?.docs?.[0] || undefined
         }
 
-        return req.payload.findByID({
+        return payload.findByID({
           id,
           collection: entity.slug,
           overrideAccess: true,
@@ -101,9 +98,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
       docBeingAccessed = await getEntityDoc()
     }
 
-    const data = req?.body
-
-    const accessResult = await access({ id, data, doc: docBeingAccessed, req })
+    // https://payloadcms.slack.com/archives/C048Z9C2BEX/p1702054928343769
+    const accessResult = await access({ id, data, doc: docBeingAccessed, payload, user })
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {

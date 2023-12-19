@@ -1,6 +1,7 @@
 import { login as loginOperation } from 'payload/operations'
 import { createPayloadRequest } from '../createPayloadRequest'
 import { SanitizedConfig } from 'payload/types'
+import { isNumber } from 'payload/utilities'
 
 export const login = ({ config }: { config: Promise<SanitizedConfig> }) =>
   async function (request: Request, { params }: { params: { collection: string } }) {
@@ -8,20 +9,26 @@ export const login = ({ config }: { config: Promise<SanitizedConfig> }) =>
     const req = await createPayloadRequest({ request, config })
     const collection = req.payload.collections[params.collection]
 
+    const { searchParams } = new URL(request.url)
+    const depth = searchParams.get('depth')
+    let responseOptions = {
+      headers: new Headers(),
+    }
     const result = await loginOperation({
       collection,
       data,
-      // TODO: get searchParams a different way
-      // depth: searchParams.get('depth')
-      //   ? parseInt(String(searchParams.get('depth')), 10)
-      //   : undefined,
+      depth: isNumber(depth) ? Number(depth) : undefined,
       req,
+      responseOptions,
     })
 
-    return Response.json({
-      exp: result.exp,
-      message: 'Auth Passed',
-      token: result.token,
-      user: result.user,
-    })
+    return Response.json(
+      {
+        exp: result.exp,
+        message: 'Auth Passed',
+        token: result.token,
+        user: result.user,
+      },
+      responseOptions,
+    )
   }

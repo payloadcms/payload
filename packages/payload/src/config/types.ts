@@ -190,8 +190,10 @@ export type AccessArgs<T = any, U = any> = {
   data?: T
   /** ID of the resource being accessed */
   id?: number | string
-  /** The original request that requires an access check */
-  req: PayloadRequest<U>
+  /** The `payload` object to interface with the payload API */
+  payload: PayloadT
+  /** The `user` object of the currently authenticated user. */
+  user: (U & User) | null
 }
 
 /**

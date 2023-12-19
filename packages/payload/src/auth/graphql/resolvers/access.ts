@@ -1,4 +1,4 @@
-import type { Payload } from '../../../payload'
+import type { PayloadT } from '../../..'
 
 import formatName from '../../../graphql/utilities/formatName'
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
@@ -16,7 +16,7 @@ const formatConfigNames = (results, configs) => {
   return formattedResults
 }
 
-function accessResolver(payload: Payload) {
+function accessResolver(payload: PayloadT) {
   async function resolver(_, args, context) {
     const options = {
       req: isolateTransactionID(context.req),
