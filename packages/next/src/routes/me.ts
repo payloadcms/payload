@@ -1,3 +1,4 @@
+import httpStatus from 'http-status'
 import type { SanitizedConfig } from 'payload/types'
 import { me as meOperation } from 'payload/operations'
 import { createPayloadRequest } from '../createPayloadRequest'
@@ -11,5 +12,7 @@ export const me = ({ config }: { config: Promise<SanitizedConfig> }) =>
       req,
     })
 
-    return Response.json(meRes)
+    return Response.json(meRes, {
+      status: httpStatus.OK,
+    })
   }

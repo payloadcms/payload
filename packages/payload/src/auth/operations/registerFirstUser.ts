@@ -1,5 +1,3 @@
-// TODO(JARROD): remove express Response
-import type { Response } from 'express'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../'
@@ -18,8 +16,9 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
     password: string
   }
   req: PayloadRequest
-  // TODO(JARROD): remove express Response
-  res: Response
+  responseOptions?: ResponseInit & {
+    headers: Headers
+  }
 }
 
 export type Result<T> = {

@@ -1,5 +1,3 @@
-import type { Response } from 'express'
-
 import type { PayloadT, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../index'
 import type { PayloadRequest } from '../../../types'
@@ -23,7 +21,9 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   locale?: string
   overrideAccess?: boolean
   req?: PayloadRequest
-  res?: Response
+  responseOptions?: ResponseInit & {
+    headers: Headers
+  }
   showHiddenFields?: boolean
 }
 
@@ -40,7 +40,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     locale,
     overrideAccess = true,
     req = {} as PayloadRequest,
-    res,
+    responseOptions,
     showHiddenFields,
   } = options
   setRequestContext(req, context)
@@ -68,7 +68,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     depth,
     overrideAccess,
     req,
-    res,
+    responseOptions,
     showHiddenFields,
   }
 
