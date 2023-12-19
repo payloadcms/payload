@@ -3,6 +3,7 @@ import type { LocalizedPost } from './payload-types'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { ArrayCollection } from './collections/Array'
+import { NestedToArrayAndBlock } from './collections/NestedToArrayAndBlock'
 import {
   defaultLocale,
   englishTitle,
@@ -231,6 +232,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    NestedToArrayAndBlock,
   ],
   globals: [
     {
