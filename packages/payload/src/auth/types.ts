@@ -109,7 +109,7 @@ export type AuthStrategy = {
 export interface IncomingAuthType {
   cookies?: {
     domain?: string
-    sameSite?: 'lax' | 'none' | 'strict' | boolean
+    sameSite?: 'Lax' | 'None' | 'Strict' | boolean
     secure?: boolean
   }
   depth?: number

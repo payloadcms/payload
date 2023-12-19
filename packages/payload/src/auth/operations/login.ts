@@ -1,5 +1,3 @@
-import type { CookieOptions, Response } from 'express'
-
 import jwt from 'jsonwebtoken'
 
 import type { GeneratedTypes } from '../../'
@@ -11,6 +9,7 @@ import { buildAfterOperation } from '../../collections/operations/utils'
 import { AuthenticationError, LockedAuth } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { commitTransaction } from '../../utilities/commitTransaction'
+import { generateCookie } from '../../utilities/cookies'
 import getCookieExpiration from '../../utilities/getCookieExpiration'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -36,7 +35,9 @@ export type Arguments = {
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
-  res?: Response
+  responseOptions?: ResponseInit & {
+    headers: Headers
+  }
   showHiddenFields?: boolean
 }
 
@@ -151,20 +152,26 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       expiresIn: collectionConfig.auth.tokenExpiration,
     })
 
-    if (args.res) {
-      const cookieOptions: CookieOptions = {
-        domain: undefined,
+    if (args.responseOptions) {
+      const sameSite =
+        typeof collectionConfig.auth.cookies.sameSite === 'string'
+          ? collectionConfig.auth.cookies.sameSite
+          : collectionConfig.auth.cookies.sameSite
+          ? 'Strict'
+          : undefined
+
+      const cookie = generateCookie({
+        name: `${config.cookiePrefix}-token`,
+        domain: collectionConfig.auth.cookies.domain ?? undefined,
         expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
         httpOnly: true,
         path: '/',
-        sameSite: collectionConfig.auth.cookies.sameSite,
+        sameSite,
         secure: collectionConfig.auth.cookies.secure,
-      }
+        value: token,
+      })
 
-      if (collectionConfig.auth.cookies.domain)
-        cookieOptions.domain = collectionConfig.auth.cookies.domain
-
-      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions)
+      args.responseOptions.headers.set('Set-Cookie', cookie)
     }
 
     req.user = user

@@ -33,6 +33,11 @@ export const auth = cache(
       req: {
         user,
         payload,
+        context: {},
+        payloadAPI: 'REST',
+        headers,
+        i18n: undefined,
+        t: undefined,
       },
     })
 

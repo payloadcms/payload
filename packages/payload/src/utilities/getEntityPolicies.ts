@@ -1,4 +1,3 @@
-import type { PayloadT } from '..'
 import type { CollectionPermission, GlobalPermission, User } from '../auth/types'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
 import type { Access } from '../config/types'
@@ -12,11 +11,7 @@ type Args = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: number | string
   operations: AllOperations[]
-  req: Partial<PayloadRequest> & {
-    data?: Record<string, unknown>
-    payload: PayloadT
-    user: User | null
-  }
+  req: PayloadRequest
   type: 'collection' | 'global'
 }
 
@@ -50,7 +45,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
       if (type === 'global') {
         return payload.findGlobal({
           overrideAccess: true,
-          // req, (REMOVED)
+          req,
           slug: entity.slug,
         })
       }
@@ -61,7 +56,6 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             collection: entity.slug,
             limit: 1,
             overrideAccess: true,
-            // TODO: should we type find as a partial?
             req,
             where: {
               ...where,
@@ -83,7 +77,6 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           id,
           collection: entity.slug,
           overrideAccess: true,
-          // TODO: should we type findByID as a partial?
           req,
         })
       }

@@ -26,8 +26,13 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
     const shouldCommit = await initTransaction(req)
     const results = getAccessResults({
       req: {
+        context: req.context,
         data: req.data,
+        headers: req.headers,
+        i18n: req.i18n,
         payload,
+        payloadAPI: req.payloadAPI,
+        t: req.t,
         user,
       },
       searchParams,
