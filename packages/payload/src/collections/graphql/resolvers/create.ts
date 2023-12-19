@@ -30,11 +30,9 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
 ): Resolver<TSlug> {
   return async function resolver(_, args, context) {
     let { req } = context
+    const locale = req.locale
     req = isolateObjectProperty(req, 'locale')
-    if (args.locale) req.locale = args.locale
-    if (args.locale) {
-      context.req.locale = args.locale
-    }
+    req.locale = args.locale || locale
 
     const options = {
       collection,
