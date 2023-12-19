@@ -90,7 +90,7 @@ export type FilterOptionsProps<T = any> = {
 }
 
 export type FilterOptions<T = any> =
-  | ((options: FilterOptionsProps<T>) => Promise<Where> | Where)
+  | ((options: FilterOptionsProps<T>) => Promise<Where | boolean> | Where | boolean)
   | Where
   | null
 

@@ -2,7 +2,7 @@ import type { SerializedQuoteNode } from '@lexical/rich-text'
 
 import { $createQuoteNode, QuoteNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import { $getSelection, $isRangeSelection } from 'lexical'
+import { $INTERNAL_isPointSelection, $getSelection } from 'lexical'
 
 import type { HTMLConverter } from '../converters/html/converter/types'
 import type { FeatureProvider } from '../types'
@@ -31,7 +31,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                 onClick: ({ editor }) => {
                   editor.update(() => {
                     const selection = $getSelection()
-                    if ($isRangeSelection(selection)) {
+                    if ($INTERNAL_isPointSelection(selection)) {
                       $setBlocksType(selection, () => $createQuoteNode())
                     }
                   })
@@ -82,7 +82,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
                   keywords: ['quote', 'blockquote'],
                   onSelect: () => {
                     const selection = $getSelection()
-                    if ($isRangeSelection(selection)) {
+                    if ($INTERNAL_isPointSelection(selection)) {
                       $setBlocksType(selection, () => $createQuoteNode())
                     }
                   },

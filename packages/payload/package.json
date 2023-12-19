@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -23,6 +23,11 @@
       "import": "./src/exports/*.ts",
       "require": "./src/exports/*.ts",
       "types": "./src/exports/*.ts"
+    },
+    "./dist/*": {
+      "import": "./src/*.ts",
+      "require": "./src/*.ts",
+      "types": "./src/*.ts"
     }
   },
   "scripts": {

@@ -3,7 +3,8 @@ import type { UIField } from 'payload/dist/fields/config/types'
 
 import { useWatchForm } from 'payload/components/forms'
 import { useConfig } from 'payload/components/utilities'
-import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
+// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
+// import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 import React from 'react'
 
 type FieldsWithDoc = Fields & {
@@ -47,7 +48,7 @@ export const LinkToDoc: React.FC<UIField> = () => {
         >
           Doc URL
         </span>
-        <CopyToClipboard value={href} />
+        {/* <CopyToClipboard value={href} /> */}
       </div>
       <div
         style={{

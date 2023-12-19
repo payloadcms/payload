@@ -1,11 +1,11 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types'
+import type { ArrayField, Block } from '../../../../packages/payload/src/fields/config/types'
 
 import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
 import { textFieldsSlug } from '../Text/shared'
 
-export const BlockColumns: any = {
+export const BlockColumns = ({ name }: { name: string }): ArrayField => ({
   type: 'array',
-  name: 'columns',
+  name,
   interfaceName: 'BlockColumns',
   admin: {
     initCollapsed: true,
@@ -16,7 +16,7 @@ export const BlockColumns: any = {
       type: 'text',
     },
   ],
-}
+})
 export const ConditionalLayoutBlock: Block = {
   fields: [
     {
@@ -28,7 +28,7 @@ export const ConditionalLayoutBlock: Block = {
       required: true,
     },
     {
-      ...BlockColumns,
+      ...BlockColumns({ name: 'columns' }),
       admin: {
         condition: (data, siblingData) => {
           return ['1'].includes(siblingData.layout)
@@ -38,7 +38,7 @@ export const ConditionalLayoutBlock: Block = {
       maxRows: 1,
     },
     {
-      ...BlockColumns,
+      ...BlockColumns({ name: 'columns2' }),
       admin: {
         condition: (data, siblingData) => {
           return ['2'].includes(siblingData.layout)
@@ -48,7 +48,7 @@ export const ConditionalLayoutBlock: Block = {
       maxRows: 2,
     },
     {
-      ...BlockColumns,
+      ...BlockColumns({ name: 'columns3' }),
       admin: {
         condition: (data, siblingData) => {
           return ['3'].includes(siblingData.layout)

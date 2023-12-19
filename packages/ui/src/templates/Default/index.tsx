@@ -2,6 +2,7 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
 import type { Props } from './types'
 
 import { Hamburger } from '../../elements/Hamburger'

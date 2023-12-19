@@ -98,11 +98,57 @@
     }
   }
 
-  &__controls {
+  &__actions-wrapper {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
     gap: calc(var(--base) / 2);
+    margin-right: var(--base);
+  }
+
+  &__gradient-placeholder {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: var(--base);
+    height: var(--base);
+    background: linear-gradient(to right, transparent, var(--theme-bg));
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+    flex-shrink: 0;
+    max-width: 600px;
+    overflow: auto;
+    white-space: nowrap;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__last-action {
+    margin-right: var(--base);
+  }
+
+  @include large-break {
+    &__actions {
+      max-width: 500px;
+    }
+  }
+
+  @include mid-break {
+    &__gradient-placeholder {
+      right: var(--base);
+    }
+
+    &__actions {
+      max-width: 300px;
+      margin-right: var(--base);
+    }
   }
 
   @include small-break {
@@ -128,6 +174,15 @@
     &__step-header {
       // TODO: overflow the step header instead of hide it
       display: none;
+    }
+
+    &__gradient-placeholder {
+      right: 0;
+    }
+
+    &__actions {
+      max-width: 150px;
+      margin-right: 0;
     }
   }
 }

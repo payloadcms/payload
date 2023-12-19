@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { PayloadT } from '../../..'
+import type { PayloadT, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
@@ -12,6 +12,7 @@ import { setRequestContext } from '../../../utilities/setRequestContext'
 import update from '../update'
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
+  context?: RequestContext
   data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
   depth?: number
   draft?: boolean
@@ -29,6 +30,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
+    context,
     data,
     depth,
     draft,
@@ -58,7 +60,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 

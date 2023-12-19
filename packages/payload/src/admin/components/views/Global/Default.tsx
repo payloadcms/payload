@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { FieldTypes } from '../../forms/field-types'
@@ -8,6 +8,7 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
+import { useActions } from '../../utilities/ActionsProvider'
 import { OperationContext } from '../../utilities/OperationProvider'
 import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { GlobalRoutes } from './Routes'
@@ -37,9 +38,27 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
     permissions,
   } = props
 
+  const { setViewActions } = useActions()
+
   const { label } = global
 
   const hasSavePermission = permissions?.update?.permission
+
+  useEffect(() => {
+    const path = location.pathname
+
+    if (!path.endsWith(global.slug)) {
+      return
+    }
+
+    const editConfig = global?.admin?.components?.views?.Edit
+    const defaultActions =
+      editConfig && 'Default' in editConfig && 'actions' in editConfig.Default
+        ? editConfig.Default.actions
+        : []
+
+    setViewActions(defaultActions)
+  }, [global.slug, location.pathname, global?.admin?.components?.views?.Edit, setViewActions])
 
   return (
     <main className={baseClass}>

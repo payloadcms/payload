@@ -252,12 +252,13 @@ const validateFilterOptions: Validate = async (
       [collection: string]: (number | string)[]
     } = {}
 
+    const falseCollections: string[] = []
     const collections = typeof relationTo === 'string' ? [relationTo] : relationTo
     const values = Array.isArray(value) ? value : [value]
 
     await Promise.all(
       collections.map(async (collection) => {
-        const optionFilter =
+        let optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
@@ -267,6 +268,10 @@ const validateFilterOptions: Validate = async (
                 user,
               })
             : filterOptions
+
+        if (optionFilter === true) {
+          optionFilter = null
+        }
 
         const valueIDs: (number | string)[] = []
 
@@ -286,6 +291,10 @@ const validateFilterOptions: Validate = async (
           }
 
           if (optionFilter) findWhere.and.push(optionFilter)
+
+          if (optionFilter === false) {
+            falseCollections.push(optionFilter)
+          }
 
           const result = await payload.find({
             collection,
@@ -318,6 +327,10 @@ const validateFilterOptions: Validate = async (
       if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
         collection = val.relationTo
         requestedID = val.value
+      }
+
+      if (falseCollections.find((slug) => relationTo === slug)) {
+        return true
       }
 
       return options[collection].indexOf(requestedID) === -1

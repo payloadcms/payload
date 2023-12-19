@@ -40,6 +40,8 @@ import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './commands'
 
 export function LinkEditor({
   anchorElem,
+  disabledCollections,
+  enabledCollections,
   fields: customFieldSchema,
 }: { anchorElem: HTMLElement } & LinkFeatureProps): JSX.Element {
   const [editor] = useLexicalComposerContext()
@@ -61,7 +63,13 @@ export function LinkEditor({
   const [initialState, setInitialState] = useState<Fields>({})
 
   const [fieldSchema] = useState(() => {
-    const fieldsUnsanitized = transformExtraFields(customFieldSchema, config, i18n)
+    const fieldsUnsanitized = transformExtraFields(
+      customFieldSchema,
+      config,
+      i18n,
+      enabledCollections,
+      disabledCollections,
+    )
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fields = sanitizeFields({
@@ -117,7 +125,7 @@ export function LinkEditor({
         // internal link
         setLinkUrl(
           `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${linkParent.getFields()
-            ?.doc?.value?.id}`,
+            ?.doc?.value}`,
         )
 
         const relatedField = config.collections.find(
@@ -315,11 +323,6 @@ export function LinkEditor({
         handleModalSubmit={(fields: Fields, data: Data) => {
           closeModal(drawerSlug)
 
-          if (data?.fields?.doc?.value) {
-            data.fields.doc.value = {
-              id: data.fields.doc.value,
-            }
-          }
           const newLinkPayload: LinkPayload = data as LinkPayload
 
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)

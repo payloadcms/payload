@@ -234,7 +234,7 @@ export default async function resizeAndTransformImageSizes({
       }
 
       const imageToResize = sharpBase.clone()
-      let resized = imageToResize.resize(imageResizeConfig)
+      let resized = imageToResize
 
       if (
         req.query?.uploadEdits?.focalPoint &&
@@ -283,6 +283,8 @@ export default async function resizeAndTransformImageSizes({
           top: safeOffsetY,
           width: safeResizeWidth,
         })
+      } else {
+        resized = imageToResize.resize(imageResizeConfig)
       }
 
       if (imageResizeConfig.formatOptions) {

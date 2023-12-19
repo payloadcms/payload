@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Group } from '../../utilities/groupNavItems'
@@ -12,6 +12,7 @@ import { Gutter } from '../../elements/Gutter'
 import './index.scss'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
+import { useActions } from '../../providers/ActionsProvider'
 
 const baseClass = 'dashboard'
 
@@ -22,6 +23,12 @@ export const DefaultDashboardClient: React.FC = () => {
     globals: globalsConfig,
     routes: { admin },
   } = config
+
+  const { setViewActions } = useActions()
+
+  useEffect(() => {
+    setViewActions([])
+  }, [setViewActions])
 
   const { permissions, user } = useAuth()
 

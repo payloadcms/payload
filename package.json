@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@playwright/test": "1.39.0",
+    "@playwright/test": "1.40.1",
     "@swc/cli": "^0.1.62",
     "@swc/jest": "0.2.29",
     "@swc/register": "0.1.10",
@@ -77,13 +77,13 @@
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "jwt-decode": "3.1.2",
-    "lexical": "0.12.2",
+    "lexical": "0.12.5",
     "lint-staged": "^14.0.1",
     "minimist": "1.2.8",
-    "mongodb-memory-server": "8.12.2",
+    "mongodb-memory-server": "8.13.0",
     "next": "14.0.2",
     "node-fetch": "2.6.12",
-    "nodemon": "3.0.1",
+    "nodemon": "3.0.2",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
@@ -96,10 +96,9 @@
     "slate": "0.91.4",
     "tempfile": "^3.0.0",
     "ts-node": "10.9.1",
-    "tsx": "^3.13.0",
-    "turbo": "^1.10.15",
+    "turbo": "^1.11.1",
     "typescript": "5.2.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "peerDependencies": {
     "react": "18.2.0",

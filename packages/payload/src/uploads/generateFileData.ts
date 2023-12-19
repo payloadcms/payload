@@ -18,7 +18,7 @@ import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
 import getFileByPath from './getFileByPath'
-import getFileByURL from './getFileByURL'
+import { getExternalFile } from './getExternalFile'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -70,14 +70,13 @@ export const generateFileData = async <T>({
     const { filename, url } = data as FileData
 
     try {
-      if (url && url.startsWith('/')) {
+      if (url && url.startsWith('/') && !disableLocalStorage) {
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response as UploadedFile
         overwriteExistingFiles = true
-      } else {
-        const response = await getFileByURL(url)
-        file = response as UploadedFile
+      } else if (filename && url) {
+        file = (await getExternalFile({ req, data: data as FileData })) as UploadedFile
         overwriteExistingFiles = true
       }
     } catch (err) {

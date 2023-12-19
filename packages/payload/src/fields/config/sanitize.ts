@@ -1,7 +1,12 @@
 import type { Config } from '../../config/types'
 import type { Field } from './types'
 
-import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors'
+import {
+  DuplicateFieldName,
+  InvalidFieldName,
+  InvalidFieldRelationship,
+  MissingFieldType,
+} from '../../errors'
 import { formatLabels, toWords } from '../../utilities/formatLabels'
 import { baseBlockFields } from '../baseFields/baseBlockFields'
 import { baseIDField } from '../baseFields/baseIDField'
@@ -10,6 +15,7 @@ import { fieldAffectsData, tabHasName } from './types'
 
 type Args = {
   config: Config
+  existingFieldNames?: Set<string>
   fields: Field[]
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
@@ -18,7 +24,12 @@ type Args = {
   validRelationships: null | string[]
 }
 
-export const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] => {
+export const sanitizeFields = ({
+  config,
+  existingFieldNames = new Set(),
+  fields,
+  validRelationships,
+}: Args): Field[] => {
   if (!fields) return []
 
   return fields.map((unsanitizedField) => {
@@ -99,6 +110,12 @@ export const sanitizeFields = ({ config, fields, validRelationships }: Args): Fi
     }
 
     if (fieldAffectsData(field)) {
+      if (existingFieldNames.has(field.name)) {
+        throw new DuplicateFieldName(field.name)
+      } else if (!['id', 'blockName'].includes(field.name)) {
+        existingFieldNames.add(field.name)
+      }
+
       if (field.localized && !config.localization) delete field.localized
 
       if (typeof field.validate === 'undefined') {
@@ -121,6 +138,7 @@ export const sanitizeFields = ({ config, fields, validRelationships }: Args): Fi
     if ('fields' in field && field.fields) {
       field.fields = sanitizeFields({
         config,
+        existingFieldNames: fieldAffectsData(field) ? new Set() : existingFieldNames,
         fields: field.fields,
         validRelationships,
       })
@@ -135,6 +153,7 @@ export const sanitizeFields = ({ config, fields, validRelationships }: Args): Fi
 
         unsanitizedTab.fields = sanitizeFields({
           config,
+          existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
           fields: tab.fields,
           validRelationships,
         })
@@ -154,6 +173,7 @@ export const sanitizeFields = ({ config, fields, validRelationships }: Args): Fi
           config,
           fields: block.fields,
           validRelationships,
+          existingFieldNames: new Set(),
         })
 
         return unsanitizedBlock

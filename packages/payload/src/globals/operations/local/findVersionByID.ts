@@ -1,4 +1,4 @@
-import type { PayloadT } from '../../..'
+import type { PayloadT, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
@@ -11,6 +11,7 @@ import { setRequestContext } from '../../../utilities/setRequestContext'
 import findVersionByID from '../findVersionByID'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  context?: RequestContext
   depth?: number
   disableErrors?: boolean
   fallbackLocale?: string
@@ -29,6 +30,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
 ): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> {
   const {
     id,
+    context,
     depth,
     disableErrors = false,
     fallbackLocale = null,
@@ -57,7 +59,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 

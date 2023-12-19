@@ -36,7 +36,9 @@ export interface Config {
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
-  globals: {}
+  globals: {
+    tabsWithRichText: TabsWithRichText
+  }
 }
 export interface LexicalField {
   id: string
@@ -169,6 +171,12 @@ export interface ArrayField {
   title?: string | null
   items: {
     text: string
+    subArray?:
+      | {
+          text?: string | null
+          id?: string | null
+        }[]
+      | null
     id?: string | null
   }[]
   collapsedArray?:
@@ -447,6 +455,12 @@ export interface CollapsibleField {
     }
   }
   someText?: string | null
+  group2?: {
+    textWithinGroup?: string | null
+    subGroup?: {
+      textWithinSubGroup?: string | null
+    }
+  }
   functionTitleField?: string | null
   componentTitleField?: string | null
   nestedTitle?: string | null
@@ -838,6 +852,15 @@ export interface TabsField {
   }
   textInRow: string
   numberInRow: number
+  json?:
+    | {
+        [k: string]: unknown
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null
   tab: {
     array: {
       text: string
@@ -942,6 +965,45 @@ export interface PayloadMigration {
   batch?: number | null
   updatedAt: string
   createdAt: string
+}
+export interface TabsWithRichText {
+  id: string
+  tab1: {
+    rt1?: {
+      root: {
+        children: {
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        type: string
+        version: number
+      }
+      [k: string]: unknown
+    } | null
+  }
+  tab2: {
+    rt2?: {
+      root: {
+        children: {
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        type: string
+        version: number
+      }
+      [k: string]: unknown
+    } | null
+  }
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
 declare module 'payload' {

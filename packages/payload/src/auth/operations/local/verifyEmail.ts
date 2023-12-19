@@ -1,4 +1,4 @@
-import type { PayloadT } from '../../..'
+import type { PayloadT, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 
@@ -9,6 +9,7 @@ import verifyEmail from '../verifyEmail'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
+  context?: RequestContext
   req?: PayloadRequest
   token: string
 }
@@ -17,8 +18,8 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
   payload: PayloadT,
   options: Options<T>,
 ): Promise<boolean> {
-  const { collection: collectionSlug, req = {} as PayloadRequest, token } = options
-  setRequestContext(req)
+  const { collection: collectionSlug, context, req = {} as PayloadRequest, token } = options
+  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
 

@@ -1,4 +1,4 @@
-import type { PayloadT } from '../../..'
+import type { PayloadT, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../'
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest } from '../../../types'
@@ -12,6 +12,7 @@ import { setRequestContext } from '../../../utilities/setRequestContext'
 import findVersions from '../findVersions'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  context?: RequestContext
   depth?: number
   fallbackLocale?: string
   limit?: number
@@ -31,6 +32,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
   const {
+    context,
     depth,
     fallbackLocale = null,
     limit,
@@ -62,7 +64,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 

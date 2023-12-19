@@ -13,6 +13,7 @@ import { LocaleProvider } from '../Locale'
 import StepNav, { StepNavProvider } from '../../elements/StepNav'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay'
 import { NavProvider } from '../../elements/Nav/context'
+import { ActionsProvider } from '../ActionsProvider'
 
 type Props = {
   config: ClientConfig
@@ -39,7 +40,9 @@ export const RootProvider: React.FC<Props> = ({ config, children }) => {
                   <LocaleProvider>
                     <StepNavProvider>
                       <LoadingOverlayProvider>
-                        <NavProvider>{children}</NavProvider>
+                        <ActionsProvider>
+                          <NavProvider>{children}</NavProvider>
+                        </ActionsProvider>
                       </LoadingOverlayProvider>
                     </StepNavProvider>
                   </LocaleProvider>
