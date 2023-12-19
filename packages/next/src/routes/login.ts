@@ -11,17 +11,24 @@ export const login = ({ config }: { config: Promise<SanitizedConfig> }) =>
 
     const { searchParams } = new URL(request.url)
     const depth = searchParams.get('depth')
+    let responseOptions = {
+      headers: new Headers(),
+    }
     const result = await loginOperation({
       collection,
       data,
       depth: isNumber(depth) ? Number(depth) : undefined,
       req,
+      responseOptions,
     })
 
-    return Response.json({
-      exp: result.exp,
-      message: 'Auth Passed',
-      token: result.token,
-      user: result.user,
-    })
+    return Response.json(
+      {
+        exp: result.exp,
+        message: 'Auth Passed',
+        token: result.token,
+        user: result.user,
+      },
+      responseOptions,
+    )
   }

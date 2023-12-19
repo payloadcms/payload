@@ -44,10 +44,7 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
       id,
       entity: config,
       operations: collectionOperations,
-      req: {
-        payload: req.payload,
-        user: req.user,
-      },
+      req,
       type: 'collection',
     })
 
