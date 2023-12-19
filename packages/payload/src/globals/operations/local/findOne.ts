@@ -30,7 +30,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
     context,
     depth,
     draft = false,
-    fallbackLocale = null,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     showHiddenFields,
@@ -39,8 +39,12 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const localizationConfig = payload?.config?.localization
   const defaultLocale = payload?.config?.localization
     ? payload?.config?.localization?.defaultLocale
+    : null
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
     : null
 
   if (!globalConfig) {
@@ -50,7 +54,10 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   const i18n = i18nInit(payload.config.i18n)
 
   const req = {
-    fallbackLocale: fallbackLocale ?? options.req?.fallbackLocale ?? defaultLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     i18n,
     locale: locale ?? options.req?.locale ?? defaultLocale,
     payload,

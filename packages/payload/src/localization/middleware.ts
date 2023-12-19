@@ -11,7 +11,7 @@ export default function localizationMiddleware(req, res, next) {
   const validLocales = [...localization.localeCodes, 'all']
   const validFallbackLocales = [...localization.localeCodes, 'null']
 
-  let requestedLocale = req.query.locale
+  let requestedLocale = req.query.locale || localization.defaultLocale
   let requestedFallbackLocale = req.query['fallback-locale']
 
   if (req.body) {
