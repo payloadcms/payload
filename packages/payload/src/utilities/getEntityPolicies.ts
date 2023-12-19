@@ -99,7 +99,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     }
 
     // https://payloadcms.slack.com/archives/C048Z9C2BEX/p1702054928343769
-    const accessResult = await access({ id, data, doc: docBeingAccessed, payload, user })
+    const accessResult = await access({ id, data, doc: docBeingAccessed, req })
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {

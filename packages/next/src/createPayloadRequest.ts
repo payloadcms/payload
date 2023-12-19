@@ -68,8 +68,14 @@ export const createPayloadRequest = async ({
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
   let requestData
-  if (request.body && request.headers.get('Content-Type') === 'application/json') {
+  const contentType = request.headers.get('Content-Type')
+  if (request.body && contentType === 'application/json') {
     requestData = await request.json()
+  } else if (contentType?.startsWith('multipart/form-data')) {
+    const formData = (await request.formData()).get('_payload')
+    if (typeof formData === 'string') {
+      requestData = JSON.parse(formData)
+    }
   }
 
   let requestFallbackLocale
@@ -112,7 +118,6 @@ export const createPayloadRequest = async ({
   req.user = getAuthenticatedUser({
     payload,
     headers: req.headers,
-    searchParams,
     isGraphQL,
   })
 

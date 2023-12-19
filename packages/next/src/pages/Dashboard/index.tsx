@@ -9,7 +9,7 @@ export const Dashboard = async ({
   searchParams,
   config: configPromise,
 }: {
-  searchParams: URLSearchParams
+  searchParams: { [key: string]: string | undefined }
   config: Promise<SanitizedConfig>
 }) => {
   const headers = getHeaders()

@@ -3,4 +3,4 @@
 import { me } from '@payloadcms/next/routes/me'
 import config from 'payload-config'
 
-export const POST = me({ config })
+export const GET = me({ config })

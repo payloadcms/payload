@@ -1,5 +1,3 @@
-import { URL } from 'url'
-
 import type { PayloadRequest } from '../../types'
 import type { Permissions } from '../types'
 
@@ -20,7 +18,6 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
   } = args
 
   adminInitTelemetry(req)
-  const { searchParams } = new URL(req.url)
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -35,7 +32,6 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
         t: req.t,
         user,
       },
-      searchParams,
     })
     if (shouldCommit) await commitTransaction(req)
     return results

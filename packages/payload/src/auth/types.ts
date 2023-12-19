@@ -93,13 +93,11 @@ export type AuthStrategyFunctionArgs = {
   headers: Request['headers']
   isGraphQL?: boolean
   payload: PayloadT
-  searchParams: URLSearchParams
 }
 export type AuthStrategyFunction = ({
   headers,
   isGraphQL,
   payload,
-  searchParams,
 }: AuthStrategyFunctionArgs) => Promise<User | null> | User | null
 export type AuthStrategy = {
   authenticate: AuthStrategyFunction

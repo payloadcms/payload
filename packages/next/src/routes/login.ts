@@ -5,7 +5,6 @@ import { isNumber } from 'payload/utilities'
 
 export const login = ({ config }: { config: Promise<SanitizedConfig> }) =>
   async function (request: Request, { params }: { params: { collection: string } }) {
-    const data = await request.json()
     const req = await createPayloadRequest({ request, config })
     const collection = req.payload.collections[params.collection]
 
@@ -16,7 +15,10 @@ export const login = ({ config }: { config: Promise<SanitizedConfig> }) =>
     }
     const result = await loginOperation({
       collection,
-      data,
+      data: {
+        email: typeof req.data?.email === 'string' ? req.data.email : '',
+        password: typeof req.data?.password === 'string' ? req.data.password : '',
+      },
       depth: isNumber(depth) ? Number(depth) : undefined,
       req,
       responseOptions,
