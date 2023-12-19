@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Group } from '../../utilities/groupNavItems'
+import type { EntityToGroup, Group } from '../../utilities/groupNavItems'
 
 import { getTranslation } from 'payload/utilities'
 import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
@@ -18,6 +18,7 @@ const baseClass = 'dashboard'
 
 export const DefaultDashboardClient: React.FC = () => {
   const config = useConfig()
+
   const {
     collections: collectionsConfig,
     globals: globalsConfig,
@@ -32,54 +33,54 @@ export const DefaultDashboardClient: React.FC = () => {
 
   const { permissions, user } = useAuth()
 
-  const collections = collectionsConfig.filter(
-    (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
-  )
-
-  const globals = globalsConfig.filter(
-    (global) => permissions?.globals?.[global.slug]?.read?.permission,
-  )
-
   const { i18n, t } = useTranslation('general')
 
   const [groups, setGroups] = useState<Group[]>([])
 
-  // useEffect(() => {
-  //   setGroups(
-  //     groupNavItems(
-  //       [
-  //         ...(collections
-  //           ?.filter(
-  //             ({ admin: { hidden } }) =>
-  //               !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-  //           )
-  //           .map((collection) => {
-  //             const entityToGroup: EntityToGroup = {
-  //               entity: collection,
-  //               type: EntityType.collection,
-  //             }
+  useEffect(() => {
+    const collections = collectionsConfig.filter(
+      (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
+    )
 
-  //             return entityToGroup
-  //           }) ?? []),
-  //         ...(globals
-  //           ?.filter(
-  //             ({ admin: { hidden } }) =>
-  //               !(typeof hidden === 'function' ? hidden({ user }) : hidden),
-  //           )
-  //           .map((global) => {
-  //             const entityToGroup: EntityToGroup = {
-  //               entity: global,
-  //               type: EntityType.global,
-  //             }
+    const globals = globalsConfig.filter(
+      (global) => permissions?.globals?.[global.slug]?.read?.permission,
+    )
 
-  //             return entityToGroup
-  //           }) ?? []),
-  //       ],
-  //       permissions,
-  //       i18n,
-  //     ),
-  //   )
-  // }, [collections, globals, i18n, permissions, user])
+    setGroups(
+      groupNavItems(
+        [
+          ...(collections
+            ?.filter(
+              ({ admin: { hidden } }) =>
+                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+            )
+            .map((collection) => {
+              const entityToGroup: EntityToGroup = {
+                entity: collection,
+                type: EntityType.collection,
+              }
+
+              return entityToGroup
+            }) ?? []),
+          ...(globals
+            ?.filter(
+              ({ admin: { hidden } }) =>
+                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+            )
+            .map((global) => {
+              const entityToGroup: EntityToGroup = {
+                entity: global,
+                type: EntityType.global,
+              }
+
+              return entityToGroup
+            }) ?? []),
+        ],
+        permissions,
+        i18n,
+      ),
+    )
+  }, [collectionsConfig, globalsConfig, i18n, permissions, user])
 
   return (
     <div className={baseClass}>
