@@ -8,6 +8,7 @@ import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { englishLocale } from '../globals/config'
 import { initPayloadTest } from '../helpers/configHelpers'
+import { idToString } from '../helpers/idToString'
 import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
@@ -651,11 +652,15 @@ describe('Localization', () => {
 
   describe('Localized - GraphQL', () => {
     let token
+    let client
+
+    beforeAll(() => {
+      // Defining locale=en in graphQL string should not break JWT strategy
+      const url = `${serverURL}${config?.routes?.api}${config?.routes?.graphQL}?locale=en`
+      client = new GraphQLClient(url)
+    })
 
     it('should allow user to login and retrieve populated localized field', async () => {
-      const url = `${serverURL}${config?.routes?.api}${config?.routes?.graphQL}?locale=en`
-      const client = new GraphQLClient(url)
-
       const query = `mutation {
         loginUser(email: "dev@payloadcms.com", password: "test") {
           token
@@ -677,10 +682,6 @@ describe('Localization', () => {
     })
 
     it('should allow retrieval of populated localized fields within meUser', async () => {
-      // Defining locale=en in graphQL string should not break JWT strategy
-      const url = `${serverURL}${config?.routes?.api}${config?.routes?.graphQL}?locale=en`
-      const client = new GraphQLClient(url)
-
       const query = `query {
         meUser {
           user {
@@ -747,6 +748,40 @@ describe('Localization', () => {
       expect(updateResult.title).toStrictEqual(spanishTitle)
       expect(result.title[defaultLocale]).toStrictEqual(englishTitle)
       expect(result.title[spanishLocale]).toStrictEqual(spanishTitle)
+    })
+
+    it('should query multiple locales', async () => {
+      const englishDoc = await payload.create({
+        collection: localizedPostsSlug,
+        data: {
+          title: englishTitle,
+        },
+        locale: defaultLocale,
+      })
+      const spanishDoc = await payload.create({
+        collection: localizedPostsSlug,
+        data: {
+          title: spanishTitle,
+        },
+        locale: spanishLocale,
+      })
+      const query = `
+      {
+        es: LocalizedPost(id: ${idToString(spanishDoc.id, payload)}, locale: es) {
+          title
+        }
+        en: LocalizedPost(id: ${idToString(englishDoc.id, payload)}, locale: en) {
+          title
+        }
+      }
+      `
+
+      const { en, es } = await client.request(query, null, {
+        Authorization: `JWT ${token}`,
+      })
+
+      expect(en.title).toStrictEqual(englishTitle)
+      expect(es.title).toStrictEqual(spanishTitle)
     })
   })
 
