@@ -61,10 +61,67 @@
 
 #### @payloadcms/richtext-lexical
 
-* **richtext-lexical:** rename TreeviewFeature into TreeViewFeature (#4520)
-* **richtext-lexical:** link node: change doc data format to be consistent with relationship field (#4504)
-* **richtext-lexical:** improve floating select menu Dropdown classNames (#4444)
-* **richtext-lexical:** lazy import React components to prevent client-only code from leaking into the server (#4290)
+* **richtext-lexical:** rename TreeviewFeature into TreeViewFeature ([#4520](https://github.com/payloadcms/payload/issues/4520)) ([c49fd66](https://github.com/payloadcms/payload/commit/c49fd6692231b68ca61b079103a0fd7aa4673be1))
+
+If you import TreeviewFeature, you have to rename the import to use TreeViewFeature (capitalized "V")
+
+* **richtext-lexical:** link node: change doc data format to be consistent with relationship field ([#4504](https://github.com/payloadcms/payload/issues/4504)) ([cc0ba89](https://github.com/payloadcms/payload/commit/cc0ba895188f40181c6ba3779f66d547d4ea66f9))
+
+An unpopulated, internal link node no longer saves the doc id under fields.doc.value.id. Now, it saves it under fields.doc.value.
+Migration inside of payload is automatic. If you are reading from the link node inside of your frontend though, you will have to adjust it.
+
+* **richtext-lexical:** improve floating select menu Dropdown classNames ([#4444](https://github.com/payloadcms/payload/issues/4444)) ([9331204](https://github.com/payloadcms/payload/commit/9331204295bfeaf7dd10bc075f42995b2cab2de4))
+
+Dropdown component has a new mandatory sectionKey prop
+
+* **richtext-lexical:** lazy import React components to prevent client-only code from leaking into the server ([#4290](https://github.com/payloadcms/payload/issues/4290)) ([5de347f](https://github.com/payloadcms/payload/commit/5de347ffffca3bf38315d3d87d2ccc5c28cd2723))
+
+1. Most important: If you are updating `@payloadcms/richtext-lexical` to v0.4.0 or higher, you will HAVE to update payload to the latest version as well. If you don't update it, payload likely won't start up due to validation errors. It's generally good practice to upgrade packages prefixed with @payloadcms/ together with payload and keep the versions in sync.
+
+2. `@payloadcms/richtext-slate` is not affected by this.
+
+3. Every single property in the `Feature` interface which accepts a React component now no longer accepts a React component, but a function which imports a React component instead. This is done to ensure no unnecessary client-only code is leaked to the server when importing Features on a server.
+Here's an example migration:
+
+Old:
+
+```ts
+import { BlockIcon } from '../../lexical/ui/icons/Block'
+...
+Icon: BlockIcon,
+```
+
+New:
+
+```ts
+// import { BlockIcon } from '../../lexical/ui/icons/Block' // <= Remove this import
+...
+Icon: () =>
+  // @ts-expect-error
+  import('../../lexical/ui/icons/Block').then((module) => module.BlockIcon),
+```
+
+Or alternatively, if you're using default exports instead of named exports:
+
+```ts
+// import BlockIcon from '../../lexical/ui/icons/Block' // <= Remove this import
+...
+Icon: () =>
+  // @ts-expect-error
+  import('../../lexical/ui/icons/Block'),
+```
+
+4. The types for `SanitizedEditorConfig` and `EditorConfig` have changed. Their respective `lexical` property no longer expects the `LexicalEditorConfig`. It now expects a function returning the `LexicalEditorConfig`. You will have to adjust this if you adjusted that property anywhere, e.g. when initializing the lexical field editor property, or when initializing a new headless editor.
+
+5. The following exports are now exported from the `@payloadcms/richtext-lexical/components` subpath exports instead of `@payloadcms/richtext-lexical`:
+
+- `ToolbarButton`
+- `ToolbarDropdown`
+- `RichTextCell`
+- `RichTextField`
+- `defaultEditorLexicalConfig`
+
+You will have to adjust your imports, only if you import any of those properties in your project.
 
 ## @payloadcms/richtext-*
 
