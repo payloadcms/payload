@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import Account from '../../graphics/Account'
 import { useConfig } from '../../providers/Config'
@@ -15,7 +14,9 @@ import { useActions } from '../../providers/ActionsProvider'
 
 const baseClass = 'app-header'
 
-export const AppHeader: React.FC = () => {
+export const AppHeader: React.FC<{
+  Link?: React.ComponentType
+}> = ({ Link }) => {
   const { t } = useTranslation()
 
   const {
@@ -47,6 +48,8 @@ export const AppHeader: React.FC = () => {
     }
   }, [actions])
 
+  const LinkElement = Link || 'a'
+
   return (
     <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__bg`} />
@@ -57,7 +60,7 @@ export const AppHeader: React.FC = () => {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav className={`${baseClass}__step-nav`} />
+              <StepNav className={`${baseClass}__step-nav`} Link={Link} />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
@@ -78,14 +81,15 @@ export const AppHeader: React.FC = () => {
             {localization && (
               <LocalizerLabel ariaLabel="invisible" className={`${baseClass}__localizer-spacing`} />
             )}
-            <Link
+            <LinkElement
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               tabIndex={0}
-              to={`${adminRoute}/account`}
+              // to={`${adminRoute}/account`} // for `react-router-dom` Link
+              href={`${adminRoute}/account`} // for `next/link` Link
             >
               <Account />
-            </Link>
+            </LinkElement>
           </div>
         </div>
       </div>

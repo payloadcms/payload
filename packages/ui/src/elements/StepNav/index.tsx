@@ -1,7 +1,6 @@
 'use client'
 import React, { Fragment, createContext, useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import type { Context as ContextType } from './types'
 
@@ -33,23 +32,32 @@ const useStepNav = (): ContextType => useContext(Context)
 
 const StepNav: React.FC<{
   className?: string
-}> = (props) => {
-  const { className } = props
+  Link?: React.ComponentType
+}> = ({ Link, className }) => {
   const { i18n } = useTranslation()
 
   const { stepNav } = useStepNav()
+
   const config = useConfig()
+
   const {
     routes: { admin },
   } = config
+
+  const LinkElement = Link || 'a'
 
   return (
     <Fragment>
       {stepNav.length > 0 ? (
         <nav className={[baseClass, className].filter(Boolean).join(' ')}>
-          <Link className={`${baseClass}__home`} tabIndex={0} to={admin}>
+          <LinkElement
+            className={`${baseClass}__home`}
+            tabIndex={0}
+            // to={admin} // for `react-router-dom`
+            href={admin} // for `next/link`
+          >
             <IconGraphic />
-          </Link>
+          </LinkElement>
           <span>/</span>
           {stepNav.map((item, i) => {
             const StepLabel = getTranslation(item.label, i18n)
@@ -62,9 +70,12 @@ const StepNav: React.FC<{
             ) : (
               <Fragment key={i}>
                 {item.url ? (
-                  <Link to={item.url}>
+                  <LinkElement
+                    // to={item.url} // for `react-router-dom`
+                    href={item.url} // for `next/link`
+                  >
                     <span key={i}>{StepLabel}</span>
-                  </Link>
+                  </LinkElement>
                 ) : (
                   <span key={i}>{StepLabel}</span>
                 )}
