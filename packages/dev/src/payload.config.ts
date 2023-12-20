@@ -14,4 +14,13 @@ export default buildConfig({
   // }),
   // editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET,
+  // onInit: async (payload) => {
+  //   await payload.create({
+  //     collection: 'users',
+  //     data: {
+  //       email: 'dev@payloadcms.com',
+  //       password: 'test',
+  //     },
+  //   })
+  // },
 })
