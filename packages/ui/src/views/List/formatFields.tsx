@@ -1,5 +1,4 @@
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
-import type { Field } from '../../../../../fields/config/types'
+import type { Field, SanitizedCollectionConfig } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types'
 
