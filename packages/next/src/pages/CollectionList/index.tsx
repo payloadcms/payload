@@ -4,8 +4,6 @@ import { headers as getHeaders } from 'next/headers'
 import { auth } from '../../utilities/auth'
 import { RenderCustomComponent, TableColumnsProvider } from '@payloadcms/ui/elements'
 import { DefaultList } from '@payloadcms/ui/views'
-import formatFields from '../../../../ui/src/views/List/formatFields'
-import { createClientConfig } from '../../createClientConfig'
 
 export const CollectionList = async ({
   collectionSlug,
@@ -24,7 +22,6 @@ export const CollectionList = async ({
   })
 
   const config = await configPromise
-  const clientConfig = await createClientConfig(configPromise)
 
   const {
     routes: { admin },
@@ -34,17 +31,7 @@ export const CollectionList = async ({
     (collection) => collection.slug === collectionSlug,
   )
 
-  const collectionClientConfig = clientConfig.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
-
   if (collectionConfig) {
-    const collectionPermissions = permissions?.collections?.[collectionSlug]
-    const hasCreatePermission = collectionPermissions?.create?.permission
-    const newDocumentURL = `${admin}/collections/${collectionSlug}/create`
-    const defaultLimit = collectionConfig.admin.pagination.defaultLimit
-    const fields = formatFields(collectionClientConfig)
-
     const {
       admin: { components: { views: { List: CustomList } = {} } = {} },
     } = collectionConfig
@@ -57,17 +44,19 @@ export const CollectionList = async ({
       ListToRender = CustomList.Component
     }
 
+    const initialData = {}
+
     return (
-      <TableColumnsProvider collection={collectionClientConfig}>
+      <TableColumnsProvider collectionSlug={collectionSlug}>
         <RenderCustomComponent
           CustomComponent={ListToRender}
           DefaultComponent={DefaultList}
           componentProps={{
-            collection: { ...collectionClientConfig, fields },
-            data: {},
-            hasCreatePermission,
-            limit: searchParams?.limit || defaultLimit,
-            newDocumentURL,
+            collection: collectionConfig,
+            data: initialData,
+            hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+            limit: searchParams?.limit || collectionConfig.admin.pagination.defaultLimit,
+            newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
             // resetParams,
             // titleField,
           }}

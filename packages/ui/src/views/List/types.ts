@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
 import type { PaginatedDocs } from 'payload/database'
 import type { FieldAffectingData, Where } from 'payload/types'
 import type { Props as ListControlsProps } from '../../elements/ListControls/types'

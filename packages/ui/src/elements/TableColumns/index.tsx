@@ -20,6 +20,7 @@ import formatFields from '../../views/List/formatFields'
 import buildColumns from './buildColumns'
 import { columnReducer } from './columnReducer'
 import getInitialColumnState from './getInitialColumns'
+import { useConfig } from '../../providers/Config'
 
 export interface ITableColumns {
   columns: Column[]
@@ -36,16 +37,14 @@ export const useTableColumns = (): ITableColumns => useContext(TableColumnContex
 export const TableColumnsProvider: React.FC<{
   cellProps?: Partial<CellProps>[]
   children: React.ReactNode
-  collection: SanitizedCollectionConfig
-}> = ({
-  cellProps,
-  children,
-  collection: {
-    admin: { defaultColumns, useAsTitle },
-  },
-  collection,
-}) => {
-  const preferenceKey = `${collection.slug}-list`
+  collectionSlug: string
+}> = ({ cellProps, children, collectionSlug }) => {
+  const config = useConfig()
+  const collection = config.collections.find((collection) => collection.slug === collectionSlug)
+  const {
+    admin: { useAsTitle, defaultColumns },
+  } = collection
+  const preferenceKey = `${collectionSlug}-list`
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>()
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()

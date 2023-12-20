@@ -24,19 +24,18 @@ import ViewDescription from '../../elements/ViewDescription'
 import { RelationshipProvider } from './RelationshipProvider'
 import { SelectionProvider } from './SelectionProvider'
 import './index.scss'
+import { useConfig } from '../../providers/Config'
+import { SanitizedCollectionConfig } from 'payload/types'
 
 const baseClass = 'collection-list'
 
-export const DefaultList: React.FC<Props> = (props) => {
+export const DefaultListClient: React.FC<
+  Omit<Props, 'collection'> & {
+    collectionSlug: SanitizedCollectionConfig['slug']
+  }
+> = (props) => {
   const {
-    collection: {
-      admin: {
-        components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
-        description,
-      } = {},
-      labels: { plural: pluralLabel, singular: singularLabel },
-    },
-    collection,
+    collectionSlug,
     customHeader,
     data,
     handlePageChange,
@@ -51,6 +50,9 @@ export const DefaultList: React.FC<Props> = (props) => {
     resetParams,
     titleField,
   } = props
+
+  const config = useConfig()
+  const collection = config.collections.find((collection) => collection.slug === collectionSlug)
 
   const {
     breakpoints: { s: smallBreak },
@@ -69,9 +71,6 @@ export const DefaultList: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      {Array.isArray(BeforeList) &&
-        BeforeList.map((Component, i) => <Component key={i} {...props} />)}
-
       {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
@@ -91,11 +90,11 @@ export const DefaultList: React.FC<Props> = (props) => {
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
                 )}
-                {description && (
+                {/* {description && (
                   <div className={`${baseClass}__sub-header`}>
                     <ViewDescription description={description} />
                   </div>
-                )}
+                )} */}
               </Fragment>
             )}
           </header>
@@ -108,8 +107,8 @@ export const DefaultList: React.FC<Props> = (props) => {
             resetParams={resetParams}
             titleField={titleField}
           />
-          {Array.isArray(BeforeListTable) &&
-            BeforeListTable.map((Component, i) => <Component key={i} {...props} />)}
+          {/* {Array.isArray(BeforeListTable) &&
+            BeforeListTable.map((Component, i) => <Component key={i} {...props} />)} */}
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -131,8 +130,8 @@ export const DefaultList: React.FC<Props> = (props) => {
               )}
             </div>
           )}
-          {Array.isArray(AfterListTable) &&
-            AfterListTable.map((Component, i) => <Component key={i} {...props} />)}
+          {/* {Array.isArray(AfterListTable) &&
+            AfterListTable.map((Component, i) => <Component key={i} {...props} />)} */}
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Paginator
@@ -182,8 +181,6 @@ export const DefaultList: React.FC<Props> = (props) => {
           )}
         </Gutter>
       </SelectionProvider>
-      {Array.isArray(AfterList) &&
-        AfterList.map((Component, i) => <Component key={i} {...props} />)}
     </div>
   )
 }
