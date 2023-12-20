@@ -43,10 +43,11 @@ describe('database', () => {
   })
 
   describe('schema', () => {
-    if (checkSchema) {
-      it('should use custom tableNames', () => {
-        const db: PostgresAdapter = payload.db
+    it('should use custom tableNames', () => {
+      const db: PostgresAdapter = payload.db
+      expect(db).toBeDefined()
 
+      if (checkSchema) {
         // collection
         expect(db.tables['customs']).toBeDefined()
 
@@ -77,9 +78,10 @@ describe('database', () => {
         // enum names
         expect(db.enums.enum_customs_selectEnum).toBeDefined()
         expect(db.enums.enum_customs_radioEnum).toBeDefined()
-      })
-    }
+      }
+    })
   })
+
   describe('transactions', () => {
     describe('local api', () => {
       it('should commit multiple operations in isolation', async () => {
