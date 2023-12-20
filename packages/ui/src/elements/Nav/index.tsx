@@ -1,7 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { NavLink } from 'react-router-dom'
 
 import type { EntityToGroup, Group } from '../../utilities/groupNavItems'
 
@@ -19,7 +18,10 @@ import './index.scss'
 
 const baseClass = 'nav'
 
-const DefaultNav: React.FC = () => {
+const DefaultNav: React.FC<{
+  Link?: React.ComponentType
+}> = (props) => {
+  const { Link } = props
   const { navOpen, navRef, setNavOpen } = useNav()
   const { permissions, user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
@@ -97,20 +99,23 @@ const DefaultNav: React.FC = () => {
                     id = `nav-global-${entity.slug}`
                   }
 
+                  const LinkElement = Link || 'a'
+
                   return (
-                    <NavLink
-                      activeClassName="active"
+                    <LinkElement
+                      // activeClassName="active"
                       className={`${baseClass}__link`}
                       id={id}
                       key={i}
                       tabIndex={!navOpen ? -1 : undefined}
-                      to={href}
+                      // to={href} // for `react-router-dom` Link
+                      href={href} // for `next/link` Link
                     >
                       <span className={`${baseClass}__link-icon`}>
                         <Chevron direction="right" />
                       </span>
                       <span className={`${baseClass}__link-label`}>{entityLabel}</span>
-                    </NavLink>
+                    </LinkElement>
                   )
                 })}
               </NavGroup>

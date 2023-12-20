@@ -108,10 +108,13 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
 
   switch (el) {
     case 'link':
-      if (!Link) throw new Error('Link is required when using el="link"')
+      if (!Link) {
+        console.error('Link is required when using el="link"')
+        return null
+      }
 
       return (
-        <Link {...buttonProps} to={to || url}>
+        <Link {...buttonProps} to={to || url} href={to || url}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

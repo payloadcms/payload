@@ -7,4 +7,6 @@ export type Props = {
   onClick?: () => void
   title: string
   titleAs?: ElementType
+  Link?: ElementType
+  href?: string
 }

@@ -1,10 +1,11 @@
+'use client'
 import React from 'react'
-import { useLocation } from 'react-router-dom'
 
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { DefaultAccountIcon } from './Default'
 import Gravatar from './Gravatar'
+import { usePathname } from 'next/navigation'
 
 const Account = () => {
   const {
@@ -12,11 +13,11 @@ const Account = () => {
     routes: { admin: adminRoute },
   } = useConfig()
   const { user } = useAuth()
-  const location = useLocation()
+  const pathname = usePathname()
 
-  const isOnAccountPage = location.pathname === `${adminRoute}/account`
+  const isOnAccountPage = pathname === `${adminRoute}/account`
 
-  if (!user.email || Avatar === 'default') return <DefaultAccountIcon active={isOnAccountPage} />
+  if (!user?.email || Avatar === 'default') return <DefaultAccountIcon active={isOnAccountPage} />
   if (Avatar === 'gravatar') return <Gravatar />
   if (Avatar) return <Avatar active={isOnAccountPage} />
   return <DefaultAccountIcon active={isOnAccountPage} />
