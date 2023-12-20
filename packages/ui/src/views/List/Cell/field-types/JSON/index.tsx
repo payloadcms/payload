@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { JSONField } from '../../../../../../../../exports/types'
+import type { JSONField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
 import './index.scss'

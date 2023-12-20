@@ -1,10 +1,10 @@
+'use client'
 import queryString from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
-import type { Where } from '../../../../../../types'
+import type { Where } from 'payload/types'
 
-import { useLocale } from '../../../../utilities/Locale'
+import { useLocale } from '../../../providers/Locale'
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -33,7 +33,6 @@ type Props = {
 export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
   const contextRef = useRef({} as SelectionContext)
 
-  const history = useHistory()
   const { code: locale } = useLocale()
   const [selected, setSelected] = useState<SelectionContext['selected']>({})
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
@@ -84,11 +83,11 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     (additionalParams?: Where): string => {
       let where: Where
       if (selectAll === SelectAllStatus.AllAvailable) {
-        const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true })
-          .where as Where
-        where = params || {
-          id: { not_equals: '' },
-        }
+        // const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true })
+        //   .where as Where
+        // where = params || {
+        //   id: { not_equals: '' },
+        // }
       } else {
         where = {
           id: {
@@ -111,7 +110,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
         { addQueryPrefix: true },
       )
     },
-    [history.location.search, selectAll, selected, locale],
+    [selectAll, selected, locale],
   )
 
   useEffect(() => {
@@ -143,7 +142,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       setSelected(rows)
     }
     setSelectAll(SelectAllStatus.None)
-  }, [docs, history])
+  }, [docs])
 
   useEffect(() => {
     const newCount =

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { TextareaField } from '../../../../../../../../exports/types'
+import type { TextareaField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
 const TextareaCell: React.FC<CellComponentProps<TextareaField, string>> = ({ data }) => {

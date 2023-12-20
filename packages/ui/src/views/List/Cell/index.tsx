@@ -1,14 +1,14 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import Link from 'next/link' // TODO: abstract this out to support all routers
 
-import type { CodeField } from '../../../../../../fields/config/types'
+import type { CodeField } from 'payload/types'
 import type { CellComponentProps, Props } from './types'
 
-import { fieldAffectsData } from '../../../../../../fields/config/types'
-import { getTranslation } from '../../../../../../utilities/getTranslation'
-import { useConfig } from '../../../../utilities/Config'
-import RenderCustomComponent from '../../../../utilities/RenderCustomComponent'
+import { fieldAffectsData } from 'payload/types'
+import { getTranslation } from 'payload/utilities'
+import { useConfig } from '../../../providers/Config'
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent'
 import cellComponents from './field-types'
 import CodeCell from './field-types/Code'
 
@@ -35,7 +35,7 @@ const DefaultCell: React.FC<Props> = (props) => {
   const wrapElementProps: {
     className?: string
     onClick?: () => void
-    to?: string
+    href?: string
     type?: 'button'
   } = {
     className,
@@ -43,7 +43,7 @@ const DefaultCell: React.FC<Props> = (props) => {
 
   if (link) {
     WrapElement = Link
-    wrapElementProps.to = `${admin}/collections/${slug}/${id}`
+    wrapElementProps.href = `${admin}/collections/${slug}/${id}`
   }
 
   if (typeof onClick === 'function') {

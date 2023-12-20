@@ -1,33 +1,33 @@
+'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import formatFilesize from '../../../../../uploads/formatFilesize'
-import { getTranslation } from '../../../../../utilities/getTranslation'
-import Button from '../../../elements/Button'
-import DeleteMany from '../../../elements/DeleteMany'
-import EditMany from '../../../elements/EditMany'
-import { Gutter } from '../../../elements/Gutter'
-import { ListControls } from '../../../elements/ListControls'
-import ListSelection from '../../../elements/ListSelection'
-import Paginator from '../../../elements/Paginator'
-import PerPage from '../../../elements/PerPage'
-import Pill from '../../../elements/Pill'
-import PublishMany from '../../../elements/PublishMany'
-import { StaggeredShimmers } from '../../../elements/ShimmerEffect'
-import { Table } from '../../../elements/Table'
-import UnpublishMany from '../../../elements/UnpublishMany'
-import ViewDescription from '../../../elements/ViewDescription'
-import Meta from '../../../utilities/Meta'
+// import formatFilesize from '../../../../../uploads/formatFilesize'
+import { getTranslation } from 'payload/utilities'
+import { Button } from '../../elements/Button'
+import DeleteMany from '../../elements/DeleteMany'
+import EditMany from '../../elements/EditMany'
+import { Gutter } from '../../elements/Gutter'
+import { ListControls } from '../../elements/ListControls'
+import ListSelection from '../../elements/ListSelection'
+import Paginator from '../../elements/Paginator'
+import PerPage from '../../elements/PerPage'
+import Pill from '../../elements/Pill'
+import PublishMany from '../../elements/PublishMany'
+import { StaggeredShimmers } from '../../elements/ShimmerEffect'
+import { Table } from '../../elements/Table'
+import UnpublishMany from '../../elements/UnpublishMany'
+import ViewDescription from '../../elements/ViewDescription'
 import { RelationshipProvider } from './RelationshipProvider'
 import { SelectionProvider } from './SelectionProvider'
 import './index.scss'
 
 const baseClass = 'collection-list'
 
-const DefaultList: React.FC<Props> = (props) => {
+export const DefaultList: React.FC<Props> = (props) => {
   const {
     collection: {
       admin: {
@@ -56,13 +56,13 @@ const DefaultList: React.FC<Props> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
   const { i18n, t } = useTranslation('general')
-  let formattedDocs = data.docs || []
+  let formattedDocs = data?.docs || []
 
   if (collection.upload) {
     formattedDocs = formattedDocs?.map((doc) => {
       return {
         ...doc,
-        filesize: formatFilesize(doc.filesize),
+        // filesize: formatFilesize(doc.filesize),
       }
     })
   }
@@ -72,7 +72,7 @@ const DefaultList: React.FC<Props> = (props) => {
       {Array.isArray(BeforeList) &&
         BeforeList.map((Component, i) => <Component key={i} {...props} />)}
 
-      <Meta title={getTranslation(collection.labels.plural, i18n)} />
+      {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
@@ -187,5 +187,3 @@ const DefaultList: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default DefaultList

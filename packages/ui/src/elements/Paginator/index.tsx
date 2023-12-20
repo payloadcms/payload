@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom'
 
 import type { Node, Props } from './types'
 
-import { useSearchParams } from '../../utilities/SearchParams'
+import { useSearchParams } from '../../providers/SearchParams'
 import ClickableArrow from './ClickableArrow'
 import Page from './Page'
 import Separator from './Separator'

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input'
+import { CheckboxInput } from '../../../forms/field-types/Checkbox/Input'
 import { useSelection } from '../SelectionProvider'
 import './index.scss'
 

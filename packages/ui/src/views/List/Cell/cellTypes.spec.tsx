@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
 import React from 'react'
 
-import type { BlockField, DateField, SelectField } from '../../../../../../fields/config/types'
+import type { BlockField, DateField, SelectField } from 'payload/types'
 
 import BlocksCell from './field-types/Blocks'
 import Checkbox from './field-types/Checkbox'

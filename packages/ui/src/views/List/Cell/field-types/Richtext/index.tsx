@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 
-import type { RichTextField } from '../../../../../../../../fields/config/types'
-import type { RichTextAdapter } from '../../../../../../forms/field-types/RichText/types'
+import type { RichTextField } from 'payload/types'
+import type { RichTextAdapter } from '../../../../../forms/field-types/RichText/types'
 import type { CellComponentProps } from '../../types'
 
 const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {

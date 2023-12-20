@@ -1,7 +1,7 @@
 import type { ElementType } from 'react'
 
 import React from 'react'
-import { Link } from 'react-router-dom'
+import Link from 'next/link' // TODO: abstract this out to support all routers
 
 import type { Props, RenderedTypeProps } from './types'
 
@@ -79,7 +79,7 @@ const StaticPill: React.FC<Props> = (props) => {
       aria-label={ariaLabel}
       className={classes}
       onClick={onClick}
-      to={to || undefined}
+      href={to || ''}
       type={Element === 'button' ? 'button' : undefined}
     >
       {icon && alignIcon === 'left' && <span className={`${baseClass}__icon`}>{icon}</span>}

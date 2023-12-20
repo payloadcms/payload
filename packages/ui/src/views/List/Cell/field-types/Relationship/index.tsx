@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { RelationshipField } from '../../../../../../../../exports/types'
+import type { RelationshipField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from '../../../../../../../../utilities/getTranslation'
-import useIntersect from '../../../../../../../hooks/useIntersect'
-import { formatUseAsTitle } from '../../../../../../../hooks/useTitle'
-import { useConfig } from '../../../../../../utilities/Config'
+import { getTranslation } from 'payload/utilities'
+import { useIntersect } from '../../../../../hooks/useIntersect'
+import { formatUseAsTitle } from '../../../../../hooks/useTitle'
+import { useConfig } from '../../../../../providers/Config'
 import { useListRelationships } from '../../../RelationshipProvider'
 import './index.scss'
 

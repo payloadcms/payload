@@ -4,12 +4,11 @@ import { RenderCustomComponent } from '@payloadcms/ui/elements'
 import { DefaultDashboard } from '@payloadcms/ui/views'
 import { headers as getHeaders } from 'next/headers'
 import { auth } from '../../utilities/auth'
+import Link from 'next/link'
 
 export const Dashboard = async ({
-  searchParams,
   config: configPromise,
 }: {
-  searchParams: { [key: string]: string | undefined }
   config: Promise<SanitizedConfig>
 }) => {
   const headers = getHeaders()
@@ -18,7 +17,6 @@ export const Dashboard = async ({
 
   await auth({
     headers,
-    searchParams,
     config: configPromise,
   })
 
@@ -32,6 +30,7 @@ export const Dashboard = async ({
       DefaultComponent={DefaultDashboard}
       componentProps={{
         config,
+        Link,
       }}
     />
   )

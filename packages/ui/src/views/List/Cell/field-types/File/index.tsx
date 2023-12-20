@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { CellComponentProps } from '../../types'
 
-import Thumbnail from '../../../../../../elements/Thumbnail'
+import Thumbnail from '../../../../../elements/Thumbnail'
 import './index.scss'
 
 const baseClass = 'file'

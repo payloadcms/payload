@@ -1,6 +1,6 @@
 import type { Field, SanitizedCollectionConfig } from 'payload/types'
 
-import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 
 const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   const hasID =

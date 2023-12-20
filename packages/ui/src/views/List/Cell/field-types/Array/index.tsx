@@ -1,10 +1,10 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { ArrayField } from '../../../../../../../../fields/config/types'
+import type { ArrayField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from '../../../../../../../../utilities/getTranslation'
+import { getTranslation } from 'payload/utilities'
 
 const ArrayCell: React.FC<CellComponentProps<ArrayField, Record<string, unknown>>> = ({
   data,

@@ -7,12 +7,10 @@ import { cache } from 'react'
 export const auth = cache(
   async ({
     headers,
-    searchParams,
     config,
     unauthorizedRedirect = true,
   }: {
     headers: any
-    searchParams: { [key: string]: string | undefined }
     config: Promise<SanitizedConfig>
     unauthorizedRedirect?: boolean
   }) => {

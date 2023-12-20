@@ -1,12 +1,13 @@
+'use client'
 import querystring from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { TypeWithID } from '../../../../../../collections/config/types'
+import type { TypeWithID } from 'payload/types'
 
-import useDebounce from '../../../../../hooks/useDebounce'
-import { useConfig } from '../../../../utilities/Config'
-import { useLocale } from '../../../../utilities/Locale'
+import useDebounce from '../../../hooks/useDebounce'
+import { useConfig } from '../../../providers/Config'
+import { useLocale } from '../../../providers/Locale'
 import { reducer } from './reducer'
 
 // documents are first set to null when requested

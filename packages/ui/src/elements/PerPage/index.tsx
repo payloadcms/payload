@@ -3,16 +3,16 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 
-import { defaults } from '../../../../collections/config/defaults'
-import Chevron from '../../icons/Chevron'
-import { useSearchParams } from '../../utilities/SearchParams'
+import { collectionDefaults } from 'payload/config'
+import { Chevron } from '../../icons/Chevron'
+import { useSearchParams } from '../../providers/SearchParams'
 import Popup from '../Popup'
 import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'per-page'
 
-const defaultLimits = defaults.admin.pagination.limits
+const defaultLimits = collectionDefaults.admin.pagination.limits
 
 export type Props = {
   handleChange?: (limit: number) => void

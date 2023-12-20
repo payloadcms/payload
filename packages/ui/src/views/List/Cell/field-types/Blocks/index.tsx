@@ -1,10 +1,10 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { BlockField } from '../../../../../../../../fields/config/types'
+import type { BlockField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from '../../../../../../../../utilities/getTranslation'
+import { getTranslation } from 'payload/utilities'
 
 const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field }) => {
   const { i18n, t } = useTranslation('fields')

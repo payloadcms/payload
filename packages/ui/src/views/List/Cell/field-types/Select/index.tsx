@@ -1,11 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { OptionObject, SelectField } from '../../../../../../../../fields/config/types'
+import type { OptionObject, SelectField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { optionsAreObjects } from '../../../../../../../../fields/config/types'
-import { getTranslation } from '../../../../../../../../utilities/getTranslation'
+import { optionsAreObjects } from 'payload/types'
+import { getTranslation } from 'payload/utilities'
 
 const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, field }) => {
   const { i18n } = useTranslation()

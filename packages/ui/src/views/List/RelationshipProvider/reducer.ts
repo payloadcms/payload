@@ -1,4 +1,4 @@
-import type { TypeWithID } from '../../../../../../collections/config/types'
+import type { TypeWithID } from 'payload/types'
 import type { Documents } from './index'
 
 type RequestDocuments = {

@@ -10,7 +10,6 @@ import type {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
-import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
@@ -211,10 +210,10 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
-    AfterList?: React.ComponentType<ListProps>[]
-    AfterListTable?: React.ComponentType<ListProps>[]
-    BeforeList?: React.ComponentType<ListProps>[]
-    BeforeListTable?: React.ComponentType<ListProps>[]
+    AfterList?: React.ComponentType<any>[]
+    AfterListTable?: React.ComponentType<any>[]
+    BeforeList?: React.ComponentType<any>[]
+    BeforeListTable?: React.ComponentType<any>[]
     /**
      * Components within the edit view
      */
@@ -275,10 +274,10 @@ export type CollectionAdminOptions = {
         | AdminViewComponent
       List?:
         | {
-            Component?: React.ComponentType<ListProps>
+            Component?: React.ComponentType<any>
             actions?: React.ComponentType<any>[]
           }
-        | React.ComponentType<ListProps>
+        | React.ComponentType<any>
     }
   }
   /**

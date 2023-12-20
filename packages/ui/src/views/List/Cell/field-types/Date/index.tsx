@@ -1,11 +1,11 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { DateField } from '../../../../../../../../exports/types'
+import type { DateField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { formatDate } from '../../../../../../../utilities/formatDate'
-import { useConfig } from '../../../../../../utilities/Config'
+import { formatDate } from '../../../../../utilities/formatDate'
+import { useConfig } from '../../../../../providers/Config'
 
 const DateCell: React.FC<CellComponentProps<DateField, any>> = ({ data, field }) => {
   const {

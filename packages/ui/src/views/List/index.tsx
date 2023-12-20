@@ -1,3 +1,4 @@
+'use client'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,16 +8,16 @@ import { v4 as uuid } from 'uuid'
 import type { Where, Field } from 'payload/types'
 import type { ListIndexProps, ListPreferences, Props } from './types'
 
-import usePayloadAPI from '../../../../hooks/usePayloadAPI'
-import { useUseTitleField } from '../../../../hooks/useUseAsTitle'
-import { useStepNav } from '../../../elements/StepNav'
-import { TableColumnsProvider } from '../../../elements/TableColumns'
-import { useActions } from '../../../utilities/ActionsProvider'
+import usePayloadAPI from '../../hooks/usePayloadAPI'
+import { useUseTitleField } from '../../hooks/useUseAsTitle'
+import { useStepNav } from '../../elements/StepNav'
+import { TableColumnsProvider } from '../../elements/TableColumns'
+import { useActions } from '../../providers/ActionsProvider'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { usePreferences } from '../../providers/Preferences'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import { useSearchParams } from '../../../utilities/SearchParams'
+import { useSearchParams } from '../../providers/SearchParams'
 import DefaultList from './Default'
 import formatFields from './formatFields'
 
@@ -42,7 +43,7 @@ const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
  * Users can also create pass their own custom list view component instead
  * of using the default one.
  */
-const ListView: React.FC<ListIndexProps> = (props) => {
+export const ListView: React.FC<ListIndexProps> = (props) => {
   const {
     collection,
     collection: {
@@ -240,5 +241,3 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     </TableColumnsProvider>
   )
 }
-
-export default ListView

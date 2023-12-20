@@ -14,15 +14,15 @@ import usePayloadAPI from '../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
-import X from '../../icons/X'
+import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo'
 import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useLocale } from '../../providers/Locale'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-import DefaultEdit from '../../views/collections/Edit/Default'
-import formatFields from '../../views/collections/Edit/formatFields'
+// import DefaultEdit from '../../views/collections/Edit/Default'
+import formatFields from '../../utilities/formatFields'
 import { Button } from '../Button'
 import IDLabel from '../IDLabel'
 
@@ -136,7 +136,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
   return (
     <RenderCustomComponent
       CustomComponent={CustomEditView}
-      DefaultComponent={DefaultEdit}
+      // DefaultComponent={DefaultEdit}
+      DefaultComponent={null}
       componentProps={{
         id,
         action,
