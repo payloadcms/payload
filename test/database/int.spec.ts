@@ -1,5 +1,6 @@
 import { GraphQLClient } from 'graphql-request'
 
+import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../packages/payload/src/express/types'
 
@@ -17,6 +18,7 @@ describe('database', () => {
   const title = 'title'
   let user: TypeWithID & Record<string, unknown>
   let useTransactions = true
+  let checkSchema = true
 
   beforeAll(async () => {
     const init = await initPayloadTest({ __dirname, init: { local: false } })
@@ -24,6 +26,7 @@ describe('database', () => {
     const url = `${serverURL}/api/graphql`
     client = new GraphQLClient(url)
     if (payload.db.name === 'mongoose') {
+      checkSchema = false
       useTransactions = false
     }
 
@@ -39,6 +42,44 @@ describe('database', () => {
     user = loginResult.user
   })
 
+  describe('schema', () => {
+    if (checkSchema) {
+      it('should use custom tableNames', () => {
+        const db: PostgresAdapter = payload.db
+
+        // collection
+        expect(db.tables['customs']).toBeDefined()
+
+        // collection relationships
+        expect(db.tables.customs_rels).toBeDefined()
+
+        // collection localized
+        expect(db.tables.customs_locales).toBeDefined()
+
+        // global
+        expect(db.tables.customGlobal).toBeDefined()
+
+        // select
+        expect(db.tables.customs_customSelect).toBeDefined()
+
+        // array
+        expect(db.tables.customs_customArrays).toBeDefined()
+
+        // array localized
+        expect(db.tables.customs_customArrays_locales).toBeDefined()
+
+        // blocks
+        expect(db.tables.customs_blocks_customBlocks).toBeDefined()
+
+        // localized blocks
+        expect(db.tables.customs_blocks_customBlocks_locales).toBeDefined()
+
+        // enum names
+        expect(db.enums.enum_customs_selectEnum).toBeDefined()
+        expect(db.enums.enum_customs_radioEnum).toBeDefined()
+      })
+    }
+  })
   describe('transactions', () => {
     describe('local api', () => {
       it('should commit multiple operations in isolation', async () => {
