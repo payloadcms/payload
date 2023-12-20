@@ -47,7 +47,13 @@ const collectionSchema = joi.object().keys({
             // References
           }),
         ),
-        List: componentSchema,
+        List: joi.alternatives().try(
+          componentSchema,
+          joi.object({
+            Component: componentSchema,
+            actions: joi.array().items(componentSchema),
+          }),
+        ),
       }),
     }),
     defaultColumns: joi.array().items(joi.string()),

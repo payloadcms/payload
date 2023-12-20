@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { postsSlug } from '../../_community/collections/Posts'
+import { postsSlug } from '../shared'
 
 export const Posts: CollectionConfig = {
   slug: postsSlug,

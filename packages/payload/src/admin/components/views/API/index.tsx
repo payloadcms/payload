@@ -10,6 +10,7 @@ import { Gutter } from '../../elements/Gutter'
 import { CheckboxInput } from '../../forms/field-types/Checkbox/Input'
 import SelectInput from '../../forms/field-types/Select/Input'
 import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
@@ -123,7 +124,13 @@ const RecursivelyRenderObjectData = ({
               )
             }
 
-            if (type === 'date' || type === 'string' || type === 'null' || type === 'number' || type === 'boolean') {
+            if (
+              type === 'date' ||
+              type === 'string' ||
+              type === 'null' ||
+              type === 'number' ||
+              type === 'boolean'
+            ) {
               const parentHasKey = Boolean(parentType === 'object' && key)
 
               const rowClasses = [
@@ -176,6 +183,8 @@ export const API: React.FC<EditViewProps> = (props) => {
   const { code } = useLocale()
   const url = createURL(apiURL)
 
+  const { setViewActions } = useActions()
+
   const draftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
   const docEndpoint = global ? `/globals/${global.slug}` : `/${collection.slug}/${id}`
 
@@ -203,6 +212,14 @@ export const API: React.FC<EditViewProps> = (props) => {
 
     fetchData()
   }, [i18n.language, fetchURL, authenticated])
+
+  React.useEffect(() => {
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
+    const apiActions =
+      editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
+
+    setViewActions(apiActions)
+  }, [collection, global, setViewActions])
 
   const localeOptions =
     localization &&

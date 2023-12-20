@@ -130,15 +130,16 @@ export const traverseFields = ({
                 with: {},
               }
 
-              if (adapter.tables[`${topLevelTableName}_blocks_${getTableName(block)}_locales`])
-                withBlock.with._locales = _locales
+              const tableName = `${topLevelTableName}_blocks_${getTableName(block)}`
+
+              if (adapter.tables[`${tableName}_locales`]) withBlock.with._locales = _locales
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({
                 _locales,
                 adapter,
                 currentArgs: withBlock,
-                currentTableName,
+                currentTableName: tableName,
                 depth,
                 fields: block.fields,
                 path: '',

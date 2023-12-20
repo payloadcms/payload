@@ -3,45 +3,28 @@ import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payl
 
 import type { PostgresAdapter } from './types'
 
-import { buildFindManyArgs } from './find/buildFindManyArgs'
-import buildQuery from './queries/buildQuery'
-import { transform } from './transform/read'
+import { findMany } from './find/findMany'
 import { getTableName } from './utilities/getTableName'
 
 export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,
   { collection, locale, req = {} as PayloadRequest, where: incomingWhere }: FindOneArgs,
 ): Promise<T> {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = getTableName(collectionConfig)
 
-  const { where } = await buildQuery({
+  const { docs } = await findMany({
     adapter: this,
     fields: collectionConfig.fields,
+    limit: 1,
     locale,
+    page: 1,
+    pagination: false,
+    req,
+    sort: undefined,
     tableName,
     where: incomingWhere,
   })
 
-  const findManyArgs = buildFindManyArgs({
-    adapter: this,
-    depth: 0,
-    fields: collectionConfig.fields,
-    tableName,
-  })
-
-  findManyArgs.where = where
-
-  const doc = await db.query[tableName].findFirst(findManyArgs)
-
-  if (!doc) {
-    return null
-  }
-
-  return transform<T>({
-    config: this.payload.config,
-    data: doc,
-    fields: collectionConfig.fields,
-  })
+  return docs?.[0] || null
 }

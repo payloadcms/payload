@@ -215,6 +215,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return null
   }
 
+  const listComponent = selectedCollectionConfig?.admin?.components?.views?.List
+  let ListToRender = null
+
+  if (listComponent && typeof listComponent === 'function') {
+    ListToRender = listComponent
+  } else if (typeof listComponent === 'object' && typeof listComponent.Component === 'function') {
+    ListToRender = listComponent.Component
+  }
+
   return (
     <TableColumnsProvider
       cellProps={[
@@ -235,7 +244,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
-          CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
+          CustomComponent={ListToRender}
           DefaultComponent={DefaultList}
           componentProps={{
             collection: {

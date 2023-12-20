@@ -1,5 +1,6 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 
 import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
@@ -8,6 +9,7 @@ import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
+import { useActions } from '../../../utilities/ActionsProvider'
 import { useAuth } from '../../../utilities/Auth'
 import { useDocumentEvents } from '../../../utilities/DocumentEvents'
 import { OperationContext } from '../../../utilities/OperationProvider'
@@ -43,11 +45,15 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
     onSave: onSaveFromProps,
   } = props
 
+  const { setViewActions } = useActions()
+
   const { reportUpdate } = useDocumentEvents()
 
   const { auth } = collection
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
+
+  const location = useLocation()
 
   const onSave = useCallback(
     async (json) => {
@@ -71,6 +77,21 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
   )
 
   const operation = isEditing ? 'update' : 'create'
+
+  useEffect(() => {
+    const path = location.pathname
+
+    if (!(path.endsWith(id) || path.endsWith('/create'))) {
+      return
+    }
+    const editConfig = collection?.admin?.components?.views?.Edit
+    const defaultActions =
+      editConfig && 'Default' in editConfig && 'actions' in editConfig.Default
+        ? editConfig.Default.actions
+        : []
+
+    setViewActions(defaultActions)
+  }, [id, location.pathname, collection?.admin?.components?.views?.Edit, setViewActions])
 
   return (
     <main className={classes}>

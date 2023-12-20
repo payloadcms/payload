@@ -229,6 +229,21 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    test('should show collection versions view level action in collection versions view', async () => {
+      await page.goto(url.list)
+      await page.locator('tbody tr .cell-title a').first().click()
+      await page.goto(`${page.url()}/versions`)
+      await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
+    })
+
+    test('should show global versions view level action in globals versions view', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
+      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
+    })
+
+    // TODO: Check versions/:version-id view for collections / globals
+
     test('global - has versions tab', async () => {
       const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
       await page.goto(global.global(draftGlobalSlug))

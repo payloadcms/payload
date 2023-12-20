@@ -81,6 +81,16 @@ describe('Live Preview', () => {
     await saveDocAndAssert(page)
   })
 
+  test('collection - should show live-preview view level action in live-preview view', async () => {
+    await goToCollectionPreview(page)
+    await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
+  })
+
+  test('global - should show live-preview view level action in live-preview view', async () => {
+    await goToGlobalPreview(page, 'footer')
+    await expect(page.locator('.app-header .global-live-preview-button')).toHaveCount(1)
+  })
+
   test('global - has tab', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
@@ -176,11 +186,11 @@ describe('Live Preview', () => {
       .click()
 
     // Make sure the value has been set
-    expect(breakpointSelector).toContainText(mobileBreakpoint.label)
+    await expect(breakpointSelector).toContainText(mobileBreakpoint.label)
     const option = page.locator(
       '.live-preview-toolbar-controls__breakpoint button.popup-button-list__button--selected',
     )
-    expect(option).toHaveText(mobileBreakpoint.label)
+    await expect(option).toHaveText(mobileBreakpoint.label)
 
     // Measure the size of the iframe against the specified breakpoint
     const iframe = page.locator('iframe')

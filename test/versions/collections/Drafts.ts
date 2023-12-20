@@ -1,6 +1,8 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
 import { extractTranslations } from '../../../packages/payload/src/translations/extractTranslations'
+import CollectionVersionButton from '../elements/CollectionVersionButton'
+import CollectionVersionsButton from '../elements/CollectionVersionsButton'
 import { CustomPublishButton } from '../elements/CustomSaveButton'
 import { draftCollectionSlug } from '../slugs'
 
@@ -34,6 +36,16 @@ const DraftPosts: CollectionConfig = {
     components: {
       edit: {
         PublishButton: CustomPublishButton,
+      },
+      views: {
+        Edit: {
+          Version: {
+            actions: [CollectionVersionButton],
+          },
+          Versions: {
+            actions: [CollectionVersionsButton],
+          },
+        },
       },
     },
     defaultColumns: ['title', 'description', 'createdAt', '_status'],

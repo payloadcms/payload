@@ -9,9 +9,10 @@ import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import { arrayCollectionSlug } from './collections/Array'
+import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock'
 import configPromise from './config'
+import { defaultLocale } from './shared'
 import {
-  defaultLocale,
   englishTitle,
   localizedPostsSlug,
   relationEnglishTitle,
@@ -803,6 +804,60 @@ describe('Localization', () => {
       })
 
       expect(nestedFieldRes.docs.map(({ id }) => id)).toContain(post1.id)
+    })
+  })
+
+  describe('Nested To Array And Block', () => {
+    it('should be equal to the created document', async () => {
+      const { id, blocks } = await payload.create({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: defaultLocale,
+        data: {
+          blocks: [
+            {
+              blockType: 'block',
+              array: [
+                {
+                  text: 'english',
+                  textNotLocalized: 'test',
+                },
+              ],
+            },
+          ],
+        },
+      })
+
+      await payload.update({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: spanishLocale,
+        id,
+        data: {
+          blocks: (blocks as { array: { text: string }[] }[]).map((block) => ({
+            ...block,
+            array: block.array.map((item) => ({ ...item, text: 'spanish' })),
+          })),
+        },
+      })
+
+      const docDefaultLocale = await payload.findByID({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: defaultLocale,
+        id,
+      })
+
+      const docSpanishLocale = await payload.findByID({
+        collection: nestedToArrayAndBlockCollectionSlug,
+        locale: spanishLocale,
+        id,
+      })
+
+      const rowDefault = docDefaultLocale.blocks[0].array[0]
+      const rowSpanish = docSpanishLocale.blocks[0].array[0]
+
+      expect(rowDefault.text).toEqual('english')
+      expect(rowDefault.textNotLocalized).toEqual('test')
+      expect(rowSpanish.text).toEqual('spanish')
+      expect(rowSpanish.textNotLocalized).toEqual('test')
     })
   })
 })

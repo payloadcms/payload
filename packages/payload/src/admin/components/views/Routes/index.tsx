@@ -6,6 +6,7 @@ import { requests } from '../../../api'
 import { LoadingOverlayToggle } from '../../elements/Loading'
 import StayLoggedIn from '../../modals/StayLoggedIn'
 import DefaultTemplate from '../../templates/Default'
+import { ActionsProvider } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
@@ -146,37 +147,39 @@ export const Routes: React.FC = () => {
                   {user ? (
                     <Fragment>
                       {canAccessAdmin && (
-                        <DefaultTemplate>
-                          <Switch>
-                            <Route exact path={`${match.url}/`}>
-                              <Dashboard />
-                            </Route>
-                            <Route path={`${match.url}/account`}>
-                              <DocumentInfoProvider
-                                collection={collections.find(({ slug }) => slug === userSlug)}
-                                id={user.id}
-                              >
-                                <Account />
-                              </DocumentInfoProvider>
-                            </Route>
-                            {collectionRoutes({
-                              collections,
-                              match,
-                              permissions,
-                              user,
-                            })}
-                            {globalRoutes({
-                              globals,
-                              locale,
-                              match,
-                              permissions,
-                              user,
-                            })}
-                            <Route path={`${match.url}*`}>
-                              <NotFound />
-                            </Route>
-                          </Switch>
-                        </DefaultTemplate>
+                        <ActionsProvider>
+                          <DefaultTemplate>
+                            <Switch>
+                              <Route exact path={`${match.url}/`}>
+                                <Dashboard />
+                              </Route>
+                              <Route path={`${match.url}/account`}>
+                                <DocumentInfoProvider
+                                  collection={collections.find(({ slug }) => slug === userSlug)}
+                                  id={user.id}
+                                >
+                                  <Account />
+                                </DocumentInfoProvider>
+                              </Route>
+                              {collectionRoutes({
+                                collections,
+                                match,
+                                permissions,
+                                user,
+                              })}
+                              {globalRoutes({
+                                globals,
+                                locale,
+                                match,
+                                permissions,
+                                user,
+                              })}
+                              <Route path={`${match.url}*`}>
+                                <NotFound />
+                              </Route>
+                            </Switch>
+                          </DefaultTemplate>
+                        </ActionsProvider>
                       )}
                       {canAccessAdmin === false && <Unauthorized />}
                     </Fragment>

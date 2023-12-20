@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "The official live preview JavaScript SDK for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",

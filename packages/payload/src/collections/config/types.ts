@@ -273,7 +273,12 @@ export type CollectionAdminOptions = {
               }
           )
         | AdminViewComponent
-      List?: React.ComponentType<ListProps>
+      List?:
+        | {
+            Component?: React.ComponentType<ListProps>
+            actions?: React.ComponentType<any>[]
+          }
+        | React.ComponentType<ListProps>
     }
   }
   /**
