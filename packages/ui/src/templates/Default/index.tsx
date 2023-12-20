@@ -1,8 +1,6 @@
 'use client'
 import React, { Fragment } from 'react'
-import { useTranslation } from 'react-i18next'
 
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
 import type { Props } from './types'
 
 import { Hamburger } from '../../elements/Hamburger'
@@ -16,7 +14,7 @@ import './index.scss'
 
 const baseClass = 'template-default'
 
-export const Default: React.FC<Props> = ({ children, className }) => {
+export const Default: React.FC<Props> = ({ children, className, Link }) => {
   const {
     admin: {
       components: { Nav: CustomNav } = {
@@ -24,8 +22,6 @@ export const Default: React.FC<Props> = ({ children, className }) => {
       },
     } = {},
   } = useConfig()
-
-  const { t } = useTranslation('general')
 
   const { navOpen } = useNav()
 
@@ -43,7 +39,7 @@ export const Default: React.FC<Props> = ({ children, className }) => {
       >
         <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
         <div className={`${baseClass}__wrap`}>
-          <AppHeader />
+          <AppHeader Link={Link} />
           {children}
         </div>
       </div>

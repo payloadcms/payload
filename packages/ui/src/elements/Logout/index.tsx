@@ -1,6 +1,5 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import { LogOut } from '../../icons/LogOut'
 import { useConfig } from '../../providers/Config'
@@ -10,7 +9,8 @@ const baseClass = 'nav'
 
 const DefaultLogout: React.FC<{
   tabIndex?: number
-}> = ({ tabIndex }) => {
+  Link: React.ComponentType
+}> = ({ tabIndex, Link }) => {
   const { t } = useTranslation('authentication')
   const config = useConfig()
 
@@ -19,15 +19,18 @@ const DefaultLogout: React.FC<{
     routes: { admin },
   } = config
 
+  const LinkElement = Link || 'a'
+
   return (
-    <Link
+    <LinkElement
       aria-label={t('logOut')}
       className={`${baseClass}__log-out`}
       tabIndex={tabIndex}
-      to={`${admin}${logoutRoute}`}
+      // to={`${admin}${logoutRoute}`} // for `react-router-dom`
+      href={`${admin}${logoutRoute}`} // for `next/link`
     >
       <LogOut />
-    </Link>
+    </LinkElement>
   )
 }
 
