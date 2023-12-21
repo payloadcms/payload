@@ -101,8 +101,8 @@ export const GET = async (
         return endpoints.collection.GET.find({ req })
       case 2:
         if (slug2 in endpoints.collection.GET) {
-          // /:collection/me
           // /:collection/init
+          // /:collection/me
           // /:collection/versions
           return endpoints.collection.GET?.[slug2]({ req })
         } else {
