@@ -1,13 +1,14 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import logout from '../../operations/logout'
 
 function logoutResolver(collection: Collection): any {
   async function resolver(_, args, context) {
     const options = {
       collection,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
       res: context.res,
     }
 

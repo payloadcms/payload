@@ -1,10 +1,9 @@
 import type { ObjMap } from 'graphql/jsutils/ObjMap'
-import type { GraphQLFieldResolver } from 'graphql/type/definition'
-import type { GraphQLFieldConfig } from 'graphql/type/definition'
+import type { GraphQLFieldConfig, GraphQLFieldResolver } from 'graphql/type/definition'
 
 import type { PayloadRequest } from '../../express/types'
 
-import isolateTransactionID from '../../utilities/isolateTransactionID'
+import isolateObjectProperty from '../../utilities/isolateObjectProperty'
 
 type PayloadContext = { req: PayloadRequest }
 
@@ -12,7 +11,12 @@ function wrapCustomResolver<TSource, TArgs, TResult>(
   resolver: GraphQLFieldResolver<TSource, PayloadContext, TArgs, TResult>,
 ): GraphQLFieldResolver<TSource, PayloadContext, TArgs, TResult> {
   return (source, args, context, info) => {
-    return resolver(source, args, { ...context, req: isolateTransactionID(context.req) }, info)
+    return resolver(
+      source,
+      args,
+      { ...context, req: isolateObjectProperty(context.req, 'transactionID') },
+      info,
+    )
   }
 }
 

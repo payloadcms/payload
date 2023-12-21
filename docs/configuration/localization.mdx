@@ -96,10 +96,22 @@ export default buildConfig({
 
 **`locales`**
 
-Array-based list of all locales that you would like to support. These can be strings of locale codes or objects with
-a `label`, a locale `code`, `rtl` (right-to-left), and `fallbackLocale` property. The locale codes do not need to be in
-any specific format. It's up to you to define how to represent your locales. Common patterns are to use two-letter ISO
-639 language codes or four-letter language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
+Array-based list of all the languages that you would like to support. This can be an array containing strings for each
+language code you want your project to store and serve or objects with a `label`, a locale `code`, `rtl` (
+right-to-left), and `fallbackLocale` property. The locale codes do not need to be in any specific format. It's up to you
+to define how to represent your locales. Common patterns are to use two-letter ISO 639 language codes or four-letter
+language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
+
+### Locale Properties:
+
+| Option               | Description                                                                                                                    |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                     |
+| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use. |
+| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                      |
+| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present.                                       |
+
+_\* An asterisk denotes that a property is required._
 
 **`defaultLocale`**
 
@@ -195,11 +207,11 @@ The `fallbackLocale` arg will accept valid locales as well as `none` to disable 
 
 ```graphql
 query {
-  Posts(locale: de, fallbackLocale: none) {
-    docs {
-      title
+    Posts(locale: de, fallbackLocale: none) {
+        docs {
+            title
+        }
     }
-  }
 }
 ```
 
