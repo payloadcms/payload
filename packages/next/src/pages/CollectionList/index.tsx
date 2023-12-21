@@ -1,9 +1,8 @@
 import { SanitizedConfig } from 'payload/types'
 import React from 'react'
-import { headers as getHeaders } from 'next/headers'
-import { auth } from '../../utilities/auth'
 import { RenderCustomComponent, TableColumnsProvider } from '@payloadcms/ui/elements'
 import { DefaultList } from '@payloadcms/ui/views'
+import { initPage } from '../../utilities/initPage'
 
 export const CollectionList = async ({
   collectionSlug,
@@ -14,14 +13,7 @@ export const CollectionList = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const headers = getHeaders()
-
-  const { permissions } = await auth({
-    headers,
-    config: configPromise,
-  })
-
-  const config = await configPromise
+  const { config, payload, permissions, user } = await initPage(configPromise)
 
   const {
     routes: { admin },
@@ -44,7 +36,14 @@ export const CollectionList = async ({
       ListToRender = CustomList.Component
     }
 
-    const initialData = {}
+    const limit = Number(searchParams?.limit) || collectionConfig.admin.pagination.defaultLimit
+
+    const data = await payload.find({
+      collection: collectionSlug,
+      depth: 0,
+      limit,
+      user,
+    })
 
     return (
       <TableColumnsProvider collectionSlug={collectionSlug}>
@@ -53,9 +52,9 @@ export const CollectionList = async ({
           DefaultComponent={DefaultList}
           componentProps={{
             collection: collectionConfig,
-            data: initialData,
+            data,
             hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-            limit: searchParams?.limit || collectionConfig.admin.pagination.defaultLimit,
+            limit,
             newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
             // resetParams,
             // titleField,
