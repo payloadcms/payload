@@ -10,14 +10,13 @@ export const rollbackTransaction: RollbackTransaction = async function rollbackT
   }
 
   // when session exists but is not inTransaction something unexpected is happening to the session
-  if (!this.sessions[id].inTransaction()) {
+  if (!this.sessions[id].clientSession.inTransaction()) {
     this.payload.logger.warn('rollbackTransaction called when no transaction exists')
     delete this.sessions[id]
     return
   }
 
   // the first call for rollback should be aborted and deleted causing any other operations with the same transaction to fail
-  await this.sessions[id].abortTransaction()
-  await this.sessions[id].endSession()
+  await this.sessions[id].reject()
   delete this.sessions[id]
 }

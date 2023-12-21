@@ -9,6 +9,12 @@ import type { MongooseAdapter } from './index'
 export function withSession(
   db: MongooseAdapter,
   transactionID?: number | string,
-): { session: ClientSession } | object {
-  return db.sessions[transactionID] ? { session: db.sessions[transactionID] } : {}
+):
+  | {
+      session: ClientSession
+    }
+  | object {
+  return db.sessions[transactionID]?.clientSession
+    ? { session: db.sessions[transactionID]?.clientSession }
+    : {}
 }
