@@ -27,14 +27,15 @@ You can override a set of admin panel-wide components by providing a component t
 | **`BeforeNavLinks`**  | Array of components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                         |
 | **`AfterNavLinks`**   | Array of components to inject into the built-in Nav, _after_ the links.                                                                                                                                     |
 | **`BeforeDashboard`** | Array of components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                         |
-| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx) |
+| **`AfterDashboard`**  | Array of components to inject into the built-in Dashboard, _after_ the default dashboard contents. [Demo](https://github.com/payloadcms/payload/tree/main/test/admin/components/AfterDashboard/index.tsx)   |
 | **`BeforeLogin`**     | Array of components to inject into the built-in Login, _before_ the default login form.                                                                                                                     |
 | **`AfterLogin`**      | Array of components to inject into the built-in Login, _after_ the default login form.                                                                                                                      |
 | **`logout.Button`**   | A custom React component.                                                                                                                                                                                   |
 | **`graphics.Icon`**   | Used as a graphic within the `Nav` component. Often represents a condensed version of a full logo.                                                                                                          |
 | **`graphics.Logo`**   | The full logo to be used in contexts like the `Login` view.                                                                                                                                                 |
 | **`providers`**       | Define your own provider components that will wrap the Payload Admin UI. [More](#custom-providers)                                                                                                          |
-| **`views`**           | Override or create new views within the Payload Admin UI. [More](#views)                                                                                                                             |
+| **`actions`**         | Array of custom components to be rendered in the Payload Admin UI header, providing additional interactivity and functionality.                                                                             |
+| **`views`**           | Override or create new views within the Payload Admin UI. [More](#views)                                                                                                                                    |
 
 Here is a full example showing how to swap some of these components for your own.
 
@@ -50,6 +51,7 @@ import {
   MyCustomAccount,
   MyCustomDashboard,
   MyProvider,
+  MyCustomAdminAction,
 } from './customComponents'
 
 export default buildConfig({
@@ -60,6 +62,7 @@ export default buildConfig({
         Icon: MyCustomIcon,
         Logo: MyCustomLogo,
       },
+      actions: [MyCustomAdminAction],
       views: {
         Account: MyCustomAccount,
         Dashboard: MyCustomDashboard,
@@ -72,7 +75,7 @@ export default buildConfig({
 
 #### Views
 
-You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views dy default, all of which can be overridden:
+You can easily swap entire views with your own by using the `admin.components.views` property. At the root level, Payload renders the following views by default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -217,7 +220,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 #### Collection views
 
-To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views dy default, all of which can be overridden:
+To swap out entire views on collections, you can use the `admin.components.views` property on the collection's config. Payload renders the following views by default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -243,7 +246,11 @@ To swap out any of these views, simply pass in your custom component to the `adm
 
 _For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component)._
 
-To swap specific _nested_ views within the parent `Edit` view, you can use the `admin.components.views.Edit` property on the globals's config. This will only replace the nested view, leaving the page breadcrumbs, title, tabs, etc intact.
+**Customizing Nested Views within 'Edit' in Collections**
+
+The `Edit` view in collections consists of several nested views, each serving a unique purpose. You can customize these nested views using the `admin.components.views.Edit` property in the collection's configuration. This approach allows you to replace specific nested views while keeping the overall structure of the `Edit` view intact, including the page breadcrumbs, title, tabs, etc.
+
+Here's an example of how you can customize nested views within the `Edit` view in collections, including the use of the `actions` property:
 
 ```ts
 // Collection.ts
@@ -253,13 +260,37 @@ To swap specific _nested_ views within the parent `Edit` view, you can use the `
     components: {
       views: {
         Edit: {
-          Default: MyCustomDefaultTab,
+          Default: {
+            Component: MyCustomDefaultTab,
+            actions: [CollectionEditButton], // Custom actions for the default edit view
+          },
+          API: {
+            Component: MyCustomAPIView,
+            actions: [CollectionAPIButton], // Custom actions for API view
+          },
+          LivePreview: {
+            Component: MyCustomLivePreviewView,
+            actions: [CollectionLivePreviewButton], // Custom actions for Live Preview
+          },
+          Version: {
+            Component: MyCustomVersionView,
+            actions: [CollectionVersionButton], // Custom actions for Version view
+          },
+          Versions: {
+            Component: MyCustomVersionsView,
+            actions: [CollectionVersionsButton], // Custom actions for Versions view
+          },
+        },
+        List: {
+          actions: [CollectionListButton],
         },
       },
     },
   },
 }
 ```
+
+**Adding New Tabs to 'Edit' View**
 
 You can also add _new_ tabs to the `Edit` view by adding another key to the `components.views.Edit[key]` object with a `path` and `Component` property. See [Custom Tabs](#custom-tabs) for more information.
 
@@ -277,7 +308,7 @@ As with Collections, you can override components on a global-by-global basis via
 
 #### Global views
 
-To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views dy default, all of which can be overridden:
+To swap out views for globals, you can use the `admin.components.views` property on the global's config. Payload renders the following views by default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -301,7 +332,11 @@ To swap out any of these views, simply pass in your custom component to the `adm
 
 _For help on how to build your own custom view components, see [building a custom view component](#building-a-custom-view-component)._
 
-To swap specific _nested_ views within the parent `Edit` view, you can use the `admin.components.views.Edit` property on the globals's config. This will only replace the nested view, leaving the page breadcrumbs, title, and tabs intact.
+**Customizing Nested Views within 'Edit' in Globals**
+
+Similar to collections, Globals allow for detailed customization within the `Edit` view. This includes the ability to swap specific nested views while maintaining the overall structure of the `Edit` view. You can use the `admin.components.views.Edit` property in the Globals configuration to achieve this, and this will only replace the nested view, leaving the page breadcrumbs, title, and tabs intact.
+
+Here's how you can customize nested views within the `Edit` view in Globals, including the use of the `actions` property:
 
 ```ts
 // Global.ts
@@ -311,7 +346,26 @@ To swap specific _nested_ views within the parent `Edit` view, you can use the `
     components: {
       views: {
         Edit: {
-          Default: MyCustomDefaultTab,
+          Default: {
+            Component: MyCustomGlobalDefaultTab,
+            actions: [GlobalEditButton], // Custom actions for the default edit view
+          },
+          API: {
+            Component: MyCustomGlobalAPIView,
+            actions: [GlobalAPIButton], // Custom actions for API view
+          },
+          LivePreview: {
+            Component: MyCustomGlobalLivePreviewView,
+            actions: [GlobalLivePreviewButton], // Custom actions for Live Preview
+          },
+          Version: {
+            Component: MyCustomGlobalVersionView,
+            actions: [GlobalVersionButton], // Custom actions for Version view
+          },
+          Versions: {
+            Component: MyCustomGlobalVersionsView,
+            actions: [GlobalVersionsButton], // Custom actions for Versions view
+          },
         },
       },
     },
@@ -323,7 +377,7 @@ You can also add _new_ tabs to the `Edit` view by adding another key to the `com
 
 ### Custom Tabs
 
-You can easily swap individual collection or global edit views. To do this, pass an _object_ to the `admin.components.views.Edit` property of the config. Payload renders the following views dy default, all of which can be overridden:
+You can easily swap individual collection or global edit views. To do this, pass an _object_ to the `admin.components.views.Edit` property of the config. Payload renders the following views by default, all of which can be overridden:
 
 | Property           | Description                                                                                                                  |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |

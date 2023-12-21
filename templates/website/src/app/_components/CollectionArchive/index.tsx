@@ -3,7 +3,7 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import qs from 'qs'
 
-import { Post, Project } from '../../../payload/payload-types'
+import type { Post, Project } from '../../../payload/payload-types'
 import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
 import { Card } from '../Card'
 import { Gutter } from '../Gutter'
@@ -13,61 +13,69 @@ import { Pagination } from '../Pagination'
 import classes from './index.module.scss'
 
 type Result = {
-  totalDocs: number
-  docs: (Project | Post)[]
-  page: number
-  totalPages: number
-  hasPrevPage: boolean
+  docs: (Post | Project)[]
   hasNextPage: boolean
+  hasPrevPage: boolean
   nextPage: number
+  page: number
   prevPage: number
+  totalDocs: number
+  totalPages: number
 }
 
 export type Props = {
-  className?: string
-  relationTo?: 'posts' | 'projects'
-  populateBy?: 'collection' | 'selection'
-  showPageRange?: boolean
-  onResultChange?: (result: Result) => void // eslint-disable-line no-unused-vars
-  sort?: string
-  limit?: number
-  populatedDocs?: ArchiveBlockProps['populatedDocs']
-  selectedDocs?: ArchiveBlockProps['selectedDocs']
-  populatedDocsTotal?: ArchiveBlockProps['populatedDocsTotal']
   categories?: ArchiveBlockProps['categories']
+  className?: string
+  limit?: number
+  onResultChange?: (result: Result) => void // eslint-disable-line no-unused-vars
+  populateBy?: 'collection' | 'selection'
+  populatedDocs?: ArchiveBlockProps['populatedDocs']
+  populatedDocsTotal?: ArchiveBlockProps['populatedDocsTotal']
+  relationTo?: 'posts' | 'projects'
+  selectedDocs?: ArchiveBlockProps['selectedDocs']
+  showPageRange?: boolean
+  sort?: string
 }
 
 export const CollectionArchive: React.FC<Props> = props => {
   const {
+    categories: catsFromProps,
     className,
-    relationTo,
-    showPageRange,
-    onResultChange,
-    sort = '-createdAt',
     limit = 10,
+    onResultChange,
+    populateBy,
     populatedDocs,
     populatedDocsTotal,
+    relationTo,
     selectedDocs,
-    categories: catsFromProps,
-    populateBy,
+    showPageRange,
+    sort = '-createdAt',
   } = props
 
   const [results, setResults] = useState<Result>({
-    totalDocs: typeof populatedDocsTotal === 'number' ? populatedDocsTotal : 0,
-    docs: populatedDocs?.map(doc => doc.value) || selectedDocs?.map(doc => doc.value) || [],
-    page: 1,
-    totalPages: 1,
-    hasPrevPage: false,
+    docs: (populateBy === 'collection'
+      ? populatedDocs
+      : populateBy === 'selection'
+      ? selectedDocs
+      : []
+    )?.map(doc => doc.value),
     hasNextPage: false,
-    prevPage: 1,
+    hasPrevPage: false,
     nextPage: 1,
+    page: 1,
+    prevPage: 1,
+    totalDocs: typeof populatedDocsTotal === 'number' ? populatedDocsTotal : 0,
+    totalPages: 1,
   })
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const scrollRef = useRef<HTMLDivElement>(null)
   const hasHydrated = useRef(false)
+  const isRequesting = useRef(false)
   const [page, setPage] = useState(1)
+
+  const categories = (catsFromProps || []).map(cat => cat.id).join(',')
 
   const scrollToRef = useCallback(() => {
     const { current } = scrollRef
@@ -87,34 +95,33 @@ export const CollectionArchive: React.FC<Props> = props => {
   useEffect(() => {
     let timer: NodeJS.Timeout = null
 
-    if (populateBy === 'collection') {
+    if (populateBy === 'collection' && !isRequesting.current) {
+      isRequesting.current = true
+
       // hydrate the block with fresh content after first render
       // don't show loader unless the request takes longer than x ms
       // and don't show it during initial hydration
       timer = setTimeout(() => {
-        if (hasHydrated) {
+        if (hasHydrated.current) {
           setIsLoading(true)
         }
       }, 500)
 
       const searchQuery = qs.stringify(
         {
+          depth: 1,
+          limit,
+          page,
           sort,
           where: {
-            ...(catsFromProps && catsFromProps?.length > 0
+            ...(categories
               ? {
                   categories: {
-                    in:
-                      typeof catsFromProps === 'string'
-                        ? [catsFromProps]
-                        : catsFromProps.map(cat => cat.id).join(','),
+                    in: categories,
                   },
                 }
               : {}),
           },
-          limit,
-          page,
-          depth: 1,
         },
         { encode: false },
       )
@@ -124,11 +131,11 @@ export const CollectionArchive: React.FC<Props> = props => {
           const req = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/api/${relationTo}?${searchQuery}`,
           )
+
           const json = await req.json()
           clearTimeout(timer)
-          hasHydrated.current = true
 
-          const { docs } = json as { docs: (Project | Post)[] }
+          const { docs } = json as { docs: (Post | Project)[] }
 
           if (docs && Array.isArray(docs)) {
             setResults(json)
@@ -142,29 +149,32 @@ export const CollectionArchive: React.FC<Props> = props => {
           setIsLoading(false)
           setError(`Unable to load "${relationTo} archive" data at this time.`)
         }
+
+        isRequesting.current = false
+        hasHydrated.current = true
       }
 
-      makeRequest()
+      void makeRequest()
     }
 
     return () => {
       if (timer) clearTimeout(timer)
     }
-  }, [page, catsFromProps, relationTo, onResultChange, sort, limit, populateBy])
+  }, [page, categories, relationTo, onResultChange, sort, limit, populateBy])
 
   return (
     <div className={[classes.collectionArchive, className].filter(Boolean).join(' ')}>
-      <div ref={scrollRef} className={classes.scrollRef} />
+      <div className={classes.scrollRef} ref={scrollRef} />
       {!isLoading && error && <Gutter>{error}</Gutter>}
       <Fragment>
-        {showPageRange !== false && (
+        {showPageRange !== false && populateBy !== 'selection' && (
           <Gutter>
             <div className={classes.pageRange}>
               <PageRange
-                totalDocs={results.totalDocs}
-                currentPage={results.page}
                 collection={relationTo}
+                currentPage={results.page}
                 limit={limit}
+                totalDocs={results.totalDocs}
               />
             </div>
           </Gutter>
@@ -173,18 +183,18 @@ export const CollectionArchive: React.FC<Props> = props => {
           <div className={classes.grid}>
             {results.docs?.map((result, index) => {
               return (
-                <div key={index} className={classes.column}>
-                  <Card relationTo={relationTo} doc={result} showCategories />
+                <div className={classes.column} key={index}>
+                  <Card doc={result} relationTo={relationTo} showCategories />
                 </div>
               )
             })}
           </div>
-          {results.totalPages > 1 && (
+          {results.totalPages > 1 && populateBy !== 'selection' && (
             <Pagination
               className={classes.pagination}
+              onClick={setPage}
               page={results.page}
               totalPages={results.totalPages}
-              onClick={setPage}
             />
           )}
         </Gutter>

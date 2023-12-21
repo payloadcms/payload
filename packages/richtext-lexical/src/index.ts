@@ -261,7 +261,7 @@ export { consolidateHTMLConverters } from './field/features/converters/html/fiel
 export { lexicalHTML } from './field/features/converters/html/field'
 
 export { TestRecorderFeature } from './field/features/debug/TestRecorder'
-export { TreeviewFeature } from './field/features/debug/TreeView'
+export { TreeViewFeature } from './field/features/debug/TreeView'
 
 export { BoldTextFeature } from './field/features/format/Bold'
 export { InlineCodeTextFeature } from './field/features/format/InlineCode'
@@ -277,10 +277,12 @@ export { OrderedListFeature } from './field/features/lists/OrderedList'
 export { UnorderedListFeature } from './field/features/lists/UnorderedList'
 export { LexicalPluginToLexicalFeature } from './field/features/migrations/LexicalPluginToLexical'
 export { SlateToLexicalFeature } from './field/features/migrations/SlateToLexical'
-export { SlateHeadingConverter } from './field/features/migrations/SlateToLexical/converter/converters/heading'
+export { SlateBlockquoteConverter } from './field/features/migrations/SlateToLexical/converter/converters/blockquote'
 
+export { SlateHeadingConverter } from './field/features/migrations/SlateToLexical/converter/converters/heading'
 export { SlateIndentConverter } from './field/features/migrations/SlateToLexical/converter/converters/indent'
 export { SlateLinkConverter } from './field/features/migrations/SlateToLexical/converter/converters/link'
+
 export { SlateListItemConverter } from './field/features/migrations/SlateToLexical/converter/converters/listItem'
 export { SlateOrderedListConverter } from './field/features/migrations/SlateToLexical/converter/converters/orderedList'
 export { SlateRelationshipConverter } from './field/features/migrations/SlateToLexical/converter/converters/relationship'

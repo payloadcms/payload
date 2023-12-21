@@ -42,6 +42,10 @@ export { default as Select } from '../../admin/components/forms/field-types/Sele
 export { default as SelectInput } from '../../admin/components/forms/field-types/Select/Input'
 export { default as Text } from '../../admin/components/forms/field-types/Text'
 export { default as TextInput } from '../../admin/components/forms/field-types/Text/Input'
+export { default as Textarea } from '../../admin/components/forms/field-types/Textarea'
+export { default as TextareaInput } from '../../admin/components/forms/field-types/Textarea/Input'
+export { default as Upload } from '../../admin/components/forms/field-types/Upload'
+export { default as UploadInput } from '../../admin/components/forms/field-types/Upload/Input'
 
 /**
  * @deprecated This method is now called useField. The useFieldType alias will be removed in an upcoming version.

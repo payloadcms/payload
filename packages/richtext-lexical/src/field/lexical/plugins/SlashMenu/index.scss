@@ -14,7 +14,7 @@ html[data-theme='light'] {
   list-style: none;
   font-family: var(--font-body);
   max-height: 300px;
-  overflow-y: scroll;
+  overflow-y: auto;
   z-index: 10;
   position: absolute;
 

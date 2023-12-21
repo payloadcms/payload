@@ -1,6 +1,6 @@
 import type { FeatureProvider } from '../../types'
 
-export const TreeviewFeature = (): FeatureProvider => {
+export const TreeViewFeature = (): FeatureProvider => {
   return {
     feature: () => {
       return {

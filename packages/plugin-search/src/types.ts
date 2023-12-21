@@ -29,7 +29,10 @@ export interface SearchConfig {
   syncDrafts?: boolean
 }
 
-// TODO: extend this hook with additional args
-// searchConfig: SearchConfig
-// collection: string
-export type SyncWithSearch = CollectionAfterChangeHook
+// Extend the `CollectionAfterChangeHook` with more function args
+// Convert the `collection` arg from `SanitizedCollectionConfig` to a string
+export type SyncWithSearch = (
+  Args: Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'> & {
+    collection: string
+  },
+) => ReturnType<CollectionAfterChangeHook>

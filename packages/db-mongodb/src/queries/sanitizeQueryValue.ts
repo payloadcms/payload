@@ -17,8 +17,9 @@ export const sanitizeQueryValue = ({
   operator,
   path,
   val,
-}: SanitizeQueryValueArgs): unknown => {
+}: SanitizeQueryValueArgs): { operator: string; val: unknown } => {
   let formattedValue = val
+  let formattedOperator = operator
 
   // Disregard invalid _ids
   if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
@@ -26,7 +27,7 @@ export const sanitizeQueryValue = ({
       const isValid = mongoose.Types.ObjectId.isValid(val)
 
       if (!isValid) {
-        return undefined
+        return { operator: formattedOperator, val: undefined }
       }
     }
 
@@ -34,7 +35,7 @@ export const sanitizeQueryValue = ({
       const parsedNumber = parseFloat(val)
 
       if (Number.isNaN(parsedNumber)) {
-        return undefined
+        return { operator: formattedOperator, val: undefined }
       }
     }
   }
@@ -123,9 +124,18 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  if (
+    (path === '_id' || path === 'parent') &&
+    operator === 'like' &&
+    formattedValue.length === 24 &&
+    !hasCustomID
+  ) {
+    formattedOperator = 'equals'
+  }
+
   if (operator === 'exists') {
     formattedValue = formattedValue === 'true' || formattedValue === true
   }
 
-  return formattedValue
+  return { operator: formattedOperator, val: formattedValue }
 }

@@ -250,6 +250,7 @@ export const promise = async ({
     }
 
     // Execute access control
+    let allowDefaultValue = true
     if (triggerAccessControl && field.access && field.access.read) {
       const result = overrideAccess
         ? true
@@ -262,6 +263,7 @@ export const promise = async ({
           })
 
       if (!result) {
+        allowDefaultValue = false
         delete siblingDoc[field.name]
       }
     }
@@ -269,6 +271,7 @@ export const promise = async ({
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default
     if (
+      allowDefaultValue &&
       typeof siblingDoc[field.name] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'
     ) {

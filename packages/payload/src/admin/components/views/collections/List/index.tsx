@@ -12,6 +12,7 @@ import usePayloadAPI from '../../../../hooks/usePayloadAPI'
 import { useUseTitleField } from '../../../../hooks/useUseAsTitle'
 import { useStepNav } from '../../../elements/StepNav'
 import { TableColumnsProvider } from '../../../elements/TableColumns'
+import { useActions } from '../../../utilities/ActionsProvider'
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { usePreferences } from '../../../utilities/Preferences'
@@ -60,6 +61,9 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     routes: { admin, api },
     serverURL,
   } = useConfig()
+
+  const { setViewActions } = useActions()
+
   const preferenceKey = `${collection.slug}-list`
   const { permissions } = useAuth()
   const { setStepNav } = useStepNav()
@@ -74,6 +78,16 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const newDocumentURL = `${admin}/collections/${slug}/create`
   const [{ data }, { setParams }] = usePayloadAPI(fetchURL, { initialParams: { page: 1 } })
   const titleField = useUseTitleField(collection)
+
+  useEffect(() => {
+    if (CustomList && typeof CustomList === 'object' && 'actions' in CustomList) {
+      setViewActions(CustomList.actions || [])
+    }
+
+    return () => {
+      setViewActions([])
+    }
+  }, [CustomList, setViewActions])
 
   useEffect(() => {
     setStepNav([
@@ -107,13 +121,16 @@ const ListView: React.FC<ListIndexProps> = (props) => {
       if (search) {
         let copyOfWhere = { ...((where as Where) || {}) }
 
-        const searchAsConditions = (listSearchableFields || [titleField?.name]).map((fieldName) => {
-          return {
-            [fieldName]: {
-              like: search,
-            },
-          }
-        }, [])
+        const searchAsConditions = (listSearchableFields || [titleField?.name || 'id']).map(
+          (fieldName) => {
+            return {
+              [fieldName]: {
+                like: search,
+              },
+            }
+          },
+          [],
+        )
 
         if (searchAsConditions.length > 0) {
           const conditionalSearchFields = {
@@ -202,10 +219,18 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     }
   }, [data, history, resetParams])
 
+  let ListToRender = null
+
+  if (CustomList && typeof CustomList === 'function') {
+    ListToRender = CustomList
+  } else if (typeof CustomList === 'object' && typeof CustomList.Component === 'function') {
+    ListToRender = CustomList.Component
+  }
+
   return (
     <TableColumnsProvider collection={collection}>
       <RenderCustomComponent
-        CustomComponent={CustomList}
+        CustomComponent={ListToRender}
         DefaultComponent={DefaultList}
         componentProps={{
           collection: { ...collection, fields },

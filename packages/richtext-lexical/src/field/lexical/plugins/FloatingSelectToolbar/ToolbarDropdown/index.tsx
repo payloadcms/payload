@@ -67,18 +67,23 @@ export const ToolbarDropdown = ({
   classNames,
   editor,
   entries,
+  sectionKey,
 }: {
   Icon?: React.FC
   anchorElem: HTMLElement
   classNames?: string[]
   editor: LexicalEditor
   entries: FloatingToolbarSectionEntry[]
+  sectionKey: string
 }) => {
   return (
     <DropDown
       Icon={Icon}
-      buttonAriaLabel="Formatting options"
-      buttonClassName={[baseClass, ...(classNames || [])].filter(Boolean).join(' ')}
+      buttonAriaLabel={`${sectionKey} dropdown`}
+      buttonClassName={[baseClass, `${baseClass}-${sectionKey}`, ...(classNames || [])]
+        .filter(Boolean)
+        .join(' ')}
+      key={sectionKey}
     >
       {entries.length &&
         entries.map((entry) => {

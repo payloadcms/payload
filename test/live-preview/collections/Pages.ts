@@ -5,6 +5,7 @@ import { Archive } from '../blocks/ArchiveBlock'
 import { CallToAction } from '../blocks/CallToAction'
 import { Content } from '../blocks/Content'
 import { MediaBlock } from '../blocks/MediaBlock'
+import CollectionLivePreviewButton from '../components/CollectionLivePreviewButton'
 import { hero } from '../fields/hero'
 import { pagesSlug, tenantsSlug } from '../shared'
 
@@ -19,6 +20,15 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
+    components: {
+      views: {
+        Edit: {
+          LivePreview: {
+            actions: [CollectionLivePreviewButton],
+          },
+        },
+      },
+    },
   },
   fields: [
     {

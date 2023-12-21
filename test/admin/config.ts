@@ -12,6 +12,7 @@ import { CollectionHidden } from './collections/Hidden'
 import { CollectionNoApiView } from './collections/NoApiView'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
+import AdminButton from './components/AdminButton'
 import AfterDashboard from './components/AfterDashboard'
 import AfterNavLinks from './components/AfterNavLinks'
 import BeforeLogin from './components/BeforeLogin'
@@ -35,6 +36,7 @@ export default buildConfigWithDefaults({
     css: path.resolve(__dirname, 'styles.scss'),
     components: {
       // providers: [CustomProvider, CustomProvider],
+      actions: [AdminButton],
       afterDashboard: [AfterDashboard],
       beforeLogin: [BeforeLogin],
       logout: {
