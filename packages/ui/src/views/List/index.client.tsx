@@ -70,7 +70,7 @@ export const DefaultListClient: React.FC<
   }
 
   return (
-    <div className={baseClass}>
+    <Fragment>
       {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
@@ -181,6 +181,6 @@ export const DefaultListClient: React.FC<
           )}
         </Gutter>
       </SelectionProvider>
-    </div>
+    </Fragment>
   )
 }

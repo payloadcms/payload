@@ -21,7 +21,6 @@ import SortComplex from '../SortComplex'
 import UnpublishMany from '../UnpublishMany'
 import WhereBuilder from '../WhereBuilder'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery'
-import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched'
 import './index.scss'
 
 const baseClass = 'list-controls'
@@ -33,11 +32,6 @@ const baseClass = 'list-controls'
  */
 export const ListControls: React.FC<Props> = (props) => {
   const {
-    collection: {
-      admin: { listSearchableFields },
-      fields,
-    },
-    collection,
     enableColumns = true,
     enableSort = false,
     handleSearchChange,
@@ -46,14 +40,12 @@ export const ListControls: React.FC<Props> = (props) => {
     modifySearchQuery = true,
     resetParams,
     titleField,
+    textFieldsToBeSearched,
   } = props
 
   const params = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
 
-  const [textFieldsToBeSearched, setFieldsToBeSearched] = useState(
-    getTextFieldsToBeSearched(listSearchableFields, fields),
-  )
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
@@ -61,10 +53,6 @@ export const ListControls: React.FC<Props> = (props) => {
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
-
-  React.useEffect(() => {
-    setFieldsToBeSearched(getTextFieldsToBeSearched(listSearchableFields, fields))
-  }, [listSearchableFields, fields])
 
   return (
     <div className={baseClass}>
@@ -82,10 +70,10 @@ export const ListControls: React.FC<Props> = (props) => {
           <div className={`${baseClass}__buttons-wrap`}>
             {!smallBreak && (
               <React.Fragment>
-                <EditMany collection={collection} resetParams={resetParams} />
-                <PublishMany collection={collection} resetParams={resetParams} />
-                <UnpublishMany collection={collection} resetParams={resetParams} />
-                <DeleteMany collection={collection} resetParams={resetParams} />
+                {/* <EditMany resetParams={resetParams} />
+                <PublishMany resetParams={resetParams} />
+                <UnpublishMany resetParams={resetParams} />
+                <DeleteMany resetParams={resetParams} /> */}
               </React.Fragment>
             )}
             {enableColumns && (
@@ -137,7 +125,8 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'columns' ? 'auto' : 0}
           id={`${baseClass}-columns`}
         >
-          <ColumnSelector collection={collection} />
+          <p>Column Selector</p>
+          {/* <ColumnSelector collection={collection} /> */}
         </AnimateHeight>
       )}
       <AnimateHeight
@@ -145,11 +134,12 @@ export const ListControls: React.FC<Props> = (props) => {
         height={visibleDrawer === 'where' ? 'auto' : 0}
         id={`${baseClass}-where`}
       >
-        <WhereBuilder
+        <p>Where Builder</p>
+        {/* <WhereBuilder
           collection={collection}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
-        />
+        /> */}
       </AnimateHeight>
       {enableSort && (
         <AnimateHeight
@@ -157,11 +147,12 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'sort' ? 'auto' : 0}
           id={`${baseClass}-sort`}
         >
-          <SortComplex
+          <p>Sort Complex</p>
+          {/* <SortComplex
             collection={collection}
             handleChange={handleSortChange}
             modifySearchQuery={modifySearchQuery}
-          />
+          /> */}
         </AnimateHeight>
       )}
     </div>

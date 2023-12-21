@@ -1,11 +1,8 @@
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { FieldAffectingData } from '../../../../exports/types'
-import type { Where } from '../../../../types'
-import type { Props as ListProps } from '../../views/collections/List/types'
+import type { SanitizedCollectionConfig, FieldAffectingData, Where } from 'payload/types'
+import type { Props as ListProps } from '../../views/List/types'
 import type { Column } from '../Table/types'
 
 export type Props = {
-  collection: SanitizedCollectionConfig
   enableColumns?: boolean
   enableSort?: boolean
   handleSearchChange?: (search: string) => void
@@ -14,6 +11,7 @@ export type Props = {
   modifySearchQuery?: boolean
   resetParams?: ListProps['resetParams']
   titleField: FieldAffectingData
+  textFieldsToBeSearched?: FieldAffectingData[]
 }
 
 export type ListControls = {

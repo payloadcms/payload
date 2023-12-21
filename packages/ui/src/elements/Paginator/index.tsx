@@ -1,3 +1,4 @@
+'use client'
 import queryString from 'qs'
 import React from 'react'
 import { useHistory } from 'react-router-dom'
