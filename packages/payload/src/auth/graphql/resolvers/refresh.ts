@@ -3,7 +3,7 @@ import type { PayloadRequest } from '../../../express/types'
 
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import { extractJWT } from '../../getExtractJWT'
-import refresh from '../../operations/refresh'
+import { refreshOperation } from '../../operations/refresh'
 
 function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -23,7 +23,7 @@ function refreshResolver(collection: Collection) {
       token,
     }
 
-    const result = await refresh(options)
+    const result = await refreshOperation(options)
 
     return result
   }

@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../exports/types'
 import { Forbidden } from '../errors'
 
 type OperationArgs = {
-  data?: Record<string, unknown>
+  data?: any
   disableErrors?: boolean
   id?: number | string
   req: PayloadRequest

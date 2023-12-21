@@ -25,9 +25,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
+export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
-): Promise<Document> {
+): Promise<Document> => {
   let args = incomingArgs
 
   try {
@@ -222,5 +222,3 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     throw error
   }
 }
-
-export default deleteByID

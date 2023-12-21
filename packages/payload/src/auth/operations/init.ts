@@ -1,6 +1,9 @@
 import type { PayloadRequest } from '../../types'
 
-async function init(args: { collection: string; req: PayloadRequest }): Promise<boolean> {
+export const initOperation = async (args: {
+  collection: string
+  req: PayloadRequest
+}): Promise<boolean> => {
   const { collection: slug, req } = args
 
   const doc = await req.payload.db.findOne({
@@ -10,5 +13,3 @@ async function init(args: { collection: string; req: PayloadRequest }): Promise<
 
   return !!doc
 }
-
-export default init

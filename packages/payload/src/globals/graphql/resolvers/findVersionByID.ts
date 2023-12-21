@@ -5,8 +5,13 @@ import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findVersionByID from '../../operations/findVersionByID'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { findVersionByIDOperation } from '../../operations/findVersionByID'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver = (
   _: unknown,
@@ -35,7 +40,7 @@ export default function findVersionByIDResolver(globalConfig: SanitizedGlobalCon
       req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
     }
 
-    const result = await findVersionByID(options)
+    const result = await findVersionByIDOperation(options)
     return result
   }
 }

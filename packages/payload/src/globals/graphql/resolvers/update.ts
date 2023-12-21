@@ -5,8 +5,13 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import update from '../../operations/update'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { updateOperation } from '../../operations/update'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   _: unknown,
@@ -40,7 +45,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
       slug,
     }
 
-    const result = await update<TSlug>(options)
+    const result = await updateOperation<TSlug>(options)
     return result
   }
 }

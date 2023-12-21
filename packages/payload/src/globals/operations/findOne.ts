@@ -21,7 +21,9 @@ type Args = {
   slug: string
 }
 
-async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T> {
+export const findOneOperation = async <T extends Record<string, unknown>>(
+  args: Args,
+): Promise<T> => {
   const {
     slug,
     depth,
@@ -140,5 +142,3 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     throw error
   }
 }
-
-export default findOne

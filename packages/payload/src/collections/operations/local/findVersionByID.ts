@@ -4,8 +4,15 @@ import type { Document } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 
 import { APIError } from '../../../errors'
+<<<<<<< HEAD
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import findVersionByID from '../findVersionByID'
+=======
+import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
+import { getDataLoader } from '../../dataloader'
+import { findVersionByIDOperation } from '../findVersionByID'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -50,7 +57,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
 
   const req = createLocalReq(options, payload)
 
-  return findVersionByID({
+  return findVersionByIDOperation({
     id,
     collection,
     depth,

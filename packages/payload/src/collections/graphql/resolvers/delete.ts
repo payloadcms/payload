@@ -5,8 +5,13 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import deleteByID from '../../operations/deleteByID'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { deleteByIDOperation } from '../../operations/deleteByID'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
@@ -39,7 +44,7 @@ export default function getDeleteResolver<TSlug extends keyof GeneratedTypes['co
       req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
-    const result = await deleteByID(options)
+    const result = await deleteByIDOperation(options)
 
     return result
   }

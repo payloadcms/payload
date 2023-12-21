@@ -5,8 +5,13 @@ import type { PayloadRequest } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 import type { Collection, TypeWithID } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findVersionByID from '../../operations/findVersionByID'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { findVersionByIDOperation } from '../../operations/findVersionByID'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
@@ -40,7 +45,7 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
       req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
-    const result = await findVersionByID(options)
+    const result = await findVersionByIDOperation(options)
 
     return result
   }

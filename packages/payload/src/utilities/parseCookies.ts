@@ -1,6 +1,6 @@
 import { APIError } from '../errors'
 
-export default function parseCookies(headers: Request['headers']): Map<string, string> {
+export const parseCookies = (headers: Request['headers']): Map<string, string> => {
   const list = new Map<string, string>()
   const rc = headers.get('Cookie')
 

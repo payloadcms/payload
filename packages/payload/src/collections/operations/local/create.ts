@@ -9,8 +9,14 @@ import type { File } from '../../../uploads/types'
 
 import { APIError } from '../../../errors'
 import getFileByPath from '../../../uploads/getFileByPath'
+<<<<<<< HEAD
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import create from '../create'
+=======
+import { setRequestContext } from '../../../utilities/setRequestContext'
+import { getDataLoader } from '../../dataloader'
+import { createOperation } from '../create'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -72,7 +78,16 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     }
   }
 
+<<<<<<< HEAD
   return create<TSlug>({
+=======
+  if (typeof user !== 'undefined') req.user = user
+
+  if (!req.t) req.t = req.i18n.t
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+
+  return createOperation<TSlug>({
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
     collection,
     data,
     depth,

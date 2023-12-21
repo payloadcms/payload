@@ -4,8 +4,13 @@ import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import restoreVersion from '../../operations/restoreVersion'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { restoreVersionOperation } from '../../operations/restoreVersion'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 type Resolver = (
   _: unknown,
@@ -26,7 +31,7 @@ export default function restoreVersionResolver(globalConfig: SanitizedGlobalConf
       req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
     }
 
-    const result = await restoreVersion(options)
+    const result = await restoreVersionOperation(options)
     return result
   }
 }

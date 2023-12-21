@@ -14,7 +14,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
-export async function docAccess(args: Arguments): Promise<CollectionPermission> {
+export async function docAccessOperation(args: Arguments): Promise<CollectionPermission> {
   const {
     id,
     req,

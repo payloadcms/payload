@@ -5,8 +5,6 @@ import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../types'
 import type { User } from '../types'
 
-import { extractJWT } from '../getExtractJWT'
-
 export type Result = {
   collection?: string
   exp?: number
@@ -16,11 +14,16 @@ export type Result = {
 
 export type Arguments = {
   collection: Collection
+  currentToken?: string
   req: PayloadRequest
 }
 
-async function me({ collection, req }: Arguments): Promise<Result> {
-  let response: Result = {
+export const meOperation = async ({
+  collection,
+  currentToken,
+  req,
+}: Arguments): Promise<Result> => {
+  let result: Result = {
     user: null,
   }
 
@@ -45,17 +48,15 @@ async function me({ collection, req }: Arguments): Promise<Result> {
 
     delete user.collection
 
-    response = {
+    result = {
       collection: req.user.collection,
       user,
     }
 
-    const token = extractJWT(req)
-
-    if (token) {
-      const decoded = jwt.decode(token) as jwt.JwtPayload
-      if (decoded) response.exp = decoded.exp
-      if (!collection.config.auth.removeTokenFromResponses) response.token = token
+    if (currentToken) {
+      const decoded = jwt.decode(currentToken) as jwt.JwtPayload
+      if (decoded) result.exp = decoded.exp
+      if (!collection.config.auth.removeTokenFromResponses) result.token = currentToken
     }
   }
 
@@ -66,16 +67,14 @@ async function me({ collection, req }: Arguments): Promise<Result> {
   await collection.config.hooks.afterMe.reduce(async (priorHook, hook) => {
     await priorHook
 
-    response =
+    result =
       (await hook({
         collection: collection?.config,
         context: req.context,
         req,
-        response,
-      })) || response
+        response: result,
+      })) || result
   }, Promise.resolve())
 
-  return response
+  return result
 }
-
-export default me

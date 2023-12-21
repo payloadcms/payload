@@ -9,9 +9,16 @@ import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
 import getFileByPath from '../../../uploads/getFileByPath'
+<<<<<<< HEAD
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import update from '../update'
 import updateByID from '../updateByID'
+=======
+import { setRequestContext } from '../../../utilities/setRequestContext'
+import { getDataLoader } from '../../dataloader'
+import { updateOperation } from '../update'
+import { updateByIDOperation } from '../updateByID'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   autosave?: boolean
@@ -115,9 +122,9 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   if (options.id) {
-    return updateByID<TSlug>(args)
+    return updateByIDOperation<TSlug>(args)
   }
-  return update<TSlug>(args)
+  return updateOperation<TSlug>(args)
 }
 
 export default updateLocal

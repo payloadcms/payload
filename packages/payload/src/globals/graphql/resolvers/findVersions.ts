@@ -4,8 +4,13 @@ import type { PayloadRequest } from '../../../types'
 import type { Document, Where } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findVersions from '../../operations/findVersions'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { findVersionsOperation } from '../../operations/findVersions'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver = (
   _: unknown,
@@ -35,7 +40,7 @@ export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig
       where: args.where,
     }
 
-    const result = await findVersions(options)
+    const result = await findVersionsOperation(options)
 
     return result
   }

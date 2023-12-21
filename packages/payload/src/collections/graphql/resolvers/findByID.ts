@@ -2,8 +2,13 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findByID from '../../operations/findByID'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { findByIDOperation } from '../../operations/findByID'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver<T> = (
   _: unknown,
@@ -39,7 +44,7 @@ export default function findByIDResolver<T extends keyof GeneratedTypes['collect
       req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
-    const result = await findByID(options)
+    const result = await findByIDOperation(options)
 
     return result
   }

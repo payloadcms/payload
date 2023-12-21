@@ -3,8 +3,13 @@
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findOne from '../../operations/findOne'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { findOneOperation } from '../../operations/findOne'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
   return async function resolver(_, args, context) {
@@ -21,7 +26,7 @@ export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Do
       slug,
     }
 
-    const result = await findOne(options)
+    const result = await findOneOperation(options)
     return result
   }
 }

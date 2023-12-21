@@ -5,8 +5,13 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
 
+<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import updateByID from '../../operations/updateByID'
+=======
+import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import { updateByIDOperation } from '../../operations/updateByID'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
@@ -45,7 +50,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
       req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
-    const result = await updateByID<TSlug>(options)
+    const result = await updateByIDOperation<TSlug>(options)
 
     return result
   }

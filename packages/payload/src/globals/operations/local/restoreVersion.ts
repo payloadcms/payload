@@ -3,8 +3,14 @@ import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'
+<<<<<<< HEAD
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import restoreVersion from '../restoreVersion'
+=======
+import { i18nInit } from '../../../translations/init'
+import { setRequestContext } from '../../../utilities/setRequestContext'
+import { restoreVersionOperation } from '../restoreVersion'
+>>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -33,7 +39,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
 
   const req = createLocalReq(options, payload)
 
-  return restoreVersion({
+  return restoreVersionOperation({
     id,
     depth,
     globalConfig,

@@ -3,7 +3,7 @@ import type { PayloadT } from '../../..'
 
 import formatName from '../../../graphql/utilities/formatName'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import access from '../../operations/access'
+import { accessOperation } from '../../operations/access'
 
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results }
@@ -23,7 +23,7 @@ function accessResolver(payload: PayloadT) {
       req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
     }
 
-    const accessResults = await access(options)
+    const accessResults = await accessOperation(options)
 
     return {
       ...accessResults,
