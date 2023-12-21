@@ -23,7 +23,7 @@ export type Arguments = {
 
 export type Result = string
 
-async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
+export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<null | string> => {
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
     throw new APIError('Missing email.', 400)
   }
@@ -66,8 +66,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
     // Forget password
     // /////////////////////////////////////
 
-    let token: Buffer | string = crypto.randomBytes(20)
-    token = token.toString('hex')
+    let token: string = crypto.randomBytes(20).toString('hex')
 
     type UserDoc = {
       id: number | string
@@ -165,5 +164,3 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
     throw error
   }
 }
-
-export default forgotPassword

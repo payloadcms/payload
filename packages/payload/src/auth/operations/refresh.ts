@@ -1,6 +1,3 @@
-// TODO(JARROD): remove express Response
-import type { Response } from 'express'
-
 import jwt from 'jsonwebtoken'
 import url from 'url'
 
@@ -10,8 +7,7 @@ import type { Document } from '../../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
 import { Forbidden } from '../../errors'
-import getCookieExpiration from '../../utilities/getCookieExpiration'
-import { getFieldsToSign } from './getFieldsToSign'
+import { getFieldsToSign } from '../getFieldsToSign'
 
 export type Result = {
   exp: number
@@ -22,11 +18,10 @@ export type Result = {
 export type Arguments = {
   collection: Collection
   req: PayloadRequest
-  res?: Response
   token: string
 }
 
-async function refresh(incomingArgs: Arguments): Promise<Result> {
+export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -83,22 +78,6 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
   const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
 
-  if (args.res) {
-    const cookieOptions = {
-      domain: undefined,
-      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-      httpOnly: true,
-      path: '/',
-      sameSite: collectionConfig.auth.cookies.sameSite,
-      secure: collectionConfig.auth.cookies.secure,
-    }
-
-    if (collectionConfig.auth.cookies.domain)
-      cookieOptions.domain = collectionConfig.auth.cookies.domain
-
-    args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions)
-  }
-
   let result: Result = {
     exp,
     refreshedToken,
@@ -118,7 +97,6 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
         context: args.req.context,
         exp,
         req: args.req,
-        res: args.res,
         token: refreshedToken,
       })) || result
   }, Promise.resolve())
@@ -144,5 +122,3 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
   return result
 }
-
-export default refresh

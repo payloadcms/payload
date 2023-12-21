@@ -3,7 +3,7 @@ import type { PayloadRequest } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import { docAccess } from '../../operations/docAccess'
+import { docAccessOperation } from '../../operations/docAccess'
 
 export type Resolver = (
   _: unknown,
@@ -15,7 +15,7 @@ export type Resolver = (
 
 export function docAccessResolver(global: SanitizedGlobalConfig): Resolver {
   async function resolver(_, context) {
-    return docAccess({
+    return docAccessOperation({
       globalConfig: global,
       req: isolateTransactionID(context.req),
     })

@@ -1,7 +1,7 @@
 import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import me from '../../operations/me'
+import { meOperation } from '../../operations/me'
 
 function meResolver(collection: Collection): any {
   async function resolver(_, args, context) {
@@ -10,7 +10,7 @@ function meResolver(collection: Collection): any {
       depth: 0,
       req: isolateTransactionID(context.req),
     }
-    return me(options)
+    return meOperation(options)
   }
 
   return resolver

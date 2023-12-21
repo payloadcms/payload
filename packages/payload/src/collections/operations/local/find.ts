@@ -7,7 +7,7 @@ import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
-import find from '../find'
+import { findOperation } from '../find'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -89,7 +89,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
 
   if (typeof user !== 'undefined') req.user = user
 
-  return find<GeneratedTypes['collections'][T]>({
+  return findOperation<GeneratedTypes['collections'][T]>({
     collection,
     currentDepth,
     depth,

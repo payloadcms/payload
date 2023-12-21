@@ -8,7 +8,7 @@ import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import findVersions from '../../operations/findVersions'
+import { findVersionsOperation } from '../../operations/findVersions'
 
 export type Resolver = (
   _: unknown,
@@ -41,7 +41,7 @@ export default function findVersionsResolver(collection: Collection): Resolver {
       where: args.where,
     }
 
-    const result = await findVersions(options)
+    const result = await findVersionsOperation(options)
 
     return result
   }

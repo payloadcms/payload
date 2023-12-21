@@ -5,7 +5,7 @@ import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import restoreVersion from '../../operations/restoreVersion'
+import { restoreVersionOperation } from '../../operations/restoreVersion'
 
 type Resolver = (
   _: unknown,
@@ -26,7 +26,7 @@ export default function restoreVersionResolver(globalConfig: SanitizedGlobalConf
       req: isolateTransactionID(context.req),
     }
 
-    const result = await restoreVersion(options)
+    const result = await restoreVersionOperation(options)
     return result
   }
 }

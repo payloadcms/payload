@@ -7,7 +7,7 @@ import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import create from '../../operations/create'
+import { createOperation } from '../../operations/create'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
@@ -21,7 +21,6 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 
@@ -41,7 +40,7 @@ export default function createResolver<TSlug extends keyof GeneratedTypes['colle
       req: isolateTransactionID(context.req),
     }
 
-    const result = await create(options)
+    const result = await createOperation(options)
 
     return result
   }

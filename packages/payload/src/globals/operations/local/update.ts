@@ -9,7 +9,7 @@ import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import update from '../update'
+import { updateOperation } from '../update'
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -64,7 +64,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
-  return update<TSlug>({
+  return updateOperation<TSlug>({
     data,
     depth,
     draft,

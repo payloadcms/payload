@@ -11,8 +11,8 @@ import { i18nInit } from '../../../translations/init'
 import getFileByPath from '../../../uploads/getFileByPath'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
-import update from '../update'
-import updateByID from '../updateByID'
+import { updateOperation } from '../update'
+import { updateByIDOperation } from '../updateByID'
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   autosave?: boolean
@@ -130,9 +130,9 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   if (options.id) {
-    return updateByID<TSlug>(args)
+    return updateByIDOperation<TSlug>(args)
   }
-  return update<TSlug>(args)
+  return updateOperation<TSlug>(args)
 }
 
 export default updateLocal

@@ -5,7 +5,7 @@ import type { PayloadRequest } from '../../../types'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import verifyEmail from '../verifyEmail'
+import { verifyEmailOperation } from '../verifyEmail'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -33,7 +33,7 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
   req.payloadAPI = req.payloadAPI || 'local'
   req.i18n = i18nInit(payload.config.i18n)
 
-  return verifyEmail({
+  return verifyEmailOperation({
     collection,
     req,
     token,

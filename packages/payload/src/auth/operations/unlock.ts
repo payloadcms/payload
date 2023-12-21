@@ -17,7 +17,7 @@ export type Args = {
   req: PayloadRequest
 }
 
-async function unlock(args: Args): Promise<boolean> {
+export const unlockOperation = async (args: Args): Promise<boolean> => {
   if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
     throw new APIError('Missing email.')
   }
@@ -25,7 +25,7 @@ async function unlock(args: Args): Promise<boolean> {
   const {
     collection: { config: collectionConfig },
     overrideAccess,
-    req: { locale, payload },
+    req: { locale },
     req,
   } = args
 
@@ -82,4 +82,4 @@ async function unlock(args: Args): Promise<boolean> {
   }
 }
 
-export default unlock
+export default unlockOperation

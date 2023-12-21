@@ -6,7 +6,7 @@ import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import updateByID from '../../operations/updateByID'
+import { updateByIDOperation } from '../../operations/updateByID'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
@@ -40,7 +40,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
       req: isolateTransactionID(context.req),
     }
 
-    const result = await updateByID<TSlug>(options)
+    const result = await updateByIDOperation<TSlug>(options)
 
     return result
   }

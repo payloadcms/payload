@@ -27,7 +27,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<T> {
+export const findByIDOperation = async <T extends TypeWithID>(
+  incomingArgs: Arguments,
+): Promise<T> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -208,5 +210,3 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     throw error
   }
 }
-
-export default findByID

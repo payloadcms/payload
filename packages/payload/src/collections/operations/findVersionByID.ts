@@ -24,9 +24,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function findVersionByID<T extends TypeWithID = any>(
+export const findVersionByIDOperation = async <T extends TypeWithID = any>(
   args: Arguments,
-): Promise<TypeWithVersion<T>> {
+): Promise<TypeWithVersion<T>> => {
   const {
     id,
     collection: { config: collectionConfig },
@@ -147,5 +147,3 @@ async function findVersionByID<T extends TypeWithID = any>(
     throw error
   }
 }
-
-export default findVersionByID

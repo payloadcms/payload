@@ -49,9 +49,9 @@ export type Arguments<T extends CreateUpdateType> = {
   showHiddenFields?: boolean
 }
 
-async function create<TSlug extends keyof GeneratedTypes['collections']>(
+export const createOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<GeneratedTypes['collections'][TSlug]> {
+): Promise<GeneratedTypes['collections'][TSlug]> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -371,5 +371,3 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     throw error
   }
 }
-
-export default create

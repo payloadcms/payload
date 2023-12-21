@@ -28,7 +28,7 @@ export type Arguments = {
   where: Where
 }
 
-async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
+export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
 ): Promise<{
   docs: GeneratedTypes['collections'][TSlug][]
@@ -36,7 +36,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     id: GeneratedTypes['collections'][TSlug]['id']
     message: string
   }[]
-}> {
+}> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -268,5 +268,3 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     throw error
   }
 }
-
-export default deleteOperation

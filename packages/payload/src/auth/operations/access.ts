@@ -11,7 +11,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
-async function accessOperation(args: Arguments): Promise<Permissions> {
+export const accessOperation = async (args: Arguments): Promise<Permissions> => {
   const {
     req,
     req: { payload, user },
@@ -40,5 +40,3 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
     throw e
   }
 }
-
-export default accessOperation

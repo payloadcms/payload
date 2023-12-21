@@ -1,5 +1,3 @@
-import type { Response } from 'express'
-
 import type { PayloadT, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../index'
 import type { PayloadRequest } from '../../../types'
@@ -9,7 +7,7 @@ import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import login from '../login'
+import { loginOperation } from '../login'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -23,7 +21,6 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   locale?: string
   overrideAccess?: boolean
   req?: PayloadRequest
-  res?: Response
   showHiddenFields?: boolean
 }
 
@@ -40,7 +37,6 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     locale,
     overrideAccess = true,
     req = {} as PayloadRequest,
-    res,
     showHiddenFields,
   } = options
   setRequestContext(req, context)
@@ -68,14 +64,13 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     depth,
     overrideAccess,
     req,
-    res,
     showHiddenFields,
   }
 
   if (locale) args.req.locale = locale
   if (fallbackLocale) args.req.fallbackLocale = fallbackLocale
 
-  return login<TSlug>(args)
+  return loginOperation<TSlug>(args)
 }
 
 export default localLogin

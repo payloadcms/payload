@@ -7,7 +7,7 @@ import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import resetPassword from '../resetPassword'
+import { resetPasswordOperation } from '../resetPassword'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -51,7 +51,7 @@ async function localResetPassword<T extends keyof GeneratedTypes['collections']>
   if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
-  return resetPassword({
+  return resetPasswordOperation({
     collection,
     data,
     overrideAccess,

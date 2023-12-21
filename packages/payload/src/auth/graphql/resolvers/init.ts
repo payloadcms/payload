@@ -1,5 +1,5 @@
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import init from '../../operations/init'
+import { init } from '../../operations/init'
 
 function initResolver(collection: string) {
   async function resolver(_, args, context) {

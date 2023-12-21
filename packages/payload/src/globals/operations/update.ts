@@ -28,9 +28,9 @@ type Args<T extends { [field: number | string | symbol]: unknown }> = {
   slug: string
 }
 
-async function update<TSlug extends keyof GeneratedTypes['globals']>(
+export const updateOperation = async <TSlug extends keyof GeneratedTypes['globals']>(
   args: Args<GeneratedTypes['globals'][TSlug]>,
-): Promise<GeneratedTypes['globals'][TSlug]> {
+): Promise<GeneratedTypes['globals'][TSlug]> => {
   const {
     autosave,
     depth,
@@ -284,5 +284,3 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     throw error
   }
 }
-
-export default update
