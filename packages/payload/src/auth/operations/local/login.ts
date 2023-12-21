@@ -21,9 +21,6 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   locale?: string
   overrideAccess?: boolean
   req?: PayloadRequest
-  responseOptions?: ResponseInit & {
-    headers: Headers
-  }
   showHiddenFields?: boolean
 }
 
@@ -40,7 +37,6 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     locale,
     overrideAccess = true,
     req = {} as PayloadRequest,
-    responseOptions,
     showHiddenFields,
   } = options
   setRequestContext(req, context)
@@ -68,7 +64,6 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     depth,
     overrideAccess,
     req,
-    responseOptions,
     showHiddenFields,
   }
 

@@ -1,6 +1,5 @@
-import type { AuthStrategyFunctionArgs } from '.'
-
-import { parseCookies } from '../utilities/parseCookies'
+import { AuthStrategyFunctionArgs } from 'payload/auth'
+import { parseCookies } from './cookies'
 
 export const extractJWT = (
   args: Pick<AuthStrategyFunctionArgs, 'headers' | 'payload'>,
@@ -21,7 +20,7 @@ export const extractJWT = (
 
   const cookies = parseCookies(headers)
   const tokenCookieName = `${payload.config.cookiePrefix}-token`
-  const cookieToken = cookies.get(tokenCookieName)
+  const cookieToken = cookies?.get(tokenCookieName)
 
   if (!cookieToken) {
     return null

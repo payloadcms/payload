@@ -16,14 +16,12 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
     password: string
   }
   req: PayloadRequest
-  responseOptions?: ResponseInit & {
-    headers: Headers
-  }
 }
 
 export type Result<T> = {
-  message: string
-  user: T
+  exp?: number
+  token?: string
+  user?: T
 }
 
 async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections']>(
@@ -79,22 +77,18 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     // Log in new user
     // /////////////////////////////////////
 
-    const { token } = await payload.login({
+    const { exp, token } = await payload.login({
       ...args,
       collection: slug,
       req,
     })
 
-    const resultToReturn = {
-      ...result,
-      token,
-    }
-
     if (shouldCommit) await commitTransaction(req)
 
     return {
-      message: 'Registered and logged in successfully. Welcome!',
-      user: resultToReturn,
+      exp,
+      token,
+      user: result,
     }
   } catch (error: unknown) {
     await killTransaction(req)

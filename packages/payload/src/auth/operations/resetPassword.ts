@@ -1,6 +1,3 @@
-// TODO(JARROD): remove express Response
-import type { Response } from 'express'
-
 import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types'
@@ -8,7 +5,6 @@ import type { PayloadRequest } from '../../types'
 
 import { APIError } from '../../errors'
 import { commitTransaction } from '../../utilities/commitTransaction'
-import getCookieExpiration from '../../utilities/getCookieExpiration'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate'
@@ -29,8 +25,6 @@ export type Arguments = {
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
-  // TODO(JARROD): remove express Response
-  res?: Response
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
@@ -47,7 +41,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     depth,
     overrideAccess,
     req: {
-      payload: { config, secret },
+      payload: { secret },
       payload,
     },
     req,
@@ -101,22 +95,6 @@ async function resetPassword(args: Arguments): Promise<Result> {
     const token = jwt.sign(fieldsToSign, secret, {
       expiresIn: collectionConfig.auth.tokenExpiration,
     })
-
-    if (args.res) {
-      const cookieOptions = {
-        domain: undefined,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        httpOnly: true,
-        path: '/',
-        sameSite: collectionConfig.auth.cookies.sameSite,
-        secure: collectionConfig.auth.cookies.secure,
-      }
-
-      if (collectionConfig.auth.cookies.domain)
-        cookieOptions.domain = collectionConfig.auth.cookies.domain
-
-      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions)
-    }
 
     const fullUser = await payload.findByID({
       id: user.id,

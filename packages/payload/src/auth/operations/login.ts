@@ -9,8 +9,6 @@ import { buildAfterOperation } from '../../collections/operations/utils'
 import { AuthenticationError, LockedAuth } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { commitTransaction } from '../../utilities/commitTransaction'
-import { generateCookie } from '../../utilities/cookies'
-import getCookieExpiration from '../../utilities/getCookieExpiration'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
@@ -35,9 +33,6 @@ export type Arguments = {
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
-  responseOptions?: ResponseInit & {
-    headers: Headers
-  }
   showHiddenFields?: boolean
 }
 
@@ -70,7 +65,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     req: {
       payload,
-      payload: { config, secret },
+      payload: { secret },
     },
     showHiddenFields,
   } = args
@@ -151,28 +146,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     const token = jwt.sign(fieldsToSign, secret, {
       expiresIn: collectionConfig.auth.tokenExpiration,
     })
-
-    if (args.responseOptions) {
-      const sameSite =
-        typeof collectionConfig.auth.cookies.sameSite === 'string'
-          ? collectionConfig.auth.cookies.sameSite
-          : collectionConfig.auth.cookies.sameSite
-          ? 'Strict'
-          : undefined
-
-      const cookie = generateCookie({
-        name: `${config.cookiePrefix}-token`,
-        domain: collectionConfig.auth.cookies.domain ?? undefined,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        httpOnly: true,
-        path: '/',
-        sameSite,
-        secure: collectionConfig.auth.cookies.secure,
-        value: token,
-      })
-
-      args.responseOptions.headers.set('Set-Cookie', cookie)
-    }
 
     req.user = user
 

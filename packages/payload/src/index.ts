@@ -463,7 +463,7 @@ type GeneratedTypes = {
   }
 }
 
-type PayloadT = Payload<GeneratedTypes>
+export type PayloadT = Payload<GeneratedTypes>
 
 interface RequestContext {
   [key: string]: unknown

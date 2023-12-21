@@ -186,7 +186,6 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   exp: number
   req: PayloadRequest
-  res: Response
   token: string
 }) => any
 

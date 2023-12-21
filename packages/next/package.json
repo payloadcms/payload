@@ -38,6 +38,9 @@
     "payload": "workspace:*",
     "sass": "^1.69.5"
   },
+  "dependencies": {
+    "jsonwebtoken": "9.0.1"
+  },
   "peerDependencies": {
     "payload": "^2.0.0",
     "next": "^14.0.0",
