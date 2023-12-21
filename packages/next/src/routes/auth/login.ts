@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { login as loginOperation } from 'payload/operations'
+import { loginOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import { isNumber } from 'payload/utilities'
 import { generatePayloadCookie } from '../../utilities/cookies'

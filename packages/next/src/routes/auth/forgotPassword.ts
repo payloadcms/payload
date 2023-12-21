@@ -1,4 +1,4 @@
-import { forgotPassword as forgotPasswordOperation } from 'payload/operations'
+import { forgotPasswordOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import httpStatus from 'http-status'
 

@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { logout as logoutOperation } from 'payload/operations'
+import { logoutOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import { generateExpiredPayloadCookie } from '../../utilities/cookies'
 

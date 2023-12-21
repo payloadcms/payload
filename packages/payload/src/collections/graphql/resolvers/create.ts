@@ -21,7 +21,6 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 

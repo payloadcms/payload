@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { access as accessOperation } from 'payload/operations'
+import { accessOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
