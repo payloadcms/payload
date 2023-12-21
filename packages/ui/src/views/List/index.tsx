@@ -53,6 +53,17 @@ export const DefaultList: React.FC<Props> = (props) => {
 
   const textFieldsToBeSearched = getTextFieldsToBeSearched(listSearchableFields, fields)
 
+  let docs = data.docs || []
+
+  if (collection.upload) {
+    docs = docs?.map((doc) => {
+      return {
+        ...doc,
+        // filesize: formatFilesize(doc.filesize),
+      }
+    })
+  }
+
   return (
     <div className={baseClass}>
       <SetStepNav
@@ -111,7 +122,9 @@ export const DefaultList: React.FC<Props> = (props) => {
             />
           )}
           {data.docs && data.docs.length > 0 && (
-            <RelationshipProvider>{/* <Table data={formattedDocs} /> */}</RelationshipProvider>
+            <RelationshipProvider>
+              <Table data={docs} />
+            </RelationshipProvider>
           )}
           {data.docs && data.docs.length === 0 && (
             <div className={`${baseClass}__no-results`}>
@@ -155,19 +168,19 @@ export const DefaultList: React.FC<Props> = (props) => {
                     modifySearchParams={modifySearchParams}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />
-                  {/* {smallBreak && ( */}
-                  <div className={`${baseClass}__list-selection`}>
-                    <Fragment>
-                      {/* <ListSelection label={getTranslation(collection.labels.plural, i18n)} /> */}
-                      <div className={`${baseClass}__list-selection-actions`}>
-                        {/* <EditMany resetParams={resetParams} />
-                        <PublishMany resetParams={resetParams} />
-                        <UnpublishMany resetParams={resetParams} />
-                        <DeleteMany resetParams={resetParams} /> */}
-                      </div>
-                    </Fragment>
-                  </div>
-                  {/* )} */}
+                  {/* {smallBreak && (
+                    <div className={`${baseClass}__list-selection`}>
+                      <Fragment>
+                        <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
+                        <div className={`${baseClass}__list-selection-actions`}>
+                          <EditMany resetParams={resetParams} />
+                          <PublishMany resetParams={resetParams} />
+                          <UnpublishMany resetParams={resetParams} />
+                          <DeleteMany resetParams={resetParams} />
+                        </div>
+                      </Fragment>
+                    </div>
+                  )} */}
                 </Fragment>
               )}
             </div>

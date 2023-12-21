@@ -4,6 +4,7 @@ export type Props = {
   collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
   handleChange?: (where: Where) => void
   modifySearchQuery?: boolean
+  collectionSlug: SanitizedCollectionConfig['slug']
 }
 
 export type FieldCondition = {

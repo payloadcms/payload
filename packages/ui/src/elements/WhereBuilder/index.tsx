@@ -1,13 +1,12 @@
-import queryString from 'qs'
+// import queryString from 'qs'
 import React, { useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
 
-import type { Where } from 'payload/types'
+// import type { Where } from 'payload/types'
 import type { Props } from './types'
 
 import { flattenTopLevelFields, getTranslation } from 'payload/utilities'
-import useThrottledEffect from '../../hooks/useThrottledEffect'
+// import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useSearchParams } from '../../providers/SearchParams'
 import { Button } from '../Button'
 import Condition from './Condition'
@@ -16,6 +15,7 @@ import './index.scss'
 import reducer from './reducer'
 import { transformWhereQuery } from './transformWhereQuery'
 import validateWhereQuery from './validateWhereQuery'
+import { useConfig } from '../../providers/Config'
 
 const baseClass = 'where-builder'
 
@@ -58,11 +58,14 @@ const reduceFields = (fields, i18n) =>
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 const WhereBuilder: React.FC<Props> = (props) => {
-  const { collectionPluralLabel, handleChange, modifySearchQuery = true } = props
-
-  const history = useHistory()
-  const params = useSearchParams()
+  const { collectionSlug, collectionPluralLabel, handleChange, modifySearchQuery = true } = props
   const { i18n, t } = useTranslation('general')
+
+  const config = useConfig()
+  const collection = config.collections.find((c) => c.slug === collectionSlug)
+  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
+
+  const params = useSearchParams()
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
@@ -85,61 +88,59 @@ const WhereBuilder: React.FC<Props> = (props) => {
     return []
   })
 
-  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
-
   // This handles updating the search query (URL) when the where conditions change
-  useThrottledEffect(
-    () => {
-      const currentParams = queryString.parse(history.location.search, {
-        depth: 10,
-        ignoreQueryPrefix: true,
-      }) as { where: Where }
+  // useThrottledEffect(
+  //   () => {
+  //     const currentParams = queryString.parse(history.location.search, {
+  //       depth: 10,
+  //       ignoreQueryPrefix: true,
+  //     }) as { where: Where }
 
-      const paramsToKeep =
-        typeof currentParams?.where === 'object' && 'or' in currentParams.where
-          ? currentParams.where.or.reduce((keptParams, param) => {
-              const newParam = { ...param }
-              if (param.and) {
-                delete newParam.and
-              }
-              return [...keptParams, newParam]
-            }, [])
-          : []
+  //     const paramsToKeep =
+  //       typeof currentParams?.where === 'object' && 'or' in currentParams.where
+  //         ? currentParams.where.or.reduce((keptParams, param) => {
+  //             const newParam = { ...param }
+  //             if (param.and) {
+  //               delete newParam.and
+  //             }
+  //             return [...keptParams, newParam]
+  //           }, [])
+  //         : []
 
-      const hasNewWhereConditions = conditions.length > 0
+  //     const hasNewWhereConditions = conditions.length > 0
 
-      const newWhereQuery = {
-        ...(typeof currentParams?.where === 'object' &&
-        (validateWhereQuery(currentParams?.where) || !hasNewWhereConditions)
-          ? currentParams.where
-          : {}),
-        or: [...conditions, ...paramsToKeep],
-      }
+  //     const newWhereQuery = {
+  //       ...(typeof currentParams?.where === 'object' &&
+  //       (validateWhereQuery(currentParams?.where) || !hasNewWhereConditions)
+  //         ? currentParams.where
+  //         : {}),
+  //       or: [...conditions, ...paramsToKeep],
+  //     }
 
-      if (handleChange) handleChange(newWhereQuery as Where)
+  //     if (handleChange) handleChange(newWhereQuery as Where)
 
-      const hasExistingConditions =
-        typeof currentParams?.where === 'object' && 'or' in currentParams.where
+  //     const hasExistingConditions =
+  //       typeof currentParams?.where === 'object' && 'or' in currentParams.where
 
-      if (
-        modifySearchQuery &&
-        ((hasExistingConditions && !hasNewWhereConditions) || hasNewWhereConditions)
-      ) {
-        history.replace({
-          search: queryString.stringify(
-            {
-              ...currentParams,
-              page: 1,
-              where: newWhereQuery,
-            },
-            { addQueryPrefix: true },
-          ),
-        })
-      }
-    },
-    500,
-    [conditions, modifySearchQuery, handleChange],
-  )
+  //     if (
+  //       modifySearchQuery &&
+  //       ((hasExistingConditions && !hasNewWhereConditions) || hasNewWhereConditions)
+  //     ) {
+  //       history.replace({
+  //         search: queryString.stringify(
+  //           {
+  //             ...currentParams,
+  //             page: 1,
+  //             where: newWhereQuery,
+  //           },
+  //           { addQueryPrefix: true },
+  //         ),
+  //       })
+  //     }
+  //   },
+  //   500,
+  //   [conditions, modifySearchQuery, handleChange],
+  // )
 
   return (
     <div className={baseClass}>

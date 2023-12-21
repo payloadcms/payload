@@ -135,12 +135,12 @@ export const ListControls: React.FC<Props> = (props) => {
         height={visibleDrawer === 'where' ? 'auto' : 0}
         id={`${baseClass}-where`}
       >
-        <p>where builder</p>
-        {/* <WhereBuilder
+        <WhereBuilder
+          collectionSlug={collectionSlug}
           collectionPluralLabel={collectionPluralLabel}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
-        /> */}
+        />
       </AnimateHeight>
       {enableSort && (
         <AnimateHeight
