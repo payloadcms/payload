@@ -1,33 +1,16 @@
-import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import { getAuthenticatedUser, getAccessResults } from 'payload/auth'
 import { SanitizedConfig } from 'payload/types'
 import { cache } from 'react'
 
 export const auth = cache(
-  async ({
-    headers,
-    searchParams,
-    config,
-    unauthorizedRedirect = true,
-  }: {
-    headers: any
-    searchParams: { [key: string]: string | undefined }
-    config: Promise<SanitizedConfig>
-    unauthorizedRedirect?: boolean
-  }) => {
+  async ({ headers, config }: { headers: any; config: Promise<SanitizedConfig> }) => {
     const payload = await getPayload({ config })
 
     const user = await getAuthenticatedUser({
       headers,
       payload,
     })
-
-    if (unauthorizedRedirect && !user) {
-      // TODO: revert to: `redirect(`${payload.config.routes.admin}/unauthorized`)`
-      // once unauthorized page is built out
-      redirect(`${payload.config.routes.admin}/login`)
-    }
 
     const permissions = await getAccessResults({
       req: {
