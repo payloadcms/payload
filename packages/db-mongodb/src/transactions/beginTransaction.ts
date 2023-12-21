@@ -17,24 +17,25 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   const session = client.startSession()
 
   let clientSession: ClientSession
-  let reject: (value?: unknown) => void
-  let resolve: (value?: unknown) => void
+  let reject: () => void
+  let resolve: () => Promise<void>
+
   session
     .withTransaction(
       async (tx) => {
         clientSession = tx
-        await new Promise((res, rej) => {
+        await new Promise<void>((res, rej) => {
           reject = rej
-          resolve = res
+          resolve = async () => {
+            await clientSession.endSession()
+            res()
+          }
         })
       },
       options || (this.transactionOptions as TransactionOptions),
     )
     .catch((reason) => {
       this.payload.logger.error(`Transaction could not be committed: ${reason}`)
-    })
-    .finally(async () => {
-      await clientSession.endSession()
     })
 
   this.sessions[id] = {
