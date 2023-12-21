@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import { PayloadRequest } from 'payload/types'
-import { findVersionByID as findVersionByIdOperation } from 'payload/operations'
+import { findVersionByIDOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
@@ -15,7 +15,7 @@ export const findVersionByID = async ({
   const { searchParams } = new URL(req.url)
   const depth = searchParams.get('depth')
 
-  const result = await findVersionByIdOperation({
+  const result = await findVersionByIDOperation({
     id,
     collection: req.collection,
     depth: isNumber(depth) ? Number(depth) : undefined,

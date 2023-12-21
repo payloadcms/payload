@@ -12,11 +12,11 @@ import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
+import { getFieldsToSign } from '../getFieldsToSign'
 import isLocked from '../isLocked'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts'
-import { getFieldsToSign } from './getFieldsToSign'
-import unlock from './unlock'
+import { unlockOperation } from './unlock'
 
 export type Result = {
   exp?: number
@@ -36,9 +36,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function login<TSlug extends keyof GeneratedTypes['collections']>(
+export const loginOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
-): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
+): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -115,7 +115,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     }
 
     if (maxLoginAttemptsEnabled) {
-      await unlock({
+      await unlockOperation({
         collection: {
           config: collectionConfig,
         },
@@ -246,5 +246,3 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     throw error
   }
 }
-
-export default login

@@ -42,9 +42,9 @@ export type Arguments<T extends CreateUpdateType> = {
   where: Where
 }
 
-async function update<TSlug extends keyof GeneratedTypes['collections']>(
+export const updateOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<BulkOperationResult<TSlug>> {
+): Promise<BulkOperationResult<TSlug>> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -408,5 +408,3 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     throw error
   }
 }
-
-export default update

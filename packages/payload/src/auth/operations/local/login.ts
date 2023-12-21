@@ -7,7 +7,7 @@ import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import login from '../login'
+import { loginOperation } from '../login'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -70,7 +70,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   if (locale) args.req.locale = locale
   if (fallbackLocale) args.req.fallbackLocale = fallbackLocale
 
-  return login<TSlug>(args)
+  return loginOperation<TSlug>(args)
 }
 
 export default localLogin

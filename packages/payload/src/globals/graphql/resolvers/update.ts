@@ -6,7 +6,7 @@ import type { PayloadRequest } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import update from '../../operations/update'
+import { updateOperation } from '../../operations/update'
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   _: unknown,
@@ -40,7 +40,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
       slug,
     }
 
-    const result = await update<TSlug>(options)
+    const result = await updateOperation<TSlug>(options)
     return result
   }
 }

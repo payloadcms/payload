@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 
 import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
-import { updateGlobal as updateOperation } from 'payload/operations'
+import { updateOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
@@ -18,7 +18,7 @@ export const update = async ({
   const draft = searchParams.get('draft') === 'true'
   const autosave = searchParams.get('autosave') === 'true'
 
-  const result = await updateOperation({
+  const result = await updateOperationGlobal({
     autosave,
     data: req.data,
     depth: isNumber(depth) ? Number(depth) : undefined,

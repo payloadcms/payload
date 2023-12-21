@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 
-import { unlock as unlockOperation } from 'payload/operations'
+import { unlockOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 
 // TODO(JARROD): pattern to catch errors and return correct Response

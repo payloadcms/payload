@@ -6,7 +6,7 @@ import type { TypeWithVersion } from '../../../versions/types'
 import type { Collection, TypeWithID } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import findVersionByID from '../../operations/findVersionByID'
+import { findVersionByIDOperation } from '../../operations/findVersionByID'
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
@@ -35,7 +35,7 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
       req: isolateTransactionID(context.req),
     }
 
-    const result = await findVersionByID(options)
+    const result = await findVersionByIDOperation(options)
 
     return result
   }

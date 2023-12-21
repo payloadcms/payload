@@ -41,9 +41,9 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
   showHiddenFields?: boolean
 }
 
-async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
+export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<GeneratedTypes['collections'][TSlug]> {
+): Promise<GeneratedTypes['collections'][TSlug]> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -380,5 +380,3 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     throw error
   }
 }
-
-export default updateByID

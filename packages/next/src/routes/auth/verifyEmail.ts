@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 
-import { verifyEmail as verifyEmailOperation } from 'payload/operations'
+import { verifyEmailOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 
 export const verifyEmail = async ({

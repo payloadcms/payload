@@ -24,9 +24,9 @@ export type Result<T> = {
   user?: T
 }
 
-async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections']>(
+export const registerFirstUserOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   args: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<Result<GeneratedTypes['collections'][TSlug]>> {
+): Promise<Result<GeneratedTypes['collections'][TSlug]>> => {
   const {
     collection: {
       config,
@@ -95,5 +95,3 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     throw error
   }
 }
-
-export default registerFirstUser

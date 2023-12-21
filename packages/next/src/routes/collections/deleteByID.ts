@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 import type { PayloadRequest } from 'payload/types'
 
 import { isNumber } from 'payload/utilities'
-import { deleteByID as deleteByIdOperation } from 'payload/operations'
+import { deleteByIDOperation } from 'payload/operations'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
 export const deleteByID = async ({
@@ -15,7 +15,7 @@ export const deleteByID = async ({
 }): Promise<Response> => {
   const { searchParams } = new URL(req.url)
   const depth = searchParams.get('depth')
-  const doc = await deleteByIdOperation({
+  const doc = await deleteByIDOperation({
     id,
     collection: req.collection,
     depth: isNumber(depth) ? depth : undefined,

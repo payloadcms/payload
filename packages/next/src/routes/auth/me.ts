@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import type { PayloadRequest } from 'payload/types'
-import { me as meOperation } from 'payload/operations'
+import { meOperation } from 'payload/operations'
 import { extractJWT } from '../../utilities/jwt'
 
 // TODO(JARROD): pattern to catch errors and return correct Response

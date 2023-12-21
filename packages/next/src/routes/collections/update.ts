@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 import type { PayloadRequest, Where } from 'payload/types'
 
 import { isNumber } from 'payload/utilities'
-import { update as updateOperation } from 'payload/operations'
+import { updateOperation } from 'payload/operations'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
 export const update = async ({ req }: { req: PayloadRequest }): Promise<Response> => {

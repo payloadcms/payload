@@ -7,9 +7,9 @@ import {
   GraphQLString,
 } from 'graphql'
 
+import type { PayloadT } from '../..'
 import type { Field } from '../../fields/config/types'
 import type { ObjectTypeConfig } from '../../graphql/schema/buildObjectType'
-import type { Payload } from '../../payload'
 import type { Collection, SanitizedCollectionConfig } from '../config/types'
 
 import forgotPassword from '../../auth/graphql/resolvers/forgotPassword'
@@ -42,7 +42,7 @@ import findVersionsResolver from './resolvers/findVersions'
 import restoreVersionResolver from './resolvers/restoreVersion'
 import updateResolver from './resolvers/update'
 
-function initCollectionsGraphQL(payload: Payload): void {
+function initCollectionsGraphQL(payload: PayloadT): void {
   Object.keys(payload.collections).forEach((slug) => {
     const collection: Collection = payload.collections[slug]
     const {

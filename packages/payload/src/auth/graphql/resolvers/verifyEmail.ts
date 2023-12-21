@@ -2,7 +2,7 @@
 import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import verifyEmail from '../../operations/verifyEmail'
+import { verifyEmailOperation } from '../../operations/verifyEmail'
 
 function verifyEmailResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -17,7 +17,7 @@ function verifyEmailResolver(collection: Collection) {
       token: args.token,
     }
 
-    const success = await verifyEmail(options)
+    const success = await verifyEmailOperation(options)
     return success
   }
 

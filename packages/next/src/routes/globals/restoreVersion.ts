@@ -2,7 +2,7 @@ import httpStatus from 'http-status'
 
 import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
-import { restoreVersionGlobal as restoreVersionOperation } from 'payload/operations'
+import { restoreVersionOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
@@ -18,7 +18,7 @@ export const restoreVersion = async ({
   const { searchParams } = new URL(req.url)
   const depth = searchParams.get('depth')
 
-  const doc = await restoreVersionOperation({
+  const doc = await restoreVersionOperationGlobal({
     id,
     depth: isNumber(depth) ? Number(depth) : undefined,
     globalConfig,

@@ -7,9 +7,9 @@ import { APIError } from '../../errors'
 import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
+import { getFieldsToSign } from '../getFieldsToSign'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash'
-import { getFieldsToSign } from './getFieldsToSign'
 
 export type Result = {
   token?: string
@@ -27,7 +27,7 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-async function resetPassword(args: Arguments): Promise<Result> {
+export const resetPasswordOperation = async (args: Arguments): Promise<Result> => {
   if (
     !Object.prototype.hasOwnProperty.call(args.data, 'token') ||
     !Object.prototype.hasOwnProperty.call(args.data, 'password')
@@ -115,4 +115,4 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }
 }
 
-export default resetPassword
+export default resetPasswordOperation

@@ -19,7 +19,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
+export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any>(
+  args: Arguments,
+): Promise<T> => {
   const {
     id,
     depth,
@@ -167,5 +169,3 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     throw error
   }
 }
-
-export default restoreVersion

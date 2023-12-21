@@ -6,7 +6,7 @@ import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import findVersionByID from '../../operations/findVersionByID'
+import { findVersionByIDOperation } from '../../operations/findVersionByID'
 
 export type Resolver = (
   _: unknown,
@@ -35,7 +35,7 @@ export default function findVersionByIDResolver(globalConfig: SanitizedGlobalCon
       req: isolateTransactionID(context.req),
     }
 
-    const result = await findVersionByID(options)
+    const result = await findVersionByIDOperation(options)
     return result
   }
 }

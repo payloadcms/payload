@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 import type { PayloadRequest } from 'payload/types'
 
 import { isNumber } from 'payload/utilities'
-import { updateByID as updateByIdOperation } from 'payload/operations'
+import { updateByIDOperation } from 'payload/operations'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
 export const updateByID = async ({
@@ -18,7 +18,7 @@ export const updateByID = async ({
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
 
-  const doc = await updateByIdOperation({
+  const doc = await updateByIDOperation({
     id,
     autosave,
     collection: req.collection,

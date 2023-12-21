@@ -32,9 +32,9 @@ export type Arguments = {
   where?: Where
 }
 
-async function find<T extends TypeWithID & Record<string, unknown>>(
+export const findOperation = async <T extends TypeWithID & Record<string, unknown>>(
   incomingArgs: Arguments,
-): Promise<PaginatedDocs<T>> {
+): Promise<PaginatedDocs<T>> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -257,5 +257,3 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     throw error
   }
 }
-
-export default find

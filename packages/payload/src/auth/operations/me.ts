@@ -18,7 +18,11 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-async function me({ collection, currentToken, req }: Arguments): Promise<Result> {
+export const meOperation = async ({
+  collection,
+  currentToken,
+  req,
+}: Arguments): Promise<Result> => {
   let result: Result = {
     user: null,
   }
@@ -74,5 +78,3 @@ async function me({ collection, currentToken, req }: Arguments): Promise<Result>
 
   return result
 }
-
-export default me

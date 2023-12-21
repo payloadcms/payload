@@ -1,5 +1,5 @@
 import { extractJWT } from '../../utilities/jwt'
-import { refresh as refreshOperation } from 'payload/operations'
+import { refreshOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import httpStatus from 'http-status'
 import { generatePayloadCookie } from '../../utilities/cookies'

@@ -169,7 +169,6 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   req: PayloadRequest
-  res: Response
 }) => any
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {

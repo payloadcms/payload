@@ -10,17 +10,28 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-function logout(incomingArgs: Arguments): boolean {
+export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {
+  let args = incomingArgs
   const {
     collection: { config: collectionConfig },
-    req: { user },
+    req: { collection, user },
+    req,
   } = incomingArgs
 
   if (!user) throw new APIError('No User', httpStatus.BAD_REQUEST)
   if (user.collection !== collectionConfig.slug)
     throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
 
+  await collection.config.hooks.afterLogout.reduce(async (priorHook, hook) => {
+    await priorHook
+
+    args =
+      (await hook({
+        collection: args.collection?.config,
+        context: req.context,
+        req,
+      })) || args
+  }, Promise.resolve())
+
   return true
 }
-
-export default logout

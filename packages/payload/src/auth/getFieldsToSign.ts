@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
-import type { User } from '..'
-import type { CollectionConfig } from '../../collections/config/types'
-import type { Field, TabAsField } from '../../fields/config/types'
+import type { User } from '.'
+import type { CollectionConfig } from '../collections/config/types'
+import type { Field, TabAsField } from '../fields/config/types'
 
-import { fieldAffectsData, tabHasName } from '../../fields/config/types'
+import { fieldAffectsData, tabHasName } from '../fields/config/types'
 
 type TraverseFieldsArgs = {
   data: Record<string, unknown>

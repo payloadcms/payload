@@ -8,7 +8,7 @@ import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import findVersionByID from '../findVersionByID'
+import { findVersionByIDOperation } from '../findVersionByID'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -63,7 +63,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
-  return findVersionByID({
+  return findVersionByIDOperation({
     id,
     depth,
     disableErrors,

@@ -5,7 +5,7 @@ import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import find from '../../operations/find'
+import { findOperation } from '../../operations/find'
 
 export type Resolver = (
   _: unknown,
@@ -42,7 +42,7 @@ export default function findResolver(collection: Collection): Resolver {
       where: args.where,
     }
 
-    const results = await find(options)
+    const results = await findOperation(options)
     return results
   }
 }

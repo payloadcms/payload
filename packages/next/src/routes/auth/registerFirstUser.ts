@@ -1,5 +1,5 @@
 import httpStatus from 'http-status'
-import { registerFirstUser as registerFirstUserOperation } from 'payload/operations'
+import { registerFirstUserOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import { generatePayloadCookie } from '../../utilities/cookies'
 

@@ -2,7 +2,7 @@
 import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import resetPassword from '../../operations/resetPassword'
+import { resetPasswordOperation } from '../../operations/resetPassword'
 
 function resetPasswordResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -18,7 +18,7 @@ function resetPasswordResolver(collection: Collection) {
       res: context.res,
     }
 
-    const result = await resetPassword(options)
+    const result = await resetPasswordOperation(options)
 
     return result
   }

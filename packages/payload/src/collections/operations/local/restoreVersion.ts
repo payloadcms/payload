@@ -6,7 +6,7 @@ import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
-import restoreVersion from '../restoreVersion'
+import { restoreVersionOperation } from '../restoreVersion'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -77,5 +77,5 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     showHiddenFields,
   }
 
-  return restoreVersion(args)
+  return restoreVersionOperation(args)
 }

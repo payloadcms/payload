@@ -1,26 +1,26 @@
-import type forgotPassword from '../../auth/operations/forgotPassword'
-import type login from '../../auth/operations/login'
-import type refresh from '../../auth/operations/refresh'
+import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword'
+import type { loginOperation } from '../../auth/operations/login'
+import type { refreshOperation } from '../../auth/operations/refresh'
 import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types'
-import type create from './create'
-import type deleteOperation from './delete'
-import type deleteByID from './deleteByID'
-import type find from './find'
-import type findByID from './findByID'
-import type update from './update'
-import type updateByID from './updateByID'
+import type { createOperation } from './create'
+import type { deleteOperation } from './delete'
+import type { deleteByIDOperation } from './deleteByID'
+import type { findOperation } from './find'
+import type { findByIDOperation } from './findByID'
+import type { updateOperation } from './update'
+import type { updateByIDOperation } from './updateByID'
 
 export type AfterOperationMap<T extends TypeWithID> = {
-  create: typeof create // todo: pass correct generic
+  create: typeof createOperation // todo: pass correct generic
   delete: typeof deleteOperation // todo: pass correct generic
-  deleteByID: typeof deleteByID // todo: pass correct generic
-  find: typeof find<T>
-  findByID: typeof findByID<T>
-  forgotPassword: typeof forgotPassword
-  login: typeof login
-  refresh: typeof refresh
-  update: typeof update // todo: pass correct generic
-  updateByID: typeof updateByID // todo: pass correct generic
+  deleteByID: typeof deleteByIDOperation // todo: pass correct generic
+  find: typeof findOperation<T>
+  findByID: typeof findByIDOperation<T>
+  forgotPassword: typeof forgotPasswordOperation
+  login: typeof loginOperation
+  refresh: typeof refreshOperation
+  update: typeof updateOperation // todo: pass correct generic
+  updateByID: typeof updateByIDOperation // todo: pass correct generic
 }
 export type AfterOperationArg<T extends TypeWithID> =
   | {

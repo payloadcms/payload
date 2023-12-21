@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import { PayloadRequest } from 'payload/types'
-import { restoreVersion as restoreVersionOperation } from 'payload/operations'
+import { restoreVersionOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
 // TODO(JARROD): pattern to catch errors and return correct Response

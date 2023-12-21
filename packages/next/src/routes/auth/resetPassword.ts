@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 
-import { resetPassword as resetPasswordOperation } from 'payload/operations'
+import { resetPasswordOperation } from 'payload/operations'
 import { generatePayloadCookie } from '../../utilities/cookies'
 import { PayloadRequest } from 'payload/types'
 

@@ -8,8 +8,8 @@ import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
-import deleteOperation from '../delete'
-import deleteByID from '../deleteByID'
+import { deleteOperation } from '../delete'
+import { deleteByIDOperation } from '../deleteByID'
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -106,7 +106,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   if (options.id) {
-    return deleteByID<TSlug>(args)
+    return deleteByIDOperation<TSlug>(args)
   }
   return deleteOperation<TSlug>(args)
 }

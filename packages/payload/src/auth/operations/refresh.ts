@@ -1,6 +1,3 @@
-// TODO(JARROD): remove express Response
-import type { Response } from 'express'
-
 import jwt from 'jsonwebtoken'
 import url from 'url'
 
@@ -10,7 +7,7 @@ import type { Document } from '../../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
 import { Forbidden } from '../../errors'
-import { getFieldsToSign } from './getFieldsToSign'
+import { getFieldsToSign } from '../getFieldsToSign'
 
 export type Result = {
   exp: number
@@ -24,7 +21,7 @@ export type Arguments = {
   token: string
 }
 
-async function refresh(incomingArgs: Arguments): Promise<Result> {
+export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -125,5 +122,3 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
   return result
 }
-
-export default refresh
