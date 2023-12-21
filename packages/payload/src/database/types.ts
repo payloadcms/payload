@@ -116,8 +116,8 @@ export interface BaseDatabaseAdapter {
   sessions?: {
     [id: string]: {
       db: unknown
-      reject: () => void
-      resolve: () => void
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
     }
   }
 
