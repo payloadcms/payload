@@ -92,6 +92,7 @@ export const DefaultList: React.FC<Props> = (props) => {
             )}
           </header>
           <ListControls
+            collectionPluralLabel={plural}
             collectionSlug={collectionSlug}
             textFieldsToBeSearched={textFieldsToBeSearched}
             handleSearchChange={handleSearchChange}

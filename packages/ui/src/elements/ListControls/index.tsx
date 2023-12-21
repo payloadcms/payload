@@ -33,6 +33,7 @@ const baseClass = 'list-controls'
 export const ListControls: React.FC<Props> = (props) => {
   const {
     collectionSlug,
+    collectionPluralLabel,
     enableColumns = true,
     enableSort = false,
     handleSearchChange,
@@ -134,9 +135,9 @@ export const ListControls: React.FC<Props> = (props) => {
         height={visibleDrawer === 'where' ? 'auto' : 0}
         id={`${baseClass}-where`}
       >
-        <p>Where Builder</p>
+        <p>where builder</p>
         {/* <WhereBuilder
-          collection={collection}
+          collectionPluralLabel={collectionPluralLabel}
           handleChange={handleWhereChange}
           modifySearchQuery={modifySearchQuery}
         /> */}

@@ -1,3 +1,4 @@
+'use client'
 import React, { Fragment, forwardRef, isValidElement } from 'react'
 
 import type { Props } from './types'

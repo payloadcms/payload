@@ -58,12 +58,7 @@ const reduceFields = (fields, i18n) =>
  * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
  */
 const WhereBuilder: React.FC<Props> = (props) => {
-  const {
-    collection: { labels: { plural } = {} } = {},
-    collection,
-    handleChange,
-    modifySearchQuery = true,
-  } = props
+  const { collectionPluralLabel, handleChange, modifySearchQuery = true } = props
 
   const history = useHistory()
   const params = useSearchParams()
@@ -151,7 +146,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
       {conditions.length > 0 && (
         <React.Fragment>
           <div className={`${baseClass}__label`}>
-            {t('filterWhere', { label: getTranslation(plural, i18n) })}
+            {t('filterWhere', { label: getTranslation(collectionPluralLabel, i18n) })}
           </div>
           <ul className={`${baseClass}__or-filters`}>
             {conditions.map((or, orIndex) => (

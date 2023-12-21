@@ -1,9 +1,7 @@
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { Field } from '../../../../fields/config/types'
-import type { Operator, Where } from '../../../../types'
+import type { SanitizedCollectionConfig, Field, Operator, Where } from 'payload/types'
 
 export type Props = {
-  collection: SanitizedCollectionConfig
+  collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
   handleChange?: (where: Where) => void
   modifySearchQuery?: boolean
 }
