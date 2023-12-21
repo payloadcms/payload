@@ -35,8 +35,8 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale = null,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
+    locale: localeArg = null,
     overrideAccess = true,
     req: incomingReq,
     showHiddenFields,
@@ -44,6 +44,12 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   } = options
 
   const collection = payload.collections[collectionSlug]
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
+  const locale = localeArg || incomingReq?.locale || defaultLocale
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
+    : null
 
   if (!collection) {
     throw new APIError(
@@ -55,7 +61,10 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
 
   const i18n = i18nInit(payload.config.i18n)
   const req = {
-    fallbackLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     i18n,
     locale,
     payload,
