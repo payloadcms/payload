@@ -20,6 +20,7 @@ import PublishMany from '../../elements/PublishMany'
 import UnpublishMany from '../../elements/UnpublishMany'
 import DeleteMany from '../../elements/DeleteMany'
 import { getTextFieldsToBeSearched } from '../../elements/ListControls/getTextFieldsToBeSearched'
+import { SetStepNav } from '../../elements/StepNav/SetStepNav'
 
 const baseClass = 'collection-list'
 
@@ -30,6 +31,7 @@ export const DefaultList: React.FC<Props> = (props) => {
     collection: {
       slug: collectionSlug,
       fields,
+      labels: { plural },
       admin: {
         listSearchableFields,
         components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
@@ -53,6 +55,13 @@ export const DefaultList: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
+      <SetStepNav
+        nav={[
+          {
+            label: plural,
+          },
+        ]}
+      />
       {Array.isArray(BeforeList) &&
         BeforeList.map((Component, i) => <Component key={i} {...props} />)}
       {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
