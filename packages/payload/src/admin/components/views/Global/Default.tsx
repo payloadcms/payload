@@ -58,6 +58,10 @@ const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
         : []
 
     setViewActions(defaultActions)
+
+    return () => {
+      setViewActions([])
+    }
   }, [global.slug, location.pathname, global?.admin?.components?.views?.Edit, setViewActions])
 
   return (
