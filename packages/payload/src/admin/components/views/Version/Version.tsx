@@ -184,6 +184,10 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
         : []
 
     setViewActions(versionActions)
+
+    return () => {
+      setViewActions([])
+    }
   }, [collection, global, setViewActions])
 
   let metaTitle: string
