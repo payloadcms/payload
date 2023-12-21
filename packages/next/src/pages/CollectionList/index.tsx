@@ -1,7 +1,6 @@
 import { SanitizedConfig } from 'payload/types'
 import React from 'react'
-import { headers as getHeaders } from 'next/headers'
-import { auth } from '../../utilities/auth'
+import { initPage } from '../../utilities/initPage'
 
 export const CollectionList = async ({
   searchParams,
@@ -10,13 +9,6 @@ export const CollectionList = async ({
   searchParams: URLSearchParams
   config: Promise<SanitizedConfig>
 }) => {
-  const headers = getHeaders()
-
-  await auth({
-    headers,
-    searchParams,
-    config: configPromise,
-  })
-
+  await initPage(configPromise)
   return <p>This is the collection list view</p>
 }
