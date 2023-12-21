@@ -80,6 +80,7 @@ export const generateFormCollection = (formConfig: PluginConfig): CollectionConf
         name: 'title',
         required: true,
         type: 'text',
+        localized: true,
       },
       {
         name: 'fields',
