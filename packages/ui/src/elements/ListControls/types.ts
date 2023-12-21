@@ -3,6 +3,7 @@ import type { Props as ListProps } from '../../views/List/types'
 import type { Column } from '../Table/types'
 
 export type Props = {
+  collectionSlug: SanitizedCollectionConfig['slug']
   enableColumns?: boolean
   enableSort?: boolean
   handleSearchChange?: (search: string) => void

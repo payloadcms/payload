@@ -1,3 +1,4 @@
+'use client'
 import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -14,9 +15,7 @@ import './index.scss'
 
 const baseClass = 'column-selector'
 
-const ColumnSelector: React.FC<Props> = (props) => {
-  const { collection } = props
-
+const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
   const { i18n } = useTranslation()
@@ -53,7 +52,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
             draggable
             icon={active ? <X /> : <Plus />}
             id={accessor}
-            key={`${collection.slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            key={`${collectionSlug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             onClick={() => {
               toggleColumn(accessor)
             }}

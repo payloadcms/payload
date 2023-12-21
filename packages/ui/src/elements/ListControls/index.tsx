@@ -32,6 +32,7 @@ const baseClass = 'list-controls'
  */
 export const ListControls: React.FC<Props> = (props) => {
   const {
+    collectionSlug,
     enableColumns = true,
     enableSort = false,
     handleSearchChange,
@@ -125,8 +126,7 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'columns' ? 'auto' : 0}
           id={`${baseClass}-columns`}
         >
-          <p>Column Selector</p>
-          {/* <ColumnSelector collection={collection} /> */}
+          <ColumnSelector collectionSlug={collectionSlug} />
         </AnimateHeight>
       )}
       <AnimateHeight

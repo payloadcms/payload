@@ -92,6 +92,7 @@ export const DefaultList: React.FC<Props> = (props) => {
             )}
           </header>
           <ListControls
+            collectionSlug={collectionSlug}
             textFieldsToBeSearched={textFieldsToBeSearched}
             handleSearchChange={handleSearchChange}
             handleSortChange={handleSortChange}
