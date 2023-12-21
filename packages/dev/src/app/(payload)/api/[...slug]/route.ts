@@ -128,11 +128,8 @@ export const GET = async (
         const key = `doc-${slug3}`
         return endpoints.global.GET[key]({ req, globalConfig })
       case 4:
-        if (slug3 === 'versions') {
-          // /globals/:slug/versions/:id
-          return endpoints.global.GET.findVersionByID({ req, id: slug4, globalConfig })
-        }
-        break
+        // /globals/:slug/versions/:id
+        return endpoints.global.GET.findVersionByID({ req, id: slug4, globalConfig })
       default:
         return new Response('Not Found', { status: 404 })
     }
