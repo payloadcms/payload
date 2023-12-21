@@ -36,22 +36,22 @@ const endpoints = {
     GET: {
       init,
       me,
+      versions: findVersions,
       find,
       findByID,
-      versions: findVersions,
-      'doc-versions-by-id': findVersionByID,
       'doc-access-by-id': docAccess,
+      'doc-versions-by-id': findVersionByID,
     },
     POST: {
-      unlock,
+      create: createCollectionDoc,
       login,
+      logout,
+      unlock,
+      access,
       'first-register': registerFirstUser,
       'forgot-password': forgotPassword,
       'reset-password': resetPassword,
-      logout,
       'refresh-token': refresh,
-      create: createCollectionDoc,
-      access,
       'doc-access-by-id': docAccess,
       'doc-versions-by-id': restoreVersion,
       'doc-verify-by-id': verifyEmail,
@@ -68,14 +68,14 @@ const endpoints = {
   global: {
     GET: {
       findOne,
-      findVersionByID: findVersionByIdGlobal,
-      'doc-versions': findVersionsGlobal,
       'doc-access': docAccessGlobal,
+      'doc-versions': findVersionsGlobal,
+      'doc-versions-by-id': findVersionByIdGlobal,
     },
     POST: {
-      docAccess: docAccessGlobal,
-      restoreVersion: restoreVersionGlobal,
       update: updateGlobal,
+      'doc-access': docAccessGlobal,
+      'doc-versions-by-id': restoreVersionGlobal,
     },
   },
 }
@@ -101,8 +101,10 @@ export const GET = async (
         return endpoints.collection.GET.find({ req })
       case 2:
         if (slug2 in endpoints.collection.GET) {
-          // i.e. /:collection/me or /:collection/init
-          return endpoints.collection.GET[slug2]({ req })
+          // /:collection/me
+          // /:collection/init
+          // /:collection/versions
+          return endpoints.collection.GET?.[slug2]({ req })
         } else {
           // /:collection/:id
           return endpoints.collection.GET.findByID({ req, id: slug2 })
@@ -110,10 +112,9 @@ export const GET = async (
       case 3:
         // /:collection/access/:id
         // /:collection/versions/:id
-        const key = `doc-${slug2}-by-id`
-        return endpoints.collection.GET[key]({ req, id: slug3 })
+        return endpoints.collection.GET?.[`doc-${slug2}-by-id`]({ req, id: slug3 })
       default:
-        return new Response('Not Found', { status: 404 })
+        return new Response('Route Not Found', { status: 404 })
     }
   } else if (slug1 === 'globals') {
     const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
@@ -125,13 +126,12 @@ export const GET = async (
       case 3:
         // /globals/:slug/access
         // /globals/:slug/versions
-        const key = `doc-${slug3}`
-        return endpoints.global.GET[key]({ req, globalConfig })
+        return endpoints.global.GET?.[`doc-${slug3}`]({ req, globalConfig })
       case 4:
         // /globals/:slug/versions/:id
-        return endpoints.global.GET.findVersionByID({ req, id: slug4, globalConfig })
+        return endpoints.global.GET?.[`doc-${slug3}-by-id`]({ req, id: slug4, globalConfig })
       default:
-        return new Response('Not Found', { status: 404 })
+        return new Response('Route Not Found', { status: 404 })
     }
   }
 }
@@ -151,16 +151,23 @@ export const POST = async (
         return endpoints.collection.POST.create({ req })
       case 2:
         if (slug2 in endpoints.collection.POST) {
+          // /:collection/login
+          // /:collection/logout
+          // /:collection/unlock
+          // /:collection/access
+          // /:collection/first-register
+          // /:collection/forgot-password
+          // /:collection/reset-password
+          // /:collection/refresh-token
           return endpoints.collection.POST[slug2]({ req })
         }
       case 3:
         // /:collection/access/:id
         // /:collection/versions/:id
         // /:collection/verify/:token ("doc-verify-by-id" uses id as token internally)
-        const key = `doc-${slug2}-by-id`
-        return endpoints.collection.POST[key]({ req, id: slug3 })
+        return endpoints.collection.POST?.[`doc-${slug2}-by-id`]({ req, id: slug3 })
       default:
-        return new Response('Not Found', { status: 404 })
+        return new Response('Route Not Found', { status: 404 })
     }
   } else if (slug1 === 'globals') {
     const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
@@ -169,11 +176,13 @@ export const POST = async (
         // /globals/:slug
         return endpoints.global.POST.update({ req, globalConfig })
       case 3:
-        return endpoints.global.POST.docAccess({ req, globalConfig })
+        // /globals/:slug/access
+        return endpoints.global.POST?.[`doc-${slug3}`]({ req, globalConfig })
       case 4:
-        return endpoints.global.POST.restoreVersion({ req, id: slug4, globalConfig })
+        // /globals/:slug/versions/:id
+        return endpoints.global.POST?.[`doc-${slug3}-by-id`]({ req, id: slug4, globalConfig })
       default:
-        return new Response('Not Found', { status: 404 })
+        return new Response('Route Not Found', { status: 404 })
     }
   }
 }
@@ -198,10 +207,10 @@ export const DELETE = async (
         // /:collection
         return endpoints.collection.DELETE.delete({ req })
       case 2:
-        // /:collection/access/:id
+        // /:collection/:id
         return endpoints.collection.DELETE.deleteByID({ req, id: slug2 })
       default:
-        return new Response('Not Found', { status: 404 })
+        return new Response('Route Not Found', { status: 404 })
     }
   }
 }
@@ -229,7 +238,7 @@ export const PATCH = async (
         // /:collection/:id
         return endpoints.collection.PATCH.updateByID({ req, id: slug2 })
       default:
-        return new Response('Not Found', { status: 404 })
+        return new Response('Route Not Found', { status: 404 })
     }
   }
 }
