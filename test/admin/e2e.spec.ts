@@ -310,6 +310,14 @@ describe('admin', () => {
       await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
       await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
     })
+
+    test('should reset actions array when navigating from view with actions to view without actions', async () => {
+      await page.goto(geoUrl.list)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
+      await page.locator(`#nav-posts`).click()
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
+    })
   })
 
   describe('ui', () => {

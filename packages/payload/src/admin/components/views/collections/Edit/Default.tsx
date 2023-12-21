@@ -91,6 +91,10 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
         : []
 
     setViewActions(defaultActions)
+
+    return () => {
+      setViewActions([])
+    }
   }, [id, location.pathname, collection?.admin?.components?.views?.Edit, setViewActions])
 
   return (
