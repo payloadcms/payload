@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
@@ -12,15 +11,14 @@ const baseClass = `doc-header`
 
 export const DocumentHeader: React.FC<{
   apiURL?: string
-  collection?: SanitizedCollectionConfig
+  collectionConfig?: SanitizedCollectionConfig
   customHeader?: React.ReactNode
   data?: any
   global?: SanitizedGlobalConfig
   id?: string
   isEditing?: boolean
 }> = (props) => {
-  const { id, apiURL, collection, customHeader, data, global, isEditing } = props
-  const { t } = useTranslation('general')
+  const { id, apiURL, collectionConfig, customHeader, data, global, isEditing } = props
 
   return (
     <Gutter className={baseClass}>
@@ -29,15 +27,15 @@ export const DocumentHeader: React.FC<{
         <Fragment>
           <RenderTitle
             className={`${baseClass}__title`}
-            collection={collection}
+            // collection={collectionConfig}
             data={data}
-            fallback={`[${t('untitled')}]`}
+            // fallback={`[${t('untitled')}]`}
             global={global}
-            useAsTitle={collection?.admin?.useAsTitle}
+            useAsTitle={collectionConfig?.admin?.useAsTitle}
           />
           <DocumentTabs
             apiURL={apiURL}
-            collection={collection}
+            // collection={collectionConfig}
             global={global}
             id={id}
             isEditing={isEditing}

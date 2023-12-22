@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
 import { FieldTypes } from '../../forms/field-types'
-import type { CollectionEditViewProps } from '../Edit'
+import type { CollectionEditViewProps } from '../types'
 
 export type IndexProps = {
   collection: SanitizedCollectionConfig

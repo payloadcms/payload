@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
@@ -21,12 +20,11 @@ export const DefaultCollectionEdit: React.FC<
     fieldTypes: FieldTypes
   }
 > = (props) => {
-  const { i18n, t } = useTranslation('general')
-
   const {
     id,
     apiURL,
-    collection,
+    config,
+    collectionConfig,
     data,
     disableActions,
     disableLeaveWithoutSaving,
@@ -37,7 +35,7 @@ export const DefaultCollectionEdit: React.FC<
     permissions,
   } = props
 
-  const { auth, fields, upload } = collection
+  const { auth, fields, upload } = collectionConfig
 
   const operation = isEditing ? 'update' : 'create'
 
@@ -54,12 +52,13 @@ export const DefaultCollectionEdit: React.FC<
           i18n,
         )}`}
       /> */}
-      {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
+      {!(collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave) &&
         !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-      <SetStepNav collection={collection} id={id} isEditing={isEditing} />
+      <SetStepNav collectionSlug={collectionConfig?.slug} id={id} isEditing={isEditing} />
       <DocumentControls
         apiURL={apiURL}
-        collection={collection}
+        config={config}
+        collectionConfig={collectionConfig}
         data={data}
         disableActions={disableActions}
         hasSavePermission={hasSavePermission}
@@ -73,7 +72,7 @@ export const DefaultCollectionEdit: React.FC<
             {auth && (
               <Auth
                 className={`${baseClass}__auth`}
-                collection={collection}
+                collectionSlug={collectionConfig.slug}
                 email={data?.email}
                 operation={operation}
                 readOnly={!hasSavePermission}

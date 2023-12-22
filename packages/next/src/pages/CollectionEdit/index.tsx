@@ -2,7 +2,7 @@ import { SanitizedConfig } from 'payload/types'
 import React from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
-  EditDepthContext,
+  EditDepthProvider,
   RenderCustomComponent,
   DefaultEdit,
   DefaultEditViewProps,
@@ -11,6 +11,7 @@ import {
   buildStateFromSchema,
   formatFields,
   FormQueryParamsProvider,
+  QueryParamTypes,
 } from '@payloadcms/ui'
 import queryString from 'qs'
 
@@ -95,7 +96,7 @@ export const CollectionEdit = async ({
       user,
     })
 
-    const formQueryParams = {
+    const formQueryParams: QueryParamTypes = {
       depth: 0,
       'fallback-locale': 'null',
       locale: '',
@@ -119,19 +120,22 @@ export const CollectionEdit = async ({
       action,
       apiURL,
       canAccessAdmin: permissions?.canAccessAdmin,
-      collection: collectionConfig,
+      config,
+      collectionConfig,
       data,
       fieldTypes: fieldTypes,
       hasSavePermission,
       internalState: state,
       isEditing,
       permissions: collectionPermissions,
-      updatedAt: data?.updatedAt,
+      updatedAt: data?.updatedAt.toString(),
       user,
+      onSave: () => {},
+      isLoading: false,
     }
 
     return (
-      <EditDepthContext.Provider value={1}>
+      <EditDepthProvider depth={1}>
         <FormQueryParamsProvider formQueryParams={formQueryParams}>
           <RenderCustomComponent
             CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
@@ -139,7 +143,7 @@ export const CollectionEdit = async ({
             componentProps={componentProps}
           />
         </FormQueryParamsProvider>
-      </EditDepthContext.Provider>
+      </EditDepthProvider>
     )
   }
 

@@ -7,6 +7,7 @@ import type { CollectionEditViewProps } from '../types'
 // import VersionView from '../../../Version/Version'
 // import VersionsView from '../../../Versions'
 import { DefaultCollectionEdit } from './Default/index'
+import { SanitizedCollectionConfig } from 'payload/types'
 
 export type collectionViewType =
   | 'API'
@@ -34,9 +35,9 @@ export const RenderCustomView = (
     view: collectionViewType
   },
 ) => {
-  const { collection, view } = args
+  const { collectionConfig, view } = args
 
-  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collection
+  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
 
   // Overriding components may come from multiple places in the config
   // Need to cascade through the hierarchy to find the correct component to render

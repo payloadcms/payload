@@ -1,11 +1,13 @@
 import React, { Fragment } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type { SanitizedGlobalConfig, SanitizedCollectionConfig } from 'payload/types'
+import type {
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
 
 import { formatDate } from '../../utilities/formatDate'
-import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import Autosave from '../Autosave'
 import DeleteDocument from '../DeleteDocument'
@@ -24,7 +26,6 @@ const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
   apiURL: string
-  collection?: SanitizedCollectionConfig
   data?: any
   disableActions?: boolean
   global?: SanitizedGlobalConfig
@@ -33,10 +34,13 @@ export const DocumentControls: React.FC<{
   isAccountView?: boolean
   isEditing?: boolean
   permissions?: CollectionPermission | GlobalPermission | null
+  config?: SanitizedConfig
+  collectionConfig?: SanitizedCollectionConfig
 }> = (props) => {
   const {
     id,
-    collection,
+    config,
+    collectionConfig,
     data,
     disableActions,
     global,
@@ -46,20 +50,16 @@ export const DocumentControls: React.FC<{
     permissions,
   } = props
 
-  const { publishedDoc } = useDocumentInfo()
-
   const {
     admin: { dateFormat },
     routes: { admin: adminRoute },
-  } = useConfig()
-
-  const { i18n, t } = useTranslation('general')
+  } = config
 
   const hasCreatePermission = 'create' in permissions && permissions.create?.permission
   const hasDeletePermission = 'delete' in permissions && permissions.delete?.permission
 
   const showDotMenu = Boolean(
-    collection && id && !disableActions && (hasCreatePermission || hasDeletePermission),
+    collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
   )
 
   return (
@@ -67,21 +67,21 @@ export const DocumentControls: React.FC<{
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <ul className={`${baseClass}__meta`}>
-            {collection && !isEditing && !isAccountView && (
+            {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
-                  {t('creatingNewLabel', {
+                  {/* {t('creatingNewLabel', {
                     label:
-                      typeof collection?.labels?.singular === 'string'
-                        ? collection.labels.singular
+                      typeof collectionConfig?.labels?.singular === 'string'
+                        ? collectionConfig.labels.singular
                         : 'document',
-                  })}
+                  })} */}
                 </p>
               </li>
             )}
-            {(collection?.versions?.drafts || global?.versions?.drafts) && (
+            {(collectionConfig?.versions?.drafts || global?.versions?.drafts) && (
               <Fragment>
-                {(global || (collection && isEditing)) && (
+                {(global || (collectionConfig && isEditing)) && (
                   <li
                     className={[`${baseClass}__status`, `${baseClass}__list-item`]
                       .filter(Boolean)
@@ -90,34 +90,45 @@ export const DocumentControls: React.FC<{
                     <Status />
                   </li>
                 )}
-                {((collection?.versions?.drafts && collection?.versions?.drafts?.autosave) ||
+                {((collectionConfig?.versions?.drafts &&
+                  collectionConfig?.versions?.drafts?.autosave) ||
                   (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
                   hasSavePermission && (
                     <li className={`${baseClass}__list-item`}>
-                      <Autosave
-                        collection={collection}
+                      {/* <Autosave
+                        collection={collectionConfig}
                         global={global}
                         id={id}
-                        publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-                      />
+                        publishedDocUpdatedAt={data?.createdAt}
+                      /> */}
                     </li>
                   )}
               </Fragment>
             )}
-            {collection?.timestamps && (isEditing || isAccountView) && (
+            {collectionConfig?.timestamps && (isEditing || isAccountView) && (
               <Fragment>
                 <li
                   className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
                     .filter(Boolean)
                     .join(' ')}
                   title={
-                    data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''
+                    data?.updatedAt
+                      ? formatDate(
+                          data?.updatedAt,
+                          dateFormat,
+                          // i18n?.language
+                        )
+                      : ''
                   }
                 >
-                  <p className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</p>
+                  <p className={`${baseClass}__label`}>{/* {t('lastModified')}:&nbsp; */}</p>
                   {data?.updatedAt && (
                     <p className={`${baseClass}__value`}>
-                      {formatDate(data.updatedAt, dateFormat, i18n?.language)}
+                      {formatDate(
+                        data.updatedAt,
+                        dateFormat,
+                        //  i18n?.language
+                      )}
                     </p>
                   )}
                 </li>
@@ -126,22 +137,22 @@ export const DocumentControls: React.FC<{
                     .filter(Boolean)
                     .join(' ')}
                   title={
-                    publishedDoc?.createdAt || data?.createdAt
+                    data?.createdAt
                       ? formatDate(
-                          publishedDoc?.createdAt || data?.createdAt,
+                          data?.createdAt,
                           dateFormat,
-                          i18n?.language,
+                          // i18n?.language,
                         )
                       : ''
                   }
                 >
-                  <p className={`${baseClass}__label`}>{t('created')}:&nbsp;</p>
-                  {(publishedDoc?.createdAt || data?.createdAt) && (
+                  <p className={`${baseClass}__label`}>{/* {t('created')}:&nbsp; */}</p>
+                  {data?.createdAt && (
                     <p className={`${baseClass}__value`}>
                       {formatDate(
-                        publishedDoc?.createdAt || data?.createdAt,
+                        data?.createdAt,
                         dateFormat,
-                        i18n?.language,
+                        // i18n?.language,
                       )}
                     </p>
                   )}
@@ -152,31 +163,32 @@ export const DocumentControls: React.FC<{
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {(collection?.admin?.preview || global?.admin?.preview) && (
+            {/* {(collectionConfig?.admin?.preview || global?.admin?.preview) && (
               <PreviewButton
                 CustomComponent={
-                  collection?.admin?.components?.edit?.PreviewButton ||
+                  collectionConfig?.admin?.components?.edit?.PreviewButton ||
                   global?.admin?.components?.elements?.PreviewButton
                 }
-                generatePreviewURL={collection?.admin?.preview || global?.admin?.preview}
+                generatePreviewURL={collectionConfig?.admin?.preview || global?.admin?.preview}
               />
-            )}
+            )} */}
             {hasSavePermission && (
               <React.Fragment>
-                {collection?.versions?.drafts || global?.versions?.drafts ? (
+                {collectionConfig?.versions?.drafts || global?.versions?.drafts ? (
                   <React.Fragment>
-                    {((collection?.versions?.drafts && !collection?.versions?.drafts?.autosave) ||
+                    {((collectionConfig?.versions?.drafts &&
+                      !collectionConfig?.versions?.drafts?.autosave) ||
                       (global?.versions?.drafts && !global?.versions?.drafts?.autosave)) && (
                       <SaveDraft
                         CustomComponent={
-                          collection?.admin?.components?.edit?.SaveDraftButton ||
+                          collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
                           global?.admin?.components?.elements?.SaveDraftButton
                         }
                       />
                     )}
                     <Publish
                       CustomComponent={
-                        collection?.admin?.components?.edit?.PublishButton ||
+                        collectionConfig?.admin?.components?.edit?.PublishButton ||
                         global?.admin?.components?.elements?.PublishButton
                       }
                     />
@@ -184,7 +196,7 @@ export const DocumentControls: React.FC<{
                 ) : (
                   <Save
                     CustomComponent={
-                      collection?.admin?.components?.edit?.SaveButton ||
+                      collectionConfig?.admin?.components?.edit?.SaveButton ||
                       global?.admin?.components?.elements?.SaveButton
                     }
                   />
@@ -209,21 +221,25 @@ export const DocumentControls: React.FC<{
               <PopupList.ButtonGroup>
                 {hasCreatePermission && (
                   <React.Fragment>
-                    <PopupList.Button
+                    {/* <PopupList.Button
                       id="action-create"
-                      to={`${adminRoute}/collections/${collection?.slug}/create`}
+                      to={`${adminRoute}/collections/${collectionConfig?.slug}/create`}
                     >
                       {t('createNew')}
-                    </PopupList.Button>
+                    </PopupList.Button> */}
 
-                    {!collection?.admin?.disableDuplicate && isEditing && (
-                      <DuplicateDocument collection={collection} id={id} slug={collection?.slug} />
-                    )}
+                    {/* {!collectionConfig?.admin?.disableDuplicate && isEditing && (
+                      <DuplicateDocument
+                        collection={collectionConfig}
+                        id={id}
+                        slug={collectionConfig?.slug}
+                      />
+                    )} */}
                   </React.Fragment>
                 )}
-                {hasDeletePermission && (
-                  <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
-                )}
+                {/* {hasDeletePermission && (
+                  <DeleteDocument buttonId="action-delete" collection={collectionConfig} id={id} />
+                )} */}
               </PopupList.ButtonGroup>
             </Popup>
           )}

@@ -34,6 +34,14 @@ export const DocumentFields: React.FC<{
     permissions,
   } = props
 
+  const mainFields = filterFields({
+    fieldSchema: fields,
+    fieldTypes,
+    filter: (field) => !field?.admin?.position || field?.admin?.position !== 'sidebar',
+    permissions: permissions.fields,
+    readOnly: !hasSavePermission,
+  })
+
   const sidebarFields = filterFields({
     fieldSchema: fields,
     fieldTypes,
@@ -60,20 +68,16 @@ export const DocumentFields: React.FC<{
             <header className={`${baseClass}__header`}>
               {description && (
                 <div className={`${baseClass}__sub-header`}>
-                  <ViewDescription description={description} />
+                  {/* <ViewDescription description={description} /> */}
                 </div>
               )}
             </header>
             {BeforeFields || null}
             <RenderFields
               className={`${baseClass}__fields`}
-              fieldSchema={fields}
               fieldTypes={fieldTypes}
-              filter={(field) =>
-                !field.admin.position ||
-                (field.admin.position && field.admin.position !== 'sidebar')
-              }
-              permissions={permissions.fields}
+              fields={mainFields}
+              // permissions={permissions.fields}
               readOnly={!hasSavePermission}
             />
             {AfterFields || null}
@@ -86,7 +90,7 @@ export const DocumentFields: React.FC<{
                 <RenderFields
                   fieldTypes={fieldTypes}
                   fields={sidebarFields}
-                  permissions={permissions.fields}
+                  // permissions={permissions.fields}
                   readOnly={!hasSavePermission}
                 />
               </div>

@@ -37,7 +37,7 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
                 return (
                   <DocumentTab
                     {...{
-                      ...props,
+                      // ...props,
                       ...(Tab || {}),
                       ...(tabOverrides || {}),
                     }}

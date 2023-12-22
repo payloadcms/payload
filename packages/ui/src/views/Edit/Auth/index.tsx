@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
@@ -19,8 +20,8 @@ const baseClass = 'auth-fields'
 const Auth: React.FC<Props> = (props) => {
   const {
     className,
-    collection,
-    collection: { slug },
+    disableLocalStrategy,
+    collectionSlug,
     email,
     operation,
     readOnly,
@@ -53,7 +54,7 @@ const Auth: React.FC<Props> = (props) => {
   )
 
   const unlock = useCallback(async () => {
-    const url = `${serverURL}${api}/${slug}/unlock`
+    const url = `${serverURL}${api}/${collectionSlug}/unlock`
     const response = await fetch(url, {
       body: JSON.stringify({
         email,
@@ -71,7 +72,7 @@ const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('failedToUnlock'))
     }
-  }, [i18n, serverURL, api, slug, email, t])
+  }, [i18n, serverURL, api, collectionSlug, email, t])
 
   useEffect(() => {
     if (!modified) {
@@ -79,13 +80,13 @@ const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
-  if (collection.auth.disableLocalStrategy && !collection.auth.useAPIKey) {
+  if (disableLocalStrategy && !useAPIKey) {
     return null
   }
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
-      {!collection.auth.disableLocalStrategy && (
+      {!disableLocalStrategy && (
         <React.Fragment>
           <Email
             admin={{ autoComplete: 'email', readOnly }}

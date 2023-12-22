@@ -1,3 +1,4 @@
+'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

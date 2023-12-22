@@ -1,12 +1,14 @@
-import type { CollectionPermission, GlobalPermission, User } from '../../../auth'
+import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
 import type {
-  Fields,
   SanitizedCollectionConfig,
+  SanitizedConfig,
   SanitizedGlobalConfig,
-} from '../../../exports/types'
+} from 'payload/types'
+import type { Fields } from '../forms/Form/types'
 
 export type CollectionEditViewProps = BaseEditViewProps & {
-  collection: SanitizedCollectionConfig
+  config: SanitizedConfig
+  collectionConfig: SanitizedCollectionConfig
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean
   hasSavePermission?: boolean

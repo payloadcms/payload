@@ -51,6 +51,8 @@ const Email: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
+  console.log('fieldType', fieldType)
+
   const { errorMessage, setValue, showError, value } = fieldType
 
   const ErrorComp = Error || DefaultError
