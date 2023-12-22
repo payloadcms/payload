@@ -27,9 +27,6 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
         clientSession = tx
         await new Promise<void>((res, rej) => {
           resolve = async () => {
-            // setTimeout(async () => {
-            //   await clientSession.endSession()
-            // })
             res()
             return done
           }
@@ -40,11 +37,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
         })
       }, transactionOptions)
       .catch((e) => {
-        console.log(e)
         // swallow
-      })
-      .finally(async () => {
-        await clientSession.endSession()
       })
 
     this.sessions[id] = {
