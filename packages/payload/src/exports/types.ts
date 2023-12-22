@@ -1,20 +1,5 @@
 export * from './../types'
 
-export type {
-  CreateFormData,
-  Data,
-  Fields,
-  FormField,
-  FormFieldsContext,
-} from '../admin/components/forms/Form/types'
-
-export type {
-  RichTextAdapter,
-  RichTextFieldProps,
-} from '../admin/components/forms/field-types/RichText/types'
-
-export type { CellComponentProps } from '../admin/components/views/collections/List/Cell/types'
-
 export type { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
 
 export type {
@@ -22,8 +7,6 @@ export type {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from './../admin/components/elements/types'
-
-export type { RowLabel } from './../admin/components/forms/RowLabel/types'
 
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
@@ -128,5 +111,7 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './../globals/config/types'
+
+export type { DocumentPreferences } from './../preferences/types'
 
 export { validOperators } from './../types/constants'

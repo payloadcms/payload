@@ -1,7 +1,7 @@
 import type { LinkProps } from 'react-router-dom'
 
 import * as React from 'react'
-import { Link } from 'react-router-dom'
+import Link from 'next/link' // TODO: abstract this out to support all routers
 
 import './index.scss'
 
@@ -53,7 +53,7 @@ export const Button: React.FC<MenuButtonProps> = ({
             onClick()
           }
         }}
-        to={to}
+        href={to}
       >
         {children}
       </Link>

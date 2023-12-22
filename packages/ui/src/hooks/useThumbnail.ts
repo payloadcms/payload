@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import isImage from '../../uploads/isImage'
+// import isImage from '../../uploads/isImage'
 import { useConfig } from '../providers/Config'
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i')
@@ -35,25 +35,25 @@ const useThumbnail = (
     return `${pathURL}/${thumbnailURL}`
   }
 
-  if (isImage(mimeType as string)) {
-    if (typeof adminThumbnail === 'undefined' && url) {
-      return url as string
-    }
+  // if (isImage(mimeType as string)) {
+  //   if (typeof adminThumbnail === 'undefined' && url) {
+  //     return url as string
+  //   }
 
-    if (sizes?.[adminThumbnail]?.url) {
-      return sizes[adminThumbnail].url
-    }
+  //   if (sizes?.[adminThumbnail]?.url) {
+  //     return sizes[adminThumbnail].url
+  //   }
 
-    if (sizes?.[adminThumbnail]?.filename) {
-      return `${pathURL}/${sizes[adminThumbnail].filename}`
-    }
+  //   if (sizes?.[adminThumbnail]?.filename) {
+  //     return `${pathURL}/${sizes[adminThumbnail].filename}`
+  //   }
 
-    if (url) {
-      return url as string
-    }
+  //   if (url) {
+  //     return url as string
+  //   }
 
-    return `${pathURL}/${filename}`
-  }
+  //   return `${pathURL}/${filename}`
+  // }
 
   return false
 }

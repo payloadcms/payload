@@ -14,13 +14,18 @@ export {
 
 export { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated'
 export { deepCopyObject } from '../utilities/deepCopyObject'
+
 export { deepMerge } from '../utilities/deepMerge'
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON'
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields'
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels'
 export { getIDType } from '../utilities/getIDType'
+export { getObjectDotNotation } from '../utilities/getObjectDotNotation'
 
 export { getTranslation } from '../utilities/getTranslation'
 export { isNumber } from '../utilities/isNumber'
 
 export { isValidID } from '../utilities/isValidID'
+export { default as toKebabCase } from '../utilities/toKebabCase'
+
+export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex'

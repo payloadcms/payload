@@ -52,7 +52,12 @@ const DraggableSortable: React.FC<Props> = (props) => {
   )
 
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
+    <DndContext
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+      sensors={sensors}
+      id={id}
+    >
       <SortableContext items={ids}>
         <div className={className} ref={setNodeRef}>
           {children}
