@@ -19,7 +19,7 @@ const Search =
         // write any config defaults here
       }
 
-      // add a beforeChange hook to every search-enabled collection
+      // add a afterChange and afterDelete hooks to every search-enabled collection
       const collectionsWithSearchHooks = config?.collections
         ?.map((collection) => {
           const { hooks: existingHooks } = collection
