@@ -1,4 +1,4 @@
-import type { Express, NextFunction, Response } from 'express'
+import type { Express } from 'express'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
 import type { InitOptions as i18nInitOptions } from 'i18next'
@@ -205,9 +205,13 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export interface PayloadHandler {
-  (req: PayloadRequest, res: Response, next: NextFunction): void
-}
+export type PayloadHandler = ({
+  params,
+  req,
+}: {
+  params: Record<string, unknown>
+  req: PayloadRequest | Request
+}) => Promise<Response>
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
@@ -220,7 +224,7 @@ export type Endpoint = {
    *
    * Compatible with Express middleware
    */
-  handler: PayloadHandler | PayloadHandler[]
+  handler: PayloadHandler
   /** HTTP method (or "all") */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**

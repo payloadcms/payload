@@ -1,8 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 import type { FilterQuery } from 'mongoose'
-import type { Payload } from 'payload'
-import type { Operator, Where } from 'payload/types'
+import type { Operator, PayloadT, Where } from 'payload/types'
 import type { Field } from 'payload/types'
 
 import deepmerge from 'deepmerge'
@@ -24,7 +23,7 @@ export async function parseParams({
   fields: Field[]
   globalSlug?: string
   locale: string
-  payload: Payload
+  payload: PayloadT
   where: Where
 }): Promise<Record<string, unknown>> {
   let result = {} as FilterQuery<any>

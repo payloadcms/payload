@@ -1,5 +1,5 @@
 import type { PayloadRequest } from 'payload/types'
-import { init as initOperation } from 'payload/operations'
+import { initOperation } from 'payload/operations'
 
 export const init = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const initialized = await initOperation({
