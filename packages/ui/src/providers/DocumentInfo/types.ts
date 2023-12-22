@@ -3,7 +3,8 @@ import type React from 'react'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig, TypeWithID, SanitizedGlobalConfig } from 'payload/types'
 import type { PaginatedDocs } from 'payload/database'
-import type { TypeWithVersion, TypeWithTimestamps } from 'payload/dist/collections/config/types'
+import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'
+import { TypeWithVersion } from 'payload/database'
 
 export type Version = TypeWithVersion<any>
 

@@ -4,19 +4,22 @@ import { headers as getHeaders } from 'next/headers'
 import { auth } from '../../utilities/auth'
 
 export const Document = async ({
-  searchParams,
+  collectionSlug,
+  id,
   config: configPromise,
+  searchParams,
 }: {
-  searchParams: URLSearchParams
+  collectionSlug: string
+  id: string
   config: Promise<SanitizedConfig>
+  searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const headers = getHeaders()
 
   await auth({
     headers,
-    searchParams,
     config: configPromise,
   })
 
-  return <p>This is a document view</p>
+  return <p>{`This is a document in collection: ${collectionSlug} with id: ${id}`}</p>
 }

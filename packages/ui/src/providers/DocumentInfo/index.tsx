@@ -3,11 +3,9 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 
-import type { TypeWithTimestamps } from '../../../../collections/config/types'
-import type { PaginatedDocs } from '../../../../database/types'
-import type { TypeWithID } from '../../../../globals/config/types'
-import type { DocumentPreferences } from '../../../../preferences/types'
-import type { Where } from '../../../../types'
+import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'
+import type { PaginatedDocs } from 'payload/database'
+import type { TypeWithID, DocumentPreferences, Where } from 'payload/types'
 import type { ContextType, DocumentPermissions, Props, Version } from './types'
 
 import { useAuth } from '../Auth'

@@ -20,7 +20,7 @@ export const RootLayout = async ({
   const clientConfig = await createClientConfig(configPromise)
 
   return (
-    <html lang="en">
+    <html lang="en" dir="LTR">
       <body>
         <RootProvider config={clientConfig}>{children}</RootProvider>
       </body>

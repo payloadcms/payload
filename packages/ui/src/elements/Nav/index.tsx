@@ -81,7 +81,7 @@ const DefaultNav: React.FC<{
             beforeNavLinks.map((Component, i) => <Component key={i} />)}
           {groups.map(({ entities, label }, key) => {
             return (
-              <NavGroup {...{ key, label }}>
+              <NavGroup key={key} label={label}>
                 {entities.map(({ entity, type }, i) => {
                   let entityLabel: string
                   let href: string

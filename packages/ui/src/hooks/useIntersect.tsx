@@ -12,11 +12,13 @@ export const useIntersect = (
   const [node, setNode] = useState(null)
 
   const observer = useRef(
-    new window.IntersectionObserver(([ent]) => updateEntry(ent), {
-      root,
-      rootMargin,
-      threshold,
-    }),
+    typeof window !== 'undefined' && 'IntersectionObserver' in window
+      ? new window.IntersectionObserver(([ent]) => updateEntry(ent), {
+          root,
+          rootMargin,
+          threshold,
+        })
+      : null,
   )
 
   useEffect(() => {

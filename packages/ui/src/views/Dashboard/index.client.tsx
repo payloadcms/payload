@@ -14,7 +14,9 @@ import { useConfig } from '../../providers/Config'
 
 const baseClass = 'dashboard'
 
-export const DefaultDashboardClient: React.FC = () => {
+export const DefaultDashboardClient: React.FC<{
+  Link: React.ComponentType
+}> = ({ Link }) => {
   const config = useConfig()
 
   const {
@@ -85,13 +87,13 @@ export const DefaultDashboardClient: React.FC = () => {
                 let title: string
                 let buttonAriaLabel: string
                 let createHREF: string
-                let onClick: () => void
+                let href: string
                 let hasCreatePermission: boolean
 
                 if (type === EntityType.collection) {
                   title = getTranslation(entity.labels.plural, i18n)
                   buttonAriaLabel = t('showAllLabel', { label: title })
-                  // onClick = () => push({ pathname: `${admin}/collections/${entity.slug}` })
+                  href = `${admin}/collections/${entity.slug}`
                   createHREF = `${admin}/collections/${entity.slug}/create`
                   hasCreatePermission = permissions?.collections?.[entity.slug]?.create?.permission
                 }
@@ -99,7 +101,7 @@ export const DefaultDashboardClient: React.FC = () => {
                 if (type === EntityType.global) {
                   title = getTranslation(entity.label, i18n)
                   buttonAriaLabel = t('editLabel', { label: getTranslation(entity.label, i18n) })
-                  // onClick = () => push({ pathname: `${admin}/globals/${entity.slug}` })
+                  href = `${admin}/globals/${entity.slug}`
                 }
 
                 return (
@@ -117,14 +119,16 @@ export const DefaultDashboardClient: React.FC = () => {
                             iconStyle="with-border"
                             round
                             to={createHREF}
+                            Link={Link}
                           />
                         ) : undefined
                       }
                       buttonAriaLabel={buttonAriaLabel}
                       id={`card-${entity.slug}`}
-                      onClick={onClick}
                       title={title}
                       titleAs="h3"
+                      Link={Link}
+                      href={href}
                     />
                   </li>
                 )

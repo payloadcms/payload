@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import Link from 'next/link' // TODO: abstract this out to support all routers
 
 import type { Props, RenderedTypeProps } from './types'
 
@@ -28,13 +28,13 @@ export const Banner: React.FC<Props> = ({
     .filter(Boolean)
     .join(' ')
 
-  let RenderedType: React.ComponentType<RenderedTypeProps> | string = 'div'
+  let RenderedType: React.ComponentType<RenderedTypeProps> | React.ElementType = 'div'
 
   if (onClick && !to) RenderedType = 'button'
   if (to) RenderedType = Link
 
   return (
-    <RenderedType className={classes} onClick={onClick} to={to || undefined}>
+    <RenderedType className={classes} onClick={onClick} href={to || ''}>
       {icon && alignIcon === 'left' && <React.Fragment>{icon}</React.Fragment>}
       <span className={`${baseClass}__content`}>{children}</span>
       {icon && alignIcon === 'right' && <React.Fragment>{icon}</React.Fragment>}
