@@ -8,7 +8,7 @@ import type { CollectionEditViewProps } from '../../../types'
 import { useAuth } from '../../../../utilities/Auth'
 import { useConfig } from '../../../../utilities/Config'
 import NotFound from '../../../NotFound'
-import { CustomCollectionComponent } from './CustomComponent'
+import { CustomCollectionComponent } from '../RenderCustomView'
 import { collectionCustomRoutes } from './custom'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue

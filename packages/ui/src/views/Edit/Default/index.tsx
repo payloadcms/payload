@@ -1,17 +1,17 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { FieldTypes } from '../../../../forms/field-types'
-import type { CollectionEditViewProps } from '../../../types'
+import type { FieldTypes } from '../../../forms/field-types'
+import type { CollectionEditViewProps } from '../../types'
 
-import { getTranslation } from '../../../../../../utilities/getTranslation'
-import { DocumentControls } from '../../../../elements/DocumentControls'
-import { DocumentFields } from '../../../../elements/DocumentFields'
-import { LeaveWithoutSaving } from '../../../../modals/LeaveWithoutSaving'
-import Meta from '../../../../utilities/Meta'
+// import { getTranslation } from 'payload/utilities'
+import { DocumentControls } from '../../../elements/DocumentControls'
+import { DocumentFields } from '../../../elements/DocumentFields'
+import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving'
+// import Meta from '../../../../utilities/Meta'
 import Auth from '../Auth'
 import { SetStepNav } from '../SetStepNav'
-import { Upload } from '../Upload'
+// import { Upload } from '../Upload'
 import './index.scss'
 
 const baseClass = 'collection-default-edit'
@@ -43,7 +43,7 @@ export const DefaultCollectionEdit: React.FC<
 
   return (
     <Fragment>
-      <Meta
+      {/* <Meta
         description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
           collection.labels.singular,
           i18n,
@@ -53,7 +53,7 @@ export const DefaultCollectionEdit: React.FC<
           collection.labels.singular,
           i18n,
         )}`}
-      />
+      /> */}
       {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
         !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
       <SetStepNav collection={collection} id={id} isEditing={isEditing} />
@@ -82,7 +82,7 @@ export const DefaultCollectionEdit: React.FC<
                 verify={auth.verify}
               />
             )}
-            {upload && <Upload collection={collection} internalState={internalState} />}
+            {/* {upload && <Upload collection={collection} internalState={internalState} />} */}
           </Fragment>
         }
         fieldTypes={fieldTypes}

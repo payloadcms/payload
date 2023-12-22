@@ -51,7 +51,7 @@ export type Props = {
   initialData?: Data
   initialState?: Fields
   log?: boolean
-  method?: 'DELETE' | 'GET' | 'PATH' | 'POST'
+  method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
   onSubmit?: (fields: Fields, data: Data) => void
   onSuccess?: (json: unknown) => void
   redirect?: string

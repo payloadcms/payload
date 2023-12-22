@@ -1,29 +1,21 @@
+'use client'
 import React, { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocation } from 'react-router-dom'
 
-import type { FieldTypes } from '../../../forms/field-types'
-import type { CollectionEditViewProps } from '../../types'
+import type { DefaultEditViewProps } from './types'
 
 import { getTranslation } from 'payload/utilities'
-import { DocumentHeader } from '../../../elements/DocumentHeader'
-import { FormLoadingOverlayToggle } from '../../../elements/Loading'
-import Form from '../../../forms/Form'
-import { useActions } from '../../../utilities/ActionsProvider'
-import { useAuth } from '../../../utilities/Auth'
-import { useDocumentEvents } from '../../../utilities/DocumentEvents'
-import { OperationContext } from '../../../utilities/OperationProvider'
-import { CollectionRoutes } from './Routes'
-import { CustomCollectionComponent } from './Routes/CustomComponent'
+import { DocumentHeader } from '../../elements/DocumentHeader'
+import { FormLoadingOverlayToggle } from '../../elements/Loading'
+import Form from '../../forms/Form'
+import { useActions } from '../../providers/ActionsProvider'
+import { useAuth } from '../../providers/Auth'
+import { useDocumentEvents } from '../../providers/DocumentEvents'
+import { OperationContext } from '../../providers/OperationProvider'
 import './index.scss'
+import { RenderCustomView } from './RenderCustomView'
 
 const baseClass = 'collection-edit'
-
-export type DefaultEditViewProps = CollectionEditViewProps & {
-  customHeader?: React.ReactNode
-  disableRoutes?: boolean
-  fieldTypes: FieldTypes
-}
 
 export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
   const { i18n } = useTranslation('general')
@@ -36,8 +28,6 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
     collection,
     customHeader,
     data,
-    disableRoutes,
-    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,
@@ -52,8 +42,6 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
   const { auth } = collection
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
-
-  const location = useLocation()
 
   const onSave = useCallback(
     async (json) => {
@@ -101,7 +89,7 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
           initialState={internalState}
-          method={id ? 'patch' : 'post'}
+          method={id ? 'PATCH' : 'POST'}
           onSuccess={onSave}
         >
           <FormLoadingOverlayToggle
@@ -125,11 +113,7 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
                 id={id}
                 isEditing={isEditing}
               />
-              {disableRoutes ? (
-                <CustomCollectionComponent view="Default" {...props} />
-              ) : (
-                <CollectionRoutes {...props} fieldTypes={fieldTypes} />
-              )}
+              <RenderCustomView view="Default" {...props} />
             </React.Fragment>
           )}
         </Form>

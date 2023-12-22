@@ -1,3 +1,4 @@
+'use client'
 import { createContext, useContext } from 'react'
 
 export const EditDepthContext = createContext(0)

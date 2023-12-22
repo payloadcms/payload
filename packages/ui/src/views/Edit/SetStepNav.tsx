@@ -1,15 +1,14 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
-import type { SanitizedGlobalConfig } from '../../../../../exports/types'
-import type { StepNavItem } from '../../../elements/StepNav/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
+import type { StepNavItem } from '../../elements/StepNav/types'
 
-import { getTranslation } from '../../../../../utilities/getTranslation'
-import useTitle from '../../../../hooks/useTitle'
-import { useStepNav } from '../../../elements/StepNav'
-import { useConfig } from '../../../utilities/Config'
-import { useEditDepth } from '../../../utilities/EditDepth'
+import { getTranslation } from 'payload/utilities'
+import useTitle from '../../hooks/useTitle'
+import { useStepNav } from '../../elements/StepNav'
+import { useConfig } from '../../providers/Config'
+import { useEditDepth } from '../../providers/EditDepth'
 
 export const SetStepNav: React.FC<
   | {

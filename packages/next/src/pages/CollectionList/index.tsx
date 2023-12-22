@@ -1,7 +1,6 @@
 import { SanitizedConfig } from 'payload/types'
 import React from 'react'
-import { RenderCustomComponent, TableColumnsProvider } from '@payloadcms/ui/elements'
-import { DefaultList } from '@payloadcms/ui/views'
+import { RenderCustomComponent, TableColumnsProvider, DefaultList } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 
 export const CollectionList = async ({

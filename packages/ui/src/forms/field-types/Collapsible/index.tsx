@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { DocumentPreferences } from 'payload/types'

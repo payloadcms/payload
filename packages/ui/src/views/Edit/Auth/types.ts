@@ -1,5 +1,5 @@
-import type { VerifyConfig } from '../../../../../../auth/types'
-import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
+import type { VerifyConfig } from 'payload/auth'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
   className?: string

@@ -3,7 +3,6 @@ import React from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
   EditDepthContext,
-  FormQueryParams,
   RenderCustomComponent,
   DefaultEdit,
   DefaultEditViewProps,
@@ -11,9 +10,9 @@ import {
   fieldTypes,
   buildStateFromSchema,
   formatFields,
+  FormQueryParamsProvider,
 } from '@payloadcms/ui'
 import queryString from 'qs'
-import { FormQueryParamsProvider } from '../../../../ui/src/providers/FormQueryParams'
 
 export const CollectionEdit = async ({
   collectionSlug,
@@ -23,7 +22,7 @@ export const CollectionEdit = async ({
   isEditing = true,
 }: {
   collectionSlug: string
-  id: string
+  id?: string
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
   isEditing?: boolean
@@ -63,6 +62,27 @@ export const CollectionEdit = async ({
 
     const fieldSchema = formatFields(collectionConfig, isEditing)
 
+    let preferencesKey: string
+
+    if (id) {
+      preferencesKey = `collection-${collectionSlug}-${id}`
+    }
+
+    const {
+      docs: [preferences],
+    } = await payload.find({
+      collection: 'payload-preferences',
+      depth: 0,
+      pagination: false,
+      user,
+      limit: 1,
+      where: {
+        key: {
+          equals: preferencesKey,
+        },
+      },
+    })
+
     const state = await buildStateFromSchema({
       id,
       config,
@@ -71,7 +91,7 @@ export const CollectionEdit = async ({
       locale,
       operation: isEditing ? 'update' : 'create',
       preferences,
-      t,
+      // t,
       user,
     })
 
@@ -82,15 +102,13 @@ export const CollectionEdit = async ({
       uploadEdits: undefined,
     }
 
-    const formattedQueryParams = queryString.stringify(formQueryParams)
-
     const apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
       collectionConfig.versions.drafts ? '&draft=true' : ''
     }`
 
     const action = `${serverURL}${api}/${collectionSlug}${
       isEditing ? `/${id}` : ''
-    }?${formattedQueryParams}`
+    }?${queryString.stringify(formQueryParams)}`
 
     const hasSavePermission =
       (isEditing && collectionPermissions?.update?.permission) ||
