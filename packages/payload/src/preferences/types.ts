@@ -8,7 +8,7 @@ export type PreferenceRequest = {
   user: User
 }
 
-export type PreferenceUpdateRequest = PreferenceRequest & { value: undefined }
+export type PreferenceUpdateRequest = PreferenceRequest & { value: unknown }
 
 export type CollapsedPreferences = string[]
 

@@ -1,9 +1,9 @@
 import type { CollectionConfig } from '../collections/config/types'
 import type { Access, Config } from '../config/types'
 
-import deleteHandler from './requestHandlers/delete'
-import findOne from './requestHandlers/findOne'
-import update from './requestHandlers/update'
+import { deleteHandler } from './requestHandlers/delete'
+import { findByIDHandler } from './requestHandlers/findOne'
+import { updateHandler } from './requestHandlers/update'
 
 const preferenceAccess: Access = ({ req }) => ({
   'user.value': {
@@ -22,7 +22,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
   },
   endpoints: [
     {
-      handler: findOne,
+      handler: findByIDHandler,
       method: 'get',
       path: '/:key',
     },
@@ -32,7 +32,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
       path: '/:key',
     },
     {
-      handler: update,
+      handler: updateHandler,
       method: 'post',
       path: '/:key',
     },
