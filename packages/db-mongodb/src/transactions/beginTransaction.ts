@@ -11,37 +11,50 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   this: MongooseAdapter,
   options: TransactionOptions,
 ) {
-  const id = uuid()
+  let id
+  const transactionOptions = options || this.transactionOptions || undefined
+  try {
+    id = uuid()
+    const client = this.connection.getClient()
+    const session = client.startSession()
 
-  const client = this.connection.getClient()
-  const session = client.startSession()
+    let reject: () => Promise<unknown>
+    let resolve: () => Promise<unknown>
+    let clientSession: ClientSession
 
-  let clientSession: ClientSession
-  let reject: () => void
-  let resolve: () => Promise<void>
-
-  session
-    .withTransaction(
-      async (tx) => {
+    const done = session
+      .withTransaction(async (tx) => {
         clientSession = tx
         await new Promise<void>((res, rej) => {
-          reject = rej
           resolve = async () => {
-            await clientSession.endSession()
+            // setTimeout(async () => {
+            //   await clientSession.endSession()
+            // })
             res()
+            return done
+          }
+          reject = async () => {
+            rej()
+            return done
           }
         })
-      },
-      options || (this.transactionOptions as TransactionOptions),
-    )
-    .catch((reason) => {
-      this.payload.logger.error(`Transaction could not be committed: ${reason}`)
-    })
+      }, transactionOptions)
+      .catch((e) => {
+        console.log(e)
+        // swallow
+      })
+      .finally(async () => {
+        await clientSession.endSession()
+      })
 
-  this.sessions[id] = {
-    clientSession,
-    reject,
-    resolve,
+    this.sessions[id] = {
+      clientSession,
+      reject,
+      resolve,
+    }
+  } catch (err) {
+    this.payload.logger.error(`Error: cannot begin transaction: ${err.message}`, err)
+    // process.exit(1)
   }
 
   return id
