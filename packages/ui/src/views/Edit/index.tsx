@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom'
 import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
 
-import { getTranslation } from '../../../../../utilities/getTranslation'
+import { getTranslation } from 'payload/utilities'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
@@ -25,7 +25,7 @@ export type DefaultEditViewProps = CollectionEditViewProps & {
   fieldTypes: FieldTypes
 }
 
-const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
+export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
   const { i18n } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
@@ -137,5 +137,3 @@ const DefaultEditView: React.FC<DefaultEditViewProps> = (props) => {
     </main>
   )
 }
-
-export default DefaultEditView

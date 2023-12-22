@@ -17,7 +17,7 @@ type Args = {
     [key: string]: unknown
   }
   siblingData?: Data
-  t: TFunction
+  t?: TFunction // TODO: make this required again
   user?: User | null
 }
 
