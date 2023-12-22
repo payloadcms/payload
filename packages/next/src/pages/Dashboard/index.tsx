@@ -2,13 +2,12 @@ import { SanitizedConfig } from 'payload/types'
 import React from 'react'
 import { RenderCustomComponent } from '@payloadcms/ui/elements'
 import { DefaultDashboard } from '@payloadcms/ui/views'
+import Link from 'next/link'
 import { initPage } from '../../utilities/initPage'
 
 export const Dashboard = async ({
-  searchParams,
   config: configPromise,
 }: {
-  searchParams: { [key: string]: string | undefined }
   config: Promise<SanitizedConfig>
 }) => {
   const { config } = await initPage(configPromise)
@@ -23,6 +22,7 @@ export const Dashboard = async ({
       DefaultComponent={DefaultDashboard}
       componentProps={{
         config,
+        Link,
       }}
     />
   )

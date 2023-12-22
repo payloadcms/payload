@@ -2,25 +2,20 @@ import type i18next from 'i18next'
 
 import { useTranslation } from 'react-i18next'
 
-import type {
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-  FormField,
-  ClientConfig,
-} from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig, ClientConfig } from 'payload/types'
 
 import { getObjectDotNotation } from 'payload/utilities'
 import { getTranslation } from 'payload/utilities'
 import { useFormFields } from '../forms/Form/context'
 import { useConfig } from '../providers/Config'
 import { formatDate } from '../utilities/formatDate'
+import { FormField } from '../forms/Form/types'
 
 // either send the `useAsTitle` field itself
 // or an object to dynamically extract the `useAsTitle` field from
 export const formatUseAsTitle = (args: {
-  collection: ClientConfig
-  config: SanitizedConfig
+  collection: ClientConfig['collections'][0]
+  config: ClientConfig
   doc?: Record<string, any>
   field?: FormField
   i18n: typeof i18next

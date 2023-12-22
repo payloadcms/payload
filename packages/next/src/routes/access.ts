@@ -1,6 +1,6 @@
 import type { SanitizedConfig } from 'payload/types'
 import { getAccessResults } from 'payload/auth'
-import { createPayloadRequest } from '../createPayloadRequest'
+import { createPayloadRequest } from '../utilities/createPayloadRequest'
 
 export const access = ({
   config,
