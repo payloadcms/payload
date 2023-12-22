@@ -1,17 +1,9 @@
-/* eslint-disable no-param-reassign */
-import type { Response } from 'express'
-
 import type { PayloadRequest } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 import type { Collection, TypeWithID } from '../../config/types'
 
-<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import findVersionByID from '../../operations/findVersionByID'
-=======
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import { findVersionByIDOperation } from '../../operations/findVersionByID'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
@@ -23,7 +15,6 @@ export type Resolver<T extends TypeWithID = any> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<TypeWithVersion<T>>
 

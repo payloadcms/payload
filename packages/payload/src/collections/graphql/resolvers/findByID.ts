@@ -2,13 +2,8 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
 
-<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import findByID from '../../operations/findByID'
-=======
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import { findByIDOperation } from '../../operations/findByID'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver<T> = (
   _: unknown,
@@ -20,7 +15,6 @@ export type Resolver<T> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<T>
 

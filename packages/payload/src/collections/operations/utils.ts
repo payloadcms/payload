@@ -1,13 +1,7 @@
-<<<<<<< HEAD
-import type forgotPassword from '../../auth/operations/forgotPassword'
-import type login from '../../auth/operations/login'
-import type refresh from '../../auth/operations/refresh'
-import type { PayloadRequest } from '../../express/types'
-=======
 import type { forgotPasswordOperation } from '../../auth/operations/forgotPassword'
 import type { loginOperation } from '../../auth/operations/login'
 import type { refreshOperation } from '../../auth/operations/refresh'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
+import type { PayloadRequest } from '../../exports/types'
 import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types'
 import type { createOperation } from './create'
 import type { deleteOperation } from './delete'

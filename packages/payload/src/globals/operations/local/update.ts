@@ -1,18 +1,12 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes, PayloadT } from '../../../'
-import type { PayloadRequest } from '../../../types'
+import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'
-<<<<<<< HEAD
 import { createLocalReq } from '../../../utilities/createLocalReq'
-import update from '../update'
-=======
-import { i18nInit } from '../../../translations/init'
-import { setRequestContext } from '../../../utilities/setRequestContext'
 import { updateOperation } from '../update'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -42,12 +36,8 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
 
   const req = createLocalReq(options, payload)
 
-<<<<<<< HEAD
-  return update<TSlug>({
-    slug: globalSlug as string,
-=======
   return updateOperation<TSlug>({
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
+    slug: globalSlug as string,
     data,
     depth,
     draft,

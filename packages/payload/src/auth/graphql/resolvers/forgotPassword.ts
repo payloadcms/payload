@@ -2,7 +2,7 @@ import type { Collection } from '../../../collections/config/types'
 import type { PayloadRequest } from '../../../express/types'
 
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import forgotPassword from '../../operations/forgotPassword'
+import { forgotPasswordOperation } from '../../operations/forgotPassword'
 
 function forgotPasswordResolver(collection: Collection): any {
   async function resolver(_, args, context) {
@@ -16,7 +16,7 @@ function forgotPasswordResolver(collection: Collection): any {
       req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
     }
 
-    await forgotPassword(options)
+    await forgotPasswordOperation(options)
     return true
   }
 

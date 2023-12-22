@@ -1,16 +1,10 @@
-/* eslint-disable no-param-reassign */
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest } from '../../../types'
 import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 
-<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import find from '../../operations/find'
-=======
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import { findOperation } from '../../operations/find'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver = (
   _: unknown,
@@ -26,7 +20,6 @@ export type Resolver = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<PaginatedDocs<any>>

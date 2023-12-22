@@ -19,7 +19,6 @@ function refreshResolver(collection: Collection) {
       collection,
       depth: 0,
       req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
-      res: context.res,
       token,
     }
 

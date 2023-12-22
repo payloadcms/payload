@@ -4,17 +4,9 @@ import type { Document, Where } from '../../../types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
-<<<<<<< HEAD
 import { createLocalReq } from '../../../utilities/createLocalReq'
-import deleteOperation from '../delete'
-import deleteByID from '../deleteByID'
-=======
-import { i18nInit } from '../../../translations/init'
-import { setRequestContext } from '../../../utilities/setRequestContext'
-import { getDataLoader } from '../../dataloader'
 import { deleteOperation } from '../delete'
 import { deleteByIDOperation } from '../deleteByID'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   collection: T

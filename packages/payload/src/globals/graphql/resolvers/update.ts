@@ -1,17 +1,11 @@
-/* eslint-disable no-param-reassign */
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
-<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import update from '../../operations/update'
-=======
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import { updateOperation } from '../../operations/update'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   _: unknown,
@@ -23,7 +17,6 @@ type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<GeneratedTypes['globals'][TSlug]>
 
@@ -37,12 +30,12 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
     const { slug } = globalConfig
 
     const options = {
+      slug,
       data: args.data,
       depth: 0,
       draft: args.draft,
       globalConfig,
       req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
-      slug,
     }
 
     const result = await updateOperation<TSlug>(options)

@@ -1,19 +1,10 @@
-/* eslint-disable no-param-reassign */
-
-import type { Response } from 'express'
-
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest } from '../../../types'
 import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 
-<<<<<<< HEAD
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
-import findVersions from '../../operations/findVersions'
-=======
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import { findVersionsOperation } from '../../operations/findVersions'
->>>>>>> 988a21e94 (feat(3.0): next route handlers (#4590))
 
 export type Resolver = (
   _: unknown,
@@ -27,7 +18,6 @@ export type Resolver = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<PaginatedDocs<any>>
 

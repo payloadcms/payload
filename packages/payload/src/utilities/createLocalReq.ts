@@ -1,4 +1,4 @@
-import type { Payload, RequestContext } from '..'
+import type { PayloadT, RequestContext } from '..'
 import type { PayloadRequest } from '../exports/types'
 
 import { getDataLoader } from '../collections/dataloader'
@@ -29,7 +29,7 @@ type CreateLocalReq = (
     req?: PayloadRequest
     user?: Document
   },
-  payload: Payload,
+  payload: PayloadT,
 ) => PayloadRequest
 export const createLocalReq: CreateLocalReq = (
   { collection, context, fallbackLocale, locale, req = {} as PayloadRequest, user },
