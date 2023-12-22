@@ -27,7 +27,9 @@ export type Arguments = {
   showHiddenFields?: boolean
 }
 
-async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
+export const restoreVersionOperation = async <T extends TypeWithID = any>(
+  args: Arguments,
+): Promise<T> => {
   const {
     id,
     collection: { config: collectionConfig },
@@ -203,5 +205,3 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     throw error
   }
 }
-
-export default restoreVersion

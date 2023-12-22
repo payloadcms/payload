@@ -1,4 +1,3 @@
-import type { Express, Router } from 'express'
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler'
 import type { SendMailOptions } from 'nodemailer'
@@ -95,8 +94,6 @@ export class Payload<TGeneratedTypes extends GeneratedTypes> {
   encrypt = encrypt
 
   errorHandler: ErrorHandler
-
-  express?: Express
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -238,8 +235,6 @@ export class Payload<TGeneratedTypes extends GeneratedTypes> {
     const { restoreVersion } = localOperations
     return restoreVersion<T>(this, options)
   }
-
-  router?: Router
 
   schema: GraphQLSchema
 
@@ -463,7 +458,7 @@ type GeneratedTypes = {
   }
 }
 
-type PayloadT = Payload<GeneratedTypes>
+export type PayloadT = Payload<GeneratedTypes>
 
 interface RequestContext {
   [key: string]: unknown

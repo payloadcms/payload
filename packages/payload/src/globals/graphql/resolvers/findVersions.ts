@@ -5,7 +5,7 @@ import type { Document, Where } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import findVersions from '../../operations/findVersions'
+import { findVersionsOperation } from '../../operations/findVersions'
 
 export type Resolver = (
   _: unknown,
@@ -35,7 +35,7 @@ export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig
       where: args.where,
     }
 
-    const result = await findVersions(options)
+    const result = await findVersionsOperation(options)
 
     return result
   }

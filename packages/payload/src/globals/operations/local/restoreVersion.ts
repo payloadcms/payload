@@ -7,7 +7,7 @@ import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import restoreVersion from '../restoreVersion'
+import { restoreVersionOperation } from '../restoreVersion'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -60,7 +60,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
-  return restoreVersion({
+  return restoreVersionOperation({
     id,
     depth,
     globalConfig,

@@ -27,9 +27,9 @@ export type Arguments = {
   where?: Where
 }
 
-async function findVersions<T extends TypeWithVersion<T>>(
+export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   args: Arguments,
-): Promise<PaginatedDocs<T>> {
+): Promise<PaginatedDocs<T>> => {
   const {
     collection: { config: collectionConfig },
     depth,
@@ -181,5 +181,3 @@ async function findVersions<T extends TypeWithVersion<T>>(
     throw error
   }
 }
-
-export default findVersions

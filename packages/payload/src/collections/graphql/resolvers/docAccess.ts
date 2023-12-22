@@ -2,7 +2,7 @@ import type { CollectionPermission, GlobalPermission } from '../../../auth'
 import type { PayloadRequest } from '../../../types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import { docAccess } from '../../operations/docAccess'
+import { docAccessOperation } from '../../operations/docAccess'
 
 export type Resolver = (
   _: unknown,
@@ -17,7 +17,7 @@ export type Resolver = (
 
 export function docAccessResolver(): Resolver {
   async function resolver(_, args, context) {
-    return docAccess({
+    return docAccessOperation({
       id: args.id,
       req: isolateTransactionID(context.req),
     })

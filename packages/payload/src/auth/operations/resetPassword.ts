@@ -1,6 +1,3 @@
-// TODO(JARROD): remove express Response
-import type { Response } from 'express'
-
 import jwt from 'jsonwebtoken'
 
 import type { Collection } from '../../collections/config/types'
@@ -8,12 +5,11 @@ import type { PayloadRequest } from '../../types'
 
 import { APIError } from '../../errors'
 import { commitTransaction } from '../../utilities/commitTransaction'
-import getCookieExpiration from '../../utilities/getCookieExpiration'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
+import { getFieldsToSign } from '../getFieldsToSign'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash'
-import { getFieldsToSign } from './getFieldsToSign'
 
 export type Result = {
   token?: string
@@ -29,11 +25,9 @@ export type Arguments = {
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
-  // TODO(JARROD): remove express Response
-  res?: Response
 }
 
-async function resetPassword(args: Arguments): Promise<Result> {
+export const resetPasswordOperation = async (args: Arguments): Promise<Result> => {
   if (
     !Object.prototype.hasOwnProperty.call(args.data, 'token') ||
     !Object.prototype.hasOwnProperty.call(args.data, 'password')
@@ -47,7 +41,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     depth,
     overrideAccess,
     req: {
-      payload: { config, secret },
+      payload: { secret },
       payload,
     },
     req,
@@ -102,22 +96,6 @@ async function resetPassword(args: Arguments): Promise<Result> {
       expiresIn: collectionConfig.auth.tokenExpiration,
     })
 
-    if (args.res) {
-      const cookieOptions = {
-        domain: undefined,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        httpOnly: true,
-        path: '/',
-        sameSite: collectionConfig.auth.cookies.sameSite,
-        secure: collectionConfig.auth.cookies.secure,
-      }
-
-      if (collectionConfig.auth.cookies.domain)
-        cookieOptions.domain = collectionConfig.auth.cookies.domain
-
-      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions)
-    }
-
     const fullUser = await payload.findByID({
       id: user.id,
       collection: collectionConfig.slug,
@@ -137,4 +115,4 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }
 }
 
-export default resetPassword
+export default resetPasswordOperation

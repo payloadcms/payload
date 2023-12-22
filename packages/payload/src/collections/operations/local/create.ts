@@ -12,7 +12,7 @@ import { i18nInit } from '../../../translations/init'
 import getFileByPath from '../../../uploads/getFileByPath'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
-import create from '../create'
+import { createOperation } from '../create'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -86,7 +86,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
-  return create<TSlug>({
+  return createOperation<TSlug>({
     collection,
     data,
     depth,

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Response } from 'express'
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired } from 'ts-essentials'
 
@@ -168,7 +166,6 @@ export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   req: PayloadRequest
-  res: Response
 }) => any
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
@@ -185,7 +182,6 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   exp: number
   req: PayloadRequest
-  res: Response
   token: string
 }) => any
 

@@ -9,16 +9,14 @@ import { buildAfterOperation } from '../../collections/operations/utils'
 import { AuthenticationError, LockedAuth } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { commitTransaction } from '../../utilities/commitTransaction'
-import { generateCookie } from '../../utilities/cookies'
-import getCookieExpiration from '../../utilities/getCookieExpiration'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
+import { getFieldsToSign } from '../getFieldsToSign'
 import isLocked from '../isLocked'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts'
-import { getFieldsToSign } from './getFieldsToSign'
-import unlock from './unlock'
+import { unlockOperation } from './unlock'
 
 export type Result = {
   exp?: number
@@ -35,15 +33,12 @@ export type Arguments = {
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
-  responseOptions?: ResponseInit & {
-    headers: Headers
-  }
   showHiddenFields?: boolean
 }
 
-async function login<TSlug extends keyof GeneratedTypes['collections']>(
+export const loginOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
-): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
+): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> => {
   let args = incomingArgs
 
   // /////////////////////////////////////
@@ -70,7 +65,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     req: {
       payload,
-      payload: { config, secret },
+      payload: { secret },
     },
     showHiddenFields,
   } = args
@@ -120,7 +115,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     }
 
     if (maxLoginAttemptsEnabled) {
-      await unlock({
+      await unlockOperation({
         collection: {
           config: collectionConfig,
         },
@@ -151,28 +146,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     const token = jwt.sign(fieldsToSign, secret, {
       expiresIn: collectionConfig.auth.tokenExpiration,
     })
-
-    if (args.responseOptions) {
-      const sameSite =
-        typeof collectionConfig.auth.cookies.sameSite === 'string'
-          ? collectionConfig.auth.cookies.sameSite
-          : collectionConfig.auth.cookies.sameSite
-          ? 'Strict'
-          : undefined
-
-      const cookie = generateCookie({
-        name: `${config.cookiePrefix}-token`,
-        domain: collectionConfig.auth.cookies.domain ?? undefined,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        httpOnly: true,
-        path: '/',
-        sameSite,
-        secure: collectionConfig.auth.cookies.secure,
-        value: token,
-      })
-
-      args.responseOptions.headers.set('Set-Cookie', cookie)
-    }
 
     req.user = user
 
@@ -273,5 +246,3 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     throw error
   }
 }
-
-export default login

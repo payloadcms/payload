@@ -1,5 +1,3 @@
-// TODO(JARROD): remove express Response
-import type { Response } from 'express'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../'
@@ -18,18 +16,17 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
     password: string
   }
   req: PayloadRequest
-  // TODO(JARROD): remove express Response
-  res: Response
 }
 
 export type Result<T> = {
-  message: string
-  user: T
+  exp?: number
+  token?: string
+  user?: T
 }
 
-async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections']>(
+export const registerFirstUserOperation = async <TSlug extends keyof GeneratedTypes['collections']>(
   args: Arguments<GeneratedTypes['collections'][TSlug]>,
-): Promise<Result<GeneratedTypes['collections'][TSlug]>> {
+): Promise<Result<GeneratedTypes['collections'][TSlug]>> => {
   const {
     collection: {
       config,
@@ -80,27 +77,21 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     // Log in new user
     // /////////////////////////////////////
 
-    const { token } = await payload.login({
+    const { exp, token } = await payload.login({
       ...args,
       collection: slug,
       req,
     })
 
-    const resultToReturn = {
-      ...result,
-      token,
-    }
-
     if (shouldCommit) await commitTransaction(req)
 
     return {
-      message: 'Registered and logged in successfully. Welcome!',
-      user: resultToReturn,
+      exp,
+      token,
+      user: result,
     }
   } catch (error: unknown) {
     await killTransaction(req)
     throw error
   }
 }
-
-export default registerFirstUser

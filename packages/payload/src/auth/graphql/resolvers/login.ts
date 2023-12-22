@@ -1,7 +1,7 @@
 import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import login from '../../operations/login'
+import { loginOperation } from '../../operations/login'
 
 function loginResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -16,7 +16,7 @@ function loginResolver(collection: Collection) {
       res: context.res,
     }
 
-    const result = login(options)
+    const result = loginOperation(options)
     return result
   }
 

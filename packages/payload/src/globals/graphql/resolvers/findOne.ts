@@ -4,7 +4,7 @@ import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import findOne from '../../operations/findOne'
+import { findOneOperation } from '../../operations/findOne'
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
   return async function resolver(_, args, context) {
@@ -21,7 +21,7 @@ export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Do
       slug,
     }
 
-    const result = await findOne(options)
+    const result = await findOneOperation(options)
     return result
   }
 }

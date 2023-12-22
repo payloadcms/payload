@@ -13,7 +13,7 @@ type Arguments = {
   req: PayloadRequest
 }
 
-export async function docAccess(args: Arguments): Promise<GlobalPermission> {
+export const docAccessOperation = async (args: Arguments): Promise<GlobalPermission> => {
   const { globalConfig, req } = args
 
   const globalOperations: AllOperations[] = ['read', 'update']

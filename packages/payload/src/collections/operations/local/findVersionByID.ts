@@ -7,7 +7,7 @@ import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
-import findVersionByID from '../findVersionByID'
+import { findVersionByIDOperation } from '../findVersionByID'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -77,7 +77,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
-  return findVersionByID({
+  return findVersionByIDOperation({
     id,
     collection,
     depth,

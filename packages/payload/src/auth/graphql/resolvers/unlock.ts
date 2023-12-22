@@ -1,7 +1,7 @@
 import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import unlock from '../../operations/unlock'
+import { unlockOperation } from '../../operations/unlock'
 
 function unlockResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -11,7 +11,7 @@ function unlockResolver(collection: Collection) {
       req: isolateTransactionID(context.req),
     }
 
-    const result = await unlock(options)
+    const result = await unlockOperation(options)
     return result
   }
 

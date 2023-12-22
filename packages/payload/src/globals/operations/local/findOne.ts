@@ -7,7 +7,7 @@ import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
 import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
-import findOne from '../findOne'
+import { findOneOperation } from '../findOne'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   context?: RequestContext
@@ -62,7 +62,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
-  return findOne({
+  return findOneOperation({
     depth,
     draft,
     globalConfig,

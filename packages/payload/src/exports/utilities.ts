@@ -11,6 +11,7 @@ export {
   entityToJSONSchema,
   withNullableJSONSchemaType,
 } from '../utilities/configToJSONSchema'
+
 export { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated'
 export { deepCopyObject } from '../utilities/deepCopyObject'
 
@@ -20,6 +21,7 @@ export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFi
 export { formatLabels, formatNames, toWords } from '../utilities/formatLabels'
 export { getIDType } from '../utilities/getIDType'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation'
+
 export { getTranslation } from '../utilities/getTranslation'
 export { isNumber } from '../utilities/isNumber'
 

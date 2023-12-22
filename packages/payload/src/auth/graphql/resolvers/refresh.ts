@@ -2,7 +2,7 @@ import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
 import { extractJWT } from '../../getExtractJWT'
-import refresh from '../../operations/refresh'
+import { refreshOperation } from '../../operations/refresh'
 
 function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -22,7 +22,7 @@ function refreshResolver(collection: Collection) {
       token,
     }
 
-    const result = await refresh(options)
+    const result = await refreshOperation(options)
 
     return result
   }
