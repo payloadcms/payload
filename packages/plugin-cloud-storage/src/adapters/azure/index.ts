@@ -54,6 +54,7 @@ export const azureBlobStorageAdapter = ({
   baseURL,
   connectionString,
   containerName,
+  storageClient: customStorageClient,
 }: Args): Adapter => {
   let storageClient: ContainerClient | null = customStorageClient ?? null
 
