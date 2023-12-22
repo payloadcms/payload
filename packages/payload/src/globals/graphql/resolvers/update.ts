@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../../'
@@ -18,7 +17,6 @@ type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<GeneratedTypes['globals'][TSlug]>
 

@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
@@ -14,7 +12,6 @@ type Resolver = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<Document>
 export default function restoreVersionResolver(globalConfig: SanitizedGlobalConfig): Resolver {

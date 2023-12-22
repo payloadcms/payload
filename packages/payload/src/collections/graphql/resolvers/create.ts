@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-import type { Response } from 'express'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../../'

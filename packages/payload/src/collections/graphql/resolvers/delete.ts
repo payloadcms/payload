@@ -1,6 +1,3 @@
-/* eslint-disable no-param-reassign */
-import type { Response } from 'express'
-
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Collection } from '../../config/types'
@@ -16,7 +13,6 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<GeneratedTypes['collections'][TSlug]>
 

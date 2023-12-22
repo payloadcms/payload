@@ -8,7 +8,6 @@ function logoutResolver(collection: Collection): any {
     const options = {
       collection,
       req: isolateTransactionID(context.req),
-      res: context.res,
     }
 
     const result = await logoutOperation(options)

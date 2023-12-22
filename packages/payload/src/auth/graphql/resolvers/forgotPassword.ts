@@ -1,7 +1,7 @@
 import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import forgotPassword from '../../operations/forgotPassword'
+import { forgotPasswordOperation } from '../../operations/forgotPassword'
 
 function forgotPasswordResolver(collection: Collection): any {
   async function resolver(_, args, context) {
@@ -15,7 +15,7 @@ function forgotPasswordResolver(collection: Collection): any {
       req: isolateTransactionID(context.req),
     }
 
-    await forgotPassword(options)
+    await forgotPasswordOperation(options)
     return true
   }
 

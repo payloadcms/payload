@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 

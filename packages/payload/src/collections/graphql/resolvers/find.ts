@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest } from '../../../types'
 import type { Where } from '../../../types'
@@ -21,7 +20,6 @@ export type Resolver = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => Promise<PaginatedDocs<any>>

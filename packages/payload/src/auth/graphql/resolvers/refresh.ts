@@ -18,7 +18,6 @@ function refreshResolver(collection: Collection) {
       collection,
       depth: 0,
       req: isolateTransactionID(context.req),
-      res: context.res,
       token,
     }
 

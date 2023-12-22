@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { Collection } from '../../../collections/config/types'
 
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
@@ -13,7 +12,6 @@ function verifyEmailResolver(collection: Collection) {
       api: 'GraphQL',
       collection,
       req: isolateTransactionID(context.req),
-      res: context.res,
       token: args.token,
     }
 

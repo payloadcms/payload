@@ -11,7 +11,6 @@ export type Resolver = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<CollectionPermission | GlobalPermission>
 
