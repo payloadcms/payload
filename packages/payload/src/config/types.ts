@@ -360,7 +360,7 @@ export type LocalizationConfig = Prettify<
  */
 export type Config = {
   /** Configure admin dashboard */
-  admin?: {
+  admin: {
     /** Automatically log in as a user when visiting the admin dashboard. */
     autoLogin?:
       | {
@@ -389,7 +389,7 @@ export type Config = {
      * */
     buildPath?: string
     /** Customize the bundler used to run your admin panel. */
-    bundler?: PayloadBundler
+    bundler: PayloadBundler
     /**
      * Add extra and/or replace built-in components with custom components
      *
