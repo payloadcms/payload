@@ -547,7 +547,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     config: SanitizedConfig,
     buildSchemaOptions: BuildSchemaOptions,
   ): void => {
-    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String }
+    const baseSchema = {
+      ...formatBaseSchema(field, buildSchemaOptions),
+      type: field.hasMany ? [String] : String,
+    }
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),

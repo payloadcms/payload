@@ -94,6 +94,21 @@ export interface LexicalMigrateField {
     }
     [k: string]: unknown
   } | null
+  lexicalWithSlateData?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
   lexicalSimple?: {
     root: {
       children: {
@@ -426,6 +441,35 @@ export interface BlockField {
           }
       )[]
     | null
+  relationshipBlocks?:
+    | {
+        relationship?: (string | null) | TextField
+        id?: string | null
+        blockName?: string | null
+        blockType: 'relationships'
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+export interface TextField {
+  id: string
+  text: string
+  localizedText?: string | null
+  i18nText?: string | null
+  defaultFunction?: string | null
+  defaultAsync?: string | null
+  overrideLength?: string | null
+  fieldWithDefaultValue?: string | null
+  dependentOnFieldWithDefaultValue?: string | null
+  customLabel?: string | null
+  customError?: string | null
+  beforeAndAfterInput?: string | null
+  hasMany?: string | null
+  validatesHasMany?: string | null
+  localizedHasMany?: string | null
+  withMinRows?: string | null
+  withMaxRows?: string | null
   updatedAt: string
   createdAt: string
 }
@@ -689,22 +733,6 @@ export interface RelationshipField {
         value: string | TextField
       }[]
     | null
-  updatedAt: string
-  createdAt: string
-}
-export interface TextField {
-  id: string
-  text: string
-  localizedText?: string | null
-  i18nText?: string | null
-  defaultFunction?: string | null
-  defaultAsync?: string | null
-  overrideLength?: string | null
-  fieldWithDefaultValue?: string | null
-  dependentOnFieldWithDefaultValue?: string | null
-  customLabel?: string | null
-  customError?: string | null
-  beforeAndAfterInput?: string | null
   updatedAt: string
   createdAt: string
 }
