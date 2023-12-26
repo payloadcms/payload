@@ -4,6 +4,7 @@ type Args<T = unknown> = {
   path: string
   value?: T
 }
+
 export type DescriptionFunction<T = unknown> = (args: Args<T>) => string
 
 export type DescriptionComponent<T = unknown> = React.ComponentType<Args<T>>

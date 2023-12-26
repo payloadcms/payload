@@ -1,19 +1,15 @@
-'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
-import './index.scss'
+// import { getTranslation } from 'payload/utilities'
 import { isComponent } from './types'
+import './index.scss'
 
 const baseClass = 'field-description'
 
 const FieldDescription: React.FC<Props> = (props) => {
   const { className, description, marginPlacement, path, value } = props
-
-  const { i18n } = useTranslation()
 
   if (isComponent(description)) {
     const Description = description
@@ -31,9 +27,14 @@ const FieldDescription: React.FC<Props> = (props) => {
           .filter(Boolean)
           .join(' ')}
       >
-        {typeof description === 'function'
-          ? description({ path, value })
-          : getTranslation(description, i18n)}
+        {
+          typeof description === 'function'
+            ? description({
+                path,
+                value,
+              })
+            : '' // : getTranslation(description, i18n)
+        }
       </div>
     )
   }

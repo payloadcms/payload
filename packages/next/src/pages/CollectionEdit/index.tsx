@@ -1,5 +1,5 @@
 import { SanitizedConfig } from 'payload/types'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
   EditDepthProvider,
@@ -12,6 +12,7 @@ import {
   formatFields,
   FormQueryParamsProvider,
   QueryParamTypes,
+  HydrateClientUser,
 } from '@payloadcms/ui'
 import queryString from 'qs'
 
@@ -135,15 +136,18 @@ export const CollectionEdit = async ({
     }
 
     return (
-      <EditDepthProvider depth={1}>
-        <FormQueryParamsProvider formQueryParams={formQueryParams}>
-          <RenderCustomComponent
-            CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
-            DefaultComponent={DefaultEdit}
-            componentProps={componentProps}
-          />
-        </FormQueryParamsProvider>
-      </EditDepthProvider>
+      <Fragment>
+        <HydrateClientUser user={user} />
+        <EditDepthProvider depth={1}>
+          <FormQueryParamsProvider formQueryParams={formQueryParams}>
+            <RenderCustomComponent
+              CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
+              DefaultComponent={DefaultEdit}
+              componentProps={componentProps}
+            />
+          </FormQueryParamsProvider>
+        </EditDepthProvider>
+      </Fragment>
     )
   }
 

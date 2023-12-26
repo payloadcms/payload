@@ -1,6 +1,11 @@
 import { SanitizedConfig } from 'payload/types'
-import React from 'react'
-import { RenderCustomComponent, TableColumnsProvider, DefaultList } from '@payloadcms/ui'
+import React, { Fragment } from 'react'
+import {
+  RenderCustomComponent,
+  TableColumnsProvider,
+  DefaultList,
+  HydrateClientUser,
+} from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 
 export const CollectionList = async ({
@@ -45,21 +50,24 @@ export const CollectionList = async ({
     })
 
     return (
-      <TableColumnsProvider collectionSlug={collectionSlug}>
-        <RenderCustomComponent
-          CustomComponent={ListToRender}
-          DefaultComponent={DefaultList}
-          componentProps={{
-            collection: collectionConfig,
-            data,
-            hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-            limit,
-            newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
-            // resetParams,
-            // titleField,
-          }}
-        />
-      </TableColumnsProvider>
+      <Fragment>
+        <HydrateClientUser user={user} />
+        <TableColumnsProvider collectionSlug={collectionSlug}>
+          <RenderCustomComponent
+            CustomComponent={ListToRender}
+            DefaultComponent={DefaultList}
+            componentProps={{
+              collection: collectionConfig,
+              data,
+              hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+              limit,
+              newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
+              // resetParams,
+              // titleField,
+            }}
+          />
+        </TableColumnsProvider>
+      </Fragment>
     )
   }
 

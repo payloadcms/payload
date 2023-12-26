@@ -28,7 +28,8 @@ export const generateMetadata = async ({
 
 export const Login: React.FC<{
   config: Promise<SanitizedConfig>
-}> = async ({ config: configPromise }) => {
+  searchParams: { [key: string]: string | string[] | undefined }
+}> = async ({ config: configPromise, searchParams }) => {
   const { config, user } = await initPage(configPromise, false)
 
   const {
@@ -50,7 +51,9 @@ export const Login: React.FC<{
           <Logo config={config} />
         </div>
         {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-        {!collection?.auth?.disableLocalStrategy && <LoginForm action={login} />}
+        {!collection?.auth?.disableLocalStrategy && (
+          <LoginForm action={login} config={config} searchParams={searchParams} />
+        )}
         {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
       </Fragment>
     </MinimalTemplate>

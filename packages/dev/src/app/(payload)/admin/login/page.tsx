@@ -6,4 +6,4 @@ import config from 'payload-config'
 
 export const generateMetadata = async (): Promise<Metadata> => generateMeta({ config })
 
-export default async () => <Login config={config} />
+export default async ({ searchParams }) => <Login config={config} searchParams={searchParams} />
