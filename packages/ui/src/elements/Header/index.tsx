@@ -12,12 +12,11 @@ import { useNav } from '../Nav/context'
 import StepNav from '../StepNav'
 import './index.scss'
 import { useActions } from '../../providers/ActionsProvider'
+import Link from 'next/link'
 
 const baseClass = 'app-header'
 
-export const AppHeader: React.FC<{
-  Link?: React.ComponentType
-}> = ({ Link }) => {
+export const AppHeader: React.FC = () => {
   const { t } = useTranslation()
 
   const {

@@ -1,27 +1,6 @@
 @import '../../scss/styles.scss';
 
 .template-default {
-  min-height: 100vh;
-  display: grid;
-  position: relative;
-  grid-template-columns: 0 auto;
-  transition: grid-template-columns var(--nav-trans-time) linear;
-  isolation: isolate;
-  @media (prefers-reduced-motion) {
-    transition: none;
-  }
-
-  &--nav-open {
-    width: 100%;
-    grid-template-columns: var(--nav-width) auto;
-
-    .template-default {
-      &__nav-overlay {
-        transition: opacity var(--nav-trans-time) linear;
-      }
-    }
-  }
-
   &__nav-toggler-wrapper {
     position: fixed;
     z-index: var(--z-modal);
@@ -62,15 +41,6 @@
   }
 
   @include small-break {
-    &--nav-open {
-      .template-default__wrap {
-        &:before {
-          opacity: 0.7;
-          visibility: visible;
-        }
-      }
-    }
-
     &__nav-toggler-wrapper {
       width: unset;
       justify-content: unset;

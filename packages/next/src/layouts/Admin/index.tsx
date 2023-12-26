@@ -1,7 +1,6 @@
 import React from 'react'
 import { Default as DefaultTemplate } from '@payloadcms/ui/templates'
 import { SanitizedConfig } from 'payload/types'
-import Link from 'next/link'
 
 import '@payloadcms/ui/scss/app.scss'
 
@@ -11,8 +10,9 @@ export const metadata = {
 }
 
 export const AdminLayout = async ({
-  children, // config: configPromise,
+  children,
+  config,
 }: {
   children: React.ReactNode
   config: Promise<SanitizedConfig>
-}) => <DefaultTemplate Link={Link}>{children}</DefaultTemplate>
+}) => <DefaultTemplate config={config}>{children}</DefaultTemplate>

@@ -15,13 +15,11 @@ import Logout from '../Logout'
 import NavGroup from '../NavGroup'
 import { useNav } from './context'
 import './index.scss'
+import Link from 'next/link'
 
 const baseClass = 'nav'
 
-const DefaultNav: React.FC<{
-  Link?: React.ComponentType
-}> = (props) => {
-  const { Link } = props
+const DefaultNav: React.FC = (props) => {
   const { navOpen, navRef, setNavOpen } = useNav()
   const { permissions, user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
