@@ -114,11 +114,7 @@ export interface BaseDatabaseAdapter {
    * A key-value store of all sessions open (used for transactions)
    */
   sessions?: {
-    [id: string]: {
-      db: unknown
-      reject: () => Promise<void>
-      resolve: () => Promise<void>
-    }
+    [id: string]: unknown
   }
 
   updateGlobal: UpdateGlobal

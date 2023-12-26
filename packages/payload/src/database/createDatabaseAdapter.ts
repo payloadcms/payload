@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import type { MarkOptional } from 'ts-essentials'
 
 import type {
