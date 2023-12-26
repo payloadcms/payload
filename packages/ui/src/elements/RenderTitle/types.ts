@@ -2,7 +2,9 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 
 export type Props = {
   className?: string
-  collection?: SanitizedCollectionConfig
+  useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
+  globalLabel?: SanitizedGlobalConfig['label']
+  globalSlug?: SanitizedGlobalConfig['slug']
   data?: {
     id?: string
   }
@@ -10,5 +12,4 @@ export type Props = {
   fallback?: string
   global?: SanitizedGlobalConfig
   title?: string
-  useAsTitle?: string
 }

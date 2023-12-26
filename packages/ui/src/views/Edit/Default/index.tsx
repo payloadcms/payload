@@ -54,7 +54,13 @@ export const DefaultCollectionEdit: React.FC<
       /> */}
       {!(collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave) &&
         !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-      <SetStepNav collectionSlug={collectionConfig?.slug} id={id} isEditing={isEditing} />
+      <SetStepNav
+        collectionSlug={collectionConfig?.slug}
+        useAsTitle={collectionConfig?.admin?.useAsTitle}
+        id={id}
+        isEditing={isEditing}
+        pluralLabel={collectionConfig?.labels?.plural}
+      />
       <DocumentControls
         apiURL={apiURL}
         config={config}

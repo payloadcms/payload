@@ -5,13 +5,13 @@ import type { DefaultEditViewProps } from './types'
 import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
-import { OperationContext, OperationProvider } from '../../providers/OperationProvider'
+import { OperationProvider } from '../../providers/OperationProvider'
 import './index.scss'
 import { RenderCustomView } from './RenderCustomView'
 
 const baseClass = 'collection-edit'
 
-export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
+export const DefaultEdit: React.FC<DefaultEditViewProps> = async (props) => {
   const {
     id,
     action,
@@ -24,10 +24,9 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
     isEditing,
     isLoading,
     onSave: onSaveFromProps,
-    user,
   } = props
 
-  const { auth } = collectionConfig
+  // const { auth } = collectionConfig
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
@@ -76,7 +75,7 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = (props) => {
           action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
-          initialState={data}
+          initialState={internalState}
           method={id ? 'PATCH' : 'POST'}
           // onSuccess={onSave}
         >

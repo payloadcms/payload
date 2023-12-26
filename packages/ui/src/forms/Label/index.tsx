@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+// import { getTranslation } from 'payload/utilities'
 import './index.scss'
 
 const Label: React.FC<Props> = (props) => {
@@ -12,6 +12,7 @@ const Label: React.FC<Props> = (props) => {
   if (label) {
     return (
       <label className="field-label" htmlFor={htmlFor}>
+        {typeof label === 'string' ? label : ''}
         {/* {getTranslation(label, i18n)} */}
         {required && <span className="required">*</span>}
       </label>

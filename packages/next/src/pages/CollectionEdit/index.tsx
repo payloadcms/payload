@@ -87,7 +87,7 @@ export const CollectionEdit = async ({
 
     const state = await buildStateFromSchema({
       id,
-      config,
+      config: collectionConfig,
       data: data || {},
       fieldSchema,
       locale,

@@ -12,14 +12,14 @@ export type Row = {
 }
 
 export type FormField = {
-  condition?: Condition
+  // condition?: Condition
   disableFormData?: boolean
   errorMessage?: string
   initialValue: unknown
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
-  validate?: Validate
+  // validate?: Validate
   value: unknown
 }
 

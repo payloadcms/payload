@@ -9,21 +9,26 @@ import { getTranslation } from 'payload/utilities'
 import { useStepNav } from '../../elements/StepNav'
 import { useConfig } from '../../providers/Config'
 import { useEditDepth } from '../../providers/EditDepth'
+import useTitle from '../../hooks/useTitle'
 
 export const SetStepNav: React.FC<{
   collectionSlug?: SanitizedCollectionConfig['slug']
+  useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
+  globalLabel?: SanitizedGlobalConfig['label']
   globalSlug?: SanitizedGlobalConfig['slug']
   pluralLabel?: SanitizedCollectionConfig['labels']['plural']
-  useAsTitle?: string | undefined
   id?: number | string
   isEditing: boolean
   view?: string
 }> = (props) => {
-  const { collectionSlug, globalSlug, pluralLabel, useAsTitle, id, isEditing } = props
+  const { collectionSlug, globalSlug, pluralLabel, useAsTitle, id, isEditing, globalLabel } = props
   const view: string | undefined = props?.view || undefined
 
-  let title = ''
-  // const title = useTitle({ collection, global })
+  const title = useTitle({
+    useAsTitle,
+    globalLabel,
+    globalSlug,
+  })
 
   const { setStepNav } = useStepNav()
 

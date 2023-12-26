@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next'
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { ClientConfig, NonPresentationalField } from 'payload/types'
+import type { NonPresentationalField, SanitizedCollectionConfig } from 'payload/types'
 import type { Data, Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -12,7 +12,7 @@ import getValueWithDefault from 'payload/dist/fields/getDefaultValue' // TODO: r
 import { iterateFields } from './iterateFields'
 
 type Args = {
-  config: ClientConfig
+  config: SanitizedCollectionConfig
   data: Data
   field: NonPresentationalField
   fullData: Data
@@ -46,11 +46,11 @@ export const addFieldStatePromise = async ({
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     const fieldState: FormField = {
-      condition: field.admin?.condition,
+      // condition: field.admin?.condition,
       initialValue: undefined,
       passesCondition,
       valid: true,
-      validate: field.validate,
+      // validate: field.validate,
       value: undefined,
     }
 
@@ -67,18 +67,18 @@ export const addFieldStatePromise = async ({
 
     let validationResult: boolean | string = true
 
-    if (typeof fieldState.validate === 'function') {
-      validationResult = await fieldState.validate(data?.[field.name], {
-        ...field,
-        id,
-        config,
-        data: fullData,
-        operation,
-        siblingData: data,
-        t,
-        user,
-      })
-    }
+    // if (typeof fieldState.validate === 'function') {
+    //   validationResult = await fieldState.validate(data?.[field.name], {
+    //     ...field,
+    //     id,
+    //     config,
+    //     data: fullData,
+    //     operation,
+    //     siblingData: data,
+    //     t,
+    //     user,
+    //   })
+    // }
 
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult

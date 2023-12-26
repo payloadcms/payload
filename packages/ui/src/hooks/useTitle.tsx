@@ -1,80 +1,33 @@
-import type i18next from 'i18next'
-
-import { useTranslation } from 'react-i18next'
-
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig, ClientConfig } from 'payload/types'
 
-import { getObjectDotNotation } from 'payload/utilities'
-import { getTranslation } from 'payload/utilities'
 import { useFormFields } from '../forms/Form/context'
-import { useConfig } from '../providers/Config'
-import { formatDate } from '../utilities/formatDate'
-import { FormField } from '../forms/Form/types'
-
-// either send the `useAsTitle` field itself
-// or an object to dynamically extract the `useAsTitle` field from
-export const formatUseAsTitle = (args: {
-  collection: ClientConfig['collections'][0]
-  config: ClientConfig
-  doc?: Record<string, any>
-  field?: FormField
-  i18n: typeof i18next
-}): string => {
-  const {
-    collection: {
-      admin: { useAsTitle },
-    },
-    collection,
-    config: {
-      admin: { dateFormat: dateFormatFromConfig },
-    },
-    doc,
-    field: fieldFromProps,
-    i18n,
-  } = args
-
-  if (!fieldFromProps && !doc) {
-    return ''
-  }
-
-  const field = fieldFromProps || getObjectDotNotation<FormField>(doc, collection.admin.useAsTitle)
-
-  let title = typeof field === 'string' ? field : (field?.value as string)
-
-  const fieldConfig = collection?.fields?.find((f) => 'name' in f && f?.name === useAsTitle)
-  const isDate = fieldConfig?.type === 'date'
-
-  if (title && isDate) {
-    const dateFormat = fieldConfig?.admin?.date?.displayFormat || dateFormatFromConfig
-    title = formatDate(title, dateFormat, i18n?.language)
-  }
-
-  return title
-}
+import { formatDocTitle } from '../utilities/formatDocTitle'
 
 // Keep `collection` optional so that component do need to worry about conditionally rendering hooks
 // This is so that components which take both `collection` and `global` props can use this hook
 const useTitle = (args: {
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
+  useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
+  globalLabel?: SanitizedGlobalConfig['label']
+  globalSlug?: SanitizedGlobalConfig['slug']
 }): string => {
-  const { collection, global } = args
-  const { i18n } = useTranslation()
-  const config = useConfig()
+  const { useAsTitle, globalLabel, globalSlug } = args
+  // const { i18n } = useTranslation()
 
   let title: string = ''
 
-  const field = useFormFields(([formFields]) => {
-    if (!collection) return
-    return formFields[collection?.admin?.useAsTitle]
-  })
+  const field = useFormFields(([formFields]) => formFields[useAsTitle])
 
-  if (collection) {
-    title = formatUseAsTitle({ collection, config, field, i18n })
+  if (useAsTitle) {
+    title = formatDocTitle({
+      useAsTitle,
+      field,
+      // i18n
+    })
   }
 
-  if (global) {
-    title = getTranslation(global.label, i18n) || global.slug
+  if (globalLabel) {
+    title = typeof globalLabel === 'string' ? globalLabel : globalSlug
+    // title = getTranslation(globalLabel, i18n) || globalSlug
   }
 
   return title
