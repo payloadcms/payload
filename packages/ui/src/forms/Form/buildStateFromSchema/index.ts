@@ -1,13 +1,13 @@
 import type { TFunction } from 'i18next'
 
 import type { User } from 'payload/auth'
-import type { ClientConfig, Field as FieldSchema } from 'payload/types'
+import type { Field as FieldSchema, SanitizedCollectionConfig } from 'payload/types'
 import type { Data, Fields } from '../types'
 
 import { iterateFields } from './iterateFields'
 
 type Args = {
-  config: ClientConfig
+  config: SanitizedCollectionConfig
   data?: Data
   fieldSchema: FieldSchema[] | undefined
   id?: number | string
@@ -17,7 +17,7 @@ type Args = {
     [key: string]: unknown
   }
   siblingData?: Data
-  t: TFunction
+  t?: TFunction // TODO: make this required again
   user?: User | null
 }
 

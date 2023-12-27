@@ -1,20 +1,23 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import type { Props } from './types'
 
 import { date as dateValidation } from 'payload/fields/validations'
-import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { DateTimeInput } from './Input'
 import './index.scss'
+import FieldDescription from '../../FieldDescription'
+import { fieldBaseClass } from '../shared'
+import DefaultLabel from '../../Label'
+import DefaultError from '../../Error'
+
+const baseClass = 'date-time-field'
 
 const DateTime: React.FC<Props> = (props) => {
   const {
     name,
     admin: {
       className,
-      components,
-      condition,
+      components: { beforeInput, afterInput, Label, Error },
       date,
       description,
       placeholder,
@@ -30,40 +33,47 @@ const DateTime: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      return validate(value, { ...options, required })
-    },
-    [validate, required],
-  )
-
-  const { errorMessage, setValue, showError, value } = useField<Date>({
-    condition,
-    path,
-    validate: memoizedValidate,
-  })
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   return (
-    <DateTimeInput
-      className={className}
-      components={components}
-      datePickerProps={date}
-      description={description}
-      errorMessage={errorMessage}
-      label={label}
-      onChange={(incomingDate) => {
-        if (!readOnly) setValue(incomingDate?.toISOString() || null)
+    <div
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        // showError && `${baseClass}--has-error`,
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
       }}
-      path={path}
-      placeholder={placeholder}
-      readOnly={readOnly}
-      required={required}
-      showError={showError}
-      style={style}
-      value={value}
-      width={width}
-    />
+    >
+      <div className={`${baseClass}__error-wrap`}>
+        <ErrorComp
+        // message={errorMessage}
+        // showError={showError}
+        />
+      </div>
+      <LabelComp htmlFor={path} label={label} required={required} />
+      <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
+        <DateTimeInput
+          datePickerProps={date}
+          placeholder={placeholder}
+          readOnly={readOnly}
+          path={path}
+          style={style}
+          width={width}
+        />
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+      </div>
+      <FieldDescription description={description} path={path} />
+    </div>
   )
 }
 
-export default withCondition(DateTime)
+export default DateTime

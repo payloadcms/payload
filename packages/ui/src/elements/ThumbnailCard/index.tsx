@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { formatUseAsTitle } from '../../hooks/useTitle'
+import { formatDocTitle } from '../../utilities/formatDocTitle'
 import { useConfig } from '../../providers/Config'
 import Thumbnail from '../Thumbnail'
 import './index.scss'
@@ -37,11 +37,10 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
 
   if (!title) {
     title =
-      formatUseAsTitle({
-        collection,
-        config,
+      formatDocTitle({
+        useAsTitle: collection?.admin?.useAsTitle,
         doc,
-        i18n,
+        // i18n,
       }) ||
       (doc?.filename as string) ||
       `[${t('untitled')}]`

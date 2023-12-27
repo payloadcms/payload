@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next'
 
 import type { User } from 'payload/auth'
-import type { ClientConfig, Field as FieldSchema } from 'payload/types'
+import type { Field as FieldSchema, SanitizedCollectionConfig } from 'payload/types'
 import type { Data, Fields } from '../types'
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise'
 
@@ -16,7 +16,7 @@ type Args = {
   /**
    * config is only needed for validation
    */
-  config?: ClientConfig
+  config?: SanitizedCollectionConfig
   data: Data
   fields: FieldSchema[]
   filter?: (args: AddFieldStatePromiseArgs) => boolean

@@ -1,7 +1,7 @@
 import type { Action, Option, OptionGroup } from './types'
 
 import { getTranslation } from 'payload/utilities'
-import { formatUseAsTitle } from '../../../hooks/useTitle'
+import { formatDocTitle } from '../../../utilities/formatDocTitle'
 
 const reduceToIDs = (options) =>
   options.reduce((ids, option) => {
@@ -35,11 +35,10 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const relation = collection.slug
       const newOptions = [...state]
 
-      const docTitle = formatUseAsTitle({
-        collection,
-        config,
+      const docTitle = formatDocTitle({
+        useAsTitle: collection.admin.useAsTitle,
         doc,
-        i18n,
+        // i18n,
       })
 
       const foundOptionGroup = newOptions.find(
@@ -70,11 +69,10 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
         ) {
           loadedIDs.push({ id: doc.id, relationTo: relation })
 
-          const docTitle = formatUseAsTitle({
-            collection,
-            config,
+          const docTitle = formatDocTitle({
+            useAsTitle: collection.admin.useAsTitle,
             doc,
-            i18n,
+            // i18n,
           })
 
           return [

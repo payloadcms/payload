@@ -241,7 +241,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
           },
         },
       ]}
-      collection={selectedCollectionConfig}
+      collectionSlug={selectedCollectionConfig.slug}
     >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent

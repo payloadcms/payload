@@ -11,6 +11,7 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "exports": {
+    ".": "./src/exports/index.ts",
     "./*": {
       "import": "./src/exports/*.ts",
       "require": "./src/exports/*.ts",

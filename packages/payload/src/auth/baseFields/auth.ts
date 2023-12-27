@@ -1,6 +1,7 @@
+import { email } from 'payload/fields/validations'
+
 import type { Field } from '../../fields/config/types'
 
-import { email } from '../../fields/validations'
 import { extractTranslations } from '../../translations/extractTranslations'
 
 const labels = extractTranslations(['general:email'])

@@ -4,8 +4,8 @@ import isDeepEqual from 'deep-equal'
 import { serialize } from 'object-to-formdata'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { useRouter } from 'next/navigation'
 
 import type { Field } from 'payload/types'
 import type {
@@ -71,7 +71,8 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   } = props
 
-  const history = useHistory()
+  const { push } = useRouter()
+
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation('general')
   const { refreshCookie, user } = useAuth()
@@ -262,12 +263,18 @@ const Form: React.FC<Props> = (props) => {
       const formData = contextRef.current.createFormData(overrides)
 
       try {
-        const res = await requests[methodToUse.toLowerCase()](actionToUse, {
-          body: formData,
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        })
+        let res
+
+        if (typeof actionToUse === 'string') {
+          res = await requests[methodToUse.toLowerCase()](actionToUse, {
+            body: formData,
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          })
+        } else if (typeof actionToUse === 'function') {
+          res = await actionToUse(formData)
+        }
 
         setModified(false)
 
@@ -291,23 +298,23 @@ const Form: React.FC<Props> = (props) => {
           if (typeof onSuccess === 'function') onSuccess(json)
 
           if (redirect) {
-            const destination = {
-              pathname: redirect,
-              state: {},
-            }
+            // const destination = {
+            //   pathname: redirect,
+            //   state: {},
+            // }
 
-            if (typeof json === 'object' && json.message && !disableSuccessStatus) {
-              destination.state = {
-                status: [
-                  {
-                    message: json.message,
-                    type: 'success',
-                  },
-                ],
-              }
-            }
+            // if (typeof json === 'object' && json.message && !disableSuccessStatus) {
+            //   destination.state = {
+            //     status: [
+            //       {
+            //         message: json.message,
+            //         type: 'success',
+            //       },
+            //     ],
+            //   }
+            // }
 
-            history.push(destination)
+            push(redirect)
           } else if (!disableSuccessStatus) {
             toast.success(json.message || t('submissionSuccessful'), { autoClose: 3000 })
           }
@@ -382,11 +389,11 @@ const Form: React.FC<Props> = (props) => {
       dispatchFields,
       fields,
       handleResponse,
-      history,
       method,
       onSubmit,
       onSuccess,
       redirect,
+      push,
       t,
       i18n,
       waitForAutocomplete,

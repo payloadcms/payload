@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next'
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { ClientConfig, NonPresentationalField } from 'payload/types'
+import type { NonPresentationalField, SanitizedCollectionConfig } from 'payload/types'
 import type { Data, Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -16,7 +16,7 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
-  config: ClientConfig
+  config: SanitizedCollectionConfig
   data: Data
   field: NonPresentationalField
   /**
@@ -86,12 +86,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } = args
   if (fieldAffectsData(field)) {
     const fieldState: FormField = {
-      condition: field.admin?.condition,
+      // condition: field.admin?.condition,
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
       valid: true,
-      validate: field.validate,
+      // validate: field.validate,
       value: undefined,
     }
 
@@ -108,18 +108,18 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     let validationResult: string | true = true
 
-    if (typeof fieldState.validate === 'function' && !skipValidation) {
-      validationResult = await fieldState.validate(data?.[field.name], {
-        ...field,
-        id,
-        config,
-        data: fullData,
-        operation,
-        siblingData: data,
-        t,
-        user,
-      })
-    }
+    // if (typeof fieldState.validate === 'function' && !skipValidation) {
+    //   validationResult = await fieldState.validate(data?.[field.name], {
+    //     ...field,
+    //     id,
+    //     config,
+    //     data: fullData,
+    //     operation,
+    //     siblingData: data,
+    //     t,
+    //     user,
+    //   })
+    // }
 
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult

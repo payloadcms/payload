@@ -1,16 +1,15 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import type { Props } from './types'
 
 import { password } from 'payload/fields/validations'
 import Error from '../../Error'
 import Label from '../../Label'
-import useField from '../../useField'
-import withCondition from '../../withCondition'
 import './index.scss'
 import { fieldBaseClass } from '../shared'
+import { PasswordInput } from './Input'
 
-const Password: React.FC<Props> = (props) => {
+export const Password: React.FC<Props> = (props) => {
   const {
     name,
     autoComplete,
@@ -26,22 +25,14 @@ const Password: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      const validationResult = validate(value, { ...options, required })
-      return validationResult
-    },
-    [validate, required],
-  )
-
-  const { errorMessage, formProcessing, setValue, showError, value } = useField({
-    path,
-    validate: memoizedValidate,
-  })
-
   return (
     <div
-      className={[fieldBaseClass, 'password', className, showError && 'error']
+      className={[
+        fieldBaseClass,
+        'password',
+        className,
+        // showError && 'error'/
+      ]
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -49,19 +40,15 @@ const Password: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-      <input
-        autoComplete={autoComplete}
-        disabled={formProcessing || disabled}
-        id={`field-${path.replace(/\./g, '__')}`}
-        name={path}
-        onChange={setValue}
-        type="password"
-        value={(value as string) || ''}
+      <Error
+        message=""
+        // message={errorMessage}
+        // showError={showError}
       />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <PasswordInput name={name} autoComplete={autoComplete} disabled={disabled} path={path} />
     </div>
   )
 }
 
-export default withCondition(Password)
+export default Password

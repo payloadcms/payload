@@ -55,5 +55,10 @@
     "titleBar.inactiveBackground": "#e42c9d99",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "peacock.color": "#e42c9d"
+  "peacock.color": "#e42c9d",
+  "[javascript][typescript][typescriptreact]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  }
 }
