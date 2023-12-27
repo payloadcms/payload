@@ -196,9 +196,7 @@ export async function buildSearchParam({
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            console.log('formattedvalue', formattedValue)
             result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } })
-            console.log('isValid', result.value.$or)
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
               (relationTo) => {

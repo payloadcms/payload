@@ -9,7 +9,7 @@ import NavGroup from '../NavGroup'
 import './index.scss'
 import Link from 'next/link'
 import { SanitizedConfig } from 'payload/types'
-import { User } from 'payload/auth'
+import { Permissions, User } from 'payload/auth'
 import { NavWrapper } from './NavWrapper'
 import { NavHamburger } from './NavHamburger'
 import { i18n } from 'i18next'
@@ -19,8 +19,9 @@ const baseClass = 'nav'
 export const DefaultNav: React.FC<{
   config: SanitizedConfig
   user: User
+  permissions: Permissions
 }> = (props) => {
-  const { config, user } = props
+  const { config, user, permissions } = props
   // const { i18n } = useTranslation('general')
 
   const {
@@ -59,14 +60,15 @@ export const DefaultNav: React.FC<{
           return entityToGroup
         }),
     ],
-    undefined,
-    {} as i18n,
-    // permissions,
+    permissions,
+    {
+      t: (key: string) => key, // TODO: this is just a placeholder
+    } as i18n,
     // i18n,
   )
 
   return (
-    <NavWrapper>
+    <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
         {Array.isArray(beforeNavLinks) &&
           beforeNavLinks.map((Component, i) => <Component key={i} />)}
@@ -80,12 +82,14 @@ export const DefaultNav: React.FC<{
 
                 if (type === EntityType.collection) {
                   href = `${admin}/collections/${entity.slug}`
+                  entityLabel = entity.labels.plural['en'] // TODO: this is just a placeholder
                   // entityLabel = getTranslation(entity.labels.plural, i18n)
                   id = `nav-${entity.slug}`
                 }
 
                 if (type === EntityType.global) {
                   href = `${admin}/globals/${entity.slug}`
+                  entityLabel = entity.label['en'] // TODO: this is just a placeholder
                   // entityLabel = getTranslation(entity.label, i18n)
                   id = `nav-global-${entity.slug}`
                 }

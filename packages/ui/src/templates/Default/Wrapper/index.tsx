@@ -4,7 +4,7 @@ import { useNav } from '../../../elements/Nav/context'
 
 import './index.scss'
 
-export const NavWrapper: React.FC<{
+export const Wrapper: React.FC<{
   baseClass?: string
   className?: string
   children?: React.ReactNode
