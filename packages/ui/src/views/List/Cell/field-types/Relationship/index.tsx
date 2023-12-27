@@ -6,7 +6,7 @@ import type { CellComponentProps } from '../../types'
 
 import { getTranslation } from 'payload/utilities'
 import { useIntersect } from '../../../../../hooks/useIntersect'
-import { formatUseAsTitle } from '../../../../../hooks/useTitle'
+import { formatDocTitle } from '../../../../../utilities/formatDocTitle'
 import { useConfig } from '../../../../../providers/Config'
 import { useListRelationships } from '../../../RelationshipProvider'
 import './index.scss'
@@ -61,11 +61,10 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
         const document = documents[relationTo][value]
         const relatedCollection = collections.find(({ slug }) => slug === relationTo)
 
-        const label = formatUseAsTitle({
-          collection: relatedCollection,
-          config,
+        const label = formatDocTitle({
+          useAsTitle: relatedCollection?.admin?.useAsTitle,
           doc: document === false ? null : document,
-          i18n,
+          // i18n,
         })
 
         return (

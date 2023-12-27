@@ -6,7 +6,6 @@ import { text } from 'payload/fields/validations'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { isFieldRTL } from '../shared'
 import TextInput from './Input'
 
@@ -58,32 +57,7 @@ const Text: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  return (
-    <TextInput
-      Error={Error}
-      Label={Label}
-      afterInput={afterInput}
-      beforeInput={beforeInput}
-      className={className}
-      description={description}
-      errorMessage={errorMessage}
-      inputRef={inputRef}
-      label={label}
-      name={name}
-      onChange={(e) => {
-        setValue(e.target.value)
-      }}
-      path={path}
-      placeholder={placeholder}
-      readOnly={readOnly}
-      required={required}
-      rtl={isRTL}
-      showError={showError}
-      style={style}
-      value={value}
-      width={width}
-    />
-  )
+  return null
 }
 
-export default withCondition(Text)
+export default Text

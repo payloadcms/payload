@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react'
 import AnimateHeight from 'react-animate-height'
 import { useTranslation } from 'react-i18next'

@@ -1,26 +1,27 @@
 import type { Field, ClientConfig, SanitizedConfig } from 'payload/types'
 
-const sanitizeFields = (fields: Field[]): Field[] =>
-  fields.map((f) => {
-    const field = { ...f }
+export const sanitizeField = (f) => {
+  const field = { ...f }
 
-    if ('access' in field) delete field.access
-    if ('hooks' in field) delete field.hooks
-    if ('validate' in field) delete field.validate
-    if ('defaultValue' in field) delete field.defaultValue
+  if ('access' in field) delete field.access
+  if ('hooks' in field) delete field.hooks
+  if ('validate' in field) delete field.validate
+  if ('defaultValue' in field) delete field.defaultValue
 
-    if ('fields' in field) {
-      field.fields = sanitizeFields(field.fields)
+  if ('fields' in field) {
+    field.fields = sanitizeFields(field.fields)
+  }
+
+  if ('admin' in field) {
+    if ('components' in field.admin) {
+      delete field.admin.components
     }
+  }
 
-    if ('admin' in field) {
-      if ('components' in field.admin) {
-        delete field.admin.components
-      }
-    }
+  return field
+}
 
-    return field
-  })
+export const sanitizeFields = (fields: Field[]): Field[] => fields.map(sanitizeField)
 
 export const createClientConfig = async (
   configPromise: SanitizedConfig | Promise<SanitizedConfig>,

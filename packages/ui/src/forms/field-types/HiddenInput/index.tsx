@@ -1,38 +1,18 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import type { Props } from './types'
-
-import useField from '../../useField'
-import withCondition from '../../withCondition'
+import { HiddenInput } from './Input'
 
 /**
  * This is mainly used to save a value on the form that is not visible to the user.
  * For example, this sets the `ìd` property of a block in the Blocks field.
  */
-const HiddenInput: React.FC<Props> = (props) => {
-  const { name, disableModifyingForm = true, path: pathFromProps, value: valueFromProps } = props
+const HiddenField: React.FC<Props> = (props) => {
+  const { name, disableModifyingForm = true, path: pathFromProps, value } = props
 
   const path = pathFromProps || name
 
-  const { setValue, value } = useField({
-    path,
-  })
-
-  useEffect(() => {
-    if (valueFromProps !== undefined) {
-      setValue(valueFromProps, disableModifyingForm)
-    }
-  }, [valueFromProps, setValue, disableModifyingForm])
-
-  return (
-    <input
-      id={`field-${path.replace(/\./g, '__')}`}
-      name={path}
-      onChange={setValue}
-      type="hidden"
-      value={(value as string) || ''}
-    />
-  )
+  return <HiddenInput path={path} value={value} disableModifyingForm={disableModifyingForm} />
 }
 
-export default withCondition(HiddenInput)
+export default HiddenField
