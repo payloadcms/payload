@@ -1,6 +1,5 @@
-import type { Payload } from 'payload'
 import type { PathToQuery } from 'payload/database'
-import type { Field } from 'payload/types'
+import type { Field, PayloadT } from 'payload/types'
 import type { Operator } from 'payload/types'
 
 import objectID from 'bson-objectid'
@@ -43,7 +42,7 @@ export async function buildSearchParam({
   incomingPath: string
   locale?: string
   operator: string
-  payload: Payload
+  payload: PayloadT
   val: unknown
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
@@ -197,7 +196,9 @@ export async function buildSearchParam({
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
+            console.log('formattedvalue', formattedValue)
             result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } })
+            console.log('isValid', result.value.$or)
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
               (relationTo) => {

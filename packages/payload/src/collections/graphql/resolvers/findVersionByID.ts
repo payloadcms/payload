@@ -1,6 +1,3 @@
-/* eslint-disable no-param-reassign */
-import type { Response } from 'express'
-
 import type { PayloadRequest } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 import type { Collection, TypeWithID } from '../../config/types'
@@ -18,7 +15,6 @@ export type Resolver<T extends TypeWithID = any> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<TypeWithVersion<T>>
 

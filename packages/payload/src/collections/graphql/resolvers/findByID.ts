@@ -15,7 +15,6 @@ export type Resolver<T> = (
   },
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<T>
 

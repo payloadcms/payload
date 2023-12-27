@@ -1,5 +1,6 @@
 import config from 'payload-config'
 import { createPayloadRequest } from '../utilities/createPayloadRequest'
+import { match } from 'path-to-regexp'
 
 import { me } from './auth/me'
 import { init } from './auth/init'
@@ -31,6 +32,8 @@ import { docAccess as docAccessGlobal } from './globals/docAccess'
 import { findVersions as findVersionsGlobal } from './globals/findVersions'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
+import { PayloadRequest } from 'payload/types'
+import { Endpoint } from 'payload/config'
 
 const endpoints = {
   root: {
@@ -86,6 +89,52 @@ const endpoints = {
   },
 }
 
+const fn = () => {
+  return Response.json(
+    {},
+    {
+      status: 200,
+    },
+  )
+}
+
+const handleCustomEndpoints = ({
+  entitySlug,
+  endpoints,
+  request,
+  payloadRequest,
+}: {
+  entitySlug?: string
+  endpoints: Endpoint[]
+  request: Request
+  payloadRequest: PayloadRequest
+}): Promise<Response> => {
+  if (endpoints && endpoints.length > 0) {
+    let handlerParams = {}
+    const { pathname } = new URL(request.url)
+    const pathPrefix = entitySlug ? `${payloadRequest.payload.config.routes.api}/${entitySlug}` : ''
+    const customEndpoint = endpoints.find((endpoint) => {
+      if (endpoint.method === payloadRequest.method.toLowerCase()) {
+        const pathMatchFn = match(`${pathPrefix}${endpoint.path}`, {
+          decode: decodeURIComponent,
+        })
+        const tempParams = pathMatchFn(pathname)
+        if (tempParams) {
+          handlerParams = tempParams.params
+          return true
+        }
+      }
+    })
+
+    if (customEndpoint) {
+      return customEndpoint.handler({
+        req: customEndpoint.root ? request : payloadRequest,
+        params: handlerParams,
+      })
+    }
+  }
+}
+
 export const GET = async (
   request: Request,
   { params: { slug } }: { params: { slug: string[] } },
@@ -100,11 +149,14 @@ export const GET = async (
     },
   })
 
-  if (slug.length === 1 && slug1 === 'access') {
-    return endpoints.root.GET.access({ req })
-  }
-
   if (req?.collection) {
+    await handleCustomEndpoints({
+      entitySlug: slug1,
+      payloadRequest: req,
+      request,
+      endpoints: req.collection.config?.endpoints || [],
+    })
+
     switch (slug.length) {
       case 1:
         // /:collection
@@ -115,9 +167,8 @@ export const GET = async (
           // /:collection/me
           // /:collection/versions
           return endpoints.collection.GET?.[slug2]({ req })
-        } else if (req.collection.config.endpoints && req.collection.config.endpoints.length > 0) {
-          // /:collection/:id
         }
+        // /:collection/:id
         return endpoints.collection.GET.findByID({ req, id: slug2 })
       case 3:
         // /:collection/access/:id
@@ -133,6 +184,15 @@ export const GET = async (
   } else if (slug1 === 'globals') {
     const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
 
+    if (slug2) {
+      await handleCustomEndpoints({
+        entitySlug: `${slug1}/${slug2}`,
+        payloadRequest: req,
+        request,
+        endpoints: globalConfig?.endpoints || [],
+      })
+    }
+
     switch (slug.length) {
       case 2:
         // /globals/:slug
@@ -147,6 +207,17 @@ export const GET = async (
       default:
         return new Response('Route Not Found', { status: 404 })
     }
+  } else {
+    // root routes
+    await handleCustomEndpoints({
+      payloadRequest: req,
+      request,
+      endpoints: req.payload.config.endpoints,
+    })
+
+    if (slug.length === 1 && slug1 === 'access') {
+      return endpoints.root.GET.access({ req })
+    }
   }
 }
 
@@ -159,6 +230,13 @@ export const POST = async (
   const req = await createPayloadRequest({ request, config, params: { collection: slug1 } })
 
   if (req?.collection) {
+    await handleCustomEndpoints({
+      entitySlug: slug1,
+      payloadRequest: req,
+      request,
+      endpoints: req.collection.config?.endpoints || [],
+    })
+
     switch (slug.length) {
       case 1:
         // /:collection
@@ -173,7 +251,7 @@ export const POST = async (
           // /:collection/forgot-password
           // /:collection/reset-password
           // /:collection/refresh-token
-          return endpoints.collection.POST[slug2]({ req })
+          return endpoints.collection.POST?.[slug2]({ req })
         }
       case 3:
         // /:collection/access/:id
@@ -185,6 +263,16 @@ export const POST = async (
     }
   } else if (slug1 === 'globals') {
     const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
+
+    if (slug2) {
+      await handleCustomEndpoints({
+        entitySlug: `${slug1}/${slug2}`,
+        payloadRequest: req,
+        request,
+        endpoints: globalConfig?.endpoints || [],
+      })
+    }
+
     switch (slug.length) {
       case 2:
         // /globals/:slug
@@ -198,6 +286,13 @@ export const POST = async (
       default:
         return new Response('Route Not Found', { status: 404 })
     }
+  } else {
+    // root routes
+    await handleCustomEndpoints({
+      payloadRequest: req,
+      request,
+      endpoints: req.payload.config.endpoints,
+    })
   }
 }
 
@@ -216,6 +311,13 @@ export const DELETE = async (
   })
 
   if (req?.collection) {
+    await handleCustomEndpoints({
+      entitySlug: slug1,
+      payloadRequest: req,
+      request,
+      endpoints: req.collection.config?.endpoints || [],
+    })
+
     switch (slug.length) {
       case 1:
         // /:collection
@@ -226,6 +328,13 @@ export const DELETE = async (
       default:
         return new Response('Route Not Found', { status: 404 })
     }
+  } else {
+    // root routes
+    await handleCustomEndpoints({
+      payloadRequest: req,
+      request,
+      endpoints: req.payload.config.endpoints,
+    })
   }
 }
 
@@ -244,6 +353,13 @@ export const PATCH = async (
   })
 
   if (req?.collection) {
+    await handleCustomEndpoints({
+      entitySlug: slug1,
+      payloadRequest: req,
+      request,
+      endpoints: req.collection.config?.endpoints || [],
+    })
+
     switch (slug.length) {
       case 1:
         // /:collection
@@ -254,5 +370,12 @@ export const PATCH = async (
       default:
         return new Response('Route Not Found', { status: 404 })
     }
+  } else {
+    // root routes
+    await handleCustomEndpoints({
+      payloadRequest: req,
+      request,
+      endpoints: req.payload.config.endpoints,
+    })
   }
 }

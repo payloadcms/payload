@@ -13,7 +13,6 @@ function loginResolver(collection: Collection) {
       },
       depth: 0,
       req: isolateTransactionID(context.req),
-      res: context.res,
     }
 
     const result = loginOperation(options)

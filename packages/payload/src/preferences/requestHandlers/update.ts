@@ -1,31 +1,27 @@
-import type { NextFunction, Response } from 'express'
-
 import httpStatus from 'http-status'
 
-import type { GeneratedTypes } from '../../'
+import type { PayloadHandler } from '../../exports/config'
 import type { PayloadRequest } from '../../types'
+// import formatSuccessResponse from '../../express/responses/formatSuccess'
 
-import formatSuccessResponse from '../../express/responses/formatSuccess'
 import update from '../operations/update'
 
-export default async function updateHandler(
-  req: PayloadRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<Response<GeneratedTypes['collections']['_preference']> | void> {
-  try {
-    const doc = await update({
-      key: req.params.key,
-      req,
-      user: req.user,
-      value: req.body.value || req.body,
-    })
+export const updateHandler: PayloadHandler = async ({ params, req }) => {
+  const payloadRequest = req as PayloadRequest
+  const doc = await update({
+    key: params?.key as string,
+    req: payloadRequest,
+    user: payloadRequest?.user,
+    value: payloadRequest.data.value || payloadRequest.data,
+  })
 
-    return res.status(httpStatus.OK).json({
-      ...formatSuccessResponse(req.t('general:updatedSuccessfully'), 'message'),
-      doc,
-    })
-  } catch (error) {
-    return next(error)
-  }
+  return Response.json(
+    {
+      ...doc,
+      // message: formatSuccessResponse(req.t('general:updatedSuccessfully'), 'message'),
+    },
+    {
+      status: httpStatus.OK,
+    },
+  )
 }

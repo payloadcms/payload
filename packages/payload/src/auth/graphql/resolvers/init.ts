@@ -1,5 +1,5 @@
 import isolateTransactionID from '../../../utilities/isolateTransactionID'
-import { init } from '../../operations/init'
+import { initOperation } from '../../operations/init'
 
 function initResolver(collection: string) {
   async function resolver(_, args, context) {
@@ -8,7 +8,7 @@ function initResolver(collection: string) {
       req: isolateTransactionID(context.req),
     }
 
-    return init(options)
+    return initOperation(options)
   }
 
   return resolver

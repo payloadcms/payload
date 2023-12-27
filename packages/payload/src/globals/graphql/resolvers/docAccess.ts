@@ -9,7 +9,6 @@ export type Resolver = (
   _: unknown,
   context: {
     req: PayloadRequest
-    res: Response
   },
 ) => Promise<CollectionPermission | GlobalPermission>
 
