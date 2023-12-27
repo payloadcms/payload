@@ -104,28 +104,22 @@ export const CollectionEdit = async ({
       uploadEdits: undefined,
     }
 
-    const apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
-      collectionConfig.versions.drafts ? '&draft=true' : ''
-    }`
-
-    const action = `${serverURL}${api}/${collectionSlug}${
-      isEditing ? `/${id}` : ''
-    }?${queryString.stringify(formQueryParams)}`
-
-    const hasSavePermission =
-      (isEditing && collectionPermissions?.update?.permission) ||
-      (!isEditing && collectionPermissions?.create?.permission)
-
     const componentProps: DefaultEditViewProps = {
       id,
-      action,
-      apiURL,
+      action: `${serverURL}${api}/${collectionSlug}${
+        isEditing ? `/${id}` : ''
+      }?${queryString.stringify(formQueryParams)}`,
+      apiURL: `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
+        collectionConfig.versions.drafts ? '&draft=true' : ''
+      }`,
       canAccessAdmin: permissions?.canAccessAdmin,
       config,
       collectionConfig,
       data,
-      fieldTypes: fieldTypes,
-      hasSavePermission,
+      fieldTypes,
+      hasSavePermission:
+        (isEditing && collectionPermissions?.update?.permission) ||
+        (!isEditing && collectionPermissions?.create?.permission),
       internalState: state,
       isEditing,
       permissions: collectionPermissions,
