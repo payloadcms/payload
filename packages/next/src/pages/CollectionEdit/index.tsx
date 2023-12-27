@@ -1,4 +1,4 @@
-import { SanitizedConfig } from 'payload/types'
+import { SanitizedConfig, TypeWithID } from 'payload/types'
 import React, { Fragment } from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
@@ -47,12 +47,18 @@ export const CollectionEdit = async ({
       admin: { components: { views: { Edit: CustomEdit } = {} } = {} },
     } = collectionConfig
 
-    const data = await payload.findByID({
-      collection: collectionSlug,
-      id,
-      depth: 0,
-      user,
-    })
+    let data: TypeWithID & Record<string, unknown>
+
+    try {
+      data = await payload.findByID({
+        collection: collectionSlug,
+        id,
+        depth: 0,
+        user,
+      })
+    } catch (error) {
+      return notFound()
+    }
 
     const defaultLocale =
       localization && localization.defaultLocale ? localization.defaultLocale : 'en'

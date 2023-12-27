@@ -1,4 +1,4 @@
-import { SanitizedConfig } from 'payload/types'
+import { SanitizedConfig, TypeWithID } from 'payload/types'
 import React, { Fragment } from 'react'
 import {
   RenderCustomComponent,
@@ -41,12 +41,18 @@ export const Account = async ({
   const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
 
   if (collectionConfig) {
-    const data = await payload.findByID({
-      collection: userSlug,
-      id: user.id,
-      depth: 0,
-      user,
-    })
+    let data: TypeWithID & Record<string, unknown>
+
+    try {
+      data = await payload.findByID({
+        collection: userSlug,
+        id: user.id,
+        depth: 0,
+        user,
+      })
+    } catch (error) {
+      return notFound()
+    }
 
     const fieldSchema = formatFields(collectionConfig, true)
 
