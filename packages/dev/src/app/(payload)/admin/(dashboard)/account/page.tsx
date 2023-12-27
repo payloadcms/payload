@@ -3,5 +3,4 @@
 import { Account } from '@payloadcms/next/pages/Account'
 import config from 'payload-config'
 
-export default ({ params, searchParams }) =>
-  Account({ collectionSlug: params.collection, config, searchParams })
+export default ({ searchParams }) => Account({ config, searchParams })

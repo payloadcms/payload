@@ -34,7 +34,7 @@ export const DocumentControls: React.FC<{
   isAccountView?: boolean
   isEditing?: boolean
   permissions?: CollectionPermission | GlobalPermission | null
-  config?: SanitizedConfig
+  config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
 }> = (props) => {
   const {

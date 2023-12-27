@@ -11,20 +11,19 @@ import {
   fieldTypes,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
+import { notFound } from 'next/navigation'
 
 export const Account = async ({
-  collectionSlug,
   config: configPromise,
   searchParams,
 }: {
-  collectionSlug: string
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const { config, payload, permissions, user } = await initPage(configPromise)
 
   const {
-    admin: { components: { views: { Account: CustomAccountComponent } = {} } = {} },
+    admin: { user: userSlug, components: { views: { Account: CustomAccountComponent } = {} } = {} },
     routes: { api },
     localization,
     serverURL,
@@ -37,15 +36,13 @@ export const Account = async ({
 
   const locale = localization && findLocaleFromCode(localization, localeCode)
 
-  const collectionPermissions = permissions?.collections?.[collectionSlug]
+  const collectionPermissions = permissions?.collections?.[userSlug]
 
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
+  const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
 
   if (collectionConfig) {
     const data = await payload.findByID({
-      collection: collectionSlug,
+      collection: userSlug,
       id: user.id,
       depth: 0,
       user,
@@ -56,7 +53,7 @@ export const Account = async ({
     let preferencesKey: string
 
     if (user?.id) {
-      preferencesKey = `collection-${collectionSlug}-${user.id}`
+      preferencesKey = `collection-${userSlug}-${user.id}`
     }
 
     const {
@@ -87,8 +84,9 @@ export const Account = async ({
     })
 
     const componentProps: DefaultAccountViewProps = {
-      action: `${serverURL}${api}/${collectionSlug}/${data?.id}?locale=${locale}`,
-      apiURL: `${serverURL}${api}/${collectionSlug}/${data?.id}?locale=${locale}`,
+      action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
+      apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
+      config,
       collectionConfig,
       data,
       fieldTypes,
@@ -113,5 +111,5 @@ export const Account = async ({
     )
   }
 
-  return null
+  return notFound()
 }

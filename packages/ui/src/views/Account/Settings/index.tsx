@@ -1,7 +1,8 @@
+'use client'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Translation } from '../../../../../translations/type'
+import type { Translation } from 'payload/dist/translations/type'
 
 import ReactSelect from '../../../elements/ReactSelect'
 import Label from '../../../forms/Label'

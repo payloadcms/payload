@@ -15,6 +15,7 @@ import {
   HydrateClientUser,
 } from '@payloadcms/ui'
 import queryString from 'qs'
+import { notFound } from 'next/navigation'
 
 export const CollectionEdit = async ({
   collectionSlug,
@@ -145,5 +146,5 @@ export const CollectionEdit = async ({
     )
   }
 
-  return null
+  return notFound()
 }
