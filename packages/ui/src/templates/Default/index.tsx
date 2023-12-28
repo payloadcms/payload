@@ -1,48 +1,57 @@
-'use client'
 import React, { Fragment } from 'react'
 
 import type { Props } from './types'
 
-import { Hamburger } from '../../elements/Hamburger'
 import { AppHeader } from '../../elements/Header'
-import { Nav as DefaultNav } from '../../elements/Nav'
+import { DefaultNav } from '../../elements/Nav'
 import { NavToggler } from '../../elements/Nav/NavToggler'
-import { useNav } from '../../elements/Nav/context'
-import { useConfig } from '../../providers/Config'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+import { NavHamburger } from './NavHamburger'
+import { Wrapper } from './Wrapper'
+
 import './index.scss'
 
 const baseClass = 'template-default'
 
-export const Default: React.FC<Props> = ({ children, className, Link }) => {
+export const Default: React.FC<Props> = async ({
+  children,
+  className,
+  config: configPromise,
+  user,
+  permissions,
+}) => {
+  const config = await configPromise
+
   const {
     admin: {
       components: { Nav: CustomNav } = {
         Nav: undefined,
       },
     } = {},
-  } = useConfig()
-
-  const { navOpen } = useNav()
+  } = config
 
   return (
     <Fragment>
       <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
         <NavToggler className={`${baseClass}__nav-toggler`}>
-          <Hamburger closeIcon="collapse" isActive={navOpen} />
+          <NavHamburger />
         </NavToggler>
       </div>
-      <div
-        className={[baseClass, className, navOpen && `${baseClass}--nav-open`]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
+      <Wrapper className={className} baseClass={baseClass}>
+        <RenderCustomComponent
+          CustomComponent={CustomNav}
+          DefaultComponent={DefaultNav}
+          componentProps={{
+            config,
+            user,
+            permissions,
+          }}
+        />
         <div className={`${baseClass}__wrap`}>
-          <AppHeader Link={Link} />
+          <AppHeader />
           {children}
         </div>
-      </div>
+      </Wrapper>
     </Fragment>
   )
 }

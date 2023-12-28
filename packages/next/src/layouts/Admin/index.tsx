@@ -1,9 +1,9 @@
 import React from 'react'
 import { Default as DefaultTemplate } from '@payloadcms/ui/templates'
 import { SanitizedConfig } from 'payload/types'
-import Link from 'next/link'
 
 import '@payloadcms/ui/scss/app.scss'
+import { initPage } from '../../utilities/initPage'
 
 export const metadata = {
   title: 'Next.js',
@@ -11,8 +11,17 @@ export const metadata = {
 }
 
 export const AdminLayout = async ({
-  children, // config: configPromise,
+  children,
+  config,
 }: {
   children: React.ReactNode
   config: Promise<SanitizedConfig>
-}) => <DefaultTemplate Link={Link}>{children}</DefaultTemplate>
+}) => {
+  const { user, permissions } = await initPage(config)
+
+  return (
+    <DefaultTemplate config={config} user={user} permissions={permissions}>
+      {children}
+    </DefaultTemplate>
+  )
+}
