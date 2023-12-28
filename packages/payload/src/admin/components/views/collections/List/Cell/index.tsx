@@ -68,7 +68,8 @@ const DefaultCell: React.FC<Props> = (props) => {
     )
   }
 
-  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[field.type]
+  let CellComponent: React.FC<CellComponentProps> | false =
+    cellData !== null && typeof cellData !== 'undefined' && cellComponents[field.type]
 
   if (!CellComponent) {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
