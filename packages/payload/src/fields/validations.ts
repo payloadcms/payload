@@ -36,17 +36,12 @@ export const text: Validate<unknown, unknown, TextField> = (
     if (!value) return true
   }
 
-  if (required) {
-    if (value?.length === 0) return t('validation:required')
-  }
-
   if (hasMany === true) {
     const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
     if (typeof lengthValidationResult === 'string') return lengthValidationResult
   }
 
   if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-
   if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
 
   const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
@@ -60,6 +55,12 @@ export const text: Validate<unknown, unknown, TextField> = (
 
     if (typeof minLength === 'number' && length < minLength) {
       return t('validation:longerThanMin', { label: t('value'), minLength, stringValue })
+    }
+  }
+
+  if (required) {
+    if (typeof value !== 'string' || value?.length === 0) {
+      return t('validation:required')
     }
   }
 
