@@ -20,6 +20,8 @@ const resaveChildren =
         },
       })
 
+      const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
+
       try {
         children.docs.forEach(async (child: any) => {
           const updateAsDraft =
@@ -32,7 +34,7 @@ const resaveChildren =
             collection: collection.slug,
             data: {
               ...child,
-              breadcrumbs: await populateBreadcrumbs(req, pluginConfig, collection, child),
+              [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
             },
             depth: 0,
             draft: updateAsDraft,

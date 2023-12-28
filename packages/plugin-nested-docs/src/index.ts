@@ -16,30 +16,39 @@ const nestedDocs =
       if (pluginConfig.collections.indexOf(collection.slug) > -1) {
         const fields = [...(collection?.fields || [])]
 
-        if (!pluginConfig.parentFieldSlug) {
+        const existingBreadcrumbField = collection.fields.find(
+          (field) =>
+            'name' in field && field.name === (pluginConfig?.breadcrumbsFieldSlug || 'breadcrumbs'),
+        )
+
+        const existingParentField = collection.fields.find(
+          (field) => 'name' in field && field.name === (pluginConfig?.parentFieldSlug || 'parent'),
+        )
+
+        if (!existingParentField && !pluginConfig.parentFieldSlug) {
           fields.push(createParentField(collection.slug))
         }
 
-        if (!pluginConfig.breadcrumbsFieldSlug) {
+        if (!existingBreadcrumbField && !pluginConfig.breadcrumbsFieldSlug) {
           fields.push(createBreadcrumbsField(collection.slug))
         }
 
         return {
           ...collection,
+          fields,
           hooks: {
             ...(collection.hooks || {}),
-            beforeChange: [
-              async ({ req, data, originalDoc }) =>
-                populateBreadcrumbs(req, pluginConfig, collection, data, originalDoc),
-              ...(collection?.hooks?.beforeChange || []),
-            ],
             afterChange: [
               resaveChildren(pluginConfig, collection),
               resaveSelfAfterCreate(collection),
               ...(collection?.hooks?.afterChange || []),
             ],
+            beforeChange: [
+              async ({ data, originalDoc, req }) =>
+                populateBreadcrumbs(req, pluginConfig, collection, data, originalDoc),
+              ...(collection?.hooks?.beforeChange || []),
+            ],
           },
-          fields,
         }
       }
 
