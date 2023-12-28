@@ -68,5 +68,34 @@ describe('Nested Docs', () => {
 
       expect(parentField.admin.description).toStrictEqual('custom')
     })
+
+    it('should allow custom breadcrumb slugs', async () => {
+      const parent = await payload.create({
+        collection: 'categories',
+        data: {
+          name: 'parent',
+        },
+      })
+      const child = await payload.create({
+        collection: 'categories',
+        data: {
+          name: 'child',
+          parent: parent.id,
+        },
+      })
+      const grandchild = await payload.create({
+        collection: 'categories',
+        data: {
+          name: 'grandchild',
+          parent: child.id,
+        },
+      })
+
+      expect(grandchild.categorization[0].doc).toStrictEqual(parent.id)
+      expect(grandchild.categorization[0].label).toStrictEqual('parent')
+      expect(grandchild.categorization[1].doc).toStrictEqual(child.id)
+      expect(grandchild.categorization[1].label).toStrictEqual('child')
+      expect(grandchild.categorization[2].label).toStrictEqual('grandchild')
+    })
   })
 })
