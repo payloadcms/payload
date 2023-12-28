@@ -40,7 +40,7 @@ const nestedDocs =
             ...(collection.hooks || {}),
             afterChange: [
               resaveChildren(pluginConfig, collection),
-              resaveSelfAfterCreate(collection),
+              resaveSelfAfterCreate(pluginConfig, collection),
               ...(collection?.hooks?.afterChange || []),
             ],
             beforeChange: [
