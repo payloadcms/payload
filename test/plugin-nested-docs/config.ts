@@ -35,6 +35,7 @@ export default buildConfigWithDefaults({
       collections: ['categories'],
       generateLabel: (_, doc) => doc.name as string,
       generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.name}`, ''),
+      parentFieldSlug: 'owner',
     }),
   ],
 })

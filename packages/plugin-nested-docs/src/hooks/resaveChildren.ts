@@ -7,6 +7,7 @@ import populateBreadcrumbs from '../utilities/populateBreadcrumbs'
 const resaveChildren =
   (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
   async ({ doc, req: { locale, payload }, req }) => {
+    const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
     const resaveChildrenAsync = async (): Promise<void> => {
       const children = await payload.find({
         collection: collection.slug,
@@ -14,7 +15,7 @@ const resaveChildren =
         locale,
         req,
         where: {
-          parent: {
+          [parentSlug]: {
             equals: doc.id,
           },
         },

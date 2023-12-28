@@ -63,13 +63,13 @@ describe('Nested Docs', () => {
 
     it('should allow overriding parent field', () => {
       const parentField = collection.fields.find(
-        (field) => field.type === 'relationship' && field.name === 'parent',
+        (field) => field.type === 'relationship' && field.name === 'owner',
       ) as RelationshipField
 
       expect(parentField.admin.description).toStrictEqual('custom')
     })
 
-    it('should allow custom breadcrumb slugs', async () => {
+    it('should allow custom breadcrumb and parent slugs', async () => {
       const parent = await payload.create({
         collection: 'categories',
         data: {
@@ -80,14 +80,14 @@ describe('Nested Docs', () => {
         collection: 'categories',
         data: {
           name: 'child',
-          parent: parent.id,
+          owner: parent.id,
         },
       })
       const grandchild = await payload.create({
         collection: 'categories',
         data: {
           name: 'grandchild',
-          parent: child.id,
+          owner: child.id,
         },
       })
 

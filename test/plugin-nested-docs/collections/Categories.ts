@@ -29,6 +29,7 @@ export const Categories: CollectionConfig = {
       ],
     }),
     createParentField('categories', {
+      name: 'owner',
       admin: {
         description: 'custom',
       },
