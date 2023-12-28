@@ -31,7 +31,7 @@ export const DefaultList: React.FC<Props> = (props) => {
     collection: {
       slug: collectionSlug,
       fields,
-      labels: { plural },
+      labels: { plural: pluralLabel },
       admin: {
         listSearchableFields,
         components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
@@ -69,7 +69,7 @@ export const DefaultList: React.FC<Props> = (props) => {
       <SetStepNav
         nav={[
           {
-            label: plural,
+            label: pluralLabel,
           },
         ]}
       />
@@ -82,6 +82,7 @@ export const DefaultList: React.FC<Props> = (props) => {
             {customHeader && customHeader}
             {!customHeader && (
               <Fragment>
+                <h1>{pluralLabel['en']}</h1>
                 {/* <h1>{getTranslation(pluralLabel, i18n)}</h1> */}
                 {hasCreatePermission && (
                   <Pill
@@ -103,7 +104,7 @@ export const DefaultList: React.FC<Props> = (props) => {
             )}
           </header>
           <ListControls
-            collectionPluralLabel={plural}
+            collectionPluralLabel={pluralLabel}
             collectionSlug={collectionSlug}
             textFieldsToBeSearched={textFieldsToBeSearched}
             handleSearchChange={handleSearchChange}

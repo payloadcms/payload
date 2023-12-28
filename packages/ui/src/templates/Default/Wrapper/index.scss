@@ -1,0 +1,25 @@
+@import '../../../scss/styles.scss';
+
+.template-default {
+  min-height: 100vh;
+  display: grid;
+  position: relative;
+  grid-template-columns: 0 auto;
+  transition: grid-template-columns var(--nav-trans-time) linear;
+  isolation: isolate;
+
+  @media (prefers-reduced-motion) {
+    transition: none;
+  }
+
+  &--nav-open {
+    width: 100%;
+    grid-template-columns: var(--nav-width) auto;
+
+    .template-default {
+      &__nav-overlay {
+        transition: opacity var(--nav-trans-time) linear;
+      }
+    }
+  }
+}
