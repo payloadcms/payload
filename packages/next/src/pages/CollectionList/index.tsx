@@ -7,6 +7,7 @@ import {
   HydrateClientUser,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
+import { notFound } from 'next/navigation'
 
 export const CollectionList = async ({
   collectionSlug,
@@ -71,5 +72,5 @@ export const CollectionList = async ({
     )
   }
 
-  return null
+  return notFound()
 }
