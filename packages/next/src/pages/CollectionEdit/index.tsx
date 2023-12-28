@@ -22,15 +22,15 @@ export const CollectionEdit = async ({
   id,
   config: configPromise,
   searchParams,
-  isEditing = true,
 }: {
   collectionSlug: string
   id?: string
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
-  isEditing?: boolean
 }) => {
   const { config, payload, permissions, user } = await initPage(configPromise)
+
+  const isEditing = !!id
 
   const {
     routes: { api },
@@ -56,9 +56,7 @@ export const CollectionEdit = async ({
         depth: 0,
         user,
       })
-    } catch (error) {
-      return notFound()
-    }
+    } catch (error) {}
 
     const defaultLocale =
       localization && localization.defaultLocale ? localization.defaultLocale : 'en'

@@ -8,7 +8,6 @@ import type { SanitizedConfig } from 'payload/types'
 import i18n from 'i18next'
 import { meta } from '../../utilities/meta'
 import { Metadata } from 'next'
-import { login } from './action'
 import { initPage } from '../../utilities/initPage'
 import { redirect } from 'next/navigation'
 
@@ -52,7 +51,7 @@ export const Login: React.FC<{
         </div>
         {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
         {!collection?.auth?.disableLocalStrategy && (
-          <LoginForm action={login} config={config} searchParams={searchParams} />
+          <LoginForm config={config} searchParams={searchParams} />
         )}
         {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
       </Fragment>
