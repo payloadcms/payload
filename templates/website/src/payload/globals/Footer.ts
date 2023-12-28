@@ -17,6 +17,15 @@ export const Footer: GlobalConfig = {
           appearances: false,
         }),
       ],
+      admin: {
+        components: {
+          RowLabel: ( { data, index } ) => {
+
+            return data?.link?.label;
+          
+          },
+        },
+      },
     },
   ],
 }
