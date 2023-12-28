@@ -465,11 +465,11 @@ export interface TextField {
   customLabel?: string | null
   customError?: string | null
   beforeAndAfterInput?: string | null
-  hasMany?: string | null
-  validatesHasMany?: string | null
-  localizedHasMany?: string | null
-  withMinRows?: string | null
-  withMaxRows?: string | null
+  hasMany?: string[] | null
+  validatesHasMany?: string[] | null
+  localizedHasMany?: string[] | null
+  withMinRows?: string[] | null
+  withMaxRows?: string[] | null
   updatedAt: string
   createdAt: string
 }

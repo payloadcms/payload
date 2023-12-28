@@ -539,7 +539,13 @@ function buildObjectType({
       }, objectTypeConfig),
     text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+      [field.name]: {
+        type: withNullableType(
+          field,
+          field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
+          forceNullable,
+        ),
+      },
     }),
     textarea: (objectTypeConfig: ObjectTypeConfig, field: TextareaField) => ({
       ...objectTypeConfig,

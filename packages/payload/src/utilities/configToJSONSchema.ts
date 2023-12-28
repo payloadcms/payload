@@ -99,6 +99,15 @@ function fieldsToJSONSchema(
         let fieldSchema: JSONSchema4
         switch (field.type) {
           case 'text':
+            if (field.hasMany === true) {
+              fieldSchema = {
+                items: { type: 'string' },
+                type: withNullableJSONSchemaType('array', isRequired),
+              }
+            } else {
+              fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
+            }
+            break
           case 'textarea':
           case 'code':
           case 'email':
