@@ -1,5 +1,4 @@
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import React from 'react'
 
 import type { FieldTypes } from '../../forms/field-types'
 import type { CollectionEditViewProps } from '../types'
@@ -9,11 +8,10 @@ import { DocumentFields } from '../../elements/DocumentFields'
 import { DocumentHeader } from '../../elements/DocumentHeader'
 import { LoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
-import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
-import { useAuth } from '../../utilities/Auth'
-import Meta from '../../utilities/Meta'
-import { OperationContext } from '../../utilities/OperationProvider'
-import Auth from '../collections/Edit/Auth'
+import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
+// import Meta from '../../utilities/Meta'
+import { OperationProvider } from '../../providers/OperationProvider'
+import Auth from '../Edit/Auth'
 import { Settings } from './Settings'
 import './index.scss'
 
@@ -23,11 +21,12 @@ export type DefaultAccountViewProps = CollectionEditViewProps & {
   fieldTypes: FieldTypes
 }
 
-const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
+export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
   const {
     action,
     apiURL,
-    collection,
+    config,
+    collectionConfig,
     data,
     fieldTypes,
     hasSavePermission,
@@ -37,41 +36,42 @@ const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
     permissions,
   } = props
 
-  const { auth, fields } = collection
+  const { auth, fields } = collectionConfig
 
-  const { refreshCookieAsync } = useAuth()
-  const { t } = useTranslation('authentication')
+  // const { refreshCookieAsync } = useAuth()
+  // const { t } = useTranslation('authentication')
 
-  const onSave = useCallback(
-    async (json) => {
-      await refreshCookieAsync()
-      if (typeof onSaveFromProps === 'function') {
-        onSaveFromProps(json)
-      }
-    },
-    [onSaveFromProps, refreshCookieAsync],
-  )
+  // const onSave = useCallback(
+  //   async (json) => {
+  //     await refreshCookieAsync()
+  //     if (typeof onSaveFromProps === 'function') {
+  //       onSaveFromProps(json)
+  //     }
+  //   },
+  //   [onSaveFromProps, refreshCookieAsync],
+  // )
 
   return (
     <React.Fragment>
-      <Meta description={t('accountOfCurrentUser')} keywords={t('account')} title={t('account')} />
+      {/* <Meta description={t('accountOfCurrentUser')} keywords={t('account')} title={t('account')} /> */}
       <LoadingOverlayToggle name="account" show={isLoading} type="withoutNav" />
       {!isLoading && (
-        <OperationContext.Provider value="update">
+        <OperationProvider operation="update">
           <Form
             action={action}
             disabled={!hasSavePermission}
             initialState={initialState}
-            method="patch"
-            onSuccess={onSave}
+            method="PATCH"
+            // onSuccess={onSave}
           >
-            {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
-              <LeaveWithoutSaving />
-            )}
-            <DocumentHeader apiURL={apiURL} collection={collection} data={data} />
+            {!(
+              collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave
+            ) && <LeaveWithoutSaving />}
+            <DocumentHeader apiURL={apiURL} collectionConfig={collectionConfig} data={data} />
             <DocumentControls
               apiURL={apiURL}
-              collection={collection}
+              config={config}
+              collectionConfig={collectionConfig}
               data={data}
               hasSavePermission={hasSavePermission}
               isAccountView
@@ -82,7 +82,7 @@ const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
               BeforeFields={
                 <Auth
                   className={`${baseClass}__auth`}
-                  collection={collection}
+                  collectionSlug={collectionConfig.slug}
                   email={data?.email}
                   operation="update"
                   readOnly={!hasSavePermission}
@@ -95,10 +95,8 @@ const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
               permissions={permissions}
             />
           </Form>
-        </OperationContext.Provider>
+        </OperationProvider>
       )}
     </React.Fragment>
   )
 }
-
-export default DefaultAccount

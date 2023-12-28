@@ -1,14 +1,19 @@
+'use client'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { OnChange } from '../../../forms/field-types/RadioGroup/types'
-import type { Theme } from '../../../utilities/Theme'
+import type { Theme } from '../../../providers/Theme/types'
 
 import RadioGroupInput from '../../../forms/field-types/RadioGroup/Input'
-import { useTheme } from '../../../utilities/Theme'
+import { useTheme } from '../../../providers/Theme'
 
 export const ToggleTheme: React.FC = () => {
-  const { autoMode, setTheme, theme } = useTheme()
+  const {
+    //  autoMode,
+    setTheme,
+    theme,
+  } = useTheme()
   const { t } = useTranslation('general')
 
   const onChange = useCallback<OnChange<Theme>>(
@@ -37,7 +42,8 @@ export const ToggleTheme: React.FC = () => {
           value: 'dark',
         },
       ]}
-      value={autoMode ? 'auto' : theme}
+      // value={autoMode ? 'auto' : theme}
+      value={theme}
     />
   )
 }
