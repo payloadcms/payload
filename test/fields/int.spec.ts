@@ -658,7 +658,12 @@ describe('Fields', () => {
         id,
         collection,
         locale: 'all',
-      })) as unknown as { localized: { en: unknown; es: unknown } }
+      })) as unknown as {
+        localized: {
+          en: unknown
+          es: unknown
+        }
+      }
 
       expect(enDoc.localized[0].text).toStrictEqual(enText)
       expect(esDoc.localized[0].text).toStrictEqual(esText)
@@ -989,22 +994,86 @@ describe('Fields', () => {
       let fooBar
       let bazBar
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         fooBar = await payload.create({
           collection: 'json-fields',
           data: {
-            json: { foo: 'bar' },
+            json: { foo: 'foobar', number: 5 },
           },
         })
         bazBar = await payload.create({
           collection: 'json-fields',
           data: {
-            json: { baz: 'bar' },
+            json: { baz: 'bar', number: 10 },
           },
         })
       })
 
-      it('should query exists', async () => {
+      it('should query nested properties - like', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { like: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - equals', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { equals: 'foobar' },
+          },
+        })
+
+        const notEquals = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { equals: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+        expect(notEquals.docs).toHaveLength(0)
+      })
+
+      it('should query nested numbers - equals', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.number': { equals: 5 },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - exists', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { exists: true },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query - exists', async () => {
         const nullJSON = await payload.create({
           collection: 'json-fields',
           data: {},
