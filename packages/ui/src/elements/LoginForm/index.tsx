@@ -12,7 +12,7 @@ import { SanitizedConfig } from 'payload/types'
 const baseClass = 'login-form'
 
 export const LoginForm: React.FC<{
-  action: (formData: FormData) => Promise<void>
+  action?: (formData: FormData) => Promise<void> | string
   config: SanitizedConfig
   searchParams: { [key: string]: string | string[] | undefined }
 }> = async ({ config, searchParams }) => {
