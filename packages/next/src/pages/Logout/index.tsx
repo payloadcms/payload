@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useLocation } from 'react-router-dom'
+import React from 'react'
 
-import { Minimal, Button } from '@payloadcms/ui'
+import { MinimalTemplate, Button } from '@payloadcms/ui'
 import { meta } from '../../utilities/meta'
 import './index.scss'
 import i18n from 'i18next'
 import { Metadata } from 'next'
 import { SanitizedConfig } from 'payload/types'
+import { LogoutClient } from './LogoutClient'
 
 const baseClass = 'logout'
 
@@ -23,31 +22,27 @@ export const generateMetadata = async ({
     config,
   })
 
-export const Logout: React.FC<{ inactivity?: boolean }> = (props) => {
-  const { inactivity } = props
+export const Logout: React.FC<{
+  inactivity?: boolean
+  config: Promise<SanitizedConfig>
+  searchParams: { [key: string]: string[] | string }
+}> = async ({ searchParams, config: configPromise, inactivity }) => {
+  const config = await configPromise
 
-  const { t } = useTranslation('authentication')
-
-  // Fetch 'redirect' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
-  const query = new URLSearchParams(useLocation().search)
-  const redirect = query.get('redirect')
+  const {
+    routes: { admin },
+  } = config
 
   return (
-    <Minimal className={baseClass}>
+    <MinimalTemplate className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        {inactivity && <h2>{t('loggedOutInactivity')}</h2>}
-        {!inactivity && <h2>{t('loggedOutSuccessfully')}</h2>}
-        <Button
-          buttonStyle="secondary"
-          el="anchor"
-          url={`${admin}/login${
-            redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
-          }`}
-        >
-          {t('logBackIn')}
-        </Button>
+        <LogoutClient
+          inactivity={inactivity}
+          adminRoute={admin}
+          redirect={searchParams.redirect as string}
+        />
       </div>
-    </Minimal>
+    </MinimalTemplate>
   )
 }
 

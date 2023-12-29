@@ -13,7 +13,7 @@ import './index.scss'
 
 const baseClass = 'template-default'
 
-export const Default: React.FC<Props> = async ({
+export const DefaultTemplate: React.FC<Props> = async ({
   children,
   className,
   config: configPromise,

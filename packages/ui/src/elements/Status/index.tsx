@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 
 import type { Field } from 'payload/types'
 
-import { Minimal as MinimalTemplate } from '../../templates/Minimal'
+import { MinimalTemplate } from '../../templates/Minimal'
 // import { requests } from '../../../api'
 import { useForm } from '../../forms/Form/context'
 import { useConfig } from '../../providers/Config'

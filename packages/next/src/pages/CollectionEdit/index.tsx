@@ -28,7 +28,7 @@ export const CollectionEdit = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise)
+  const { config, payload, permissions, user } = await initPage(configPromise, true)
 
   const isEditing = !!id
 

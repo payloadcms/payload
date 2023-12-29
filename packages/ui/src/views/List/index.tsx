@@ -89,6 +89,7 @@ export const DefaultList: React.FC<Props> = (props) => {
                     // aria-label={t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
                     to={newDocumentURL}
                   >
+                    Create New
                     {/* {t('createNew')} */}
                   </Pill>
                 )}
