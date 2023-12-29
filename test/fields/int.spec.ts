@@ -5,7 +5,7 @@ import { GraphQLClient } from 'graphql-request'
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
-import type { RichTextField } from './payload-types'
+import type { GroupField, RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
@@ -29,7 +29,6 @@ import {
 import { tabsDoc } from './collections/Tabs/shared'
 import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
-import { GroupField } from './payload-types'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -984,6 +983,61 @@ describe('Fields', () => {
       })
 
       expect(updatedJsonFieldsDoc.json.state).toEqual({})
+    })
+
+    describe('querying', () => {
+      let fooBar
+      let bazBar
+
+      beforeAll(async () => {
+        fooBar = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { foo: 'bar' },
+          },
+        })
+        bazBar = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { baz: 'bar' },
+          },
+        })
+      })
+
+      it('should query exists', async () => {
+        const nullJSON = await payload.create({
+          collection: 'json-fields',
+          data: {},
+        })
+        const hasJSON = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: [],
+          },
+        })
+
+        const docsExistsFalse = await payload.find({
+          collection: 'json-fields',
+          where: {
+            json: { exists: false },
+          },
+        })
+        const docsExistsTrue = await payload.find({
+          collection: 'json-fields',
+          where: {
+            json: { exists: true },
+          },
+        })
+
+        const existFalseIDs = docsExistsFalse.docs.map(({ id }) => id)
+        const existTrueIDs = docsExistsTrue.docs.map(({ id }) => id)
+
+        expect(existFalseIDs).toContain(nullJSON.id)
+        expect(existTrueIDs).not.toContain(nullJSON.id)
+
+        expect(existTrueIDs).toContain(hasJSON.id)
+        expect(existFalseIDs).not.toContain(hasJSON.id)
+      })
     })
   })
 
