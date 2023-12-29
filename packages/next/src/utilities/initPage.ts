@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation'
 
 export const initPage = async (
   configPromise: Promise<SanitizedConfig>,
-  redirectUnauthenticatedUser = true,
+  redirectUnauthenticatedUser?: boolean,
 ): Promise<{
   payload: Awaited<ReturnType<typeof getPayload>>
   permissions: Awaited<ReturnType<typeof auth>>['permissions']

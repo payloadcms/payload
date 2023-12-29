@@ -1,14 +1,12 @@
-@import '../../../scss/styles';
-
-.reset-password {
+.create-first-user {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   min-height: 100vh;
 
   &__wrap {
-    margin: 0 auto base(1);
     width: 100%;
+    margin: 0 auto var(--base);
 
     svg {
       width: 100%;

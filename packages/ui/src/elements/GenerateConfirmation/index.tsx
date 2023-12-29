@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { Minimal as MinimalTemplate } from '../../templates/Minimal'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { Button } from '../Button'
 import './index.scss'

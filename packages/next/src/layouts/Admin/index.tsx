@@ -1,5 +1,5 @@
 import React from 'react'
-import { Default as DefaultTemplate } from '@payloadcms/ui/templates'
+import { DefaultTemplate } from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 
 import '@payloadcms/ui/scss/app.scss'
@@ -12,15 +12,15 @@ export const metadata = {
 
 export const AdminLayout = async ({
   children,
-  config,
+  config: configPromise,
 }: {
   children: React.ReactNode
   config: Promise<SanitizedConfig>
 }) => {
-  const { user, permissions } = await initPage(config)
+  const { user, permissions } = await initPage(configPromise)
 
   return (
-    <DefaultTemplate config={config} user={user} permissions={permissions}>
+    <DefaultTemplate config={configPromise} user={user} permissions={permissions}>
       {children}
     </DefaultTemplate>
   )

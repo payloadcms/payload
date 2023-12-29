@@ -144,8 +144,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logOut = useCallback(() => {
     setUser(null)
+    console.log('set the user to null')
     revokeTokenAndExpire()
-    requests.post(`${serverURL}${api}/${userSlug}/logout`)
+    try {
+      requests.post(`${serverURL}${api}/${userSlug}/logout`)
+    } catch (e) {
+      toast.error(`Logging out failed: ${e.message}`)
+    }
   }, [serverURL, api, userSlug, revokeTokenAndExpire])
 
   const refreshPermissions = useCallback(async () => {

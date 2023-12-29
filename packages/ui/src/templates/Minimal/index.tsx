@@ -6,7 +6,7 @@ import './index.scss'
 
 const baseClass = 'template-minimal'
 
-export const Minimal: React.FC<Props> = (props) => {
+export const MinimalTemplate: React.FC<Props> = (props) => {
   const { children, className, style = {}, width = 'normal' } = props
 
   const classes = [className, baseClass, `${baseClass}--width-${width}`].filter(Boolean).join(' ')

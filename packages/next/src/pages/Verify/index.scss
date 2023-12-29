@@ -1,5 +1,3 @@
-@import '../../../scss/styles';
-
 .verify {
   display: flex;
   align-items: center;
@@ -11,6 +9,6 @@
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-bottom: base(2);
+    margin-bottom: calc(var(--base) * 2);
   }
 }
