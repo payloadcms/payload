@@ -30,7 +30,6 @@ export const DefaultCollectionEdit: React.FC<
     disableLeaveWithoutSaving,
     fieldTypes,
     hasSavePermission,
-    internalState,
     isEditing,
     permissions,
   } = props
@@ -58,7 +57,7 @@ export const DefaultCollectionEdit: React.FC<
         collectionSlug={collectionConfig?.slug}
         useAsTitle={collectionConfig?.admin?.useAsTitle}
         id={id}
-        isEditing={isEditing}
+        isEditing={isEditing || false}
         pluralLabel={collectionConfig?.labels?.plural}
       />
       <DocumentControls

@@ -1,12 +1,8 @@
 import React from 'react'
 
-import type { GlobalEditViewProps } from '../../types'
+import type { GlobalEditViewProps } from '../types'
 
-import { API } from '../../API'
-import { LivePreviewView } from '../../LivePreview'
-import VersionView from '../../Version/Version'
-import VersionsView from '../../Versions'
-import { DefaultGlobalEdit } from '../Default/index'
+import { DefaultGlobalEdit } from './Default/index'
 
 export type globalViewType =
   | 'API'
@@ -20,29 +16,31 @@ export type globalViewType =
 export const defaultGlobalViews = (): {
   [key in globalViewType]: React.ComponentType<any>
 } => ({
-  API,
+  API: null,
   Default: DefaultGlobalEdit,
-  LivePreview: LivePreviewView,
+  LivePreview: null,
   References: null,
   Relationships: null,
-  Version: VersionView,
-  Versions: VersionsView,
+  Version: null,
+  Versions: null,
 })
 
-export const CustomGlobalComponent = (
+export const RenderCustomView = (
   args: GlobalEditViewProps & {
     view: globalViewType
   },
 ) => {
-  const { global, view } = args
+  const { globalConfig, view } = args
 
-  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = global
+  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = globalConfig
 
   // Overriding components may come from multiple places in the config
   // Need to cascade through the hierarchy to find the correct component to render
   // For example, the Edit view:
   // 1. Edit?.Default
   // 2. Edit?.Default?.Component
+  // TODO: Remove the `@ts-ignore` when a Typescript wizard arrives
+  // For some reason `Component` does not exist on type `Edit[view]` no matter how narrow the type is
   const Component =
     typeof Edit === 'object' && typeof Edit[view] === 'function'
       ? Edit[view]

@@ -2,6 +2,8 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 // import { postgresAdapter } from '@payloadcms/db-postgres'
 // import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload/config'
+import { Users } from './collections/Users'
+import { Settings } from './globals/Settings'
 
 export default buildConfig({
   db: mongooseAdapter({
@@ -14,6 +16,8 @@ export default buildConfig({
   // }),
   // editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET,
+  collections: [Users],
+  globals: [Settings],
   // onInit: async (payload) => {
   //   await payload.create({
   //     collection: 'users',

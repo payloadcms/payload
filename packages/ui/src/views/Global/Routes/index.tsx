@@ -8,7 +8,7 @@ import type { GlobalEditViewProps } from '../../types'
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import NotFound from '../../NotFound'
-import { CustomGlobalComponent } from './CustomComponent'
+import { CustomGlobalComponent } from '../RenderCustomView'
 import { globalCustomRoutes } from './custom'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue

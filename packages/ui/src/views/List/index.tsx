@@ -64,6 +64,8 @@ export const DefaultList: React.FC<Props> = (props) => {
     })
   }
 
+  console.log(pluralLabel)
+
   return (
     <div className={baseClass}>
       <SetStepNav
@@ -82,7 +84,7 @@ export const DefaultList: React.FC<Props> = (props) => {
             {customHeader && customHeader}
             {!customHeader && (
               <Fragment>
-                <h1>{pluralLabel['en']}</h1>
+                <h1>{typeof pluralLabel === 'string' ? pluralLabel : pluralLabel['en']}</h1>
                 {/* <h1>{getTranslation(pluralLabel, i18n)}</h1> */}
                 {hasCreatePermission && (
                   <Pill

@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import type { EditViewConfig } from 'payload/config'
 
-import { defaultGlobalViews } from '../../../views/Global/Routes/CustomComponent'
+import { defaultGlobalViews } from '../../../views/Global/RenderCustomView'
 import { defaultCollectionViews } from '../../../views/collections/Edit/Routes/CustomComponent'
 
 export const getCustomViews = (args: {

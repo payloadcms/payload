@@ -10,6 +10,5 @@ export type Props = {
   }
   element?: React.ElementType
   fallback?: string
-  global?: SanitizedGlobalConfig
   title?: string
 }

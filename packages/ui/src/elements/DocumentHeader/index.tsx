@@ -14,11 +14,11 @@ export const DocumentHeader: React.FC<{
   collectionConfig?: SanitizedCollectionConfig
   customHeader?: React.ReactNode
   data?: any
-  global?: SanitizedGlobalConfig
+  globalConfig?: SanitizedGlobalConfig
   id?: string
   isEditing?: boolean
 }> = (props) => {
-  const { id, apiURL, collectionConfig, customHeader, data, global, isEditing } = props
+  const { id, apiURL, collectionConfig, customHeader, data, globalConfig, isEditing } = props
 
   return (
     <Gutter className={baseClass}>
@@ -28,16 +28,15 @@ export const DocumentHeader: React.FC<{
           <RenderTitle
             className={`${baseClass}__title`}
             useAsTitle={collectionConfig?.admin?.useAsTitle}
-            globalLabel={global?.label}
-            globalSlug={global?.slug}
+            globalLabel={globalConfig?.label}
+            globalSlug={globalConfig?.slug}
             data={data}
             // fallback={`[${t('untitled')}]`}
-            global={global}
           />
           <DocumentTabs
             apiURL={apiURL}
             // collection={collectionConfig}
-            global={global}
+            globalConfig={globalConfig}
             id={id}
             isEditing={isEditing}
           />

@@ -7,7 +7,6 @@ import type { CollectionEditViewProps } from '../types'
 // import VersionView from '../../../Version/Version'
 // import VersionsView from '../../../Versions'
 import { DefaultCollectionEdit } from './Default/index'
-import { SanitizedCollectionConfig } from 'payload/types'
 
 export type collectionViewType =
   | 'API'

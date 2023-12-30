@@ -8,17 +8,17 @@ import type { ContextType } from '../../../providers/DocumentInfo/types'
 
 export type DocumentTabProps = {
   apiURL?: string
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
+  collectionConfig?: SanitizedCollectionConfig
+  globalConfig?: SanitizedGlobalConfig
   id: string
   isEditing?: boolean
 }
 
 export type DocumentTabCondition = (args: {
-  collection: SanitizedCollectionConfig
+  collectionConfig: SanitizedCollectionConfig
   config: Config
   documentInfo: ContextType
-  global: SanitizedGlobalConfig
+  globalConfig: SanitizedGlobalConfig
 }) => boolean
 
 // Everything is optional because we merge in the defaults

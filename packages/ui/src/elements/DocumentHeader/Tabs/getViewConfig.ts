@@ -2,30 +2,30 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 import { EditViewConfig } from 'payload/config'
 
 export const getViewConfig = (args: {
-  collection: SanitizedCollectionConfig
-  global: SanitizedGlobalConfig
+  collectionConfig: SanitizedCollectionConfig
+  globalConfig: SanitizedGlobalConfig
   name: string
 }): EditViewConfig => {
-  const { name, collection, global } = args
+  const { name, collectionConfig, globalConfig } = args
 
-  if (collection) {
-    const collectionViewsConfig =
-      typeof collection?.admin?.components?.views?.Edit === 'object' &&
-      typeof collection?.admin?.components?.views?.Edit !== 'function'
-        ? collection?.admin?.components?.views?.Edit
+  if (collectionConfig) {
+    const collectionConfigViewsConfig =
+      typeof collectionConfig?.admin?.components?.views?.Edit === 'object' &&
+      typeof collectionConfig?.admin?.components?.views?.Edit !== 'function'
+        ? collectionConfig?.admin?.components?.views?.Edit
         : undefined
 
-    return collectionViewsConfig?.[name]
+    return collectionConfigViewsConfig?.[name]
   }
 
-  if (global) {
-    const globalViewsConfig =
-      typeof global?.admin?.components?.views?.Edit === 'object' &&
-      typeof global?.admin?.components?.views?.Edit !== 'function'
-        ? global?.admin?.components?.views?.Edit
+  if (globalConfig) {
+    const globalConfigViewsConfig =
+      typeof globalConfig?.admin?.components?.views?.Edit === 'object' &&
+      typeof globalConfig?.admin?.components?.views?.Edit !== 'function'
+        ? globalConfig?.admin?.components?.views?.Edit
         : undefined
 
-    return globalViewsConfig?.[name]
+    return globalConfigViewsConfig?.[name]
   }
 
   return null

@@ -1,10 +1,8 @@
 import type { TFunction } from 'i18next'
 
 import type { User } from 'payload/auth'
-import type { Field as FieldSchema, SanitizedCollectionConfig } from 'payload/types'
+import type { Field as FieldSchema, SanitizedConfig } from 'payload/types'
 import type { Data, Fields } from '../types'
-import type { AddFieldStatePromiseArgs } from './addFieldStatePromise'
-
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { addFieldStatePromise } from './addFieldStatePromise'
 
@@ -16,10 +14,9 @@ type Args = {
   /**
    * config is only needed for validation
    */
-  config?: SanitizedCollectionConfig
+  config?: SanitizedConfig
   data: Data
   fields: FieldSchema[]
-  filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
    */
@@ -73,7 +70,6 @@ export const iterateFields = async ({
   config,
   data,
   fields,
-  filter,
   forceFullValue = false,
   fullData,
   includeSchema = false,
@@ -108,7 +104,6 @@ export const iterateFields = async ({
           config,
           data,
           field,
-          filter,
           forceFullValue,
           fullData,
           includeSchema,

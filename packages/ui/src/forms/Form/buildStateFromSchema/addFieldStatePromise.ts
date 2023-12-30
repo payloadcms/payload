@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next'
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { NonPresentationalField, SanitizedCollectionConfig } from 'payload/types'
+import type { NonPresentationalField, SanitizedConfig } from 'payload/types'
 import type { Data, Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -16,7 +16,7 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
-  config: SanitizedCollectionConfig
+  config: SanitizedConfig
   data: Data
   field: NonPresentationalField
   /**

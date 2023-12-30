@@ -4,9 +4,9 @@ import { initPage } from '../../utilities/initPage'
 import {
   EditDepthProvider,
   RenderCustomComponent,
-  DefaultEditView,
-  DefaultEditViewProps,
+  DefaultGlobalViewProps,
   findLocaleFromCode,
+  DefaultGlobalView,
   fieldTypes,
   buildStateFromSchema,
   formatFields,
@@ -14,23 +14,37 @@ import {
   QueryParamTypes,
   HydrateClientUser,
 } from '@payloadcms/ui'
-import queryString from 'qs'
 import { notFound } from 'next/navigation'
+import { Metadata } from 'next'
+import { meta } from '../../utilities/meta'
+// import i18n from 'i18next'
+// import { getTranslation } from 'payload/utilities'
 
-export const CollectionEdit = async ({
-  collectionSlug,
-  id,
+export const generateMetadata = async ({
+  config,
+}: {
+  config: Promise<SanitizedConfig>
+}): Promise<Metadata> =>
+  meta({
+    // title: getTranslation(label, i18n),
+    // description: getTranslation(label, i18n),
+    // keywords: `${getTranslation(label, i18n)}, Payload, CMS`,
+    title: '',
+    description: '',
+    keywords: '',
+    config,
+  })
+
+export const Global = async ({
+  globalSlug,
   config: configPromise,
   searchParams,
 }: {
-  collectionSlug: string
-  id?: string
+  globalSlug: string
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const { config, payload, permissions, user } = await initPage(configPromise, true)
-
-  const isEditing = !!id
 
   const {
     routes: { api },
@@ -38,22 +52,19 @@ export const CollectionEdit = async ({
     localization,
   } = config
 
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
+  const globalConfig = config.globals.find((global) => global.slug === globalSlug)
 
-  if (collectionConfig) {
+  if (globalConfig) {
     const {
       admin: { components: { views: { Edit: CustomEdit } = {} } = {} },
       fields,
-    } = collectionConfig
+    } = globalConfig
 
     let data: TypeWithID & Record<string, unknown>
 
     try {
-      data = await payload.findByID({
-        collection: collectionSlug,
-        id,
+      data = await payload.findGlobal({
+        slug: globalSlug,
         depth: 0,
         user,
       })
@@ -66,15 +77,11 @@ export const CollectionEdit = async ({
 
     const locale = localization && findLocaleFromCode(localization, localeCode)
 
-    const collectionPermissions = permissions?.collections?.[collectionSlug]
+    const globalPermission = permissions?.globals?.[globalSlug]
 
-    const fieldSchema = formatFields(fields, isEditing)
+    const fieldSchema = formatFields(fields, true)
 
-    let preferencesKey: string
-
-    if (id) {
-      preferencesKey = `collection-${collectionSlug}-${id}`
-    }
+    const preferencesKey = `global-${globalSlug}`
 
     const {
       docs: [preferences],
@@ -92,12 +99,11 @@ export const CollectionEdit = async ({
     })
 
     const state = await buildStateFromSchema({
-      id,
       config,
       data: data || {},
       fieldSchema,
       locale,
-      operation: isEditing ? 'update' : 'create',
+      operation: 'update',
       preferences,
       // t,
       user,
@@ -110,26 +116,19 @@ export const CollectionEdit = async ({
       uploadEdits: undefined,
     }
 
-    const componentProps: DefaultEditViewProps = {
-      id,
-      action: `${serverURL}${api}/${collectionSlug}${
-        isEditing ? `/${id}` : ''
-      }?${queryString.stringify(formQueryParams)}`,
-      apiURL: `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
-        collectionConfig.versions.drafts ? '&draft=true' : ''
+    const componentProps: DefaultGlobalViewProps = {
+      action: `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null`,
+      apiURL: `${serverURL}${api}/globals/${globalSlug}?locale=${locale}${
+        global.versions?.drafts ? '&draft=true' : ''
       }`,
       canAccessAdmin: permissions?.canAccessAdmin,
       config,
-      collectionConfig,
+      globalConfig,
       data,
       fieldTypes,
-      hasSavePermission:
-        (isEditing && collectionPermissions?.update?.permission) ||
-        (!isEditing && collectionPermissions?.create?.permission),
       initialState: state,
-      isEditing,
-      permissions: collectionPermissions,
-      updatedAt: data?.updatedAt.toString(),
+      permissions: globalPermission,
+      updatedAt: data?.updatedAt?.toString(),
       user,
       onSave: () => {},
     }
@@ -141,7 +140,7 @@ export const CollectionEdit = async ({
           <FormQueryParamsProvider formQueryParams={formQueryParams}>
             <RenderCustomComponent
               CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
-              DefaultComponent={DefaultEditView}
+              DefaultComponent={DefaultGlobalView}
               componentProps={componentProps}
             />
           </FormQueryParamsProvider>
