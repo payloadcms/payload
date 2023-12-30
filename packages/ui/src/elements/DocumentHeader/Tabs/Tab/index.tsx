@@ -16,9 +16,9 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
   const {
     id,
     apiURL,
-    collection,
+    collectionSlug,
     condition,
-    global,
+    globalSlug,
     href: tabHref,
     isActive: checkIsActive,
     label,

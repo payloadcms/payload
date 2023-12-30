@@ -22,7 +22,7 @@ import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useLocale } from '../../providers/Locale'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 // import DefaultEdit from '../../views/collections/Edit/Default'
-import formatFields from '../../utilities/formatFields'
+import { formatFields } from '../../utilities/formatFields'
 import { Button } from '../Button'
 import IDLabel from '../IDLabel'
 
@@ -32,10 +32,13 @@ const Content: React.FC<DocumentDrawerProps> = ({
   drawerSlug,
   onSave,
 }) => {
+  const config = useConfig()
+
   const {
     routes: { api },
     serverURL,
-  } = useConfig()
+  } = config
+
   const { closeModal, modalState, toggleModal } = useModal()
   const { code: locale } = useLocale()
   const { user } = useAuth()
@@ -44,11 +47,11 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const hasInitializedState = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
-  const config = useConfig()
   const { formQueryParams } = useFormQueryParams()
   const formattedQueryParams = queryString.stringify(formQueryParams)
 
-  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
+  const { admin: { components: { views: { Edit } = {} } = {} } = {}, fields: fieldsFromConfig } =
+    collectionConfig
 
   const { id, docPermissions, getDocPreferences } = useDocumentInfo()
 
@@ -68,7 +71,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       ? Edit.Default.Component
       : undefined
 
-  const [fields, setFields] = useState(() => formatFields(collectionConfig, true))
+  const [fields, setFields] = useState(() => formatFields(fieldsFromConfig, true))
 
   // no need to an additional requests when creating new documents
   const initialID = useRef(id)
@@ -78,7 +81,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   )
 
   useEffect(() => {
-    setFields(formatFields(collectionConfig, true))
+    setFields(formatFields(fields, true))
   }, [collectionSlug, collectionConfig])
 
   useEffect(() => {

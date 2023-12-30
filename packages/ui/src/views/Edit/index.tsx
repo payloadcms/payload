@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { DefaultEditViewProps } from './types'
 
@@ -11,7 +11,7 @@ import { RenderCustomView } from './RenderCustomView'
 
 const baseClass = 'collection-edit'
 
-export const DefaultEdit: React.FC<DefaultEditViewProps> = async (props) => {
+export const DefaultEditView: React.FC<DefaultEditViewProps> = async (props) => {
   const {
     id,
     action,
@@ -20,10 +20,10 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = async (props) => {
     customHeader,
     data,
     hasSavePermission,
-    internalState,
+    initialState,
     isEditing,
-    isLoading,
-    onSave: onSaveFromProps,
+    // isLoading,
+    // onSave: onSaveFromProps,
   } = props
 
   // const { auth } = collectionConfig
@@ -75,13 +75,13 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = async (props) => {
           action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
-          initialState={internalState}
+          initialState={initialState}
           method={id ? 'PATCH' : 'POST'}
           // onSuccess={onSave}
         >
           <FormLoadingOverlayToggle
-            action={isLoading ? 'loading' : operation}
-            formIsLoading={isLoading}
+            action={operation}
+            // formIsLoading={isLoading}
             // loadingSuffix={getTranslation(collectionConfig.labels.singular, i18n)}
             name={`collection-edit--${
               typeof collectionConfig?.labels?.singular === 'string'
@@ -90,19 +90,17 @@ export const DefaultEdit: React.FC<DefaultEditViewProps> = async (props) => {
             }`}
             type="withoutNav"
           />
-          {!isLoading && (
-            <React.Fragment>
-              <DocumentHeader
-                apiURL={apiURL}
-                collectionConfig={collectionConfig}
-                customHeader={customHeader}
-                data={data}
-                id={id}
-                isEditing={isEditing}
-              />
-              <RenderCustomView view="Default" {...props} />
-            </React.Fragment>
-          )}
+          <Fragment>
+            <DocumentHeader
+              apiURL={apiURL}
+              collectionConfig={collectionConfig}
+              customHeader={customHeader}
+              data={data}
+              id={id}
+              isEditing={isEditing}
+            />
+            <RenderCustomView {...props} view="Default" />
+          </Fragment>
         </Form>
       </OperationProvider>
     </main>

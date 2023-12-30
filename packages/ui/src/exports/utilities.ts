@@ -1,2 +1,2 @@
 export { findLocaleFromCode } from '../utilities/findLocaleFromCode'
-export { default as formatFields } from '../utilities/formatFields'
+export { formatFields } from '../utilities/formatFields'

@@ -18,7 +18,6 @@ const RenderTitle: React.FC<Props> = (props) => {
     data,
     element = 'h1',
     fallback = '[untitled]',
-    global,
     title: titleFromProps,
   } = props
 

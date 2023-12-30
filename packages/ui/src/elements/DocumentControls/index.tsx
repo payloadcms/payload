@@ -28,12 +28,12 @@ export const DocumentControls: React.FC<{
   apiURL: string
   data?: any
   disableActions?: boolean
-  global?: SanitizedGlobalConfig
+  globalConfig?: SanitizedGlobalConfig
   hasSavePermission?: boolean
   id?: string
   isAccountView?: boolean
   isEditing?: boolean
-  permissions?: CollectionPermission | GlobalPermission | null
+  permissions: CollectionPermission | GlobalPermission | null
   config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
 }> = (props) => {
@@ -43,7 +43,7 @@ export const DocumentControls: React.FC<{
     collectionConfig,
     data,
     disableActions,
-    global,
+    globalConfig,
     hasSavePermission,
     isAccountView,
     isEditing,
