@@ -1,12 +1,8 @@
 import React from 'react'
 
-import type { GlobalEditViewProps } from '../../types'
+import type { GlobalEditViewProps } from '../types'
 
-import { API } from '../../API'
-import { LivePreviewView } from '../../LivePreview'
-import VersionView from '../../Version/Version'
-import VersionsView from '../../Versions'
-import { DefaultGlobalEdit } from '../Default/index'
+import { DefaultGlobalEdit } from './Default/index'
 
 export type globalViewType =
   | 'API'
@@ -20,23 +16,23 @@ export type globalViewType =
 export const defaultGlobalViews: {
   [key in globalViewType]: React.ComponentType<any>
 } = {
-  API,
+  API: null,
   Default: DefaultGlobalEdit,
-  LivePreview: LivePreviewView,
+  LivePreview: null,
   References: null,
   Relationships: null,
-  Version: VersionView,
-  Versions: VersionsView,
+  Version: null,
+  Versions: null,
 }
 
-export const CustomGlobalComponent = (
+export const RenderCustomView = (
   args: GlobalEditViewProps & {
     view: globalViewType
   },
 ) => {
-  const { global, view } = args
+  const { globalConfig, view } = args
 
-  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = global
+  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = globalConfig
 
   // Overriding components may come from multiple places in the config
   // Need to cascade through the hierarchy to find the correct component to render

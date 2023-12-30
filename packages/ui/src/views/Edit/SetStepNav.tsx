@@ -18,10 +18,19 @@ export const SetStepNav: React.FC<{
   globalSlug?: SanitizedGlobalConfig['slug']
   pluralLabel?: SanitizedCollectionConfig['labels']['plural']
   id?: number | string
-  isEditing: boolean
+  isEditing?: boolean
   view?: string
 }> = (props) => {
-  const { collectionSlug, globalSlug, pluralLabel, useAsTitle, id, isEditing, globalLabel } = props
+  const {
+    collectionSlug,
+    globalSlug,
+    pluralLabel,
+    useAsTitle,
+    id,
+    isEditing = true,
+    globalLabel,
+  } = props
+
   const view: string | undefined = props?.view || undefined
 
   const title = useTitle({

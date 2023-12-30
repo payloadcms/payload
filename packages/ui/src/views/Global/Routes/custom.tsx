@@ -6,7 +6,7 @@ import { Route } from 'react-router-dom'
 import type { GlobalPermission, User } from '../../../../../auth'
 import type { EditView } from '../../../../../config/types'
 import type { SanitizedGlobalConfig } from '../../../../../exports/types'
-import type { globalViewType } from './CustomComponent'
+import type { globalViewType } from '../RenderCustomView'
 
 import Unauthorized from '../../Unauthorized'
 

@@ -41,6 +41,8 @@ export const Account = async ({
   const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
 
   if (collectionConfig) {
+    const { fields } = collectionConfig
+
     let data: TypeWithID & Record<string, unknown>
 
     try {
@@ -54,7 +56,7 @@ export const Account = async ({
       return notFound()
     }
 
-    const fieldSchema = formatFields(collectionConfig, true)
+    const fieldSchema = formatFields(fields, true)
 
     let preferencesKey: string
 
@@ -79,7 +81,7 @@ export const Account = async ({
 
     const state = await buildStateFromSchema({
       id: user?.id,
-      config: collectionConfig,
+      config,
       data: data || {},
       fieldSchema,
       locale,

@@ -1,13 +1,13 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import type { Props } from './types'
 
 import { text } from 'payload/fields/validations'
-import { useConfig } from '../../../providers/Config'
-import { useLocale } from '../../../providers/Locale'
-import useField from '../../useField'
-import { isFieldRTL } from '../shared'
-import TextInput from './Input'
+import { fieldBaseClass, isFieldRTL } from '../shared'
+import { TextInput } from './Input'
+import FieldDescription from '../../FieldDescription'
+import DefaultError from '../../Error'
+import DefaultLabel from '../../Label'
 
 const Text: React.FC<Props> = (props) => {
   const {
@@ -15,7 +15,7 @@ const Text: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      condition,
+      // condition,
       description,
       placeholder,
       readOnly,
@@ -23,7 +23,7 @@ const Text: React.FC<Props> = (props) => {
       style,
       width,
     } = {},
-    inputRef,
+    // inputRef,
     label,
     localized,
     maxLength,
@@ -34,30 +34,52 @@ const Text: React.FC<Props> = (props) => {
   } = props
 
   const path = pathFromProps || name
-  const locale = useLocale()
 
-  const { localization } = useConfig()
-  const isRTL = isFieldRTL({
-    fieldLocalized: localized,
-    fieldRTL: rtl,
-    locale,
-    localizationConfig: localization || undefined,
-  })
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      return validate(value, { ...options, maxLength, minLength, required })
-    },
-    [validate, minLength, maxLength, required],
+  return (
+    <div
+      className={[
+        fieldBaseClass,
+        'text',
+        className,
+        // showError && 'error', readOnly && 'read-only'
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
+    >
+      <ErrorComp
+      // message={errorMessage}
+      // showError={showError}
+      />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <div className="input-wrapper">
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
+        <TextInput
+          path={path}
+          name={name}
+          localized={localized}
+          rtl={rtl}
+          placeholder={placeholder}
+          readOnly={readOnly}
+          maxLength={maxLength}
+          minLength={minLength}
+        />
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+      </div>
+      <FieldDescription
+        className={`field-description-${path.replace(/\./g, '__')}`}
+        description={description}
+        path={path}
+        // value={value}
+      />
+    </div>
   )
-
-  const { errorMessage, setValue, showError, value } = useField<string>({
-    condition,
-    path,
-    validate: memoizedValidate,
-  })
-
-  return null
 }
 
 export default Text

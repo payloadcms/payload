@@ -14,13 +14,13 @@ export type CollectionEditViewProps = BaseEditViewProps & {
   hasSavePermission?: boolean
   id: string
   initialState?: Fields
-  internalState?: Fields
   isEditing?: boolean
   permissions: CollectionPermission | null
 }
 
 export type GlobalEditViewProps = BaseEditViewProps & {
-  global: SanitizedGlobalConfig
+  config: SanitizedConfig
+  globalConfig: SanitizedGlobalConfig
   initialState?: Fields
   permissions: GlobalPermission | null
 }
@@ -30,7 +30,7 @@ export type BaseEditViewProps = {
   apiURL: string
   canAccessAdmin?: boolean
   data: any
-  isLoading: boolean
+  // isLoading: boolean
   onSave: (json: any) => void
   updatedAt: string
   user: User | null | undefined

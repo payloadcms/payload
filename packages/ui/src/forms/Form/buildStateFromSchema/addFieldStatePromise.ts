@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next'
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { NonPresentationalField, SanitizedCollectionConfig } from 'payload/types'
+import type { NonPresentationalField, SanitizedConfig } from 'payload/types'
 import type { Data, Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -12,7 +12,7 @@ import getValueWithDefault from 'payload/dist/fields/getDefaultValue' // TODO: r
 import { iterateFields } from './iterateFields'
 
 type Args = {
-  config: SanitizedCollectionConfig
+  config: SanitizedConfig
   data: Data
   field: NonPresentationalField
   fullData: Data

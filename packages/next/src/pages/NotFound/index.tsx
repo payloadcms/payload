@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import Button from '../../elements/Button'
+import { Button } from '../../elements/Button'
 import { Gutter } from '../../elements/Gutter'
 import { useStepNav } from '../../elements/StepNav'
-import { useConfig } from '../../utilities/Config'
-import Meta from '../../utilities/Meta'
+import { useConfig } from '../../providers/Config'
+// import Meta from '../../utilities/Meta'
 import './index.scss'
 
 const baseClass = 'not-found'
@@ -21,15 +21,13 @@ const NotFound: React.FC<{
     routes: { admin },
   } = useConfig()
 
-  const { t } = useTranslation('general')
-
-  useEffect(() => {
-    setStepNav([
-      {
-        label: t('notFound'),
-      },
-    ])
-  }, [setStepNav, t])
+  // useEffect(() => {
+  //   setStepNav([
+  //     {
+  //       label: t('notFound'),
+  //     },
+  //   ])
+  // }, [setStepNav, t])
 
   return (
     <div
@@ -37,16 +35,23 @@ const NotFound: React.FC<{
         .filter(Boolean)
         .join(' ')}
     >
-      <Meta
+      {/* <Meta
         description={t('pageNotFound')}
         keywords={`404 ${t('notFound')}`}
         title={t('notFound')}
-      />
+      /> */}
       <Gutter className={`${baseClass}__wrap`}>
-        <h1>{t('nothingFound')}</h1>
-        <p>{t('sorryNotFound')}</p>
+        <h1>
+          Nothing Found
+          {/* {t('nothingFound')} */}
+        </h1>
+        <p>
+          Sorry, we couldn't find what you were looking for.
+          {/* {t('sorryNotFound')} */}
+        </p>
         <Button className={`${baseClass}__button`} el="link" to={`${admin}`}>
-          {t('backToDashboard')}
+          Back to Dashboard
+          {/* {t('backToDashboard')} */}
         </Button>
       </Gutter>
     </div>
