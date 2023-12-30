@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
 // import { useActions } from '../../providers/ActionsProvider'
@@ -103,10 +102,7 @@ export const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
             // loadingSuffix={getTranslation(label, i18n)}
             name={`global-edit--${typeof label === 'string' ? label : label?.en}`}
           />
-          <React.Fragment>
-            <DocumentHeader apiURL={apiURL} data={data} globalConfig={globalConfig} />
-            <RenderCustomView {...props} view="Default" />
-          </React.Fragment>
+          <RenderCustomView {...props} view="Default" />
         </Form>
       </OperationProvider>
     </main>
