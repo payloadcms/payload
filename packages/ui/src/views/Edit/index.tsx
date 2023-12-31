@@ -1,8 +1,7 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { DefaultEditViewProps } from './types'
 
-import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
 import { OperationProvider } from '../../providers/OperationProvider'
@@ -90,17 +89,7 @@ export const DefaultEditView: React.FC<DefaultEditViewProps> = async (props) => 
             }`}
             type="withoutNav"
           />
-          <Fragment>
-            <DocumentHeader
-              apiURL={apiURL}
-              collectionConfig={collectionConfig}
-              customHeader={customHeader}
-              data={data}
-              id={id}
-              isEditing={isEditing}
-            />
-            <RenderCustomView {...props} view="Default" />
-          </Fragment>
+          <RenderCustomView {...props} view="Default" />
         </Form>
       </OperationProvider>
     </main>
