@@ -1,8 +1,8 @@
-@import '../../../scss/styles.scss';
+@import '../../../scss/queries.scss';
 
 .versions {
   width: 100%;
-  margin-bottom: base(2);
+  margin-bottom: calc(var(--base) * 2);
 
   &__wrap {
     padding-top: 0;
@@ -53,12 +53,12 @@
 
   &__page-info {
     [dir='ltr'] & {
-      margin-right: base(1);
+      margin-right: var(--base);
       margin-left: auto;
     }
 
     [dir='rtl'] & {
-      margin-left: base(1);
+      margin-left: var(--base);
       margin-right: auto;
     }
   }
@@ -102,7 +102,7 @@
 
     .paginator {
       width: 100%;
-      margin-bottom: $baseline;
+      margin-bottom: var(--base);
     }
   }
 }

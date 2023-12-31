@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react'
 
 import type { Props } from './types'
 
-import { LoadingOverlayToggle } from '../../elements/Loading'
+import { LoadingOverlayToggle } from '@payloadcms/ui'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const VersionView = lazy(() => import('./Version'))

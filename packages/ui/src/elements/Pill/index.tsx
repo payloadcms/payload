@@ -90,7 +90,7 @@ const StaticPill: React.FC<Props> = (props) => {
   )
 }
 
-const Pill: React.FC<Props> = (props) => {
+export const Pill: React.FC<Props> = (props) => {
   const { draggable } = props
 
   if (draggable) return <DraggablePill {...props} />

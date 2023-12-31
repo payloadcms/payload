@@ -19,7 +19,7 @@ const nodeTypes = {
 
 const baseClass = 'paginator'
 
-const Pagination: React.FC<Props> = (props) => {
+export const Pagination: React.FC<Props> = (props) => {
   const history = useHistory()
   const params = useSearchParams()
 
@@ -128,5 +128,3 @@ const Pagination: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default Pagination

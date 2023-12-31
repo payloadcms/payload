@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
 import type { Props as CellProps } from '../../views/List/Cell/types'
 import type { Column } from '../Table/types'
 
@@ -13,15 +13,17 @@ import SortColumn from '../SortColumn'
 
 const buildColumns = ({
   cellProps,
-  collection,
+  config,
+  collectionConfig,
   columns,
 }: {
   cellProps: Partial<CellProps>[]
-  collection: SanitizedCollectionConfig
+  config: SanitizedConfig
+  collectionConfig: SanitizedCollectionConfig
   columns: Pick<Column, 'accessor' | 'active'>[]
 }): Column[] => {
   // sort the fields to the order of activeColumns
-  const sortedFields = flattenTopLevelFields(collection.fields, true).sort((a, b) => {
+  const sortedFields = flattenTopLevelFields(collectionConfig.fields, true).sort((a, b) => {
     const aIndex = columns.findIndex((column) => column.accessor === a.name)
     const bIndex = columns.findIndex((column) => column.accessor === b.name)
     if (aIndex === -1 && bIndex === -1) return 0
@@ -63,7 +65,8 @@ const buildColumns = ({
             <Cell
               cellData={cellData}
               colIndex={colIndex}
-              collection={collection}
+              config={config}
+              collectionConfig={collectionConfig}
               field={field}
               key={JSON.stringify(cellData)}
               link={isFirstActive}

@@ -1,12 +1,13 @@
-import type { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
 import type { PaginatedDocs } from 'payload/database'
 import type { FieldAffectingData, Where } from 'payload/types'
 import type { Props as ListControlsProps } from '../../elements/ListControls/types'
-import type { Props as PaginatorProps } from '../../elements/Paginator/types'
+import type { Props as PaginatorProps } from '../../elements/Pagination/types'
 import type { Props as PerPageProps } from '../../elements/PerPage'
 
-export type Props = {
-  collection: SanitizedCollectionConfig
+export type DefaultListViewProps = {
+  config: SanitizedConfig
+  collectionConfig: SanitizedCollectionConfig
   customHeader?: React.ReactNode
   data: PaginatedDocs<any>
   handleDelete?: () => void

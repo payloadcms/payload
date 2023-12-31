@@ -1,0 +1,29 @@
+@import './vars';
+
+// TODO: This is just temporary, this is duplicative of the `ui` package stylesheets
+// We need to figure out a way to share media queries between packages
+// Media queries do not allow CSS variables, so we need to use SCSS variables afaik
+
+@mixin extra-small-break {
+  @media (max-width: $breakpoint-xs-width) {
+    @content;
+  }
+}
+
+@mixin small-break {
+  @media (max-width: $breakpoint-s-width) {
+    @content;
+  }
+}
+
+@mixin mid-break {
+  @media (max-width: $breakpoint-m-width) {
+    @content;
+  }
+}
+
+@mixin large-break {
+  @media (max-width: $breakpoint-l-width) {
+    @content;
+  }
+}

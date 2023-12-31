@@ -1,14 +1,10 @@
-'use client'
 import React, { Fragment } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Link, useLocation, useRouteMatch } from 'react-router-dom'
 
 import type { DocumentTabConfig } from '../types'
 import type { DocumentTabProps } from '../types'
 
-import { useConfig } from '../../../../providers/Config'
-import { useDocumentInfo } from '../../../../providers/DocumentInfo'
 import './index.scss'
+import { DocumentTabLink } from './TabLink'
 
 const baseClass = 'doc-tab'
 
@@ -16,9 +12,10 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
   const {
     id,
     apiURL,
-    collectionSlug,
+    config,
+    collectionConfig,
     condition,
-    globalSlug,
+    globalConfig,
     href: tabHref,
     isActive: checkIsActive,
     label,
@@ -26,58 +23,48 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     pillLabel,
   } = props
 
-  const { t } = useTranslation('general')
-  const location = useLocation()
-  const config = useConfig()
-  const documentInfo = useDocumentInfo()
-  const match = useRouteMatch()
-
   const { routes } = config
-  const { versions } = documentInfo
+  // const { versions } = documentInfo
 
-  let href = `${match.url}${typeof tabHref === 'string' ? tabHref : ''}`
+  let href = typeof tabHref === 'string' ? tabHref : ''
 
   if (typeof tabHref === 'function') {
     href = tabHref({
       id,
       apiURL,
-      collection,
-      global,
-      match,
+      collection: collectionConfig,
+      global: globalConfig,
       routes,
     })
   }
 
-  const isActive =
-    typeof checkIsActive === 'function'
-      ? checkIsActive({ href, location, match })
-      : typeof checkIsActive === 'boolean'
-      ? checkIsActive
-      : location.pathname.startsWith(href)
+  if (
+    !condition ||
+    (condition && condition({ collectionConfig, config, documentInfo: undefined, globalConfig }))
+  ) {
+    const labelToRender =
+      typeof label === 'function'
+        ? label({
+            // t
+            t: (str: string) => str,
+          })
+        : label
 
-  if (!condition || (condition && condition({ collection, config, documentInfo, global }))) {
-    const labelToRender = typeof label === 'function' ? label({ t }) : label
-    const pillToRender = typeof pillLabel === 'function' ? pillLabel({ versions }) : pillLabel
+    const pillToRender =
+      typeof pillLabel === 'function' ? pillLabel({ versions: undefined }) : pillLabel
 
     return (
-      <li className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}>
-        <Link
-          className={`${baseClass}__link`}
-          to={href}
-          {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
-          tabIndex={isActive ? -1 : 0}
-        >
-          <span className={`${baseClass}__label`}>
-            {labelToRender}
-            {pillToRender && (
-              <Fragment>
-                &nbsp;
-                <span className={`${baseClass}__count`}>{pillToRender}</span>
-              </Fragment>
-            )}
-          </span>
-        </Link>
-      </li>
+      <DocumentTabLink href={href} newTab={newTab} baseClass={baseClass} isActive={checkIsActive}>
+        <span className={`${baseClass}__label`}>
+          {labelToRender}
+          {pillToRender && (
+            <Fragment>
+              &nbsp;
+              <span className={`${baseClass}__count`}>{pillToRender}</span>
+            </Fragment>
+          )}
+        </span>
+      </DocumentTabLink>
     )
   }
 

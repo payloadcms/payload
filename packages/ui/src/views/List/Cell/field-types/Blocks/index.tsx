@@ -1,5 +1,4 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { BlockField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
@@ -7,7 +6,9 @@ import type { CellComponentProps } from '../../types'
 import { getTranslation } from 'payload/utilities'
 
 const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field }) => {
-  const { i18n, t } = useTranslation('fields')
+  const i18n = undefined // TODO: this temporary until we can get i18n working server-side
+  const t = (key, params) => key // TODO: this temporary until we can get i18n working server-side
+
   const selectedBlocks = data ? data.map(({ blockType }) => blockType) : []
   const blockLabels = field.blocks.map((s) => ({
     label: getTranslation(s.labels.singular, i18n),

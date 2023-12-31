@@ -42,9 +42,9 @@ const RenderFields: React.FC<Props> = (props) => {
                 CustomComponent={field?.admin?.components?.Field}
                 DefaultComponent={FieldComponent}
                 componentProps={{
-                  // ...field,
+                  ...field,
                   admin: {
-                    // ...(field.admin || {}),
+                    ...(field.admin || {}),
                     readOnly,
                   },
                   fieldTypes,
@@ -52,7 +52,7 @@ const RenderFields: React.FC<Props> = (props) => {
                   indexPath:
                     'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
                   path: field.path || (isFieldAffectingData && 'name' in field ? field.name : ''),
-                  // permissions: fieldPermissions,
+                  permissions: fieldPermissions,
                 }}
                 key={fieldIndex}
               />

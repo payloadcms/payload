@@ -58,7 +58,6 @@ const JSONField: React.FC<Props> = (props) => {
   const handleChange = useCallback(
     (val) => {
       if (readOnly) return
-      console.log(val)
       setStringValue(val)
 
       try {
