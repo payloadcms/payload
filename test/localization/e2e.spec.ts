@@ -224,6 +224,10 @@ describe('Localization', () => {
 
       // verify that the locale did copy
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+
+      // await the success toast
+      await expect(page.locator('.Toastify')).toContainText('successfully duplicated')
+
       // expect that the document has a new id
       expect(page.url()).not.toStrictEqual(originalDocURL)
     })
