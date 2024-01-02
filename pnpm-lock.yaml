@@ -748,8 +748,8 @@ importers:
         specifier: 0.38.0
         version: 0.38.0
       nodemailer:
-        specifier: 6.9.4
-        version: 6.9.4
+        specifier: 6.9.8
+        version: 6.9.8
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -1067,8 +1067,8 @@ importers:
         specifier: ^6.1.2
         version: 6.3.6
       nodemailer:
-        specifier: ^6.9.1
-        version: 6.9.4
+        specifier: 6.9.8
+        version: 6.9.8
       resend:
         specifier: ^0.17.2
         version: 0.17.2
@@ -13593,8 +13593,8 @@ packages:
   /node-releases@2.0.13:
     resolution: {integrity: sha512-uYr7J37ae/ORWdZeQ1xxMJe3NtdmqMC/JZK+geofDrkLUApKRHPd18/TxtBOJ4A0/+uUIliorNrfYV6s1b02eQ==}
 
-  /nodemailer@6.9.4:
-    resolution: {integrity: sha512-CXjQvrQZV4+6X5wP6ZIgdehJamI63MFoYFGGPtHudWym9qaEHDNdPzaj5bfMCvxG1vhAileSWW90q7nL0N36mA==}
+  /nodemailer@6.9.8:
+    resolution: {integrity: sha512-cfrYUk16e67Ks051i4CntM9kshRYei1/o/Gi8K1d+R34OIs21xdFnW7Pt7EucmVKA0LKtqUGNcjMZ7ehjl49mQ==}
     engines: {node: '>=6.0.0'}
     dev: false
 
