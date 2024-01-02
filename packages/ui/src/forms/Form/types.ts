@@ -12,14 +12,14 @@ export type Row = {
 }
 
 export type FormField = {
-  condition?: Condition
+  // condition?: Condition
   disableFormData?: boolean
   errorMessage?: string
   initialValue: unknown
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
-  validate?: Validate
+  // validate?: Validate
   value: unknown
 }
 
@@ -51,7 +51,7 @@ export type Props = {
   initialData?: Data
   initialState?: Fields
   log?: boolean
-  method?: 'DELETE' | 'GET' | 'PATH' | 'POST'
+  method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
   onSubmit?: (fields: Fields, data: Data) => void
   onSuccess?: (json: unknown) => void
   redirect?: string

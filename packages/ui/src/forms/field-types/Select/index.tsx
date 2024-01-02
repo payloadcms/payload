@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option, OptionObject } from 'payload/types'

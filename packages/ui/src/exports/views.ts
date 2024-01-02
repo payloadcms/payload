@@ -1,2 +1,8 @@
+export { DefaultAccount } from '../views/Account'
 export { DefaultDashboard } from '../views/Dashboard'
 export { DefaultList } from '../views/List'
+export { DefaultEditView } from '../views/Edit'
+export { DefaultGlobalView } from '../views/Global'
+export type { DefaultEditViewProps } from '../views/Edit/types'
+export type { DefaultGlobalViewProps } from '../views/Global/types'
+export type { DefaultAccountViewProps } from '../views/Account/types'

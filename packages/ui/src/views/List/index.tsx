@@ -31,7 +31,7 @@ export const DefaultList: React.FC<Props> = (props) => {
     collection: {
       slug: collectionSlug,
       fields,
-      labels: { plural },
+      labels: { plural: pluralLabel },
       admin: {
         listSearchableFields,
         components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
@@ -64,12 +64,14 @@ export const DefaultList: React.FC<Props> = (props) => {
     })
   }
 
+  console.log(pluralLabel)
+
   return (
     <div className={baseClass}>
       <SetStepNav
         nav={[
           {
-            label: plural,
+            label: pluralLabel,
           },
         ]}
       />
@@ -82,12 +84,14 @@ export const DefaultList: React.FC<Props> = (props) => {
             {customHeader && customHeader}
             {!customHeader && (
               <Fragment>
+                <h1>{typeof pluralLabel === 'string' ? pluralLabel : pluralLabel['en']}</h1>
                 {/* <h1>{getTranslation(pluralLabel, i18n)}</h1> */}
                 {hasCreatePermission && (
                   <Pill
                     // aria-label={t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
                     to={newDocumentURL}
                   >
+                    Create New
                     {/* {t('createNew')} */}
                   </Pill>
                 )}
@@ -103,7 +107,7 @@ export const DefaultList: React.FC<Props> = (props) => {
             )}
           </header>
           <ListControls
-            collectionPluralLabel={plural}
+            collectionPluralLabel={pluralLabel}
             collectionSlug={collectionSlug}
             textFieldsToBeSearched={textFieldsToBeSearched}
             handleSearchChange={handleSearchChange}

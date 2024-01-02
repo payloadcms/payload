@@ -1,8 +1,13 @@
 import { SanitizedConfig } from 'payload/types'
-import React from 'react'
-import { RenderCustomComponent, TableColumnsProvider } from '@payloadcms/ui/elements'
-import { DefaultList } from '@payloadcms/ui/views'
+import React, { Fragment } from 'react'
+import {
+  RenderCustomComponent,
+  TableColumnsProvider,
+  DefaultList,
+  HydrateClientUser,
+} from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
+import { notFound } from 'next/navigation'
 
 export const CollectionList = async ({
   collectionSlug,
@@ -13,7 +18,7 @@ export const CollectionList = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise)
+  const { config, payload, permissions, user } = await initPage(configPromise, true)
 
   const {
     routes: { admin },
@@ -46,23 +51,26 @@ export const CollectionList = async ({
     })
 
     return (
-      <TableColumnsProvider collectionSlug={collectionSlug}>
-        <RenderCustomComponent
-          CustomComponent={ListToRender}
-          DefaultComponent={DefaultList}
-          componentProps={{
-            collection: collectionConfig,
-            data,
-            hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-            limit,
-            newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
-            // resetParams,
-            // titleField,
-          }}
-        />
-      </TableColumnsProvider>
+      <Fragment>
+        <HydrateClientUser user={user} />
+        <TableColumnsProvider collectionSlug={collectionSlug}>
+          <RenderCustomComponent
+            CustomComponent={ListToRender}
+            DefaultComponent={DefaultList}
+            componentProps={{
+              collection: collectionConfig,
+              data,
+              hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+              limit,
+              newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
+              // resetParams,
+              // titleField,
+            }}
+          />
+        </TableColumnsProvider>
+      </Fragment>
     )
   }
 
-  return null
+  return notFound()
 }

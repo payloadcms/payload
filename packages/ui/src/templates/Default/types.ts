@@ -1,7 +1,11 @@
+import { Permissions, User } from 'payload/auth'
+import { SanitizedConfig } from 'payload/types'
 import type React from 'react'
 
 export type Props = {
   children?: React.ReactNode
   className?: string
-  Link?: React.ComponentType<any>
+  config: Promise<SanitizedConfig>
+  user: User
+  permissions: Permissions
 }

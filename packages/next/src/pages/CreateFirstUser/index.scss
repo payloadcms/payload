@@ -1,0 +1,15 @@
+.create-first-user {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 100vh;
+
+  &__wrap {
+    width: 100%;
+    margin: 0 auto var(--base);
+
+    svg {
+      width: 100%;
+    }
+  }
+}

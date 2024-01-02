@@ -1,105 +1,82 @@
-import type { ChangeEvent } from 'react'
-
+'use client'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { TextField } from 'payload/types'
-import type { Description } from '../../FieldDescription/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { getTranslation } from 'payload/utilities'
-import DefaultError from '../../Error'
-import FieldDescription from '../../FieldDescription'
-import DefaultLabel from '../../Label'
-import { fieldBaseClass } from '../shared'
+import { isFieldRTL } from '../shared'
 import './index.scss'
+import useField from '../../useField'
+import { useLocale } from '../../../providers/Locale'
 
-export type TextInputProps = Omit<TextField, 'type'> & {
-  Error?: React.ComponentType<any>
-  Label?: React.ComponentType<any>
-  afterInput?: React.ComponentType<any>[]
-  beforeInput?: React.ComponentType<any>[]
-  className?: string
-  description?: Description
-  errorMessage?: string
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-  path: string
-  placeholder?: Record<string, string> | string
+export const TextInput: React.FC<{
+  name: string
+  autoComplete?: string
+  // condition?: Condition
   readOnly?: boolean
+  path: string
   required?: boolean
+  placeholder?: Record<string, string> | string
+  localized?: boolean
+  localizationConfig?: SanitizedConfig['localization']
   rtl?: boolean
-  showError?: boolean
-  style?: React.CSSProperties
-  value?: string
-  width?: string
-}
-
-const TextInput: React.FC<TextInputProps> = (props) => {
+  maxLength?: number
+  minLength?: number
+}> = (props) => {
   const {
-    Error,
-    Label,
-    afterInput,
-    beforeInput,
-    className,
-    description,
-    errorMessage,
-    inputRef,
-    label,
-    onChange,
-    onKeyDown,
     path,
     placeholder,
     readOnly,
-    required,
+    localized,
+    localizationConfig,
     rtl,
-    showError,
-    style,
-    value,
-    width,
+    // maxLength,
+    // minLength,
   } = props
 
   const { i18n } = useTranslation()
+  const locale = useLocale()
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const {
+    // errorMessage,
+    setValue,
+    // showError,
+    value,
+  } = useField({
+    // condition,
+    path,
+    // validate: memoizedValidate,
+  })
+
+  // const memoizedValidate = useCallback(
+  //   (value, options) => {
+  //     return validate(value, { ...options, maxLength, minLength, required })
+  //   },
+  //   [validate, minLength, maxLength, required],
+  // )
+
+  const renderRTL = isFieldRTL({
+    fieldLocalized: localized,
+    fieldRTL: rtl,
+    locale,
+    localizationConfig: localizationConfig || undefined,
+  })
 
   return (
-    <div
-      className={[fieldBaseClass, 'text', className, showError && 'error', readOnly && 'read-only']
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
+    <input
+      data-rtl={renderRTL}
+      disabled={readOnly}
+      id={`field-${path.replace(/\./g, '__')}`}
+      name={path}
+      onChange={(e) => {
+        setValue(e.target.value)
       }}
-    >
-      <ErrorComp message={errorMessage} showError={showError} />
-      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-      <div className="input-wrapper">
-        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
-        <input
-          data-rtl={rtl}
-          disabled={readOnly}
-          id={`field-${path.replace(/\./g, '__')}`}
-          name={path}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
-          placeholder={getTranslation(placeholder, i18n)}
-          ref={inputRef}
-          type="text"
-          value={value || ''}
-        />
-        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
-      </div>
-      <FieldDescription
-        className={`field-description-${path.replace(/\./g, '__')}`}
-        description={description}
-        path={path}
-        value={value}
-      />
-    </div>
+      // onKeyDown={onKeyDown}
+      placeholder={getTranslation(placeholder, i18n)}
+      // ref={inputRef}
+      type="text"
+      value={(value as string) || ''}
+    />
   )
 }
-
-export default TextInput
