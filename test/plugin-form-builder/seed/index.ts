@@ -1,7 +1,7 @@
 import type { Payload } from '../../../packages/payload/src'
 import type { PayloadRequest } from '../../../packages/payload/src/express/types'
 
-import { formsSlug, pagesSlug } from '../shared'
+import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
@@ -50,6 +50,34 @@ export const seed = async (payload: Payload): Promise<boolean> => {
             required: true,
           },
         ],
+        emails: [
+          {
+            subject: "You've received a new message.",
+            emailTo: '{{email}}',
+            message: [
+              {
+                children: [
+                  {
+                    text: 'Welcome {{name}}. Here is a dynamic ',
+                  },
+                  {
+                    children: [
+                      {
+                        text: 'link',
+                      },
+                    ],
+                    linkType: 'custom',
+                    type: 'link',
+                    url: 'www.test.com?email={{email}}',
+                  },
+                  {
+                    text: '.',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
     })
 
@@ -61,6 +89,23 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         form: formID,
       },
     })
+
+    // await payload.create({
+    //   collection: formSubmissionsSlug,
+    //   data: {
+    //     submissionData: [
+    //       {
+    //         field: 'name',
+    //         value: 'Test Submission',
+    //       },
+    //       {
+    //         field: 'email',
+    //         value: 'dev@payloadcms.com',
+    //       },
+    //     ],
+    //     form: formID,
+    //   },
+    // })
 
     return true
   } catch (err) {
