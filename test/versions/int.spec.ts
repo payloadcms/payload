@@ -835,9 +835,7 @@ describe('Versions', () => {
 
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
-              collectionGraphQLPostID,
-            )} } }) {
+            versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
                 docs {
                     id
                 }
@@ -915,9 +913,7 @@ describe('Versions', () => {
 
         // language=graphQL
         const query = `query {
-            versionsAutosavePosts(where: { parent: { equals: ${formatGraphQLID(
-              collectionGraphQLPostID,
-            )} } }) {
+            versionsAutosavePosts(where: { parent: { equals: "${collectionGraphQLPostID}" } }) {
                 docs {
                     id
                 }
