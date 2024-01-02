@@ -89,15 +89,6 @@ const endpoints = {
   },
 }
 
-const fn = () => {
-  return Response.json(
-    {},
-    {
-      status: 200,
-    },
-  )
-}
-
 const handleCustomEndpoints = ({
   entitySlug,
   endpoints,
