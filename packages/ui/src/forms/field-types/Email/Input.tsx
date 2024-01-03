@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import useField from '../../useField'
@@ -9,7 +9,6 @@ import { getTranslation } from 'payload/utilities'
 export const EmailInput: React.FC<{
   name: string
   autoComplete?: string
-  // condition?: Condition
   readOnly?: boolean
   path: string
   required?: boolean
@@ -18,7 +17,6 @@ export const EmailInput: React.FC<{
   const {
     name,
     autoComplete,
-    // condition,
     readOnly,
     path: pathFromProps,
     required,
@@ -43,7 +41,6 @@ export const EmailInput: React.FC<{
     // showError,
     value,
   } = useField({
-    // condition,
     path,
     // validate: memoizedValidate,
   })

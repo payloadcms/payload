@@ -9,7 +9,6 @@ import { getTranslation } from 'payload/utilities'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { isFieldRTL } from '../shared'
 import TextareaInput from './Input'
 import './index.scss'
@@ -20,7 +19,6 @@ const Textarea: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      condition,
       description,
       placeholder,
       readOnly,
@@ -59,7 +57,6 @@ const Textarea: React.FC<Props> = (props) => {
   )
 
   const { errorMessage, setValue, showError, value } = useField({
-    condition,
     path,
     validate: memoizedValidate,
   })
@@ -91,4 +88,4 @@ const Textarea: React.FC<Props> = (props) => {
     />
   )
 }
-export default withCondition(Textarea)
+export default Textarea
