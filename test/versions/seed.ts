@@ -27,60 +27,60 @@ export async function clearAndSeedEverything(_payload: Payload) {
             password: devUser.password,
           },
         }),
-        _payload.create({
-          collection: draftCollectionSlug,
-          data: {
-            blocksField,
-            description: 'Description',
-            radio: 'test',
-            title: 'Draft Title',
-          },
-          draft: true,
-        }),
+        // _payload.create({
+        //   collection: draftCollectionSlug,
+        //   data: {
+        //     blocksField,
+        //     description: 'Description',
+        //     radio: 'test',
+        //     title: 'Draft Title',
+        //   },
+        //   draft: true,
+        // }),
       ])
 
-      const { id: manyDraftsID } = await _payload.create({
-        collection: draftCollectionSlug,
-        data: {
-          blocksField,
-          description: 'Description',
-          radio: 'test',
-          title: 'Title With Many Versions',
-        },
-        draft: true,
-      })
+      // const { id: manyDraftsID } = await _payload.create({
+      //   collection: draftCollectionSlug,
+      //   data: {
+      //     blocksField,
+      //     description: 'Description',
+      //     radio: 'test',
+      //     title: 'Title With Many Versions',
+      //   },
+      //   draft: true,
+      // })
 
-      for (let i = 0; i < 10; i++) {
-        await _payload.update({
-          id: manyDraftsID,
-          collection: draftCollectionSlug,
-          data: {
-            title: `Title With Many Versions ${i + 2}`,
-          },
-        })
-      }
+      // for (let i = 0; i < 10; i++) {
+      //   await _payload.update({
+      //     id: manyDraftsID,
+      //     collection: draftCollectionSlug,
+      //     data: {
+      //       title: `Title With Many Versions ${i + 2}`,
+      //     },
+      //   })
+      // }
 
-      await _payload.create({
-        collection: draftCollectionSlug,
-        data: {
-          _status: 'published',
-          blocksField,
-          description: 'Description',
-          radio: 'test',
-          title: 'Published Title',
-        },
-        draft: false,
-      })
+      // await _payload.create({
+      //   collection: draftCollectionSlug,
+      //   data: {
+      //     _status: 'published',
+      //     blocksField,
+      //     description: 'Description',
+      //     radio: 'test',
+      //     title: 'Published Title',
+      //   },
+      //   draft: false,
+      // })
 
-      await _payload.create({
-        collection: draftCollectionSlug,
-        data: {
-          blocksField,
-          description: 'Description',
-          title: titleToDelete,
-        },
-        draft: true,
-      })
+      // await _payload.create({
+      //   collection: draftCollectionSlug,
+      //   data: {
+      //     blocksField,
+      //     description: 'Description',
+      //     title: titleToDelete,
+      //   },
+      //   draft: true,
+      // })
     },
   })
 }

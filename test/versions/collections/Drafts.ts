@@ -54,6 +54,10 @@ const DraftPosts: CollectionConfig = {
   },
   fields: [
     {
+      name: 'id',
+      type: 'text',
+    },
+    {
       name: 'title',
       label: 'Title',
       localized: true,

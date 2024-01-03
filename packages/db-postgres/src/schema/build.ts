@@ -19,6 +19,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, PostgresAdapter } from '../types'
 
+import { getConfigIDType } from './getConfigIDType'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { traverseFields } from './traverseFields'
 
@@ -37,6 +38,7 @@ type Args = {
   rootTableName?: string
   tableName: string
   timestamps?: boolean
+  versionsParentIDColType?: string
 }
 
 type Result = {
@@ -59,6 +61,7 @@ export const buildTable = ({
   rootTableName: incomingRootTableName,
   tableName,
   timestamps,
+  versionsParentIDColType,
 }: Args): Result => {
   const rootTableName = incomingRootTableName || tableName
   const columns: Record<string, PgColumnBuilder> = baseColumns
@@ -82,23 +85,15 @@ export const buildTable = ({
   // Drizzle relations
   const relationsToBuild: Map<string, string> = new Map()
 
-  const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
-  let idColType = 'integer'
+  const idColType = getConfigIDType(fields)
 
-  if (idField) {
-    if (idField.type === 'number') {
-      idColType = 'numeric'
-      columns.id = numeric('id').primaryKey()
-    }
-
-    if (idField.type === 'text') {
-      idColType = 'varchar'
-      columns.id = varchar('id').primaryKey()
-    }
-  } else {
-    columns.id = serial('id').primaryKey()
+  const idColTypeMap = {
+    integer: serial,
+    numeric,
+    varchar,
   }
 
+  columns.id = idColTypeMap[idColType]('id').primaryKey()
   ;({
     hasLocalizedField,
     hasLocalizedManyNumberField,
@@ -239,7 +234,7 @@ export const buildTable = ({
       const relationshipColumns: Record<string, PgColumnBuilder> = {
         id: serial('id').primaryKey(),
         order: integer('order'),
-        parent: parentIDColumnMap[idColType]('parent_id')
+        parent: parentIDColumnMap[versionsParentIDColType || idColType]('parent_id')
           .references(() => table.id, { onDelete: 'cascade' })
           .notNull(),
         path: varchar('path').notNull(),

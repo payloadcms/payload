@@ -9,6 +9,7 @@ import toSnakeCase from 'to-snake-case'
 import type { PostgresAdapter } from './types'
 
 import { buildTable } from './schema/build'
+import { getConfigIDType } from './schema/getConfigIDType'
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
@@ -36,6 +37,8 @@ export const init: Init = async function init(this: PostgresAdapter) {
       const versionsTableName = `_${tableName}_v`
       const versionFields = buildVersionCollectionFields(collection)
 
+      const versionsParentIDColType = getConfigIDType(collection.fields)
+
       buildTable({
         adapter: this,
         buildNumbers: true,
@@ -45,6 +48,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,
+        versionsParentIDColType,
       })
     }
   })
