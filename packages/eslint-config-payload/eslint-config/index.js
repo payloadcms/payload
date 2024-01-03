@@ -68,7 +68,7 @@ module.exports = {
         'partition-by-comment': true,
         groups: ['top', 'unknown'],
         'custom-groups': {
-          top: ['_id', 'id', 'name'],
+          top: ['_id', 'id', 'name', 'slug', 'type'],
         },
       },
     ],
