@@ -38,7 +38,6 @@ type Args = {
   rootTableName?: string
   tableName: string
   timestamps?: boolean
-  versionsParentIDColType?: string
 }
 
 type Result = {
@@ -61,7 +60,6 @@ export const buildTable = ({
   rootTableName: incomingRootTableName,
   tableName,
   timestamps,
-  versionsParentIDColType,
 }: Args): Result => {
   const rootTableName = incomingRootTableName || tableName
   const columns: Record<string, PgColumnBuilder> = baseColumns
@@ -234,7 +232,7 @@ export const buildTable = ({
       const relationshipColumns: Record<string, PgColumnBuilder> = {
         id: serial('id').primaryKey(),
         order: integer('order'),
-        parent: parentIDColumnMap[versionsParentIDColType || idColType]('parent_id')
+        parent: parentIDColumnMap[idColType]('parent_id')
           .references(() => table.id, { onDelete: 'cascade' })
           .notNull(),
         path: varchar('path').notNull(),

@@ -435,7 +435,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
             if (typeof locale === 'string') {
               ref[locale] = fieldData
             } else {
-              result[field.name] = fieldData
+              if (typeof fieldData !== 'undefined') {
+                result[field.name] = fieldData
+              }
             }
 
             break
