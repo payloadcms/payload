@@ -33,8 +33,7 @@ export default buildConfigWithDefaults({
     resources: {
       es: {
         'plugin-seo': {
-          previewDescription:
-            'Las listas de resultados pueden variar segun la relevancia de buesqueda y el contenido.',
+          autoGenerate: 'Auto-génerar',
         },
       },
     },

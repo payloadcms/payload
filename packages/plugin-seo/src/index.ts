@@ -8,7 +8,7 @@ import { getMetaImageField } from './fields/MetaImage'
 import { getMetaTitleField } from './fields/MetaTitle'
 import { Overview } from './ui/Overview'
 import { getPreviewField } from './ui/Preview'
-
+import { deepMerge } from 'payload/dist/utilities/deepMerge'
 import translations from './translations'
 
 const seo =
@@ -181,17 +181,7 @@ const seo =
       i18n: {
         ...config.i18n,
         resources: {
-          ...config.i18n?.resources,
-          en: {
-            ...config.i18n?.resources?.en,
-            'plugin-seo': {
-              ...(config.i18n?.resources?.en?.['plugin-seo'] &&
-              typeof config.i18n?.resources?.en?.['plugin-seo'] === 'object'
-                ? config.i18n?.resources?.en?.['plugin-seo']
-                : {}),
-              ...translations(),
-            },
-          },
+          ...deepMerge(translations, config.i18n?.resources),
         },
       },
     }
