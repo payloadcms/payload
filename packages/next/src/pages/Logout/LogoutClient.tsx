@@ -1,6 +1,5 @@
 'use client'
 import React, { Fragment, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../ui/src/providers/Auth'
 import { Button } from '@payloadcms/ui'
 
@@ -39,7 +38,7 @@ export const LogoutClient: React.FC<{
         )}
         <Button
           buttonStyle="secondary"
-          el="anchor"
+          el="link"
           url={`${adminRoute}/login${
             redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
           }`}

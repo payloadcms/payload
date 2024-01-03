@@ -23,7 +23,7 @@ export type Props = {
   resetPage?: boolean
 }
 
-const PerPage: React.FC<Props> = ({
+export const PerPage: React.FC<Props> = ({
   handleChange,
   limit,
   limits = defaultLimits,
@@ -89,5 +89,3 @@ const PerPage: React.FC<Props> = ({
     </div>
   )
 }
-
-export default PerPage

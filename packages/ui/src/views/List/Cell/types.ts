@@ -1,11 +1,16 @@
-import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
-import type { FieldAffectingData, UIField } from '../../../../../../fields/config/types'
+import type {
+  SanitizedCollectionConfig,
+  FieldAffectingData,
+  UIField,
+  SanitizedConfig,
+} from 'payload/types'
 
-export type Props = {
+export type CellProps = {
   cellData: unknown
   className?: string
   colIndex: number
-  collection: SanitizedCollectionConfig
+  config: SanitizedConfig
+  collectionConfig: SanitizedCollectionConfig
   field: FieldAffectingData | UIField
   link?: boolean
   onClick?: (Props) => void
@@ -15,8 +20,8 @@ export type Props = {
 }
 
 export type CellComponentProps<Field = FieldAffectingData | UIField, Data = unknown> = Pick<
-  Props,
-  'collection' | 'rowData'
+  CellProps,
+  'config' | 'collectionConfig' | 'rowData'
 > & {
   data: Data
   field: Field

@@ -1,3 +1,4 @@
+'use client'
 import queryString from 'qs'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +13,7 @@ import './index.scss'
 
 const baseClass = 'sort-column'
 
-const SortColumn: React.FC<Props> = (props) => {
+export const SortColumn: React.FC<Props> = (props) => {
   const { name, disable = false, label } = props
   const params = useSearchParams()
   const history = useHistory()

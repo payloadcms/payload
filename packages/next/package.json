@@ -40,8 +40,11 @@
     "sass": "^1.69.5"
   },
   "dependencies": {
+    "@faceless-ui/modal": "2.0.1",
     "jsonwebtoken": "9.0.1",
-    "path-to-regexp": "^6.2.1"
+    "path-to-regexp": "^6.2.1",
+    "react-diff-viewer-continued": "3.2.6",
+    "react-toastify": "8.2.0"
   },
   "peerDependencies": {
     "http-status": "1.6.2",

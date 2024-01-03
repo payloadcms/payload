@@ -1,10 +1,7 @@
+'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
-import { Button } from '../../elements/Button'
-import { Gutter } from '../../elements/Gutter'
-import { useStepNav } from '../../elements/StepNav'
-import { useConfig } from '../../providers/Config'
+import { Button, Gutter, useStepNav, useConfig } from '@payloadcms/ui'
 // import Meta from '../../utilities/Meta'
 import './index.scss'
 

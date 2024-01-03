@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import type { Props } from './types'
+import type { DefaultListViewProps } from './types'
 
 import './index.scss'
 import { SelectionProvider } from './SelectionProvider'
@@ -12,8 +12,8 @@ import { StaggeredShimmers } from '../../elements/ShimmerEffect'
 import { RelationshipProvider } from './RelationshipProvider'
 import Table from '../../elements/Table'
 import { Button } from '../../elements/Button'
-import PerPage from '../../elements/PerPage'
-import Paginator from '../../elements/Paginator'
+import { PerPage } from '../../elements/PerPage'
+import { Pagination } from '../../elements/Pagination'
 import ListSelection from '../../elements/ListSelection'
 import EditMany from '../../elements/EditMany'
 import PublishMany from '../../elements/PublishMany'
@@ -21,22 +21,28 @@ import UnpublishMany from '../../elements/UnpublishMany'
 import DeleteMany from '../../elements/DeleteMany'
 import { getTextFieldsToBeSearched } from '../../elements/ListControls/getTextFieldsToBeSearched'
 import { SetStepNav } from '../../elements/StepNav/SetStepNav'
+import buildColumns from '../../elements/TableColumns/buildColumns'
+import getInitialColumnState from '../../elements/TableColumns/getInitialColumns'
+import formatFields from './formatFields'
 
 const baseClass = 'collection-list'
 
-export const DefaultList: React.FC<Props> = (props) => {
+export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
   const {
-    customHeader,
-    collection,
-    collection: {
-      slug: collectionSlug,
+    config,
+    collectionConfig,
+    collectionConfig: {
+      admin: {
+        components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
+        defaultColumns,
+        listSearchableFields,
+        useAsTitle,
+      } = {},
       fields,
       labels: { plural: pluralLabel },
-      admin: {
-        listSearchableFields,
-        components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
-      } = {},
+      slug: collectionSlug,
     },
+    customHeader,
     data,
     handlePageChange,
     handlePerPageChange,
@@ -55,7 +61,7 @@ export const DefaultList: React.FC<Props> = (props) => {
 
   let docs = data.docs || []
 
-  if (collection.upload) {
+  if (collectionConfig.upload) {
     docs = docs?.map((doc) => {
       return {
         ...doc,
@@ -64,7 +70,19 @@ export const DefaultList: React.FC<Props> = (props) => {
     })
   }
 
-  console.log(pluralLabel)
+  const formattedFields = formatFields(collectionConfig)
+
+  const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
+
+  const columns = buildColumns({
+    cellProps: [],
+    config,
+    collectionConfig,
+    columns: initialColumns.map((column) => ({
+      accessor: column,
+      active: true,
+    })),
+  })
 
   return (
     <div className={baseClass}>
@@ -110,11 +128,11 @@ export const DefaultList: React.FC<Props> = (props) => {
             collectionPluralLabel={pluralLabel}
             collectionSlug={collectionSlug}
             textFieldsToBeSearched={textFieldsToBeSearched}
-            handleSearchChange={handleSearchChange}
-            handleSortChange={handleSortChange}
-            handleWhereChange={handleWhereChange}
-            modifySearchQuery={modifySearchParams}
-            resetParams={resetParams}
+            // handleSearchChange={handleSearchChange}
+            // handleSortChange={handleSortChange}
+            // handleWhereChange={handleWhereChange}
+            // modifySearchQuery={modifySearchParams}
+            // resetParams={resetParams}
             titleField={titleField}
           />
           {Array.isArray(BeforeListTable) &&
@@ -127,7 +145,7 @@ export const DefaultList: React.FC<Props> = (props) => {
           )}
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
-              <Table data={docs} />
+              <Table data={docs} columns={columns} />
             </RelationshipProvider>
           )}
           {data.docs && data.docs.length === 0 && (
@@ -135,6 +153,7 @@ export const DefaultList: React.FC<Props> = (props) => {
               {/* <p>{t('noResults', { label: getTranslation(pluralLabel, i18n) })}</p> */}
               {hasCreatePermission && newDocumentURL && (
                 <Button el="link" to={newDocumentURL}>
+                  Create New
                   {/* {t('createNewLabel', { label: getTranslation(singularLabel, i18n) })} */}
                 </Button>
               )}
@@ -144,7 +163,7 @@ export const DefaultList: React.FC<Props> = (props) => {
             AfterListTable.map((Component, i) => <Component key={i} {...props} />)}
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
-              <Paginator
+              <Pagination
                 disableHistoryChange={modifySearchParams === false}
                 hasNextPage={data.hasNextPage}
                 hasPrevPage={data.hasPrevPage}
@@ -168,7 +187,7 @@ export const DefaultList: React.FC<Props> = (props) => {
                   <PerPage
                     handleChange={handlePerPageChange}
                     limit={limit}
-                    limits={collection?.admin?.pagination?.limits}
+                    limits={collectionConfig?.admin?.pagination?.limits}
                     modifySearchParams={modifySearchParams}
                     resetPage={data.totalDocs <= data.pagingCounter}
                   />

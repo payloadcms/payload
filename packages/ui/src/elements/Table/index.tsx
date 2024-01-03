@@ -1,17 +1,12 @@
-'use client'
 import React from 'react'
 
 import type { Props } from './types'
 
-import { useTableColumns } from '../TableColumns'
 import './index.scss'
 
 const baseClass = 'table'
 
-export const Table: React.FC<Props> = ({ columns: columnsFromProps, data }) => {
-  const { columns: columnsFromContext } = useTableColumns()
-
-  const columns = columnsFromProps || columnsFromContext
+export const Table: React.FC<Props> = ({ columns, data }) => {
   const activeColumns = columns?.filter((col) => col.active)
 
   if (!activeColumns || activeColumns.length === 0) {

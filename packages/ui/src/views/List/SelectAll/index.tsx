@@ -1,5 +1,5 @@
+'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
 import { SelectAllStatus, useSelection } from '../SelectionProvider'
 import './index.scss'
@@ -8,7 +8,8 @@ import { CheckboxInput } from '../../../forms/field-types/Checkbox/Input'
 const baseClass = 'select-all'
 
 const SelectAll: React.FC = () => {
-  const { t } = useTranslation('general')
+  const t = (key: string) => key // TODO: wire this in
+
   const { selectAll, toggleAll } = useSelection()
 
   return (

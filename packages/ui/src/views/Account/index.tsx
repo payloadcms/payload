@@ -31,7 +31,6 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
     fieldTypes,
     hasSavePermission,
     initialState,
-    isLoading,
     onSave: onSaveFromProps,
     permissions,
   } = props
@@ -54,49 +53,52 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
   return (
     <React.Fragment>
       {/* <Meta description={t('accountOfCurrentUser')} keywords={t('account')} title={t('account')} /> */}
-      <LoadingOverlayToggle name="account" show={isLoading} type="withoutNav" />
-      {!isLoading && (
-        <OperationProvider operation="update">
-          <Form
-            action={action}
-            disabled={!hasSavePermission}
-            initialState={initialState}
-            method="PATCH"
-            // onSuccess={onSave}
-          >
-            {!(
-              collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave
-            ) && <LeaveWithoutSaving />}
-            <DocumentHeader apiURL={apiURL} collectionConfig={collectionConfig} data={data} />
-            <DocumentControls
-              apiURL={apiURL}
-              config={config}
-              collectionConfig={collectionConfig}
-              data={data}
-              hasSavePermission={hasSavePermission}
-              isAccountView
-              permissions={permissions}
-            />
-            <DocumentFields
-              AfterFields={<Settings className={`${baseClass}__settings`} />}
-              BeforeFields={
-                <Auth
-                  className={`${baseClass}__auth`}
-                  collectionSlug={collectionConfig.slug}
-                  email={data?.email}
-                  operation="update"
-                  readOnly={!hasSavePermission}
-                  useAPIKey={auth.useAPIKey}
-                />
-              }
-              fieldTypes={fieldTypes}
-              fields={fields}
-              hasSavePermission={hasSavePermission}
-              permissions={permissions}
-            />
-          </Form>
-        </OperationProvider>
-      )}
+      {/* <LoadingOverlayToggle name="account" show={isLoading} type="withoutNav" /> */}
+      <OperationProvider operation="update">
+        <Form
+          action={action}
+          disabled={!hasSavePermission}
+          initialState={initialState}
+          method="PATCH"
+          // onSuccess={onSave}
+        >
+          {!(collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave) && (
+            <LeaveWithoutSaving />
+          )}
+          <DocumentHeader
+            apiURL={apiURL}
+            config={config}
+            collectionConfig={collectionConfig}
+            data={data}
+          />
+          <DocumentControls
+            apiURL={apiURL}
+            config={config}
+            collectionConfig={collectionConfig}
+            data={data}
+            hasSavePermission={hasSavePermission}
+            isAccountView
+            permissions={permissions}
+          />
+          <DocumentFields
+            AfterFields={<Settings className={`${baseClass}__settings`} />}
+            BeforeFields={
+              <Auth
+                className={`${baseClass}__auth`}
+                collectionSlug={collectionConfig.slug}
+                email={data?.email}
+                operation="update"
+                readOnly={!hasSavePermission}
+                useAPIKey={auth.useAPIKey}
+              />
+            }
+            fieldTypes={fieldTypes}
+            fields={fields}
+            hasSavePermission={hasSavePermission}
+            permissions={permissions}
+          />
+        </Form>
+      </OperationProvider>
     </React.Fragment>
   )
 }

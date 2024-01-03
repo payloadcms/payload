@@ -37,6 +37,7 @@ export const DocumentLayout = async ({
     <Fragment>
       <DocumentHeader
         // apiURL={apiURL}
+        config={config}
         collectionConfig={collectionConfig}
         globalConfig={globalConfig}
         // customHeader={customHeader}

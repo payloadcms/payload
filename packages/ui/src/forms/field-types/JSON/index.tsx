@@ -57,6 +57,12 @@ const JSONField: React.FC<Props> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
+<<<<<<< HEAD
+=======
+      if (readOnly) return
+      setStringValue(val)
+
+>>>>>>> 3d5500e69 (chore(next): ssr versions view (#4645))
       try {
         if (readOnly) return
         setStringValue(val)

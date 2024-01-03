@@ -12,7 +12,7 @@ const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
   const { collectionConfig, globalConfig, isEditing } = props
-  // const customViews = getCustomViews({ collection, global })
+  const customViews = getCustomViews({ collectionConfig, globalConfig })
 
   // Don't show tabs when creating new documents
   if ((collectionConfig && isEditing) || global) {
@@ -34,20 +34,18 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
                 const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
                 const tabOverrides = viewConfig && 'Tab' in viewConfig ? viewConfig.Tab : undefined
 
-                return null
-
-                // return (
-                //   <DocumentTab
-                //     {...{
-                //       // ...props,
-                //       ...(Tab || {}),
-                //       ...(tabOverrides || {}),
-                //     }}
-                //     key={`tab-${index}`}
-                //   />
-                // )
+                return (
+                  <DocumentTab
+                    {...{
+                      ...props,
+                      ...(Tab || {}),
+                      ...(tabOverrides || {}),
+                    }}
+                    key={`tab-${index}`}
+                  />
+                )
               })}
-            {/* {customViews?.map((CustomView, index) => {
+            {customViews?.map((CustomView, index) => {
               if ('Tab' in CustomView) {
                 const { Tab, path } = CustomView
 
@@ -66,7 +64,7 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
                 )
               }
               return null
-            })} */}
+            })}
           </ul>
         </div>
       </div>

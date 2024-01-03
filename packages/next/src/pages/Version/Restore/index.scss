@@ -1,0 +1,28 @@
+.restore-version {
+  cursor: pointer;
+
+  &__modal {
+    // @include blur-bg;
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    &__toggle {
+      // @extend %btn-reset;
+    }
+
+    .btn {
+      [dir='ltr'] & {
+        margin-right: var(--base);
+      }
+      [dir='rtl'] & {
+        margin-left: var(--base);
+      }
+    }
+  }
+
+  &__modal-template {
+    position: relative;
+    z-index: 1;
+  }
+}
