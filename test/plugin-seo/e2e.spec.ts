@@ -1,15 +1,44 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-
+import type { Page as PayloadPage } from './payload-types'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-
+import payload from '../../packages/payload/src'
 import { initPageConsoleErrorCatch } from '../helpers'
+import path from 'path'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
+import { mediaSlug } from './shared'
 
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
 let page: Page
+let id: string
+
+async function createPage(overrides?: Partial<PayloadPage>): Promise<PayloadPage> {
+  const filePath = path.resolve(__dirname, './image-1.jpg')
+  const file = await getFileByPath(filePath)
+
+  const mediaDoc = await payload.create({
+    collection: mediaSlug,
+    data: {},
+    file,
+  })
+
+  return payload.create({
+    collection: 'pages',
+    data: {
+      title: 'Test Page',
+      slug: 'test-page',
+      meta: {
+        title: 'This is a test meta title',
+        description: 'This is a test meta description',
+        ogTitle: 'This is a custom og:title field',
+        image: mediaDoc.id,
+      },
+    },
+  }) as unknown as Promise<PayloadPage>
+}
 
 describe('SEO Plugin', () => {
   beforeAll(async ({ browser }) => {
@@ -19,11 +48,13 @@ describe('SEO Plugin', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    const createdPage = await createPage()
+    id = createdPage.id
   })
 
   describe('Core functionality', () => {
     test('Config tab should be merged in correctly', async () => {
-      await page.goto(url.edit('1'))
+      await page.goto(url.edit(id))
       const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
 
       const firstTab = page.locator(contentTabsClass).nth(0)
@@ -61,7 +92,7 @@ describe('SEO Plugin', () => {
     })
 
     test('Should generate a search result preview based on content', async () => {
-      await page.goto(url.edit('1'))
+      await page.goto(url.edit(id))
       const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaDescriptionClass = '#field-description'
@@ -83,7 +114,7 @@ describe('SEO Plugin', () => {
 
   describe('i18n', () => {
     test('Test support for another language', async () => {
-      await page.goto(url.edit('1'))
+      await page.goto(url.edit(id))
       const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
 
@@ -105,7 +136,7 @@ describe('SEO Plugin', () => {
       await options.locator('text=Español').click()
 
       // Navigate back to the page
-      await page.goto(url.edit('1'))
+      await page.goto(url.edit(id))
 
       await secondTab.click()
 
