@@ -1,15 +1,13 @@
+'use client'
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { PaginatedDocs } from '../../../../../database/types'
-import type { Where } from '../../../../../types'
+import type { PaginatedDocs } from 'payload/database'
+import type { Where } from 'payload/types'
 import type { Props } from './types'
 
-import { formatDate } from '../../../../utilities/formatDate'
-import ReactSelect from '../../../elements/ReactSelect'
-import { fieldBaseClass } from '../../../forms/field-types/shared'
-import { useConfig } from '../../../utilities/Config'
+import { formatDate, ReactSelect, fieldBaseClass, useConfig } from '@payloadcms/ui'
 import { mostRecentVersionOption, publishedVersionOption } from '../shared'
 import './index.scss'
 

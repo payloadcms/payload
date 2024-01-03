@@ -1,16 +1,16 @@
 import type { i18n as Ii18n } from 'i18next'
 
 import React from 'react'
-import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
-import { useTranslation } from 'react-i18next'
+import { DiffMethod } from 'react-diff-viewer-continued'
 
-import type { OptionObject, SelectField } from '../../../../../../../fields/config/types'
+import type { OptionObject, SelectField } from 'payload/types'
 import type { Props } from '../types'
 
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
+import { getTranslation } from 'payload/utilities'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
 import './index.scss'
+import { DiffViewer } from './DiffViewer'
 
 const baseClass = 'select-diff'
 
@@ -46,7 +46,11 @@ const getTranslatedOptions = (
 
 const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, version }) => {
   let placeholder = ''
-  const { i18n, t } = useTranslation('general')
+  // const { i18n, t } = useTranslation('general')
+  const t = (key: string) => key // TODO
+  const i18n = {
+    options: {},
+  } as Ii18n // TODO
 
   if (version === comparison) placeholder = `[${t('noValue')}]`
 
@@ -65,14 +69,12 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, versio
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {getTranslation(field.label, i18n)}
       </Label>
-      <ReactDiffViewer
-        compareMethod={DiffMethod[diffMethod]}
-        hideLineNumbers
-        newValue={typeof versionToRender !== 'undefined' ? versionToRender : placeholder}
-        oldValue={comparisonToRender}
-        showDiffOnly={false}
-        splitView
-        styles={diffStyles}
+      <DiffViewer
+        diffMethod={diffMethod as DiffMethod}
+        versionToRender={versionToRender}
+        comparisonToRender={comparisonToRender}
+        placeholder={placeholder}
+        diffStyles={diffStyles}
       />
     </div>
   )

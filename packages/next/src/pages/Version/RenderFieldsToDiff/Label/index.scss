@@ -1,6 +1,4 @@
-@import '../../../../../scss/styles.scss';
-
 .field-diff-label {
-  margin-bottom: base(0.25);
+  margin-bottom: calc(var(--base) * 0.25);
   font-weight: 600;
 }

@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import ReactSelect from '../../../elements/ReactSelect'
-import { useLocale } from '../../../utilities/Locale'
+import { ReactSelect, useLocale } from '@payloadcms/ui'
 import './index.scss'
 
 const baseClass = 'select-version-locales'

@@ -625,6 +625,9 @@ importers:
 
   packages/next:
     dependencies:
+      '@faceless-ui/modal':
+        specifier: 2.0.1
+        version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -640,6 +643,12 @@ importers:
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.1
+      react-diff-viewer-continued:
+        specifier: 3.2.6
+        version: 3.2.6(react-dom@18.2.0)(react@18.2.0)
+      react-toastify:
+        specifier: 8.2.0
+        version: 8.2.0(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*

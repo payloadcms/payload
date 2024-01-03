@@ -1,21 +1,17 @@
+'use client'
 import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 import { useTranslation } from 'react-i18next'
 
-import type { SanitizedCollectionConfig } from '../../../../../../../collections/config/types'
-import type { RelationshipField } from '../../../../../../../fields/config/types'
+import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
 import type { Props } from '../types'
 
-import {
-  fieldAffectsData,
-  fieldIsPresentationalOnly,
-} from '../../../../../../../fields/config/types'
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
-import { useConfig } from '../../../../../utilities/Config'
-import { useLocale } from '../../../../../utilities/Locale'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
+import { getTranslation } from 'payload/utilities'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
 import './index.scss'
+import { useConfig, useLocale } from '@payloadcms/ui'
 
 const baseClass = 'relationship-diff'
 

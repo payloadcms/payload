@@ -54,12 +54,18 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
 const TextCell: React.FC<{ children?: React.ReactNode }> = ({ children }) => <span>{children}</span>
 
-export const buildVersionColumns = (
-  config: SanitizedConfig,
-  collectionConfig: SanitizedCollectionConfig,
-  globalConfig: SanitizedGlobalConfig,
+export const buildVersionColumns = ({
+  config,
+  collectionConfig,
+  globalConfig,
+  docID,
+}: {
+  config: SanitizedConfig
+  collectionConfig?: SanitizedCollectionConfig
+  globalConfig?: SanitizedGlobalConfig
+  docID?: string
   // t: TFunction,
-): Column[] => [
+}): Column[] => [
   {
     name: '',
     accessor: 'updatedAt',
@@ -79,7 +85,7 @@ export const buildVersionColumns = (
           date={data}
           globalConfig={globalConfig}
           versionID={row?.id}
-          docID={row?.document}
+          docID={docID}
         />
       ),
     },

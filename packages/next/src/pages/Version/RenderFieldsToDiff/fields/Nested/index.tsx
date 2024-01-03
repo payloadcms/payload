@@ -1,11 +1,10 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
-import type { FieldWithSubFields } from '../../../../../../../fields/config/types'
+import type { FieldWithSubFields } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
+import { getTranslation } from 'payload/utilities'
 import Label from '../../Label'
 import './index.scss'
 
@@ -21,14 +20,15 @@ const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
   permissions,
   version,
 }) => {
-  const { i18n } = useTranslation()
+  // const { i18n } = useTranslation()
 
   return (
     <div className={baseClass}>
       {field.label && (
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field.label, i18n)}
+          {field.label}
+          {/* {getTranslation(field.label, i18n)} */}
         </Label>
       )}
       <div

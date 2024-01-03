@@ -1,5 +1,5 @@
-import type { FieldPermissions } from '../../../../../auth'
-import type { Field } from '../../../../../fields/config/types'
+import type { FieldPermissions } from 'payload/auth'
+import type { Field } from 'payload/types'
 import type { FieldComponents } from './fields/types'
 
 export type Props = {

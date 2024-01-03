@@ -1,14 +1,12 @@
-@import '../../../../../../scss/styles.scss';
-
 .nested-diff {
   &__wrap--gutter {
     [dir='ltr'] & {
-      padding-left: base(1);
-      border-left: $style-stroke-width-s solid var(--theme-elevation-150);
+      padding-left: calc(var(--base) * 0.25);
+      // border-left: $style-stroke-width-s solid var(--theme-elevation-150);
     }
     [dir='rtl'] & {
-      padding-right: base(1);
-      border-right: $style-stroke-width-s solid var(--theme-elevation-150);
+      padding-right: calc(var(--base) * 0.25);
+      // border-right: $style-stroke-width-s solid var(--theme-elevation-150);
     }
   }
 }

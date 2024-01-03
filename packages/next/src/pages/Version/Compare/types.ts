@@ -1,6 +1,6 @@
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
-import type { PaginatedDocs } from '../../../../../database/types'
-import type { CompareOption } from '../types'
+import type { SanitizedCollectionConfig } from 'payload/types'
+import type { PaginatedDocs } from 'payload/database'
+import type { CompareOption } from '../Default/types'
 
 export type Props = {
   baseURL: string

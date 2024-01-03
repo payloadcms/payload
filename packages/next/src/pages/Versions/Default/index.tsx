@@ -59,7 +59,12 @@ export const DefaultVersionsView: React.FC<DefaultVersionsViewProps> = (props) =
                 })}
               </div> */}
               <Table
-                columns={buildVersionColumns(config, collectionConfig, globalConfig)}
+                columns={buildVersionColumns({
+                  config,
+                  collectionConfig,
+                  globalConfig,
+                  docID: id,
+                })}
                 data={versionsData?.docs}
               />
               <div className={`${baseClass}__page-controls`}>

@@ -1,13 +1,11 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
-import type { ArrayField, BlockField, Field } from '../../../../../../../fields/config/types'
+import type { ArrayField, BlockField, Field } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
-import { fieldAffectsData } from '../../../../../../../fields/config/types'
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
-import getUniqueListBy from '../../../../../../../utilities/getUniqueListBy'
+import { fieldAffectsData } from 'payload/types'
+import { getTranslation, getUniqueListBy } from 'payload/utilities'
 import Label from '../../Label'
 import './index.scss'
 
@@ -25,14 +23,14 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
   const versionRowCount = Array.isArray(version) ? version.length : 0
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
   const maxRows = Math.max(versionRowCount, comparisonRowCount)
-  const { i18n, t } = useTranslation('version')
 
   return (
     <div className={baseClass}>
       {field.label && (
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field.label, i18n)}
+          {field.label}
+          {/* {getTranslation(field.label, i18n)} */}
         </Label>
       )}
       {maxRows > 0 && (
@@ -49,7 +47,8 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
               subFields = [
                 {
                   name: 'blockType',
-                  label: t('fields:blockType'),
+                  label: 'Block Type', // TODO: i18n
+                  // label: t('fields:blockType'),
                   type: 'text',
                 },
               ]
@@ -93,11 +92,12 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
       )}
       {maxRows === 0 && (
         <div className={`${baseClass}__no-rows`}>
-          {t('noRowsFound', {
+          No rows found
+          {/* {t('noRowsFound', {
             label: field.labels?.plural
               ? getTranslation(field.labels?.plural, i18n)
               : t('general:rows'),
-          })}
+          })} */}
         </div>
       )}
     </div>

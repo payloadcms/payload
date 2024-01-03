@@ -1,24 +1,22 @@
-@import '../../../../scss/styles.scss';
-
 .restore-version {
   cursor: pointer;
 
   &__modal {
-    @include blur-bg;
+    // @include blur-bg;
     display: flex;
     align-items: center;
     height: 100%;
 
     &__toggle {
-      @extend %btn-reset;
+      // @extend %btn-reset;
     }
 
     .btn {
       [dir='ltr'] & {
-        margin-right: $baseline;
+        margin-right: var(--base);
       }
       [dir='rtl'] & {
-        margin-left: $baseline;
+        margin-left: var(--base);
       }
     }
   }

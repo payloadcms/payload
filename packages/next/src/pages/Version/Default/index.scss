@@ -1,4 +1,4 @@
-@import '../../../scss/styles.scss';
+@import '../../../scss/queries.scss';
 
 .view-version {
   width: 100%;
@@ -42,7 +42,7 @@
   }
 
   &__restore {
-    margin: 0 0 0 $baseline;
+    margin: 0 0 0 var(--base);
   }
 
   @include mid-break {
@@ -57,7 +57,7 @@
     }
 
     &__restore {
-      margin: base(0.5) 0 0 0;
+      margin: calc(var(--base) * 0.5) 0 0 0;
     }
   }
 

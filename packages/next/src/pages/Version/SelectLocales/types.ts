@@ -1,4 +1,4 @@
-import type { Option } from '../../../elements/ReactSelect/types'
+import type { Option } from '@payloadcms/ui'
 
 export type Props = {
   onChange: (options: Option[]) => void

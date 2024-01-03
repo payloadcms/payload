@@ -1,6 +1,6 @@
 import React from 'react'
 
-import type { TabsField } from '../../../../../../../fields/config/types'
+import type { TabsField } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'

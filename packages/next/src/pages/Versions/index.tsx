@@ -54,8 +54,6 @@ export const VersionsView = async ({
       // draft: true,
     })
 
-    console.log(typeof id, id)
-
     versionsData = await payload.findVersions({
       collection: collectionSlug,
       depth: 0,
