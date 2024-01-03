@@ -13,8 +13,14 @@ export const sanitizeField = (f) => {
   }
 
   if ('admin' in field) {
+    field.admin = { ...field.admin }
+
     if ('components' in field.admin) {
       delete field.admin.components
+    }
+
+    if ('condition' in field.admin) {
+      delete field.admin.condition
     }
   }
 

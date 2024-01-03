@@ -1,15 +1,15 @@
 import React from 'react'
 
-import type { CollectionPermission, GlobalPermission } from 'payload/auth'
+import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
 import type { Description } from '../../forms/FieldDescription/types'
 import type { FieldTypes } from '../../forms/field-types'
 
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
 import { Gutter } from '../Gutter'
-import ViewDescription from '../ViewDescription'
 import './index.scss'
-import { FieldWithPath } from 'payload/types'
+import { Document, FieldWithPath } from 'payload/types'
+import { Fields } from '../../forms/Form/types'
 
 const baseClass = 'document-fields'
 
@@ -22,6 +22,9 @@ export const DocumentFields: React.FC<{
   forceSidebarWrap?: boolean
   hasSavePermission: boolean
   permissions: CollectionPermission | GlobalPermission
+  data: Document
+  state: Fields
+  user: User
 }> = (props) => {
   const {
     AfterFields,
@@ -32,6 +35,9 @@ export const DocumentFields: React.FC<{
     forceSidebarWrap,
     hasSavePermission,
     permissions,
+    data,
+    state,
+    user,
   } = props
 
   const mainFields = filterFields({
@@ -79,6 +85,9 @@ export const DocumentFields: React.FC<{
               fields={mainFields}
               // permissions={permissions.fields}
               readOnly={!hasSavePermission}
+              data={data}
+              state={state}
+              user={user}
             />
             {AfterFields || null}
           </Gutter>
@@ -92,6 +101,9 @@ export const DocumentFields: React.FC<{
                   fields={sidebarFields}
                   // permissions={permissions.fields}
                   readOnly={!hasSavePermission}
+                  data={data}
+                  state={state}
+                  user={user}
                 />
               </div>
             </div>

@@ -9,7 +9,6 @@ import { getTranslation } from 'payload/utilities'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { isFieldRTL } from '../shared'
 import TextareaInput from './Input'
 import './index.scss'
@@ -91,4 +90,4 @@ const Textarea: React.FC<Props> = (props) => {
     />
   )
 }
-export default withCondition(Textarea)
+export default Textarea

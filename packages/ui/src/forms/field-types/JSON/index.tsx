@@ -9,7 +9,6 @@ import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
@@ -106,4 +105,4 @@ const JSONField: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(JSONField)
+export default JSONField

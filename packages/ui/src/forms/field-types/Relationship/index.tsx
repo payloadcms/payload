@@ -21,7 +21,6 @@ import FieldDescription from '../../FieldDescription'
 import { useFormProcessing } from '../../Form/context'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
@@ -539,4 +538,4 @@ const Relationship: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(Relationship)
+export default Relationship

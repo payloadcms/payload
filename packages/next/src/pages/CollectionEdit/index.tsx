@@ -1,4 +1,4 @@
-import { SanitizedConfig, TypeWithID } from 'payload/types'
+import { Document, SanitizedConfig, TypeWithID } from 'payload/types'
 import React, { Fragment } from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
@@ -48,7 +48,7 @@ export const CollectionEdit = async ({
       fields,
     } = collectionConfig
 
-    let data: TypeWithID & Record<string, unknown>
+    let data: Document
 
     try {
       data = await payload.findByID({
@@ -126,7 +126,7 @@ export const CollectionEdit = async ({
       hasSavePermission:
         (isEditing && collectionPermissions?.update?.permission) ||
         (!isEditing && collectionPermissions?.create?.permission),
-      initialState: state,
+      state,
       isEditing,
       permissions: collectionPermissions,
       updatedAt: data?.updatedAt.toString(),

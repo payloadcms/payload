@@ -6,7 +6,6 @@ import type { Props } from './types'
 import { upload } from 'payload/fields/validations'
 import { useConfig } from '../../../providers/Config'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import UploadInput from './Input'
 import './index.scss'
 
@@ -92,4 +91,4 @@ const Upload: React.FC<Props> = (props) => {
 
   return null
 }
-export default withCondition(Upload)
+export default Upload

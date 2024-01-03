@@ -20,7 +20,6 @@ import FieldDescription from '../../FieldDescription'
 import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { ArrayRow } from './ArrayRow'
 import './index.scss'
@@ -291,4 +290,4 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(ArrayFieldType)
+export default ArrayFieldType

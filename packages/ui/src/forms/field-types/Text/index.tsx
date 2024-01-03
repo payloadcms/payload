@@ -3,7 +3,7 @@ import React from 'react'
 import type { Props } from './types'
 
 import { text } from 'payload/fields/validations'
-import { fieldBaseClass, isFieldRTL } from '../shared'
+import { fieldBaseClass } from '../shared'
 import { TextInput } from './Input'
 import FieldDescription from '../../FieldDescription'
 import DefaultError from '../../Error'
@@ -15,7 +15,6 @@ const Text: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      // condition,
       description,
       placeholder,
       readOnly,
@@ -23,7 +22,6 @@ const Text: React.FC<Props> = (props) => {
       style,
       width,
     } = {},
-    // inputRef,
     label,
     localized,
     maxLength,
