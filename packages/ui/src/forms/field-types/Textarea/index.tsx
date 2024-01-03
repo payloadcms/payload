@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { textarea } from 'payload/fields/validations'
 import { getTranslation } from 'payload/utilities'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
@@ -33,7 +32,7 @@ const Textarea: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    validate = textarea,
+    validate,
   } = props
 
   const { i18n } = useTranslation()

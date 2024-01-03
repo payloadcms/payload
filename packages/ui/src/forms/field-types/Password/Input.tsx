@@ -1,11 +1,9 @@
 'use client'
 import React, { useCallback } from 'react'
 
-import type { Props } from './types'
-
-import { password } from 'payload/fields/validations'
 import useField from '../../useField'
 import './index.scss'
+import { Validate } from 'payload/types'
 
 export const PasswordInput: React.FC<{
   name: string
@@ -13,28 +11,23 @@ export const PasswordInput: React.FC<{
   disabled?: boolean
   path: string
   required?: boolean
+  validate?: Validate
 }> = (props) => {
-  const {
-    name,
-    autoComplete,
-    disabled,
-    path: pathFromProps,
-    // required,
-  } = props
+  const { name, autoComplete, disabled, path: pathFromProps, required, validate } = props
 
   const path = pathFromProps || name
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     const validationResult = validate(value, { ...options, required })
-  //     return validationResult
-  //   },
-  //   [validate, required],
-  // )
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      const validationResult = validate(value, { ...options, required })
+      return validationResult
+    },
+    [validate, required],
+  )
 
   const { errorMessage, formProcessing, setValue, showError, value } = useField({
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   return (

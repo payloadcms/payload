@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { text } from 'payload/fields/validations'
 import { fieldBaseClass } from '../shared'
 import { TextInput } from './Input'
 import FieldDescription from '../../FieldDescription'
@@ -28,7 +27,6 @@ const Text: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    validate = text,
   } = props
 
   const path = pathFromProps || name

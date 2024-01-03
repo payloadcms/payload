@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { point } from 'payload/fields/validations'
 import { getTranslation } from 'payload/utilities'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
@@ -32,7 +31,7 @@ const PointField: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = point,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -55,7 +54,6 @@ const PointField: React.FC<Props> = (props) => {
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    condition,
     path,
     validate: memoizedValidate,
   })

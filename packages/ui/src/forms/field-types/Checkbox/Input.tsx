@@ -3,6 +3,7 @@ import React, { useCallback } from 'react'
 
 import './index.scss'
 import useField from '../../useField'
+import { Validate } from 'payload/types'
 
 const baseClass = 'checkbox-input'
 
@@ -19,6 +20,7 @@ type CheckboxInputProps = {
   readOnly?: boolean
   required?: boolean
   path: string
+  validate?: Validate
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
@@ -33,19 +35,20 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     readOnly,
     required,
     path,
+    validate,
   } = props
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, required })
-  //   },
-  //   [validate, required],
-  // )
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const { errorMessage, setValue, showError, value } = useField({
     // disableFormData,
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   const onToggle = useCallback(() => {

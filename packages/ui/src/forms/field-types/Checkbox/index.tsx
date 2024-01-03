@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { checkbox } from 'payload/fields/validations'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import { fieldBaseClass } from '../shared'
@@ -28,7 +27,6 @@ const Checkbox: React.FC<Props> = (props) => {
     onChange,
     path: pathFromProps,
     required,
-    validate = checkbox,
   } = props
 
   const path = pathFromProps || name

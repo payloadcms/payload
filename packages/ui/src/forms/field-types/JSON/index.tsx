@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
-import { json } from 'payload/fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
@@ -20,7 +19,6 @@ const JSONField: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label } = {},
-      condition,
       description,
       editorOptions,
       readOnly,
@@ -30,7 +28,7 @@ const JSONField: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = json,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -49,7 +47,6 @@ const JSONField: React.FC<Props> = (props) => {
   )
 
   const { errorMessage, initialValue, setValue, showError, value } = useField<string>({
-    condition,
     path,
     validate: memoizedValidate,
   })

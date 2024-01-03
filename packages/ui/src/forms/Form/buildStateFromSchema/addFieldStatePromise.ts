@@ -46,7 +46,6 @@ export const addFieldStatePromise = async ({
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     const fieldState: FormField = {
-      // condition: field.admin?.condition,
       initialValue: undefined,
       passesCondition,
       valid: true,
@@ -67,18 +66,18 @@ export const addFieldStatePromise = async ({
 
     let validationResult: boolean | string = true
 
-    // if (typeof fieldState.validate === 'function') {
-    //   validationResult = await fieldState.validate(data?.[field.name], {
-    //     ...field,
-    //     id,
-    //     config,
-    //     data: fullData,
-    //     operation,
-    //     siblingData: data,
-    //     t,
-    //     user,
-    //   })
-    // }
+    if (typeof fieldState.validate === 'function') {
+      validationResult = await fieldState.validate(data?.[field.name], {
+        ...field,
+        id,
+        config,
+        data: fullData,
+        operation,
+        siblingData: data,
+        t,
+        user,
+      })
+    }
 
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult

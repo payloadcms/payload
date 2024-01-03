@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { date as dateValidation } from 'payload/fields/validations'
 import { DateTimeInput } from './Input'
 import './index.scss'
 import FieldDescription from '../../FieldDescription'
@@ -28,7 +27,6 @@ const DateTime: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = dateValidation,
   } = props
 
   const path = pathFromProps || name

@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { DateField } from 'payload/types'
@@ -18,21 +18,21 @@ export type DateTimeInputProps = Omit<DateField, 'admin' | 'name' | 'type'> & {
 }
 
 export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
-  const { path, readOnly, placeholder, datePickerProps, style, width } = props
+  const { path, readOnly, placeholder, datePickerProps, style, width, validate, required } = props
 
   const { i18n } = useTranslation()
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, required })
-  //   },
-  //   [validate, required],
-  // )
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const { errorMessage, setValue, showError, value } = useField<Date>({
     // condition,
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   return (

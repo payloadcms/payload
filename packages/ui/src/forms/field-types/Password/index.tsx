@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { password } from 'payload/fields/validations'
 import Error from '../../Error'
 import Label from '../../Label'
 import './index.scss'
@@ -19,7 +18,6 @@ export const Password: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     style,
-    validate = password,
     width,
   } = props
 
