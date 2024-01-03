@@ -13,14 +13,17 @@ import { initPayloadTest } from '../helpers/configHelpers'
 import { isMongoose } from '../helpers/isMongoose'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
-import { arrayDefaultValue } from './collections/Array'
+import { arrayAfterChangeMock, arrayDefaultValue } from './collections/Array'
+import { blockAfterChangeMock } from './collections/Blocks'
 import { blocksDoc } from './collections/Blocks/shared'
 import { dateDoc } from './collections/Date/shared'
-import { groupDefaultChild, groupDefaultValue } from './collections/Group'
+import { groupAfterChangeMock, groupDefaultChild, groupDefaultValue } from './collections/Group'
 import { groupDoc } from './collections/Group/shared'
 import { defaultNumber } from './collections/Number'
 import { numberDoc } from './collections/Number/shared'
 import { pointDoc } from './collections/Point/shared'
+import { rowAfterChangeMock } from './collections/Row'
+import { tabAfterChangeMock } from './collections/Tabs'
 import {
   localizedTextValue,
   namedTabDefaultValue,
@@ -35,6 +38,7 @@ import {
   blockFieldsSlug,
   groupFieldsSlug,
   relationshipFieldsSlug,
+  rowFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs'
@@ -666,6 +670,25 @@ describe('Fields', () => {
       expect(allLocales.localized.en[0].text).toStrictEqual(enText)
       expect(allLocales.localized.es[0].text).toStrictEqual(esText)
     })
+
+    it('should call afterChange hook with correct value and previousValue', async () => {
+      doc = await payload.update({
+        collection: arrayFieldsSlug,
+        id: doc.id,
+        data: {
+          arrayWithNestedAfterChange: [
+            {
+              text: 'changedNestedValue',
+            },
+          ],
+        },
+      })
+
+      expect(arrayAfterChangeMock).toHaveBeenLastCalledWith({
+        value: 'changedNestedValue',
+        previousValue: 'defaultNestedValue',
+      })
+    })
   })
 
   describe('group', () => {
@@ -681,6 +704,52 @@ describe('Fields', () => {
     it('should create with defaultValue', async () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue)
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild)
+    })
+
+    it('should call afterChange hook with correct value and previousValue', async () => {
+      document = await payload.update({
+        collection: groupFieldsSlug,
+        id: document.id,
+        data: {
+          groupWithNestedAfterChange: {
+            text: 'changedNestedValue',
+          },
+        },
+      })
+
+      expect(groupAfterChangeMock).toHaveBeenLastCalledWith({
+        value: 'changedNestedValue',
+        previousValue: 'defaultNestedValue',
+      })
+    })
+  })
+
+  describe('row', () => {
+    let document
+
+    beforeEach(async () => {
+      document = await payload.create({
+        collection: rowFieldsSlug,
+        data: {
+          id: 'id',
+          title: 'title',
+        },
+      })
+    })
+
+    it('should call afterChange hook with correct value and previousValue', async () => {
+      document = await payload.update({
+        collection: rowFieldsSlug,
+        id: document.id,
+        data: {
+          nestedText: 'changedNestedValue',
+        },
+      })
+
+      expect(rowAfterChangeMock).toHaveBeenLastCalledWith({
+        value: 'changedNestedValue',
+        previousValue: 'defaultNestedValue',
+      })
     })
   })
 
@@ -742,6 +811,23 @@ describe('Fields', () => {
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
+    })
+
+    it('should call afterChange hook with correct value and previousValue', async () => {
+      document = await payload.update({
+        collection: tabsFieldsSlug,
+        id: document.id,
+        data: {
+          tabWithNestedAfterChange: {
+            text: 'changedNestedValue',
+          },
+        },
+      })
+
+      expect(tabAfterChangeMock).toHaveBeenLastCalledWith({
+        value: 'changedNestedValue',
+        previousValue: 'initialNestedValue',
+      })
     })
   })
 
@@ -934,6 +1020,38 @@ describe('Fields', () => {
 
       expect(result.docs).toHaveLength(1)
       expect(result.docs[0]).toMatchObject(blockDoc)
+    })
+
+    it('should call afterChange hook with correct value and previousValue', async () => {
+      const document = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocksWithNestedAfterChange: [
+            {
+              blockType: 'block-after-change',
+              text: 'initialNestedValue',
+            },
+          ],
+        },
+      })
+
+      await payload.update({
+        collection: blockFieldsSlug,
+        id: document.id,
+        data: {
+          blocksWithNestedAfterChange: [
+            {
+              blockType: 'block-after-change',
+              text: 'changedNestedValue',
+            },
+          ],
+        },
+      })
+
+      expect(blockAfterChangeMock).toHaveBeenLastCalledWith({
+        value: 'changedNestedValue',
+        previousValue: 'initialNestedValue',
+      })
     })
   })
 

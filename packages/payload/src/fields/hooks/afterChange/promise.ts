@@ -55,7 +55,7 @@ export const promise = async ({
           originalDoc: doc,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc[field.name],
+          previousValue: previousSiblingDoc[field.name],
           req,
           siblingData,
           value: siblingData[field.name],
@@ -80,7 +80,7 @@ export const promise = async ({
         global,
         operation,
         previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
+        previousSiblingDoc: (previousSiblingDoc?.[field.name] as Record<string, unknown>) || {},
         req,
         siblingData: (siblingData?.[field.name] as Record<string, unknown>) || {},
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
@@ -105,7 +105,8 @@ export const promise = async ({
               global,
               operation,
               previousDoc,
-              previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
+              previousSiblingDoc:
+                previousSiblingDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
               req,
               siblingData: siblingData?.[field.name]?.[i] || {},
               siblingDoc: { ...row } || {},
@@ -137,7 +138,7 @@ export const promise = async ({
                 operation,
                 previousDoc,
                 previousSiblingDoc:
-                  previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
+                  previousSiblingDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
                 req,
                 siblingData: siblingData?.[field.name]?.[i] || {},
                 siblingDoc: { ...row } || {},
@@ -174,12 +175,12 @@ export const promise = async ({
     case 'tab': {
       let tabSiblingData = siblingData
       let tabSiblingDoc = siblingDoc
-      let tabPreviousSiblingDoc = siblingDoc
+      let tabPreviousSiblingDoc = previousSiblingDoc
 
       if (tabHasName(field)) {
         tabSiblingData = siblingData[field.name] as Record<string, unknown>
         tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
-        tabPreviousSiblingDoc = previousDoc[field.name] as Record<string, unknown>
+        tabPreviousSiblingDoc = (previousSiblingDoc?.[field.name] ?? {}) as Record<string, unknown>
       }
 
       await traverseFields({

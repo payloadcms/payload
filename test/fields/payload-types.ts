@@ -94,6 +94,21 @@ export interface LexicalMigrateField {
     }
     [k: string]: unknown
   } | null
+  lexicalWithSlateData?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
   lexicalSimple?: {
     root: {
       children: {
@@ -217,6 +232,12 @@ export interface ArrayField {
       }[]
     | null
   arrayWithMinRows?:
+    | {
+        text?: string | null
+        id?: string | null
+      }[]
+    | null
+  arrayWithNestedAfterChange?:
     | {
         text?: string | null
         id?: string | null
@@ -426,6 +447,38 @@ export interface BlockField {
           }
       )[]
     | null
+  relationshipBlocks?:
+    | {
+        relationship?: (string | null) | TextField
+        id?: string | null
+        blockName?: string | null
+        blockType: 'relationships'
+      }[]
+    | null
+  blocksWithNestedAfterChange?:
+    | {
+        text?: string | null
+        id?: string | null
+        blockName?: string | null
+        blockType: 'block-after-change'
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+export interface TextField {
+  id: string
+  text: string
+  localizedText?: string | null
+  i18nText?: string | null
+  defaultFunction?: string | null
+  defaultAsync?: string | null
+  overrideLength?: string | null
+  fieldWithDefaultValue?: string | null
+  dependentOnFieldWithDefaultValue?: string | null
+  customLabel?: string | null
+  customError?: string | null
+  beforeAndAfterInput?: string | null
   updatedAt: string
   createdAt: string
 }
@@ -554,6 +607,9 @@ export interface GroupField {
       }
     }
   }
+  groupWithNestedAfterChange?: {
+    text?: string | null
+  }
   updatedAt: string
   createdAt: string
 }
@@ -564,6 +620,7 @@ export interface RowField {
   field_with_width_b?: string | null
   field_within_collapsible_a?: string | null
   field_within_collapsible_b?: string | null
+  nestedText?: string | null
   updatedAt: string
   createdAt: string
 }
@@ -689,22 +746,6 @@ export interface RelationshipField {
         value: string | TextField
       }[]
     | null
-  updatedAt: string
-  createdAt: string
-}
-export interface TextField {
-  id: string
-  text: string
-  localizedText?: string | null
-  i18nText?: string | null
-  defaultFunction?: string | null
-  defaultAsync?: string | null
-  overrideLength?: string | null
-  fieldWithDefaultValue?: string | null
-  dependentOnFieldWithDefaultValue?: string | null
-  customLabel?: string | null
-  customError?: string | null
-  beforeAndAfterInput?: string | null
   updatedAt: string
   createdAt: string
 }
@@ -883,6 +924,9 @@ export interface TabsField {
     beforeChange?: boolean | null
     afterChange?: boolean | null
     afterRead?: boolean | null
+  }
+  tabWithNestedAfterChange: {
+    text?: string | null
   }
   textarea?: string | null
   anotherText: string
