@@ -19,7 +19,6 @@ const Textarea: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      condition,
       description,
       placeholder,
       readOnly,
@@ -58,7 +57,6 @@ const Textarea: React.FC<Props> = (props) => {
   )
 
   const { errorMessage, setValue, showError, value } = useField({
-    condition,
     path,
     validate: memoizedValidate,
   })

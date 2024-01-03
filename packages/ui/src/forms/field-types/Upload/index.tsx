@@ -46,7 +46,6 @@ const Upload: React.FC<Props> = (props) => {
   )
 
   const field = useField({
-    condition,
     path,
     validate: memoizedValidate,
   })

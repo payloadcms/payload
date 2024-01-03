@@ -13,7 +13,6 @@ import { useLocale } from '../../../providers/Locale'
 export const TextInput: React.FC<{
   name: string
   autoComplete?: string
-  // condition?: Condition
   readOnly?: boolean
   path: string
   required?: boolean
@@ -44,7 +43,6 @@ export const TextInput: React.FC<{
     // showError,
     value,
   } = useField({
-    // condition,
     path,
     // validate: memoizedValidate,
   })

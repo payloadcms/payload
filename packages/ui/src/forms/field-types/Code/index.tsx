@@ -25,7 +25,6 @@ const Code: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label } = {},
-      condition,
       description,
       editorOptions,
       language,
@@ -52,7 +51,6 @@ const Code: React.FC<Props> = (props) => {
   )
 
   const { errorMessage, setValue, showError, value } = useField({
-    condition,
     path,
     validate: memoizedValidate,
   })

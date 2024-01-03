@@ -43,7 +43,6 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
   // )
 
   const { errorMessage, setValue, showError, value } = useField({
-    // condition,
     // disableFormData,
     path,
     // validate: memoizedValidate,
