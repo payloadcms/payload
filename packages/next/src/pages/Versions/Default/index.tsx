@@ -42,6 +42,8 @@ export const DefaultVersionsView: React.FC<DefaultVersionsViewProps> = (props) =
         globalSlug={globalConfig?.slug}
         id={id}
         isEditing
+        view="Versions" // TODO; i18n
+        pluralLabel={collectionConfig?.labels?.plural}
         // view={t('versions')}
       />
       {/* <LoadingOverlayToggle name="versions" show={isLoadingVersions} /> */}

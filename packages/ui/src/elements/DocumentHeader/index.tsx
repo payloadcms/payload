@@ -26,6 +26,10 @@ export const DocumentHeader: React.FC<{
   const { id, apiURL, config, collectionConfig, customHeader, data, globalConfig, isEditing } =
     props
 
+  const titleFieldConfig = collectionConfig?.fields?.find(
+    (f) => 'name' in f && f?.name === collectionConfig?.admin?.useAsTitle,
+  )
+
   return (
     <Gutter className={baseClass}>
       {customHeader && customHeader}
@@ -37,6 +41,12 @@ export const DocumentHeader: React.FC<{
             globalLabel={globalConfig?.label}
             globalSlug={globalConfig?.slug}
             data={data}
+            isDate={titleFieldConfig?.type === 'date'}
+            dateFormat={
+              'date' in titleFieldConfig?.admin
+                ? titleFieldConfig?.admin?.date?.displayFormat
+                : undefined
+            }
             // fallback={`[${t('untitled')}]`}
           />
           <DocumentTabs

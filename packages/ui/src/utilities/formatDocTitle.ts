@@ -1,25 +1,18 @@
-// either send the `useAsTitle` field itself
-
-import { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
+import { SanitizedCollectionConfig } from 'payload/types'
 import { FormField } from '../forms/Form/types'
 import { getObjectDotNotation } from 'payload/utilities'
-// import { formatDate } from './formatDate'
+import { formatDate } from './formatDate'
+import i18next from 'i18next'
 
-// or an object to dynamically extract the `useAsTitle` field from
 export const formatDocTitle = (args: {
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
   doc?: Record<string, any>
   field?: FormField
-  dateFormat?: ClientConfig['admin']['dateFormat']
-  // i18n: typeof i18next
+  dateFormat?: any
+  i18n: typeof i18next
+  isDate?: boolean
 }): string => {
-  const {
-    useAsTitle,
-    dateFormat: dateFormatFromProps,
-    doc,
-    field: fieldFromProps,
-    // i18n,
-  } = args
+  const { useAsTitle, dateFormat, doc, field: fieldFromProps, i18n, isDate } = args
 
   if (!fieldFromProps && !doc) {
     return ''
@@ -29,13 +22,9 @@ export const formatDocTitle = (args: {
 
   let title = typeof field === 'string' ? field : (field?.value as string)
 
-  // const fieldConfig = collection?.fields?.find((f) => 'name' in f && f?.name === useAsTitle)
-  // const isDate = fieldConfig?.type === 'date'
-
-  // if (title && isDate) {
-  //   const dateFormat = fieldConfig?.admin?.date?.displayFormat || dateFormatFromProps
-  //   title = formatDate(title, dateFormat, i18n?.language)
-  // }
+  if (title && isDate) {
+    title = formatDate(title, dateFormat, i18n?.language)
+  }
 
   return title
 }
