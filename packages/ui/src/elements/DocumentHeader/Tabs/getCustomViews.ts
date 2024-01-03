@@ -2,21 +2,21 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 import type { EditViewConfig } from 'payload/config'
 
 import { defaultGlobalViews } from '../../../views/Global/RenderCustomView'
-import { defaultCollectionViews } from '../../../views/collections/Edit/Routes/CustomComponent'
+import { defaultCollectionViews } from '../../../views/Edit/RenderCustomView'
 
 export const getCustomViews = (args: {
-  collection: SanitizedCollectionConfig
-  global: SanitizedGlobalConfig
+  collectionConfig: SanitizedCollectionConfig
+  globalConfig: SanitizedGlobalConfig
 }): EditViewConfig[] => {
-  const { collection, global } = args
+  const { collectionConfig, globalConfig } = args
 
   let customViews: EditViewConfig[]
 
-  if (collection) {
+  if (collectionConfig) {
     const collectionViewsConfig =
-      typeof collection?.admin?.components?.views?.Edit === 'object' &&
-      typeof collection?.admin?.components?.views?.Edit !== 'function'
-        ? collection?.admin?.components?.views?.Edit
+      typeof collectionConfig?.admin?.components?.views?.Edit === 'object' &&
+      typeof collectionConfig?.admin?.components?.views?.Edit !== 'function'
+        ? collectionConfig?.admin?.components?.views?.Edit
         : undefined
 
     const defaultViewKeys = Object.keys(defaultCollectionViews)
@@ -30,11 +30,11 @@ export const getCustomViews = (args: {
     }, [])
   }
 
-  if (global) {
+  if (globalConfig) {
     const globalViewsConfig =
-      typeof global?.admin?.components?.views?.Edit === 'object' &&
-      typeof global?.admin?.components?.views?.Edit !== 'function'
-        ? global?.admin?.components?.views?.Edit
+      typeof globalConfig?.admin?.components?.views?.Edit === 'object' &&
+      typeof globalConfig?.admin?.components?.views?.Edit !== 'function'
+        ? globalConfig?.admin?.components?.views?.Edit
         : undefined
 
     const defaultViewKeys = Object.keys(defaultGlobalViews)

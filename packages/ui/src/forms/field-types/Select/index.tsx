@@ -1,13 +1,12 @@
-'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 
 import type { Option, OptionObject } from 'payload/types'
 import type { Props } from './types'
-
-import { select } from 'payload/fields/validations'
-import useField from '../../useField'
-import withCondition from '../../withCondition'
+import DefaultError from '../../Error'
+import DefaultLabel from '../../Label'
+import FieldDescription from '../../FieldDescription'
 import SelectInput from './Input'
+import { fieldBaseClass } from '../shared'
 
 const formatOptions = (options: Option[]): OptionObject[] =>
   options.map((option) => {
@@ -21,12 +20,12 @@ const formatOptions = (options: Option[]): OptionObject[] =>
     } as OptionObject
   })
 
-const Select: React.FC<Props> = (props) => {
+export const Select: React.FC<Props> = (props) => {
   const {
     name,
     admin: {
       className,
-      condition,
+      // condition,
       description,
       isClearable,
       isSortable = true,
@@ -37,78 +36,54 @@ const Select: React.FC<Props> = (props) => {
     } = {},
     hasMany,
     label,
-    options: optionsFromProps,
+    options,
     path: pathFromProps,
     required,
-    validate = select,
+    // validate = select,
   } = props
 
   const path = pathFromProps || name
 
-  const [options, setOptions] = useState(formatOptions(optionsFromProps))
-
-  useEffect(() => {
-    setOptions(formatOptions(optionsFromProps))
-  }, [optionsFromProps])
-
-  const memoizedValidate = useCallback(
-    (value, validationOptions) => {
-      return validate(value, { ...validationOptions, hasMany, options, required })
-    },
-    [validate, required, hasMany, options],
-  )
-
-  const { errorMessage, setValue, showError, value } = useField({
-    condition,
-    path,
-    validate: memoizedValidate,
-  })
-
-  const onChange = useCallback(
-    (selectedOption) => {
-      if (!readOnly) {
-        let newValue
-        if (!selectedOption) {
-          newValue = null
-        } else if (hasMany) {
-          if (Array.isArray(selectedOption)) {
-            newValue = selectedOption.map((option) => option.value)
-          } else {
-            newValue = []
-          }
-        } else {
-          newValue = selectedOption.value
-        }
-
-        setValue(newValue)
-      }
-    },
-    [readOnly, hasMany, setValue],
-  )
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   return (
-    <SelectInput
-      className={className}
-      description={description}
-      errorMessage={errorMessage}
-      hasMany={hasMany}
-      isClearable={isClearable}
-      isSortable={isSortable}
-      label={label}
-      name={name}
-      onChange={onChange}
-      options={options}
-      path={path}
-      readOnly={readOnly}
-      required={required}
-      showError={showError}
-      style={style}
-      value={value as string | string[]}
-      width={width}
-      Error={Error}
-      Label={Label}
-    />
+    <div
+      className={[
+        fieldBaseClass,
+        'select',
+        className,
+        // showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
+      style={{
+        ...style,
+        width,
+      }}
+    >
+      <ErrorComp
+      // message={errorMessage}
+      // showError={showError}
+      />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <SelectInput
+        readOnly={readOnly}
+        isClearable={isClearable}
+        hasMany={hasMany}
+        isSortable={isSortable}
+        options={formatOptions(options)}
+        path={path}
+      />
+      <FieldDescription
+        description={description}
+        path={path}
+        // value={value}
+      />
+    </div>
   )
 }
 
-export default withCondition(Select)
+export default Select
