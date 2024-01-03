@@ -29,6 +29,16 @@ export default buildConfigWithDefaults({
       },
     }),
   },
+  i18n: {
+    resources: {
+      es: {
+        'plugin-seo': {
+          previewDescription:
+            'Las listas de resultados pueden variar segun la relevancia de buesqueda y el contenido.',
+        },
+      },
+    },
+  },
   plugins: [
     seoPlugin({
       collections: ['pages', 'posts'],

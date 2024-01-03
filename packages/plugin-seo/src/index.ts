@@ -9,6 +9,8 @@ import { getMetaTitleField } from './fields/MetaTitle'
 import { Overview } from './ui/Overview'
 import { getPreviewField } from './ui/Preview'
 
+import translations from './translations'
+
 const seo =
   (pluginConfig: PluginConfig) =>
   (config: Config): Config => {
@@ -176,6 +178,22 @@ const seo =
 
           return global
         }) || [],
+      i18n: {
+        ...config.i18n,
+        resources: {
+          ...config.i18n?.resources,
+          en: {
+            ...config.i18n?.resources?.en,
+            'plugin-seo': {
+              ...(config.i18n?.resources?.en?.['plugin-seo'] &&
+              typeof config.i18n?.resources?.en?.['plugin-seo'] === 'object'
+                ? config.i18n?.resources?.en?.['plugin-seo']
+                : {}),
+              ...translations(),
+            },
+          },
+        },
+      },
     }
   }
 
