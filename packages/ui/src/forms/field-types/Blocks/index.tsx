@@ -22,7 +22,6 @@ import FieldDescription from '../../FieldDescription'
 import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { BlockRow } from './BlockRow'
 import { BlocksDrawer } from './BlocksDrawer'
@@ -311,4 +310,4 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(BlocksField)
+export default BlocksField

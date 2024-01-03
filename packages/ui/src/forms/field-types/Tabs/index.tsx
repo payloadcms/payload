@@ -18,7 +18,6 @@ import { useFormSubmitted } from '../../Form/context'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import { WatchChildErrors } from '../../WatchChildErrors'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { TabsProvider } from './provider'
@@ -217,4 +216,4 @@ const TabsField: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(TabsField)
+export default TabsField

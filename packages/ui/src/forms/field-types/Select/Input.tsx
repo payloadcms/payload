@@ -28,7 +28,6 @@ const SelectInput: React.FC<{
   // )
 
   const { errorMessage, setValue, showError, value } = useField({
-    // condition,
     path,
     // validate: memoizedValidate,
   })

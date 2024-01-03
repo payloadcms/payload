@@ -1,5 +1,6 @@
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
 import type {
+  Document,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -13,7 +14,7 @@ export type CollectionEditViewProps = BaseEditViewProps & {
   disableLeaveWithoutSaving?: boolean
   hasSavePermission?: boolean
   id: string
-  initialState?: Fields
+  state?: Fields
   isEditing?: boolean
   permissions: CollectionPermission | null
 }
@@ -29,7 +30,7 @@ export type BaseEditViewProps = {
   action: string
   apiURL: string
   canAccessAdmin?: boolean
-  data: any
+  data: Document
   // isLoading: boolean
   onSave: (json: any) => void
   updatedAt: string

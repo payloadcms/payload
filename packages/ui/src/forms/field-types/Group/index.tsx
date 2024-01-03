@@ -12,7 +12,6 @@ import { useFormSubmitted } from '../../Form/context'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import { WatchChildErrors } from '../../WatchChildErrors'
-import withCondition from '../../withCondition'
 import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
 import { fieldBaseClass } from '../shared'
@@ -103,4 +102,4 @@ const Group: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(Group)
+export default Group

@@ -5,7 +5,6 @@ import type { Props } from './types'
 
 import { radio } from 'payload/fields/validations'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import RadioGroupInput from './Input'
 
 const RadioGroup: React.FC<Props> = (props) => {
@@ -65,4 +64,4 @@ const RadioGroup: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(RadioGroup)
+export default RadioGroup

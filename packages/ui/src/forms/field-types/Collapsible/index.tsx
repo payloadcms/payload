@@ -14,7 +14,6 @@ import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import { RowLabel } from '../../RowLabel'
 import { WatchChildErrors } from '../../WatchChildErrors'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
@@ -131,4 +130,4 @@ const CollapsibleField: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(CollapsibleField)
+export default CollapsibleField

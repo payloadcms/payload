@@ -86,13 +86,16 @@ export const iterateFields = async ({
   user,
 }: Args): Promise<void> => {
   const promises = []
+
   fields.forEach((field) => {
+    const initialData = data
+
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
       let passesCondition = true
       if (!skipConditionChecks) {
         passesCondition = Boolean(
           (field?.admin?.condition
-            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user }))
+            ? field.admin.condition(fullData || {}, initialData || {}, { user })
             : true) && parentPassesCondition,
         )
       }

@@ -17,7 +17,7 @@ import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
 const useField = <T,>(options: Options): FieldType<T> => {
-  const { condition, disableFormData = false, hasRows, path, validate } = options
+  const { disableFormData = false, hasRows, path, validate } = options
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
@@ -132,7 +132,6 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
           if (typeof dispatchField === 'function') {
             dispatchField({
-              condition,
               disableFormData:
                 disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
               errorMessage,
@@ -140,7 +139,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
               rows: field?.rows,
               type: 'UPDATE',
               valid,
-              validate,
+              // validate,
               value,
             })
           }
@@ -152,7 +151,6 @@ const useField = <T,>(options: Options): FieldType<T> => {
     150,
     [
       value,
-      condition,
       disableFormData,
       dispatchField,
       getData,

@@ -19,7 +19,7 @@ export const DefaultEditView: React.FC<DefaultEditViewProps> = async (props) => 
     customHeader,
     data,
     hasSavePermission,
-    initialState,
+    state,
     isEditing,
     // isLoading,
     // onSave: onSaveFromProps,
@@ -74,7 +74,7 @@ export const DefaultEditView: React.FC<DefaultEditViewProps> = async (props) => 
           action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
-          initialState={initialState}
+          initialState={state}
           method={id ? 'PATCH' : 'POST'}
           // onSuccess={onSave}
         >

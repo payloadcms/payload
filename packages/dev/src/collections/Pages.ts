@@ -15,5 +15,18 @@ export const Pages: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'enableConditionalField',
+      label: 'Enable Conditional Field',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalField',
+      label: 'Conditional Field',
+      type: 'text',
+      admin: {
+        condition: (data) => data.enableConditionalField,
+      },
+    },
   ],
 }

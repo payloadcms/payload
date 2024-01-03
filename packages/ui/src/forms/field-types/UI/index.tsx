@@ -3,8 +3,6 @@ import React from 'react'
 
 import type { UIField } from 'payload/types'
 
-import withCondition from '../../withCondition'
-
 const UI: React.FC<UIField> = (props) => {
   const {
     admin: {
@@ -19,4 +17,4 @@ const UI: React.FC<UIField> = (props) => {
   return null
 }
 
-export default withCondition(UI)
+export default UI
