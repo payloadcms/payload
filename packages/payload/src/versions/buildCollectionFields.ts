@@ -12,7 +12,7 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
     {
       name: 'version',
       type: 'group',
-      fields: collection.fields.filter((field) => 'name' in field && field.name !== 'id'),
+      fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
     },
     {
       name: 'createdAt',
