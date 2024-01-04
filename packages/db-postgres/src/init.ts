@@ -24,6 +24,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
 
     buildTable({
       adapter: this,
+      buildTexts: true,
       buildNumbers: true,
       buildRelationships: true,
       disableNotNull: !!collection?.versions?.drafts,
@@ -41,6 +42,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
 
       buildTable({
         adapter: this,
+        buildTexts: true,
         buildNumbers: true,
         buildRelationships: true,
         disableNotNull: !!collection.versions?.drafts,
@@ -57,6 +59,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
 
     buildTable({
       adapter: this,
+      buildTexts: true,
       buildNumbers: true,
       buildRelationships: true,
       disableNotNull: !!global?.versions?.drafts,
@@ -72,6 +75,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
 
       buildTable({
         adapter: this,
+        buildTexts: true,
         buildNumbers: true,
         buildRelationships: true,
         disableNotNull: !!global.versions?.drafts,

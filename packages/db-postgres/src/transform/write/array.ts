@@ -18,6 +18,7 @@ type Args = {
   data: unknown
   field: ArrayField
   locale?: string
+  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
@@ -36,6 +37,7 @@ export const transformArray = ({
   data,
   field,
   locale,
+  texts,
   numbers,
   path,
   relationships,
@@ -86,6 +88,7 @@ export const transformArray = ({
         fieldPrefix: '',
         fields: field.fields,
         locales: newRow.locales,
+        texts,
         numbers,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
