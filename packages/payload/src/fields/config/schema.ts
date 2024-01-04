@@ -83,8 +83,11 @@ export const text = baseField.keys({
     rtl: joi.boolean(),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
+  hasMany: joi.boolean().default(false),
   maxLength: joi.number(),
+  maxRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
   minLength: joi.number(),
+  minRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
   type: joi.string().valid('text').required(),
 })
 

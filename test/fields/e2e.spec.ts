@@ -119,6 +119,25 @@ describe('fields', () => {
       const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
     })
+
+    test('should create hasMany with multiple texts', async () => {
+      const input = 'five'
+      const furtherInput = 'six'
+
+      await page.goto(url.create)
+      const requiredField = page.locator('#field-text')
+      const field = page.locator('.field-hasMany')
+
+      await requiredField.fill(String(input))
+      await field.click()
+      await page.keyboard.type(input)
+      await page.keyboard.press('Enter')
+      await page.keyboard.type(furtherInput)
+      await page.keyboard.press('Enter')
+      await saveDocAndAssert(page)
+      await expect(field.locator('.rs__value-container')).toContainText(input)
+      await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
+    })
   })
 
   describe('number', () => {

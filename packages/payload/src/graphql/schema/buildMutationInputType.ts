@@ -268,7 +268,13 @@ function buildMutationInputType(
     },
     text: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+      [field.name]: {
+        type: withNullableType(
+          field,
+          field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
+          forceNullable,
+        ),
+      },
     }),
     textarea: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextareaField) => ({
       ...inputObjectTypeConfig,
