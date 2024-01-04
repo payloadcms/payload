@@ -1,24 +1,28 @@
+import type { I18n } from '@payloadcms/translations'
+import type {
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
+
 import React from 'react'
 
+import { ShouldRenderTabs } from './ShouldRenderTabs'
 import { DocumentTab } from './Tab'
 import { getCustomViews } from './getCustomViews'
 import { getViewConfig } from './getViewConfig'
-import { tabs as defaultTabs } from './tabs'
-import { ShouldRenderTabs } from './ShouldRenderTabs'
-import { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
-import { I18n } from '@payloadcms/translations'
-
 import './index.scss'
+import { tabs as defaultTabs } from './tabs'
 
 const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<{
-  config: SanitizedConfig
   collectionConfig: SanitizedCollectionConfig
+  config: SanitizedConfig
   globalConfig: SanitizedGlobalConfig
   i18n: I18n
 }> = (props) => {
-  const { collectionConfig, globalConfig, config } = props
+  const { collectionConfig, config, globalConfig } = props
 
   const customViews = getCustomViews({ collectionConfig, globalConfig })
 
@@ -45,7 +49,8 @@ export const DocumentTabs: React.FC<{
                 const { condition } = tabConfig || {}
 
                 const meetsCondition =
-                  !condition || (condition && condition({ collectionConfig, config, globalConfig }))
+                  !condition ||
+                  (condition && Boolean(condition({ collectionConfig, config, globalConfig })))
 
                 if (meetsCondition) {
                   return (

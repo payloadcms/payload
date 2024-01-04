@@ -44,9 +44,11 @@ export const blockValidationHOC = (
         const fieldValue = 'name' in field ? node.fields[field.name] : null
 
         const passesCondition = field.admin?.condition
-          ? field.admin.condition(fieldValue, node.fields, {
-              user: req?.user,
-            })
+          ? Boolean(
+              field.admin.condition(fieldValue, node.fields, {
+                user: req?.user,
+              }),
+            )
           : true
         if (!passesCondition) {
           continue // Fixes https://github.com/payloadcms/payload/issues/4000

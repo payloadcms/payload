@@ -1,26 +1,25 @@
+import type { DocumentTabConfig, DocumentTabProps } from 'payload/types'
+
 import React, { Fragment } from 'react'
 
 import { DocumentTabLink } from './TabLink'
-
-import { DocumentTabConfig, DocumentTabProps } from 'payload/types'
-
 import './index.scss'
 
 export const baseClass = 'doc-tab'
 
 export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (props) => {
   const {
+    Pill,
     apiURL,
-    config,
     collectionConfig,
     condition,
+    config,
     globalConfig,
     href: tabHref,
+    i18n,
     isActive: tabIsActive,
     label,
     newTab,
-    Pill,
-    i18n,
   } = props
 
   const { routes } = config
@@ -43,7 +42,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     })
   }
 
-  if (!condition || (condition && condition({ collectionConfig, config, globalConfig }))) {
+  if (!condition || (condition && Boolean(condition({ collectionConfig, config, globalConfig })))) {
     const labelToRender =
       typeof label === 'function'
         ? label({
@@ -53,12 +52,12 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
 
     return (
       <DocumentTabLink
-        href={href}
-        newTab={newTab}
-        baseClass={baseClass}
-        isActive={isActive}
         adminRoute={routes.admin}
+        baseClass={baseClass}
+        href={href}
+        isActive={isActive}
         isCollection={!!collectionConfig && !globalConfig}
+        newTab={newTab}
       >
         <span className={`${baseClass}__label`}>
           {labelToRender}
