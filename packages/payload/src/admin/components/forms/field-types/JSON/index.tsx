@@ -56,10 +56,10 @@ const JSONField: React.FC<Props> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (readOnly) return
-      setStringValue(val)
-
       try {
+        if (readOnly) return
+        setStringValue(val)
+
         setValue(val ? JSON.parse(val) : '')
         setJsonError(undefined)
       } catch (e) {
@@ -70,16 +70,17 @@ const JSONField: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    const hasValue = value && value.toString().length > 0
-    if (hasLoadedValue) {
-      setStringValue(hasValue ? JSON.stringify(value, null, 2) : '')
-    } else
-      try {
+    try {
+      const hasValue = value && value.toString().length > 0
+      if (hasLoadedValue) {
+        setStringValue(hasValue ? JSON.stringify(value, null, 2) : '')
+      } else {
         setStringValue(JSON.stringify(hasValue ? value : initialValue, null, 2))
         setHasLoadedValue(true)
-      } catch (e) {
-        setJsonError(e)
       }
+    } catch (e) {
+      setJsonError(e)
+    }
   }, [initialValue, value, hasLoadedValue])
 
   return (
