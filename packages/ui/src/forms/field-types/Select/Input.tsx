@@ -2,7 +2,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { OptionObject } from 'payload/types'
+import type { OptionObject, Validate } from 'payload/types'
 import type { Option } from '../../../elements/ReactSelect/types'
 
 import { getTranslation } from 'payload/utilities'
@@ -17,19 +17,22 @@ const SelectInput: React.FC<{
   isSortable: boolean
   options: OptionObject[]
   path: string
-}> = ({ readOnly, isClearable, hasMany, isSortable, options, path }) => {
+  validate?: Validate
+  required?: boolean
+}> = ({ readOnly, isClearable, hasMany, isSortable, options, path, validate, required }) => {
   const { i18n } = useTranslation()
 
-  // const memoizedValidate = useCallback(
-  //   (value, validationOptions) => {
-  //     return validate(value, { ...validationOptions, hasMany, options, required })
-  //   },
-  //   [validate, required, hasMany, options],
-  // )
+  const memoizedValidate: Validate = useCallback(
+    (value, validationOptions) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...validationOptions, hasMany, options, required })
+    },
+    [validate, required],
+  )
 
   const { errorMessage, setValue, showError, value } = useField({
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   let valueToRender

@@ -16,6 +16,7 @@ import {
 } from '@payloadcms/ui'
 import queryString from 'qs'
 import { notFound } from 'next/navigation'
+import { TFunction } from 'i18next'
 
 export const CollectionEdit = async ({
   collectionSlug,
@@ -99,7 +100,7 @@ export const CollectionEdit = async ({
       locale,
       operation: isEditing ? 'update' : 'create',
       preferences,
-      // t,
+      t: ((key: string) => key) as TFunction, // TODO: i18n
       user,
     })
 

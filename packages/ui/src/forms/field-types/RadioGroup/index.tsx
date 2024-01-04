@@ -30,7 +30,8 @@ const RadioGroup: React.FC<Props> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      return validate(value, { ...validationOptions, options, required })
+      if (typeof validate === 'function')
+        return validate(value, { ...validationOptions, options, required })
     },
     [validate, options, required],
   )

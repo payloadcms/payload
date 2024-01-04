@@ -8,8 +8,10 @@ import { fieldBaseClass } from '../shared'
 import { CheckboxInput } from './Input'
 import DefaultLabel from '../../Label'
 import './index.scss'
+import { CheckboxWrapper } from './Wrapper'
 
 const baseClass = 'checkbox'
+const inputBaseClass = 'checkbox-input'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
@@ -24,9 +26,11 @@ const Checkbox: React.FC<Props> = (props) => {
     } = {},
     disableFormData,
     label,
-    onChange,
     path: pathFromProps,
     required,
+    valid,
+    errorMessage,
+    value,
   } = props
 
   const path = pathFromProps || name
@@ -41,9 +45,9 @@ const Checkbox: React.FC<Props> = (props) => {
       className={[
         fieldBaseClass,
         baseClass,
-        // showError && 'error',
+        !valid && 'error',
         className,
-        // value && `${baseClass}--checked`,
+        value && `${baseClass}--checked`,
         readOnly && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
@@ -54,23 +58,10 @@ const Checkbox: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <ErrorComp
-          alignCaret="left"
-          // message={errorMessage}
-          //  showError={showError}
-        />
+        <ErrorComp alignCaret="left" message={errorMessage} showError={!valid} />
       </div>
-      <div
-        className={[
-          baseClass,
-          className,
-          // (checked || partialChecked) && `${baseClass}--checked`,
-          readOnly && `${baseClass}--read-only`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <div className={`${baseClass}__input`}>
+      <CheckboxWrapper path={path} readOnly={readOnly} baseClass={inputBaseClass}>
+        <div className={`${inputBaseClass}__input`}>
           {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
           <CheckboxInput
             id={fieldID}
@@ -80,20 +71,13 @@ const Checkbox: React.FC<Props> = (props) => {
             readOnly={readOnly}
             required={required}
             path={path}
+            iconClassName={`${inputBaseClass}__icon`}
           />
           {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
-          {/* <span className={`${baseClass}__icon ${!partialChecked ? 'check' : 'partial'}`}>
-            {!partialChecked && <Check />}
-            {partialChecked && <Line />}
-          </span> */}
         </div>
         {label && <LabelComp htmlFor={fieldID} label={label} required={required} />}
-      </div>
-      <FieldDescription
-        description={description}
-        path={path}
-        // value={value}
-      />
+      </CheckboxWrapper>
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

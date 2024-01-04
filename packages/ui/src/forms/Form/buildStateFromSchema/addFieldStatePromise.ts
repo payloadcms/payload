@@ -45,11 +45,12 @@ export const addFieldStatePromise = async ({
   user,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
+    const validate = field.validate
+
     const fieldState: FormField = {
       initialValue: undefined,
       passesCondition,
       valid: true,
-      // validate: field.validate,
       value: undefined,
     }
 
@@ -66,8 +67,8 @@ export const addFieldStatePromise = async ({
 
     let validationResult: boolean | string = true
 
-    if (typeof fieldState.validate === 'function') {
-      validationResult = await fieldState.validate(data?.[field.name], {
+    if (typeof validate === 'function') {
+      validationResult = await validate(data?.[field.name], {
         ...field,
         id,
         config,

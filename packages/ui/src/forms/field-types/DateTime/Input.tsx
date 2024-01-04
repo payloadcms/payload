@@ -2,7 +2,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { DateField } from 'payload/types'
+import type { DateField, Validate } from 'payload/types'
 
 import { getTranslation } from 'payload/utilities'
 import DatePicker from '../../../elements/DatePicker'
@@ -22,15 +22,14 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, required })
+      if (typeof validate === 'function') return validate(value, { ...options, required })
     },
     [validate, required],
   )
 
   const { errorMessage, setValue, showError, value } = useField<Date>({
-    // condition,
     path,
     validate: memoizedValidate,
   })

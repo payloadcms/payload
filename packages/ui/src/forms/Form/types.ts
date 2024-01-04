@@ -18,8 +18,8 @@ export type FormField = {
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
-  validate?: Validate
   value: unknown
+  validate?: Validate
 }
 
 export type Fields = {
@@ -47,7 +47,6 @@ export type Props = {
    */
   fields?: Field[]
   handleResponse?: (res: Response) => void
-  initialData?: Data
   initialState?: Fields
   log?: boolean
   method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'

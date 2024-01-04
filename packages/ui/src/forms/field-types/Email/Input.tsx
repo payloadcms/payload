@@ -30,9 +30,9 @@ export const EmailInput: React.FC<{
 
   const path = pathFromProps || name
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, required })
+      if (typeof validate === 'function') return validate(value, { ...options, required })
     },
     [validate, required],
   )

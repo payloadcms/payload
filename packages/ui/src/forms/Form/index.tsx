@@ -31,7 +31,6 @@ import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
 import { WatchFormErrors } from './WatchFormErrors'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap'
-import buildInitialState from './buildInitialState'
 import buildStateFromSchema from './buildStateFromSchema'
 import {
   FormContext,
@@ -61,7 +60,6 @@ const Form: React.FC<Props> = (props) => {
     disabled,
     fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
-    initialData, // values only, paths are required as key - form should build initial state as convenience
     initialState, // fully formed initial field state
     method,
     onSubmit,
@@ -83,17 +81,10 @@ const Form: React.FC<Props> = (props) => {
   const [modified, setModified] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData))
-
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
 
-  let initialFieldState = {}
-
-  if (formattedInitialData) initialFieldState = formattedInitialData
-  if (initialState) initialFieldState = initialState
-
-  const fieldsReducer = useReducer(fieldReducer, {}, () => initialFieldState)
+  const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
   /**
    * `fields` is the current, up-to-date state/data of all fields in the form. It can be modified by using dispatchFields,
    * which calls the fieldReducer, which then updates the state.
@@ -641,15 +632,6 @@ const Form: React.FC<Props> = (props) => {
       dispatchFields({ state: initialState, type: 'REPLACE_STATE' })
     }
   }, [initialState, dispatchFields])
-
-  useEffect(() => {
-    if (initialData) {
-      contextRef.current = { ...initContextState } as FormContextType
-      const builtState = buildInitialState(initialData)
-      setFormattedInitialData(builtState)
-      dispatchFields({ state: builtState, type: 'REPLACE_STATE' })
-    }
-  }, [initialData, dispatchFields])
 
   useThrottledEffect(
     () => {

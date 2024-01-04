@@ -17,10 +17,9 @@ export const PasswordInput: React.FC<{
 
   const path = pathFromProps || name
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      const validationResult = validate(value, { ...options, required })
-      return validationResult
+      if (typeof validate === 'function') return validate(value, { ...options, required })
     },
     [validate, required],
   )

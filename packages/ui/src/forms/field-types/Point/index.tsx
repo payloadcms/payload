@@ -11,6 +11,7 @@ import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
+import { Validate } from 'payload/types'
 
 const baseClass = 'point'
 
@@ -41,9 +42,9 @@ const PointField: React.FC<Props> = (props) => {
 
   const { i18n, t } = useTranslation('fields')
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, required })
+      if (typeof validate === 'function') return validate(value, { ...options, required })
     },
     [validate, required],
   )

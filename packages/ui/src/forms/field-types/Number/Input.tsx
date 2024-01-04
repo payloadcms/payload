@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { getTranslation } from 'payload/utilities'
 import useField from '../../useField'
 import './index.scss'
+import { Validate } from 'payload/types'
 
 export const NumberInput: React.FC<{
   path: string
@@ -16,6 +17,7 @@ export const NumberInput: React.FC<{
   step?: number
   hasMany?: boolean
   name?: string
+  validate?: Validate
 }> = (props) => {
   const {
     name,
@@ -27,23 +29,23 @@ export const NumberInput: React.FC<{
     min,
     path: pathFromProps,
     required,
+    validate,
   } = props
 
   const { i18n, t } = useTranslation()
 
   const path = pathFromProps || name
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, max, min, required })
-  //   },
-  //   [validate, min, max, required],
-  // )
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, max, min, required })
+    },
+    [validate, min, max, required],
+  )
 
   const { errorMessage, setValue, showError, value } = useField<number | number[]>({
-    // condition,
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   const handleChange = useCallback(

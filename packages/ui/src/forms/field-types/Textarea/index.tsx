@@ -11,6 +11,7 @@ import useField from '../../useField'
 import { isFieldRTL } from '../shared'
 import TextareaInput from './Input'
 import './index.scss'
+import { Validate } from 'payload/types'
 
 const Textarea: React.FC<Props> = (props) => {
   const {
@@ -48,11 +49,13 @@ const Textarea: React.FC<Props> = (props) => {
     locale,
     localizationConfig: localization || undefined,
   })
-  const memoizedValidate = useCallback(
+
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, maxLength, minLength, required })
+      if (typeof validate === 'function')
+        return validate(value, { ...options, maxLength, minLength, required })
     },
-    [validate, required, maxLength, minLength],
+    [validate, required],
   )
 
   const { errorMessage, setValue, showError, value } = useField({
