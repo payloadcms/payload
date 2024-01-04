@@ -19,6 +19,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, GenericTable, PostgresAdapter } from '../types'
 
+import { getConfigIDType } from './getConfigIDType'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { traverseFields } from './traverseFields'
 
@@ -82,23 +83,15 @@ export const buildTable = ({
   // Drizzle relations
   const relationsToBuild: Map<string, string> = new Map()
 
-  const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
-  let idColType = 'integer'
+  const idColType = getConfigIDType(fields)
 
-  if (idField) {
-    if (idField.type === 'number') {
-      idColType = 'numeric'
-      columns.id = numeric('id').primaryKey()
-    }
-
-    if (idField.type === 'text') {
-      idColType = 'varchar'
-      columns.id = varchar('id').primaryKey()
-    }
-  } else {
-    columns.id = serial('id').primaryKey()
+  const idColTypeMap = {
+    integer: serial,
+    numeric,
+    varchar,
   }
 
+  columns.id = idColTypeMap[idColType]('id').primaryKey()
   ;({
     hasLocalizedField,
     hasLocalizedManyNumberField,
