@@ -48,7 +48,6 @@ export const init: Init = async function init(this: PostgresAdapter) {
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,
-        versionsParentIDColType,
       })
     }
   })
