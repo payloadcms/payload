@@ -11,6 +11,8 @@ import React, { useCallback } from 'react'
 
 import type { PluginConfig } from '../types'
 
+import { useTranslation } from 'react-i18next'
+
 import { Pill } from '../ui/Pill'
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
@@ -23,6 +25,8 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
   const { name, fieldTypes, label, pluginConfig, relationTo } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
+
+  const { t } = useTranslation('plugin-seo')
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -83,7 +87,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
                 }}
                 type="button"
               >
-                Auto-generate
+                {t('autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -94,7 +98,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
               color: '#9A9A9A',
             }}
           >
-            Auto-generation will retrieve the selected hero image.
+            {t('imageAutoGenerationTip')}
           </div>
         )}
       </div>
@@ -139,7 +143,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
         <Pill
           backgroundColor={hasImage ? 'green' : 'red'}
           color="white"
-          label={hasImage ? 'Good' : 'No Image'}
+          label={hasImage ? t('good') : t('noImage')}
         />
       </div>
     </div>

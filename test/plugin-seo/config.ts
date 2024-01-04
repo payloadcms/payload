@@ -29,6 +29,15 @@ export default buildConfigWithDefaults({
       },
     }),
   },
+  i18n: {
+    resources: {
+      es: {
+        'plugin-seo': {
+          autoGenerate: 'Auto-génerar',
+        },
+      },
+    },
+  },
   plugins: [
     seoPlugin({
       collections: ['pages', 'posts'],
