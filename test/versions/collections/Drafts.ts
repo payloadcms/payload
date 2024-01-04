@@ -1,14 +1,12 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { extractTranslations } from '../../../packages/payload/src/translations/extractTranslations'
 import CollectionVersionButton from '../elements/CollectionVersionButton'
 import CollectionVersionsButton from '../elements/CollectionVersionsButton'
 import { CustomPublishButton } from '../elements/CustomSaveButton'
 import { draftCollectionSlug } from '../slugs'
 
-const labels = extractTranslations(['version:draft', 'version:published', 'version:status'])
-
 const DraftPosts: CollectionConfig = {
+  slug: draftCollectionSlug,
   access: {
     read: ({ req: { user } }) => {
       if (user) {
@@ -54,35 +52,32 @@ const DraftPosts: CollectionConfig = {
   },
   fields: [
     {
-      name: 'id',
-      type: 'text',
-    },
-    {
       name: 'title',
+      type: 'text',
       label: 'Title',
       localized: true,
       required: true,
-      type: 'text',
       unique: true,
     },
     {
       name: 'description',
+      type: 'textarea',
       label: 'Description',
       required: true,
-      type: 'textarea',
     },
     {
       name: 'radio',
+      type: 'radio',
       options: [
         {
           label: { en: 'Test en', es: 'Test es' },
           value: 'test',
         },
       ],
-      type: 'radio',
     },
     {
       name: 'select',
+      type: 'select',
       hasMany: true,
       options: [
         {
@@ -94,12 +89,13 @@ const DraftPosts: CollectionConfig = {
           value: 'test2',
         },
       ],
-      type: 'select',
     },
     {
       name: 'blocksField',
+      type: 'blocks',
       blocks: [
         {
+          slug: 'block',
           fields: [
             {
               name: 'text',
@@ -107,17 +103,14 @@ const DraftPosts: CollectionConfig = {
             },
             {
               name: 'localized',
-              localized: true,
               type: 'text',
+              localized: true,
             },
           ],
-          slug: 'block',
         },
       ],
-      type: 'blocks',
     },
   ],
-  slug: draftCollectionSlug,
   versions: {
     drafts: true,
     maxPerDoc: 35,

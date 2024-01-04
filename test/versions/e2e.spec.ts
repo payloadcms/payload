@@ -44,6 +44,7 @@ import { titleToDelete } from './shared'
 import {
   autoSaveGlobalSlug,
   autosaveCollectionSlug,
+  customIDSlug,
   disablePublishGlobalSlug,
   disablePublishSlug,
   draftCollectionSlug,
@@ -58,6 +59,7 @@ describe('versions', () => {
   let serverURL: string
   let autosaveURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
+  let customIDURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
@@ -77,6 +79,7 @@ describe('versions', () => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
+      customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
     })
 
     // This test has to run before bulk updates that will rename the title
@@ -363,6 +366,19 @@ describe('versions', () => {
       await page.locator('tbody tr .cell-title a').nth(1).click()
       await expect(page.locator('#field-title')).toHaveValue('first post title')
       await expect(page.locator('#field-description')).toHaveValue('first post description')
+    })
+
+    test('should save versions with custom IDs', async () => {
+      await page.goto(customIDURL.create)
+      await page.locator('#field-id').fill('custom')
+      await page.locator('#field-title').fill('title')
+      await page.locator('#action-save').click()
+
+      await page.goto(customIDURL.list)
+      await page.locator('tbody tr .cell-id a').click()
+
+      await expect(page.locator('#field-id')).toHaveValue('custom')
+      await expect(page.locator('#field-title')).toHaveValue('title')
     })
 
     test('should hide publish when access control prevents updating on globals', async () => {
