@@ -12,19 +12,10 @@
 
   // place the localizer outside the `overflow: hidden` container so that the popup is visible
   // this means we need to use a placeholder div so that the space is retained in the DOM
-<<<<<<< HEAD
-  [dir='rtl']
-  &__localizer {
-    right: unset;
-    left: base(4.5);
-  }
-=======
 [dir='rtl'] &__localizer {
     right: unset;
     left:  base(4.5)
   }
-  
->>>>>>> 85e38b7cfd5c0772344c4a8fb5100f7c48eb508f
   &__localizer {
     position: absolute;
     top: 50%;

@@ -11,6 +11,8 @@ import React, { useCallback } from 'react'
 
 import type { PluginConfig } from '../types'
 
+import { useTranslation } from 'react-i18next'
+
 import { defaults } from '../defaults'
 import { LengthIndicator } from '../ui/LengthIndicator'
 
@@ -24,6 +26,8 @@ type MetaDescriptionProps = TextareaField & {
 
 export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
   const { name, label, path, pluginConfig } = props
+
+  const { t } = useTranslation('plugin-seo')
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -82,7 +86,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
                 }}
                 type="button"
               >
-                Auto-generate
+                {t('autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -92,13 +96,13 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {`This should be between ${minLength} and ${maxLength} characters. For help in writing quality meta descriptions, see `}
+          {t('lengthTipDescription', { minLength, maxLength })}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/snippet#meta-descriptions"
             rel="noopener noreferrer"
             target="_blank"
           >
-            best practices
+            {t('bestPractices')}
           </a>
         </div>
       </div>

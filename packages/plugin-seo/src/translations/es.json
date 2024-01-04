@@ -1,0 +1,22 @@
+{
+  "$schema": "./translation-schema.json",
+  "plugin-seo": {
+    "autoGenerate": "Autogénerar",
+    "imageAutoGenerationTip": "La autogeneración recuperará la imagen de héroe seleccionada.",
+    "bestPractices": "mejores prácticas",
+    "lengthTipTitle": "Debe tener entre {{minLength}} y {{maxLength}} caracteres. Para obtener ayuda sobre cómo escribir metatítulos de calidad, consulte ",
+    "lengthTipDescription": "Esto debe estar entre {{minLength}} y {{maxLength}} caracteres. Para obtener ayuda sobre cómo escribir meta descripciones de calidad, consulte ",
+    "good": "Bien",
+    "tooLong": "Demasiado largo",
+    "tooShort": "Demasiado corto",
+    "almostThere": "Ya casi está",
+    "characterCount": "{{current}}/{{minLength}}-{{maxLength}} letras, ",
+    "charactersToGo": "{{characters}} letras sobrantes",
+    "charactersLeftOver": "{{characters}} letras sobrantes",
+    "charactersTooMany": "{{characters}} letras demasiados",
+    "noImage": "Sin imagen",
+    "checksPassing": "{{current}}/{{max}} las comprobaciones están pasando",
+    "preview": "Vista previa",
+    "previewDescription": "Las listas de resultados pueden variar segun la relevancia de buesqueda y el contenido."
+  }
+}
