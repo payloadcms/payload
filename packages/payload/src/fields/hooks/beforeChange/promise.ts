@@ -106,7 +106,7 @@ export const promise = async ({
 
       if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
         try {
-          siblingData[field.name] as string
+          JSON.parse(siblingData[field.name] as string)
         } catch (e) {
           jsonError = e
         }
