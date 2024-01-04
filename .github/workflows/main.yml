@@ -306,9 +306,10 @@ jobs:
         with:
           mongodb-version: 6.0
 
-      - name: Build Website
+      - name: Build Template
         run: |
           cd templates/${{ matrix.template }}
           cp .env.example .env
           yarn install
           yarn build
+          yarn generate:types
