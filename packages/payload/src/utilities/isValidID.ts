@@ -4,7 +4,11 @@ export const isValidID = (
   value: number | string,
   type: 'ObjectID' | 'number' | 'text',
 ): boolean => {
-  if (type === 'text') return value && typeof value === 'string'
+  if (type === 'text' && value) {
+    const isObjectID = ObjectID.isValid(value as string)
+    return typeof value === 'string' || isObjectID
+  }
+
   if (typeof value === 'number' && !Number.isNaN(value)) return true
 
   if (type === 'ObjectID') {
