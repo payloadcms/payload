@@ -8,6 +8,8 @@ import { getMetaImageField } from './fields/MetaImage'
 import { getMetaTitleField } from './fields/MetaTitle'
 import { Overview } from './ui/Overview'
 import { getPreviewField } from './ui/Preview'
+import { deepMerge } from 'payload/dist/utilities/deepMerge'
+import translations from './translations'
 
 const seo =
   (pluginConfig: PluginConfig) =>
@@ -176,6 +178,12 @@ const seo =
 
           return global
         }) || [],
+      i18n: {
+        ...config.i18n,
+        resources: {
+          ...deepMerge(translations, config.i18n?.resources),
+        },
+      },
     }
   }
 
