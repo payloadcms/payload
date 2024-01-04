@@ -7,7 +7,7 @@ const CustomIDs: CollectionConfig = {
   admin: {
     defaultColumns: ['id', 'title', 'createdAt'],
     preview: () => 'https://payloadcms.com',
-    useAsTitle: 'title',
+    useAsTitle: 'id',
   },
   fields: [
     {

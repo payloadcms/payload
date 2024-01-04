@@ -377,7 +377,7 @@ describe('versions', () => {
       await page.goto(customIDURL.list)
       await page.locator('tbody tr .cell-id a').click()
 
-      await expect(page.locator('#field-id')).toHaveValue('custom')
+      await expect(page.locator('div.id-label')).toHaveText(/custom/)
       await expect(page.locator('#field-title')).toHaveValue('title')
     })
 
