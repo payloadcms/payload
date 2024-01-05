@@ -7,6 +7,7 @@ import { Route } from 'react-router-dom'
 import type { Permissions, User } from '../../../../auth'
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 
+import { useActions } from '../../utilities/ActionsProvider'
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 import List from '../collections/List'
 
@@ -31,6 +32,9 @@ export const collectionRoutes = (props: {
   return collections
     ?.filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
     .reduce((acc, collection) => {
+      const { setDocumentInfo } = useActions()
+      setDocumentInfo({ collection: collection })
+
       // Default routes
       const routesToReturn = [
         ...acc,

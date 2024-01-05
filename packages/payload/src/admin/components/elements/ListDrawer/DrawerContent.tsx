@@ -13,6 +13,7 @@ import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { useUseTitleField } from '../../../hooks/useUseAsTitle'
 import Label from '../../forms/Label'
 import X from '../../icons/X'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
@@ -59,6 +60,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [page, setPage] = useState(1)
   const [where, setWhere] = useState(null)
   const [search, setSearch] = useState('')
+  const { setDocumentInfo } = useActions()
 
   const {
     collections,
@@ -133,7 +135,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
-    const { admin: { listSearchableFields } = {}, slug } = selectedCollectionConfig
+    const { slug, admin: { listSearchableFields } = {} } = selectedCollectionConfig
     const params: {
       cacheBust?: number
       limit?: number
@@ -193,7 +195,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       sort,
     }
 
-    setPreference(preferenceKey, newPreferences, true)
+    void setPreference(preferenceKey, newPreferences, true)
   }, [sort, limit, setPreference, preferenceKey])
 
   const onCreateNew = useCallback(
@@ -223,6 +225,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   } else if (typeof listComponent === 'object' && typeof listComponent.Component === 'function') {
     ListToRender = listComponent.Component
   }
+
+  setDocumentInfo({ collection: selectedCollectionConfig })
 
   return (
     <TableColumnsProvider

@@ -7,6 +7,7 @@ import { Route } from 'react-router-dom'
 import type { Permissions, User } from '../../../../auth'
 import type { SanitizedGlobalConfig } from '../../../../exports/types'
 
+import { useActions } from '../../utilities/ActionsProvider'
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
@@ -32,6 +33,8 @@ export const globalRoutes = (props: {
     ?.filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
     .reduce((acc, global) => {
       const canReadGlobal = permissions?.globals?.[global.slug]?.read?.permission
+      const { setDocumentInfo } = useActions()
+      setDocumentInfo({ global: global })
 
       // Default routes
       const routesToReturn = [
