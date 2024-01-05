@@ -45,6 +45,7 @@ import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequ
 import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
 import withNullableType from './withNullableType'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 
 const idFieldTypes = {
   number: GraphQLInt,
@@ -55,12 +56,9 @@ export const getCollectionIDType = (
   payload: Payload,
   collection: SanitizedCollectionConfig,
 ): GraphQLScalarType => {
-  const idField =
-    collection.fields[0].type === 'tabs'
-      ? collection.fields[0]?.tabs[0]?.fields.find(
-          (field) => fieldAffectsData(field) && field.name === 'id',
-        )
-      : collection.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+  const idField = flattenFields(collection.fields).find(
+    (field) => fieldAffectsData(field) && field.name === 'id',
+  )
 
   if (!idField) {
     return idFieldTypes[payload.db.defaultIDType]

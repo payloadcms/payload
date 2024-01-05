@@ -529,7 +529,7 @@ describe('admin', () => {
       await expect(page.locator('#field-title')).toHaveValue(title)
     })
 
-    test('should allow custom ID field nested inside the first tab', async () => {
+    test('should allow custom ID field nested inside an unnamed tab', async () => {
       await page.goto(url.collection(customIdCollectionSlug) + '/' + customIdCollectionId)
 
       const idField = await page.locator('#field-id')

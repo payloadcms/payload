@@ -23,11 +23,11 @@ export const CustomId: CollectionConfig = {
           label: 'Tab 1',
           fields: [
             {
-              name: 'id',
+              name: 'title',
               type: 'text',
             },
             {
-              name: 'title',
+              name: 'id',
               type: 'text',
             },
             {

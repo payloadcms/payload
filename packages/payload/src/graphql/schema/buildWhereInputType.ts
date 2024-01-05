@@ -13,6 +13,7 @@ import {
 import formatName from '../utilities/formatName'
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap'
 import { withOperators } from './withOperators'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 
 type Args = {
   fields: Field[]
@@ -44,10 +45,12 @@ const buildWhereInputType = ({
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
-  let idField: FieldAffectingData | undefined
+  let idField = flattenFields(fields).find(
+    (field) => fieldAffectsData(field) && field.name === 'id',
+  )
 
   const fieldTypes = fields.reduce((schema, field) => {
-    if (fieldAffectsData(field) && field.name === 'id') idField = field
+    /* if (fieldAffectsData(field) && field.name === 'id') idField = field */
 
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
       const getFieldSchema = fieldToSchemaMap({

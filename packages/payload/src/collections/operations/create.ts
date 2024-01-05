@@ -31,6 +31,7 @@ import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import { saveVersion } from '../../versions/saveVersion'
 import { buildAfterOperation } from './utils'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 
 const unlinkFile = promisify(fs.unlink)
 
@@ -109,18 +110,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // Custom id
     // /////////////////////////////////////
 
-    /* const hasIdField =
-      collectionConfig.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
-      -1 */
-
     const hasIdField =
-      collectionConfig.fields[0].type === 'tabs'
-        ? collectionConfig.fields[0]?.tabs[0]?.fields.findIndex(
-            (field) => fieldAffectsData(field) && field.name === 'id',
-          ) > -1
-        : collectionConfig.fields.findIndex(
-            (field) => fieldAffectsData(field) && field.name === 'id',
-          ) > -1
+      flattenFields(collectionConfig.fields).findIndex((field) => field.name === 'id') > -1
 
     if (hasIdField) {
       data = {
