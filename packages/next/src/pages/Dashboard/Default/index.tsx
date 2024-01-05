@@ -1,10 +1,9 @@
 import React from 'react'
 import type { SanitizedConfig } from 'payload/types'
 
-import { Gutter } from '../../elements/Gutter'
+import { Gutter, SetStepNav } from '@payloadcms/ui'
 import './index.scss'
 import { DefaultDashboardClient } from './index.client'
-import { SetStepNav } from '../../elements/StepNav/SetStepNav'
 
 const baseClass = 'dashboard'
 

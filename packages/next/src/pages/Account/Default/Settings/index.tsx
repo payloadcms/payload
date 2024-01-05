@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import type { Translation } from 'payload/dist/translations/type'
 
-import ReactSelect from '../../../elements/ReactSelect'
-import Label from '../../../forms/Label'
+import { ReactSelect, Label } from '@payloadcms/ui'
 import { ToggleTheme } from '../ToggleTheme'
 import './index.scss'
 

@@ -2,16 +2,19 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { EntityToGroup, Group } from '../../utilities/groupNavItems'
+import type { EntityToGroup, Group } from '@payloadcms/ui'
+import {
+  EntityType,
+  groupNavItems,
+  Button,
+  Card,
+  useAuth,
+  useConfig,
+  useActions,
+} from '@payloadcms/ui'
 
 import { getTranslation } from 'payload/utilities'
-import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
-import { Button } from '../../elements/Button'
-import { Card } from '../../elements/Card'
 import './index.scss'
-import { useAuth } from '../../providers/Auth'
-import { useConfig } from '../../providers/Config'
-import { useActions } from '../../providers/ActionsProvider'
 
 const baseClass = 'dashboard'
 
