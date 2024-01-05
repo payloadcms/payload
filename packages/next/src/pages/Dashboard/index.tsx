@@ -1,8 +1,9 @@
 import { SanitizedConfig } from 'payload/types'
 import React, { Fragment } from 'react'
-import { RenderCustomComponent, DefaultDashboard, HydrateClientUser } from '@payloadcms/ui'
+import { RenderCustomComponent, HydrateClientUser } from '@payloadcms/ui'
 import Link from 'next/link'
 import { initPage } from '../../utilities/initPage'
+import { DefaultDashboard } from './Default'
 
 export const Dashboard = async ({
   config: configPromise,

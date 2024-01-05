@@ -1,3 +1,5 @@
 export { findLocaleFromCode } from '../utilities/findLocaleFromCode'
 export { formatFields } from '../utilities/formatFields'
 export { formatDate } from '../utilities/formatDate'
+export type { EntityToGroup, Group } from '../utilities/groupNavItems'
+export { EntityType, groupNavItems } from '../utilities/groupNavItems'
