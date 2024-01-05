@@ -2,7 +2,7 @@ import type React from 'react'
 import type { Dispatch } from 'react'
 
 import type { User } from 'payload/auth'
-import type { Condition, Field, Field as FieldConfig, Validate } from 'payload/types'
+import type { Field, Field as FieldConfig, Validate } from 'payload/types'
 
 export type Row = {
   blockType?: string
@@ -12,7 +12,6 @@ export type Row = {
 }
 
 export type FormField = {
-  // condition?: Condition
   disableFormData?: boolean
   errorMessage?: string
   fieldSchema?: FieldConfig
@@ -20,8 +19,8 @@ export type FormField = {
   passesCondition?: boolean
   rows?: Row[]
   valid: boolean
-  // validate?: Validate
   value: unknown
+  validate?: Validate
 }
 
 export type Fields = {
@@ -49,7 +48,6 @@ export type Props = {
    */
   fields?: Field[]
   handleResponse?: (res: Response) => void
-  initialData?: Data
   initialState?: Fields
   log?: boolean
   method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'

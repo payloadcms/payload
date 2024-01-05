@@ -22,7 +22,7 @@ export type CollectionEditViewProps = BaseEditViewProps & {
 export type GlobalEditViewProps = BaseEditViewProps & {
   config: SanitizedConfig
   globalConfig: SanitizedGlobalConfig
-  initialState?: Fields
+  state?: Fields
   permissions: GlobalPermission | null
 }
 

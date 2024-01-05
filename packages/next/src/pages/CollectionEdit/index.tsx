@@ -13,9 +13,11 @@ import {
   FormQueryParamsProvider,
   QueryParamTypes,
   HydrateClientUser,
+  DocumentInfoProvider,
 } from '@payloadcms/ui'
 import queryString from 'qs'
 import { notFound } from 'next/navigation'
+import { TFunction } from 'i18next'
 
 export const CollectionEdit = async ({
   collectionSlug,
@@ -99,7 +101,7 @@ export const CollectionEdit = async ({
       locale,
       operation: isEditing ? 'update' : 'create',
       preferences,
-      // t,
+      t: ((key: string) => key) as TFunction, // TODO: i18n
       user,
     })
 
@@ -136,16 +138,24 @@ export const CollectionEdit = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
-        <EditDepthProvider depth={1}>
-          <FormQueryParamsProvider formQueryParams={formQueryParams}>
-            <RenderCustomComponent
-              CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
-              DefaultComponent={DefaultEditView}
-              componentProps={componentProps}
-            />
-          </FormQueryParamsProvider>
-        </EditDepthProvider>
+        <HydrateClientUser user={user} permissions={permissions} />
+        <DocumentInfoProvider
+          collectionSlug={collectionConfig.slug}
+          id={id}
+          key={`${collectionSlug}-${locale}`}
+          versionsEnabled={Boolean(collectionConfig.versions)}
+          draftsEnabled={Boolean(collectionConfig.versions?.drafts)}
+        >
+          <EditDepthProvider depth={1}>
+            <FormQueryParamsProvider formQueryParams={formQueryParams}>
+              <RenderCustomComponent
+                CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
+                DefaultComponent={DefaultEditView}
+                componentProps={componentProps}
+              />
+            </FormQueryParamsProvider>
+          </EditDepthProvider>
+        </DocumentInfoProvider>
       </Fragment>
     )
   }

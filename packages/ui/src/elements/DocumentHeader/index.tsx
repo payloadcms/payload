@@ -43,7 +43,7 @@ export const DocumentHeader: React.FC<{
             data={data}
             isDate={titleFieldConfig?.type === 'date'}
             dateFormat={
-              'date' in titleFieldConfig?.admin
+              titleFieldConfig && 'date' in titleFieldConfig?.admin
                 ? titleFieldConfig?.admin?.date?.displayFormat
                 : undefined
             }

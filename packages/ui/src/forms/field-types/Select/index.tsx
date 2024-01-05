@@ -39,7 +39,6 @@ export const Select: React.FC<Props> = (props) => {
     options,
     path: pathFromProps,
     required,
-    // validate = select,
   } = props
 
   const path = pathFromProps || name

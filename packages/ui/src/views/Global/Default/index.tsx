@@ -13,7 +13,7 @@ export const DefaultGlobalEdit: React.FC<
     fieldTypes: FieldTypes
   }
 > = (props) => {
-  const { apiURL, data, fieldTypes, globalConfig, permissions, config } = props
+  const { apiURL, data, fieldTypes, globalConfig, permissions, config, user, state } = props
 
   const { admin: { description } = {}, fields, label } = globalConfig
 
@@ -40,6 +40,9 @@ export const DefaultGlobalEdit: React.FC<
         fields={fields}
         hasSavePermission={hasSavePermission}
         permissions={permissions}
+        user={user}
+        state={state}
+        data={data}
       />
     </React.Fragment>
   )

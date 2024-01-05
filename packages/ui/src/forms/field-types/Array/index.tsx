@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { array } from 'payload/fields/validations'
 import { getTranslation } from 'payload/utilities'
 import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
@@ -40,7 +39,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     path: pathFromProps,
     permissions,
     required,
-    validate = array,
+    validate,
   } = props
 
   const path = pathFromProps || name
@@ -93,7 +92,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     valid,
     value,
   } = useField<number>({
-    condition,
     hasRows: true,
     path,
     validate: memoizedValidate,

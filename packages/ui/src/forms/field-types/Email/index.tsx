@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { email } from 'payload/fields/validations'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
@@ -25,7 +24,6 @@ export const Email: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = email,
   } = props
 
   const path = pathFromProps || name
@@ -59,7 +57,6 @@ export const Email: React.FC<Props> = (props) => {
         <EmailInput
           name={name}
           autoComplete={autoComplete}
-          // condition={condition}
           readOnly={readOnly}
           path={path}
           required={required}

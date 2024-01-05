@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { text } from 'payload/fields/validations'
 import { fieldBaseClass } from '../shared'
 import { TextInput } from './Input'
 import FieldDescription from '../../FieldDescription'
@@ -32,7 +31,8 @@ const Text: React.FC<Props> = (props) => {
     minRows,
     path: pathFromProps,
     required,
-    validate = text,
+    valid,
+    errorMessage,
   } = props
 
   const path = pathFromProps || name
@@ -42,12 +42,7 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={[
-        fieldBaseClass,
-        'text',
-        className,
-        // showError && 'error', readOnly && 'read-only'
-      ]
+      className={[fieldBaseClass, 'text', className, !valid && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -55,10 +50,7 @@ const Text: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <ErrorComp
-      // message={errorMessage}
-      // showError={showError}
-      />
+      <ErrorComp message={errorMessage} showError={!valid} />
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <div className="input-wrapper">
         {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}

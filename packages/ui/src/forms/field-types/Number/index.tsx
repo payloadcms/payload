@@ -1,9 +1,7 @@
 import React from 'react'
 
-import type { Option } from '../../../elements/ReactSelect/types'
 import type { Props } from './types'
 
-import { number } from 'payload/fields/validations'
 import { isNumber } from 'payload/utilities'
 import ReactSelect from '../../../elements/ReactSelect'
 import DefaultError from '../../Error'
@@ -36,7 +34,7 @@ const NumberField: React.FC<Props> = (props) => {
     minRows,
     path: pathFromProps,
     required,
-    validate = number,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -44,10 +42,16 @@ const NumberField: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
+  const memoizedValidate = React.useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
+
   const { errorMessage, setValue, showError, value } = useField<number | number[]>({
-    condition,
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   return (

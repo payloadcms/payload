@@ -10,4 +10,5 @@ export type AuthContext<T = User> = {
   setUser: (user: T) => void
   token?: string
   user?: T | null
+  setPermissions: (permissions: Permissions) => void
 }

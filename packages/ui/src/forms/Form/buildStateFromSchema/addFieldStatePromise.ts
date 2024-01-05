@@ -85,13 +85,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     user,
   } = args
   if (fieldAffectsData(field)) {
+    const validate = operation === 'update' ? field.validate : undefined
+
     const fieldState: FormField = {
-      // condition: field.admin?.condition,
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
       valid: true,
-      // validate: field.validate,
       value: undefined,
     }
 
@@ -108,18 +108,18 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     let validationResult: string | true = true
 
-    // if (typeof fieldState.validate === 'function' && !skipValidation) {
-    //   validationResult = await fieldState.validate(data?.[field.name], {
-    //     ...field,
-    //     id,
-    //     config,
-    //     data: fullData,
-    //     operation,
-    //     siblingData: data,
-    //     t,
-    //     user,
-    //   })
-    // }
+    if (typeof validate === 'function' && !skipValidation) {
+      validationResult = await validate(data?.[field.name], {
+        ...field,
+        id,
+        config,
+        data: fullData,
+        operation,
+        siblingData: data,
+        t,
+        user,
+      })
+    }
 
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult
@@ -138,9 +138,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             if (!omitParents && (!filter || filter(args))) {
               state[`${rowPath}id`] = {
-                fieldSchema: includeSchema
-                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
-                  : undefined,
                 initialValue: row.id,
                 valid: true,
                 value: row.id,
@@ -154,7 +151,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 config,
                 data: row,
                 fields: field.fields,
-                filter,
                 forceFullValue,
                 fullData,
                 includeSchema,
@@ -453,7 +449,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       config,
       data,
       fields: field.fields,
-      filter,
       forceFullValue,
       fullData,
       includeSchema,
@@ -477,7 +472,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         config,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         fields: tab.fields,
-        filter,
         forceFullValue,
         fullData,
         includeSchema,

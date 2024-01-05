@@ -1,8 +1,8 @@
 'use client'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig, Validate } from 'payload/types'
 
 import { getTranslation } from 'payload/utilities'
 import { isFieldRTL } from '../shared'
@@ -22,6 +22,8 @@ export const TextInput: React.FC<{
   rtl?: boolean
   maxLength?: number
   minLength?: number
+  validate?: Validate
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }> = (props) => {
   const {
     path,
@@ -30,29 +32,30 @@ export const TextInput: React.FC<{
     localized,
     localizationConfig,
     rtl,
-    // maxLength,
-    // minLength,
+    maxLength,
+    minLength,
+    validate,
+    required,
+    onKeyDown,
   } = props
 
   const { i18n } = useTranslation()
   const locale = useLocale()
 
-  const {
-    // errorMessage,
-    setValue,
-    // showError,
-    value,
-  } = useField({
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...options, maxLength, minLength, required })
+    },
+    [validate, minLength, maxLength, required],
+  )
+
+  const field = useField({
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, maxLength, minLength, required })
-  //   },
-  //   [validate, minLength, maxLength, required],
-  // )
+  const { setValue, value } = field
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -70,7 +73,7 @@ export const TextInput: React.FC<{
       onChange={(e) => {
         setValue(e.target.value)
       }}
-      // onKeyDown={onKeyDown}
+      onKeyDown={onKeyDown}
       placeholder={getTranslation(placeholder, i18n)}
       // ref={inputRef}
       type="text"

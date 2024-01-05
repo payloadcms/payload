@@ -107,7 +107,7 @@ export const Account = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
+        <HydrateClientUser user={user} permissions={permissions} />
         <RenderCustomComponent
           CustomComponent={
             typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined

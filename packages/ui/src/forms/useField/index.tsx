@@ -102,9 +102,9 @@ const useField = <T,>(options: Options): FieldType<T> => {
         }
 
         let errorMessage: string | undefined
-        let valid: boolean | string = false
+        let valid: boolean | string = prevValid.current
 
-        const validationResult =
+        const isValid =
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
@@ -117,11 +117,11 @@ const useField = <T,>(options: Options): FieldType<T> => {
               })
             : true
 
-        if (typeof validationResult === 'string') {
-          errorMessage = validationResult
+        if (typeof isValid === 'string') {
           valid = false
-        } else {
-          valid = validationResult
+          errorMessage = isValid
+        } else if (typeof isValid === 'boolean') {
+          valid = isValid
           errorMessage = undefined
         }
 

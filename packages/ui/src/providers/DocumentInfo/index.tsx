@@ -2,7 +2,6 @@
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
 
 import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'
 import type { PaginatedDocs } from 'payload/database'
@@ -13,6 +12,7 @@ import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
 import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
+import { useParams } from 'next/navigation'
 
 const Context = createContext({} as ContextType)
 
@@ -21,12 +21,14 @@ export const useDocumentInfo = (): ContextType => useContext(Context)
 export const DocumentInfoProvider: React.FC<Props> = ({
   id: idFromProps,
   children,
-  collection,
-  global,
+  collectionSlug,
+  globalSlug,
   idFromParams: getIDFromParams,
+  draftsEnabled,
+  versionsEnabled,
 }) => {
-  const { id: idFromParams } = useParams<{ id: string }>()
-  const id = idFromProps || (getIDFromParams ? idFromParams : null)
+  const { id: idFromParams } = useParams()
+  const id = idFromProps || (getIDFromParams ? (idFromParams as string) : null)
 
   const {
     routes: { api },
@@ -45,14 +47,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   let pluralType: 'collections' | 'globals'
   let preferencesKey: string
 
-  if (global) {
-    slug = global.slug
+  if (globalSlug) {
+    slug = globalSlug
     pluralType = 'globals'
     preferencesKey = `global-${slug}`
   }
 
-  if (collection) {
-    slug = collection.slug
+  if (collectionSlug) {
+    slug = collectionSlug
     pluralType = 'collections'
 
     if (id) {
@@ -67,8 +69,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
-    let draftsEnabled = false
-    let shouldFetchVersions = false
+    let shouldFetchVersions = versionsEnabled
     let unpublishedVersionJSON = null
     let versionJSON = null
     let shouldFetch = true
@@ -103,19 +104,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       },
     }
 
-    if (global) {
-      draftsEnabled = Boolean(global?.versions?.drafts)
-      shouldFetchVersions = Boolean(global?.versions)
-      versionFetchURL = `${baseURL}/globals/${global.slug}/versions`
-      publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs.stringify(
-        publishedVersionParams,
-      )}`
+    if (globalSlug) {
+      versionFetchURL = `${baseURL}/globals/${globalSlug}/versions`
+      publishedFetchURL = `${baseURL}/globals/${globalSlug}?${qs.stringify(publishedVersionParams)}`
     }
 
-    if (collection) {
-      draftsEnabled = Boolean(collection?.versions?.drafts)
-      shouldFetchVersions = Boolean(collection?.versions)
-      versionFetchURL = `${baseURL}/${collection.slug}/versions`
+    if (collectionSlug) {
+      versionFetchURL = `${baseURL}/${collectionSlug}/versions`
 
       publishedVersionParams.where.and.push({
         id: {
@@ -123,7 +118,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
         },
       })
 
-      publishedFetchURL = `${baseURL}/${collection.slug}?${qs.stringify(publishedVersionParams)}`
+      publishedFetchURL = `${baseURL}/${collectionSlug}?${qs.stringify(publishedVersionParams)}`
 
       if (!id) {
         shouldFetch = false
@@ -147,7 +142,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           },
         }).then((res) => res.json())
 
-        if (collection) {
+        if (collectionSlug) {
           publishedJSON = publishedJSON?.docs?.[0]
         }
       }
@@ -197,7 +192,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, global, collection, id, baseURL, code])
+  }, [i18n, globalSlug, collectionSlug, id, baseURL, code, versionsEnabled, draftsEnabled])
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
@@ -264,18 +259,18 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const value: ContextType = {
     id,
-    slug,
-    collection,
+    collectionSlug,
     docPermissions,
     getDocPermissions,
     getDocPreferences,
     getVersions,
-    global,
+    globalSlug,
     preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
     unpublishedVersions,
-    versions,
+    versionsEnabled,
+    draftsEnabled,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>

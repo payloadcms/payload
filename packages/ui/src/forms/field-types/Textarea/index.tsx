@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { textarea } from 'payload/fields/validations'
 import { getTranslation } from 'payload/utilities'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
@@ -12,6 +11,7 @@ import useField from '../../useField'
 import { isFieldRTL } from '../shared'
 import TextareaInput from './Input'
 import './index.scss'
+import { Validate } from 'payload/types'
 
 const Textarea: React.FC<Props> = (props) => {
   const {
@@ -33,7 +33,7 @@ const Textarea: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    validate = textarea,
+    validate,
   } = props
 
   const { i18n } = useTranslation()
@@ -49,11 +49,13 @@ const Textarea: React.FC<Props> = (props) => {
     locale,
     localizationConfig: localization || undefined,
   })
-  const memoizedValidate = useCallback(
+
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, maxLength, minLength, required })
+      if (typeof validate === 'function')
+        return validate(value, { ...options, maxLength, minLength, required })
     },
-    [validate, required, maxLength, minLength],
+    [validate, required],
   )
 
   const { errorMessage, setValue, showError, value } = useField({

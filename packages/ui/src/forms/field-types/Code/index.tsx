@@ -3,7 +3,6 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { code } from 'payload/fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
@@ -35,7 +34,7 @@ const Code: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = code,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
