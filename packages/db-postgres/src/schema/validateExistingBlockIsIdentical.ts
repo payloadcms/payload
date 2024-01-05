@@ -1,7 +1,7 @@
-import type { Block } from 'payload/types'
+import type { Block, Field } from 'payload/types'
 
 import { InvalidConfiguration } from 'payload/errors'
-import { flattenTopLevelFields } from 'payload/utilities'
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 
 import type { GenericTable } from '../types'
 
@@ -12,6 +12,38 @@ type Args = {
   table: GenericTable
 }
 
+const getFlattenedFieldNames = (fields: Field[], prefix: string = ''): string[] => {
+  return fields.reduce((fieldsToUse, field) => {
+    let fieldPrefix = prefix
+
+    if (fieldHasSubFields(field)) {
+      fieldPrefix = 'name' in field ? `${prefix}${field.name}.` : prefix
+      return [...fieldsToUse, ...getFlattenedFieldNames(field.fields, fieldPrefix)]
+    }
+
+    if (field.type === 'tabs') {
+      return [
+        ...fieldsToUse,
+        ...field.tabs.reduce((tabFields, tab) => {
+          fieldPrefix = 'name' in tab ? `${prefix}.${tab.name}` : prefix
+          return [
+            ...tabFields,
+            ...(tabHasName(tab)
+              ? [{ ...tab, type: 'tab' }]
+              : getFlattenedFieldNames(tab.fields, fieldPrefix)),
+          ]
+        }, []),
+      ]
+    }
+
+    if (fieldAffectsData(field)) {
+      return [...fieldsToUse, `${fieldPrefix?.replace('.', '_') || ''}${field.name}`]
+    }
+
+    return fieldsToUse
+  }, [])
+}
+
 export const validateExistingBlockIsIdentical = ({
   block,
   localized,
@@ -19,7 +51,7 @@ export const validateExistingBlockIsIdentical = ({
   table,
 }: Args): void => {
   if (table) {
-    const fieldNames = flattenTopLevelFields(block.fields).flatMap((field) => field.name)
+    const fieldNames = getFlattenedFieldNames(block.fields)
 
     Object.keys(table).forEach((fieldName) => {
       if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
