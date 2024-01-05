@@ -2,7 +2,6 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
@@ -11,22 +10,17 @@ import { getTranslation } from 'payload/utilities'
 // import { requests } from '../../../api'
 import useTitle from '../../hooks/useTitle'
 import { useForm } from '../../forms/Form/context'
-import { Minimal as MinimalTemplate } from '../../templates/Minimal'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { useConfig } from '../../providers/Config'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
+import { useRouter } from 'next/navigation'
 
 const baseClass = 'delete-document'
 
 const DeleteDocument: React.FC<Props> = (props) => {
-  const {
-    id,
-    buttonId,
-    collection: { labels: { singular } = {}, slug } = {},
-    collection,
-    title: titleFromProps,
-  } = props
+  const { id, buttonId, useAsTitle, collectionSlug, singularLabel, title: titleFromProps } = props
 
   const {
     routes: { admin, api },
@@ -36,9 +30,12 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)
   const { toggleModal } = useModal()
-  const history = useHistory()
+  const history = useRouter()
   const { i18n, t } = useTranslation('general')
-  const title = useTitle({ collection })
+  const title = useTitle({
+    useAsTitle,
+  })
+
   const titleToRender = titleFromProps || title || id
 
   const modalSlug = `delete-${id}`
@@ -86,12 +83,12 @@ const DeleteDocument: React.FC<Props> = (props) => {
     setModified,
     serverURL,
     api,
-    slug,
+    collectionSlug,
     id,
     toggleModal,
     modalSlug,
     t,
-    singular,
+    singularLabel,
     i18n,
     title,
     history,
@@ -118,7 +115,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
               <Trans
                 i18nKey="aboutToDelete"
                 t={t}
-                values={{ label: getTranslation(singular, i18n), title: titleToRender }}
+                values={{ label: getTranslation(singularLabel, i18n), title: titleToRender }}
               >
                 aboutToDelete
                 <strong>{titleToRender}</strong>

@@ -49,6 +49,7 @@ export const DocumentControls: React.FC<{
     isEditing,
     permissions,
   } = props
+  console.log(props)
 
   const {
     admin: { dateFormat },
@@ -221,25 +222,31 @@ export const DocumentControls: React.FC<{
               <PopupList.ButtonGroup>
                 {hasCreatePermission && (
                   <React.Fragment>
-                    {/* <PopupList.Button
+                    <PopupList.Button
                       id="action-create"
                       to={`${adminRoute}/collections/${collectionConfig?.slug}/create`}
                     >
-                      {t('createNew')}
-                    </PopupList.Button> */}
-
-                    {/* {!collectionConfig?.admin?.disableDuplicate && isEditing && (
+                      Create New
+                      {/* {t('createNew')} */}
+                    </PopupList.Button>
+                    {!collectionConfig?.admin?.disableDuplicate && isEditing && (
                       <DuplicateDocument
-                        collection={collectionConfig}
+                        singularLabel={collectionConfig?.labels?.singular}
                         id={id}
                         slug={collectionConfig?.slug}
                       />
-                    )} */}
+                    )}
                   </React.Fragment>
                 )}
-                {/* {hasDeletePermission && (
-                  <DeleteDocument buttonId="action-delete" collection={collectionConfig} id={id} />
-                )} */}
+                {hasDeletePermission && (
+                  <DeleteDocument
+                    buttonId="action-delete"
+                    collectionSlug={collectionConfig?.slug}
+                    useAsTitle={collectionConfig?.admin?.useAsTitle}
+                    singularLabel={collectionConfig?.labels?.singular}
+                    id={id}
+                  />
+                )}
               </PopupList.ButtonGroup>
             </Popup>
           )}
