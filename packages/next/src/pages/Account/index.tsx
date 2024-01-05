@@ -2,9 +2,7 @@ import { SanitizedConfig, TypeWithID } from 'payload/types'
 import React, { Fragment } from 'react'
 import {
   RenderCustomComponent,
-  DefaultAccount,
   HydrateClientUser,
-  DefaultAccountViewProps,
   buildStateFromSchema,
   findLocaleFromCode,
   formatFields,
@@ -12,6 +10,7 @@ import {
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
+import { DefaultAccount, DefaultAccountViewProps } from './Default'
 
 export const Account = async ({
   config: configPromise,
@@ -99,10 +98,12 @@ export const Account = async ({
       data,
       fieldTypes,
       hasSavePermission: collectionPermissions?.update?.permission,
-      initialState: state,
+      state,
       onSave: () => {},
-      isLoading: false,
       permissions: collectionPermissions,
+      user,
+      updatedAt: '', // TODO
+      id: user?.id,
     }
 
     return (

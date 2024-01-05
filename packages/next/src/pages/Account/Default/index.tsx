@@ -1,17 +1,17 @@
 import React from 'react'
 
-import type { FieldTypes } from '../../forms/field-types'
-import type { CollectionEditViewProps } from '../types'
+import type { FieldTypes, CollectionEditViewProps } from '@payloadcms/ui'
 
-import { DocumentControls } from '../../elements/DocumentControls'
-import { DocumentFields } from '../../elements/DocumentFields'
-import { DocumentHeader } from '../../elements/DocumentHeader'
-import { LoadingOverlayToggle } from '../../elements/Loading'
-import Form from '../../forms/Form'
-import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
-// import Meta from '../../utilities/Meta'
-import { OperationProvider } from '../../providers/OperationProvider'
-import Auth from '../Edit/Auth'
+import {
+  DocumentControls,
+  DocumentFields,
+  DocumentHeader,
+  // LoadingOverlayToggle,
+  Form,
+  LeaveWithoutSaving,
+  OperationProvider,
+  Auth,
+} from '@payloadcms/ui'
 import { Settings } from './Settings'
 import './index.scss'
 
@@ -30,9 +30,10 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
     data,
     fieldTypes,
     hasSavePermission,
-    initialState,
+    state,
     onSave: onSaveFromProps,
     permissions,
+    user,
   } = props
 
   const { auth, fields } = collectionConfig
@@ -58,7 +59,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
         <Form
           action={action}
           disabled={!hasSavePermission}
-          initialState={initialState}
+          initialState={state}
           method="PATCH"
           // onSuccess={onSave}
         >
@@ -96,6 +97,9 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
             fields={fields}
             hasSavePermission={hasSavePermission}
             permissions={permissions}
+            data={data}
+            state={state}
+            user={user}
           />
         </Form>
       </OperationProvider>
