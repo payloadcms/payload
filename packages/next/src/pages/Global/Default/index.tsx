@@ -1,11 +1,16 @@
 import React from 'react'
 
-import { FormLoadingOverlayToggle } from '../../elements/Loading'
-import Form from '../../forms/Form'
+import {
+  FormLoadingOverlayToggle,
+  Form,
+  OperationProvider,
+  DocumentFields,
+  DocumentControls,
+  SetDocumentStepNav as SetStepNav,
+  LeaveWithoutSaving,
+} from '@payloadcms/ui'
 // import { useActions } from '../../providers/ActionsProvider'
-import { OperationProvider } from '../../providers/OperationProvider'
 import './index.scss'
-import { RenderCustomView } from './RenderCustomView'
 import { DefaultGlobalViewProps } from './types'
 
 const baseClass = 'global-edit'
@@ -23,11 +28,14 @@ export const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
     state,
     // onSave,
     permissions,
+    fieldTypes,
+    config,
+    user,
   } = props
 
   // const { setViewActions } = useActions()
 
-  const { label } = globalConfig
+  const { admin: { description } = {}, fields, label } = globalConfig
 
   // const onSave = useCallback(
   //   async (json) => {
@@ -102,7 +110,30 @@ export const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
             // loadingSuffix={getTranslation(label, i18n)}
             name={`global-edit--${typeof label === 'string' ? label : label?.en}`}
           />
-          <RenderCustomView {...props} view="Default" />
+
+          {!(globalConfig.versions?.drafts && globalConfig.versions?.drafts?.autosave) && (
+            <LeaveWithoutSaving />
+          )}
+          <SetStepNav globalSlug={globalConfig.slug} globalLabel={label} />
+          <DocumentControls
+            apiURL={apiURL}
+            data={data}
+            config={config}
+            globalConfig={globalConfig}
+            hasSavePermission={hasSavePermission}
+            isEditing
+            permissions={permissions}
+          />
+          <DocumentFields
+            description={description}
+            fieldTypes={fieldTypes}
+            fields={fields}
+            hasSavePermission={hasSavePermission}
+            permissions={permissions}
+            user={user}
+            state={state}
+            data={data}
+          />
         </Form>
       </OperationProvider>
     </main>

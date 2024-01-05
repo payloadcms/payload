@@ -4,9 +4,7 @@ import { initPage } from '../../utilities/initPage'
 import {
   EditDepthProvider,
   RenderCustomComponent,
-  DefaultGlobalViewProps,
   findLocaleFromCode,
-  DefaultGlobalView,
   fieldTypes,
   buildStateFromSchema,
   formatFields,
@@ -18,6 +16,8 @@ import {
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
+import { DefaultGlobalView } from './Default'
+import { DefaultGlobalViewProps } from './Default/types'
 // import i18n from 'i18next'
 // import { getTranslation } from 'payload/utilities'
 
