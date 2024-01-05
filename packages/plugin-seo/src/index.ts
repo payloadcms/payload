@@ -17,6 +17,7 @@ const seo =
     const seoFields: GroupField[] = [
       {
         name: 'meta',
+        interfaceName: pluginConfig.interfaceName ?? 'meta',
         fields: [
           {
             name: 'overview',
@@ -28,6 +29,7 @@ const seo =
             label: 'Overview',
             type: 'ui',
           },
+          // @ts-ignore
           {
             name: 'title',
             admin: {
@@ -37,6 +39,7 @@ const seo =
             },
             localized: true,
             type: 'text',
+            ...(pluginConfig?.fieldOverrides?.title ?? {}),
           },
           {
             name: 'description',
@@ -47,6 +50,7 @@ const seo =
             },
             localized: true,
             type: 'textarea',
+            ...(pluginConfig?.fieldOverrides?.description ?? {}),
           },
           ...(pluginConfig?.uploadsCollection
             ? [
@@ -64,6 +68,7 @@ const seo =
                   localized: true,
                   relationTo: pluginConfig?.uploadsCollection,
                   type: 'upload',
+                  ...(pluginConfig?.fieldOverrides?.image ?? {}),
                 } as Field,
               ]
             : []),
