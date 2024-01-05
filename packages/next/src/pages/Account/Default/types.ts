@@ -1,7 +1,6 @@
 import type { CollectionPermission } from 'payload/auth'
 import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
-import type { Data, Fields } from '../../forms/Form/types'
-import { FieldTypes } from '../../forms/field-types'
+import type { Data, Fields, FieldTypes } from '@payloadcms/ui'
 
 export type DefaultAccountViewProps = {
   action: string

@@ -2,11 +2,8 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { OnChange } from '../../../forms/field-types/RadioGroup/types'
-import type { Theme } from '../../../providers/Theme/types'
-
-import RadioGroupInput from '../../../forms/field-types/RadioGroup/Input'
-import { useTheme } from '../../../providers/Theme'
+import type { OnChange, Theme } from '@payloadcms/ui'
+import { useTheme, RadioGroupInput } from '@payloadcms/ui'
 
 export const ToggleTheme: React.FC = () => {
   const {

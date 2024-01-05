@@ -17,6 +17,8 @@ export type CollectionEditViewProps = BaseEditViewProps & {
   state?: Fields
   isEditing?: boolean
   permissions: CollectionPermission | null
+  data: Document
+  user: User
 }
 
 export type GlobalEditViewProps = BaseEditViewProps & {
