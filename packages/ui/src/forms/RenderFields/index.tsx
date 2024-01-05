@@ -56,6 +56,8 @@ const RenderFields: React.FC<Props> = (props) => {
             permissions: fieldPermissions,
             data,
             user,
+            valid: fieldState?.valid,
+            errorMessage: fieldState?.errorMessage,
           }
 
           if (field) {

@@ -2,7 +2,6 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
@@ -10,16 +9,17 @@ import type { Props } from './types'
 import { getTranslation } from 'payload/utilities'
 // import { requests } from '../../../api'
 import { useForm, useFormModified } from '../../forms/Form/context'
-import { Minimal as MinimalTemplate } from '../../templates/Minimal'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { useConfig } from '../../providers/Config'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
+import { useRouter } from 'next/navigation'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
-  const { push } = useHistory()
+const Duplicate: React.FC<Props> = ({ id, slug, singularLabel }) => {
+  const { push } = useRouter()
   const modified = useFormModified()
   const { toggleModal } = useModal()
   const { setModified } = useForm()
@@ -66,13 +66,14 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
 
         // let data = await response.json()
 
-        if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
-          data = await collection.admin.hooks.beforeDuplicate({
-            collection,
-            data,
-            locale,
-          })
-        }
+        // TODO: convert this into a server action
+        // if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
+        //   data = await collection.admin.hooks.beforeDuplicate({
+        //     collection,
+        //     data,
+        //     locale,
+        //   })
+        // }
 
         if (!duplicateID) {
           if ('createdAt' in data) delete data.createdAt
@@ -133,10 +134,9 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         return
       }
 
-      toast.success(
-        t('successfullyDuplicated', { label: getTranslation(collection.labels.singular, i18n) }),
-        { autoClose: 3000 },
-      )
+      toast.success(t('successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }), {
+        autoClose: 3000,
+      })
 
       if (localeErrors.length > 0) {
         toast.error(
@@ -151,9 +151,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       setModified(false)
 
       setTimeout(() => {
-        push({
-          pathname: `${admin}/collections/${slug}/${duplicateID}`,
-        })
+        push(`${admin}/collections/${slug}/${duplicateID}`)
       }, 10)
     },
     [
@@ -161,7 +159,6 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       localization,
       t,
       i18n,
-      collection,
       setModified,
       toggleModal,
       modalSlug,

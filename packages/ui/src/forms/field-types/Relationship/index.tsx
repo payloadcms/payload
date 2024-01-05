@@ -8,7 +8,6 @@ import type { Where } from 'payload/types'
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
 import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types'
 
-import { relationship } from 'payload/fields/validations'
 import { wordBoundariesRegex } from 'payload/utilities'
 import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback'
 import ReactSelect from '../../../elements/ReactSelect'
@@ -55,7 +54,7 @@ const Relationship: React.FC<Props> = (props) => {
     path,
     relationTo,
     required,
-    validate = relationship,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -94,7 +93,6 @@ const Relationship: React.FC<Props> = (props) => {
   )
 
   const { errorMessage, initialValue, setValue, showError, value } = useField<Value | Value[]>({
-    condition,
     path: pathOrName,
     validate: memoizedValidate,
   })

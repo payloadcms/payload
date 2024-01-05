@@ -28,14 +28,18 @@ export const LoginForm: React.FC<{
       action={`${api}/${userSlug}/login`}
       className={`${baseClass}__form`}
       disableSuccessStatus
-      initialData={
-        prefillForm
-          ? {
-              email: autoLogin.email,
-              password: autoLogin.password,
-            }
-          : undefined
-      }
+      initialState={{
+        email: {
+          initialValue: prefillForm ? autoLogin.email : undefined,
+          value: prefillForm ? autoLogin.email : undefined,
+          valid: true,
+        },
+        password: {
+          initialValue: prefillForm ? autoLogin.password : undefined,
+          value: prefillForm ? autoLogin.password : undefined,
+          valid: true,
+        },
+      }}
       method="POST"
       redirect={`${admin}${searchParams?.redirect || ''}`}
       waitForAutocomplete

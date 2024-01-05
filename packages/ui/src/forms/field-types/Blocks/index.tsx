@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { blocks as blocksValidator } from 'payload/fields/validations'
 import { getTranslation } from 'payload/utilities'
 import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
@@ -34,7 +33,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     name,
-    admin: { className, condition, description, readOnly },
+    admin: { className, description, readOnly },
     blocks,
     fieldTypes,
     forceRender = false,
@@ -47,7 +46,7 @@ const BlocksField: React.FC<Props> = (props) => {
     path: pathFromProps,
     permissions,
     required,
-    validate = blocksValidator,
+    validate,
   } = props
 
   const path = pathFromProps || name
@@ -92,7 +91,6 @@ const BlocksField: React.FC<Props> = (props) => {
     valid,
     value,
   } = useField<number>({
-    condition,
     hasRows: true,
     path,
     validate: memoizedValidate,

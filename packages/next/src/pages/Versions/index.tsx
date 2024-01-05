@@ -5,6 +5,7 @@ import { DefaultVersionsView } from './Default'
 import { SanitizedConfig } from 'payload/types'
 import { initPage } from '../../utilities/initPage'
 import { DefaultVersionsViewProps } from './Default/types'
+import { notFound } from 'next/navigation'
 
 export const VersionsView = async ({
   collectionSlug,
@@ -46,28 +47,40 @@ export const VersionsView = async ({
   let versionsData
 
   if (collectionSlug) {
-    data = await payload.findByID({
-      collection: collectionSlug,
-      id,
-      depth: 0,
-      user,
-      // draft: true,
-    })
+    try {
+      data = await payload.findByID({
+        collection: collectionSlug,
+        id,
+        depth: 0,
+        user,
+        // draft: true,
+      })
+    } catch (error) {
+      console.error(error)
+    }
 
-    versionsData = await payload.findVersions({
-      collection: collectionSlug,
-      depth: 0,
-      user,
-      page: page ? parseInt(page as string, 10) : undefined,
-      sort: sort as string,
-      // TODO: why won't this work?!
-      // throws an `unsupported BSON` error
-      // where: {
-      //   parent: {
-      //     equals: id,
-      //   },
-      // },
-    })
+    if (!data) {
+      return notFound()
+    }
+
+    try {
+      versionsData = await payload.findVersions({
+        collection: collectionSlug,
+        depth: 0,
+        user,
+        page: page ? parseInt(page as string, 10) : undefined,
+        sort: sort as string,
+        // TODO: why won't this work?!
+        // throws an `unsupported BSON` error
+        // where: {
+        //   parent: {
+        //     equals: id,
+        //   },
+        // },
+      })
+    } catch (error) {
+      console.error(error)
+    }
 
     docURL = `${serverURL}${api}/${slug}/${id}`
     // entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
@@ -97,25 +110,41 @@ export const VersionsView = async ({
   }
 
   if (globalSlug) {
-    data = await payload.findGlobal({
-      slug: globalSlug,
-      depth: 0,
-      user,
-      // draft: true,
-    })
+    try {
+      data = await payload.findGlobal({
+        slug: globalSlug,
+        depth: 0,
+        user,
+        // draft: true,
+      })
+    } catch (error) {
+      console.error(error)
+    }
 
-    versionsData = await payload.findGlobalVersions({
-      slug: globalSlug,
-      depth: 0,
-      user,
-      page: page ? parseInt(page as string, 10) : undefined,
-      sort: sort as string,
-      where: {
-        parent: {
-          equals: id,
+    if (!data) {
+      return notFound()
+    }
+
+    try {
+      versionsData = await payload.findGlobalVersions({
+        slug: globalSlug,
+        depth: 0,
+        user,
+        page: page ? parseInt(page as string, 10) : undefined,
+        sort: sort as string,
+        where: {
+          parent: {
+            equals: id,
+          },
         },
-      },
-    })
+      })
+    } catch (error) {
+      console.error(error)
+    }
+
+    if (!versionsData) {
+      return notFound()
+    }
 
     docURL = `${serverURL}${api}/globals/${globalSlug}`
     // entityLabel = getTranslation(globalConfig.label, i18n)

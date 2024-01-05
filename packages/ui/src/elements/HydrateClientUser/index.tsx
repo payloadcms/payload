@@ -2,13 +2,18 @@
 
 import { useEffect } from 'react'
 import { useAuth } from '../../providers/Auth'
+import { Permissions, User } from 'payload/auth'
 
-export const HydrateClientUser: React.FC<{ user: any }> = ({ user }) => {
-  const { setUser } = useAuth()
+export const HydrateClientUser: React.FC<{ user: User; permissions: Permissions }> = ({
+  user,
+  permissions,
+}) => {
+  const { setUser, setPermissions } = useAuth()
 
   useEffect(() => {
     setUser(user)
-  }, [user])
+    setPermissions(permissions)
+  }, [user, permissions, setUser, setPermissions])
 
   return null
 }

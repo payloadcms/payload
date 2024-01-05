@@ -11,25 +11,29 @@ export type Version = TypeWithVersion<any>
 export type DocumentPermissions = CollectionPermission | GlobalPermission | null
 
 export type ContextType = {
-  collection?: SanitizedCollectionConfig
+  collectionSlug?: SanitizedCollectionConfig['slug']
   docPermissions: DocumentPermissions
   getDocPermissions: () => Promise<void>
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
   getVersions: () => Promise<void>
-  global?: SanitizedGlobalConfig
+  globalSlug?: SanitizedGlobalConfig['slug']
   id?: number | string
   preferencesKey?: string
   publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   slug?: string
   unpublishedVersions?: PaginatedDocs<Version>
-  versions?: PaginatedDocs<Version>
+  versionsCount?: PaginatedDocs<Version>
+  draftsEnabled?: boolean
+  versionsEnabled?: boolean
 }
 
 export type Props = {
   children?: React.ReactNode
-  collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
+  collectionSlug?: SanitizedCollectionConfig['slug']
+  globalSlug?: SanitizedGlobalConfig['slug']
   id?: number | string
   idFromParams?: boolean
+  draftsEnabled?: boolean
+  versionsEnabled?: boolean
 }

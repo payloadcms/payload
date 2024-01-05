@@ -4,7 +4,7 @@ import { DocumentLayout } from '@payloadcms/next/layouts/Document'
 import configPromise from 'payload-config'
 
 export default async ({ children, params }: { children: React.ReactNode; params }) => (
-  <DocumentLayout config={configPromise} collectionSlug={params.collection} id={params.id}>
+  <DocumentLayout config={configPromise} collectionSlug={params.collection}>
     {children}
   </DocumentLayout>
 )

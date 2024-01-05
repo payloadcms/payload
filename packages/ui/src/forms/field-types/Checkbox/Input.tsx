@@ -1,10 +1,10 @@
 'use client'
-import React, { useCallback } from 'react'
+import React, { Fragment, useCallback } from 'react'
 
-import './index.scss'
 import useField from '../../useField'
-
-const baseClass = 'checkbox-input'
+import { Validate } from 'payload/types'
+import { Check } from '../../../icons/Check'
+import { Line } from '../../../icons/Line'
 
 type CheckboxInputProps = {
   'aria-label'?: string
@@ -15,10 +15,12 @@ type CheckboxInputProps = {
   label?: string
   name?: string
   onChange?: (value: boolean) => void
-  partialChecked?: boolean
   readOnly?: boolean
   required?: boolean
   path: string
+  validate?: Validate
+  partialChecked?: boolean
+  iconClassName?: string
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
@@ -28,24 +30,27 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     'aria-label': ariaLabel,
     checked: checkedFromProps,
     className,
+    iconClassName,
     inputRef,
     onChange: onChangeFromProps,
     readOnly,
     required,
     path,
+    validate,
+    partialChecked,
   } = props
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, required })
-  //   },
-  //   [validate, required],
-  // )
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
-  const { errorMessage, setValue, showError, value } = useField({
+  const { setValue, value } = useField({
     // disableFormData,
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   const onToggle = useCallback(() => {
@@ -58,17 +63,27 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
   const checked = checkedFromProps || Boolean(value)
 
   return (
-    <input
-      className={className}
-      aria-label={ariaLabel}
-      defaultChecked={checked}
-      disabled={readOnly}
-      id={id}
-      name={name}
-      onInput={onToggle}
-      ref={inputRef}
-      type="checkbox"
-      required={required}
-    />
+    <Fragment>
+      <input
+        className={className}
+        aria-label={ariaLabel}
+        defaultChecked={Boolean(checked)}
+        disabled={readOnly}
+        id={id}
+        name={name}
+        onInput={onToggle}
+        ref={inputRef}
+        type="checkbox"
+        required={required}
+      />
+      <span
+        className={[iconClassName, !value && partialChecked ? 'check' : 'partial']
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {value && <Check />}
+        {!value && partialChecked && <Line />}
+      </span>
+    </Fragment>
   )
 }

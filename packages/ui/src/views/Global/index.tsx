@@ -20,7 +20,7 @@ export const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
     // disableRoutes,
     // fieldTypes,
     globalConfig,
-    initialState,
+    state,
     // onSave,
     permissions,
   } = props
@@ -93,7 +93,7 @@ export const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
           action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
-          initialState={initialState}
+          initialState={state}
           method="POST"
           // onSuccess={onSave}
         >

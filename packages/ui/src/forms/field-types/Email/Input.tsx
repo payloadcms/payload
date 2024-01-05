@@ -1,10 +1,11 @@
 'use client'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import useField from '../../useField'
 import './index.scss'
 import { getTranslation } from 'payload/utilities'
+import { Validate } from 'payload/types'
 
 export const EmailInput: React.FC<{
   name: string
@@ -13,6 +14,7 @@ export const EmailInput: React.FC<{
   path: string
   required?: boolean
   placeholder?: Record<string, string> | string
+  validate?: Validate
 }> = (props) => {
   const {
     name,
@@ -20,7 +22,7 @@ export const EmailInput: React.FC<{
     readOnly,
     path: pathFromProps,
     required,
-    // validate = email,
+    validate,
     placeholder,
   } = props
 
@@ -28,12 +30,12 @@ export const EmailInput: React.FC<{
 
   const path = pathFromProps || name
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, required })
-  //   },
-  //   [validate, required],
-  // )
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const {
     // errorMessage,
@@ -42,7 +44,7 @@ export const EmailInput: React.FC<{
     value,
   } = useField({
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   return (

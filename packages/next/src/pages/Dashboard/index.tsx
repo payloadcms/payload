@@ -11,13 +11,13 @@ export const Dashboard = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, user } = await initPage(configPromise, true)
+  const { config, user, permissions } = await initPage(configPromise, true)
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 
   return (
     <Fragment>
-      <HydrateClientUser user={user} />
+      <HydrateClientUser user={user} permissions={permissions} />
       <RenderCustomComponent
         CustomComponent={
           typeof CustomDashboardComponent === 'function' ? CustomDashboardComponent : undefined
