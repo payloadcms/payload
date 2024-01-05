@@ -15,13 +15,11 @@ export const DocumentLayout = async ({
   config: configPromise,
   collectionSlug,
   globalSlug,
-  id,
 }: {
   children: React.ReactNode
   config: Promise<SanitizedConfig>
   collectionSlug?: string
   globalSlug?: string
-  id?: string
 }) => {
   const { user, permissions, config } = await initPage(configPromise)
 
@@ -36,14 +34,9 @@ export const DocumentLayout = async ({
   return (
     <Fragment>
       <DocumentHeader
-        // apiURL={apiURL}
         config={config}
         collectionConfig={collectionConfig}
         globalConfig={globalConfig}
-        // customHeader={customHeader}
-        // data={data}
-        id={id}
-        // isEditing={isEditing}
       />
       {children}
     </Fragment>

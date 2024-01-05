@@ -13,6 +13,7 @@ import {
   FormQueryParamsProvider,
   QueryParamTypes,
   HydrateClientUser,
+  DocumentInfoProvider,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
@@ -136,15 +137,22 @@ export const Global = async ({
     return (
       <Fragment>
         <HydrateClientUser user={user} />
-        <EditDepthProvider depth={1}>
-          <FormQueryParamsProvider formQueryParams={formQueryParams}>
-            <RenderCustomComponent
-              CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
-              DefaultComponent={DefaultGlobalView}
-              componentProps={componentProps}
-            />
-          </FormQueryParamsProvider>
-        </EditDepthProvider>
+        <DocumentInfoProvider
+          collectionSlug={globalConfig.slug}
+          key={`${globalSlug}-${locale}`}
+          versionsEnabled={Boolean(globalConfig.versions)}
+          draftsEnabled={Boolean(globalConfig.versions?.drafts)}
+        >
+          <EditDepthProvider depth={1}>
+            <FormQueryParamsProvider formQueryParams={formQueryParams}>
+              <RenderCustomComponent
+                CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
+                DefaultComponent={DefaultGlobalView}
+                componentProps={componentProps}
+              />
+            </FormQueryParamsProvider>
+          </EditDepthProvider>
+        </DocumentInfoProvider>
       </Fragment>
     )
   }
