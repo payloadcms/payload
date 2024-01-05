@@ -8,10 +8,9 @@ import type { Props as UploadInputProps } from 'payload/components/fields/Upload
 import { UploadInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
-
-import { useTranslation } from 'react-i18next'
 
 import { Pill } from '../ui/Pill'
 

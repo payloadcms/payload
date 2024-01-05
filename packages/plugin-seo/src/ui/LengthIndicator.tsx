@@ -1,7 +1,6 @@
 'use client'
 
 import React, { Fragment, useEffect, useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 
 import { Pill } from './Pill'
@@ -73,7 +72,7 @@ export const LengthIndicator: React.FC<{
         setBarWidth(1)
       }
     }
-  }, [minLength, maxLength, text])
+  }, [minLength, maxLength, text, t])
 
   const textLength = text?.length || 0
 
@@ -98,7 +97,7 @@ export const LengthIndicator: React.FC<{
         }}
       >
         <small>
-          {t('characterCount', { current: text?.length || 0, minLength, maxLength })}
+          {t('characterCount', { current: text?.length || 0, maxLength, minLength })}
           {(textLength === 0 || charsUntilMin > 0) && (
             <Fragment>{t('charactersToGo', { characters: charsUntilMin })}</Fragment>
           )}
