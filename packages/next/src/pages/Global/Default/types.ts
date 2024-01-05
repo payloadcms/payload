@@ -1,6 +1,5 @@
 import type { SanitizedGlobalConfig } from 'payload/types'
-import { GlobalEditViewProps } from '../types'
-import { FieldTypes } from '../../forms/field-types'
+import type { GlobalEditViewProps, FieldTypes } from '@payloadcms/ui'
 
 export type IndexProps = {
   global: SanitizedGlobalConfig
