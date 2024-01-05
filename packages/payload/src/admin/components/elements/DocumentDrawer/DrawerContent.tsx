@@ -15,7 +15,6 @@ import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
 import X from '../../icons/X'
-import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -190,11 +189,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   const { id: idFromProps, collectionSlug, onSave: onSaveFromProps } = props
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const [id, setId] = useState<null | string>(idFromProps)
-  const { setDocumentInfo } = useActions()
-
-  useEffect(() => {
-    setDocumentInfo({ id, collection: collectionConfig })
-  }, [setDocumentInfo, id, collectionConfig])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {

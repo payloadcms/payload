@@ -10,7 +10,6 @@ import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { useStepNav } from '../../elements/StepNav'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'
-import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
@@ -46,11 +45,6 @@ const AccountView: React.FC = () => {
   } = useConfig()
 
   const { t } = useTranslation('authentication')
-
-  const { setDocumentInfo } = useActions()
-  useEffect(() => {
-    setDocumentInfo({ id, collection: collection })
-  }, [collection, setDocumentInfo, id])
 
   const { fields } = collection || {}
 
@@ -123,9 +117,7 @@ const AccountView: React.FC = () => {
       setInternalState(state)
     }
 
-    if (dataToRender) {
-      void awaitInternalState()
-    }
+    if (dataToRender) awaitInternalState()
   }, [
     dataToRender,
     fields,

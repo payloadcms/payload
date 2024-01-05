@@ -12,7 +12,6 @@ import type { IndexProps } from './types'
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../../forms/field-types'
-import { useActions } from '../../../utilities/ActionsProvider'
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { useDocumentInfo } from '../../../utilities/DocumentInfo'
@@ -63,11 +62,6 @@ const EditView: React.FC<IndexProps> = (props) => {
     isEditing ? `${serverURL}${api}/${collectionSlug}/${id}` : '',
     { initialData: null, initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
-
-  const { setDocumentInfo } = useActions()
-  useEffect(() => {
-    setDocumentInfo({ id, collection: collection })
-  }, [id, collection, setDocumentInfo])
 
   const buildState = useCallback(
     async (doc, overrides?: Partial<Parameters<typeof buildStateFromSchema>[0]>) => {
