@@ -50,7 +50,7 @@ import reduceFieldsToValues from './reduceFieldsToValues'
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
-  const { id, collection, getDocPreferences, global } = useDocumentInfo()
+  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
 
   const {
     action,
@@ -58,7 +58,8 @@ const Form: React.FC<Props> = (props) => {
     className,
     disableSuccessStatus,
     disabled,
-    fields: fieldsFromProps = collection?.fields || global?.fields,
+    fields: fieldsFromProps,
+    // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
     method,

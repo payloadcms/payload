@@ -45,7 +45,7 @@ export const addFieldStatePromise = async ({
   user,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
-    const validate = field.validate
+    const validate = operation === 'update' ? field.validate : undefined
 
     const fieldState: FormField = {
       initialValue: undefined,

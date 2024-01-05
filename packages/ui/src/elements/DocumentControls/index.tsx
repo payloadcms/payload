@@ -49,7 +49,6 @@ export const DocumentControls: React.FC<{
     isEditing,
     permissions,
   } = props
-  console.log(props)
 
   const {
     admin: { dateFormat },
@@ -71,6 +70,10 @@ export const DocumentControls: React.FC<{
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
+                  Creating new{' '}
+                  {typeof collectionConfig?.labels?.singular === 'string'
+                    ? collectionConfig.labels.singular
+                    : 'Doc'}
                   {/* {t('creatingNewLabel', {
                     label:
                       typeof collectionConfig?.labels?.singular === 'string'
