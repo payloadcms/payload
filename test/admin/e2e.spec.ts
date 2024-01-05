@@ -253,6 +253,13 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
+    test('collection - sidebar fields should respond to permission', async () => {
+      const { id } = await createPost()
+      await page.goto(url.edit(id))
+
+      await expect(page.locator('#field-sidebarField')).toBeDisabled()
+    })
+
     test('global - should not show API tab when disabled in config', async () => {
       await page.goto(url.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')

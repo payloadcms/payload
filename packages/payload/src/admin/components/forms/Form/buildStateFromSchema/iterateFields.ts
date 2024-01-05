@@ -47,7 +47,7 @@ export const iterateFields = async ({
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
       const passesCondition = Boolean(
         (field?.admin?.condition
-          ? field.admin.condition(fullData || {}, initialData || {}, { user })
+          ? Boolean(field.admin.condition(fullData || {}, initialData || {}, { user }))
           : true) && parentPassesCondition,
       )
 

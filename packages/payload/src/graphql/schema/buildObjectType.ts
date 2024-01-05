@@ -508,7 +508,7 @@ function buildObjectType({
           const interfaceName =
             tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true))
 
-          if (!payload.types.tabTypes[interfaceName]) {
+          if (!payload.types.groupTypes[interfaceName]) {
             const objectType = buildObjectType({
               name: interfaceName,
               fields: tab.fields,
@@ -518,14 +518,18 @@ function buildObjectType({
             })
 
             if (Object.keys(objectType.getFields()).length) {
-              return {
-                ...tabSchema,
-                [tab.name]: { type: objectType },
-              }
+              payload.types.groupTypes[interfaceName] = objectType
             }
           }
 
-          return tabSchema
+          if (!payload.types.groupTypes[interfaceName]) {
+            return tabSchema
+          }
+
+          return {
+            ...tabSchema,
+            [tab.name]: { type: payload.types.groupTypes[interfaceName] },
+          }
         }
 
         return {
@@ -539,7 +543,13 @@ function buildObjectType({
       }, objectTypeConfig),
     text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+      [field.name]: {
+        type: withNullableType(
+          field,
+          field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
+          forceNullable,
+        ),
+      },
     }),
     textarea: (objectTypeConfig: ObjectTypeConfig, field: TextareaField) => ({
       ...objectTypeConfig,
