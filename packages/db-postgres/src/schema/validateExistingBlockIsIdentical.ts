@@ -16,6 +16,10 @@ const getFlattenedFieldNames = (fields: Field[], prefix: string = ''): string[] 
   return fields.reduce((fieldsToUse, field) => {
     let fieldPrefix = prefix
 
+    if (field.type === 'blocks') {
+      return fieldsToUse
+    }
+
     if (fieldHasSubFields(field)) {
       fieldPrefix = 'name' in field ? `${prefix}${field.name}.` : prefix
       return [...fieldsToUse, ...getFlattenedFieldNames(field.fields, fieldPrefix)]
@@ -53,15 +57,21 @@ export const validateExistingBlockIsIdentical = ({
   if (table) {
     const fieldNames = getFlattenedFieldNames(block.fields)
 
-    Object.keys(table).forEach((fieldName) => {
-      if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
-        if (fieldNames.indexOf(fieldName) === -1) {
-          throw new InvalidConfiguration(
-            `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${fieldName}, while the other block does not.`,
-          )
+    const missingField =
+      // ensure every field from the config is in the matching table
+      fieldNames.find((name) => Object.keys(table).indexOf(name) === -1) ||
+      // ensure every table column is matched for every field from the config
+      Object.keys(table).find((fieldName) => {
+        if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
+          return fieldNames.indexOf(fieldName) === -1
         }
-      }
-    })
+      })
+
+    if (missingField) {
+      throw new InvalidConfiguration(
+        `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${missingField}, while the other block does not.`,
+      )
+    }
 
     if (Boolean(localized) !== Boolean(table._locale)) {
       throw new InvalidConfiguration(
