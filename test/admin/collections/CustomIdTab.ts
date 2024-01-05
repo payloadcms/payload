@@ -1,12 +1,12 @@
-import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
+import type { CollectionConfig } from 'payload/dist/collections/config/types'
 
 import { customIdCollectionSlug } from '../slugs'
 
-export const CustomId: CollectionConfig = {
-  slug: customIdCollectionSlug,
+export const CustomIdTab: CollectionConfig = {
+  slug: 'customIdTab',
   labels: {
-    singular: 'Custom Id',
-    plural: 'Custom Ids',
+    singular: 'Custom Id Tab',
+    plural: 'Custom Ids Tab',
   },
   admin: {
     description: 'Description',

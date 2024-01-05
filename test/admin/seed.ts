@@ -67,7 +67,14 @@ export async function clearAndSeedEverything(_payload: Payload) {
           data: {},
         }),
         _payload.create({
-          collection: customIdCollectionSlug,
+          collection: 'customIdTab',
+          data: {
+            id: customIdCollectionId,
+            title: 'Hello world title',
+          },
+        }),
+        _payload.create({
+          collection: 'customIdRow',
           data: {
             id: customIdCollectionId,
             title: 'Hello world title',
