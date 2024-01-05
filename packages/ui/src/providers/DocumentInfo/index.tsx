@@ -214,7 +214,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     } else {
       // fallback to permissions from the entity type
       // (i.e. create has no id)
-      setDocPermissions(permissions[pluralType][slug])
+      setDocPermissions(permissions?.[pluralType]?.[slug])
     }
   }, [serverURL, api, pluralType, slug, id, permissions, i18n.language, code])
 

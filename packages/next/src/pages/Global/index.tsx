@@ -127,7 +127,7 @@ export const Global = async ({
       globalConfig,
       data,
       fieldTypes,
-      initialState: state,
+      state,
       permissions: globalPermission,
       updatedAt: data?.updatedAt?.toString(),
       user,
@@ -136,7 +136,7 @@ export const Global = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
+        <HydrateClientUser user={user} permissions={permissions} />
         <DocumentInfoProvider
           collectionSlug={globalConfig.slug}
           key={`${globalSlug}-${locale}`}

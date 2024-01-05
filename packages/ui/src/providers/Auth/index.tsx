@@ -298,6 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser,
         token: tokenInMemory,
         user,
+        setPermissions,
       }}
     >
       {children}

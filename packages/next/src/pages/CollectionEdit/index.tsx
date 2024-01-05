@@ -138,7 +138,7 @@ export const CollectionEdit = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
+        <HydrateClientUser user={user} permissions={permissions} />
         <DocumentInfoProvider
           collectionSlug={collectionConfig.slug}
           id={id}

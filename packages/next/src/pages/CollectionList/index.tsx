@@ -67,7 +67,7 @@ export const CollectionList = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
+        <HydrateClientUser user={user} permissions={permissions} />
         <RenderCustomComponent
           CustomComponent={ListToRender}
           DefaultComponent={DefaultList}
