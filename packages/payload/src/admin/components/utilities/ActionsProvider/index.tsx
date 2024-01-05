@@ -9,7 +9,7 @@ import { useConfig } from '../../utilities/Config'
 type DocumentInfo = {
   collection?: SanitizedCollectionConfig | null
   global?: SanitizedGlobalConfig | null
-  id?: null | string
+  id?: null | number | string
 }
 type ActionsContextType = {
   actions: React.ComponentType<any>[]

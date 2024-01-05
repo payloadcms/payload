@@ -48,7 +48,9 @@ const AccountView: React.FC = () => {
   const { t } = useTranslation('authentication')
 
   const { setDocumentInfo } = useActions()
-  setDocumentInfo({ collection: collection })
+  useEffect(() => {
+    setDocumentInfo({ id, collection: collection })
+  }, [collection, setDocumentInfo, id])
 
   const { fields } = collection || {}
 

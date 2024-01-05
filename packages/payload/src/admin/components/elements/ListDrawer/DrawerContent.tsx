@@ -80,6 +80,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       )
     })
 
+  useEffect(() => {
+    setDocumentInfo({ collection: selectedCollectionConfig })
+  }, [setDocumentInfo, selectedCollectionConfig])
+
   const [selectedOption, setSelectedOption] = useState<{ label: string; value: string }>(() =>
     selectedCollectionConfig
       ? {
@@ -225,8 +229,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   } else if (typeof listComponent === 'object' && typeof listComponent.Component === 'function') {
     ListToRender = listComponent.Component
   }
-
-  setDocumentInfo({ collection: selectedCollectionConfig })
 
   return (
     <TableColumnsProvider

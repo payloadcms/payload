@@ -191,7 +191,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const [id, setId] = useState<null | string>(idFromProps)
   const { setDocumentInfo } = useActions()
-  setDocumentInfo({ id, collection: collectionConfig })
+
+  useEffect(() => {
+    setDocumentInfo({ id, collection: collectionConfig })
+  }, [setDocumentInfo, id, collectionConfig])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {

@@ -65,7 +65,9 @@ const EditView: React.FC<IndexProps> = (props) => {
   )
 
   const { setDocumentInfo } = useActions()
-  setDocumentInfo({ id, collection: collection })
+  useEffect(() => {
+    setDocumentInfo({ id, collection: collection })
+  }, [id, collection, setDocumentInfo])
 
   const buildState = useCallback(
     async (doc, overrides?: Partial<Parameters<typeof buildStateFromSchema>[0]>) => {

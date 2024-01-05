@@ -44,7 +44,9 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { slug, admin: { components: { views: { Edit: Edit } = {} } = {} } = {}, fields } = global
 
   const { setDocumentInfo } = useActions()
-  setDocumentInfo({ global })
+  useEffect(() => {
+    setDocumentInfo({ global })
+  }, [global, setDocumentInfo])
 
   const onSave = useCallback(
     async (json) => {
