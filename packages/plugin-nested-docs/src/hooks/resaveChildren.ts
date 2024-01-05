@@ -29,7 +29,9 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
   })
 
   try {
-    children.docs.forEach(async (child: any) => {
+    await children.docs.reduce(async (priorSave, child) => {
+      await priorSave
+
       const childIsPublished =
         typeof collection.versions === 'object' &&
         collection.versions.drafts &&
@@ -49,7 +51,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         locale: req.locale,
         req,
       })
-    })
+    }, Promise.resolve())
   } catch (err: unknown) {
     req.payload.logger.error(
       `Nested Docs plugin has had an error while re-saving a child document${
@@ -63,29 +65,24 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
 const resaveChildren =
   (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
   async ({ doc, req }) => {
-    const resaveChildrenAsync = async (): Promise<void> => {
+    await resave({
+      collection,
+      doc,
+      draft: true,
+      pluginConfig,
+      req,
+    })
+
+    if (doc._status === 'published') {
       await resave({
         collection,
         doc,
-        draft: true,
+        draft: false,
         pluginConfig,
         req,
       })
-
-      if (doc._status === 'published') {
-        await resave({
-          collection,
-          doc,
-          draft: false,
-          pluginConfig,
-          req,
-        })
-      }
     }
-
-    await resaveChildrenAsync()
 
     return undefined
   }
-
 export default resaveChildren
