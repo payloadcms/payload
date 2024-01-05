@@ -9,6 +9,7 @@ import type { IndexProps } from './types'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentEvents } from '../../utilities/DocumentEvents'
@@ -40,7 +41,12 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const { reportUpdate } = useDocumentEvents()
 
-  const { admin: { components: { views: { Edit: Edit } = {} } = {} } = {}, fields, slug } = global
+  const { slug, admin: { components: { views: { Edit: Edit } = {} } = {} } = {}, fields } = global
+
+  const { setDocumentInfo } = useActions()
+  useEffect(() => {
+    setDocumentInfo({ global })
+  }, [global, setDocumentInfo])
 
   const onSave = useCallback(
     async (json) => {
