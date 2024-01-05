@@ -55,7 +55,12 @@ export const getCollectionIDType = (
   payload: Payload,
   collection: SanitizedCollectionConfig,
 ): GraphQLScalarType => {
-  const idField = collection.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+  const idField =
+    collection.fields[0].type === 'tabs'
+      ? collection.fields[0]?.tabs[0]?.fields.find(
+          (field) => fieldAffectsData(field) && field.name === 'id',
+        )
+      : collection.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
 
   if (!idField) {
     return idFieldTypes[payload.db.defaultIDType]

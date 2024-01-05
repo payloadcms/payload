@@ -10,6 +10,8 @@ import {
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
+  customIdCollectionSlug,
+  customIdCollectionId,
 } from './slugs'
 
 export async function clearAndSeedEverything(_payload: Payload) {
@@ -63,6 +65,13 @@ export async function clearAndSeedEverything(_payload: Payload) {
         _payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
+        }),
+        _payload.create({
+          collection: customIdCollectionSlug,
+          data: {
+            id: customIdCollectionId,
+            title: 'Hello world title',
+          },
         }),
       ])
     },

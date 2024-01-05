@@ -109,9 +109,19 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // Custom id
     // /////////////////////////////////////
 
-    const hasIdField =
+    /* const hasIdField =
       collectionConfig.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
-      -1
+      -1 */
+
+    const hasIdField =
+      collectionConfig.fields[0].type === 'tabs'
+        ? collectionConfig.fields[0]?.tabs[0]?.fields.findIndex(
+            (field) => fieldAffectsData(field) && field.name === 'id',
+          ) > -1
+        : collectionConfig.fields.findIndex(
+            (field) => fieldAffectsData(field) && field.name === 'id',
+          ) > -1
+
     if (hasIdField) {
       data = {
         _id: data.id,

@@ -76,7 +76,10 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     collection.graphQL = {} as Collection['graphQL']
 
-    const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+    const idField =
+      fields[0].type === 'tabs'
+        ? fields[0]?.tabs[0]?.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+        : fields.find((field) => fieldAffectsData(field) && field.name === 'id')
     const idType = getCollectionIDType(payload, config)
 
     const baseFields: ObjectTypeConfig = {}
