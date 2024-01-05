@@ -1,6 +1,7 @@
 import type { Form } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { formSubmissionsSlug, formsSlug } from './shared'
 
@@ -114,6 +115,33 @@ describe('Form Builder Plugin', () => {
       expect(formSubmission.submissionData).toHaveLength(1)
       expect(formSubmission.submissionData[0]).toHaveProperty('field', 'name')
       expect(formSubmission.submissionData[0]).toHaveProperty('value', 'Test Submission')
+    })
+
+    it('replaces curly braces with data when using slate serializer', async () => {
+      const mockName = 'Test Submission'
+      const mockEmail = 'dev@payloadcms.com'
+
+      const serializedEmail = serializeSlate(
+        [
+          { text: 'Welcome {{name}}. Here is a dynamic ' },
+          {
+            children: [
+              {
+                text: 'link',
+              },
+            ],
+            type: 'link',
+            url: 'www.test.com?email={{email}}',
+          },
+        ],
+        [
+          { field: 'name', value: mockName },
+          { field: 'email', value: mockEmail },
+        ],
+      )
+
+      expect(serializedEmail).toContain(mockName)
+      expect(serializedEmail).toContain(mockEmail)
     })
   })
 })
