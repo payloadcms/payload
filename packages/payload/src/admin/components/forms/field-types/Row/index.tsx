@@ -34,7 +34,7 @@ const Row: React.FC<Props> = (props) => {
           fieldTypes={fieldTypes}
           forceRender={forceRender}
           indexPath={indexPath}
-          margins={false}
+          margins="small"
           permissions={permissions}
           readOnly={readOnly}
         />
