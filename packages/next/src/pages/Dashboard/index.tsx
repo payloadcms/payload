@@ -12,7 +12,10 @@ export const Dashboard = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, user, permissions } = await initPage(configPromise, true)
+  const { config, user, permissions } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+  })
 
   const CustomDashboardComponent = config.admin.components?.views?.Dashboard
 

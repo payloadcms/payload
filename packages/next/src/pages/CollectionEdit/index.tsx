@@ -1,4 +1,4 @@
-import { Document, SanitizedConfig, TypeWithID } from 'payload/types'
+import { Document, SanitizedConfig } from 'payload/types'
 import React, { Fragment } from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
@@ -6,7 +6,6 @@ import {
   RenderCustomComponent,
   DefaultEditView,
   DefaultEditViewProps,
-  findLocaleFromCode,
   fieldTypes,
   buildStateFromSchema,
   formatFields,
@@ -30,19 +29,18 @@ export const CollectionEdit = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user, collectionConfig, locale } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    collectionSlug,
+  })
 
   const isEditing = !!id
 
   const {
     routes: { api },
     serverURL,
-    localization,
   } = config
-
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
 
   if (collectionConfig) {
     const {
@@ -60,13 +58,6 @@ export const CollectionEdit = async ({
         user,
       })
     } catch (error) {}
-
-    const defaultLocale =
-      localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-
-    const localeCode = (searchParams?.locale as string) || defaultLocale
-
-    const locale = localization && findLocaleFromCode(localization, localeCode)
 
     const collectionPermissions = permissions?.collections?.[collectionSlug]
 

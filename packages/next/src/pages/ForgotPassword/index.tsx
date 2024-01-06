@@ -25,7 +25,7 @@ export const generateMetadata = async ({
 export const ForgotPassword: React.FC<{
   config: Promise<SanitizedConfig>
 }> = async ({ config: configPromise }) => {
-  const { config, user } = await initPage(configPromise)
+  const { config, user } = await initPage({ configPromise })
 
   const {
     admin: { user: userSlug },

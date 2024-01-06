@@ -18,15 +18,15 @@ export const CollectionList = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user, collectionConfig } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    collectionSlug,
+  })
 
   const {
     routes: { admin },
   } = config
-
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
 
   if (collectionConfig) {
     const {

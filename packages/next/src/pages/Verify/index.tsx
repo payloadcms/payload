@@ -1,7 +1,5 @@
 import React from 'react'
 
-import type { SanitizedCollectionConfig } from 'payload/types'
-
 import { Button, MinimalTemplate, Logo } from '@payloadcms/ui'
 import './index.scss'
 import { initPage } from '../../utilities/initPage'
@@ -26,19 +24,20 @@ export const generateMetadata = async ({
   })
 
 export const Verify: React.FC<{
-  collectionSlug: SanitizedCollectionConfig['slug']
   config: Promise<SanitizedConfig>
   token: string
-}> = async ({ collectionSlug, config: configPromise, token }) => {
-  const { config, user } = await initPage(configPromise)
+}> = async ({
+  config: configPromise,
+  // token
+}) => {
+  const { config, user } = await initPage({ configPromise })
 
   const {
-    admin: { user: adminUser },
+    admin: { user: userSlug },
     routes: { admin: adminRoute },
     // serverURL,
   } = config
 
-  const isAdminUser = collectionSlug === adminUser
   let verifyResult = null
   // const [verifyResult, setVerifyResult] = useState<Response | null>(null)
 
@@ -73,7 +72,7 @@ export const Verify: React.FC<{
         <Logo config={config} />
       </div>
       <h2>{getText()}</h2>
-      {isAdminUser && verifyResult?.status === 200 && (
+      {verifyResult?.status === 200 && (
         <Button buttonStyle="secondary" el="link" to={`${adminRoute}/login`}>
           Login
           {/* {t('login')} */}

@@ -21,15 +21,11 @@ export const DocumentLayout = async ({
   collectionSlug?: string
   globalSlug?: string
 }) => {
-  const { user, permissions, config } = await initPage(configPromise)
-
-  const collectionConfig = collectionSlug
-    ? config.collections.find((collection) => collection.slug === collectionSlug)
-    : null
-
-  const globalConfig = globalSlug
-    ? config.globals.find((global) => global.slug === globalSlug)
-    : null
+  const { config, collectionConfig, globalConfig } = await initPage({
+    configPromise,
+    collectionSlug,
+    globalSlug,
+  })
 
   return (
     <Fragment>

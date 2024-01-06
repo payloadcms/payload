@@ -28,7 +28,7 @@ export const Login: React.FC<{
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }> = async ({ config: configPromise, searchParams }) => {
-  const { config, user } = await initPage(configPromise)
+  const { config, user } = await initPage({ configPromise })
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, logoutRoute, user: userSlug },
@@ -40,7 +40,7 @@ export const Login: React.FC<{
     redirect(admin)
   }
 
-  const collection = collections.find(({ slug }) => slug === userSlug)
+  const collectionConfig = collections.find(({ slug }) => slug === userSlug)
 
   return (
     <MinimalTemplate className={baseClass}>
@@ -49,7 +49,7 @@ export const Login: React.FC<{
           <Logo config={config} />
         </div>
         {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-        {!collection?.auth?.disableLocalStrategy && (
+        {!collectionConfig?.auth?.disableLocalStrategy && (
           <LoginForm config={config} searchParams={searchParams} />
         )}
         {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
