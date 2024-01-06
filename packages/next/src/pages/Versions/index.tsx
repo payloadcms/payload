@@ -20,7 +20,12 @@ export const VersionsView = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    collectionSlug,
+    globalSlug,
+  })
 
   const {
     routes: { admin, api },

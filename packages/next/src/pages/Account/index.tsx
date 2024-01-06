@@ -19,7 +19,10 @@ export const Account = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+  })
 
   const {
     admin: { user: userSlug, components: { views: { Account: CustomAccountComponent } = {} } = {} },
