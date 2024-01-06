@@ -1,21 +1,24 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { EditViewProps } from '../types'
-
-import { Chevron } from '../..'
-import { requests } from '../../../api'
-import CopyToClipboard from '../../elements/CopyToClipboard'
-import { Gutter } from '../../elements/Gutter'
-import { CheckboxInput } from '../../forms/field-types/Checkbox/Input'
-import SelectInput from '../../forms/field-types/Select/Input'
-import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
-import { useActions } from '../../utilities/ActionsProvider'
-import { useConfig } from '../../utilities/Config'
-import { useDocumentInfo } from '../../utilities/DocumentInfo'
-import { useLocale } from '../../utilities/Locale'
-import { SetStepNav } from '../collections/Edit/SetStepNav'
+import type { EditViewProps } from '@payloadcms/ui'
+import {
+  Chevron,
+  CopyToClipboard,
+  Gutter,
+  CheckboxInput,
+  SelectInput,
+  MinimizeMaximize,
+  useActions,
+  useConfig,
+  useDocumentInfo,
+  useLocale,
+  SetDocumentStepNav as SetStepNav,
+} from '@payloadcms/ui'
+// import { requests } from '../../../api'
 import './index.scss'
+import { initPage } from '../../utilities/initPage'
+import { SanitizedConfig } from 'payload/types'
 
 const chars = {
   leftCurlyBracket: '\u007B',
@@ -171,22 +174,36 @@ function createURL(url: string) {
   }
 }
 
-export const API: React.FC<EditViewProps> = (props) => {
-  const { apiURL } = props
-  const { i18n } = useTranslation()
+export const APIView = async ({
+  collectionSlug,
+  id,
+  config: configPromise,
+  searchParams,
+}: {
+  collectionSlug: string
+  id?: string
+  config: Promise<SanitizedConfig>
+  searchParams: { [key: string]: string | string[] | undefined }
+}) => {
+  const { config, payload, permissions, user } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+  })
+
+  // const { i18n } = useTranslation()
+
   const {
     localization,
     routes: { api },
     serverURL,
-  } = useConfig()
-  const { id, collection, global } = useDocumentInfo()
+  } = config
+
   const { code } = useLocale()
   const url = createURL(apiURL)
 
   const { setViewActions } = useActions()
 
-  const draftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
-  const docEndpoint = global ? `/globals/${global.slug}` : `/${collection.slug}/${id}`
+  const docEndpoint = global ? `/globals/${global.slug}` : `/${collectionSlug}/${id}`
 
   const [data, setData] = React.useState<any>({})
   const [draft, setDraft] = React.useState<boolean>(url.searchParams.get('draft') === 'true')
@@ -197,29 +214,29 @@ export const API: React.FC<EditViewProps> = (props) => {
 
   const fetchURL = `${serverURL}${api}${docEndpoint}?locale=${locale}&draft=${draft}&depth=${depth}`
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const request = await requests.get(fetchURL, {
-        credentials: authenticated ? 'include' : 'omit',
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      })
+  // React.useEffect(() => {
+  //   const fetchData = async () => {
+  //     const request = await requests.get(fetchURL, {
+  //       credentials: authenticated ? 'include' : 'omit',
+  //       headers: {
+  //         'Accept-Language': i18n.language,
+  //       },
+  //     })
 
-      const json = await request.json()
-      setData(json)
-    }
+  //     const json = await request.json()
+  //     setData(json)
+  //   }
 
-    fetchData()
-  }, [i18n.language, fetchURL, authenticated])
+  //   fetchData()
+  // }, [i18n.language, fetchURL, authenticated])
 
-  React.useEffect(() => {
-    const editConfig = (collection || global)?.admin?.components?.views?.Edit
-    const apiActions =
-      editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
+  // React.useEffect(() => {
+  //   const editConfig = (collection || global)?.admin?.components?.views?.Edit
+  //   const apiActions =
+  //     editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
 
-    setViewActions(apiActions)
-  }, [collection, global, setViewActions])
+  //   setViewActions(apiActions)
+  // }, [collection, global, setViewActions])
 
   const localeOptions =
     localization &&
@@ -251,7 +268,6 @@ export const API: React.FC<EditViewProps> = (props) => {
             {fetchURL}
           </a>
         </div>
-
         <div className={`${baseClass}__form-fields`}>
           <div className={`${baseClass}__filter-query-checkboxes`}>
             {draftsEnabled && (
@@ -259,17 +275,16 @@ export const API: React.FC<EditViewProps> = (props) => {
                 checked={draft}
                 id="draft-checkbox"
                 label="Draft"
-                onToggle={() => setDraft(!draft)}
+                onChange={() => setDraft(!draft)}
               />
             )}
             <CheckboxInput
               checked={authenticated}
               id="auth-checkbox"
               label="Authenticated"
-              onToggle={() => setAuthenticated(!authenticated)}
+              onChange={() => setAuthenticated(!authenticated)}
             />
           </div>
-
           {localeOptions && (
             <SelectInput
               defaultValue={{
@@ -317,7 +332,6 @@ export const API: React.FC<EditViewProps> = (props) => {
           />
         </div>
       </div>
-
       <div className={`${baseClass}__results-wrapper`}>
         <div className={`${baseClass}__toggle-fullscreen-button-container`}>
           <button
