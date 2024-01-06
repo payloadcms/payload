@@ -9,7 +9,7 @@ import {
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
-import { CollectionPermission, FieldPermissions, GlobalPermission } from 'payload/auth'
+import { CollectionPermission, GlobalPermission } from 'payload/auth'
 import { notFound } from 'next/navigation'
 
 export const VersionView = async ({
@@ -27,15 +27,18 @@ export const VersionView = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user, collectionConfig, globalConfig } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    collectionSlug,
+    globalSlug,
+  })
 
   const { localization } = config
 
   let docPermissions: CollectionPermission | GlobalPermission
   let fields: Field[]
   let slug: string
-  let collectionConfig: SanitizedCollectionConfig
-  let globalConfig: SanitizedGlobalConfig
 
   let doc: Document
   let publishedDoc: Document
@@ -44,7 +47,6 @@ export const VersionView = async ({
 
   if (collectionSlug) {
     slug = collectionSlug
-    collectionConfig = config.collections.find((collection) => collection.slug === slug)
     fields = collectionConfig.fields
     docPermissions = permissions.collections[collectionSlug]
 
@@ -88,7 +90,6 @@ export const VersionView = async ({
 
   if (globalSlug) {
     slug = globalSlug
-    globalConfig = config.globals.find((global) => global.slug === slug)
     fields = globalConfig.fields
     docPermissions = permissions.globals[globalSlug]
 

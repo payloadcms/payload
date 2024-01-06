@@ -4,7 +4,6 @@ import { initPage } from '../../utilities/initPage'
 import {
   EditDepthProvider,
   RenderCustomComponent,
-  findLocaleFromCode,
   fieldTypes,
   buildStateFromSchema,
   formatFields,
@@ -45,15 +44,16 @@ export const Global = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user, globalConfig, locale } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    globalSlug,
+  })
 
   const {
     routes: { api },
     serverURL,
-    localization,
   } = config
-
-  const globalConfig = config.globals.find((global) => global.slug === globalSlug)
 
   if (globalConfig) {
     const {
@@ -70,13 +70,6 @@ export const Global = async ({
         user,
       })
     } catch (error) {}
-
-    const defaultLocale =
-      localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-
-    const localeCode = (searchParams?.locale as string) || defaultLocale
-
-    const locale = localization && findLocaleFromCode(localization, localeCode)
 
     const globalPermission = permissions?.globals?.[globalSlug]
 
