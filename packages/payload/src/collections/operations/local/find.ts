@@ -4,7 +4,6 @@ import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document, Where } from '../../../types'
 
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
 import { findOperation } from '../find'
@@ -81,10 +80,12 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   req.payloadAPI = req.payloadAPI || 'local'
   req.locale = locale ?? req?.locale ?? defaultLocale
   req.fallbackLocale = fallbackLocaleToUse
-  req.i18n = i18nInit(payload.config.i18n)
+  req.i18n = {
+    fallbackLanguage: payload.config.i18n.fallbackLanguage,
+    language: payload.config.i18n.fallbackLanguage,
+  }
   req.payload = payload
 
-  if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   if (typeof user !== 'undefined') req.user = user

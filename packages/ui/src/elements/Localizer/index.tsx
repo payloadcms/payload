@@ -1,6 +1,6 @@
 import qs from 'qs'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { getTranslation } from 'payload/utilities'
 import { useConfig } from '../../providers/Config'

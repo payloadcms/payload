@@ -66,7 +66,6 @@ export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collec
       locale,
       payload: { config },
       payload,
-      t,
     },
     req,
     showHiddenFields,
@@ -139,7 +138,7 @@ export const deleteOperation = async <TSlug extends keyof GeneratedTypes['collec
           config,
           doc,
           overrideDelete: true,
-          t,
+          req,
         })
 
         // /////////////////////////////////////

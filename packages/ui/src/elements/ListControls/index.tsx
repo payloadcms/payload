@@ -2,7 +2,7 @@
 import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useState } from 'react'
 import AnimateHeight from 'react-animate-height'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
@@ -51,7 +51,7 @@ export const ListControls: React.FC<Props> = (props) => {
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
     shouldInitializeWhereOpened ? 'where' : undefined,
   )
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
@@ -91,7 +91,7 @@ export const ListControls: React.FC<Props> = (props) => {
                 }
                 pillStyle="light"
               >
-                {t('columns')}
+                {t('general:columns')}
               </Pill>
             )}
             <Pill
@@ -104,7 +104,7 @@ export const ListControls: React.FC<Props> = (props) => {
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
             >
-              {t('filters')}
+              {t('general:filters')}
             </Pill>
             {enableSort && (
               <Pill
@@ -115,7 +115,7 @@ export const ListControls: React.FC<Props> = (props) => {
                 onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
                 pillStyle="light"
               >
-                {t('sort')}
+                {t('general:sort')}
               </Pill>
             )}
           </div>

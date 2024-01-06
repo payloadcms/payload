@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 import Link from 'next/link' // TODO: abstract this out to support all routers
 
 import type { CodeField } from 'payload/types'
@@ -28,7 +28,7 @@ const DefaultCell: React.FC<Props> = (props) => {
   const {
     routes: { admin },
   } = useConfig()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -78,7 +78,7 @@ const DefaultCell: React.FC<Props> = (props) => {
         <WrapElement {...wrapElementProps}>
           {(cellData === '' || typeof cellData === 'undefined') &&
             'label' in field &&
-            t('noLabel', {
+            t('general:noLabel', {
               label: getTranslation(
                 typeof field.label === 'function' ? 'data' : field.label || 'data',
                 i18n,

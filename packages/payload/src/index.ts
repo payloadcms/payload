@@ -34,7 +34,6 @@ import type {
 import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types'
 import type { PaginatedDocs } from './database/types'
 import type { BuildEmailResult } from './email/types'
-import type { ErrorHandler } from './express/middleware/errorHandler'
 import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne'
 import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID'
@@ -93,7 +92,8 @@ export class Payload<TGeneratedTypes extends GeneratedTypes> {
 
   encrypt = encrypt
 
-  errorHandler: ErrorHandler
+  // TODO: re-implement or remove?
+  // errorHandler: ErrorHandler
 
   extensions: (args: {
     args: OperationArgs<any>
@@ -458,7 +458,7 @@ type GeneratedTypes = {
   }
 }
 
-export type PayloadT = Payload<GeneratedTypes>
+type PayloadT = Payload<GeneratedTypes>
 
 interface RequestContext {
   [key: string]: unknown

@@ -1,0 +1,52 @@
+{
+  "$schema": "./translation-schema.json",
+  "authentication": {
+    "newAccountCreated": "Novi račun je kreiran. Pristupite računu klikom na <a href=\"{{serverURL}}\">{{serverURL}}</a>. Molim kliknite na sljedeći link ili zalijepite URL, koji se nalazi ispod, u preglednik da biste potvrdili svoj email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Nakon što potvrdite email, moći ćete se prijaviti.",
+    "resetYourPassword": "Restartiraj svoju lozinku",
+    "verifyYourEmail": "Potvrdi svoj email",
+    "youAreReceivingResetPassword": "Primili ste ovo jer ste Vi (ili netko drugi)  zatražili promjenu lozinke za Vaš račun. Molim kliknite na poveznicu ili zalijepite ovo u svoje preglednik da biste završili proces:",
+    "youDidNotRequestPassword": "Ako niste zatražili ovo, molim ignorirajte ovaj email i Vaša lozinka ostat će nepromijenjena."
+  },
+  "error": {
+    "deletingFile": "Dogodila se pogreška pri brisanju datoteke.",
+    "emailOrPasswordIncorrect": "Email ili lozinka netočni.",
+    "followingFieldsInvalid_one": " Ovo polje je nevaljano:",
+    "followingFieldsInvalid_other": "Ova polja su nevaljana:",
+    "noFilesUploaded": "Nijedna datoteka nije učitana.",
+    "notAllowedToPerformAction": "Nemate dopuštenje izvršiti ovu radnju.",
+    "problemUploadingFile": "Pojavio se problem pri učitavanju datoteke.",
+    "unableToDeleteCount": "Nije moguće izbrisati {{count}} od {{total}} {{label}}.",
+    "unableToUpdateCount": "Nije moguće ažurirati {{count}} od {{total}} {{label}}.",
+    "unauthorized": "Neovlašten, morate biti prijavljeni da biste uputili ovaj zahtjev.",
+    "userLocked": "Ovaj korisnik je zaključan zbog previše neuspješnih pokušaja prijave."
+  },
+  "general": {
+    "deletedCountSuccessfully": "Uspješno izbrisano {{count}} {{label}}.",
+    "deletedSuccessfully": "Uspješno obrisano.",
+    "notFound": "Nije pronađeno",
+    "successfullyCreated": "{{label}} uspješno kreirano.",
+    "updatedCountSuccessfully": "Uspješno ažurirano {{count}} {{label}}.",
+    "value": "Attribute"
+  },
+  "validation": {
+    "emailAddress": "Molim unestie valjanu email adresu.",
+    "enterNumber": "Molim unesite valjani broj.",
+    "greaterThanMax": "{{value}} exceeds the maximum allowable {{label}} limit of {{max}}.",
+    "invalidInput": "Ovo polje ima nevaljan unos.",
+    "invalidSelection": "Ovo polje ima nevaljan odabir.",
+    "invalidSelections": "Ovo polje ima sljedeće nevaljane odabire:",
+    "lessThanMin": "{{value}} is below the minimum allowable {{label}} limit of {{min}}.",
+    "longerThanMin": "Ova vrijednost mora biti duža od minimalne dužine od {{minLength}} znakova",
+    "notValidDate": "\"{{value}}\" nije valjan datum.",
+    "requiresNoMoreThan": "Ovo polje zahtjeva ne više od {{count}} {{label}}.",
+    "requiresTwoNumbers": "Ovo polje zahtjeva dva broja.",
+    "shorterThanMax": "Ova vrijednost mora biti kraća od maksimalne dužine od {{maxLength}} znakova",
+    "trueOrFalse": "Ovo polje može biti samo točno ili netočno",
+    "validUploadID": "Ovo polje nije valjani ID prijenosa."
+  },
+  "version": {
+    "autosavedSuccessfully": "Automatsko spremanje uspješno.",
+    "draftSavedSuccessfully": "Nacrt uspješno spremljen.",
+    "restoredSuccessfully": "Uspješno vraćeno."
+  }
+}

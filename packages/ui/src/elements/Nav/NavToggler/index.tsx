@@ -1,7 +1,7 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import { usePreferences } from '../../../providers/Preferences'
 import { useNav } from '../context'
@@ -17,7 +17,7 @@ export const NavToggler: React.FC<{
 }> = (props) => {
   const { id, children, className, tabIndex = 0 } = props
 
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   const { setPreference } = usePreferences()
 
@@ -29,7 +29,7 @@ export const NavToggler: React.FC<{
 
   return (
     <button
-      aria-label={`${navOpen ? t('close') : t('open')} ${t('menu')}`}
+      aria-label={`${navOpen ? t('general:close') : t('general:open')} ${t('general:menu')}`}
       className={[baseClass, navOpen && `${baseClass}--is-open`, className]
         .filter(Boolean)
         .join(' ')}

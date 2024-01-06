@@ -54,7 +54,6 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
     req: {
       payload: { config, emailOptions, sendEmail: email },
       payload,
-      t,
     },
     req,
   } = args
@@ -103,11 +102,11 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
           ? config.serverURL
           : `${protocol}://${req.headers.get('host')}`
 
-      let html = `${t('authentication:youAreReceivingResetPassword')}
+      let html = `${req.t('authentication:youAreReceivingResetPassword')}
     <a href="${serverURL}${config.routes.admin}/reset/${token}">
      ${serverURL}${config.routes.admin}/reset/${token}
     </a>
-    ${t('authentication:youDidNotRequestPassword')}`
+    ${req.t('authentication:youDidNotRequestPassword')}`
 
       if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
         html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
@@ -117,7 +116,7 @@ export const forgotPasswordOperation = async (incomingArgs: Arguments): Promise<
         })
       }
 
-      let subject = t('authentication:resetYourPassword')
+      let subject = req.t('authentication:resetYourPassword')
 
       if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
         subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({

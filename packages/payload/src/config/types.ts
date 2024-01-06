@@ -627,7 +627,22 @@ export type Config = {
    *   resources: translations,
    * }
    */
-  i18n?: i18nInitOptions
+  // i18n?: i18nInitOptions
+  i18n?: {
+    fallbackLanguage?: string
+    supportedLanguages?: string[]
+    translations?: {
+      [language: string]:
+        | {
+            $schema: string
+          }
+        | {
+            [namespace: string]: {
+              [key: string]: string
+            }
+          }
+    }
+  }
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**

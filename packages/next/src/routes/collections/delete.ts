@@ -1,8 +1,7 @@
 import httpStatus from 'http-status'
 
 import type { PayloadRequest, Where } from 'payload/types'
-
-import { isNumber } from 'payload/utilities'
+import { getTranslation, isNumber } from 'payload/utilities'
 import { deleteOperation } from 'payload/operations'
 
 // TODO(JARROD): pattern to catch errors and return correct Response
@@ -19,21 +18,23 @@ export const deleteDoc = async ({ req }: { req: PayloadRequest }): Promise<Respo
   })
 
   if (result.errors.length === 0) {
-    // const message = req.t('general:deletedCountSuccessfully', {
-    //   count: result.docs.length,
-    //   label: getTranslation(
-    //     req.collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'],
-    //     req.i18n,
-    //   ),
-    // })
-
-    // res.status(httpStatus.OK).json({
-    //   ...formatSuccessResponse(message, 'message'),
-    //   ...result,
-    // })
-    return Response.json(result, {
-      status: httpStatus.OK,
+    const message = req.t('general:deletedCountSuccessfully', {
+      count: result.docs.length,
+      label: getTranslation(
+        req.collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'],
+        req.i18n,
+      ),
     })
+
+    return Response.json(
+      {
+        ...result,
+        message,
+      },
+      {
+        status: httpStatus.OK,
+      },
+    )
   }
 
   // const total = result.docs.length + result.errors.length

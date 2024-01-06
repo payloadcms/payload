@@ -4,7 +4,7 @@ import type { Result } from '../forgotPassword'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { forgotPasswordOperation } from '../forgotPassword'
 
@@ -43,11 +43,13 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     )
   }
 
+  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
+
   req.payloadAPI = req.payloadAPI || 'local'
   req.payload = payload
-  req.i18n = i18nInit(payload.config.i18n)
+  req.i18n = i18n
+  req.t = i18n.t
 
-  if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return forgotPasswordOperation({

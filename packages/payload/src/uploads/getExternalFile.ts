@@ -1,14 +1,15 @@
+import type { PayloadRequest } from '../exports/types'
 import type { File, FileData } from './types'
-import { Request } from 'express'
+
 import { APIError } from '../errors'
 
 type Args = {
-  req: Request
   data: FileData
+  req: PayloadRequest
 }
-export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
+export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
   const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
-  const { url, filename } = data
+  const { filename, url } = data
 
   if (typeof url === 'string') {
     const fileURL = `${baseUrl}${url}`
@@ -16,10 +17,10 @@ export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
 
     const res = await fetch(fileURL, {
       credentials: 'include',
-      method: 'GET',
       headers: {
         ...req.headers,
       },
+      method: 'GET',
     })
 
     if (!res.ok) throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)

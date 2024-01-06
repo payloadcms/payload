@@ -1,6 +1,6 @@
 import queryString from 'qs'
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
 import type { OptionObject } from 'payload/types'
@@ -20,7 +20,7 @@ const SortComplex: React.FC<Props> = (props) => {
 
   const history = useHistory()
   const params = useSearchParams()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const [sortOptions, setSortOptions] = useState<OptionObject[]>()
 
   const [sortFields] = useState(() =>
@@ -36,7 +36,7 @@ const SortComplex: React.FC<Props> = (props) => {
   )
 
   const [sortField, setSortField] = useState(sortFields[0])
-  const [initialSort] = useState(() => ({ label: t('descending'), value: '-' }))
+  const [initialSort] = useState(() => ({ label: t('general:descending'), value: '-' }))
   const [sortOrder, setSortOrder] = useState(initialSort)
 
   useEffect(() => {
@@ -61,8 +61,8 @@ const SortComplex: React.FC<Props> = (props) => {
 
   useEffect(() => {
     setSortOptions([
-      { label: t('ascending'), value: '' },
-      { label: t('descending'), value: '-' },
+      { label: t('general:ascending'), value: '' },
+      { label: t('general:descending'), value: '-' },
     ])
   }, [i18n, t])
 
@@ -71,11 +71,11 @@ const SortComplex: React.FC<Props> = (props) => {
       <React.Fragment>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__select`}>
-            <div className={`${baseClass}__label`}>{t('columnToSort')}</div>
+            <div className={`${baseClass}__label`}>{t('general:columnToSort')}</div>
             <ReactSelect onChange={setSortField} options={sortFields} value={sortField} />
           </div>
           <div className={`${baseClass}__select`}>
-            <div className={`${baseClass}__label`}>{t('order')}</div>
+            <div className={`${baseClass}__label`}>{t('general:order')}</div>
             <ReactSelect
               onChange={(incomingSort) => {
                 setSortOrder(incomingSort || initialSort)

@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
@@ -41,7 +41,7 @@ const PointField: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -95,7 +95,7 @@ const PointField: React.FC<Props> = (props) => {
         <li>
           <LabelComp
             htmlFor={`field-longitude-${path.replace(/\./g, '__')}`}
-            label={`${getTranslation(label || name, i18n)} - ${t('longitude')}`}
+            label={`${getTranslation(label || name, i18n)} - ${t('fields:longitude')}`}
             required={required}
           />
           <div className="input-wrapper">
@@ -116,7 +116,7 @@ const PointField: React.FC<Props> = (props) => {
         <li>
           <LabelComp
             htmlFor={`field-latitude-${path.replace(/\./g, '__')}`}
-            label={`${getTranslation(label || name, i18n)} - ${t('latitude')}`}
+            label={`${getTranslation(label || name, i18n)} - ${t('fields:latitude')}`}
             required={required}
           />
           <div className="input-wrapper">

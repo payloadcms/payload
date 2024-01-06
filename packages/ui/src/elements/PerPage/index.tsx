@@ -1,7 +1,7 @@
 'use client'
 import qs from 'qs'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
 import { collectionDefaults } from 'payload/config'
@@ -32,14 +32,14 @@ const PerPage: React.FC<Props> = ({
 }) => {
   const params = useSearchParams()
   const history = useHistory()
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   return (
     <div className={baseClass}>
       <Popup
         button={
           <div className={`${baseClass}__base-button`}>
-            <span>{t('perPage', { limit })}</span>
+            <span>{t('general:perPage', { limit })}</span>
             &nbsp;
             {<Chevron className={`${baseClass}__icon`} />}
           </div>

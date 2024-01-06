@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
@@ -13,7 +13,7 @@ const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, valu
   const ref = useRef(null)
   const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   if (value) {
     return (
@@ -39,8 +39,8 @@ const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, valu
       >
         <Copy />
         <Tooltip delay={copied ? 0 : undefined} show={hovered || copied}>
-          {copied && (successMessage ?? t('copied'))}
-          {!copied && (defaultMessage ?? t('copy'))}
+          {copied && (successMessage ?? t('general:copied'))}
+          {!copied && (defaultMessage ?? t('general:copy'))}
         </Tooltip>
         <textarea readOnly ref={ref} tabIndex={-1} value={value} />
       </button>

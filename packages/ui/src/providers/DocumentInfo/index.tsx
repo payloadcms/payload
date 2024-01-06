@@ -1,7 +1,7 @@
 'use client'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { useParams } from 'react-router-dom'
 
 import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'

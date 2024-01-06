@@ -42,7 +42,7 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   if (result.docs.length === 1) {
     return result.docs[0]
   }
-  throw new NotFound()
+  throw new NotFound(req.t)
 }
 
 export default deleteOperation

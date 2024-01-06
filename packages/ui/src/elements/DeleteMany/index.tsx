@@ -1,14 +1,14 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
 import { getTranslation } from 'payload/utilities'
 // import { requests } from '../../../api'
-import { Minimal as MinimalTemplate } from '../../templates/Minimal'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { SelectAllStatus, useSelection } from '../../views/List/SelectionProvider'
@@ -28,7 +28,7 @@ const DeleteMany: React.FC<Props> = (props) => {
   } = useConfig()
   const { toggleModal } = useModal()
   const { count, getQueryParams, selectAll, toggleAll } = useSelection()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const [deleting, setDeleting] = useState(false)
 
   const collectionPermissions = permissions?.collections?.[slug]
@@ -54,7 +54,7 @@ const DeleteMany: React.FC<Props> = (props) => {
     //       const json = await res.json()
     //       toggleModal(modalSlug)
     //       if (res.status < 400) {
-    //         toast.success(json.message || t('deletedSuccessfully'), { autoClose: 3000 })
+    //         toast.success(json.message || t('general:deletedSuccessfully'), { autoClose: 3000 })
     //         toggleAll()
     //         resetParams({ page: selectAll ? 1 : undefined })
     //         return null
@@ -98,22 +98,22 @@ const DeleteMany: React.FC<Props> = (props) => {
           toggleModal(modalSlug)
         }}
       >
-        {t('delete')}
+        {t('general:delete')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
         <MinimalTemplate className={`${baseClass}__template`}>
-          <h1>{t('confirmDeletion')}</h1>
-          <p>{t('aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
+          <h1>{t('general:confirmDeletion')}</h1>
+          <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
           <Button
             buttonStyle="secondary"
             id="confirm-cancel"
             onClick={deleting ? undefined : () => toggleModal(modalSlug)}
             type="button"
           >
-            {t('cancel')}
+            {t('general:cancel')}
           </Button>
           <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
-            {deleting ? t('deleting') : t('confirm')}
+            {deleting ? t('general:deleting') : t('general:confirm')}
           </Button>
         </MinimalTemplate>
       </Modal>

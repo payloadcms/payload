@@ -625,6 +625,12 @@ importers:
 
   packages/next:
     dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:^
+        version: link:../translations
+      deepmerge:
+        specifier: ^4.3.1
+        version: 4.3.1
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -677,6 +683,9 @@ importers:
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
+      '@payloadcms/translations':
+        specifier: workspace:^
+        version: link:../translations
       body-scroll-lock:
         specifier: 4.0.0-beta.0
         version: 4.0.0-beta.0
@@ -1455,6 +1464,15 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/translations:
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/ui:
     dependencies:
       '@dnd-kit/core':
@@ -1475,6 +1493,9 @@ importers:
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
+      '@payloadcms/translations':
+        specifier: workspace:^
+        version: link:../translations
       body-scroll-lock:
         specifier: 4.0.0-beta.0
         version: 4.0.0-beta.0

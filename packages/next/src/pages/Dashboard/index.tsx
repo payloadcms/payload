@@ -6,10 +6,8 @@ import { initPage } from '../../utilities/initPage'
 
 export const Dashboard = async ({
   config: configPromise,
-  searchParams,
 }: {
   config: Promise<SanitizedConfig>
-  searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const { config, user } = await initPage(configPromise, true)
 

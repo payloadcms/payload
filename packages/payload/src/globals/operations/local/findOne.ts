@@ -5,7 +5,6 @@ import type { Document } from '../../../types'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { findOneOperation } from '../findOne'
 
@@ -47,15 +46,15 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  const i18n = i18nInit(payload.config.i18n)
-
   const req = {
     fallbackLocale: fallbackLocale ?? options.req?.fallbackLocale ?? defaultLocale,
-    i18n,
+    i18n: {
+      fallbackLanguage: payload.config.i18n.fallbackLanguage,
+      language: payload.config.i18n.fallbackLanguage,
+    },
     locale: locale ?? options.req?.locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
-    t: i18n.t,
     user,
   } as PayloadRequest
   setRequestContext(req, context)

@@ -1,6 +1,6 @@
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { Where, Field } from 'payload/types'
@@ -49,7 +49,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   onSelect,
   selectedCollection,
 }) => {
-  const { i18n, t } = useTranslation(['upload', 'general'])
+  const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { setPreference } = usePreferences()
   const { closeModal, isModalOpen } = useModal()
@@ -282,7 +282,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                 )}
                 {moreThanOneAvailableCollection && (
                   <div className={`${baseClass}__select-collection-wrap`}>
-                    <Label label={t('selectCollectionToBrowse')} />
+                    <Label label={t('upload:selectCollectionToBrowse')} />
                     <ReactSelect
                       className={`${baseClass}__select-collection`}
                       onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect

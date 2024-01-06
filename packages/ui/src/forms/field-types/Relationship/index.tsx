@@ -1,7 +1,7 @@
 'use client'
 import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
@@ -70,7 +70,7 @@ const Relationship: React.FC<Props> = (props) => {
     serverURL,
   } = config
 
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const formProcessing = useFormProcessing()

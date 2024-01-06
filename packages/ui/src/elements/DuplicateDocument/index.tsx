@@ -1,7 +1,7 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
@@ -10,7 +10,7 @@ import type { Props } from './types'
 import { getTranslation } from 'payload/utilities'
 // import { requests } from '../../../api'
 import { useForm, useFormModified } from '../../forms/Form/context'
-import { Minimal as MinimalTemplate } from '../../templates/Minimal'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { useConfig } from '../../providers/Config'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
@@ -32,7 +32,7 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
     routes: { admin },
   } = useConfig()
   const [hasClicked, setHasClicked] = useState<boolean>(false)
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const modalSlug = `duplicate-${id}`
 
@@ -134,7 +134,9 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
       }
 
       toast.success(
-        t('successfullyDuplicated', { label: getTranslation(collection.labels.singular, i18n) }),
+        t('general:successfullyDuplicated', {
+          label: getTranslation(collection.labels.singular, i18n),
+        }),
         { autoClose: 3000 },
       )
 
@@ -182,23 +184,23 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
   return (
     <React.Fragment>
       <PopupList.Button id="action-duplicate" onClick={() => handleClick(false)}>
-        {t('duplicate')}
+        {t('general:duplicate')}
       </PopupList.Button>
       {modified && hasClicked && (
         <Modal className={`${baseClass}__modal`} slug={modalSlug}>
           <MinimalTemplate className={`${baseClass}__modal-template`}>
-            <h1>{t('confirmDuplication')}</h1>
-            <p>{t('unsavedChangesDuplicate')}</p>
+            <h1>{t('general:confirmDuplication')}</h1>
+            <p>{t('general:unsavedChangesDuplicate')}</p>
             <Button
               buttonStyle="secondary"
               id="confirm-cancel"
               onClick={() => toggleModal(modalSlug)}
               type="button"
             >
-              {t('cancel')}
+              {t('general:cancel')}
             </Button>
             <Button id="confirm-duplicate" onClick={confirm}>
-              {t('duplicateWithoutSaving')}
+              {t('general:duplicateWithoutSaving')}
             </Button>
           </MinimalTemplate>
         </Modal>

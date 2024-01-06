@@ -5,7 +5,6 @@ import type { Document, Where } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
 import { findVersionsOperation } from '../findVersions'
@@ -61,10 +60,12 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     )
   }
 
-  const i18n = i18nInit(payload.config.i18n)
   const req = {
     fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    i18n,
+    i18n: {
+      fallbackLanguage: payload.config.i18n.fallbackLanguage,
+      language: payload.config.i18n.fallbackLanguage,
+    },
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
@@ -73,7 +74,6 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   } as PayloadRequest
   setRequestContext(req, context)
 
-  if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return findVersionsOperation({

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import { SelectAllStatus, useSelection } from '../SelectionProvider'
 import './index.scss'
@@ -8,12 +8,16 @@ import { CheckboxInput } from '../../../forms/field-types/Checkbox/Input'
 const baseClass = 'select-all'
 
 const SelectAll: React.FC = () => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { selectAll, toggleAll } = useSelection()
 
   return (
     <CheckboxInput
-      aria-label={selectAll === SelectAllStatus.None ? t('selectAllRows') : t('deselectAllRows')}
+      aria-label={
+        selectAll === SelectAllStatus.None
+          ? t('general:selectAllRows')
+          : t('general:deselectAllRows')
+      }
       checked={
         selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable
       }

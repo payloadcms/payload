@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { FormField } from '../../Form/types'
 import type { Props } from './types'
@@ -16,7 +16,7 @@ const ConfirmPassword: React.FC<Props> = (props) => {
   const { disabled } = props
 
   const password = useFormFields<FormField>(([fields]) => fields.password)
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
 
   const validate = useCallback(
     (value: string) => {
@@ -28,7 +28,7 @@ const ConfirmPassword: React.FC<Props> = (props) => {
         return true
       }
 
-      return t('passwordsDoNotMatch')
+      return t('fields:passwordsDoNotMatch')
     },
     [password, t],
   )

@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
@@ -55,7 +55,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
   const { localization } = useConfig()
 
   const editingDefaultLocale = (() => {
@@ -71,7 +71,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const getLabels = (p: Props) => {
     if (p?.labels) return p.labels
     if (p?.label) return { plural: undefined, singular: p.label }
-    return { plural: t('rows'), singular: t('row') }
+    return { plural: t('fields:rows'), singular: t('fields:row') }
   }
 
   const labels = getLabels(props)
@@ -197,7 +197,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(true)}
                   type="button"
                 >
-                  {t('collapseAll')}
+                  {t('fields:collapseAll')}
                 </button>
               </li>
               <li>
@@ -206,7 +206,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(false)}
                   type="button"
                 >
-                  {t('showAll')}
+                  {t('fields:showAll')}
                 </button>
               </li>
             </ul>
@@ -284,7 +284,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           iconStyle="with-border"
           onClick={() => addRow(value || 0)}
         >
-          {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+          {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
       )}
     </div>

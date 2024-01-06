@@ -1,6 +1,6 @@
 // either send the `useAsTitle` field itself
 
-import { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
+import { ClientConfig, PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 import { FormField } from '../forms/Form/types'
 import { getObjectDotNotation } from 'payload/utilities'
 // import { formatDate } from './formatDate'
@@ -11,15 +11,9 @@ export const formatDocTitle = (args: {
   doc?: Record<string, any>
   field?: FormField
   dateFormat?: ClientConfig['admin']['dateFormat']
-  // i18n: typeof i18next
+  i18n: PayloadRequest['i18n']
 }): string => {
-  const {
-    useAsTitle,
-    dateFormat: dateFormatFromProps,
-    doc,
-    field: fieldFromProps,
-    // i18n,
-  } = args
+  const { useAsTitle, dateFormat: dateFormatFromProps, doc, field: fieldFromProps, i18n } = args
 
   if (!fieldFromProps && !doc) {
     return ''

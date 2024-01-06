@@ -1,0 +1,52 @@
+{
+  "$schema": "./translation-schema.json",
+  "authentication": {
+    "newAccountCreated": "Току-що беше създаден нов профил за достъп до <a href=\"{{serverURL}}\">{{serverURL}}</a> Моля, въведи връзката в браузъра си, за да потвърдиш имейла си: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> След като потвърдиш имейла си, ще можеш да влезеш успешно.",
+    "resetYourPassword": "Възстанови паролата си",
+    "verifyYourEmail": "Потвърди имейла си",
+    "youAreReceivingResetPassword": "Получаваш това, защото ти (или някой друг) е заявил възстановяване на паролата. Натисни връзката или постави това в браузъра си, за да довършиш процеса:",
+    "youDidNotRequestPassword": "Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена."
+  },
+  "error": {
+    "deletingFile": "Имаше грешка при изтриването на файла.",
+    "emailOrPasswordIncorrect": "Имейлът или паролата не са правилни.",
+    "followingFieldsInvalid_one": "Следното поле е некоректно:",
+    "followingFieldsInvalid_other": "Следните полета са некоректни:",
+    "noFilesUploaded": "Никакви файлове не бяха качени.",
+    "notAllowedToPerformAction": "Нямаш право да извършиш това действие.",
+    "problemUploadingFile": "Имаше проблем при качването на файла.",
+    "unableToDeleteCount": "Не беше възможно да се изтрият {{count}} от {{total}} {{label}}.",
+    "unableToUpdateCount": "Не беше възможно да се обновят {{count}} от {{total}} {{label}}.",
+    "unauthorized": "Неавторизиран, трябва да влезеш, за да извършиш тази заявка.",
+    "userLocked": "Този потребител има прекалено много невалидни опити за влизане и е заключен."
+  },
+  "general": {
+    "deletedCountSuccessfully": "Изтрити {{count}} {{label}} успешно.",
+    "deletedSuccessfully": "Изтрито успешно.",
+    "notFound": "Няма открит",
+    "successfullyCreated": "{{label}} успешно създаден.",
+    "updatedCountSuccessfully": "Обновени {{count}} {{label}} успешно.",
+    "value": "Стойност"
+  },
+  "validation": {
+    "emailAddress": "Моля, въведи валиден имейл адрес.",
+    "enterNumber": "Моля, въведи валиден номер.",
+    "greaterThanMax": "{{value}} е по-голямо от максимално допустимото {{label}} от {{max}}.",
+    "invalidInput": "Това поле има невалиден вход.",
+    "invalidSelection": "Това поле има невалидна селекция.",
+    "invalidSelections": "Това поле има следните невалидни селекции:",
+    "lessThanMin": "{{value}} е по-малко от минимално допустимото {{label}} от {{min}}.",
+    "longerThanMin": "Тази стойност трябва да е по-голяма от минималната стойност от {{minLength}} символа.",
+    "notValidDate": "\"{{value}}\" не е валидна дата.",
+    "requiresNoMoreThan": "Това поле изисква не повече от {{count}} {{label}}.",
+    "requiresTwoNumbers": "Това поле изисква 2 числа.",
+    "shorterThanMax": "Тази стойност трябва да е по-малка от максималната стойност от {{maxLength}} символа.",
+    "trueOrFalse": "Това поле може да бъде само \"true\" или \"false\".",
+    "validUploadID": "Това поле не е валиден идентификатор на качването."
+  },
+  "version": {
+    "autosavedSuccessfully": "Успешно автоматично запазване.",
+    "draftSavedSuccessfully": "Чернова запазена успешно.",
+    "restoredSuccessfully": "Успешно възстановяване."
+  }
+}

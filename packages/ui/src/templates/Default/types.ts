@@ -8,4 +8,5 @@ export type Props = {
   config: Promise<SanitizedConfig>
   user: User
   permissions: Permissions
+  i18n: any
 }

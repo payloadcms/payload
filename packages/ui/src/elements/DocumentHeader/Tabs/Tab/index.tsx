@@ -1,6 +1,6 @@
 'use client'
 import React, { Fragment } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../providers/Translation'
 import { Link, useLocation, useRouteMatch } from 'react-router-dom'
 
 import type { DocumentTabConfig } from '../types'
@@ -26,7 +26,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     pillLabel,
   } = props
 
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const location = useLocation()
   const config = useConfig()
   const documentInfo = useDocumentInfo()

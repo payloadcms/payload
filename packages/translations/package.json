@@ -1,0 +1,50 @@
+{
+  "name": "@payloadcms/translations",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "exports": {
+    "./api": {
+      "import": "./src/api/index.ts",
+      "require": "./src/api/index.ts",
+      "types": "./src/api/index.ts"
+    },
+    "./client": {
+      "import": "./src/client/index.ts",
+      "require": "./src/client/index.ts",
+      "types": "./src/client/index.ts"
+    },
+    ".": {
+      "import": "./src/exports/index.ts",
+      "require": "./src/exports/index.ts",
+      "types": "./src/exports/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "publishConfig": {
+    "exports": {
+      "./api": {
+        "import": "./dist/api/index.ts",
+        "require": "./dist/api/index.ts"
+      },
+      "./client": {
+        "import": "./dist/client/index.ts",
+        "require": "./dist/client/index.ts"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist"
+  ]
+}

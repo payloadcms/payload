@@ -209,6 +209,8 @@ export const GET = async (
     if (slug.length === 1 && slug1 === 'access') {
       return endpoints.root.GET.access({ req })
     }
+
+    return new Response('Route Not Found', { status: 404 })
   }
 }
 

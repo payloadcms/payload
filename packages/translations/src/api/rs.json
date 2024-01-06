@@ -1,0 +1,52 @@
+{
+  "$schema": "./translation-schema.json",
+  "authentication": {
+    "newAccountCreated": "Нови налог је креиран. Приступите налогу кликом на <a href=\"{{serverURL}}\">{{serverURL}}</a>. Молимо Вас кликните на следећи линк или залепите адресу која се налази испод у претраживач да бисте потврдили адресу е-поште: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Након што потврдите адресу е-поште можете се улоговати.",
+    "resetYourPassword": "Промени своју лозинку",
+    "verifyYourEmail": "Потврди своју адресу е-поште",
+    "youAreReceivingResetPassword": "Примили сте поруку пошто сте Ви (или неко у ваше име) затражили промену лозинке налога. Молимо Вас кликните на линк или залепите адресу у свој претраживач да бисте завршили процес:",
+    "youDidNotRequestPassword": "Ако нисте затражили промену лозинке игноришите ову поруку и лозинка ће остати непромењена."
+  },
+  "error": {
+    "deletingFile": "Догодила се грешка при брисању датотеке.",
+    "emailOrPasswordIncorrect": "Емаил или лозинка су неисправни.",
+    "followingFieldsInvalid_one": "Ово поље је невалидно:",
+    "followingFieldsInvalid_other": "Ова поља су невалидна:",
+    "noFilesUploaded": "Ниједна датотека није учитана.",
+    "notAllowedToPerformAction": "Немате дозволу за извршење ове радње.",
+    "problemUploadingFile": "Постоји проблем при учитавању датотеке.",
+    "unableToDeleteCount": "Није могуће избрисати {{count}} од {{total}} {{label}}.",
+    "unableToUpdateCount": "Није могуће ажурирати {{count}} од {{total}} {{label}}.",
+    "unauthorized": "Нисте ауторизовани да бисте упутили овај захтев.",
+    "userLocked": "Овај корисник је закључан због превеликог броја неуспешних покушаја пријаве."
+  },
+  "general": {
+    "deletedCountSuccessfully": "Успешно избрисано {{count}} {{label}}.",
+    "deletedSuccessfully": "Успешно избрисано.",
+    "notFound": "Није пронађено",
+    "successfullyCreated": "{{label}} успешно креирано.",
+    "updatedCountSuccessfully": "Успешно ажурирано {{count}} {{label}}.",
+    "value": "Вредност"
+  },
+  "validation": {
+    "emailAddress": "Молимо Вас унесите валидну емаил адресу.",
+    "enterNumber": "Молимо Вас унесите валидан број.",
+    "greaterThanMax": "{{value}} прекорачује максималан дозвољени {{label}} лимит од {{max}}.",
+    "invalidInput": "Ово поље садржи невалидан унос.",
+    "invalidSelection": "Ово поље садржи невалидан одабир.",
+    "invalidSelections": "Ово поље има следеће невалидне одабире:",
+    "lessThanMin": "{{value}} је испод дозвољеног минимума за {{label}} (доњи лимит је {{min}}).",
+    "longerThanMin": "Ова вредност мора бити дужа од минималне дужине од {{минЛенгтх}} карактера",
+    "notValidDate": "\"{{value}}\" није валидан датум.",
+    "requiresNoMoreThan": "Ово поље захтева не више од {{count}} {{label}}.",
+    "requiresTwoNumbers": "Ово поље захтева два броја.",
+    "shorterThanMax": "Ова вредност мора бити краћа од максималне дужине од {{maxLength}} карактера",
+    "trueOrFalse": "Ово поље може бити само тачно или нетачно",
+    "validUploadID": "Ово поље не садржи валидан ИД преноса."
+  },
+  "version": {
+    "autosavedSuccessfully": "Аутоматско чување успешно.",
+    "draftSavedSuccessfully": "Нацрт успешно сачуван.",
+    "restoredSuccessfully": "Успешно враћено."
+  }
+}

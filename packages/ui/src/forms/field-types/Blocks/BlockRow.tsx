@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { Block } from 'payload/types'
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'

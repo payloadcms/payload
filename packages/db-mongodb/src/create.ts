@@ -1,11 +1,12 @@
 import type { Create } from 'payload/database'
 import type { Document, PayloadRequest } from 'payload/types'
 
+import { ValidationError } from 'payload/errors'
+import { i18nInit } from 'payload/utilities'
+
 import type { MongooseAdapter } from '.'
 
 import { withSession } from './withSession'
-import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
@@ -26,7 +27,7 @@ export const create: Create = async function create(
               message: req.t('error:valueMustBeUnique'),
             },
           ],
-          req?.t ?? i18nInit(this.payload.config.i18n).t,
+          req.t,
         )
       : error
   }

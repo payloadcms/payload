@@ -1,7 +1,6 @@
 import { useModal } from '@faceless-ui/modal'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 
 import type { CollectionPermission } from 'payload/auth'
@@ -17,6 +16,7 @@ import { useRelatedCollections } from '../../forms/field-types/Relationship/AddN
 import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo'
 import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useLocale } from '../../providers/Locale'
@@ -43,7 +43,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { code: locale } = useLocale()
   const { user } = useAuth()
   const [internalState, setInternalState] = useState<Fields>()
-  const { i18n, t } = useTranslation(['fields', 'general'])
+  const { i18n, t } = useTranslation()
   const hasInitializedState = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)

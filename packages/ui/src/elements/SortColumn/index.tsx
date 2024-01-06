@@ -1,6 +1,6 @@
 import queryString from 'qs'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
@@ -16,7 +16,7 @@ const SortColumn: React.FC<Props> = (props) => {
   const { name, disable = false, label } = props
   const params = useSearchParams()
   const history = useHistory()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const { sort } = params
 
@@ -50,8 +50,8 @@ const SortColumn: React.FC<Props> = (props) => {
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
-            aria-label={t('sortByLabelDirection', {
-              direction: t('ascending'),
+            aria-label={t('general:sortByLabelDirection', {
+              direction: t('general:ascending'),
               label: getTranslation(label, i18n),
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
@@ -61,8 +61,8 @@ const SortColumn: React.FC<Props> = (props) => {
             <Chevron direction="up" />
           </button>
           <button
-            aria-label={t('sortByLabelDirection', {
-              direction: t('descending'),
+            aria-label={t('general:sortByLabelDirection', {
+              direction: t('general:descending'),
               label: getTranslation(label, i18n),
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}

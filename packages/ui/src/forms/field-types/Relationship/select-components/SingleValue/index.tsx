@@ -1,7 +1,7 @@
 import type { SingleValueProps } from 'react-select'
 
 import React, { Fragment, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../../providers/Translation'
 import { components as SelectComponents } from 'react-select'
 
 import type { Option } from '../../types'
@@ -23,7 +23,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { permissions } = useAuth()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
@@ -46,7 +46,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
           {relationTo && hasReadPermission && (
             <Fragment>
               <DocumentDrawerToggler
-                aria-label={t('editLabel', { label })}
+                aria-label={t('general:editLabel', { label })}
                 className={`${baseClass}__drawer-toggler`}
                 onClick={() => setShowTooltip(false)}
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
@@ -55,7 +55,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
                 onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
               >
                 <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                  {t('edit')}
+                  {t('general:edit')}
                 </Tooltip>
                 <Edit />
               </DocumentDrawerToggler>

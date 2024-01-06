@@ -6,13 +6,13 @@ import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
 import { Chevron } from '../../icons/Chevron'
 import Logout from '../Logout'
 import NavGroup from '../NavGroup'
-import './index.scss'
 import Link from 'next/link'
-import { SanitizedConfig } from 'payload/types'
+import { PayloadRequest, SanitizedConfig } from 'payload/types'
 import { Permissions, User } from 'payload/auth'
 import { NavWrapper } from './NavWrapper'
 import { NavHamburger } from './NavHamburger'
-import { i18n } from 'i18next'
+
+import './index.scss'
 
 const baseClass = 'nav'
 
@@ -20,9 +20,9 @@ export const DefaultNav: React.FC<{
   config: SanitizedConfig
   user: User
   permissions: Permissions
+  i18n: PayloadRequest['i18n']
 }> = (props) => {
-  const { config, user, permissions } = props
-  // const { i18n } = useTranslation('general')
+  const { config, user, permissions, i18n } = props
 
   const {
     admin: {
@@ -61,10 +61,7 @@ export const DefaultNav: React.FC<{
         }),
     ],
     permissions,
-    {
-      t: (key: string) => key, // TODO: this is just a placeholder
-    } as i18n,
-    // i18n,
+    i18n,
   )
 
   return (

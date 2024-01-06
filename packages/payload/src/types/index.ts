@@ -32,8 +32,14 @@ export type CustomPayloadRequest<U = any> = {
       [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>
     }
   }
-  /** I18next instance */
-  i18n: Ii18n
+  i18n: {
+    /** The fallback language */
+    fallbackLanguage: string
+    /** The language of the request */
+    language: string
+    /** Translate function */
+    t: (key: string, options?: Record<string, unknown>) => string
+  }
   /**
    * The requested locale if specified
    * Only available for localized collections
@@ -48,8 +54,8 @@ export type CustomPayloadRequest<U = any> = {
   payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
-  /** Get a translation for the admin screen */
-  t: TFunction
+  /** Translate function - duplicate of i18n.t */
+  t: (key: string, options?: Record<string, unknown>) => string
   /**
    * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
    */

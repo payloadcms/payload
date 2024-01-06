@@ -1,7 +1,5 @@
-import type { i18n as Ii18n } from 'i18next'
-
 import type { Permissions } from 'payload/auth'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { CustomPayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedGlobalConfig } from 'payload/types'
 
 import { getTranslation } from 'payload/utilities'
@@ -29,7 +27,7 @@ export type Group = {
 export function groupNavItems(
   entities: EntityToGroup[],
   permissions: Permissions,
-  i18n: Ii18n,
+  i18n: CustomPayloadRequest['i18n'],
 ): Group[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {

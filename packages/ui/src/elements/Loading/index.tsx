@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { LoadingOverlayTypes } from '../../elements/LoadingOverlay/types'
 
@@ -24,7 +24,7 @@ export const LoadingOverlay: React.FC<Props> = ({
   overlayType,
   show = true,
 }) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   return (
     <div
@@ -47,7 +47,7 @@ export const LoadingOverlay: React.FC<Props> = ({
         <div className={`${baseClass}__bar`} />
       </div>
 
-      <span className={`${baseClass}__text`}>{loadingText || t('loading')}</span>
+      <span className={`${baseClass}__text`}>{loadingText || t('general:loading')}</span>
     </div>
   )
 }
@@ -101,12 +101,12 @@ export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({
   type = 'fullscreen',
 }) => {
   const isProcessing = useFormProcessing()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const labels = {
-    create: t('creating'),
-    loading: t('loading'),
-    update: t('updating'),
+    create: t('general:creating'),
+    loading: t('general:loading'),
+    update: t('general:updating'),
   }
 
   return (

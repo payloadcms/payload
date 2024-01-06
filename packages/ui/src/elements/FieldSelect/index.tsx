@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { Field, FieldWithPath } from 'payload/types'
 
@@ -76,7 +76,7 @@ const reduceFields = (
     return [...fieldsToUse, formattedField]
   }, [])
 export const FieldSelect: React.FC<Props> = ({ fields, setSelected }) => {
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const [options] = useState(() => reduceFields(fields, i18n))
   const { dispatchFields, getFields } = useForm()
   const handleChange = (selected) => {

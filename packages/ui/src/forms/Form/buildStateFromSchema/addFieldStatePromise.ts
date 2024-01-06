@@ -4,7 +4,7 @@ import type { TFunction } from 'i18next'
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { NonPresentationalField, SanitizedConfig } from 'payload/types'
+import type { NonPresentationalField, PayloadRequest, SanitizedConfig } from 'payload/types'
 import type { Data, Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -25,7 +25,7 @@ type Args = {
     [key: string]: unknown
   }
   state: Fields
-  t: TFunction
+  t: PayloadRequest['i18n']['t']
   user: User
 }
 

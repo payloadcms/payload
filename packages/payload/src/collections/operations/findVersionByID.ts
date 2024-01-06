@@ -34,7 +34,7 @@ export const findVersionByIDOperation = async <T extends TypeWithID = any>(
     depth,
     disableErrors,
     overrideAccess,
-    req: { locale, payload, t },
+    req: { locale, payload },
     req,
     showHiddenFields,
   } = args
@@ -78,8 +78,8 @@ export const findVersionByIDOperation = async <T extends TypeWithID = any>(
 
     if (!result) {
       if (!disableErrors) {
-        if (!hasWhereAccess) throw new NotFound(t)
-        if (hasWhereAccess) throw new Forbidden(t)
+        if (!hasWhereAccess) throw new NotFound(req.t)
+        if (hasWhereAccess) throw new Forbidden(req.t)
       }
 
       return null
