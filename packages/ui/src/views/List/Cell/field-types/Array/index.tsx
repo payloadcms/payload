@@ -4,7 +4,7 @@ import { useTranslation } from '../../../../../providers/Translation'
 import type { ArrayField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 
 const ArrayCell: React.FC<CellComponentProps<ArrayField, Record<string, unknown>>> = ({
   data,

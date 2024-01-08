@@ -4,7 +4,7 @@ import { useTranslation } from '../../providers/Translation'
 
 import type { LoadingOverlayTypes } from '../../elements/LoadingOverlay/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useFormProcessing } from '../../forms/Form/context'
 import { useLoadingOverlay } from '../../elements/LoadingOverlay'
 import './index.scss'

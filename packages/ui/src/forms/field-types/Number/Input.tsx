@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '../../../providers/Translation'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import useField from '../../useField'
 import './index.scss'
 

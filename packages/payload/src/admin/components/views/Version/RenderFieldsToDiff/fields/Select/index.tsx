@@ -1,5 +1,6 @@
 import type { i18n as Ii18n } from 'i18next'
 
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import { useTranslation } from 'react-i18next'
@@ -7,7 +8,6 @@ import { useTranslation } from 'react-i18next'
 import type { OptionObject, SelectField } from '../../../../../../../fields/config/types'
 import type { Props } from '../types'
 
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
 import './index.scss'

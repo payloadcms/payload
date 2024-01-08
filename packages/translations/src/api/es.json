@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "Clave API",
+    "enableAPIKey": "Habilitar Clave API",
     "newAccountCreated": "Se ha creado una nueva cuenta para que puedas acceder a <a href=\"{{serverURL}}\">{{serverURL}}</a>. Por favor, haz click o copia el siguiente enlace a tu navegador para verificar tu correo: <a href=\"{{verificationURL}}\">{{verificationURL}}</a>.<br> Una vez hayas verificado tu correo, podrás iniciar sesión.",
     "resetYourPassword": "Restablecer tu Contraseña",
+    "verified": "Verificado",
     "verifyYourEmail": "Verifica tu correo",
     "youAreReceivingResetPassword": "Estás recibiendo esto porque tú (o alguien más) ha solicitado restablecer la contraseña de tu cuenta. Por favor haz click en el siguiente enlace o pégalo en tu navegador para completar el proceso:",
     "youDidNotRequestPassword": "Si tú no solicitaste esto, por favor ignora este correo y tu contraseña no se cambiará."
@@ -21,12 +24,24 @@
     "userLocked": "Este usuario ha sido bloqueado debido a que tiene muchos intentos fallidos para iniciar sesión."
   },
   "general": {
+    "createdAt": "Fecha de creación",
     "deletedCountSuccessfully": "Se eliminó {{count}} {{label}} con éxito.",
     "deletedSuccessfully": "Borrado exitosamente.",
+    "email": "Correo electrónico",
     "notFound": "No encontrado",
     "successfullyCreated": "{{label}} creado correctamente.",
+    "updatedAt": "Fecha de modificado",
     "updatedCountSuccessfully": "{{count}} {{label}} actualizado con éxito.",
+    "user": "Usuario",
+    "users": "Usuarios",
     "value": "Valor"
+  },
+  "upload": {
+    "fileName": "Nombre del archivo",
+    "fileSize": "Tamaño del archivo",
+    "height": "Alto",
+    "sizes": "Tamaños",
+    "width": "Ancho"
   },
   "validation": {
     "emailAddress": "Por favor introduce un correo electrónico válido.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Guardado automáticamente con éxito.",
+    "draft": "Borrador",
     "draftSavedSuccessfully": "Borrador guardado con éxito.",
-    "restoredSuccessfully": "Restaurado éxito."
+    "published": "Publicado",
+    "restoredSuccessfully": "Restaurado éxito.",
+    "status": "Estado"
   }
 }

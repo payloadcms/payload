@@ -5,7 +5,7 @@ import { useTranslation } from '../../providers/Translation'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import type { StepNavItem } from '../../elements/StepNav/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useStepNav } from '../../elements/StepNav'
 import { useConfig } from '../../providers/Config'
 import { useEditDepth } from '../../providers/EditDepth'

@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API-nøkkel",
+    "enableAPIKey": "Aktiver API-nøkkel",
     "newAccountCreated": "En ny konto har blitt opprettet for deg på <a href=\"{{serverURL}}\">{{serverURL}}</a> Klikk på lenken nedenfor eller lim inn URLen i nettleseren din for å bekrefte e-postadressen din: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Etter at du har bekreftet e-postadressen din, kan du logge inn.",
     "resetYourPassword": "Tilbakestill passordet ditt",
+    "verified": "Bekreftet",
     "verifyYourEmail": "Bekreft e-postadressen din",
     "youAreReceivingResetPassword": "Du mottar denne e-posten fordi du (eller noen andre) har bedt om tilbakestilling av passordet til kontoen din. Klikk på lenken nedenfor, eller lim den inn i nettleseren din for å fullføre prosessen:",
     "youDidNotRequestPassword": "Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret."
@@ -21,12 +24,24 @@
     "userLocked": "Denne brukeren er låst på grunn av for mange mislykkede innloggingsforsøk."
   },
   "general": {
+    "createdAt": "Opprettet",
     "deletedCountSuccessfully": "Slettet {{count}} {{label}}.",
     "deletedSuccessfully": "Slettet.",
+    "email": "E-post",
     "notFound": "Ikke funnet",
     "successfullyCreated": "{{label}} ble opprettet.",
+    "updatedAt": "Oppdatert",
     "updatedCountSuccessfully": "Oppdaterte {{count}} {{label}} vellykket.",
+    "user": "Bruker",
+    "users": "Brukere",
     "value": "Verdi"
+  },
+  "upload": {
+    "fileName": "Filnavn",
+    "fileSize": "Filstørrelse",
+    "height": "Høyde",
+    "sizes": "Størrelser",
+    "width": "Bredde"
   },
   "validation": {
     "emailAddress": "Vennligst skriv inn en gyldig e-postadresse.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Lagret automatisk.",
+    "draft": "Utkast",
     "draftSavedSuccessfully": "Utkast lagret.",
-    "restoredSuccessfully": "Gjenopprettet."
+    "published": "Publisert",
+    "restoredSuccessfully": "Gjenopprettet.",
+    "status": "Status"
   }
 }

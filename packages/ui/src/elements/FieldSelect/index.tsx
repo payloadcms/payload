@@ -4,7 +4,7 @@ import { useTranslation } from '../../providers/Translation'
 import type { Field, FieldWithPath } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useForm } from '../../forms/Form/context'
 import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath'
 import Label from '../../forms/Label'

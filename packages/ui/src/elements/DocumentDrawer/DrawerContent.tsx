@@ -8,7 +8,7 @@ import type { Fields } from '../../forms/Form/types'
 import type { DocumentDrawerProps } from './types'
 
 import { baseClass } from '.'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import usePayloadAPI from '../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'

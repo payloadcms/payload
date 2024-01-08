@@ -11,6 +11,7 @@ import { PayloadRequest, SanitizedConfig } from 'payload/types'
 import { Permissions, User } from 'payload/auth'
 import { NavWrapper } from './NavWrapper'
 import { NavHamburger } from './NavHamburger'
+import { getTranslation } from '@payloadcms/translations'
 
 import './index.scss'
 
@@ -79,20 +80,18 @@ export const DefaultNav: React.FC<{
 
                 if (type === EntityType.collection) {
                   href = `${admin}/collections/${entity.slug}`
-                  entityLabel = entity.labels.plural['en'] // TODO: this is just a placeholder
-                  // entityLabel = getTranslation(entity.labels.plural, i18n)
+                  entityLabel = getTranslation(entity.labels.plural, i18n)
                   id = `nav-${entity.slug}`
                 }
 
                 if (type === EntityType.global) {
                   href = `${admin}/globals/${entity.slug}`
-                  entityLabel = entity.label['en'] // TODO: this is just a placeholder
-                  // entityLabel = getTranslation(entity.label, i18n)
+                  entityLabel = getTranslation(entity.label, i18n)
                   id = `nav-global-${entity.slug}`
                 }
 
                 const LinkElement = Link || 'a'
-
+                console.log('entityLabel', entityLabel)
                 return (
                   <LinkElement
                     // activeClassName="active"

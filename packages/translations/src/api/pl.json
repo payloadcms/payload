@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "Klucz API",
+    "enableAPIKey": "Aktywuj klucz API",
     "newAccountCreated": "Właśnie utworzono nowe konto, w celu uzyskania dostępu do <a href=\"{{serverURL}}\">{{serverURL}}</a>. Kliknij poniższy link lub wklej go do przeglądarki, aby zweryfikować swój adres email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a>.<br> Po zweryfikowaniu adresu email będziesz mógł się pomyślnie zalogować.",
     "resetYourPassword": "Zresetuj swoje hasło",
+    "verified": "Zweryfikowano",
     "verifyYourEmail": "Zweryfikuj swój email",
     "youAreReceivingResetPassword": "Otrzymałeś tę wiadomość, ponieważ Ty (lub ktoś inny) poprosiłeś o zresetowanie hasła do Twojego konta. Kliknij poniższy link lub wklej go w przeglądarce, aby zakończyć proces:",
     "youDidNotRequestPassword": "Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione."
@@ -21,12 +24,24 @@
     "userLocked": "Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania."
   },
   "general": {
+    "createdAt": "Data utworzenia",
     "deletedCountSuccessfully": "Pomyślnie usunięto {{count}} {{label}}.",
     "deletedSuccessfully": "Pomyślnie usunięto.",
+    "email": "Email",
     "notFound": "Nie znaleziono",
     "successfullyCreated": "Pomyślnie utworzono {{label}}.",
+    "updatedAt": "Data edycji",
     "updatedCountSuccessfully": "Pomyślnie zaktualizowano {{count}} {{label}}.",
+    "user": "użytkownik",
+    "users": "użytkownicy",
     "value": "Wartość"
+  },
+  "upload": {
+    "fileName": "Nazwa pliku",
+    "fileSize": "Rozmiar pliku",
+    "height": "Wysokość",
+    "sizes": "Rozmiary",
+    "width": "Szerokość"
   },
   "validation": {
     "emailAddress": "Wprowadź poprawny adres email.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Pomyślnie zapisano automatycznie.",
+    "draft": "Szkic",
     "draftSavedSuccessfully": "Wersja robocza została pomyślnie zapisana.",
-    "restoredSuccessfully": "Przywrócono pomyślnie."
+    "published": "Opublikowano",
+    "restoredSuccessfully": "Przywrócono pomyślnie.",
+    "status": "Status"
   }
 }

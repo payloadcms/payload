@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "کلید اِی‌پی‌آی",
+    "enableAPIKey": "فعال‌سازی کلید اِی‌پی‌آی",
     "newAccountCreated": "یک نمایه کاربری تازه برای دسترسی شما ساخته شده است <a href=\"{{serverURL}}\">{{serverURL}}</a> لطفاً روی پیوند زیر کلیک کنید یا آدرس زیر را در مرورگر خود قرار دهید تا رایانامه خود را تأیید کنید: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> پس از تایید رایانامه خود، می توانید وارد سیستم شوید.",
     "resetYourPassword": "گذرواژه خود را بازنشانی کنید",
+    "verified": "تأیید شده",
     "verifyYourEmail": "رایانامه خود را تأیید کنید",
     "youAreReceivingResetPassword": "درخواست بازنشانی گذرواژه نمایه توسط شما یا فرد دیگری فرستاده شده است، اگر این درخواست از سمت شما بوده روی پیوند مقابل کلیک کنید یا در مرورگر وب خود پیوند را کپی کنید تا مراحل بازنشانی گذرواژه تکمیل شود، در غیر این صورت جای نگرانی نیست این پیام را نادیده بگیرید:",
     "youDidNotRequestPassword": "اگر شما این درخواست را ندادید، لطفاً این رایانامه را نادیده بگیرید و گذرواژه شما تغییری نخواهد کرد."
@@ -21,12 +24,24 @@
     "userLocked": "این کاربر به دلیل تلاش های زیاد برای ورود ناموفق قفل شده است."
   },
   "general": {
+    "createdAt": "ساخته شده در",
     "deletedCountSuccessfully": "تعداد {{count}} {{label}} با موفقیت پاک گردید.",
     "deletedSuccessfully": "با موفقیت حذف شد.",
+    "email": "رایانامه",
     "notFound": "یافت نشد",
     "successfullyCreated": "{{label}} با موفقیت ساخته شد.",
+    "updatedAt": "بروز شده در",
     "updatedCountSuccessfully": "تعداد {{count}} با عنوان {{label}} با موفقیت بروزرسانی شدند.",
+    "user": "کاربر",
+    "users": "کاربران",
     "value": "مقدار"
+  },
+  "upload": {
+    "fileName": "نام رسانه",
+    "fileSize": "حجم رسانه",
+    "height": "ارتفاع",
+    "sizes": "اندازه‌ها",
+    "width": "پهنا"
   },
   "validation": {
     "emailAddress": "لطفاً یک نشانی رایانامه معتبر وارد کنید.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "با موفقیت ذخیره خودکار شد.",
+    "draft": "پیش‌نویس",
     "draftSavedSuccessfully": "پیش‌نویس با موفقیت ذخیره شد.",
-    "restoredSuccessfully": "با موفقیت بازیابی شد."
+    "published": "انتشار یافته",
+    "restoredSuccessfully": "با موفقیت بازیابی شد.",
+    "status": "وضعیت"
   }
 }

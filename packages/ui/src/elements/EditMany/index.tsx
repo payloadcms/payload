@@ -5,7 +5,7 @@ import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import Form from '../../forms/Form'
 import { useForm } from '../../forms/Form/context'
 import RenderFields from '../../forms/RenderFields'

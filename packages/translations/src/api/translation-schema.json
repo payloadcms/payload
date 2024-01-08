@@ -8,6 +8,12 @@
     "authentication": {
       "additionalProperties": false,
       "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "enableAPIKey": {
+          "type": "string"
+        },
         "newAccountCreated": {
           "type": "string"
         },
@@ -22,14 +28,20 @@
         },
         "youDidNotRequestPassword": {
           "type": "string"
+        },
+        "verified": {
+          "type": "string"
         }
       },
       "required": [
+        "apiKey",
+        "enableAPIKey",
         "newAccountCreated",
         "resetYourPassword",
         "verifyYourEmail",
         "youAreReceivingResetPassword",
-        "youDidNotRequestPassword"
+        "youDidNotRequestPassword",
+        "verified"
       ],
       "type": "object"
     },
@@ -268,16 +280,31 @@
     "general": {
       "additionalProperties": false,
       "properties": {
+        "createdAt": {
+          "type": "string"
+        },
         "deletedCountSuccessfully": {
           "type": "string"
         },
         "deletedSuccessfully": {
           "type": "string"
         },
+        "email": {
+          "type": "string"
+        },
         "notFound": {
           "type": "string"
         },
         "successfullyCreated": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "users": {
+          "type": "string"
+        },
+        "updatedAt": {
           "type": "string"
         },
         "updatedCountSuccessfully": {
@@ -288,10 +315,15 @@
         }
       },
       "required": [
+        "createdAt",
         "deletedCountSuccessfully",
         "deletedSuccessfully",
+        "email",
         "notFound",
         "successfullyCreated",
+        "user",
+        "users",
+        "updatedAt",
         "updatedCountSuccessfully",
         "value"
       ],
@@ -356,79 +388,28 @@
     "upload": {
       "additionalProperties": false,
       "properties": {
-        "crop": {
-          "type": "string"
-        },
-        "cropToolDescription": {
-          "type": "string"
-        },
-        "dragAndDrop": {
-          "type": "string"
-        },
-        "dragAndDropHere": {
-          "type": "string"
-        },
-        "editImage": {
-          "type": "string"
-        },
-        "focalPoint": {
-          "type": "string"
-        },
-        "focalPointDescription": {
-          "type": "string"
-        },
-        "fileName": {
-          "type": "string"
-        },
-        "fileSize": {
+        "width": {
           "type": "string"
         },
         "height": {
           "type": "string"
         },
-        "lessInfo": {
+        "fileSize": {
           "type": "string"
         },
-        "moreInfo": {
-          "type": "string"
-        },
-        "previewSizes": {
-          "type": "string"
-        },
-        "selectCollectionToBrowse": {
-          "type": "string"
-        },
-        "selectFile": {
-          "type": "string"
-        },
-        "setCropArea": {
-          "type": "string"
-        },
-        "setFocalPoint": {
+        "fileName": {
           "type": "string"
         },
         "sizes": {
           "type": "string"
-        },
-        "sizesFor": {
-          "type": "string"
-        },
-        "width": {
-          "type": "string"
         }
       },
       "required": [
-        "dragAndDropHere",
-        "fileName",
-        "fileSize",
+        "width",
         "height",
-        "lessInfo",
-        "moreInfo",
-        "selectCollectionToBrowse",
-        "selectFile",
-        "dragAndDrop",
-        "sizes",
-        "width"
+        "fileSize",
+        "fileName",
+        "sizes"
       ],
       "type": "object"
     },
@@ -507,20 +488,33 @@
         },
         "restoredSuccessfully": {
           "type": "string"
+        },
+        "draft": {
+          "type": "string"
+        },
+        "published": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
         }
       },
       "required": [
         "autosavedSuccessfully",
         "draftSavedSuccessfully",
-        "restoredSuccessfully"
+        "restoredSuccessfully",
+        "draft",
+        "published",
+        "status"
       ],
       "type": "object"
     }
   },
   "required": [
-    "general",
     "authentication",
+    "general",
     "error",
+    "upload",
     "validation",
     "version"
   ],

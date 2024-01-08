@@ -6,7 +6,7 @@ import type { CodeField } from 'payload/types'
 import type { CellComponentProps, Props } from './types'
 
 import { fieldAffectsData } from 'payload/types'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '../../../providers/Config'
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent'
 import cellComponents from './field-types'

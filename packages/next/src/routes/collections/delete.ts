@@ -1,7 +1,8 @@
 import httpStatus from 'http-status'
 
 import type { PayloadRequest, Where } from 'payload/types'
-import { getTranslation, isNumber } from 'payload/utilities'
+import { isNumber } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { deleteOperation } from 'payload/operations'
 
 // TODO(JARROD): pattern to catch errors and return correct Response

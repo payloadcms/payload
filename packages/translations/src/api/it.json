@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "Chiave API",
+    "enableAPIKey": "Abilita la Chiave API",
     "newAccountCreated": "Un nuovo account è appena stato creato per te per accedere a <a href=\"{{serverURL}}\">{{serverURL}}</a> Clicca sul seguente link o incolla l'URL qui sotto nel browser per verificare la tua email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Dopo aver verificato la tua email, sarai in grado di effettuare il log in con successo.",
     "resetYourPassword": "Modifica la tua Password",
+    "verified": "Verificato",
     "verifyYourEmail": "Verifica la tua email",
     "youAreReceivingResetPassword": "Ricevi questo messaggio perché tu (o qualcun altro) hai richiesto la modifica della password per il tuo account. Clicca sul seguente link o incollalo nel browser per completare il processo:",
     "youDidNotRequestPassword": "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata."
@@ -21,12 +24,24 @@
     "userLocked": "Questo utente è bloccato a causa di troppi tentativi di accesso non riusciti."
   },
   "general": {
+    "createdAt": "Creato il",
     "deletedCountSuccessfully": "{{count}} {{label}} eliminato con successo.",
     "deletedSuccessfully": "Eliminato con successo.",
+    "email": "Email",
     "notFound": "Non Trovato",
     "successfullyCreated": "{{label}} creato con successo.",
+    "updatedAt": "Aggiornato il",
     "updatedCountSuccessfully": "{{count}} {{label}} aggiornato con successo.",
+    "user": "Utente",
+    "users": "Utenti",
     "value": "Valore"
+  },
+  "upload": {
+    "fileName": "Nome File",
+    "fileSize": "Dimensione File",
+    "height": "Altezza",
+    "sizes": "Formati",
+    "width": "Larghezza"
   },
   "validation": {
     "emailAddress": "Si prega di inserire un indirizzo email valido.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Salvataggio automatico riuscito.",
+    "draft": "Bozza",
     "draftSavedSuccessfully": "Bozza salvata con successo.",
-    "restoredSuccessfully": "Ripristinato con successo."
+    "published": "Pubblicato",
+    "restoredSuccessfully": "Ripristinato con successo.",
+    "status": "Stato"
   }
 }

@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API ключ",
+    "enableAPIKey": "Активувати API ключ",
     "newAccountCreated": "Новий обліковий запис було створено, щоб отримати доступ до <a href=\"{{serverURL}}\">{{serverURL}}</a>, будь ласка, натисніть на наступне посилання, або вставте посилання в адресну строку вашого браузера, щоб підтвердити вашу пошту: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Після Підтвердження вашої пошти, ви матимете змогу зайти в систему.",
     "resetYourPassword": "Скинути ваш пароль",
+    "verified": "Підтверджено",
     "verifyYourEmail": "Підтвердити пошту",
     "youAreReceivingResetPassword": "Ви отримали це повідомлення, бо ви (або хтось інший) створив запит на скидання пароля до вашого облікового запису. Будь ласка, натисніть на наступне посилання, або вставте посилання в адресний рядок вашого браузера, щоб завершити процес:",
     "youDidNotRequestPassword": "Якщо ви не сторювали запит на це, будь ласка, ігноруйте це повідомлення і пароль залишиться без змін"
@@ -21,12 +24,24 @@
     "userLocked": "Цей користувач заблокований через велику кількість невдалих спроб входу."
   },
   "general": {
+    "createdAt": "Дата створення",
     "deletedCountSuccessfully": "Успішно видалено {{count}} {{label}}.",
     "deletedSuccessfully": "Успішно видалено.",
+    "email": "Email",
     "notFound": "Не знайдено",
     "successfullyCreated": "{{label}} успішно створено.",
+    "updatedAt": "Змінено",
     "updatedCountSuccessfully": "Успішно оновлено {{count}} {{label}}.",
+    "user": "Користувач",
+    "users": "Користувачі",
     "value": "Значення"
+  },
+  "upload": {
+    "fileName": "Назва файлу",
+    "fileSize": "Розмір файлу",
+    "height": "Висота",
+    "sizes": "Розміри",
+    "width": "Ширина"
   },
   "validation": {
     "emailAddress": "Будь ласка, введіть валідну email адресу.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Автозбереження успішно виконано.",
+    "draft": "Чернетка",
     "draftSavedSuccessfully": "Чернетка успішно збережена.",
-    "restoredSuccessfully": "Відновлено успішно."
+    "published": "Опубліковано",
+    "restoredSuccessfully": "Відновлено успішно.",
+    "status": "Статус"
   }
 }

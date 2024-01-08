@@ -2,18 +2,27 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 const serverTranslationKeys = [
-  'general:deletedCountSuccessfully',
-  'general:deletedSuccessfully',
-  'general:notFound',
-  'general:successfullyCreated',
-  'general:updatedCountSuccessfully',
-  'general:value',
-
+  'authentication:api',
+  'authentication:apiKey',
+  'authentication:enableAPIKey',
   'authentication:newAccountCreated',
   'authentication:resetYourPassword',
   'authentication:verifyYourEmail',
   'authentication:youAreReceivingResetPassword',
   'authentication:youDidNotRequestPassword',
+  'authentication:verified',
+
+  'general:createdAt',
+  'general:deletedCountSuccessfully',
+  'general:deletedSuccessfully',
+  'general:email',
+  'general:notFound',
+  'general:successfullyCreated',
+  'general:user',
+  'general:users',
+  'general:updatedAt',
+  'general:updatedCountSuccessfully',
+  'general:value',
 
   'error:deletingFile',
   'error:emailOrPasswordIncorrect',
@@ -25,6 +34,12 @@ const serverTranslationKeys = [
   'error:unableToUpdateCount',
   'error:unauthorized',
   'error:userLocked',
+
+  'upload:width',
+  'upload:height',
+  'upload:fileSize',
+  'upload:fileName',
+  'upload:sizes',
 
   'validation:emailAddress',
   'validation:enterNumber',
@@ -44,6 +59,9 @@ const serverTranslationKeys = [
   'version:autosavedSuccessfully',
   'version:draftSavedSuccessfully',
   'version:restoredSuccessfully',
+  'version:draft',
+  'version:published',
+  'version:status',
 ]
 
 const clientTranslationKeys = [

@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API Nyckel",
+    "enableAPIKey": "Aktivera API nyckel",
     "newAccountCreated": "Ett nytt konto har precis skapats som du kan komma åt <a href=\"{{serverURL}}\">{{serverURL}}</a> Klicka på följande länk eller klistra in webbadressen nedan i din webbläsare för att verifiera din e-post: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Efter att ha verifierat din e-post kommer du att kunna logga in framgångsrikt.",
     "resetYourPassword": "Återställ Ditt Lösenord",
+    "verified": "Verifierad",
     "verifyYourEmail": "Verifiera din epost",
     "youAreReceivingResetPassword": "Du får detta för att du (eller någon annan) har begärt återställning av lösenordet för ditt konto. Klicka på följande länk eller klistra in den i din webbläsare för att slutföra processen:",
     "youDidNotRequestPassword": "Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat."
@@ -21,12 +24,24 @@
     "userLocked": "Den här användaren är låst på grund av för många misslyckade inloggningsförsök."
   },
   "general": {
+    "createdAt": "Skapad Vid",
     "deletedCountSuccessfully": "Raderade {{count}} {{label}} framgångsrikt.",
     "deletedSuccessfully": "Togs bort framgångsrikt.",
+    "email": "E-post",
     "notFound": "Hittades inte",
     "successfullyCreated": "{{label}} skapades framgångsrikt.",
+    "updatedAt": "Uppdaterades Vid",
     "updatedCountSuccessfully": "Uppdaterade {{count}} {{label}} framgångsrikt.",
+    "user": "Användare",
+    "users": "Användare",
     "value": "Värde"
+  },
+  "upload": {
+    "fileName": "Filnamn",
+    "fileSize": "Filstorlek",
+    "height": "Höjd",
+    "sizes": "Storlekar",
+    "width": "Bredd"
   },
   "validation": {
     "emailAddress": "Vänligen ange en giltig e-postadress.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Autosparades framgångsrikt.",
+    "draft": "Utkast",
     "draftSavedSuccessfully": "Utkastet sparades framgångsrikt.",
-    "restoredSuccessfully": "Återställd framgångsrikt."
+    "published": "Publicerad",
+    "restoredSuccessfully": "Återställd framgångsrikt.",
+    "status": "Status"
   }
 }

@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "Clé API",
+    "enableAPIKey": "Activer la clé API",
     "newAccountCreated": "Un nouveau compte vient d'être créé pour vous permettre d'accéder <a href=\"{{serverURL}}\">{{serverURL}}</a>. Veuillez cliquer sur le lien suivant ou collez l'URL ci-dessous dans votre navigateur pour vérifier votre adresse e-mail: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br>. Après avoir vérifié votre adresse e-mail, vous pourrez vous connecter avec succès.",
     "resetYourPassword": "Réinitialisez votre mot de passe",
+    "verified": "Vérifié",
     "verifyYourEmail": "Vérifiez votre e-mail",
     "youAreReceivingResetPassword": "Vous recevez ceci parce que vous (ou quelqu'un d'autre) avez demandé la réinitialisation du mot de passe de votre compte. Veuillez cliquer sur le lien suivant ou le coller dans votre navigateur pour terminer le processus :",
     "youDidNotRequestPassword": "Si vous ne l'avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé."
@@ -21,12 +24,24 @@
     "userLocked": "Cet utilisateur est verrouillé en raison d'un trop grand nombre de tentatives de connexion infructueuses."
   },
   "general": {
+    "createdAt": "Créé(e) à",
     "deletedCountSuccessfully": "{{count}} {{label}} supprimé avec succès.",
     "deletedSuccessfully": "Supprimé(e) avec succès.",
+    "email": "E-mail",
     "notFound": "Pas trouvé",
     "successfullyCreated": "{{label}} créé(e) avec succès.",
+    "updatedAt": "Modifié le",
     "updatedCountSuccessfully": "{{count}} {{label}} mis à jour avec succès.",
+    "user": "Utilisateur",
+    "users": "Utilisateurs",
     "value": "Valeur"
+  },
+  "upload": {
+    "fileName": "Nom du fichier",
+    "fileSize": "Taille du fichier",
+    "height": "Hauteur",
+    "sizes": "Tailles",
+    "width": "Largeur"
   },
   "validation": {
     "emailAddress": "S'il vous plaît, veuillez entrer une adresse e-mail valide.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Enregistrement automatique réussi.",
+    "draft": "Brouillon",
     "draftSavedSuccessfully": "Brouillon enregistré avec succès.",
-    "restoredSuccessfully": "Restauré(e) avec succès."
+    "published": "Publié",
+    "restoredSuccessfully": "Restauré(e) avec succès.",
+    "status": "Statut"
   }
 }

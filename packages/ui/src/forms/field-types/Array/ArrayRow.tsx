@@ -6,7 +6,7 @@ import type { Row } from '../../Form/types'
 import type { RowLabel as RowLabelType } from '../../RowLabel/types'
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { Collapsible } from '../../../elements/Collapsible'
 import { ErrorPill } from '../../../elements/ErrorPill'

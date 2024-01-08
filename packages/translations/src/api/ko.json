@@ -1,7 +1,10 @@
 {
   "authentication": {
+    "apiKey": "API 키",
+    "enableAPIKey": "API 키 활성화",
     "newAccountCreated": "<a href=\"{{serverURL}}\">{{serverURL}}</a>에 접근할 수 있는 새로운 계정이 생성되었습니다. 다음 링크를 클릭하거나 브라우저에 URL을 붙여넣으세요: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> 이메일을 확인한 후에 로그인할 수 있습니다.",
     "resetYourPassword": "비밀번호 재설정",
+    "verified": "확인됨",
     "verifyYourEmail": "이메일을 확인해주세요",
     "youAreReceivingResetPassword": "당신(혹은 다른 사람)이 계정의 비밀번호 초기화를 요청했기 때문에 이 이메일을 받았습니다. 다음 링크를 클릭하거나 브라우저에 붙여넣어 비밀번호를 초기화하세요:",
     "youDidNotRequestPassword": "비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요."
@@ -20,12 +23,24 @@
     "userLocked": "이 사용자는 로그인 실패 횟수가 너무 많아 잠겼습니다."
   },
   "general": {
+    "createdAt": "생성 일시",
     "deletedCountSuccessfully": "{{count}}개의 {{label}}를 삭제했습니다.",
     "deletedSuccessfully": "삭제되었습니다.",
+    "email": "이메일",
     "notFound": "찾을 수 없음",
     "successfullyCreated": "{{label}}이(가) 생성되었습니다.",
+    "updatedAt": "업데이트 일시",
     "updatedCountSuccessfully": "{{count}}개의 {{label}}을(를) 업데이트했습니다.",
+    "user": "사용자",
+    "users": "사용자",
     "value": "값"
+  },
+  "upload": {
+    "fileName": "파일 이름",
+    "fileSize": "파일 크기",
+    "height": "높이",
+    "sizes": "크기",
+    "width": "너비"
   },
   "validation": {
     "emailAddress": "유효한 이메일 주소를 입력하세요.",
@@ -45,7 +60,10 @@
   },
   "version": {
     "autosavedSuccessfully": "자동 저장이 완료되었습니다.",
+    "draft": "초안",
     "draftSavedSuccessfully": "초안이 저장되었습니다.",
-    "restoredSuccessfully": "복원이 완료되었습니다."
+    "published": "게시됨",
+    "restoredSuccessfully": "복원이 완료되었습니다.",
+    "status": "상태"
   }
 }

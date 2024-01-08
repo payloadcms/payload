@@ -7,7 +7,7 @@ import type { Where, Field } from 'payload/types'
 import type { ListDrawerProps } from './types'
 
 import { baseClass } from '.'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import usePayloadAPI from '../../hooks/usePayloadAPI'
 import { useUseTitleField } from '../../hooks/useUseAsTitle'
 import Label from '../../forms/Label'

@@ -4,7 +4,7 @@ import { useTranslation } from '../../../providers/Translation'
 
 import type { SanitizedConfig } from 'payload/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { isFieldRTL } from '../shared'
 import './index.scss'
 import useField from '../../useField'

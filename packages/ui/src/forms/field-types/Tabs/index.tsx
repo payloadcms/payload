@@ -7,7 +7,7 @@ import type { DocumentPreferences } from 'payload/types'
 import type { Props } from './types'
 
 import { tabHasName } from 'payload/types'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
 import { useCollapsible } from '../../../elements/Collapsible/provider'
 import { ErrorPill } from '../../../elements/ErrorPill'

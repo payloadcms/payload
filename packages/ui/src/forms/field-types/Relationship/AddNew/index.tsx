@@ -6,7 +6,7 @@ import type { EditViewProps } from '../../../../views/types'
 import type { Value } from '../types'
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Button } from '../../../../elements/Button'
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer'
 import Popup from '../../../../elements/Popup'

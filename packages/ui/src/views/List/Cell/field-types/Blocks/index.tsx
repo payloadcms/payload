@@ -4,7 +4,7 @@ import { useTranslation } from '../../../../../providers/Translation'
 import type { BlockField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 
 const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field }) => {
   const { i18n, t } = useTranslation()

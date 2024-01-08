@@ -1,3 +1,4 @@
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -5,7 +6,6 @@ import type { FieldWithSubFields } from '../../../../../../../fields/config/type
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
 import Label from '../../Label'
 import './index.scss'
 

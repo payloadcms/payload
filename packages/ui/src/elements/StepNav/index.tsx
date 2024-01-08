@@ -5,7 +5,7 @@ import { useTranslation } from '../../providers/Translation'
 import type { Context as ContextType } from './types'
 
 import IconGraphic from '../../graphics/Icon'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '../../providers/Config'
 import './index.scss'
 

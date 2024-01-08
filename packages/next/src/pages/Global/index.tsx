@@ -18,7 +18,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
 // import i18n from 'i18next'
-// import { getTranslation } from 'payload/utilities'
+// import { getTranslation } from '@payloadcms/translations'
 
 export const generateMetadata = async ({
   config,

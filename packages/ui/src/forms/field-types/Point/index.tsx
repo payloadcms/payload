@@ -5,7 +5,7 @@ import { useTranslation } from '../../../providers/Translation'
 import type { Props } from './types'
 
 import { point } from 'payload/fields/validations'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'

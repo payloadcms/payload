@@ -5,7 +5,7 @@ import { useTranslation } from '../../../providers/Translation'
 import type { Props } from './types'
 
 import { textarea } from 'payload/fields/validations'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
 import useField from '../../useField'

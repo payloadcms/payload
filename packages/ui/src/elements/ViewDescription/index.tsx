@@ -4,7 +4,7 @@ import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import './index.scss'
 import { isComponent } from './types'
 

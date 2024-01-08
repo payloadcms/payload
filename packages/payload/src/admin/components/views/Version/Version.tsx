@@ -1,3 +1,4 @@
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRouteMatch } from 'react-router-dom'
@@ -9,7 +10,6 @@ import type { StepNavItem } from '../../elements/StepNav/types'
 import type { CompareOption, Props } from './types'
 
 import { fieldAffectsData } from '../../../../fields/config/types'
-import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { formatDate } from '../../../utilities/formatDate'
 import { Gutter } from '../../elements/Gutter'

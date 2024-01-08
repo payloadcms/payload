@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API Açarı",
+    "enableAPIKey": "API açarını aktivləşdir",
     "newAccountCreated": "Sizin üçün yeni hesab yaradıldı. Zəhmət olmasa, e-poçtunuzu doğrulamaq üçün aşağıdakı linke klikləyin: <a href=\"{{verificationURL}}\">{{verificationURL}}</a>. E-poçtunuzu doğruladıqdan sonra uğurla daxil ola bilərsiniz.",
     "resetYourPassword": "Şifrənizi sıfırlayın",
+    "verified": "Doğrulanmış",
     "verifyYourEmail": "E-poçtunuzu doğrulayın",
     "youAreReceivingResetPassword": "Siz (və ya başqası) hesabınız üçün parolun sıfırlanmasını tələb etdiyiniz üçün bunu alırsınız. Prosesi tamamlamaq üçün zəhmət olmasa aşağıdakı linkə klikləyin:",
     "youDidNotRequestPassword": "Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq."
@@ -22,12 +25,24 @@
     "userLocked": "Bu istifadəçi çoxsaylı uğursuz giriş cəhdləri səbəbindən kilidlənib."
   },
   "general": {
+    "createdAt": "Yaradıldığı tarix",
     "deletedCountSuccessfully": "{{count}} {{label}} uğurla silindi.",
     "deletedSuccessfully": "Uğurla silindi.",
+    "email": "Elektron poçt",
     "notFound": "Tapılmadı",
     "successfullyCreated": "{{label}} uğurla yaradıldı.",
+    "updatedAt": "Yeniləndiyi tarix",
     "updatedCountSuccessfully": "{{count}} {{label}} uğurla yeniləndi.",
+    "user": "İstifadəçi",
+    "users": "İstifadəçilər",
     "value": "Dəyər"
+  },
+  "upload": {
+    "fileName": "Faylın Adı",
+    "fileSize": "Faylım Ölçüsü",
+    "height": "Hündürlük",
+    "sizes": "Ölçülər",
+    "width": "En"
   },
   "validation": {
     "emailAddress": "Xahiş edirik doğru elektron poçt ünvanını daxil edin.",
@@ -47,7 +62,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Uğurla avtomatik olaraq yadda saxlandı.",
+    "draft": "Qaralama",
     "draftSavedSuccessfully": "Qaralama uğurla yadda saxlandı.",
-    "restoredSuccessfully": "Uğurla bərpa edildi."
+    "published": "Dərc edilmiş",
+    "restoredSuccessfully": "Uğurla bərpa edildi.",
+    "status": "Status"
   }
 }

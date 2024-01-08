@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API-kulcs",
+    "enableAPIKey": "API-kulcs engedélyezése",
     "newAccountCreated": "Létrehoztunk egy új fiókot, amellyel hozzáférhet a következőhöz <a href=\"{{serverURL}}\"> {{serverURL}} </a> Kérjük, kattintson a következő linkre, vagy illessze be az alábbi URL-t a böngészőbe az e-mail-cím ellenőrzéséhez : <a href=\"{{verificationURL}}\"> {{verificationURL}} </a> <br> Az e-mail-cím ellenőrzése után sikeresen be tud majd jelentkezni.",
     "resetYourPassword": "Jelszó visszaállítása",
+    "verified": "Megerősítve",
     "verifyYourEmail": "Erősítse meg az e-mail címét",
     "youAreReceivingResetPassword": "Ezt azért kapja, mert Ön (vagy valaki más) kérte fiókja jelszavának visszaállítását. A folyamat befejezéséhez kattintson a következő linkre, vagy illessze be böngészőjébe:",
     "youDidNotRequestPassword": "Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad."
@@ -21,12 +24,24 @@
     "userLocked": "Ez a felhasználó túl sok sikertelen bejelentkezési kísérlet miatt zárolva van."
   },
   "general": {
+    "createdAt": "Létrehozva:",
     "deletedCountSuccessfully": "{{count}} {{label}} sikeresen törölve.",
     "deletedSuccessfully": "Sikeresen törölve.",
+    "email": "E-mail",
     "notFound": "Nem található",
     "successfullyCreated": "{{label}} sikeresen létrehozva.",
+    "updatedAt": "Frissítve:",
     "updatedCountSuccessfully": "{{count}} {{label}} sikeresen frissítve.",
+    "user": "Felhasználó",
+    "users": "Felhasználók",
     "value": "Érték"
+  },
+  "upload": {
+    "fileName": "Fájlnév",
+    "fileSize": "Fájl mérete",
+    "height": "Magasság",
+    "sizes": "Méretek",
+    "width": "Szélesség"
   },
   "validation": {
     "emailAddress": "Kérjük, adjon meg egy érvényes e-mail címet.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Automatikus mentés sikeres.",
+    "draft": "Piszkozat",
     "draftSavedSuccessfully": "A piszkozat sikeresen mentve.",
-    "restoredSuccessfully": "Sikeresen visszaállítva."
+    "published": "Közzétett",
+    "restoredSuccessfully": "Sikeresen visszaállítva.",
+    "status": "Állapot"
   }
 }

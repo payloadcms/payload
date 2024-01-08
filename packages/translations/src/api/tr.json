@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API Anahtarı",
+    "enableAPIKey": "Api anahtarını etkinleştir",
     "newAccountCreated": "<0>{{serverURL}}</0> sitesinde adınıza yeni bir hesap oluşturuldu. E-postanızı doğrulamak için bağlantıya tıklayabilirsiniz: <1>{{verificationURL}}</1><br> E-postanızı doğruladıktan sonra siteye hesap bilgilerinizle giriş yapabilirsiniz.",
     "resetYourPassword": "Parolanızı Sıfırlayın",
+    "verified": "Doğrulandı",
     "verifyYourEmail": "E-postanızı doğrulayın",
     "youAreReceivingResetPassword": "Siz veya bir başkası hesabınızın parolasını sıfırlama isteğinde bulunduğu için bu e-postayı alıyorsunuz. İşlemi tamamlamak için lütfen aşağıdaki bağlantıya tıklayın veya bağlantı adresini tarayıcınızın adres yazma bölümüne kopyalayın.",
     "youDidNotRequestPassword": "Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz."
@@ -21,12 +24,24 @@
     "userLocked": "Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin."
   },
   "general": {
+    "createdAt": "Oluşturma tarihi",
     "deletedCountSuccessfully": "{{count}} {{label}} başarıyla silindi.",
     "deletedSuccessfully": "Başarıyla silindi.",
+    "email": "E-posta",
     "notFound": "Bulunamadı",
     "successfullyCreated": "{{label}} başarıyla oluşturuldu.",
+    "updatedAt": "Güncellenme tarihi",
     "updatedCountSuccessfully": "{{count}} {{label}} başarıyla güncellendi.",
+    "user": "kullanıcı",
+    "users": "kullanıcı",
     "value": "Değer"
+  },
+  "upload": {
+    "fileName": "Dosya adı",
+    "fileSize": "Dosya boyutu",
+    "height": "Yükseklik",
+    "sizes": "Boyutlar",
+    "width": "Genişlik"
   },
   "validation": {
     "emailAddress": "Lütfen geçerli bir e-posta adresi girin.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Otomatik kaydetme başarılı",
+    "draft": "Taslak",
     "draftSavedSuccessfully": "Taslak başarıyla kaydedildi.",
-    "restoredSuccessfully": "Geri getirme başarılı."
+    "published": "Yayınlandı",
+    "restoredSuccessfully": "Geri getirme başarılı.",
+    "status": "Durum"
   }
 }

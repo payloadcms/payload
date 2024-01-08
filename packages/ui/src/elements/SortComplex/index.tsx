@@ -8,7 +8,7 @@ import type { Props } from './types'
 
 import { fieldAffectsData } from 'payload/types'
 import { sortableFieldTypes } from 'payload/fields/index'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useSearchParams } from '../../providers/SearchParams'
 import ReactSelect from '../ReactSelect'
 import './index.scss'

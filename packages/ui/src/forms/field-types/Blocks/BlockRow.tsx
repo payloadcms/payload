@@ -6,7 +6,7 @@ import type { UseDraggableSortableReturn } from '../../../elements/DraggableSort
 import type { Row } from '../../Form/types'
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Collapsible } from '../../../elements/Collapsible'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import Pill from '../../../elements/Pill'

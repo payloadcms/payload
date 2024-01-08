@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API-sleutel",
+    "enableAPIKey": "Activeer API-sleutel",
     "newAccountCreated": "Er is zojuist een nieuw account voor u aangemaakt waarmee u toegang krijgt tot <a href=\"{{serverURL}}\">{{serverURL}}</a>. Klik op de volgende link, of plak onderstaande URL in uw browser om uw e-mailadres te verifiëren: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Na de verificatie van uw e-mail kunt u succesvol inloggen.",
     "resetYourPassword": "Reset uw wachtwoord",
+    "verified": "Geverifieerd",
     "verifyYourEmail": "Verifieer uw e-mailadres",
     "youAreReceivingResetPassword": "U ontvangt dit omdat u (of iemand anders) het wachtwoord voor uw account opnieuw heeft aangevraagd. Klik op de volgende link, of plak deze in uw browser om het proces te voltooien:",
     "youDidNotRequestPassword": "Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven."
@@ -21,12 +24,24 @@
     "userLocked": "Deze gebruiker is vergrendeld wegens te veel mislukte inlogpogingen."
   },
   "general": {
+    "createdAt": "Aangemaakt op",
     "deletedCountSuccessfully": "{{count}} {{label}} succesvol verwijderd.",
     "deletedSuccessfully": "Succesvol verwijderd.",
+    "email": "E-mail",
     "notFound": "Niet gevonden",
     "successfullyCreated": "{{label}} succesvol aangemaakt.",
+    "updatedAt": "Aangepast op",
     "updatedCountSuccessfully": "{{count}} {{label}} succesvol bijgewerkt.",
+    "user": "Gebruiker",
+    "users": "Gebruikers",
     "value": "Waarde"
+  },
+  "upload": {
+    "fileName": "Bestandsnaam",
+    "fileSize": "Bestandsgrootte",
+    "height": "Hoogte",
+    "sizes": "Groottes",
+    "width": "Breedte"
   },
   "validation": {
     "emailAddress": "Voer een geldig e-mailadres in.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Succesvol automatisch bewaard.",
+    "draft": "Concept",
     "draftSavedSuccessfully": "Concept succesvol bewaard.",
-    "restoredSuccessfully": "Herstelling succesvol."
+    "published": "Gepubliceerd",
+    "restoredSuccessfully": "Herstelling succesvol.",
+    "status": "Status"
   }
 }

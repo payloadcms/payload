@@ -1,3 +1,4 @@
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -6,7 +7,6 @@ import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
 import { fieldAffectsData } from '../../../../../../../fields/config/types'
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
 import getUniqueListBy from '../../../../../../../utilities/getUniqueListBy'
 import Label from '../../Label'
 import './index.scss'

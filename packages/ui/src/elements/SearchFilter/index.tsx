@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import useDebounce from '../../hooks/useDebounce'
 import { Search } from '../../icons/Search'
 import { useSearchParams } from '../../providers/SearchParams'

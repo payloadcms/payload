@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API Key",
+    "enableAPIKey": "เปิดใช้ API Key",
     "newAccountCreated": "ระบบได้สร้างบัญชีผู้ใช้ให้คุณสำหรับเข้าใช้งาน <a href=\"{{serverURL}}\">{{serverURL}}</a> เรียบร้อยแล้ว กรุณากดลิงก์ด้านล่างเพื่อยืนยันอีเมล หลังจากยืนยันอีเมลเสร็จสิ้น คุณจะสามารถเข้าใช้งานระบบได้",
     "resetYourPassword": "รีเซ็ตรหัสผ่านของคุณ",
+    "verified": "ยืนยันบััญชีแล้ว",
     "verifyYourEmail": "ยืนยันอีเมลของคุณ",
     "youAreReceivingResetPassword": "คุณได้รับอีเมลนี้เนื่องจากคุณ (หรือคนอื่น) ได้ร้องขอให้รีเซ็ตรหัสผ่านของบัญชีของคุณ กรุณากดลิงก์ด้านล่างเพื่อดำเนินการรีเซ็ตรหัสผ่านต่อ:",
     "youDidNotRequestPassword": "หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม"
@@ -21,12 +24,24 @@
     "userLocked": "บัญชีนี้ถูกล็อกเนื่องจากมีการพยายามเข้าสู่ระบบมากเกินไป"
   },
   "general": {
+    "createdAt": "สร้างเมื่อ",
     "deletedCountSuccessfully": "Deleted {{count}} {{label}} successfully.",
     "deletedSuccessfully": "ลบสำเร็จ",
+    "email": "อีเมล",
     "notFound": "ไม่พบ",
     "successfullyCreated": "สร้าง {{label}} สำเร็จ",
+    "updatedAt": "แก้ไขเมื่อ",
     "updatedCountSuccessfully": "อัปเดต {{count}} {{label}} เรียบร้อยแล้ว",
+    "user": "ผู้ใช้",
+    "users": "ผู้ใช้",
     "value": "ค่า"
+  },
+  "upload": {
+    "fileName": "ชื่อไฟล์",
+    "fileSize": "ขนาดไฟล์",
+    "height": "ความสูง",
+    "sizes": "ขนาด",
+    "width": "ความกว้าง"
   },
   "validation": {
     "emailAddress": "กรุณาระบุอีเมลที่ถูกต้อง",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "บันทึกอัตโนมัติสำเร็จ",
+    "draft": "ฉบับร่าง",
     "draftSavedSuccessfully": "บันทึกร่างสำเร็จ",
-    "restoredSuccessfully": "กู้คืนเวอร์ชันสำเร็จ"
+    "published": "เผยแพร่แล้ว",
+    "restoredSuccessfully": "กู้คืนเวอร์ชันสำเร็จ",
+    "status": "สถานะ"
   }
 }

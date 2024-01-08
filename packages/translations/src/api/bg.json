@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API ключ",
+    "enableAPIKey": "Активирай API ключ",
     "newAccountCreated": "Току-що беше създаден нов профил за достъп до <a href=\"{{serverURL}}\">{{serverURL}}</a> Моля, въведи връзката в браузъра си, за да потвърдиш имейла си: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> След като потвърдиш имейла си, ще можеш да влезеш успешно.",
     "resetYourPassword": "Възстанови паролата си",
+    "verified": "Потвърден",
     "verifyYourEmail": "Потвърди имейла си",
     "youAreReceivingResetPassword": "Получаваш това, защото ти (или някой друг) е заявил възстановяване на паролата. Натисни връзката или постави това в браузъра си, за да довършиш процеса:",
     "youDidNotRequestPassword": "Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена."
@@ -21,12 +24,24 @@
     "userLocked": "Този потребител има прекалено много невалидни опити за влизане и е заключен."
   },
   "general": {
+    "createdAt": "Създаден на",
     "deletedCountSuccessfully": "Изтрити {{count}} {{label}} успешно.",
     "deletedSuccessfully": "Изтрито успешно.",
+    "email": "Имейл",
     "notFound": "Няма открит",
     "successfullyCreated": "{{label}} успешно създаден.",
+    "updatedAt": "Обновен на",
     "updatedCountSuccessfully": "Обновени {{count}} {{label}} успешно.",
+    "user": "Потребител",
+    "users": "Потребители",
     "value": "Стойност"
+  },
+  "upload": {
+    "fileName": "Име на файла",
+    "fileSize": "Големина на файла",
+    "height": "Височина",
+    "sizes": "Големини",
+    "width": "Ширина"
   },
   "validation": {
     "emailAddress": "Моля, въведи валиден имейл адрес.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Успешно автоматично запазване.",
+    "draft": "Чернова",
     "draftSavedSuccessfully": "Чернова запазена успешно.",
-    "restoredSuccessfully": "Успешно възстановяване."
+    "published": "Публикувано",
+    "restoredSuccessfully": "Успешно възстановяване.",
+    "status": "Статус"
   }
 }

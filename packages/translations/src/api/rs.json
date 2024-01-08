@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "АПИ кључ",
+    "enableAPIKey": "Омогући API кључ",
     "newAccountCreated": "Нови налог је креиран. Приступите налогу кликом на <a href=\"{{serverURL}}\">{{serverURL}}</a>. Молимо Вас кликните на следећи линк или залепите адресу која се налази испод у претраживач да бисте потврдили адресу е-поште: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Након што потврдите адресу е-поште можете се улоговати.",
     "resetYourPassword": "Промени своју лозинку",
+    "verified": "Потврђено",
     "verifyYourEmail": "Потврди своју адресу е-поште",
     "youAreReceivingResetPassword": "Примили сте поруку пошто сте Ви (или неко у ваше име) затражили промену лозинке налога. Молимо Вас кликните на линк или залепите адресу у свој претраживач да бисте завршили процес:",
     "youDidNotRequestPassword": "Ако нисте затражили промену лозинке игноришите ову поруку и лозинка ће остати непромењена."
@@ -21,12 +24,24 @@
     "userLocked": "Овај корисник је закључан због превеликог броја неуспешних покушаја пријаве."
   },
   "general": {
+    "createdAt": "Креирано у",
     "deletedCountSuccessfully": "Успешно избрисано {{count}} {{label}}.",
     "deletedSuccessfully": "Успешно избрисано.",
+    "email": "Е-пошта",
     "notFound": "Није пронађено",
     "successfullyCreated": "{{label}} успешно креирано.",
+    "updatedAt": "Ажурирано у",
     "updatedCountSuccessfully": "Успешно ажурирано {{count}} {{label}}.",
+    "user": "Корисник",
+    "users": "Корисници",
     "value": "Вредност"
+  },
+  "upload": {
+    "fileName": "Име датотеке",
+    "fileSize": "Величина датотеке",
+    "height": "Висина",
+    "sizes": "Величине",
+    "width": "Ширина"
   },
   "validation": {
     "emailAddress": "Молимо Вас унесите валидну емаил адресу.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Аутоматско чување успешно.",
+    "draft": "Нацрт",
     "draftSavedSuccessfully": "Нацрт успешно сачуван.",
-    "restoredSuccessfully": "Успешно враћено."
+    "published": "Објављено",
+    "restoredSuccessfully": "Успешно враћено.",
+    "status": "Статус"
   }
 }

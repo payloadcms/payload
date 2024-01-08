@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 import type { FieldTypes } from '../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../types'
 
-// import { getTranslation } from 'payload/utilities'
+// import { getTranslation } from '@payloadcms/translations'
 import { DocumentControls } from '../../../elements/DocumentControls'
 import { DocumentFields } from '../../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../../elements/LeaveWithoutSaving'

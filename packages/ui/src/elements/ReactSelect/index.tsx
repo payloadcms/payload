@@ -10,7 +10,7 @@ import CreatableSelect from 'react-select/creatable'
 import type { Option } from './types'
 import type { Props as ReactSelectAdapterProps } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Chevron } from '../../icons/Chevron'
 import DraggableSortable from '../DraggableSortable'
 import { ClearIndicator } from './ClearIndicator'

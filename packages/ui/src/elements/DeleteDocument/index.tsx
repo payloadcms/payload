@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 // import { requests } from '../../../api'
 import useTitle from '../../hooks/useTitle'
 import { useForm } from '../../forms/Form/context'

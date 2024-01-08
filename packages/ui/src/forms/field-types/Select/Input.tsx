@@ -5,7 +5,7 @@ import type { OptionObject, SelectField } from 'payload/types'
 import type { Option } from '../../../elements/ReactSelect/types'
 import type { Description } from '../../FieldDescription/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import ReactSelect from '../../../elements/ReactSelect'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'

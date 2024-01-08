@@ -4,7 +4,7 @@ import { useTranslation } from '../../../providers/Translation'
 
 import useField from '../../useField'
 import './index.scss'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 
 export const EmailInput: React.FC<{
   name: string

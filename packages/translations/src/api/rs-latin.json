@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API ključ",
+    "enableAPIKey": "Omogući API ključ",
     "newAccountCreated": "Novi nalog je kreiran. Pristupite nalogu klikom na <a href=\"{{serverURL}}\">{{serverURL}}</a>. Molimo Vas kliknite na sledeći link ili zalepite URL koji se nalazi ispod u pretraživač da biste potvrdili adresu e-pošte: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Nakon što potvrdite adresu e-pošte možete se ulogovati.",
     "resetYourPassword": "Promeni svoju lozinku",
+    "verified": "Potvrđeno",
     "verifyYourEmail": "Potvrdi svoju adresu e-pošte",
     "youAreReceivingResetPassword": "Primili ste ovo pošto ste Vi (ili neko u vaše ime) zatražili promenu lozinke naloga. Molimo Vas kliknite na link ili zalepite URL u svoj pretraživač da biste završili proces:",
     "youDidNotRequestPassword": "Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena."
@@ -21,12 +24,24 @@
     "userLocked": "Ovaj korisnik je zaključan zbog prevelikog broja neuspešnih pokušaja prijave."
   },
   "general": {
+    "createdAt": "Kreirano u",
     "deletedCountSuccessfully": "Uspešno izbrisano {{count}} {{label}}.",
     "deletedSuccessfully": "Uspešno izbrisano.",
+    "email": "E-pošta",
     "notFound": "Nije pronađeno",
     "successfullyCreated": "{{label}} uspešno kreirano.",
+    "updatedAt": "Ažurirano u",
     "updatedCountSuccessfully": "Uspešno ažurirano {{count}} {{label}}.",
+    "user": "Korisnik",
+    "users": "Korisnici",
     "value": "Vrednost"
+  },
+  "upload": {
+    "fileName": "Ime datoteke",
+    "fileSize": "Veličina datoteke",
+    "height": "Visina",
+    "sizes": "Veličine",
+    "width": "Širina"
   },
   "validation": {
     "emailAddress": "Molimo Vas unesite validnu email adresu.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Automatsko čuvanje uspešno.",
+    "draft": "Nacrt",
     "draftSavedSuccessfully": "Nacrt uspešno sačuvan.",
-    "restoredSuccessfully": "Uspešno vraćeno."
+    "published": "Objavljeno",
+    "restoredSuccessfully": "Uspešno vraćeno.",
+    "status": "Status"
   }
 }

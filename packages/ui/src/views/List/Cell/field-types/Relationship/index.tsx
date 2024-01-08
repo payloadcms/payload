@@ -4,7 +4,7 @@ import { useTranslation } from '../../../../../providers/Translation'
 import type { RelationshipField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useIntersect } from '../../../../../hooks/useIntersect'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle'
 import { useConfig } from '../../../../../providers/Config'

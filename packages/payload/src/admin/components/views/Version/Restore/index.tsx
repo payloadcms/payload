@@ -1,4 +1,5 @@
 import { Modal, useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
@@ -7,7 +8,6 @@ import { toast } from 'react-toastify'
 import type { Props } from './types'
 
 import { Button, MinimalTemplate, Pill } from '../../..'
-import { getTranslation } from '../../../../../utilities/getTranslation'
 import { requests } from '../../../../api'
 import { useConfig } from '../../../utilities/Config'
 import './index.scss'

@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API ключ",
+    "enableAPIKey": "Активировать API ключ",
     "newAccountCreated": "Новый аккаунт был создан для доступа к <a href=\"{{serverURL}}\">{{serverURL}}</a> Пожалуйста, кликните по следующей ссылке или вставьте в адресную строку браузера чтобы подтвердить email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> После подтверждения вашего email, вы сможете успешно войти в систему.",
     "resetYourPassword": "Сброс вашего пароля",
+    "verified": "Подтверждено",
     "verifyYourEmail": "Подтвердить ваш email",
     "youAreReceivingResetPassword": "Вы получили это сообщение, потому что вы (или кто-то другой) запросили сброс пароля для вашей учетной записи. Пожалуйста, нажмите на следующую ссылку или вставьте ее в браузер, чтобы завершить процесс:",
     "youDidNotRequestPassword": "Если вы не запрашивали этого, пожалуйста, проигнорируйте это письмо, и ваш пароль останется неизменным."
@@ -21,12 +24,24 @@
     "userLocked": "Этот пользователь заблокирован из-за слишком большого количества неудачных попыток входа."
   },
   "general": {
+    "createdAt": "Дата создания",
     "deletedCountSuccessfully": "Удалено {{count}} {{label}} успешно.",
     "deletedSuccessfully": "Удален успешно.",
+    "email": "Email",
     "notFound": "Не найдено",
     "successfullyCreated": "{{label}} успешно создан.",
+    "updatedAt": "Дата правки",
     "updatedCountSuccessfully": "Обновлено {{count}} {{label}} успешно.",
+    "user": "пользователь",
+    "users": "пользователи",
     "value": "Значение"
+  },
+  "upload": {
+    "fileName": "Имя файла",
+    "fileSize": "Размер файла",
+    "height": "Высота",
+    "sizes": "Размеры",
+    "width": "Ширина"
   },
   "validation": {
     "emailAddress": "Пожалуйста, введите корректный адрес email.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Автосохранение успешно.",
+    "draft": "Черновик",
     "draftSavedSuccessfully": "Черновик успешно сохранен.",
-    "restoredSuccessfully": "Восстановлен успешно."
+    "published": "Опубликовано",
+    "restoredSuccessfully": "Восстановлен успешно.",
+    "status": "Статус"
   }
 }

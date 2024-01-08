@@ -6,7 +6,7 @@ import { useTranslation } from '../../../../providers/Translation'
 import type { Block, PayloadRequest } from 'payload/types'
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Drawer } from '../../../../elements/Drawer'
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard'
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage'

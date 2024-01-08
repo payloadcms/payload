@@ -3,7 +3,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 
 import type { EntityToGroup, Group } from '../../utilities/groupNavItems'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { EntityType, groupNavItems } from '../../utilities/groupNavItems'
 import { Button } from '../../elements/Button'
 import { Card } from '../../elements/Card'

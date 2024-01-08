@@ -1,6 +1,6 @@
 import type { Action, Option, OptionGroup } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { formatDocTitle } from '../../../utilities/formatDocTitle'
 
 const reduceToIDs = (options) =>

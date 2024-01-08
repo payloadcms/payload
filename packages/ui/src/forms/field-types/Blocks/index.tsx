@@ -5,7 +5,7 @@ import { useTranslation } from '../../../providers/Translation'
 import type { Props } from './types'
 
 import { blocks as blocksValidator } from 'payload/fields/validations'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
 import { Button } from '../../../elements/Button'

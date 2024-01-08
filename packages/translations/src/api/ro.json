@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "Cheia API",
+    "enableAPIKey": "Activați cheia API",
     "newAccountCreated": "A fost creat un nou cont pe care îl puteți accesa <a href=\"{{serverURL}}\">{{serverURL}}</a> Vă rugăm să intrați pe următorul link sau să copiați URL-ul de mai jos în browserul dvs. pentru a vă verifica emailul: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> După ce vă verificați adresa de email, vă veți putea autentifica cu succes.",
     "resetYourPassword": "Resetați-vă parola",
+    "verified": "Verificat",
     "verifyYourEmail": "Verifică-ți emailul",
     "youAreReceivingResetPassword": "Primiți acest mesaj deoarece dumneavoastră (sau altcineva) ați solicitat resetarea parolei pentru contul dumneavoastră. Vă rugăm să dați clic pe următorul link sau să îl copiați în browserul dvs. pentru a finaliza procesul:",
     "youDidNotRequestPassword": "Dacă nu ați solicitat acest lucru, vă rugăm să ignorați acest email și parola dvs. va rămâne neschimbată."
@@ -21,12 +24,24 @@
     "userLocked": "Acest utilizator este blocat din cauza unui număr prea mare de încercări de autentificare eșuate."
   },
   "general": {
+    "createdAt": "Creat la",
     "deletedCountSuccessfully": "Șterse cu succes {{count}} {{label}}.",
     "deletedSuccessfully": "Șters cu succes.",
+    "email": "Email",
     "notFound": "Nu a fost găsit",
     "successfullyCreated": "{{label}} creat(ă) cu succes.",
+    "updatedAt": "Actualizat la",
     "updatedCountSuccessfully": "Actualizate {{count}} {{label}} cu succes.",
+    "user": "Utilizator",
+    "users": "Utilizatori",
     "value": "Valoare"
+  },
+  "upload": {
+    "fileName": "Numele fișierului",
+    "fileSize": "Dimensiunea fișierului",
+    "height": "Înălțime",
+    "sizes": "Dimensiuni",
+    "width": "Lățime"
   },
   "validation": {
     "emailAddress": "Vă rugăm să introduceți o adresă de email validă.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Autosalvare cu succes.",
+    "draft": "Proiect",
     "draftSavedSuccessfully": "Proiect salvat cu succes.",
-    "restoredSuccessfully": "Restaurat cu succes."
+    "published": "Publicat",
+    "restoredSuccessfully": "Restaurat cu succes.",
+    "status": "Status"
   }
 }

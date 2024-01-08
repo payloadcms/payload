@@ -4,7 +4,7 @@ import { useTranslation } from '../../../providers/Translation'
 
 import type { DateField } from 'payload/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import DatePicker from '../../../elements/DatePicker'
 import useField from '../../useField'
 

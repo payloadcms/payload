@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "مفتاح API",
+    "enableAPIKey": "تفعيل مفتاح API",
     "newAccountCreated": "تمّ إنشاء حساب جديد لتتمكّن من الوصول إلى <a href=\"{{serverURL}}\"> {{serverURL}} </a> الرّجاء النّقر فوق الرّابط التّالي أو لصق عنوان URL أدناه في متصفّحّك لتأكيد بريدك الإلكتروني : <a href=\"{{verificationURL}}\"> {{verificationURL}} </a> <br> بعد التّحقّق من بريدك الإلكتروني ، ستتمكّن من تسجيل الدّخول بنجاح.",
     "resetYourPassword": "إعادة تعيين كلمة المرور الخاصّة بك",
+    "verified": "تمّ التحقّق",
     "verifyYourEmail": "قم بتأكيد بريدك الألكتروني",
     "youAreReceivingResetPassword": "أنت تتلقّى هذا البريد الالكتروني لأنّك (أو لأنّ شخص آخر) طلبت إعادة تعيين كلمة المرور لحسابك. الرّجاء النّقر فوق الرّابط التّالي ، أو لصق هذا الرّابط في متصفّحك لإكمال العمليّة:",
     "youDidNotRequestPassword": "إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير."
@@ -21,12 +24,24 @@
     "userLocked": "تمّ قفل هذا المستخدم نظرًا لوجود عدد كبير من محاولات تسجيل الدّخول الغير ناجحة."
   },
   "general": {
+    "createdAt": "تمّ الإنشاء في",
     "deletedCountSuccessfully": "تمّ حذف {{count}} {{label}} بنجاح.",
     "deletedSuccessfully": "تمّ الحذف بنجاح.",
+    "email": "البريد الإلكتروني",
     "notFound": "غير موجود",
     "successfullyCreated": "{{label}} تم إنشاؤها بنجاح.",
+    "updatedAt": "تم التحديث في",
     "updatedCountSuccessfully": "تم تحديث {{count}} {{label}} بنجاح.",
+    "user": "المستخدم",
+    "users": "المستخدمين",
     "value": "القيمة"
+  },
+  "upload": {
+    "fileName": "اسم الملفّ",
+    "fileSize": "حجم الملفّ",
+    "height": "الطّول",
+    "sizes": "الاحجام",
+    "width": "العرض"
   },
   "validation": {
     "emailAddress": "يرجى إدخال عنوان بريد إلكتروني صحيح.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "تمّ الحفظ التّلقائي بنجاح.",
+    "draft": "مسودّة",
     "draftSavedSuccessfully": "تمّ حفظ المسودّة بنجاح.",
-    "restoredSuccessfully": "تمّت الاستعادة بنحاح."
+    "published": "تمّ النّشر",
+    "restoredSuccessfully": "تمّت الاستعادة بنحاح.",
+    "status": "الحالة"
   }
 }

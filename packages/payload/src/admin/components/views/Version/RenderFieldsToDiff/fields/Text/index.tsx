@@ -1,10 +1,10 @@
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from '../types'
 
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
 import './index.scss'

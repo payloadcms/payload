@@ -1,9 +1,9 @@
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { IndexProps } from './types'
 
-import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'

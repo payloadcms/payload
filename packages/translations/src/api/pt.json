@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "Chave da API",
+    "enableAPIKey": "Habilitar Chave API",
     "newAccountCreated": "Uma nova conta acaba de ser criada para que você possa acessar <a href=\"{{serverURL}}\">{{serverURL}}</a> Por favor, clique no link a seguir ou cole a URL abaixo no seu navegador para verificar seu email: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Após a verificação de email, você será capaz de fazer o login.",
     "resetYourPassword": "Redefinir Sua Senha",
+    "verified": "Verificado",
     "verifyYourEmail": "Verifique seu email",
     "youAreReceivingResetPassword": "Você está recebendo essa mensagem porque você (ou outra pessoa) requisitou a redefinição de senha da sua conta. Por favor, clique no link a seguir ou cole no seu navegador para completar o processo:",
     "youDidNotRequestPassword": "Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual."
@@ -21,12 +24,24 @@
     "userLocked": "Esse usuário está bloqueado devido a muitas tentativas de login malsucedidas."
   },
   "general": {
+    "createdAt": "Criado Em",
     "deletedCountSuccessfully": "Excluído {{count}} {{label}} com sucesso.",
     "deletedSuccessfully": "Apagado com sucesso.",
+    "email": "Email",
     "notFound": "Não Encontrado",
     "successfullyCreated": "{{label}} criado com sucesso.",
+    "updatedAt": "Atualizado Em",
     "updatedCountSuccessfully": "Atualizado {{count}} {{label}} com sucesso.",
+    "user": "usuário",
+    "users": "usuários",
     "value": "Valor"
+  },
+  "upload": {
+    "fileName": "Nome do Arquivo",
+    "fileSize": "Tamanho do Arquivo",
+    "height": "Altura",
+    "sizes": "Tamanhos",
+    "width": "Largura"
   },
   "validation": {
     "emailAddress": "Por favor, insira um endereço de email válido.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Salvamento automático com sucesso.",
+    "draft": "Rascunho",
     "draftSavedSuccessfully": "Rascunho salvo com sucesso.",
-    "restoredSuccessfully": "Restaurado com sucesso."
+    "published": "Publicado",
+    "restoredSuccessfully": "Restaurado com sucesso.",
+    "status": "Status"
   }
 }

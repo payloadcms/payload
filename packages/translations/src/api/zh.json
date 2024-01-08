@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API密钥",
+    "enableAPIKey": "启用API密钥",
     "newAccountCreated": "刚刚为您创建了一个可以访问 <a href=\"{{serverURL}}\">{{serverURL}}</a> 的新帐户 请点击以下链接或在浏览器中粘贴以下网址，以验证您的电子邮件: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> 验证您的电子邮件后，您将能够成功登录。",
     "resetYourPassword": "重置您的密码",
+    "verified": "已验证",
     "verifyYourEmail": "验证您的电子邮件",
     "youAreReceivingResetPassword": "您收到此邮件是因为您（或其他人）已请求重置您帐户的密码。请点击以下链接，或将其粘贴到您的浏览器中以完成该过程：",
     "youDidNotRequestPassword": "如果您没有要求这样做，请忽略这封邮件，您的密码将保持不变。"
@@ -21,12 +24,24 @@
     "userLocked": "该用户由于有太多次失败的登录尝试而被锁定。"
   },
   "general": {
+    "createdAt": "创建于",
     "deletedCountSuccessfully": "已成功删除 {{count}} {{label}}。",
     "deletedSuccessfully": "已成功删除。",
+    "email": "电子邮件",
     "notFound": "未找到",
     "successfullyCreated": "成功创建{{label}}",
+    "updatedAt": "更新于",
     "updatedCountSuccessfully": "已成功更新 {{count}} {{label}}。",
+    "user": "用户",
+    "users": "用户",
     "value": "值"
+  },
+  "upload": {
+    "fileName": "文件名",
+    "fileSize": "文件大小",
+    "height": "高度",
+    "sizes": "尺寸",
+    "width": "宽度"
   },
   "validation": {
     "emailAddress": "请输入一个有效的电子邮件地址。",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "自动保存成功。",
+    "draft": "草稿",
     "draftSavedSuccessfully": "草稿成功保存。",
-    "restoredSuccessfully": "恢复成功。"
+    "published": "已发布",
+    "restoredSuccessfully": "恢复成功。",
+    "status": "状态"
   }
 }

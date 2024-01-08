@@ -9,7 +9,7 @@ import type { ListDrawerProps } from '../../../elements/ListDrawer/types'
 import type { Description } from '../../FieldDescription/types'
 import type { FilterOptionsResult } from '../Relationship/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Button } from '../../../elements/Button'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer'
 import FileDetails from '../../../elements/FileDetails'

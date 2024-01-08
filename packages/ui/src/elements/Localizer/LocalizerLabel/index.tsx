@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from '../../../providers/Translation'
 
 import { Chevron } from '../../../icons/Chevron'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useLocale } from '../../../providers/Locale'
 import './index.scss'
 

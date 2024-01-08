@@ -2,7 +2,7 @@ import type { Permissions } from 'payload/auth'
 import type { CustomPayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedGlobalConfig } from 'payload/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 
 export enum EntityType {
   collection = 'collections',
@@ -48,10 +48,9 @@ export function groupNavItems(
 
           matchedGroup.entities.push(entityToGroup)
         } else {
-          const defaultGroup = groups.find(
-            (group) =>
-              getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`),
-          ) as Group
+          const defaultGroup = groups.find((group) => {
+            return getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`)
+          }) as Group
           defaultGroup.entities.push(entityToGroup)
         }
       }

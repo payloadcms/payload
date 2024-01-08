@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "API Key",
+    "enableAPIKey": "API Keyを許可",
     "newAccountCreated": "<a href=\"{{serverURL}}\">{{serverURL}}</a>にアクセスするための新しいアカウントが作成されました。以下のリンクをクリックするか、ブラウザに以下のURLを貼り付けて、メールアドレスの確認を行ってください。<a href=\"{{verificationURL}}\">{{verificationURL}}</a><br>メールアドレスの確認後に、正常にログインできるようになります。",
     "resetYourPassword": "パスワードの再設定",
+    "verified": "検証済み",
     "verifyYourEmail": "メールアドレスの確認",
     "youAreReceivingResetPassword": "アカウントのパスワードリセットがリクエストされました。次のリンクをクリックする、または、ブラウザにリンクを貼り付けて、手続きを行ってください:",
     "youDidNotRequestPassword": "もし望まない場合は、このメールを無視してください。パスワードは変更されません。"
@@ -21,12 +24,24 @@
     "userLocked": "このユーザーは、ログイン試行回数が多すぎるため、ロックされています。"
   },
   "general": {
+    "createdAt": "作成日",
     "deletedCountSuccessfully": "{{count}}つの{{label}}を正常に削除しました。",
     "deletedSuccessfully": "正常に削除されました。",
+    "email": "メールアドレス",
     "notFound": "Not Found",
     "successfullyCreated": "{{label}} が作成されました。",
+    "updatedAt": "更新日",
     "updatedCountSuccessfully": "{{count}}つの{{label}}を正常に更新しました。",
+    "user": "ユーザー",
+    "users": "ユーザー",
     "value": "値"
+  },
+  "upload": {
+    "fileName": "ファイル名",
+    "fileSize": "ファイル容量",
+    "height": "高さ",
+    "sizes": "容量",
+    "width": "横幅"
   },
   "validation": {
     "emailAddress": "有効なメールアドレスを入力してください。",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "自動保存に成功しました。",
+    "draft": "ドラフト",
     "draftSavedSuccessfully": "下書きは正常に保存されました。",
-    "restoredSuccessfully": "正常に復元されました。"
+    "published": "公開済み",
+    "restoredSuccessfully": "正常に復元されました。",
+    "status": "ステータス"
   }
 }

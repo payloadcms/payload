@@ -7,7 +7,7 @@ import { useTranslation } from '../../providers/Translation'
 import type { Props } from './types'
 
 import { fieldAffectsData } from 'payload/types'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Chevron } from '../../icons/Chevron'
 import { useSearchParams } from '../../providers/SearchParams'
 import { Button } from '../Button'

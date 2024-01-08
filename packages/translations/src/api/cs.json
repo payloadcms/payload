@@ -1,8 +1,11 @@
 {
   "$schema": "./translation-schema.json",
   "authentication": {
+    "apiKey": "Klíč API",
+    "enableAPIKey": "Povolit klíč API",
     "newAccountCreated": "Pro přístup k <a href=\"{{serverURL}}\">{{serverURL}}</a> byl pro vás vytvořen nový účet. Klepněte na následující odkaz nebo zkopírujte URL do svého prohlížeče pro ověření vašeho emailu: <a href=\"{{verificationURL}}\">{{verificationURL}}</a><br> Po ověření vašeho emailu se budete moci úspěšně přihlásit.",
     "resetYourPassword": "Resetujte své heslo",
+    "verified": "Ověřeno",
     "verifyYourEmail": "Ověřte svůj email",
     "youAreReceivingResetPassword": "Tento email obdržíte, protože jste (nebo někdo jiný) požádali o resetování hesla pro váš účet.",
     "youDidNotRequestPassword": "Pokud jste o to nepožádali, ignorujte prosím tento e-mail a vaše heslo zůstane nezměněno."
@@ -21,12 +24,24 @@
     "userLocked": "Tento uživatel je uzamčen kvůli příliš mnoha neúspěšným pokusům o přihlášení."
   },
   "general": {
+    "createdAt": "Vytvořeno v",
     "deletedCountSuccessfully": "Úspěšně smazáno {{count}} {{label}}.",
     "deletedSuccessfully": "Úspěšně odstraněno.",
+    "email": "E-mail",
     "notFound": "Nenalezeno",
     "successfullyCreated": "{{label}} úspěšně vytvořeno.",
+    "updatedAt": "Aktualizováno v",
     "updatedCountSuccessfully": "Úspěšně aktualizováno {{count}} {{label}}.",
+    "user": "Uživatel",
+    "users": "Uživatelé",
     "value": "Hodnota"
+  },
+  "upload": {
+    "fileName": "Název souboru",
+    "fileSize": "Velikost souboru",
+    "height": "Výška",
+    "sizes": "Velikosti",
+    "width": "Šířka"
   },
   "validation": {
     "emailAddress": "Zadejte prosím platnou e-mailovou adresu.",
@@ -46,7 +61,10 @@
   },
   "version": {
     "autosavedSuccessfully": "Úspěšně uloženo automaticky.",
+    "draft": "Koncept",
     "draftSavedSuccessfully": "Koncept úspěšně uložen.",
-    "restoredSuccessfully": "Úspěšně obnoveno."
+    "published": "Publikováno",
+    "restoredSuccessfully": "Úspěšně obnoveno.",
+    "status": "Stav"
   }
 }

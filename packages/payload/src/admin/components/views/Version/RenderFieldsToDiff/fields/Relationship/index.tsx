@@ -1,3 +1,4 @@
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +11,6 @@ import {
   fieldAffectsData,
   fieldIsPresentationalOnly,
 } from '../../../../../../../fields/config/types'
-import { getTranslation } from '../../../../../../../utilities/getTranslation'
 import { useConfig } from '../../../../../utilities/Config'
 import { useLocale } from '../../../../../utilities/Locale'
 import Label from '../../Label'
