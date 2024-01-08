@@ -85,8 +85,6 @@ export const APIView = async ({
     depth || 0
   }`
 
-  console.log(depth)
-
   return (
     <Gutter
       className={[
