@@ -31,7 +31,7 @@ const Text: React.FC<Props> = (props) => {
     minRows,
     path: pathFromProps,
     required,
-    valid,
+    valid = true,
     errorMessage,
   } = props
 

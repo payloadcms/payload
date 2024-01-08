@@ -28,7 +28,7 @@ const Checkbox: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    valid,
+    valid = true,
     errorMessage,
     value,
   } = props
