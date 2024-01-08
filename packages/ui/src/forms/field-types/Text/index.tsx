@@ -27,7 +27,7 @@ const Text: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    valid,
+    valid = true,
     errorMessage,
   } = props
 

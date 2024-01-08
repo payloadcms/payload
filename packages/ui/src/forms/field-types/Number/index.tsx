@@ -7,7 +7,6 @@ import ReactSelect from '../../../elements/ReactSelect'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
-import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { NumberInput } from './Input'
@@ -18,7 +17,6 @@ const NumberField: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      condition,
       description,
       placeholder,
       readOnly,
@@ -34,7 +32,9 @@ const NumberField: React.FC<Props> = (props) => {
     minRows,
     path: pathFromProps,
     required,
-    validate,
+    valid = true,
+    errorMessage,
+    value,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -42,25 +42,13 @@ const NumberField: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
-  const memoizedValidate = React.useCallback(
-    (value, options) => {
-      return validate(value, { ...options, required })
-    },
-    [validate, required],
-  )
-
-  const { errorMessage, setValue, showError, value } = useField<number | number[]>({
-    path,
-    validate: memoizedValidate,
-  })
-
   return (
     <div
       className={[
         fieldBaseClass,
         'number',
         className,
-        showError && 'error',
+        // showError && 'error',
         readOnly && 'read-only',
         hasMany && 'has-many',
       ]
@@ -71,7 +59,7 @@ const NumberField: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <ErrorComp message={errorMessage} showError={showError} />
+      <ErrorComp message={errorMessage} showError={!valid} />
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {hasMany ? (
         <ReactSelect
@@ -97,7 +85,7 @@ const NumberField: React.FC<Props> = (props) => {
           // onChange={handleHasManyChange}
           options={[]}
           // placeholder={t('general:enterAValue')}
-          showError={showError}
+          showError={!valid}
           // value={valueToRender as Option[]}
         />
       ) : (

@@ -61,8 +61,6 @@ export const CollectionEdit = async ({
 
     const collectionPermissions = permissions?.collections?.[collectionSlug]
 
-    const fieldSchema = formatFields(fields, isEditing)
-
     let preferencesKey: string
 
     if (id) {
@@ -88,7 +86,7 @@ export const CollectionEdit = async ({
       id,
       config,
       data: data || {},
-      fieldSchema,
+      fieldSchema: formatFields(fields, isEditing),
       locale,
       operation: isEditing ? 'update' : 'create',
       preferences,
@@ -99,7 +97,7 @@ export const CollectionEdit = async ({
     const formQueryParams: QueryParamTypes = {
       depth: 0,
       'fallback-locale': 'null',
-      locale: '',
+      locale,
       uploadEdits: undefined,
     }
 
