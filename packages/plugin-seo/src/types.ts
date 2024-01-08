@@ -1,23 +1,32 @@
 import type { ContextType } from 'payload/dist/admin/components/utilities/DocumentInfo/types'
 import type { Field } from 'payload/dist/fields/config/types'
+import type { Fields, FormField } from 'payload/dist/admin/components/forms/Form/types'
 
-export type GenerateTitle = <T = any>(
-  args: ContextType & { doc: T; locale?: string },
+type GetFormFields<T> = {
+  [K in keyof T]: T[K] extends object
+    ? T[K] extends any[]
+      ? GetFormFields<T[K]>[]
+      : GetFormFields<T[K]>
+    : FormField
+}
+
+export type GenerateTitle<T = any> = (
+  args: ContextType & { doc: GetFormFields<T>; locale?: string },
 ) => Promise<string> | string
 
-export type GenerateDescription = <T = any>(
+export type GenerateDescription = (
   args: ContextType & {
-    doc: T
+    doc: Fields
     locale?: string
   },
 ) => Promise<string> | string
 
-export type GenerateImage = <T = any>(
-  args: ContextType & { doc: T; locale?: string },
+export type GenerateImage = (
+  args: ContextType & { doc: Fields; locale?: string },
 ) => Promise<string> | string
 
-export type GenerateURL = <T = any>(
-  args: ContextType & { doc: T; locale?: string },
+export type GenerateURL = (
+  args: ContextType & { doc: Fields; locale?: string },
 ) => Promise<string> | string
 
 export interface PluginConfig {

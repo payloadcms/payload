@@ -8,6 +8,11 @@ import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { seed } from './seed'
 
+import { Page } from './payload-types'
+import { GenerateTitle } from '../../packages/plugin-seo/src/types'
+
+const generateTitle: GenerateTitle<Page> = ({ doc }) => `Website.com — ${doc?.title.value}`
+
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
 
 export default buildConfigWithDefaults({

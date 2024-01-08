@@ -109,10 +109,18 @@ A function that allows you to return any meta title, including from document's c
 
 ```ts
 // payload.config.ts
+
+type Project = {
+  title: string
+  description: string
+}
+
+const generateTitleFromProject: GenerateTitle<Project> = function generateTitle({ doc }) { return doc.title }
+
 {
   // ...
   seoPlugin({
-    generateTitle: ({ ...docInfo, doc, locale }) => `Website.com — ${doc?.title?.value}`,
+    generateTitle: generateTitleFromProject,
   })
 }
 ```
@@ -123,10 +131,19 @@ A function that allows you to return any meta description, including from docume
 
 ```ts
 // payload.config.ts
+
+type Project = {
+  title: string
+  description: string
+}
+
+const generateDescriptionFromProject: GenerateDescription<Project> = function generateDescription({ doc }) { return doc.description }
+
+
 {
   // ...
   seoPlugin({
-    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt?.value
+    generateDescription: generateDescriptionFromProject
   })
 }
 ```
