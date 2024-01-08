@@ -6,7 +6,10 @@
   flex-direction: column;
   text-align: left;
   gap: 3px;
-
+  [dir='rtl']
+  &__text-align--left {
+    text-align: right;
+  }
   &__text-align--left {
     text-align: left;
   }
@@ -14,10 +17,14 @@
   &__text-align--center {
     text-align: center;
   }
-
+  [dir='rtl']
+  &__text-align--right {
+    text-align: left;
+  }
   &__text-align--right {
     text-align: right;
   }
+
 
   &__button {
     @extend %btn-reset;

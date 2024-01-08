@@ -11,11 +11,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
-import type {
-  DocumentTab,
-  DocumentTabComponent,
-  DocumentTabConfig,
-} from '../admin/components/elements/DocumentHeader/Tabs/types'
+import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
 import type { User } from '../auth/types'
@@ -291,6 +287,10 @@ export type Locale = {
    * @example "en"
    */
   code: string
+  /**
+   * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
+   */
+  fallbackLocale?: string
   /**
    * label of supported locale
    * @example "English"

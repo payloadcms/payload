@@ -226,7 +226,24 @@ export type TextField = FieldBase & {
   maxLength?: number
   minLength?: number
   type: 'text'
-}
+} & (
+    | {
+        /** Makes this field an ordered array of strings instead of just a single string. */
+        hasMany: true
+        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+        maxRows?: number
+        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+        minRows?: number
+      }
+    | {
+        /** Makes this field an ordered array of strings instead of just a single string. */
+        hasMany?: false | undefined
+        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+        maxRows?: undefined
+        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+        minRows?: undefined
+      }
+  )
 
 export type EmailField = FieldBase & {
   admin?: Admin & {

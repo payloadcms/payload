@@ -135,7 +135,7 @@ import * as React from 'react';
 import { SelectInput, useField } from 'payload/components/forms';
 import { useAuth } from 'payload/components/utilities';
 
-type customSelectProps = {
+type CustomSelectProps = {
   path: string;
   options: {
     label: string;
@@ -166,7 +166,7 @@ export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, optio
         name={path}
         options={adjustedOptions}
         value={value}
-        onChange={() => setValue(e.value)}
+        onChange={(e) => setValue(e.value)}
       />
     </div>
   )

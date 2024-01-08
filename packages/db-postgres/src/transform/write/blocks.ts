@@ -17,6 +17,7 @@ type Args = {
   data: Record<string, unknown>[]
   field: BlockField
   locale?: string
+  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
@@ -33,6 +34,7 @@ export const transformBlocks = ({
   data,
   field,
   locale,
+  texts,
   numbers,
   path,
   relationships,
@@ -83,6 +85,7 @@ export const transformBlocks = ({
       fieldPrefix: '',
       fields: matchedBlock.fields,
       locales: newRow.locales,
+      texts,
       numbers,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,

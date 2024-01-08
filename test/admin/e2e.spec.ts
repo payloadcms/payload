@@ -253,6 +253,13 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
+    test('collection - sidebar fields should respond to permission', async () => {
+      const { id } = await createPost()
+      await page.goto(url.edit(id))
+
+      await expect(page.locator('#field-sidebarField')).toBeDisabled()
+    })
+
     test('global - should not show API tab when disabled in config', async () => {
       await page.goto(url.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
@@ -309,6 +316,14 @@ describe('admin', () => {
       const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
       await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
       await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
+    })
+
+    test('should reset actions array when navigating from view with actions to view without actions', async () => {
+      await page.goto(geoUrl.list)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
+      await page.locator(`#nav-posts`).click()
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
     })
   })
 

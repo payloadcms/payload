@@ -133,7 +133,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
-    const { admin: { listSearchableFields } = {}, slug } = selectedCollectionConfig
+    const { slug, admin: { listSearchableFields } = {} } = selectedCollectionConfig
     const params: {
       cacheBust?: number
       limit?: number

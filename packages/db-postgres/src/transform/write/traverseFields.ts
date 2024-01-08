@@ -14,6 +14,7 @@ import { transformBlocks } from './blocks'
 import { transformNumbers } from './numbers'
 import { transformRelationship } from './relationships'
 import { transformSelects } from './selects'
+import { transformTexts } from './texts'
 
 type Args = {
   adapter: PostgresAdapter
@@ -45,6 +46,7 @@ type Args = {
   locales: {
     [locale: string]: Record<string, unknown>
   }
+  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   /**
    * This is the name of the parent table
@@ -72,6 +74,7 @@ export const traverseFields = ({
   fields,
   forcedLocale,
   locales,
+  texts,
   numbers,
   parentTableName,
   path,
@@ -109,6 +112,7 @@ export const traverseFields = ({
                 data: localeData,
                 field,
                 locale: localeKey,
+                texts,
                 numbers,
                 path,
                 relationships,
@@ -129,6 +133,7 @@ export const traverseFields = ({
           blocksToDelete,
           data: data[field.name],
           field,
+          texts,
           numbers,
           path,
           relationships,
@@ -159,6 +164,7 @@ export const traverseFields = ({
                 data: localeData,
                 field,
                 locale: localeKey,
+                texts,
                 numbers,
                 path,
                 relationships,
@@ -176,6 +182,7 @@ export const traverseFields = ({
           blocksToDelete,
           data: fieldData,
           field,
+          texts,
           numbers,
           path,
           relationships,
@@ -204,6 +211,7 @@ export const traverseFields = ({
               fields: field.fields,
               forcedLocale: localeKey,
               locales,
+              texts,
               numbers,
               parentTableName,
               path: `${path || ''}${field.name}.`,
@@ -226,6 +234,7 @@ export const traverseFields = ({
             fieldPrefix: `${fieldName}_`,
             fields: field.fields,
             locales,
+            texts,
             numbers,
             parentTableName,
             path: `${path || ''}${field.name}.`,
@@ -259,6 +268,7 @@ export const traverseFields = ({
                   fields: tab.fields,
                   forcedLocale: localeKey,
                   locales,
+                  texts,
                   numbers,
                   parentTableName,
                   path: `${path || ''}${tab.name}.`,
@@ -281,6 +291,7 @@ export const traverseFields = ({
                 fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
                 fields: tab.fields,
                 locales,
+                texts,
                 numbers,
                 parentTableName,
                 path: `${path || ''}${tab.name}.`,
@@ -304,6 +315,7 @@ export const traverseFields = ({
             fieldPrefix,
             fields: tab.fields,
             locales,
+            texts,
             numbers,
             parentTableName,
             path,
@@ -329,6 +341,7 @@ export const traverseFields = ({
         fieldPrefix,
         fields: field.fields,
         locales,
+        texts,
         numbers,
         parentTableName,
         path,
@@ -377,6 +390,37 @@ export const traverseFields = ({
           data: fieldData,
           field,
           relationships,
+        })
+      }
+
+      return
+    }
+
+    if (field.type === 'text' && field.hasMany) {
+      const textPath = `${path || ''}${field.name}`
+
+      if (field.localized) {
+        if (typeof fieldData === 'object') {
+          Object.entries(fieldData).forEach(([localeKey, localeData]) => {
+            if (Array.isArray(localeData)) {
+              transformTexts({
+                baseRow: {
+                  locale: localeKey,
+                  path: textPath,
+                },
+                data: localeData,
+                texts,
+              })
+            }
+          })
+        }
+      } else if (Array.isArray(fieldData)) {
+        transformTexts({
+          baseRow: {
+            path: textPath,
+          },
+          data: fieldData,
+          texts,
         })
       }
 

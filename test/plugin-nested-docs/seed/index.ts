@@ -20,6 +20,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       data: {
         slug: 'parent-page',
         title: 'Parent page',
+        _status: 'published',
       },
       req,
     })
@@ -30,6 +31,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         parent: parentID,
         slug: 'child-page',
         title: 'Child page',
+        _status: 'published',
       },
       req,
     })
@@ -40,6 +42,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         parent: childID,
         slug: 'grandchild-page',
         title: 'Grandchild page',
+        _status: 'published',
       },
       req,
     })
@@ -49,6 +52,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       data: {
         slug: 'sister-page',
         title: 'Sister page',
+        _status: 'published',
       },
       req,
     })

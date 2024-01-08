@@ -22,7 +22,6 @@ export default function registerGraphQLSchema(payload: Payload): void {
     blockInputTypes: {},
     blockTypes: {},
     groupTypes: {},
-    tabTypes: {},
   }
 
   if (payload.config.localization) {
