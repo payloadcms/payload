@@ -38,7 +38,7 @@ export const NumberInput: React.FC<{
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, max, min, required })
+      if (typeof validate === 'function') return validate(value, { ...options, max, min, required })
     },
     [validate, min, max, required],
   )

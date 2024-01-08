@@ -3,17 +3,18 @@ import * as React from 'react'
 import {
   CopyToClipboard,
   Gutter,
-  CheckboxInput,
-  SelectInput,
-  MinimizeMaximize,
-  useActions,
-  useLocale,
+  Checkbox,
   SetDocumentStepNav as SetStepNav,
+  Form,
+  Select,
+  Number as NumberInput,
 } from '@payloadcms/ui'
-// import { requests } from '../../../api'
 import './index.scss'
 import { initPage } from '../../utilities/initPage'
-import { SanitizedConfig } from 'payload/types'
+import { Document, SanitizedConfig } from 'payload/types'
+import { RenderJSON } from './RenderJSON'
+
+const baseClass = 'query-inspector'
 
 export const APIView = async ({
   collectionSlug,
@@ -28,78 +29,80 @@ export const APIView = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage({
+  const { config, payload, user, locale, collectionConfig, globalConfig } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: true,
     collectionSlug,
     globalSlug,
   })
 
-  // const { i18n } = useTranslation()
+  const { depth, draft, authenticated } = searchParams
 
   const {
     localization,
-    routes: { api },
+    routes: { api: apiRoute },
     serverURL,
   } = config
-
-  const { code } = useLocale()
-  const url = createURL(apiURL)
-
-  const { setViewActions } = useActions()
-
-  const docEndpoint = global ? `/globals/${global.slug}` : `/${collectionSlug}/${id}`
-
-  const [data, setData] = React.useState<any>({})
-  const [draft, setDraft] = React.useState<boolean>(url.searchParams.get('draft') === 'true')
-  const [locale, setLocale] = React.useState<string>(url.searchParams.get('locale') || code)
-  const [depth, setDepth] = React.useState<string>(url.searchParams.get('depth') || '1')
-  const [authenticated, setAuthenticated] = React.useState<boolean>(true)
-  const [fullscreen, setFullscreen] = React.useState<boolean>(false)
-
-  const fetchURL = `${serverURL}${api}${docEndpoint}?locale=${locale}&draft=${draft}&depth=${depth}`
-
-  // React.useEffect(() => {
-  //   const fetchData = async () => {
-  //     const request = await requests.get(fetchURL, {
-  //       credentials: authenticated ? 'include' : 'omit',
-  //       headers: {
-  //         'Accept-Language': i18n.language,
-  //       },
-  //     })
-
-  //     const json = await request.json()
-  //     setData(json)
-  //   }
-
-  //   fetchData()
-  // }, [i18n.language, fetchURL, authenticated])
-
-  // React.useEffect(() => {
-  //   const editConfig = (collection || global)?.admin?.components?.views?.Edit
-  //   const apiActions =
-  //     editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
-
-  //   setViewActions(apiActions)
-  // }, [collection, global, setViewActions])
 
   const localeOptions =
     localization &&
     localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
-  const classes = [baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')
+  const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
-  let isEditing: boolean
+  let data: Document
+  let draftsEnabled = false
+  let docEndpoint = ''
 
-  if ('collection' in props) {
-    isEditing = props?.isEditing
+  if (collectionConfig) {
+    try {
+      data = await payload.findByID({
+        collection: collectionSlug,
+        id,
+        depth: 0,
+        user,
+      })
+    } catch (error) {}
+
+    draftsEnabled = Boolean(collectionConfig.versions.drafts)
+    docEndpoint = `/${collectionSlug}/${id}`
   }
 
+  if (globalConfig) {
+    try {
+      data = await payload.findGlobal({
+        slug: globalSlug,
+        depth: 0,
+        user,
+      })
+    } catch (error) {}
+
+    draftsEnabled = Boolean(globalConfig.versions.drafts)
+    docEndpoint = `/globals/${globalSlug}`
+  }
+
+  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}?locale=${locale}&draft=${draft}&depth=${
+    depth || 0
+  }`
+
+  console.log(depth)
+
   return (
-    <Gutter className={classes} right={false}>
+    <Gutter
+      className={[
+        baseClass,
+        // fullscreen && `${baseClass}--fullscreen`
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      right={false}
+    >
       <SetStepNav
-        collection={collection}
-        global={global}
+        collectionSlug={collectionSlug}
+        useAsTitle={collectionConfig?.admin?.useAsTitle}
+        pluralLabel={collectionConfig?.labels.plural}
+        globalLabel={globalConfig?.label}
+        globalSlug={globalSlug}
         id={id}
         isEditing={isEditing}
         view="API"
@@ -113,83 +116,55 @@ export const APIView = async ({
             {fetchURL}
           </a>
         </div>
-        <div className={`${baseClass}__form-fields`}>
-          <div className={`${baseClass}__filter-query-checkboxes`}>
-            {draftsEnabled && (
-              <CheckboxInput
-                checked={draft}
-                id="draft-checkbox"
-                label="Draft"
-                onChange={() => setDraft(!draft)}
-              />
+        <Form
+          initialState={{
+            authenticated: {
+              value: authenticated || false,
+              initialValue: authenticated || false,
+              valid: true,
+            },
+            draft: {
+              value: draft || false,
+              initialValue: draft || false,
+              valid: true,
+            },
+            depth: {
+              value: Number(depth || 0),
+              initialValue: Number(depth || 0),
+              valid: true,
+            },
+            locale: {
+              value: locale,
+              initialValue: locale,
+              valid: true,
+            },
+          }}
+        >
+          <div className={`${baseClass}__form-fields`}>
+            <div className={`${baseClass}__filter-query-checkboxes`}>
+              {draftsEnabled && <Checkbox name="draft" path="draft" label="Draft" />}
+              <Checkbox name="authenticated" path="authenticated" label="Authenticated" />
+            </div>
+            {localeOptions && (
+              <Select label="Locale" name="locale" options={localeOptions} path="locale" />
             )}
-            <CheckboxInput
-              checked={authenticated}
-              id="auth-checkbox"
-              label="Authenticated"
-              onChange={() => setAuthenticated(!authenticated)}
-            />
+            <NumberInput label="Depth" name="depth" path="depth" />
           </div>
-          {localeOptions && (
-            <SelectInput
-              defaultValue={{
-                label: locale,
-                value: locale,
-              }}
-              label="Locale"
-              name="locale"
-              onChange={(e) => setLocale(e.value as string)}
-              options={localeOptions}
-              path="locale"
-            />
-          )}
-          <SelectInput
-            defaultValue={{
-              label: depth,
-              value: depth,
-            }}
-            label="Depth"
-            name="depth"
-            onChange={(e) => setDepth(e.value as string)}
-            options={[
-              {
-                label: '0',
-                value: '0',
-              },
-              {
-                label: '1',
-                value: '1',
-              },
-              {
-                label: '2',
-                value: '2',
-              },
-              {
-                label: '3',
-                value: '3',
-              },
-              {
-                label: '4',
-                value: '4',
-              },
-            ]}
-            path="depth"
-          />
-        </div>
+        </Form>
       </div>
       <div className={`${baseClass}__results-wrapper`}>
         <div className={`${baseClass}__toggle-fullscreen-button-container`}>
           <button
             aria-label="toggle fullscreen"
             className={`${baseClass}__toggle-fullscreen-button`}
-            onClick={() => setFullscreen(!fullscreen)}
+            // onClick={() => setFullscreen(!fullscreen)}
             type="button"
           >
-            <MinimizeMaximize isMinimized={!fullscreen} />
+            {/* <MinimizeMaximize isMinimized={!fullscreen} /> */}
           </button>
         </div>
         <div className={`${baseClass}__results`}>
-          <RecursivelyRenderObjectData object={data} />
+          <RenderJSON object={data} />
         </div>
       </div>
     </Gutter>
