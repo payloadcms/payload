@@ -2,6 +2,8 @@
 
 import React, { Fragment, useEffect, useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
+
 import { Pill } from './Pill'
 
 export const LengthIndicator: React.FC<{
@@ -18,6 +20,7 @@ export const LengthIndicator: React.FC<{
 
   const [label, setLabel] = useState('')
   const [barWidth, setBarWidth] = useState<number>(0)
+  const { t } = useTranslation('plugin-seo')
 
   useEffect(() => {
     const textLength = text?.length || 0
@@ -36,13 +39,13 @@ export const LengthIndicator: React.FC<{
         const ratioUntilMin = textLength / minLength
 
         if (ratioUntilMin > 0.9) {
-          setLabel('Almost there')
+          setLabel(t('almostThere'))
           setLabelStyle({
             backgroundColor: 'orange',
             color: 'white',
           })
         } else {
-          setLabel('Too short')
+          setLabel(t('tooShort'))
           setLabelStyle({
             backgroundColor: 'orangered',
             color: 'white',
@@ -53,7 +56,7 @@ export const LengthIndicator: React.FC<{
       }
 
       if (progress >= 0 && progress <= 1) {
-        setLabel('Good')
+        setLabel(t('good'))
         setLabelStyle({
           backgroundColor: 'green',
           color: 'white',
@@ -62,7 +65,7 @@ export const LengthIndicator: React.FC<{
       }
 
       if (progress > 1) {
-        setLabel('Too long')
+        setLabel(t('tooLong'))
         setLabelStyle({
           backgroundColor: 'red',
           color: 'white',
@@ -95,14 +98,16 @@ export const LengthIndicator: React.FC<{
         }}
       >
         <small>
-          {`${text?.length || 0}/${minLength}-${maxLength} chars, `}
+          {t('characterCount', { current: text?.length || 0, minLength, maxLength })}
           {(textLength === 0 || charsUntilMin > 0) && (
-            <Fragment>{`${charsUntilMin} to go`}</Fragment>
+            <Fragment>{t('charactersToGo', { characters: charsUntilMin })}</Fragment>
           )}
           {charsUntilMin <= 0 && charsUntilMax >= 0 && (
-            <Fragment>{`${charsUntilMax} left over`}</Fragment>
+            <Fragment>{t('charactersLeftOver', { characters: charsUntilMax })}</Fragment>
           )}
-          {charsUntilMax < 0 && <Fragment>{`${charsUntilMax * -1} too many`}</Fragment>}
+          {charsUntilMax < 0 && (
+            <Fragment>{t('charactersTooMany', { characters: charsUntilMax * -1 })}</Fragment>
+          )}
         </small>
       </div>
       <div

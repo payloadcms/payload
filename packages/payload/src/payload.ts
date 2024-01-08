@@ -256,7 +256,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     fallbackLocaleInputType?: any
     groupTypes: any
     localeInputType?: any
-    tabTypes: any
   }
 
   unlock = async <T extends keyof TGeneratedTypes['collections']>(

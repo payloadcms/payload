@@ -10,6 +10,7 @@ import { filterFields } from '../../forms/RenderFields/filterFields'
 import { Gutter } from '../Gutter'
 import ViewDescription from '../ViewDescription'
 import './index.scss'
+import { useOperation } from '../../utilities/OperationProvider'
 
 const baseClass = 'document-fields'
 
@@ -34,12 +35,15 @@ export const DocumentFields: React.FC<{
     permissions,
   } = props
 
+  const operation = useOperation()
+
   const sidebarFields = filterFields({
     fieldSchema: fields,
     fieldTypes,
     filter: (field) => field?.admin?.position === 'sidebar',
     permissions: permissions.fields,
     readOnly: !hasSavePermission,
+    operation,
   })
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0

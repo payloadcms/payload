@@ -13,6 +13,7 @@ import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useCallback } from 'react'
 
 import type { PluginConfig } from '../types'
+import { useTranslation } from 'react-i18next'
 
 import { defaults } from '../defaults'
 import { LengthIndicator } from '../ui/LengthIndicator'
@@ -27,6 +28,8 @@ type MetaTitleProps = TextFieldType & {
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const { name, label, path, pluginConfig } = props || {}
+
+  const { t } = useTranslation('plugin-seo')
 
   const field: FieldType<string> = useField({
     name,
@@ -85,7 +88,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
                 }}
                 type="button"
               >
-                Auto-generate
+                {t('autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -95,13 +98,13 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {`This should be between ${minLength} and ${maxLength} characters. For help in writing quality meta titles, see `}
+          {t('lengthTipTitle', { minLength, maxLength })}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/title-link#page-titles"
             rel="noopener noreferrer"
             target="_blank"
           >
-            best practices
+            {t('bestPractices')}
           </a>
           .
         </div>

@@ -486,6 +486,7 @@ describe('Auth', () => {
         it('should lock the user after too many attempts', async () => {
           await tryLogin()
           await tryLogin()
+          await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
 
           const userResult = await payload.find({
             collection: slug,

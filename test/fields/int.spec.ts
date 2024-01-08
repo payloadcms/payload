@@ -95,6 +95,27 @@ describe('Fields', () => {
 
       await expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
     })
+
+    it('should localize an array of strings using hasMany', async () => {
+      const localizedHasMany = ['hello', 'world']
+      const { id } = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text,
+          localizedHasMany,
+        },
+        locale: 'en',
+      })
+      const localizedDoc = await payload.findByID({
+        id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
+    })
   })
 
   describe('relationship', () => {
