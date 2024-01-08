@@ -1,8 +1,9 @@
 // either send the `useAsTitle` field itself
 
-import { ClientConfig, PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
+import { ClientConfig, SanitizedCollectionConfig } from 'payload/types'
 import { FormField } from '../forms/Form/types'
 import { getObjectDotNotation } from 'payload/utilities'
+import type { I18n } from '@payloadcms/translations'
 // import { formatDate } from './formatDate'
 
 // or an object to dynamically extract the `useAsTitle` field from
@@ -11,7 +12,7 @@ export const formatDocTitle = (args: {
   doc?: Record<string, any>
   field?: FormField
   dateFormat?: ClientConfig['admin']['dateFormat']
-  i18n: PayloadRequest['i18n']
+  i18n: I18n
 }): string => {
   const { useAsTitle, dateFormat: dateFormatFromProps, doc, field: fieldFromProps, i18n } = args
 

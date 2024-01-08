@@ -1,4 +1,4 @@
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
 import type { User } from 'payload/auth'
 import type { Field as FieldSchema, PayloadRequest, SanitizedConfig } from 'payload/types'
@@ -20,7 +20,7 @@ type Args = {
     [key: string]: unknown
   }
   state: Fields
-  t: PayloadRequest['i18n']['t']
+  t: TFunction
   user: User
 }
 

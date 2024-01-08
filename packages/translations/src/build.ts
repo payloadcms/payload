@@ -1,5 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import { transpileAndCopy } from './utilities/transpileAndCopy'
+import { ensureDirectoryExists } from './utilities/ensureDirExists'
 
 const serverTranslationKeys = [
   'authentication:api',
@@ -295,7 +297,8 @@ const clientTranslationKeys = [
   'version:viewingVersionsGlobal',
 ]
 
-const SOURCE_DIR = '../all'
+const DESTINATION_ROOT = '../dist'
+const SOURCE_DIR = './all'
 
 function filterKeys(obj, parentGroupKey = '', keys) {
   const result = {}
@@ -353,7 +356,7 @@ function buildSchemaFile(type: 'client' | 'server') {
   const groupedProperties = new Map()
 
   const keys = type === 'client' ? clientTranslationKeys : serverTranslationKeys
-  const DESTINATION_DIR = type === 'client' ? '../client' : '../api'
+  const DESTINATION_DIR = `${DESTINATION_ROOT}/${type === 'client' ? 'client' : 'api'}`
 
   for (const translationKey of keys) {
     const [group, selector] = translationKey.split(':')
@@ -367,7 +370,7 @@ function buildSchemaFile(type: 'client' | 'server') {
   }
 
   const schemaFileContents = JSON.parse(
-    fs.readFileSync(path.join(SOURCE_DIR, 'translation-schema.json'), 'utf8'),
+    fs.readFileSync(path.resolve(__dirname, SOURCE_DIR, 'translation-schema.json'), 'utf8'),
   )
 
   for (const [group, selectors] of groupedProperties.entries()) {
@@ -395,14 +398,17 @@ function buildSchemaFile(type: 'client' | 'server') {
   schemaFileContents.required = Array.from(groupedProperties.keys())
 
   fs.writeFileSync(
-    path.join(DESTINATION_DIR, 'translation-schema.json'),
+    path.resolve(__dirname, DESTINATION_DIR, 'translation-schema.json'),
     JSON.stringify(schemaFileContents, null, 2),
     { flag: 'w+' },
   )
 }
 
-async function sync() {
-  const filenames = fs.readdirSync(SOURCE_DIR)
+async function build() {
+  ensureDirectoryExists(path.resolve(__dirname, `${DESTINATION_ROOT}/client`))
+  ensureDirectoryExists(path.resolve(__dirname, `${DESTINATION_ROOT}/api`))
+
+  const filenames = fs.readdirSync(path.resolve(__dirname, SOURCE_DIR))
 
   // build up the client and server translation files
   for (const filename of filenames) {
@@ -410,35 +416,49 @@ async function sync() {
       continue
     }
 
-    const source = JSON.parse(fs.readFileSync(path.join(SOURCE_DIR, filename), 'utf8'))
+    const source = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, SOURCE_DIR, filename), 'utf8'),
+    )
 
     const clientTranslations = sortObject(filterKeys(source, '', clientTranslationKeys))
     fs.writeFileSync(
-      path.join('../client', filename),
+      path.resolve(__dirname, `${DESTINATION_ROOT}/client`, filename),
       JSON.stringify(clientTranslations, null, 2),
-      { flag: 'w+' },
+      {
+        flag: 'w+',
+      },
     )
 
     const serverTranslations = sortObject(filterKeys(source, '', serverTranslationKeys))
-    fs.writeFileSync(path.join('../api', filename), JSON.stringify(serverTranslations, null, 2), {
-      flag: 'w+',
-    })
+    fs.writeFileSync(
+      path.resolve(__dirname, `${DESTINATION_ROOT}/api`, filename),
+      JSON.stringify(serverTranslations, null, 2),
+      {
+        flag: 'w+',
+      },
+    )
 
     console.info(filename, ': sync complete')
   }
 
-  // build up the client and server schema files
+  // build up the client and server schema files after the translation files have been built
   buildSchemaFile('client')
   buildSchemaFile('server')
 
-  // copy barrel file
-  fs.copyFileSync(path.join(SOURCE_DIR, 'index.ts'), path.join('../client', 'index.ts'))
-  fs.copyFileSync(path.join(SOURCE_DIR, 'index.ts'), path.join('../api', 'index.ts'))
+  // copy barrel files
+  await transpileAndCopy(
+    path.resolve(__dirname, SOURCE_DIR, 'index.ts'),
+    path.resolve(__dirname, `${DESTINATION_ROOT}/api`, 'index.ts'),
+  )
+  await transpileAndCopy(
+    path.resolve(__dirname, SOURCE_DIR, 'index.ts'),
+    path.resolve(__dirname, `${DESTINATION_ROOT}/client`, 'index.ts'),
+  )
 }
 
-sync()
+build()
   .then(() => {
-    console.log('Translation update completed.')
+    console.log('Built client and api translation files.')
   })
   .catch((error) => {
     console.error('Error occurred:', error)

@@ -1,8 +1,9 @@
 import type { Permissions } from 'payload/auth'
-import type { CustomPayloadRequest, SanitizedCollectionConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedGlobalConfig } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 
 export enum EntityType {
   collection = 'collections',
@@ -27,7 +28,7 @@ export type Group = {
 export function groupNavItems(
   entities: EntityToGroup[],
   permissions: Permissions,
-  i18n: CustomPayloadRequest['i18n'],
+  i18n: I18n,
 ): Group[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {

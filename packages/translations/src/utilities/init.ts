@@ -202,11 +202,8 @@ export const initTFunction =
     })
   }
 
-export const initI18n = ({
-  config,
-  language = 'en',
-  translations,
-}: initI18nArgs): PayloadRequest['i18n'] => {
+export type I18n = PayloadRequest['i18n']
+export const initI18n = ({ config, language = 'en', translations }: initI18nArgs): I18n => {
   return {
     fallbackLanguage: config.i18n.fallbackLanguage,
     language: language || config.i18n.fallbackLanguage,

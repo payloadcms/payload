@@ -3,7 +3,7 @@ import { headers as getHeaders } from 'next/headers'
 import { auth } from './auth'
 
 import { getPayload } from 'payload'
-import type { CustomPayloadRequest, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 import { redirect } from 'next/navigation'
 import { parseCookies } from './cookies'
 import { getNextI18n } from './getNextI18n'
@@ -17,7 +17,7 @@ export const initPage = async (
   permissions: Awaited<ReturnType<typeof auth>>['permissions']
   user: Awaited<ReturnType<typeof auth>>['user']
   config: SanitizedConfig
-  i18n: CustomPayloadRequest['i18n']
+  i18n: ReturnType<typeof getNextI18n>
 }> => {
   const headers = getHeaders()
   const cookies = parseCookies(headers)

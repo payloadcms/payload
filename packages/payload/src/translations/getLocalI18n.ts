@@ -1,7 +1,7 @@
-import { initTFunction } from '@payloadcms/translations'
+import { initI18n } from '@payloadcms/translations'
 import { translations } from '@payloadcms/translations/api'
 
-import type { PayloadRequest, SanitizedConfig } from '../exports/types'
+import type { SanitizedConfig } from '../exports/types'
 
 export const getLocalI18n = ({
   config,
@@ -9,14 +9,9 @@ export const getLocalI18n = ({
 }: {
   config: SanitizedConfig
   language?: string
-}): PayloadRequest['i18n'] => {
-  return {
-    fallbackLanguage: config.i18n.fallbackLanguage,
-    language: language || config.i18n.fallbackLanguage,
-    t: initTFunction({
-      config,
-      language: language || config.i18n.fallbackLanguage,
-      translations,
-    }),
-  }
-}
+}): ReturnType<typeof initI18n> =>
+  initI18n({
+    config,
+    language,
+    translations,
+  })

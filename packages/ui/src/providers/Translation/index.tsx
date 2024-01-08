@@ -2,11 +2,12 @@
 import React, { createContext, useContext } from 'react'
 
 import { t } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import { ClientConfig, PayloadRequest } from 'payload/types'
 
 const Context = createContext<{
   t: (key: string, vars?: Record<string, string | number>) => string
-  i18n: PayloadRequest['i18n']
+  i18n: I18n
 }>({
   t: () => '',
   i18n: {

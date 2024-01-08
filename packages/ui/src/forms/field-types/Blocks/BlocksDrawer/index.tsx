@@ -3,10 +3,11 @@ import { useModal } from '@faceless-ui/modal'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from '../../../../providers/Translation'
 
-import type { Block, PayloadRequest } from 'payload/types'
+import type { Block } from 'payload/types'
 import type { Props } from './types'
 
 import { getTranslation } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import { Drawer } from '../../../../elements/Drawer'
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard'
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage'
@@ -15,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'blocks-drawer'
 
-const getBlockLabel = (block: Block, i18n: PayloadRequest['i18n']) => {
+const getBlockLabel = (block: Block, i18n: I18n) => {
   if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
   if (typeof block.labels.singular === 'object') {
     return getTranslation(block.labels.singular, i18n).toLowerCase()

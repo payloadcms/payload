@@ -1,6 +1,7 @@
 import { translations } from '@payloadcms/translations/client'
+import type { TFunction } from '@payloadcms/translations'
 
-import type { PayloadRequest, SanitizedConfig } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import { initTFunction } from '@payloadcms/translations'
 import { cookies, headers } from 'next/headers'
@@ -12,7 +13,7 @@ export const getNextT = ({
 }: {
   config: SanitizedConfig
   language?: string
-}): PayloadRequest['i18n']['t'] => {
+}): TFunction => {
   const lang = language || getRequestLanguage({ cookies: cookies(), headers: headers() })
 
   return initTFunction({

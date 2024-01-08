@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
 import ObjectID from 'bson-objectid'
 
@@ -25,7 +25,7 @@ type Args = {
     [key: string]: unknown
   }
   state: Fields
-  t: PayloadRequest['i18n']['t']
+  t: TFunction
   user: User
 }
 

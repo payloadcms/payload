@@ -1,8 +1,8 @@
-import type { PayloadRequest } from 'payload/types'
+import { initI18n } from './init'
 
 export const getTranslation = (
   label: JSX.Element | Record<string, string> | string,
-  i18n: Pick<PayloadRequest['i18n'], 'fallbackLanguage' | 'language'>,
+  i18n: Pick<ReturnType<typeof initI18n>, 'fallbackLanguage' | 'language'>,
 ): string => {
   if (typeof label === 'object') {
     if (label[i18n.language]) {

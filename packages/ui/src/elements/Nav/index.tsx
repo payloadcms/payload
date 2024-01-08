@@ -7,11 +7,12 @@ import { Chevron } from '../../icons/Chevron'
 import Logout from '../Logout'
 import NavGroup from '../NavGroup'
 import Link from 'next/link'
-import { PayloadRequest, SanitizedConfig } from 'payload/types'
+import { SanitizedConfig } from 'payload/types'
 import { Permissions, User } from 'payload/auth'
 import { NavWrapper } from './NavWrapper'
 import { NavHamburger } from './NavHamburger'
 import { getTranslation } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 
 import './index.scss'
 
@@ -21,7 +22,7 @@ export const DefaultNav: React.FC<{
   config: SanitizedConfig
   user: User
   permissions: Permissions
-  i18n: PayloadRequest['i18n']
+  i18n: I18n
 }> = (props) => {
   const { config, user, permissions, i18n } = props
 
