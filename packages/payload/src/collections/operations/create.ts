@@ -109,7 +109,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
     // Custom id
     // /////////////////////////////////////
-
+    // @todo: Refactor code to store 'customId' on the collection configuration itself so we don't need to repeat flattenFields
     const hasIdField =
       flattenFields(collectionConfig.fields).findIndex((field) => field.name === 'id') > -1
 

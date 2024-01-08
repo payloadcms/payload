@@ -77,7 +77,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     collection.graphQL = {} as Collection['graphQL']
 
-    const idField =
+    const hasIDField =
       flattenFields(fields).findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
       -1
 
@@ -87,7 +87,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     const whereInputFields = [...fields]
 
-    if (!idField) {
+    if (!hasIDField) {
       baseFields.id = { type: idType }
       whereInputFields.push({
         name: 'id',
