@@ -96,9 +96,9 @@ export async function getLocalizedPaths({
             // If this is a polymorphic relation,
             // We only support querying directly (no nested querying)
             if (typeof matchedField.relationTo !== 'string') {
-              const lastSegmentIsValid = ['relationTo', 'value'].includes(
-                pathSegments[pathSegments.length - 1],
-              )
+              const lastSegmentIsValid =
+                ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
+                pathSegments.length === 1
 
               if (lastSegmentIsValid) {
                 lastIncompletePath.complete = true
