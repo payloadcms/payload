@@ -17,7 +17,7 @@ const seo =
     const seoFields: GroupField[] = [
       {
         name: 'meta',
-        interfaceName: pluginConfig.interfaceName ?? 'meta',
+        interfaceName: pluginConfig.interfaceName,
         fields: [
           {
             name: 'overview',
