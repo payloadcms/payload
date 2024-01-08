@@ -124,6 +124,8 @@ const handleCustomEndpoints = ({
       })
     }
   }
+
+  return null
 }
 
 export const GET = async (
@@ -141,12 +143,13 @@ export const GET = async (
   })
 
   if (req?.collection) {
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       entitySlug: slug1,
       payloadRequest: req,
       request,
       endpoints: req.collection.config?.endpoints || [],
     })
+    if (customEndpointResponse) return customEndpointResponse
 
     switch (slug.length) {
       case 1:
@@ -176,12 +179,13 @@ export const GET = async (
     const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
 
     if (slug2) {
-      await handleCustomEndpoints({
+      const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: `${slug1}/${slug2}`,
         payloadRequest: req,
         request,
         endpoints: globalConfig?.endpoints || [],
       })
+      if (customEndpointResponse) return customEndpointResponse
     }
 
     switch (slug.length) {
@@ -200,11 +204,12 @@ export const GET = async (
     }
   } else {
     // root routes
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       payloadRequest: req,
       request,
       endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
 
     if (slug.length === 1 && slug1 === 'access') {
       return endpoints.root.GET.access({ req })
@@ -223,12 +228,13 @@ export const POST = async (
   const req = await createPayloadRequest({ request, config, params: { collection: slug1 } })
 
   if (req?.collection) {
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       entitySlug: slug1,
       payloadRequest: req,
       request,
       endpoints: req.collection.config?.endpoints || [],
     })
+    if (customEndpointResponse) return customEndpointResponse
 
     switch (slug.length) {
       case 1:
@@ -258,12 +264,13 @@ export const POST = async (
     const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
 
     if (slug2) {
-      await handleCustomEndpoints({
+      const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: `${slug1}/${slug2}`,
         payloadRequest: req,
         request,
         endpoints: globalConfig?.endpoints || [],
       })
+      if (customEndpointResponse) return customEndpointResponse
     }
 
     switch (slug.length) {
@@ -281,11 +288,12 @@ export const POST = async (
     }
   } else {
     // root routes
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       payloadRequest: req,
       request,
       endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
   }
 }
 
@@ -304,12 +312,13 @@ export const DELETE = async (
   })
 
   if (req?.collection) {
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       entitySlug: slug1,
       payloadRequest: req,
       request,
       endpoints: req.collection.config?.endpoints || [],
     })
+    if (customEndpointResponse) return customEndpointResponse
 
     switch (slug.length) {
       case 1:
@@ -323,11 +332,12 @@ export const DELETE = async (
     }
   } else {
     // root routes
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       payloadRequest: req,
       request,
       endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
   }
 }
 
@@ -346,12 +356,13 @@ export const PATCH = async (
   })
 
   if (req?.collection) {
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       entitySlug: slug1,
       payloadRequest: req,
       request,
       endpoints: req.collection.config?.endpoints || [],
     })
+    if (customEndpointResponse) return customEndpointResponse
 
     switch (slug.length) {
       case 1:
@@ -365,10 +376,11 @@ export const PATCH = async (
     }
   } else {
     // root routes
-    await handleCustomEndpoints({
+    const customEndpointResponse = await handleCustomEndpoints({
       payloadRequest: req,
       request,
       endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
   }
 }

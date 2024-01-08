@@ -91,7 +91,7 @@ export const DefaultNav: React.FC<{
                 }
 
                 const LinkElement = Link || 'a'
-                console.log('entityLabel', entityLabel)
+
                 return (
                   <LinkElement
                     // activeClassName="active"
