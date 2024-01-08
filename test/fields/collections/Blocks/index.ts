@@ -7,75 +7,79 @@ import { getBlocksFieldSeedData } from './shared'
 
 export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
+  type: 'blocks',
   blocks: [
     {
+      slug: prefix ? `${prefix}Content` : 'content',
       fields: [
         {
           name: 'text',
-          required: true,
           type: 'text',
+          required: true,
         },
         {
           name: 'richText',
           type: 'richText',
         },
       ],
-      slug: prefix ? `${prefix}Content` : 'content',
     },
     {
+      slug: prefix ? `${prefix}Number` : 'number',
       fields: [
         {
           name: 'number',
-          required: true,
           type: 'number',
+          required: true,
         },
       ],
-      slug: prefix ? `${prefix}Number` : 'number',
     },
     {
+      slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
       fields: [
         {
+          type: 'collapsible',
           fields: [
             {
               name: 'subBlocks',
+              type: 'blocks',
               blocks: [
                 {
+                  slug: 'text',
                   fields: [
                     {
                       name: 'text',
-                      required: true,
                       type: 'text',
+                      required: true,
                     },
                   ],
-                  slug: 'text',
                 },
                 {
+                  slug: 'number',
                   fields: [
                     {
                       name: 'number',
-                      required: true,
                       type: 'number',
+                      required: true,
                     },
                   ],
-                  slug: 'number',
                 },
               ],
-              type: 'blocks',
             },
           ],
           label: 'Collapsible within Block',
-          type: 'collapsible',
         },
       ],
-      slug: prefix ? `${prefix}SubBlocks` : 'subBlocks',
     },
     {
+      slug: prefix ? `${prefix}Tabs` : 'tabs',
       fields: [
         {
+          type: 'tabs',
           tabs: [
             {
               fields: [
                 {
+                  type: 'collapsible',
                   fields: [
                     {
                       // collapsible
@@ -84,9 +88,9 @@ export const getBlocksField = (prefix?: string): BlockField => ({
                     },
                   ],
                   label: 'Collapsible within Block',
-                  type: 'collapsible',
                 },
                 {
+                  type: 'row',
                   fields: [
                     {
                       // collapsible
@@ -94,24 +98,21 @@ export const getBlocksField = (prefix?: string): BlockField => ({
                       type: 'text',
                     },
                   ],
-                  type: 'row',
                 },
               ],
               label: 'Tab with Collapsible',
             },
           ],
-          type: 'tabs',
         },
       ],
-      slug: prefix ? `${prefix}Tabs` : 'tabs',
     },
   ],
   defaultValue: getBlocksFieldSeedData(prefix),
   required: true,
-  type: 'blocks',
 })
 
 const BlockFields: CollectionConfig = {
+  slug: blockFieldsSlug,
   fields: [
     getBlocksField(),
     {
@@ -129,8 +130,10 @@ const BlockFields: CollectionConfig = {
     },
     {
       name: 'i18nBlocks',
+      type: 'blocks',
       blocks: [
         {
+          slug: 'text',
           fields: [
             {
               name: 'text',
@@ -150,7 +153,6 @@ const BlockFields: CollectionConfig = {
               es: 'Text es',
             },
           },
-          slug: 'text',
         },
       ],
       label: {
@@ -167,113 +169,151 @@ const BlockFields: CollectionConfig = {
           es: 'Block es',
         },
       },
-      type: 'blocks',
     },
     {
       name: 'blocksWithSimilarConfigs',
+      type: 'blocks',
       blocks: [
         {
+          slug: 'block-a',
           fields: [
             {
               name: 'items',
+              type: 'array',
               fields: [
                 {
                   name: 'title',
-                  required: true,
                   type: 'text',
+                  required: true,
                 },
               ],
-              type: 'array',
             },
           ],
-          slug: 'block-a',
         },
         {
+          slug: 'block-b',
           fields: [
             {
               name: 'items',
+              type: 'array',
               fields: [
                 {
                   name: 'title2',
+                  type: 'text',
                   required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'group-block',
+          fields: [
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  name: 'text',
                   type: 'text',
                 },
               ],
-              type: 'array',
             },
           ],
-          slug: 'block-b',
         },
       ],
+    },
+    {
+      name: 'blocksWithSimilarGroup',
       type: 'blocks',
+      admin: {
+        description:
+          'The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields',
+      },
+      blocks: [
+        {
+          slug: 'group-block',
+          fields: [
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'blocksWithMinRows',
+      type: 'blocks',
       blocks: [
         {
+          slug: 'block',
           fields: [
             {
               name: 'blockTitle',
               type: 'text',
             },
           ],
-          slug: 'block',
         },
       ],
       minRows: 2,
-      type: 'blocks',
     },
     {
       name: 'customBlocks',
+      type: 'blocks',
       blocks: [
         {
+          slug: 'block-1',
           fields: [
             {
               name: 'block1Title',
               type: 'text',
             },
           ],
-          slug: 'block-1',
         },
         {
+          slug: 'block-2',
           fields: [
             {
               name: 'block2Title',
               type: 'text',
             },
           ],
-          slug: 'block-2',
         },
       ],
-      type: 'blocks',
     },
     {
       name: 'relationshipBlocks',
+      type: 'blocks',
       blocks: [
         {
+          slug: 'relationships',
           fields: [
             {
               name: 'relationship',
-              relationTo: textFieldsSlug,
               type: 'relationship',
+              relationTo: textFieldsSlug,
             },
           ],
-          slug: 'relationships',
         },
       ],
-      type: 'blocks',
     },
     {
       name: 'ui',
+      type: 'ui',
       admin: {
         components: {
           Field: AddCustomBlocks,
         },
       },
-      type: 'ui',
     },
   ],
-  slug: blockFieldsSlug,
 }
 
 export default BlockFields
