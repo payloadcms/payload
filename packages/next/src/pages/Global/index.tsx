@@ -4,19 +4,19 @@ import { initPage } from '../../utilities/initPage'
 import {
   EditDepthProvider,
   RenderCustomComponent,
-  DefaultGlobalViewProps,
-  findLocaleFromCode,
-  DefaultGlobalView,
   fieldTypes,
   buildStateFromSchema,
   formatFields,
   FormQueryParamsProvider,
   QueryParamTypes,
   HydrateClientUser,
+  DocumentInfoProvider,
 } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
+import { DefaultGlobalView } from './Default'
+import { DefaultGlobalViewProps } from './Default/types'
 // import i18n from 'i18next'
 // import { getTranslation } from '@payloadcms/translations'
 
@@ -44,15 +44,16 @@ export const Global = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user, globalConfig, locale } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    globalSlug,
+  })
 
   const {
     routes: { api },
     serverURL,
-    localization,
   } = config
-
-  const globalConfig = config.globals.find((global) => global.slug === globalSlug)
 
   if (globalConfig) {
     const {
@@ -69,13 +70,6 @@ export const Global = async ({
         user,
       })
     } catch (error) {}
-
-    const defaultLocale =
-      localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-
-    const localeCode = (searchParams?.locale as string) || defaultLocale
-
-    const locale = localization && findLocaleFromCode(localization, localeCode)
 
     const globalPermission = permissions?.globals?.[globalSlug]
 
@@ -126,7 +120,7 @@ export const Global = async ({
       globalConfig,
       data,
       fieldTypes,
-      initialState: state,
+      state,
       permissions: globalPermission,
       updatedAt: data?.updatedAt?.toString(),
       user,
@@ -135,16 +129,23 @@ export const Global = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
-        <EditDepthProvider depth={1}>
-          <FormQueryParamsProvider formQueryParams={formQueryParams}>
-            <RenderCustomComponent
-              CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
-              DefaultComponent={DefaultGlobalView}
-              componentProps={componentProps}
-            />
-          </FormQueryParamsProvider>
-        </EditDepthProvider>
+        <HydrateClientUser user={user} permissions={permissions} />
+        <DocumentInfoProvider
+          collectionSlug={globalConfig.slug}
+          key={`${globalSlug}-${locale}`}
+          versionsEnabled={Boolean(globalConfig.versions)}
+          draftsEnabled={Boolean(globalConfig.versions?.drafts)}
+        >
+          <EditDepthProvider depth={1}>
+            <FormQueryParamsProvider formQueryParams={formQueryParams}>
+              <RenderCustomComponent
+                CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
+                DefaultComponent={DefaultGlobalView}
+                componentProps={componentProps}
+              />
+            </FormQueryParamsProvider>
+          </EditDepthProvider>
+        </DocumentInfoProvider>
       </Fragment>
     )
   }

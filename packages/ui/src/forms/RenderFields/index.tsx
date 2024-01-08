@@ -8,7 +8,7 @@ import './index.scss'
 const baseClass = 'render-fields'
 
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender, margins } = props
+  const { className, fieldTypes, forceRender, margins, data, user, state } = props
 
   if ('fields' in props) {
     return (
@@ -32,8 +32,32 @@ const RenderFields: React.FC<Props> = (props) => {
             readOnly,
           } = reducedField
 
+          const path = field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
+
+          const fieldState = state?.[path]
+
+          if (!fieldState?.passesCondition) return null
+
           if (fieldIsPresentational) {
             return <FieldComponent key={fieldIndex} />
+          }
+
+          // TODO: type this, i.e. `componentProps: FieldComponentProps`
+          const componentProps = {
+            ...field,
+            admin: {
+              ...(field.admin || {}),
+              readOnly,
+            },
+            fieldTypes,
+            forceRender,
+            indexPath: 'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
+            path,
+            permissions: fieldPermissions,
+            data,
+            user,
+            valid: fieldState?.valid,
+            errorMessage: fieldState?.errorMessage,
           }
 
           if (field) {
@@ -41,19 +65,7 @@ const RenderFields: React.FC<Props> = (props) => {
               <RenderCustomComponent
                 CustomComponent={field?.admin?.components?.Field}
                 DefaultComponent={FieldComponent}
-                componentProps={{
-                  // ...field,
-                  admin: {
-                    // ...(field.admin || {}),
-                    readOnly,
-                  },
-                  fieldTypes,
-                  forceRender,
-                  indexPath:
-                    'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
-                  path: field.path || (isFieldAffectingData && 'name' in field ? field.name : ''),
-                  // permissions: fieldPermissions,
-                }}
+                componentProps={componentProps}
                 key={fieldIndex}
               />
             )

@@ -17,7 +17,7 @@ import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
 const useField = <T,>(options: Options): FieldType<T> => {
-  const { condition, disableFormData = false, hasRows, path, validate } = options
+  const { disableFormData = false, hasRows, path, validate } = options
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
@@ -102,9 +102,9 @@ const useField = <T,>(options: Options): FieldType<T> => {
         }
 
         let errorMessage: string | undefined
-        let valid: boolean | string = false
+        let valid: boolean | string = prevValid.current
 
-        const validationResult =
+        const isValid =
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
@@ -117,11 +117,11 @@ const useField = <T,>(options: Options): FieldType<T> => {
               })
             : true
 
-        if (typeof validationResult === 'string') {
-          errorMessage = validationResult
+        if (typeof isValid === 'string') {
           valid = false
-        } else {
-          valid = validationResult
+          errorMessage = isValid
+        } else if (typeof isValid === 'boolean') {
+          valid = isValid
           errorMessage = undefined
         }
 
@@ -132,7 +132,6 @@ const useField = <T,>(options: Options): FieldType<T> => {
 
           if (typeof dispatchField === 'function') {
             dispatchField({
-              condition,
               disableFormData:
                 disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
               errorMessage,
@@ -140,7 +139,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
               rows: field?.rows,
               type: 'UPDATE',
               valid,
-              validate,
+              // validate,
               value,
             })
           }
@@ -152,7 +151,6 @@ const useField = <T,>(options: Options): FieldType<T> => {
     150,
     [
       value,
-      condition,
       disableFormData,
       dispatchField,
       getData,

@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 
 import { CheckboxInput } from '../../../forms/field-types/Checkbox/Input'

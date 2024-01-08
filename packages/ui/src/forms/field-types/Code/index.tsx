@@ -3,13 +3,11 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { code } from 'payload/fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
@@ -26,7 +24,6 @@ const Code: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label } = {},
-      condition,
       description,
       editorOptions,
       language,
@@ -37,7 +34,7 @@ const Code: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = code,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -53,7 +50,6 @@ const Code: React.FC<Props> = (props) => {
   )
 
   const { errorMessage, setValue, showError, value } = useField({
-    condition,
     path,
     validate: memoizedValidate,
   })
@@ -88,4 +84,4 @@ const Code: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(Code)
+export default Code

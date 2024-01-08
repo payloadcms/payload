@@ -1,20 +1,19 @@
 import React from 'react'
-import { useTranslation } from '../../../../../providers/Translation'
 
 import type { DateField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
 import { formatDate } from '../../../../../utilities/formatDate'
-import { useConfig } from '../../../../../providers/Config'
 
-const DateCell: React.FC<CellComponentProps<DateField, any>> = ({ data, field }) => {
+const DateCell: React.FC<CellComponentProps<DateField, any>> = ({ config, data, field }) => {
   const {
     admin: { dateFormat: dateFormatFromConfig },
-  } = useConfig()
+  } = config
 
   const dateFormat = field?.admin?.date?.displayFormat || dateFormatFromConfig
 
-  const { i18n } = useTranslation()
+  // TODO(i18n)
+  const i18n = undefined
 
   return <span>{data && formatDate(data, dateFormat, i18n?.language)}</span>
 }

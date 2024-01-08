@@ -2,9 +2,9 @@ import { SanitizedConfig } from 'payload/types'
 import React, { Fragment } from 'react'
 import {
   RenderCustomComponent,
-  TableColumnsProvider,
   DefaultList,
   HydrateClientUser,
+  DefaultListViewProps,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
@@ -18,15 +18,15 @@ export const CollectionList = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user, collectionConfig } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    collectionSlug,
+  })
 
   const {
     routes: { admin },
   } = config
-
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
 
   if (collectionConfig) {
     const {
@@ -50,24 +50,29 @@ export const CollectionList = async ({
       user,
     })
 
+    const componentProps: DefaultListViewProps = {
+      config,
+      collectionConfig,
+      data,
+      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
+      limit,
+      newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
+      // titleField,
+      toggleColumn: () => {},
+      resetParams: () => {},
+      setLimit: () => {},
+      setListControls: () => {},
+      setSort: () => {},
+    }
+
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
-        <TableColumnsProvider collectionSlug={collectionSlug}>
-          <RenderCustomComponent
-            CustomComponent={ListToRender}
-            DefaultComponent={DefaultList}
-            componentProps={{
-              collection: collectionConfig,
-              data,
-              hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
-              limit,
-              newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
-              // resetParams,
-              // titleField,
-            }}
-          />
-        </TableColumnsProvider>
+        <HydrateClientUser user={user} permissions={permissions} />
+        <RenderCustomComponent
+          CustomComponent={ListToRender}
+          DefaultComponent={DefaultList}
+          componentProps={componentProps}
+        />
       </Fragment>
     )
   }

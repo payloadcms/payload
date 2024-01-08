@@ -1,17 +1,16 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
-
+import { getTranslation } from '@payloadcms/translations'
 import type { Props } from './types'
 
-import { textarea } from 'payload/fields/validations'
-import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '../../../providers/Translation'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { isFieldRTL } from '../shared'
 import TextareaInput from './Input'
+import { Validate } from 'payload/types'
+
 import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
@@ -20,7 +19,6 @@ const Textarea: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      condition,
       description,
       placeholder,
       readOnly,
@@ -35,7 +33,7 @@ const Textarea: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    validate = textarea,
+    validate,
   } = props
 
   const { i18n } = useTranslation()
@@ -51,15 +49,16 @@ const Textarea: React.FC<Props> = (props) => {
     locale,
     localizationConfig: localization || undefined,
   })
-  const memoizedValidate = useCallback(
+
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, maxLength, minLength, required })
+      if (typeof validate === 'function')
+        return validate(value, { ...options, maxLength, minLength, required })
     },
-    [validate, required, maxLength, minLength],
+    [validate, required],
   )
 
   const { errorMessage, setValue, showError, value } = useField({
-    condition,
     path,
     validate: memoizedValidate,
   })
@@ -91,4 +90,4 @@ const Textarea: React.FC<Props> = (props) => {
     />
   )
 }
-export default withCondition(Textarea)
+export default Textarea

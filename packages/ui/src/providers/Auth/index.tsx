@@ -144,7 +144,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logOut = useCallback(() => {
     setUser(null)
-    console.log('set the user to null')
     revokeTokenAndExpire()
     try {
       requests.post(`${serverURL}${api}/${userSlug}/logout`)
@@ -299,6 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser,
         token: tokenInMemory,
         user,
+        setPermissions,
       }}
     >
       {children}

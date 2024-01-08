@@ -21,10 +21,11 @@ export { formatLabels, formatNames, toWords } from '../utilities/formatLabels'
 export { getIDType } from '../utilities/getIDType'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation'
 
+export { default as getUniqueListBy } from '../utilities/getUniqueListBy'
 export { isNumber } from '../utilities/isNumber'
 
 export { isValidID } from '../utilities/isValidID'
 export { setsAreEqual } from '../utilities/setsAreEqual'
-export { default as toKebabCase } from '../utilities/toKebabCase'
 
+export { default as toKebabCase } from '../utilities/toKebabCase'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex'

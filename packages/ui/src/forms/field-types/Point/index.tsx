@@ -4,15 +4,14 @@ import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { point } from 'payload/fields/validations'
 import { getTranslation } from '@payloadcms/translations'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
+import { Validate } from 'payload/types'
 
 const baseClass = 'point'
 
@@ -33,7 +32,7 @@ const PointField: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = point,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -43,9 +42,9 @@ const PointField: React.FC<Props> = (props) => {
 
   const { i18n, t } = useTranslation()
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, required })
+      if (typeof validate === 'function') return validate(value, { ...options, required })
     },
     [validate, required],
   )
@@ -56,7 +55,6 @@ const PointField: React.FC<Props> = (props) => {
     showError,
     value = [null, null],
   } = useField<[number, number]>({
-    condition,
     path,
     validate: memoizedValidate,
   })
@@ -140,4 +138,4 @@ const PointField: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(PointField)
+export default PointField

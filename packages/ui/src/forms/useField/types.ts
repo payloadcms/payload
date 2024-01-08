@@ -1,8 +1,7 @@
-import type { Condition, Validate } from 'payload/types'
+import type { Validate } from 'payload/types'
 import type { Row } from '../Form/types'
 
 export type Options = {
-  condition?: Condition
   disableFormData?: boolean
   hasRows?: boolean
   path: string

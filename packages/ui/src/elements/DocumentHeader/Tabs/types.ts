@@ -1,13 +1,14 @@
-import type { useLocation, useRouteMatch } from 'react-router-dom'
-
-import type { Config } from 'payload/config'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
-import type { useConfig } from '../../../providers/Config'
+import type {
+  SanitizedCollectionConfig,
+  SanitizedConfig,
+  SanitizedGlobalConfig,
+} from 'payload/types'
 import type { useDocumentInfo } from '../../../providers/DocumentInfo'
 import type { ContextType } from '../../../providers/DocumentInfo/types'
 
 export type DocumentTabProps = {
   apiURL?: string
+  config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   id: string
@@ -16,7 +17,7 @@ export type DocumentTabProps = {
 
 export type DocumentTabCondition = (args: {
   collectionConfig: SanitizedCollectionConfig
-  config: Config
+  config: SanitizedConfig
   documentInfo: ContextType
   globalConfig: SanitizedGlobalConfig
 }) => boolean
@@ -31,17 +32,11 @@ export type DocumentTabConfig = {
         collection: SanitizedCollectionConfig
         global: SanitizedGlobalConfig
         id?: string
-        match: ReturnType<typeof useRouteMatch>
-        routes: ReturnType<typeof useConfig>['routes']
+        routes: SanitizedConfig['routes']
       }) => string)
     | string
-  isActive?:
-    | ((args: {
-        href: string
-        location: ReturnType<typeof useLocation>
-        match: ReturnType<typeof useRouteMatch>
-      }) => boolean)
-    | boolean
+  isActive?: boolean
+  // isActive?: ((args: { href: string }) => boolean) | boolean
   label?: ((args: { t: (key: string) => string }) => string) | string
   newTab?: boolean
   pillLabel?:

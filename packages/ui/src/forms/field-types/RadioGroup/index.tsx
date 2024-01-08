@@ -3,9 +3,7 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { radio } from 'payload/fields/validations'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import RadioGroupInput from './Input'
 
 const RadioGroup: React.FC<Props> = (props) => {
@@ -25,20 +23,20 @@ const RadioGroup: React.FC<Props> = (props) => {
     options,
     path: pathFromProps,
     required,
-    validate = radio,
+    validate,
   } = props
 
   const path = pathFromProps || name
 
   const memoizedValidate = useCallback(
     (value, validationOptions) => {
-      return validate(value, { ...validationOptions, options, required })
+      if (typeof validate === 'function')
+        return validate(value, { ...validationOptions, options, required })
     },
     [validate, options, required],
   )
 
   const { errorMessage, setValue, showError, value } = useField<string>({
-    condition,
     path,
     validate: memoizedValidate,
   })
@@ -65,4 +63,4 @@ const RadioGroup: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(RadioGroup)
+export default RadioGroup

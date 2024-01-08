@@ -1,3 +1,4 @@
+'use client'
 import type { LinkProps } from 'react-router-dom'
 
 import * as React from 'react'
@@ -6,6 +7,7 @@ import Link from 'next/link' // TODO: abstract this out to support all routers
 import './index.scss'
 
 const baseClass = 'popup-button-list'
+
 export const ButtonGroup: React.FC<{
   buttonSize?: 'default' | 'small'
   children: React.ReactNode
@@ -31,6 +33,7 @@ type MenuButtonProps = {
   onClick?: () => void
   to?: LinkProps['to']
 }
+
 export const Button: React.FC<MenuButtonProps> = ({
   id,
   active,

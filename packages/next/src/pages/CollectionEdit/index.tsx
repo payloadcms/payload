@@ -1,4 +1,4 @@
-import { SanitizedConfig, TypeWithID } from 'payload/types'
+import { Document, SanitizedConfig } from 'payload/types'
 import React, { Fragment } from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
@@ -6,16 +6,17 @@ import {
   RenderCustomComponent,
   DefaultEditView,
   DefaultEditViewProps,
-  findLocaleFromCode,
   fieldTypes,
   buildStateFromSchema,
   formatFields,
   FormQueryParamsProvider,
   QueryParamTypes,
   HydrateClientUser,
+  DocumentInfoProvider,
 } from '@payloadcms/ui'
 import queryString from 'qs'
 import { notFound } from 'next/navigation'
+import { TFunction } from 'i18next'
 
 export const CollectionEdit = async ({
   collectionSlug,
@@ -28,19 +29,18 @@ export const CollectionEdit = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage(configPromise, true)
+  const { config, payload, permissions, user, collectionConfig, locale } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: true,
+    collectionSlug,
+  })
 
   const isEditing = !!id
 
   const {
     routes: { api },
     serverURL,
-    localization,
   } = config
-
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
-  )
 
   if (collectionConfig) {
     const {
@@ -48,7 +48,7 @@ export const CollectionEdit = async ({
       fields,
     } = collectionConfig
 
-    let data: TypeWithID & Record<string, unknown>
+    let data: Document
 
     try {
       data = await payload.findByID({
@@ -59,16 +59,7 @@ export const CollectionEdit = async ({
       })
     } catch (error) {}
 
-    const defaultLocale =
-      localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-
-    const localeCode = (searchParams?.locale as string) || defaultLocale
-
-    const locale = localization && findLocaleFromCode(localization, localeCode)
-
     const collectionPermissions = permissions?.collections?.[collectionSlug]
-
-    const fieldSchema = formatFields(fields, isEditing)
 
     let preferencesKey: string
 
@@ -95,18 +86,18 @@ export const CollectionEdit = async ({
       id,
       config,
       data: data || {},
-      fieldSchema,
+      fieldSchema: formatFields(fields, isEditing),
       locale,
       operation: isEditing ? 'update' : 'create',
       preferences,
-      // t,
+      t: ((key: string) => key) as TFunction, // TODO: i18n
       user,
     })
 
     const formQueryParams: QueryParamTypes = {
       depth: 0,
       'fallback-locale': 'null',
-      locale: '',
+      locale,
       uploadEdits: undefined,
     }
 
@@ -126,7 +117,7 @@ export const CollectionEdit = async ({
       hasSavePermission:
         (isEditing && collectionPermissions?.update?.permission) ||
         (!isEditing && collectionPermissions?.create?.permission),
-      initialState: state,
+      state,
       isEditing,
       permissions: collectionPermissions,
       updatedAt: data?.updatedAt.toString(),
@@ -136,16 +127,24 @@ export const CollectionEdit = async ({
 
     return (
       <Fragment>
-        <HydrateClientUser user={user} />
-        <EditDepthProvider depth={1}>
-          <FormQueryParamsProvider formQueryParams={formQueryParams}>
-            <RenderCustomComponent
-              CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
-              DefaultComponent={DefaultEditView}
-              componentProps={componentProps}
-            />
-          </FormQueryParamsProvider>
-        </EditDepthProvider>
+        <HydrateClientUser user={user} permissions={permissions} />
+        <DocumentInfoProvider
+          collectionSlug={collectionConfig.slug}
+          id={id}
+          key={`${collectionSlug}-${locale}`}
+          versionsEnabled={Boolean(collectionConfig.versions)}
+          draftsEnabled={Boolean(collectionConfig.versions?.drafts)}
+        >
+          <EditDepthProvider depth={1}>
+            <FormQueryParamsProvider formQueryParams={formQueryParams}>
+              <RenderCustomComponent
+                CustomComponent={typeof CustomEdit === 'function' ? CustomEdit : undefined}
+                DefaultComponent={DefaultEditView}
+                componentProps={componentProps}
+              />
+            </FormQueryParamsProvider>
+          </EditDepthProvider>
+        </DocumentInfoProvider>
       </Fragment>
     )
   }

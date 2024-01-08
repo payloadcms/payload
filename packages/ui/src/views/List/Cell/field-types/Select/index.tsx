@@ -1,5 +1,4 @@
 import React from 'react'
-import { useTranslation } from '../../../../../providers/Translation'
 
 import type { OptionObject, SelectField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
@@ -8,7 +7,9 @@ import { optionsAreObjects } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 
 const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, field }) => {
-  const { i18n } = useTranslation()
+  // TODO(i18n)
+  const i18n = undefined
+
   const findLabel = (items: string[]) =>
     items
       .map((i) => {

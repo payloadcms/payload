@@ -8,7 +8,6 @@ import type { Where } from 'payload/types'
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
 import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types'
 
-import { relationship } from 'payload/fields/validations'
 import { wordBoundariesRegex } from 'payload/utilities'
 import { useDebouncedCallback } from '../../../hooks/useDebouncedCallback'
 import ReactSelect from '../../../elements/ReactSelect'
@@ -21,7 +20,6 @@ import FieldDescription from '../../FieldDescription'
 import { useFormProcessing } from '../../Form/context'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
@@ -56,7 +54,7 @@ const Relationship: React.FC<Props> = (props) => {
     path,
     relationTo,
     required,
-    validate = relationship,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -95,7 +93,6 @@ const Relationship: React.FC<Props> = (props) => {
   )
 
   const { errorMessage, initialValue, setValue, showError, value } = useField<Value | Value[]>({
-    condition,
     path: pathOrName,
     validate: memoizedValidate,
   })
@@ -539,4 +536,4 @@ const Relationship: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(Relationship)
+export default Relationship

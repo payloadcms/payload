@@ -1,7 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
@@ -16,17 +15,12 @@ import { useConfig } from '../../providers/Config'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
+import { useRouter } from 'next/navigation'
 
 const baseClass = 'delete-document'
 
 const DeleteDocument: React.FC<Props> = (props) => {
-  const {
-    id,
-    buttonId,
-    collection: { labels: { singular } = {}, slug } = {},
-    collection,
-    title: titleFromProps,
-  } = props
+  const { id, buttonId, useAsTitle, collectionSlug, singularLabel, title: titleFromProps } = props
 
   const {
     routes: { admin, api },
@@ -36,9 +30,12 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)
   const { toggleModal } = useModal()
-  const history = useHistory()
+  const history = useRouter()
   const { i18n, t } = useTranslation()
-  const title = useTitle({ useAsTitle: collection?.admin?.useAsTitle })
+  const title = useTitle({
+    useAsTitle,
+  })
+
   const titleToRender = titleFromProps || title || id
 
   const modalSlug = `delete-${id}`
@@ -86,12 +83,12 @@ const DeleteDocument: React.FC<Props> = (props) => {
     setModified,
     serverURL,
     api,
-    slug,
+    collectionSlug,
     id,
     toggleModal,
     modalSlug,
     t,
-    singular,
+    singularLabel,
     i18n,
     title,
     history,
@@ -116,13 +113,13 @@ const DeleteDocument: React.FC<Props> = (props) => {
             <h1>{t('general:confirmDeletion')}</h1>
             <p>
               {t('general:aboutToDelete', {
-                label: getTranslation(singular, i18n),
+                label: getTranslation(singularLabel, i18n),
                 title: titleToRender,
               })}
               {/* <Trans
                 i18nKey="aboutToDelete"
                 t={t}
-                values={{ label: getTranslation(singular, i18n), title: titleToRender }}
+                values={{ label: getTranslation(singularLabel, i18n), title: titleToRender }}
               >
                 aboutToDelete
                 <strong>{titleToRender}</strong>

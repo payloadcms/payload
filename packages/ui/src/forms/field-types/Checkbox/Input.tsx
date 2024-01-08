@@ -1,81 +1,89 @@
-import React from 'react'
+'use client'
+import React, { Fragment, useCallback } from 'react'
 
-import type { Props as LabelProps } from '../../Label/types'
-
+import useField from '../../useField'
+import { Validate } from 'payload/types'
 import { Check } from '../../../icons/Check'
 import { Line } from '../../../icons/Line'
-import DefaultLabel from '../../Label'
-import './index.scss'
-
-const baseClass = 'checkbox-input'
 
 type CheckboxInputProps = {
-  Label?: React.ComponentType<LabelProps>
-  afterInput?: React.ComponentType<any>[]
   'aria-label'?: string
-  beforeInput?: React.ComponentType<any>[]
   checked?: boolean
   className?: string
   id?: string
   inputRef?: React.MutableRefObject<HTMLInputElement>
   label?: string
   name?: string
-  onToggle: React.FormEventHandler<HTMLInputElement>
-  partialChecked?: boolean
+  onChange?: (value: boolean) => void
   readOnly?: boolean
   required?: boolean
+  path: string
+  validate?: Validate
+  partialChecked?: boolean
+  iconClassName?: string
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
   const {
     id,
     name,
-    Label,
-    afterInput,
     'aria-label': ariaLabel,
-    beforeInput,
-    checked,
+    checked: checkedFromProps,
     className,
+    iconClassName,
     inputRef,
-    label,
-    onToggle,
-    partialChecked,
+    onChange: onChangeFromProps,
     readOnly,
     required,
+    path,
+    validate,
+    partialChecked,
   } = props
 
-  const LabelComp = Label || DefaultLabel
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
+
+  const { setValue, value } = useField({
+    // disableFormData,
+    path,
+    validate: memoizedValidate,
+  })
+
+  const onToggle = useCallback(() => {
+    if (!readOnly) {
+      setValue(!value)
+      if (typeof onChangeFromProps === 'function') onChangeFromProps(!value)
+    }
+  }, [onChangeFromProps, readOnly, setValue, value])
+
+  const checked = checkedFromProps || Boolean(value)
 
   return (
-    <div
-      className={[
-        baseClass,
-        className,
-        (checked || partialChecked) && `${baseClass}--checked`,
-        readOnly && `${baseClass}--read-only`,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      <div className={`${baseClass}__input`}>
-        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
-        <input
-          aria-label={ariaLabel}
-          defaultChecked={Boolean(checked)}
-          disabled={readOnly}
-          id={id}
-          name={name}
-          onInput={onToggle}
-          ref={inputRef}
-          type="checkbox"
-        />
-        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
-        <span className={`${baseClass}__icon ${!partialChecked ? 'check' : 'partial'}`}>
-          {!partialChecked && <Check />}
-          {partialChecked && <Line />}
-        </span>
-      </div>
-      {label && <LabelComp htmlFor={id} label={label} required={required} />}
-    </div>
+    <Fragment>
+      <input
+        className={className}
+        aria-label={ariaLabel}
+        defaultChecked={Boolean(checked)}
+        disabled={readOnly}
+        id={id}
+        name={name}
+        onInput={onToggle}
+        ref={inputRef}
+        type="checkbox"
+        required={required}
+      />
+      <span
+        className={[iconClassName, !value && partialChecked ? 'check' : 'partial']
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {value && <Check />}
+        {!value && partialChecked && <Line />}
+      </span>
+    </Fragment>
   )
 }

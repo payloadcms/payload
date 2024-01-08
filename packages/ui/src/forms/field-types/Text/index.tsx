@@ -2,8 +2,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { text } from 'payload/fields/validations'
-import { fieldBaseClass, isFieldRTL } from '../shared'
+import { fieldBaseClass } from '../shared'
 import { TextInput } from './Input'
 import FieldDescription from '../../FieldDescription'
 import DefaultError from '../../Error'
@@ -15,7 +14,6 @@ const Text: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      // condition,
       description,
       placeholder,
       readOnly,
@@ -23,14 +21,14 @@ const Text: React.FC<Props> = (props) => {
       style,
       width,
     } = {},
-    // inputRef,
     label,
     localized,
     maxLength,
     minLength,
     path: pathFromProps,
     required,
-    validate = text,
+    valid = true,
+    errorMessage,
   } = props
 
   const path = pathFromProps || name
@@ -40,12 +38,7 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={[
-        fieldBaseClass,
-        'text',
-        className,
-        // showError && 'error', readOnly && 'read-only'
-      ]
+      className={[fieldBaseClass, 'text', className, !valid && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -53,10 +46,7 @@ const Text: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <ErrorComp
-      // message={errorMessage}
-      // showError={showError}
-      />
+      <ErrorComp message={errorMessage} showError={!valid} />
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <div className="input-wrapper">
         {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}

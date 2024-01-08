@@ -40,8 +40,10 @@ export const iterateFields = async ({
   user,
 }: Args): Promise<void> => {
   const promises = []
+
   fields.forEach((field) => {
     const initialData = data
+
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
       const passesCondition = Boolean(
         (field?.admin?.condition

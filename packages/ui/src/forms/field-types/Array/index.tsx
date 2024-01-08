@@ -4,7 +4,6 @@ import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { array } from 'payload/fields/validations'
 import { getTranslation } from '@payloadcms/translations'
 import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
@@ -20,7 +19,6 @@ import FieldDescription from '../../FieldDescription'
 import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { ArrayRow } from './ArrayRow'
 import './index.scss'
@@ -41,7 +39,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     path: pathFromProps,
     permissions,
     required,
-    validate = array,
+    validate,
   } = props
 
   const path = pathFromProps || name
@@ -94,7 +92,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     valid,
     value,
   } = useField<number>({
-    condition,
     hasRows: true,
     path,
     validate: memoizedValidate,
@@ -291,4 +288,4 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(ArrayFieldType)
+export default ArrayFieldType

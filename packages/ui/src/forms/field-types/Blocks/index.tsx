@@ -4,7 +4,6 @@ import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { blocks as blocksValidator } from 'payload/fields/validations'
 import { getTranslation } from '@payloadcms/translations'
 import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
@@ -22,7 +21,6 @@ import FieldDescription from '../../FieldDescription'
 import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { BlockRow } from './BlockRow'
 import { BlocksDrawer } from './BlocksDrawer'
@@ -35,7 +33,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     name,
-    admin: { className, condition, description, readOnly },
+    admin: { className, description, readOnly },
     blocks,
     fieldTypes,
     forceRender = false,
@@ -48,7 +46,7 @@ const BlocksField: React.FC<Props> = (props) => {
     path: pathFromProps,
     permissions,
     required,
-    validate = blocksValidator,
+    validate,
   } = props
 
   const path = pathFromProps || name
@@ -93,7 +91,6 @@ const BlocksField: React.FC<Props> = (props) => {
     valid,
     value,
   } = useField<number>({
-    condition,
     hasRows: true,
     path,
     validate: memoizedValidate,
@@ -311,4 +308,4 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(BlocksField)
+export default BlocksField

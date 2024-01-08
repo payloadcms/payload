@@ -3,15 +3,14 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
-import { json } from 'payload/fields/validations'
 import { CodeEditor } from '../../../elements/CodeEditor'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
+import { Validate } from 'payload/types'
 
 const baseClass = 'json-field'
 
@@ -21,7 +20,6 @@ const JSONField: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label } = {},
-      condition,
       description,
       editorOptions,
       readOnly,
@@ -31,7 +29,7 @@ const JSONField: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = json,
+    validate,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -42,15 +40,15 @@ const JSONField: React.FC<Props> = (props) => {
   const [jsonError, setJsonError] = useState<string>()
   const [hasLoadedValue, setHasLoadedValue] = useState(false)
 
-  const memoizedValidate = useCallback(
+  const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, jsonError, required })
+      if (typeof validate === 'function')
+        return validate(value, { ...options, jsonError, required })
     },
-    [validate, required, jsonError],
+    [validate, required],
   )
 
   const { errorMessage, initialValue, setValue, showError, value } = useField<string>({
-    condition,
     path,
     validate: memoizedValidate,
   })
@@ -58,7 +56,6 @@ const JSONField: React.FC<Props> = (props) => {
   const handleChange = useCallback(
     (val) => {
       if (readOnly) return
-      console.log(val)
       setStringValue(val)
 
       try {
@@ -107,4 +104,4 @@ const JSONField: React.FC<Props> = (props) => {
   )
 }
 
-export default withCondition(JSONField)
+export default JSONField

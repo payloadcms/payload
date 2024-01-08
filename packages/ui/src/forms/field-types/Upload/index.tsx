@@ -3,10 +3,8 @@ import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { upload } from 'payload/fields/validations'
 import { useConfig } from '../../../providers/Config'
 import useField from '../../useField'
-import withCondition from '../../withCondition'
 import UploadInput from './Input'
 import './index.scss'
 
@@ -21,7 +19,6 @@ const Upload: React.FC<Props> = (props) => {
     name,
     admin: {
       className,
-      condition,
       description,
       readOnly,
       style,
@@ -34,20 +31,19 @@ const Upload: React.FC<Props> = (props) => {
     path,
     relationTo,
     required,
-    validate = upload,
+    validate,
   } = props
 
   const collection = collections.find((coll) => coll.slug === relationTo)
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, required })
+      if (typeof validate === 'function') return validate(value, { ...options, required })
     },
     [validate, required],
   )
 
   const field = useField({
-    condition,
     path,
     validate: memoizedValidate,
   })
@@ -92,4 +88,4 @@ const Upload: React.FC<Props> = (props) => {
 
   return null
 }
-export default withCondition(Upload)
+export default Upload

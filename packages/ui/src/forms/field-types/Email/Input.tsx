@@ -1,28 +1,29 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
+import { getTranslation } from '@payloadcms/translations'
 
 import useField from '../../useField'
+import { useTranslation } from '../../../providers/Translation'
+import { Validate } from 'payload/types'
+
 import './index.scss'
-import { getTranslation } from '@payloadcms/translations'
 
 export const EmailInput: React.FC<{
   name: string
   autoComplete?: string
-  // condition?: Condition
   readOnly?: boolean
   path: string
   required?: boolean
   placeholder?: Record<string, string> | string
+  validate?: Validate
 }> = (props) => {
   const {
     name,
     autoComplete,
-    // condition,
     readOnly,
     path: pathFromProps,
     required,
-    // validate = email,
+    validate,
     placeholder,
   } = props
 
@@ -30,12 +31,12 @@ export const EmailInput: React.FC<{
 
   const path = pathFromProps || name
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, required })
-  //   },
-  //   [validate, required],
-  // )
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const {
     // errorMessage,
@@ -43,9 +44,8 @@ export const EmailInput: React.FC<{
     // showError,
     value,
   } = useField({
-    // condition,
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   return (

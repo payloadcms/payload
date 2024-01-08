@@ -15,34 +15,24 @@ export const DocumentLayout = async ({
   config: configPromise,
   collectionSlug,
   globalSlug,
-  id,
 }: {
   children: React.ReactNode
   config: Promise<SanitizedConfig>
   collectionSlug?: string
   globalSlug?: string
-  id?: string
 }) => {
-  const { user, permissions, config } = await initPage(configPromise)
-
-  const collectionConfig = collectionSlug
-    ? config.collections.find((collection) => collection.slug === collectionSlug)
-    : null
-
-  const globalConfig = globalSlug
-    ? config.globals.find((global) => global.slug === globalSlug)
-    : null
+  const { config, collectionConfig, globalConfig } = await initPage({
+    configPromise,
+    collectionSlug,
+    globalSlug,
+  })
 
   return (
     <Fragment>
       <DocumentHeader
-        // apiURL={apiURL}
+        config={config}
         collectionConfig={collectionConfig}
         globalConfig={globalConfig}
-        // customHeader={customHeader}
-        // data={data}
-        id={id}
-        // isEditing={isEditing}
       />
       {children}
     </Fragment>

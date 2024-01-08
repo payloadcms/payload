@@ -1,20 +1,20 @@
-'use client'
-import React, { useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
+import React from 'react'
+
+// TODO(i18n)
+import { getTranslation } from '@payloadcms/translations'
 
 import type { Props } from './types'
-
-import { checkbox } from 'payload/fields/validations'
-import { getTranslation } from '@payloadcms/translations'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import useField from '../../useField'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { CheckboxInput } from './Input'
+import DefaultLabel from '../../Label'
+import { CheckboxWrapper } from './Wrapper'
+
 import './index.scss'
 
 const baseClass = 'checkbox'
+const inputBaseClass = 'checkbox-input'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
@@ -22,7 +22,6 @@ const Checkbox: React.FC<Props> = (props) => {
     admin: {
       className,
       components: { Error, Label, afterInput, beforeInput } = {},
-      condition,
       description,
       readOnly,
       style,
@@ -30,47 +29,26 @@ const Checkbox: React.FC<Props> = (props) => {
     } = {},
     disableFormData,
     label,
-    onChange,
     path: pathFromProps,
     required,
-    validate = checkbox,
+    valid = true,
+    errorMessage,
+    value,
   } = props
-
-  const ErrorComp = Error || DefaultError
-
-  const { i18n } = useTranslation()
 
   const path = pathFromProps || name
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      return validate(value, { ...options, required })
-    },
-    [validate, required],
-  )
-
-  const { errorMessage, setValue, showError, value } = useField({
-    condition,
-    disableFormData,
-    path,
-    validate: memoizedValidate,
-  })
-
-  const onToggle = useCallback(() => {
-    if (!readOnly) {
-      setValue(!value)
-      if (typeof onChange === 'function') onChange(!value)
-    }
-  }, [onChange, readOnly, setValue, value])
-
   const fieldID = `field-${path.replace(/\./g, '__')}`
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   return (
     <div
       className={[
         fieldBaseClass,
         baseClass,
-        showError && 'error',
+        !valid && 'error',
         className,
         value && `${baseClass}--checked`,
         readOnly && `${baseClass}--read-only`,
@@ -83,23 +61,28 @@ const Checkbox: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <ErrorComp alignCaret="left" message={errorMessage} showError={showError} />
+        <ErrorComp alignCaret="left" message={errorMessage} showError={!valid} />
       </div>
-      <CheckboxInput
-        Label={Label}
-        afterInput={afterInput}
-        beforeInput={beforeInput}
-        checked={Boolean(value)}
-        id={fieldID}
-        label={getTranslation(label || name, i18n)}
-        name={path}
-        onToggle={onToggle}
-        readOnly={readOnly}
-        required={required}
-      />
+      <CheckboxWrapper path={path} readOnly={readOnly} baseClass={inputBaseClass}>
+        <div className={`${inputBaseClass}__input`}>
+          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
+          <CheckboxInput
+            id={fieldID}
+            label={typeof label === 'string' ? label : undefined}
+            // label={getTranslation(label || name, i18n)}
+            name={path}
+            readOnly={readOnly}
+            required={required}
+            path={path}
+            iconClassName={`${inputBaseClass}__icon`}
+          />
+          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+        </div>
+        {label && <LabelComp htmlFor={fieldID} label={label} required={required} />}
+      </CheckboxWrapper>
       <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }
 
-export default withCondition(Checkbox)
+export default Checkbox

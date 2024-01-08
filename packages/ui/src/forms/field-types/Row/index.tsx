@@ -5,7 +5,6 @@ import type { Props } from './types'
 
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import withCondition from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { RowProvider } from './provider'
@@ -43,4 +42,4 @@ const Row: React.FC<Props> = (props) => {
     </RowProvider>
   )
 }
-export default withCondition(Row)
+export default Row

@@ -1,10 +1,10 @@
 'use client'
-import React from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
-import type { SanitizedConfig } from 'payload/types'
-
+import React, { useCallback } from 'react'
 import { getTranslation } from '@payloadcms/translations'
+import type { SanitizedConfig, Validate } from 'payload/types'
+
+import { useTranslation } from '../../../providers/Translation'
 import { isFieldRTL } from '../shared'
 import './index.scss'
 import useField from '../../useField'
@@ -13,7 +13,6 @@ import { useLocale } from '../../../providers/Locale'
 export const TextInput: React.FC<{
   name: string
   autoComplete?: string
-  // condition?: Condition
   readOnly?: boolean
   path: string
   required?: boolean
@@ -23,6 +22,8 @@ export const TextInput: React.FC<{
   rtl?: boolean
   maxLength?: number
   minLength?: number
+  validate?: Validate
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }> = (props) => {
   const {
     path,
@@ -31,30 +32,30 @@ export const TextInput: React.FC<{
     localized,
     localizationConfig,
     rtl,
-    // maxLength,
-    // minLength,
+    maxLength,
+    minLength,
+    validate,
+    required,
+    onKeyDown,
   } = props
 
   const { i18n } = useTranslation()
   const locale = useLocale()
 
-  const {
-    // errorMessage,
-    setValue,
-    // showError,
-    value,
-  } = useField({
-    // condition,
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...options, maxLength, minLength, required })
+    },
+    [validate, minLength, maxLength, required],
+  )
+
+  const field = useField({
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, maxLength, minLength, required })
-  //   },
-  //   [validate, minLength, maxLength, required],
-  // )
+  const { setValue, value } = field
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -72,7 +73,7 @@ export const TextInput: React.FC<{
       onChange={(e) => {
         setValue(e.target.value)
       }}
-      // onKeyDown={onKeyDown}
+      onKeyDown={onKeyDown}
       placeholder={getTranslation(placeholder, i18n)}
       // ref={inputRef}
       type="text"

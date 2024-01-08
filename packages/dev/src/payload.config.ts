@@ -4,6 +4,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig } from 'payload/config'
 import { Users } from './collections/Users'
 import { Settings } from './globals/Settings'
+import { Pages } from './collections/Pages'
 
 export default buildConfig({
   db: mongooseAdapter({
@@ -16,15 +17,30 @@ export default buildConfig({
   // }),
   // editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET,
-  collections: [Users],
+  collections: [Users, Pages],
   globals: [Settings],
-  // onInit: async (payload) => {
-  //   await payload.create({
-  //     collection: 'users',
-  //     data: {
-  //       email: 'dev@payloadcms.com',
-  //       password: 'test',
-  //     },
-  //   })
-  // },
+  editor: {},
+  onInit: async (payload) => {
+    // await payload.create({
+    //   collection: 'users',
+    //   data: {
+    //     email: 'dev@payloadcms.com',
+    //     password: 'test',
+    //   },
+    // })
+    // const page = await payload.create({
+    //   collection: 'pages',
+    //   data: {
+    //     title: 'Test Page',
+    //   },
+    // })
+    //
+    // await payload.update({
+    //   collection: 'pages',
+    //   id: page.id,
+    //   data: {
+    //     title: 'Test Page (Updated)',
+    //   },
+    // })
+  },
 })

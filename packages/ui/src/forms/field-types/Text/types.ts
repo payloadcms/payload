@@ -1,7 +1,14 @@
 import type { TextField } from 'payload/types'
 
-export type Props = Omit<TextField, 'type'> & {
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+export type FormFieldBase = {
   path?: string
+  value?: string
+  valid?: boolean
+  errorMessage?: string
 }
+
+export type Props = FormFieldBase &
+  Omit<TextField, 'type'> & {
+    inputRef?: React.MutableRefObject<HTMLInputElement>
+    onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+  }

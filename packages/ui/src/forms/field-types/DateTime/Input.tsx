@@ -1,10 +1,9 @@
 'use client'
-import React from 'react'
-import { useTranslation } from '../../../providers/Translation'
-
-import type { DateField } from 'payload/types'
-
 import { getTranslation } from '@payloadcms/translations'
+import type { DateField, Validate } from 'payload/types'
+
+import { useTranslation } from '../../../providers/Translation'
+import React, { useCallback } from 'react'
 import DatePicker from '../../../elements/DatePicker'
 import useField from '../../useField'
 
@@ -18,21 +17,20 @@ export type DateTimeInputProps = Omit<DateField, 'admin' | 'name' | 'type'> & {
 }
 
 export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
-  const { path, readOnly, placeholder, datePickerProps, style, width } = props
+  const { path, readOnly, placeholder, datePickerProps, style, width, validate, required } = props
 
   const { i18n } = useTranslation()
 
-  // const memoizedValidate = useCallback(
-  //   (value, options) => {
-  //     return validate(value, { ...options, required })
-  //   },
-  //   [validate, required],
-  // )
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const { errorMessage, setValue, showError, value } = useField<Date>({
-    // condition,
     path,
-    // validate: memoizedValidate,
+    validate: memoizedValidate,
   })
 
   return (

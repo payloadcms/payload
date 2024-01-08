@@ -26,12 +26,14 @@ export const DefaultCollectionEdit: React.FC<
     config,
     collectionConfig,
     data,
+    state,
     disableActions,
     disableLeaveWithoutSaving,
     fieldTypes,
     hasSavePermission,
     isEditing,
     permissions,
+    user,
   } = props
 
   const { auth, fields, upload } = collectionConfig
@@ -93,6 +95,9 @@ export const DefaultCollectionEdit: React.FC<
         fields={fields}
         hasSavePermission={hasSavePermission}
         permissions={permissions}
+        data={data}
+        state={state}
+        user={user}
       />
     </Fragment>
   )

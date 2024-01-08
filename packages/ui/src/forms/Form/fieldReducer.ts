@@ -4,8 +4,6 @@ import equal from 'deep-equal'
 import type { FieldAction, Fields, FormField } from './types'
 
 import { deepCopyObject } from 'payload/utilities'
-import getSiblingData from './getSiblingData'
-import reduceFieldsToValues from './reduceFieldsToValues'
 import { flattenRows, separateRows } from './rows'
 
 /**
@@ -42,53 +40,14 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       return newState
     }
 
-    case 'MODIFY_CONDITION': {
-      const { path, result, user } = action
-
-      return Object.entries(state).reduce((newState, [fieldPath, field]) => {
-        if (fieldPath === path || fieldPath.indexOf(`${path}.`) === 0) {
-          let passesCondition = result
-
-          // If a condition is being set to true,
-          // Set all conditions to true
-          // Besides those who still fail their own conditions
-
-          if (passesCondition && field.condition) {
-            passesCondition = field.condition(
-              reduceFieldsToValues(state, true),
-              getSiblingData(state, path),
-              { user },
-            )
-          }
-
-          return {
-            ...newState,
-            [fieldPath]: {
-              ...field,
-              passesCondition,
-            },
-          }
-        }
-
-        return {
-          ...newState,
-          [fieldPath]: {
-            ...field,
-          },
-        }
-      }, {})
-    }
-
     case 'UPDATE': {
       const newField = Object.entries(action).reduce(
         (field, [key, value]) => {
           if (
             [
-              'condition',
               'disableFormData',
               'errorMessage',
               'initialValue',
-              'passesCondition',
               'rows',
               'valid',
               'validate',

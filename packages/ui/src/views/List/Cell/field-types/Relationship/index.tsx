@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from '../../../../../providers/Translation'
 
