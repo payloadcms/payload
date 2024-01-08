@@ -1,73 +1,43 @@
 import React from 'react'
 
-import { RenderCustomComponent, EditDepthProvider } from '@payloadcms/ui'
-import { DefaultVersionsView } from './Default'
-import { SanitizedConfig } from 'payload/types'
-import { initPage } from '../../utilities/initPage'
-import { DefaultVersionsViewProps } from './Default/types'
+import {
+  Gutter,
+  Pagination,
+  PerPage,
+  Table,
+  SetDocumentStepNav as SetStepNav,
+} from '@payloadcms/ui'
+import { buildVersionColumns } from './columns'
+import './index.scss'
+
+import { EditViewProps } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
 
-export const VersionsView = async ({
-  collectionSlug,
-  globalSlug,
-  id,
-  config: configPromise,
-  searchParams,
-}: {
-  collectionSlug: string
-  globalSlug?: string
-  id?: string
-  config: Promise<SanitizedConfig>
-  searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const { config, payload, permissions, user } = await initPage({
-    configPromise,
-    redirectUnauthenticatedUser: true,
-    collectionSlug,
-    globalSlug,
-  })
+const baseClass = 'versions'
+
+export const VersionsView = async (props: EditViewProps) => {
+  const { config, searchParams, payload, user } = props
+
+  const id = 'id' in props ? props.id : undefined
+  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
+  const globalConfig = 'globalConfig' in props && props?.globalConfig
+
+  const collectionSlug = collectionConfig?.slug
+  const globalSlug = globalConfig?.slug
+  const { limit, page, sort } = searchParams
 
   const {
     routes: { admin, api },
     serverURL,
   } = config
 
-  const { limit, page, sort } = searchParams
-
-  let CustomVersionsView: React.ComponentType | null = null
   let docURL: string
   let entityLabel: string
   let slug: string
   let editURL: string
-
-  const collectionConfig = collectionSlug
-    ? config.collections.find((collection) => collection.slug === collectionSlug)
-    : null
-
-  const globalConfig = globalSlug
-    ? config.globals.find((global) => global.slug === globalSlug)
-    : null
-
-  let data
   let versionsData
 
   if (collectionSlug) {
-    try {
-      data = await payload.findByID({
-        collection: collectionSlug,
-        id,
-        depth: 0,
-        user,
-        // draft: true,
-      })
-    } catch (error) {
-      console.error(error)
-    }
-
-    if (!data) {
-      return notFound()
-    }
-
     try {
       versionsData = await payload.findVersions({
         collection: collectionSlug,
@@ -90,46 +60,9 @@ export const VersionsView = async ({
     docURL = `${serverURL}${api}/${slug}/${id}`
     // entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
     editURL = `${admin}/collections/${collectionSlug}/${id}`
-
-    // The component definition could come from multiple places in the config
-    // we need to cascade into the proper component from the top-down
-    // 1. "components.Edit"
-    // 2. "components.Edit.Versions"
-    // 3. "components.Edit.Versions.Component"
-    const EditCollection = collectionConfig?.admin?.components?.views?.Edit
-
-    if (typeof EditCollection === 'function') {
-      CustomVersionsView = EditCollection
-    } else if (
-      typeof EditCollection === 'object' &&
-      typeof EditCollection.Versions === 'function'
-    ) {
-      CustomVersionsView = EditCollection.Versions
-    } else if (
-      typeof EditCollection?.Versions === 'object' &&
-      'Component' in EditCollection.Versions &&
-      typeof EditCollection.Versions.Component === 'function'
-    ) {
-      CustomVersionsView = EditCollection.Versions.Component
-    }
   }
 
   if (globalSlug) {
-    try {
-      data = await payload.findGlobal({
-        slug: globalSlug,
-        depth: 0,
-        user,
-        // draft: true,
-      })
-    } catch (error) {
-      console.error(error)
-    }
-
-    if (!data) {
-      return notFound()
-    }
-
     try {
       versionsData = await payload.findGlobalVersions({
         slug: globalSlug,
@@ -154,21 +87,6 @@ export const VersionsView = async ({
     docURL = `${serverURL}${api}/globals/${globalSlug}`
     // entityLabel = getTranslation(globalConfig.label, i18n)
     editURL = `${admin}/globals/${globalSlug}`
-
-    // See note above about cascading component definitions
-    const EditGlobal = global?.admin?.components?.views?.Edit
-
-    if (typeof EditGlobal === 'function') {
-      CustomVersionsView = EditGlobal
-    } else if (typeof EditGlobal === 'object' && typeof EditGlobal.Versions === 'function') {
-      CustomVersionsView = EditGlobal.Versions
-    } else if (
-      typeof EditGlobal?.Versions === 'object' &&
-      'Component' in EditGlobal.Versions &&
-      typeof EditGlobal.Versions.Component === 'function'
-    ) {
-      CustomVersionsView = EditGlobal.Versions.Component
-    }
   }
 
   // useEffect(() => {
@@ -181,27 +99,73 @@ export const VersionsView = async ({
   //   setViewActions(versionsActions)
   // }, [collection, global, setViewActions])
 
-  const componentProps: DefaultVersionsViewProps = {
-    id,
-    canAccessAdmin: permissions?.canAccessAdmin,
-    config,
-    collectionConfig,
-    data,
-    editURL,
-    entityLabel,
-    globalConfig,
-    user,
-    versionsData,
-    limit: limit ? parseInt(limit as string, 10) : undefined,
-  }
+  const versionCount = versionsData?.totalDocs || 0
 
   return (
-    <EditDepthProvider depth={1}>
-      <RenderCustomComponent
-        CustomComponent={CustomVersionsView}
-        DefaultComponent={DefaultVersionsView}
-        componentProps={componentProps}
+    <React.Fragment>
+      <SetStepNav
+        collectionSlug={collectionConfig?.slug}
+        globalSlug={globalConfig?.slug}
+        id={id}
+        isEditing
+        view="Versions" // TODO; i18n
+        pluralLabel={collectionConfig?.labels?.plural}
+        // view={t('versions')}
       />
-    </EditDepthProvider>
+      {/* <LoadingOverlayToggle name="versions" show={isLoadingVersions} /> */}
+      <main className={baseClass}>
+        {/* <Meta description={metaDesc} title={metaTitle} /> */}
+        <Gutter className={`${baseClass}__wrap`}>
+          {versionCount === 0 && (
+            <div className={`${baseClass}__no-versions`}>{/* {t('noFurtherVersionsFound')} */}</div>
+          )}
+          {versionCount > 0 && (
+            <React.Fragment>
+              {/* <div className={`${baseClass}__version-count`}>
+                {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', {
+                  count: versionCount,
+                })}
+              </div> */}
+              <Table
+                columns={buildVersionColumns({
+                  config,
+                  collectionConfig,
+                  globalConfig,
+                  docID: id,
+                })}
+                data={versionsData?.docs}
+              />
+              <div className={`${baseClass}__page-controls`}>
+                <Pagination
+                  hasNextPage={versionsData.hasNextPage}
+                  hasPrevPage={versionsData.hasPrevPage}
+                  limit={versionsData.limit}
+                  nextPage={versionsData.nextPage}
+                  numberOfNeighbors={1}
+                  page={versionsData.page}
+                  prevPage={versionsData.prevPage}
+                  totalPages={versionsData.totalPages}
+                />
+                {versionsData?.totalDocs > 0 && (
+                  <React.Fragment>
+                    <div className={`${baseClass}__page-info`}>
+                      {versionsData.page * versionsData.limit - (versionsData.limit - 1)}-
+                      {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page
+                        ? versionsData.limit * versionsData.page
+                        : versionsData.totalDocs}{' '}
+                      {/* {t('of')} {versionsData.totalDocs} */}
+                    </div>
+                    <PerPage
+                      limit={limit ? Number(limit) : 10}
+                      limits={collectionConfig?.admin?.pagination?.limits}
+                    />
+                  </React.Fragment>
+                )}
+              </div>
+            </React.Fragment>
+          )}
+        </Gutter>
+      </main>
+    </React.Fragment>
   )
 }

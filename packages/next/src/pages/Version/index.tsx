@@ -1,38 +1,22 @@
 import React from 'react'
 
 import { DefaultVersionView } from './Default'
-import { initPage } from '../../utilities/initPage'
-import {
-  Document,
-  Field,
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import { Document, Field } from 'payload/types'
+import type { EditViewProps } from '@payloadcms/ui'
 import { CollectionPermission, GlobalPermission } from 'payload/auth'
 import { notFound } from 'next/navigation'
 
-export const VersionView = async ({
-  collectionSlug,
-  globalSlug,
-  id,
-  versionID,
-  config: configPromise,
-  searchParams,
-}: {
-  collectionSlug?: string
-  globalSlug?: string
-  id?: string
-  versionID: string
-  config: Promise<SanitizedConfig>
-  searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const { config, payload, permissions, user, collectionConfig, globalConfig } = await initPage({
-    configPromise,
-    redirectUnauthenticatedUser: true,
-    collectionSlug,
-    globalSlug,
-  })
+export const VersionView = async (props: EditViewProps) => {
+  const { config, permissions, payload, user, params } = props
+
+  const versionID = params.segments[2]
+
+  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
+  const globalConfig = 'globalConfig' in props && props?.globalConfig
+  const id = 'id' in props ? props.id : undefined
+
+  const collectionSlug = collectionConfig?.slug
+  const globalSlug = globalConfig?.slug
 
   const { localization } = config
 

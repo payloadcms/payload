@@ -8,34 +8,23 @@ import {
   Form,
   Select,
   Number as NumberInput,
+  EditViewProps,
 } from '@payloadcms/ui'
 import './index.scss'
-import { initPage } from '../../utilities/initPage'
-import { Document, SanitizedConfig } from 'payload/types'
+import { Document } from 'payload/types'
 import { RenderJSON } from './RenderJSON'
 
 const baseClass = 'query-inspector'
 
-export const APIView = async ({
-  collectionSlug,
-  globalSlug,
-  id,
-  config: configPromise,
-  searchParams,
-}: {
-  collectionSlug?: string
-  globalSlug?: string
-  id?: string
-  config: Promise<SanitizedConfig>
-  searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const { config, payload, user, locale, collectionConfig, globalConfig } = await initPage({
-    configPromise,
-    redirectUnauthenticatedUser: true,
-    collectionSlug,
-    globalSlug,
-  })
+export const APIView = async (props: EditViewProps) => {
+  const { config, searchParams, payload, locale, user } = props
 
+  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
+  const globalConfig = 'globalConfig' in props && props?.globalConfig
+  const id = 'id' in props ? props.id : undefined
+
+  const collectionSlug = collectionConfig?.slug
+  const globalSlug = globalConfig?.slug
   const { depth, draft, authenticated } = searchParams
 
   const {
