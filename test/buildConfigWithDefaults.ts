@@ -9,17 +9,7 @@ import { postgresAdapter } from '../packages/db-postgres/src'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 import { slateEditor } from '../packages/richtext-slate/src'
 
-process.env.PAYLOAD_DATABASE = 'postgres'
-process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payload'
-// process.env.PAYLOAD_DROP_DATABASE = 'false'
-// process.env.PAYLOAD_TEST_MONGO_URL =
-//   'mongodb+srv://xxxx.ho1fahl.mongodb.net/access-control?retryWrites=true&w=majority'
-// process.env.PAYLOAD_TEST_MONGO_URL =
-//   'mongodb+srv://xxxx.iflydoh.mongodb.net/access-control?retryWrites=false&w=majority'
-
-// dockerized azure cosmosdb emulator not working at all
-// process.env.PAYLOAD_TEST_MONGO_URL =
-//   'mongodb://localhost:C2y6yDjf5%2FR%2Bob0N8A7Cgv30VRDJIWEHLM%2B4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw%2FJw%3D%3D@localhost:10255/admin?tls=true&tlsCertificateKeyFilePassword=C2y6yDjf5%2FR%2Bob0N8A7Cgv30VRDJIWEHLM%2B4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw%2FJw%3D%3D&tlsAllowInvalidCertificates=true&retrywrites=false'
+// process.env.PAYLOAD_DATABASE = 'postgres'
 
 const bundlerAdapters = {
   vite: viteBundler(),
@@ -29,7 +19,7 @@ const bundlerAdapters = {
 const databaseAdapters = {
   mongoose: mongooseAdapter({
     migrationDir: path.resolve(__dirname, '../packages/db-mongodb/migrations'),
-    url: process.env.PAYLOAD_TEST_MONGO_URL || 'mongodb://127.0.0.1/payloadtests',
+    url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
     migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
