@@ -12,6 +12,7 @@ import type {
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import config, {
@@ -23,15 +24,35 @@ import config, {
   slug,
 } from './config'
 
+let apiUrl
+let jwt
 let client: RESTClient
+
+const headers = {
+  'Content-Type': 'application/json',
+}
+const { email, password } = devUser
 
 type EasierChained = { id: string; relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
+    apiUrl = `${serverURL}/api`
     client = new RESTClient(config, { serverURL, defaultSlug: slug })
     await client.login()
+
+    const response = await fetch(`${apiUrl}/users/login`, {
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers,
+      method: 'post',
+    })
+
+    const data = await response.json()
+    jwt = data.token
   })
 
   afterAll(async () => {
@@ -565,7 +586,7 @@ describe('Relationships', () => {
   })
 
   describe('Polymorphic Relationships', () => {
-    it('should allow REST querying on polymorphic relationships', async () => {
+    it('should allow Local API querying on polymorphic relationships', async () => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
@@ -601,6 +622,48 @@ describe('Relationships', () => {
       })
 
       expect(query.result.docs).toHaveLength(1)
+    })
+
+    it('should allow REST querying on polymorphic relationships', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+
+      const movieID = movie.id.toString()
+
+      await payload.create({
+        collection: 'polymorphic-relationships',
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+      })
+
+      const queryParams = new URLSearchParams({
+        locale: 'en',
+        depth: '0',
+        draft: 'true',
+        limit: '10',
+        page: '1',
+        [`where[or][0][and][0][polymorphic.relationTo][equals]`]: 'movies',
+        [`where[or][0][and][0][polymorphic.value][equals]`]: movieID,
+      })
+
+      const response = await fetch(`${apiUrl}/polymorphic-relationships?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          ...headers,
+          Authorization: `JWT ${jwt}`,
+        },
+      })
+      const queryResult = await response.json()
+
+      expect(queryResult.docs).toHaveLength(1)
     })
   })
 })
