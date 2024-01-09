@@ -1,8 +1,8 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import { Chevron } from '../../../icons/Chevron'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useLocale } from '../../../providers/Locale'
 import './index.scss'
 
@@ -14,15 +14,15 @@ export const LocalizerLabel: React.FC<{
 }> = (props) => {
   const { ariaLabel, className } = props
   const locale = useLocale()
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { i18n } = useTranslation()
 
   return (
     <div
-      aria-label={ariaLabel || t('locale')}
+      aria-label={ariaLabel || t('general:locale')}
       className={[baseClass, className].filter(Boolean).join(' ')}
     >
-      <div className={`${baseClass}__label`}>{`${t('locale')}:`}</div>
+      <div className={`${baseClass}__label`}>{`${t('general:locale')}:`}</div>
       &nbsp;&nbsp;
       <span className={`${baseClass}__current-label`}>{`${getTranslation(
         locale.label,

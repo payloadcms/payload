@@ -33,7 +33,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     disableErrors,
     globalConfig,
     overrideAccess,
-    req: { locale, payload, t },
+    req: { locale, payload },
     req,
     showHiddenFields,
   } = args
@@ -66,13 +66,13 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findGlobalVersionsArgs.where.and[0].id) throw new NotFound(t)
+    if (!findGlobalVersionsArgs.where.and[0].id) throw new NotFound(req.t)
 
     const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs)
     if (!results || results?.length === 0) {
       if (!disableErrors) {
-        if (!hasWhereAccess) throw new NotFound(t)
-        if (hasWhereAccess) throw new Forbidden(t)
+        if (!hasWhereAccess) throw new NotFound(req.t)
+        if (hasWhereAccess) throw new Forbidden(req.t)
       }
 
       return null

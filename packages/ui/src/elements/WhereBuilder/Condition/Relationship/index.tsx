@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../providers/Translation'
 
 import type { PaginatedDocs } from 'payload/database'
 import type { Option } from '../../../ReactSelect/types'
@@ -32,7 +32,7 @@ const RelationshipField: React.FC<Props> = (props) => {
   const [errorLoading, setErrorLoading] = useState('')
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const addOptions = useCallback(
     (data, relation) => {
@@ -97,7 +97,7 @@ const RelationshipField: React.FC<Props> = (props) => {
                 }
               }
             } else {
-              setErrorLoading(t('errors:unspecific'))
+              setErrorLoading(t('error:unspecific'))
             }
           }
         }, Promise.resolve())
@@ -294,7 +294,7 @@ const RelationshipField: React.FC<Props> = (props) => {
             getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 })
           }}
           options={options}
-          placeholder={t('selectValue')}
+          placeholder={t('general:selectValue')}
           value={valueToRender}
         />
       )}

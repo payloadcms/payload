@@ -1,5 +1,4 @@
-import type i18n from 'i18next'
-
+import { I18n } from '@payloadcms/translations'
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedConfig } from 'payload/types'
 import type { RelationshipField } from 'payload/types'
@@ -36,7 +35,7 @@ type UPDATE = {
   collection: SanitizedCollectionConfig
   config: SanitizedConfig
   doc: any
-  i18n: typeof i18n
+  i18n: I18n
   type: 'UPDATE'
 }
 
@@ -44,7 +43,7 @@ type ADD = {
   collection: SanitizedCollectionConfig
   config: SanitizedConfig
   docs: any[]
-  i18n: typeof i18n
+  i18n: I18n
   ids?: (number | string)[]
   sort?: boolean
   type: 'ADD'

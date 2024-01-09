@@ -1,7 +1,7 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { Button } from '../../elements/Button'
 import { useFormModified } from '../../forms/Form/context'
@@ -18,7 +18,7 @@ const Component: React.FC<{
   onConfirm: () => void
 }> = ({ isActive, onCancel, onConfirm }) => {
   const { closeModal, openModal } = useModal()
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (isActive) openModal(modalSlug)
@@ -29,14 +29,14 @@ const Component: React.FC<{
     <Modal className={baseClass} onClose={onCancel} slug={modalSlug}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          <h1>{t('leaveWithoutSaving')}</h1>
-          <p>{t('changesNotSaved')}</p>
+          <h1>{t('general:leaveWithoutSaving')}</h1>
+          <p>{t('general:changesNotSaved')}</p>
         </div>
         <div className={`${baseClass}__controls`}>
           <Button buttonStyle="secondary" onClick={onCancel}>
-            {t('stayOnThisPage')}
+            {t('general:stayOnThisPage')}
           </Button>
-          <Button onClick={onConfirm}>{t('leaveAnyway')}</Button>
+          <Button onClick={onConfirm}>{t('general:leaveAnyway')}</Button>
         </div>
       </div>
     </Modal>

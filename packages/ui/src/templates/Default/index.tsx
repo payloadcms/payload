@@ -19,6 +19,7 @@ export const DefaultTemplate: React.FC<Props> = async ({
   config: configPromise,
   user,
   permissions,
+  i18n,
 }) => {
   const config = await configPromise
 
@@ -45,6 +46,7 @@ export const DefaultTemplate: React.FC<Props> = async ({
             config,
             user,
             permissions,
+            i18n,
           }}
         />
         <div className={`${baseClass}__wrap`}>

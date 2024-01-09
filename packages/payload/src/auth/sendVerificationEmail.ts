@@ -40,7 +40,6 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`
 
     let html = `${req.t('authentication:newAccountCreated', {
-      interpolation: { escapeValue: false },
       serverURL: config.serverURL,
       verificationURL,
     })}`

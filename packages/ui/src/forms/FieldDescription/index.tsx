@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-// import { getTranslation } from 'payload/utilities'
+// import { getTranslation } from '@payloadcms/translations'
 import { isComponent } from './types'
 import './index.scss'
 

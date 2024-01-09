@@ -5,7 +5,7 @@ import type { Document } from '../../../types'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { restoreVersionOperation } from '../restoreVersion'
 
@@ -40,11 +40,12 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
-  const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
+
+  const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
 
   const req = {
     fallbackLocale,

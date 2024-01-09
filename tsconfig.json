@@ -48,6 +48,7 @@
     { "path": "./packages/plugin-stripe" },
     { "path": "./packages/richtext-slate" },
     { "path": "./packages/richtext-lexical" },
+    { "path": "./packages/translations" },
     { "path": "./packages/ui" }
   ]
 }

@@ -1,11 +1,11 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../../providers/Translation'
 
 import type { RelationshipField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useIntersect } from '../../../../../hooks/useIntersect'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle'
 import { useConfig } from '../../../../../providers/Config'
@@ -24,7 +24,7 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
   const [values, setValues] = useState<Value[]>([])
   const { documents, getRelationships } = useListRelationships()
   const [hasRequested, setHasRequested] = useState(false)
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const isAboveViewport = entry?.boundingClientRect?.top < window.innerHeight
 
@@ -65,14 +65,14 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
         const label = formatDocTitle({
           useAsTitle: relatedCollection?.admin?.useAsTitle,
           doc: document === false ? null : document,
-          // i18n,
+          i18n,
         })
 
         return (
           <React.Fragment key={i}>
-            {document === false && `${t('untitled')} - ID: ${value}`}
-            {document === null && `${t('loading')}...`}
-            {document && (label || `${t('untitled')} - ID: ${value}`)}
+            {document === false && `${t('general:untitled')} - ID: ${value}`}
+            {document === null && `${t('general:loading')}...`}
+            {document && (label || `${t('general:untitled')} - ID: ${value}`)}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         )
@@ -80,7 +80,8 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
       {Array.isArray(cellData) &&
         cellData.length > totalToShow &&
         t('fields:itemsAndMore', { count: cellData.length - totalToShow, items: '' })}
-      {values.length === 0 && t('noLabel', { label: getTranslation(field?.label || '', i18n) })}
+      {values.length === 0 &&
+        t('general:noLabel', { label: getTranslation(field?.label || '', i18n) })}
     </div>
   )
 }

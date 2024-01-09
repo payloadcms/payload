@@ -1,16 +1,16 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 // import { requests } from '../../../api'
 import useTitle from '../../hooks/useTitle'
 import { useForm } from '../../forms/Form/context'
 import { MinimalTemplate } from '../../templates/Minimal'
+import { useTranslation } from '../../providers/Translation'
 import { useConfig } from '../../providers/Config'
 import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
@@ -31,7 +31,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
   const [deleting, setDeleting] = useState(false)
   const { toggleModal } = useModal()
   const history = useRouter()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const title = useTitle({
     useAsTitle,
   })
@@ -62,7 +62,7 @@ const DeleteDocument: React.FC<Props> = (props) => {
       //       if (res.status < 400) {
       //         setDeleting(false)
       //         toggleModal(modalSlug)
-      //         toast.success(t('titleDeleted', { label: getTranslation(singular, i18n), title }))
+      //         toast.success(t('general:titleDeleted', { label: getTranslation(singular, i18n), title }))
       //         return history.push(`${admin}/collections/${slug}`)
       //       }
       //       toggleModal(modalSlug)
@@ -106,20 +106,24 @@ const DeleteDocument: React.FC<Props> = (props) => {
             toggleModal(modalSlug)
           }}
         >
-          {t('delete')}
+          {t('general:delete')}
         </PopupList.Button>
         <Modal className={baseClass} slug={modalSlug}>
           <MinimalTemplate className={`${baseClass}__template`}>
-            <h1>{t('confirmDeletion')}</h1>
+            <h1>{t('general:confirmDeletion')}</h1>
             <p>
-              <Trans
+              {t('general:aboutToDelete', {
+                label: getTranslation(singularLabel, i18n),
+                title: titleToRender,
+              })}
+              {/* <Trans
                 i18nKey="aboutToDelete"
                 t={t}
                 values={{ label: getTranslation(singularLabel, i18n), title: titleToRender }}
               >
                 aboutToDelete
                 <strong>{titleToRender}</strong>
-              </Trans>
+              </Trans> */}
             </p>
             <div className={`${baseClass}__actions`}>
               <Button
@@ -128,10 +132,10 @@ const DeleteDocument: React.FC<Props> = (props) => {
                 onClick={deleting ? undefined : () => toggleModal(modalSlug)}
                 type="button"
               >
-                {t('cancel')}
+                {t('general:cancel')}
               </Button>
               <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete}>
-                {deleting ? t('deleting') : t('confirm')}
+                {deleting ? t('general:deleting') : t('general:confirm')}
               </Button>
             </div>
           </MinimalTemplate>

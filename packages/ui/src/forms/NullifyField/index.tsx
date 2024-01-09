@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { Banner } from '../../elements/Banner'
 import { useConfig } from '../../providers/Config'
@@ -24,7 +24,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
   const [checked, setChecked] = React.useState<boolean>(typeof fieldValue !== 'number')
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   const onChange = () => {
     const useFallback = !checked
@@ -59,7 +59,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
       <CheckboxInput
         checked={checked}
         id={`field-${path.replace(/\./g, '__')}`}
-        label={t('fallbackToDefaultLocale')}
+        label={t('general:fallbackToDefaultLocale')}
         onToggle={onChange}
       />
     </Banner>

@@ -7,7 +7,7 @@ import type { File } from '../../../uploads/types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import getFileByPath from '../../../uploads/getFileByPath'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
@@ -86,7 +86,6 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const i18n = i18nInit(payload.config.i18n)
   const defaultLocale = payload.config.localization
     ? payload.config.localization?.defaultLocale
     : null
@@ -97,6 +96,8 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
+  const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
+
   const req = {
     fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     files: {
@@ -106,12 +107,12 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    t: i18n.t,
     transactionID: incomingReq?.transactionID,
     user,
   } as unknown as PayloadRequest
   setRequestContext(req, context)
 
-  if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {

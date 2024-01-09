@@ -3,12 +3,9 @@ import React from 'react'
 import type { BlockField } from 'payload/types'
 import type { CellComponentProps } from '../../types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 
-const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field }) => {
-  const i18n = undefined // TODO: this temporary until we can get i18n working server-side
-  const t = (key, params) => key // TODO: this temporary until we can get i18n working server-side
-
+const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field, i18n }) => {
   const selectedBlocks = data ? data.map(({ blockType }) => blockType) : []
   const blockLabels = field.blocks.map((s) => ({
     label: getTranslation(s.labels.singular, i18n),
@@ -28,7 +25,7 @@ const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field
   const itemsToShow = 5
   if (selectedBlocks.length > itemsToShow) {
     const more = selectedBlocks.length - itemsToShow
-    label = `${selectedBlocks.length} ${getTranslation(field.labels.plural, i18n)} - ${t(
+    label = `${selectedBlocks.length} ${getTranslation(field.labels.plural, i18n)} - ${i18n.t(
       'fields:itemsAndMore',
       { count: more, items: formatBlockList(selectedBlocks.slice(0, itemsToShow)) },
     )}`

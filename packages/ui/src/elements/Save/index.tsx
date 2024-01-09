@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import useHotkey from '../../hooks/useHotkey'
 import { useForm } from '../../forms/Form/context'
@@ -41,7 +41,7 @@ type Props = {
   CustomComponent?: CustomSaveButtonProps
 }
 export const Save: React.FC<Props> = ({ CustomComponent }) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { submit } = useForm()
 
   return (
@@ -50,7 +50,7 @@ export const Save: React.FC<Props> = ({ CustomComponent }) => {
       DefaultComponent={DefaultSaveButton}
       componentProps={{
         DefaultButton: DefaultSaveButton,
-        label: t('save'),
+        label: t('general:save'),
         save: submit,
       }}
     />

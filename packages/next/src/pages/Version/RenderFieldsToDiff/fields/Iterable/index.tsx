@@ -1,3 +1,4 @@
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { ArrayField, BlockField, Field } from 'payload/types'
@@ -5,7 +6,7 @@ import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
 import { fieldAffectsData } from 'payload/types'
-import { getTranslation, getUniqueListBy } from 'payload/utilities'
+import { getUniqueListBy } from 'payload/utilities'
 import Label from '../../Label'
 import './index.scss'
 
@@ -80,7 +81,8 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
                   fieldComponents={fieldComponents}
                   fieldPermissions={permissions}
                   fields={subFields.filter(
-                    (subField) => !(fieldAffectsData(subField) && subField.name === 'id'),
+                    (subField) =>
+                      !(fieldAffectsData(subField) && 'name' in subField && subField.name === 'id'),
                   )}
                   locales={locales}
                   version={versionRow}

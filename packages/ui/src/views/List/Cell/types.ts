@@ -1,3 +1,4 @@
+import type { I18n } from '@payloadcms/translations'
 import type {
   SanitizedCollectionConfig,
   FieldAffectingData,
@@ -17,6 +18,7 @@ export type CellProps = {
   rowData: {
     [path: string]: unknown
   }
+  i18n: I18n
 }
 
 export type CellComponentProps<Field = FieldAffectingData | UIField, Data = unknown> = Pick<
@@ -25,4 +27,5 @@ export type CellComponentProps<Field = FieldAffectingData | UIField, Data = unkn
 > & {
   data: Data
   field: Field
+  i18n: I18n
 }

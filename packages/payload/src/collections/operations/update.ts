@@ -74,7 +74,6 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
       locale,
       payload: { config },
       payload,
-      t,
     },
     req,
     showHiddenFields,
@@ -186,7 +185,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
         //   doc,
         //   // files: filesToUpload,
         //   overrideDelete: false,
-        //   t,
+        //   req,
         // })
 
         // /////////////////////////////////////
@@ -228,7 +227,7 @@ export const updateOperation = async <TSlug extends keyof GeneratedTypes['collec
         // /////////////////////////////////////
 
         // if (!collectionConfig.upload.disableLocalStorage) {
-        //   await uploadFiles(payload, filesToUpload, t)
+        //   await uploadFiles(payload, filesToUpload, req)
         // }
 
         // /////////////////////////////////////

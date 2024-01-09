@@ -1,9 +1,10 @@
 import React from 'react'
 
 import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
-import type { Props as CellProps } from '../../views/List/Cell/types'
-import type { Column } from '../Table/types'
+import { I18n } from '@payloadcms/translations'
 
+import type { CellProps } from '../../views/List/Cell/types'
+import type { Column } from '../Table/types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'
 import Cell from '../../views/List/Cell'
@@ -14,11 +15,13 @@ import SortColumn from '../SortColumn'
 const buildColumns = ({
   cellProps,
   config,
+  i18n,
   collectionConfig,
   columns,
 }: {
   cellProps: Partial<CellProps>[]
   config: SanitizedConfig
+  i18n: I18n
   collectionConfig: SanitizedCollectionConfig
   columns: Pick<Column, 'accessor' | 'active'>[]
 }): Column[] => {
@@ -71,6 +74,7 @@ const buildColumns = ({
               key={JSON.stringify(cellData)}
               link={isFirstActive}
               rowData={rowData}
+              i18n={i18n}
               {...props}
             />
           )

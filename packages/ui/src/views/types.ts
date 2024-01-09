@@ -5,6 +5,7 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
+import type { I18n } from '@payloadcms/translations'
 import type { Fields } from '../forms/Form/types'
 
 export type CollectionEditViewProps = BaseEditViewProps & {
@@ -19,6 +20,7 @@ export type CollectionEditViewProps = BaseEditViewProps & {
   permissions: CollectionPermission | null
   data: Document
   user: User
+  i18n: I18n
 }
 
 export type GlobalEditViewProps = BaseEditViewProps & {
@@ -26,6 +28,7 @@ export type GlobalEditViewProps = BaseEditViewProps & {
   globalConfig: SanitizedGlobalConfig
   state?: Fields
   permissions: GlobalPermission | null
+  i18n: I18n
 }
 
 export type BaseEditViewProps = {

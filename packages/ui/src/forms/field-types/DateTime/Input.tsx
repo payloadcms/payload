@@ -1,10 +1,9 @@
 'use client'
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-
+import { getTranslation } from '@payloadcms/translations'
 import type { DateField, Validate } from 'payload/types'
 
-import { getTranslation } from 'payload/utilities'
+import { useTranslation } from '../../../providers/Translation'
+import React, { useCallback } from 'react'
 import DatePicker from '../../../elements/DatePicker'
 import useField from '../../useField'
 

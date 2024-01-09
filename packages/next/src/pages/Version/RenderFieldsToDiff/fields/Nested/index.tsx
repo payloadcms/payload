@@ -1,10 +1,10 @@
 import React from 'react'
+import { getTranslation } from '@payloadcms/translations'
 
 import type { FieldWithSubFields } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
-import { getTranslation } from 'payload/utilities'
 import Label from '../../Label'
 import './index.scss'
 
@@ -28,6 +28,7 @@ const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
           {field.label}
+          // TODO(i18n)
           {/* {getTranslation(field.label, i18n)} */}
         </Label>
       )}

@@ -27,12 +27,13 @@ export const VersionView = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user, collectionConfig, globalConfig } = await initPage({
-    configPromise,
-    redirectUnauthenticatedUser: true,
-    collectionSlug,
-    globalSlug,
-  })
+  const { config, payload, permissions, user, collectionConfig, globalConfig, i18n } =
+    await initPage({
+      configPromise,
+      redirectUnauthenticatedUser: true,
+      collectionSlug,
+      globalSlug,
+    })
 
   const { localization } = config
 
@@ -162,6 +163,7 @@ export const VersionView = async ({
       versionID={versionID}
       docPermissions={docPermissions}
       locale="" // TODO
+      i18n={i18n}
     />
   )
 }

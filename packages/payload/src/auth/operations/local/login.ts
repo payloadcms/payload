@@ -5,7 +5,7 @@ import type { Result } from '../login'
 
 import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { loginOperation } from '../login'
 
@@ -49,13 +49,15 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
+  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
+
   req.payloadAPI = req.payloadAPI || 'local'
   req.payload = payload
-  req.i18n = i18nInit(payload.config.i18n)
+  req.i18n = i18n
+  req.t = i18n.t
   req.locale = undefined
   req.fallbackLocale = undefined
 
-  if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {

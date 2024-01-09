@@ -8,7 +8,7 @@ import type { Document } from '../../../types'
 import type { File } from '../../../uploads/types'
 
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import getFileByPath from '../../../uploads/getFileByPath'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
@@ -72,18 +72,20 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     )
   }
 
+  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
+
   req.payloadAPI = req.payloadAPI || 'local'
   req.locale = locale ?? req?.locale ?? defaultLocale
   req.fallbackLocale = fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale
   req.payload = payload
-  req.i18n = i18nInit(payload.config.i18n)
+  req.i18n = i18n
+  req.t = i18n.t
   req.files = {
     file: (file ?? (await getFileByPath(filePath))) as UploadedFile, // TODO(NATIVE_REQUEST): fix this type
   }
 
   if (typeof user !== 'undefined') req.user = user
 
-  if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return createOperation<TSlug>({

@@ -1,8 +1,8 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import useField from '../../useField'
 import './index.scss'
 import { Validate } from 'payload/types'
@@ -32,7 +32,7 @@ export const NumberInput: React.FC<{
     validate,
   } = props
 
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
 
   const path = pathFromProps || name
 

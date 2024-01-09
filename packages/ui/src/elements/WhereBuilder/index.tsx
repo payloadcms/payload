@@ -1,11 +1,12 @@
 // import queryString from 'qs'
 import React, { useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 // import type { Where } from 'payload/types'
 import type { Props } from './types'
 
-import { flattenTopLevelFields, getTranslation } from 'payload/utilities'
+import { flattenTopLevelFields } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 // import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useSearchParams } from '../../providers/SearchParams'
 import { Button } from '../Button'
@@ -59,7 +60,7 @@ const reduceFields = (fields, i18n) =>
  */
 const WhereBuilder: React.FC<Props> = (props) => {
   const { collectionSlug, collectionPluralLabel, handleChange, modifySearchQuery = true } = props
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const config = useConfig()
   const collection = config.collections.find((c) => c.slug === collectionSlug)
@@ -147,17 +148,19 @@ const WhereBuilder: React.FC<Props> = (props) => {
       {conditions.length > 0 && (
         <React.Fragment>
           <div className={`${baseClass}__label`}>
-            {t('filterWhere', { label: getTranslation(collectionPluralLabel, i18n) })}
+            {t('general:filterWhere', { label: getTranslation(collectionPluralLabel, i18n) })}
           </div>
           <ul className={`${baseClass}__or-filters`}>
             {conditions.map((or, orIndex) => (
               <li key={orIndex}>
-                {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('or')}</div>}
+                {orIndex !== 0 && <div className={`${baseClass}__label`}>{t('general:or')}</div>}
                 <ul className={`${baseClass}__and-filters`}>
                   {Array.isArray(or?.and) &&
                     or.and.map((_, andIndex) => (
                       <li key={andIndex}>
-                        {andIndex !== 0 && <div className={`${baseClass}__label`}>{t('and')}</div>}
+                        {andIndex !== 0 && (
+                          <div className={`${baseClass}__label`}>{t('general:and')}</div>
+                        )}
                         <Condition
                           andIndex={andIndex}
                           dispatch={dispatchConditions}
@@ -183,13 +186,13 @@ const WhereBuilder: React.FC<Props> = (props) => {
                 dispatchConditions({ field: reducedFields[0].value, type: 'add' })
             }}
           >
-            {t('or')}
+            {t('general:or')}
           </Button>
         </React.Fragment>
       )}
       {conditions.length === 0 && (
         <div className={`${baseClass}__no-filters`}>
-          <div className={`${baseClass}__label`}>{t('noFiltersSet')}</div>
+          <div className={`${baseClass}__label`}>{t('general:noFiltersSet')}</div>
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__add-first-filter`}
@@ -201,7 +204,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
                 dispatchConditions({ field: reducedFields[0].value, type: 'add' })
             }}
           >
-            {t('addFilter')}
+            {t('general:addFilter')}
           </Button>
         </div>
       )}

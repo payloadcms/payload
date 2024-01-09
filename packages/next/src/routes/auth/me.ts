@@ -16,7 +16,7 @@ export const me = async ({ req }: { req: PayloadRequest }): Promise<Response> =>
   return Response.json(
     {
       ...result,
-      message: 'Successfully retrieved me user.',
+      message: req.t('authentication:account'),
     },
     {
       status: httpStatus.OK,
