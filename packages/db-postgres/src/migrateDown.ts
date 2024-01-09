@@ -28,7 +28,9 @@ export async function migrateDown(this: PostgresAdapter): Promise<void> {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  for (const migration of existingMigrations) {
+  const latestBatchMigrations = existingMigrations.filter(({ batch }) => batch === latestBatch)
+
+  for (const migration of latestBatchMigrations) {
     const migrationFile = migrationFiles.find((m) => m.name === migration.name)
     if (!migrationFile) {
       throw new Error(`Migration ${migration.name} not found locally.`)
