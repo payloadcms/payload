@@ -1,3 +1,39 @@
+## [2.7.0](https://github.com/payloadcms/payload/compare/v2.6.0...v2.7.0) (2024-01-09)
+
+
+### Features
+
+* **db-mongodb:** improve transaction support by passing req to migrations ([682eca2](https://github.com/payloadcms/payload/commit/682eca21860a4e2b2ab0bfd85613818790247224))
+* **db-postgres:** improve transaction support by passing req to migrations ([555d027](https://github.com/payloadcms/payload/commit/555d02769a8731aeebbff9b67f9b0e1022904ade))
+* hasMany property for text fields ([#4605](https://github.com/payloadcms/payload/issues/4605)) ([f43cf18](https://github.com/payloadcms/payload/commit/f43cf185d45b3c75fa0d78acd91e6cb60d87f166))
+* improve transaction support by passing req to migrations ([1d14d9f](https://github.com/payloadcms/payload/commit/1d14d9f8b8ed077691175030182f094bb300ed17))
+* **plugin-seo:** add i18n ([#4665](https://github.com/payloadcms/payload/issues/4665)) ([3027a03](https://github.com/payloadcms/payload/commit/3027a03ad11ecd679278e44a013e4dea4aa42b8d))
+* provide document info to ActionsProvider ([#4696](https://github.com/payloadcms/payload/issues/4696)) ([6a8a6e4](https://github.com/payloadcms/payload/commit/6a8a6e4ef4913e0889e4d2eac82b28b9e4e8db22))
+
+
+### Bug Fixes
+
+* adds objectID validation to isValidID if of type `text` ([#4689](https://github.com/payloadcms/payload/issues/4689)) ([d419275](https://github.com/payloadcms/payload/commit/d419275fb50f0922307f2d3b4c0fcf80ac5ec98b))
+* allow json field to be saved empty and reflect value changes ([#4687](https://github.com/payloadcms/payload/issues/4687)) ([0fb3a9c](https://github.com/payloadcms/payload/commit/0fb3a9ca89d1b63faea179bfa9b5b3d0a69c9398))
+* custom ids in versions ([#4680](https://github.com/payloadcms/payload/issues/4680)) ([5d15955](https://github.com/payloadcms/payload/commit/5d15955f839d3f0cc557d8a8d7cc3a9e52e2f6b1))
+* custom overrides of breadcrumb and parent fields ([7db58b4](https://github.com/payloadcms/payload/commit/7db58b482bba7e715c5be23cfe1a84295e95da29))
+* **db-mongodb:** migration error calling beginTransaction with transactionOptions false ([21b9453](https://github.com/payloadcms/payload/commit/21b9453cf4e6eebf145d89a0190942015658413d))
+* **db-mongodb:** querying plan for collections ignoring indexes ([#4655](https://github.com/payloadcms/payload/issues/4655)) ([63bc4ca](https://github.com/payloadcms/payload/commit/63bc4cabe1dea5f233aa1d9d4e64f3af93a8e081))
+* **db-postgres:** incorrect results querying json field using exists operator ([9d9ac0e](https://github.com/payloadcms/payload/commit/9d9ac0ec28c97281bfdc7d6fb78c52baea492380))
+* **db-postgres:** migrate down only runs latest batch size ([6acfae8](https://github.com/payloadcms/payload/commit/6acfae8ee7614746797e1fa91e1fd41c0240fdcd))
+* **db-postgres:** query on json properties ([ec4d2f9](https://github.com/payloadcms/payload/commit/ec4d2f97cbf1c89d837372059bf3bb77f3ea6594))
+* **db-postgres:** validation prevents group fields in blocks ([#4699](https://github.com/payloadcms/payload/issues/4699)) ([cab6bab](https://github.com/payloadcms/payload/commit/cab6babd608daeaabf9b63b1b446fded6804b60f))
+* non-boolean condition result causes infinite looping ([#4579](https://github.com/payloadcms/payload/issues/4579)) ([a3e7816](https://github.com/payloadcms/payload/commit/a3e78161b551e8286063a173645a1d3dee162ad1))
+* **plugin-form-builder:** slate serializer should replace curly braces in links ([#4703](https://github.com/payloadcms/payload/issues/4703)) ([28a3012](https://github.com/payloadcms/payload/commit/28a30120dd1aa3279fb2133aa0a0b1638d144be4))
+* **plugin-nested-docs:** breadcrumbsFieldSlug used in resaveSelfAfterCreate hook ([a5a91c0](https://github.com/payloadcms/payload/commit/a5a91c08a9ade1482c512d3fa4c4f519ad85cf74))
+* **plugin-nested-docs:** children wrongly publishing draft data ([#4692](https://github.com/payloadcms/payload/issues/4692)) ([5539942](https://github.com/payloadcms/payload/commit/55399424a13b1e0532d9eeefd09d442c107c3eda))
+* **plugin-nested-docs:** custom parent field slug ([635e7c2](https://github.com/payloadcms/payload/commit/635e7c26e8b3b5138cf5a9bcb29e8ddd4b1e69b6))
+* **plugin-nested-docs:** parent filterOptions errors when specifying breadcrumbsFieldSlug ([c4a4678](https://github.com/payloadcms/payload/commit/c4a4678afb097cf94c682595a78e416767a1fea8))
+* prevents row overflow ([#4704](https://github.com/payloadcms/payload/issues/4704)) ([9828772](https://github.com/payloadcms/payload/commit/98287728900cb88fa6a465899f030f81df28fc69))
+* relations with number based ids (postgres) show untitled ID: x ([1b91408](https://github.com/payloadcms/payload/commit/1b914083c8ee0c1b1d64fa7d4471ede0a24cfdb7))
+* sidebar fields not disabled by access permissions ([#4682](https://github.com/payloadcms/payload/issues/4682)) ([85e38b7](https://github.com/payloadcms/payload/commit/85e38b7cfd5c0772344c4a8fb5100f7c48eb508f))
+* unlock user condition always passes due to seconds conversion ([#4610](https://github.com/payloadcms/payload/issues/4610)) ([d543665](https://github.com/payloadcms/payload/commit/d543665995410256f77fe136173339aee6dcc7da))
+
 ## [2.6.0](https://github.com/payloadcms/payload/compare/v2.5.0...v2.6.0) (2024-01-03)
 
 
