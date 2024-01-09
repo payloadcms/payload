@@ -276,7 +276,7 @@ describe('Versions', () => {
 
         expect(versions.docs[0].version.title).toBe(updatedPost.title)
       })
-      // @ts-expect-error
+
       it('should allow a version to be restored', async () => {
         const title2 = 'Another updated post title in EN'
         const updated = 'updated'
