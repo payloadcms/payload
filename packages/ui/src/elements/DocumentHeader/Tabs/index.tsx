@@ -3,7 +3,7 @@ import React from 'react'
 import type { DocumentTabProps } from './types'
 
 import { DocumentTab } from './Tab'
-// import { getCustomViews } from './getCustomViews'
+import { getCustomViews } from './getCustomViews'
 import { getViewConfig } from './getViewConfig'
 import './index.scss'
 import { tabs as defaultViews } from './tabs'
@@ -12,7 +12,8 @@ const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
   const { collectionConfig, globalConfig, isEditing } = props
-  // const customViews = getCustomViews({ collectionConfig, globalConfig })
+
+  const customViews = getCustomViews({ collectionConfig, globalConfig })
 
   // Don't show tabs when creating new documents
   if ((collectionConfig && isEditing) || global) {
@@ -45,7 +46,7 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
                   />
                 )
               })}
-            {/* {customViews?.map((CustomView, index) => {
+            {customViews?.map((CustomView, index) => {
               if ('Tab' in CustomView) {
                 const { Tab, path } = CustomView
 
@@ -64,7 +65,7 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
                 )
               }
               return null
-            })} */}
+            })}
           </ul>
         </div>
       </div>

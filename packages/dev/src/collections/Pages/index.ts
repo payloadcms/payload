@@ -11,6 +11,10 @@ export const Pages: CollectionConfig = {
           Custom: {
             path: '/custom',
             Component: CustomView,
+            Tab: {
+              label: 'Custom View',
+              href: '/custom',
+            },
           },
         },
       },
