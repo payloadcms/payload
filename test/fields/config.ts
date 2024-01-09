@@ -17,6 +17,7 @@ import JSONFields from './collections/JSON'
 import { LexicalFields } from './collections/Lexical'
 import { LexicalMigrateFields } from './collections/LexicalMigrate'
 import NumberFields from './collections/Number'
+import SeoPlugin from './collections/PluginSeo/PluginSeo'
 import PointFields from './collections/Point'
 import RadioFields from './collections/Radio'
 import RelationshipFields from './collections/Relationship'
@@ -70,6 +71,7 @@ export const collectionSlugs: CollectionConfig[] = [
   Uploads,
   Uploads2,
   Uploads3,
+  SeoPlugin,
 ]
 
 export default buildConfigWithDefaults({
