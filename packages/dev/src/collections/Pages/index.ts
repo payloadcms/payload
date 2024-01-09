@@ -1,9 +1,20 @@
 import { CollectionConfig } from 'payload/types'
+import { CustomView } from './CustomView'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     useAsTitle: 'title',
+    components: {
+      views: {
+        Edit: {
+          Custom: {
+            path: '/custom',
+            Component: CustomView,
+          },
+        },
+      },
+    },
   },
   versions: {
     drafts: true,

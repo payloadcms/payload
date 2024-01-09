@@ -1,7 +1,7 @@
 import React from 'react'
 import { RootProvider } from '@payloadcms/ui/providers'
 import { SanitizedConfig } from 'payload/types'
-import { createClientConfig } from '../../createClientConfig'
+import { createClientConfig } from '../../utilities/createClientConfig'
 
 import '@payloadcms/ui/scss/app.scss'
 
