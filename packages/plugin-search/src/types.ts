@@ -3,6 +3,7 @@ import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 
 export interface DocToSync {
   [key: string]: any
+
   doc: {
     relationTo: string
     value: string
@@ -25,6 +26,7 @@ export interface SearchConfig {
     [collection: string]: ((doc: any) => Promise<number> | number) | number
   }
   deleteDrafts?: boolean
+  maxDepth?: number
   searchOverrides?: Partial<CollectionConfig>
   syncDrafts?: boolean
 }
