@@ -443,6 +443,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 relationships,
                 table,
               })
+
+              field.fields.forEach((field) => {
+                if ('name' in field && Boolean(field?.name)) {
+                  const fieldToDelete = `${groupFieldPrefix}${field.name}`
+
+                  deletions.push(() => delete ref[fieldToDelete])
+                }
+              })
             }
 
             break

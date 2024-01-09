@@ -703,6 +703,16 @@ describe('Fields', () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue)
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild)
     })
+
+    it('should not have duplicate keys', async () => {
+      expect(document.arrayOfGroups[0]).toMatchObject({
+        _order: 1,
+        id: expect.any(String),
+        groupItem: {
+          text: 'Hello world',
+        },
+      })
+    })
   })
 
   describe('tabs', () => {
