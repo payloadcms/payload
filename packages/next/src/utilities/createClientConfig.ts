@@ -38,6 +38,8 @@ const sanitizeCollections = (
     delete sanitized.endpoints
 
     if ('admin' in sanitized) {
+      sanitized.admin = { ...sanitized.admin }
+
       if ('components' in sanitized.admin) {
         delete sanitized.admin.components
       }
@@ -55,6 +57,8 @@ const sanitizeGlobals = (globals: SanitizedConfig['globals']): ClientConfig['glo
     delete sanitized.endpoints
 
     if ('admin' in sanitized) {
+      sanitized.admin = { ...sanitized.admin }
+
       if ('components' in sanitized.admin) {
         delete sanitized.admin.components
       }

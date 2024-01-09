@@ -1,8 +1,9 @@
 import { AdminViewComponent } from 'payload/config'
 import { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 import { lazy } from 'react'
-import { getCustomView } from './getCustomView.tsx'
+import { getCustomViewByKey } from './getCustomViewByKey.tsx'
 import { CollectionPermission, GlobalPermission, Permissions } from 'payload/auth'
+import { getCustomViewByPath } from './getCustomViewByPath.tsx'
 
 export const getViewsFromConfig = async ({
   routeSegments,
@@ -40,7 +41,7 @@ export const getViewsFromConfig = async ({
       switch (routeSegments[0]) {
         case 'create': {
           if ('create' in docPermissions && docPermissions?.create?.permission) {
-            CustomView = getCustomView(views, 'Default')
+            CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = lazy(() =>
               import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
             )
@@ -50,7 +51,7 @@ export const getViewsFromConfig = async ({
 
         default: {
           if (docPermissions?.read?.permission) {
-            CustomView = getCustomView(views, 'Default')
+            CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = lazy(() =>
               import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
             )
@@ -64,7 +65,7 @@ export const getViewsFromConfig = async ({
       switch (routeSegments[1]) {
         case 'api': {
           if (collectionConfig?.admin?.hideAPIURL !== true) {
-            CustomView = getCustomView(views, 'API')
+            CustomView = getCustomViewByKey(views, 'API')
             DefaultView = lazy(() =>
               import('../API/index.tsx').then((module) => ({ default: module.APIView })),
             )
@@ -85,7 +86,7 @@ export const getViewsFromConfig = async ({
 
         case 'versions': {
           if (docPermissions?.readVersions?.permission) {
-            CustomView = getCustomView(views, 'Versions')
+            CustomView = getCustomViewByKey(views, 'Versions')
             DefaultView = lazy(() =>
               import('../Versions/index.tsx').then((module) => ({ default: module.VersionsView })),
             )
@@ -94,10 +95,8 @@ export const getViewsFromConfig = async ({
         }
 
         default: {
-          CustomView = getCustomView(views, 'Default')
-          DefaultView = lazy(() =>
-            import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
-          )
+          const path = `/${routeSegments[1]}`
+          CustomView = getCustomViewByPath(views, path)
           break
         }
       }
@@ -107,7 +106,7 @@ export const getViewsFromConfig = async ({
     if (routeSegments?.length === 3) {
       if (routeSegments[1] === 'versions') {
         if (docPermissions?.readVersions?.permission) {
-          CustomView = getCustomView(views, 'Version')
+          CustomView = getCustomViewByKey(views, 'Version')
           DefaultView = lazy(() =>
             import('../Version/index.tsx').then((module) => ({ default: module.VersionView })),
           )
@@ -119,7 +118,7 @@ export const getViewsFromConfig = async ({
   if (globalConfig) {
     if (!routeSegments?.length) {
       if (docPermissions?.read?.permission) {
-        CustomView = getCustomView(views, 'Default')
+        CustomView = getCustomViewByKey(views, 'Default')
         DefaultView = lazy(() =>
           import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
         )
@@ -129,7 +128,7 @@ export const getViewsFromConfig = async ({
       switch (routeSegments[0]) {
         case 'api': {
           if (globalConfig?.admin?.hideAPIURL !== true) {
-            CustomView = getCustomView(views, 'API')
+            CustomView = getCustomViewByKey(views, 'API')
             DefaultView = lazy(() =>
               import('../API/index.tsx').then((module) => ({ default: module.APIView })),
             )
@@ -150,7 +149,7 @@ export const getViewsFromConfig = async ({
 
         case 'versions': {
           if (docPermissions?.readVersions?.permission) {
-            CustomView = getCustomView(views, 'Versions')
+            CustomView = getCustomViewByKey(views, 'Versions')
             DefaultView = lazy(() =>
               import('../Versions/index.tsx').then((module) => ({ default: module.VersionsView })),
             )
@@ -160,7 +159,7 @@ export const getViewsFromConfig = async ({
 
         default: {
           if (docPermissions?.read?.permission) {
-            CustomView = getCustomView(views, 'Default')
+            CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = lazy(() =>
               import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
             )
@@ -172,7 +171,7 @@ export const getViewsFromConfig = async ({
       // `../:slug/versions/:version`, etc
       if (routeSegments[1] === 'versions') {
         if (docPermissions?.readVersions?.permission) {
-          CustomView = getCustomView(views, 'Version')
+          CustomView = getCustomViewByKey(views, 'Version')
           DefaultView = lazy(() =>
             import('../Version/index.tsx').then((module) => ({ default: module.VersionView })),
           )

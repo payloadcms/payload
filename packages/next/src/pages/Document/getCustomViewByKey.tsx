@@ -1,7 +1,7 @@
 import { AdminViewComponent } from 'payload/config'
 import { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
-export const getCustomView = (
+export const getCustomViewByKey = (
   views:
     | SanitizedCollectionConfig['admin']['components']['views']
     | SanitizedGlobalConfig['admin']['components']['views'],
