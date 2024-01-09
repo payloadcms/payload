@@ -1,6 +1,5 @@
 'use client'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
@@ -13,7 +12,10 @@ import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
 import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
+import { useTranslation } from '../../providers/Translation'
+
 import './index.scss'
+
 const baseClass = 'autosave'
 
 const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdatedAt }) => {
@@ -26,7 +28,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const { replace } = useHistory()
-  const { i18n, t } = useTranslation('version')
+  const { i18n, t } = useTranslation()
 
   let interval = 800
   if (collection?.versions.drafts && collection.versions?.drafts?.autosave)
@@ -160,10 +162,10 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
 
   return (
     <div className={baseClass}>
-      {saving && t('saving')}
+      {saving && t('version:saving')}
       {!saving && lastSaved && (
         <React.Fragment>
-          {t('lastSavedAgo', {
+          {t('version:lastSavedAgo', {
             distance: formatTimeToNow(lastSaved, i18n.language),
           })}
         </React.Fragment>

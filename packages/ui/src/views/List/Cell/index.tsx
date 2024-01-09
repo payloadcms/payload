@@ -5,6 +5,7 @@ import type { CodeField } from 'payload/types'
 import type { CellComponentProps, CellProps } from './types'
 
 import { fieldAffectsData } from 'payload/types'
+import { getTranslation } from '@payloadcms/translations'
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent'
 import cellComponents from './field-types'
 import CodeCell from './field-types/Code'
@@ -21,13 +22,12 @@ const DefaultCell: React.FC<CellProps> = (props) => {
     onClick,
     rowData: { id } = {},
     rowData,
+    i18n,
   } = props
 
   const {
     routes: { admin },
   } = config
-
-  // const { i18n, t } = useTranslation('general')
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -63,6 +63,7 @@ const DefaultCell: React.FC<CellProps> = (props) => {
           field={field as CodeField}
           nowrap
           rowData={rowData}
+          i18n={i18n}
         />
       </WrapElement>
     )
@@ -74,43 +75,22 @@ const DefaultCell: React.FC<CellProps> = (props) => {
     if (collectionConfig.upload && fieldAffectsData(field) && field.name === 'filename') {
       CellComponent = cellComponents.File
     } else {
-<<<<<<< HEAD
-      if (!cellData && 'label' in field) {
-        return (
-          <WrapElement {...wrapElementProps}>
-            {t('noLabel', {
-              label: getTranslation(
-                typeof field.label === 'function' ? 'data' : field.label || 'data',
-                i18n,
-              ),
-            })}
-          </WrapElement>
-        )
-      } else if (typeof cellData === 'string' || typeof cellData === 'number') {
-        return <WrapElement {...wrapElementProps}>{cellData}</WrapElement>
-      } else if (typeof cellData === 'object') {
-        return <WrapElement {...wrapElementProps}>{JSON.stringify(cellData)}</WrapElement>
-      }
-=======
       return (
         <WrapElement {...wrapElementProps}>
           {(cellData === '' || typeof cellData === 'undefined') &&
             'label' in field &&
             typeof field.label === 'string' &&
-            field.label}
-          {/* t('noLabel', {
-             label: getTranslation(
-               typeof field.label === 'function' ? 'data' : field.label || 'data',
-               i18n,
-             ),
-           })
-          } */}
+            i18n.t('general:noLabel', {
+              label: getTranslation(
+                typeof field.label === 'function' ? 'data' : field.label || 'data',
+                i18n,
+              ),
+            })}
           {typeof cellData === 'string' && cellData}
           {typeof cellData === 'number' && cellData}
           {typeof cellData === 'object' && JSON.stringify(cellData)}
         </WrapElement>
       )
->>>>>>> 3d5500e69 (chore(next): ssr versions view (#4645))
     }
   }
 
@@ -122,6 +102,7 @@ const DefaultCell: React.FC<CellProps> = (props) => {
         data={cellData}
         field={field}
         rowData={rowData}
+        i18n={i18n}
       />
     </WrapElement>
   )
@@ -139,6 +120,7 @@ const Cell: React.FC<CellProps> = (props) => {
     link,
     onClick,
     rowData,
+    i18n,
   } = props
 
   const componentProps: CellProps = {
@@ -151,6 +133,7 @@ const Cell: React.FC<CellProps> = (props) => {
     link,
     onClick,
     rowData,
+    i18n,
   }
 
   return (

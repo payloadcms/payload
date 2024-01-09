@@ -1,6 +1,6 @@
 import queryString from 'qs'
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../providers/Translation'
 
 import { requests } from '../utilities/api'
 import { useLocale } from '../providers/Locale'

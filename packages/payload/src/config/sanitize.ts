@@ -1,3 +1,4 @@
+import { translations } from '@payloadcms/translations/api'
 import merge from 'deepmerge'
 import { isPlainObject } from 'is-plain-object'
 
@@ -45,7 +46,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     isMergeableObject: isPlainObject,
   }) as Config
 
-  if (!configWithDefaults.serverURL) {
+  if (!configWithDefaults?.serverURL) {
     configWithDefaults.serverURL = ''
   }
 
@@ -82,6 +83,13 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         toString: () => locale.code,
       }))
     }
+  }
+
+  config.i18n = {
+    fallbackLanguage: 'en',
+    supportedLanguages: Object.keys(translations),
+    translations,
+    ...(incomingConfig?.i18n ?? {}),
   }
 
   configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults))

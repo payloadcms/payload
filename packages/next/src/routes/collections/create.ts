@@ -28,6 +28,6 @@ export const create = async ({ req }: { req: PayloadRequest }): Promise<Response
   //   'message',
   // )
   return Response.json(doc, {
-    status: httpStatus.OK,
+    status: httpStatus.CREATED,
   })
 }

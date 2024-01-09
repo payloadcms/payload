@@ -1,14 +1,13 @@
 'use client'
-import type { i18n } from 'i18next'
-
 import { useModal } from '@faceless-ui/modal'
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../providers/Translation'
 
 import type { Block } from 'payload/types'
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import { Drawer } from '../../../../elements/Drawer'
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard'
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage'
@@ -17,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'blocks-drawer'
 
-const getBlockLabel = (block: Block, i18n: i18n) => {
+const getBlockLabel = (block: Block, i18n: I18n) => {
   if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
   if (typeof block.labels.singular === 'object') {
     return getTranslation(block.labels.singular, i18n).toLowerCase()
@@ -31,7 +30,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredBlocks, setFilteredBlocks] = useState(blocks)
   const { closeModal, isModalOpen } = useModal()
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -54,7 +53,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   return (
     <Drawer
       slug={drawerSlug}
-      title={t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+      title={t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
     >
       <BlockSearch setSearchTerm={setSearchTerm} />
       <div className={`${baseClass}__blocks-wrapper`}>

@@ -1,13 +1,13 @@
 'use client'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'
 import type { PaginatedDocs } from 'payload/database'
 import type { TypeWithID, DocumentPreferences, Where } from 'payload/types'
 import type { ContextType, DocumentPermissions, Props, Version } from './types'
 
+import { useTranslation } from '../../providers/Translation'
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
 import { useLocale } from '../Locale'

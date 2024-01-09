@@ -2,7 +2,9 @@ import type { SanitizedConfig, PayloadRequest, CustomPayloadRequest } from 'payl
 import { getAuthenticatedUser } from 'payload/auth'
 import { PayloadT, getPayload } from 'payload'
 import { URL } from 'url'
-import { i18nInit } from 'payload/utilities'
+import { parseCookies } from './cookies'
+import { getRequestLanguage } from './getRequestLanguage'
+import { getNextI18n } from './getNextI18n'
 
 type GetRequestLocalesArgs = {
   localization: Exclude<PayloadT['config']['localization'], false>
@@ -90,7 +92,17 @@ export const createPayloadRequest = async ({
     requestFallbackLocale = locales.fallbackLocale
   }
 
-  const i18n = i18nInit(config.i18n)
+  const cookies = parseCookies(request.headers)
+  const language = getRequestLanguage({
+    headers: request.headers,
+    cookies,
+  })
+
+  const i18n = getNextI18n({
+    config,
+    language,
+    translationContext: 'api',
+  })
 
   const customRequest: CustomPayloadRequest = {
     payload,
@@ -119,6 +131,7 @@ export const createPayloadRequest = async ({
     payload,
     headers: req.headers,
     isGraphQL,
+    cookies,
   })
 
   return req

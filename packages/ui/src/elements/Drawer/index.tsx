@@ -1,7 +1,7 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { Props, TogglerProps } from './types'
 
@@ -50,7 +50,7 @@ export const Drawer: React.FC<Props> = ({
   slug,
   title,
 }) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { closeModal, modalState } = useModal()
   const drawerDepth = useEditDepth()
   const [isOpen, setIsOpen] = useState(false)
@@ -84,7 +84,7 @@ export const Drawer: React.FC<Props> = ({
       >
         {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
         <button
-          aria-label={t('close')}
+          aria-label={t('general:close')}
           className={`${baseClass}__close`}
           id={`close-drawer__${slug}`}
           onClick={() => closeModal(slug)}
@@ -101,7 +101,7 @@ export const Drawer: React.FC<Props> = ({
                     {title}
                   </h2>
                   <button
-                    aria-label={t('close')}
+                    aria-label={t('general:close')}
                     className={`${baseClass}__header__close`}
                     id={`close-drawer__${slug}`}
                     onClick={() => closeModal(slug)}

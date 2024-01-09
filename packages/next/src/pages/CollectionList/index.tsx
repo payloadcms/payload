@@ -18,7 +18,7 @@ export const CollectionList = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user, collectionConfig } = await initPage({
+  const { config, payload, permissions, user, collectionConfig, i18n } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: true,
     collectionSlug,
@@ -63,6 +63,7 @@ export const CollectionList = async ({
       setLimit: () => {},
       setListControls: () => {},
       setSort: () => {},
+      i18n,
     }
 
     return (

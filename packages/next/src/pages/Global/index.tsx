@@ -18,7 +18,7 @@ import { meta } from '../../utilities/meta'
 import { DefaultGlobalView } from './Default'
 import { DefaultGlobalViewProps } from './Default/types'
 // import i18n from 'i18next'
-// import { getTranslation } from 'payload/utilities'
+// import { getTranslation } from '@payloadcms/translations'
 
 export const generateMetadata = async ({
   config,

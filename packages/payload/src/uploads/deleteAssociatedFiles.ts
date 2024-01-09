@@ -1,10 +1,9 @@
-import type { TFunction } from 'i18next'
-
 import fs from 'fs'
 import path from 'path'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
+import type { PayloadRequest } from '../exports/types'
 import type { FileData, FileToSave } from './types'
 
 import { ErrorDeletingFile } from '../errors'
@@ -16,7 +15,7 @@ type Args = {
   doc: Record<string, unknown>
   files?: FileToSave[]
   overrideDelete: boolean
-  t: TFunction
+  req: PayloadRequest
 }
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
@@ -25,7 +24,7 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
   doc,
   files = [],
   overrideDelete,
-  t,
+  req,
 }) => {
   if (!collectionConfig.upload) return
   if (overrideDelete || files.length > 0) {
@@ -39,7 +38,7 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
         fs.unlinkSync(fileToDelete)
       }
     } catch (err) {
-      throw new ErrorDeletingFile(t)
+      throw new ErrorDeletingFile(req.t)
     }
 
     if (doc.sizes) {
@@ -56,7 +55,7 @@ export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
             fs.unlinkSync(sizeToDelete)
           }
         } catch (err) {
-          throw new ErrorDeletingFile(t)
+          throw new ErrorDeletingFile(req.t)
         }
       }
     }

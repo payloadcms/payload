@@ -1,6 +1,6 @@
 'use client'
 import React, { createContext } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types'
 
@@ -16,8 +16,8 @@ const Context = createContext({
 })
 
 export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const { t } = useTranslation('general')
-  const fallbackText = t('loading')
+  const { t } = useTranslation()
+  const fallbackText = t('general:loading')
   const [overlays, dispatchOverlay] = React.useReducer(reducer, defaultLoadingOverlayState)
 
   const { isMounted, isUnmounting, triggerDelayedRender } = useDelayedRender({

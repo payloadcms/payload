@@ -26,6 +26,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   id,
   versionID,
   locale,
+  i18n,
 }) => {
   const {
     routes: { admin },
@@ -88,10 +89,12 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         url: `${admin}/globals/${globalConfig.slug}`,
       },
       {
+        // TODO(i18n)
         label: 'Versions',
         url: `${admin}/globals/${globalConfig.slug}/versions`,
       },
       {
+        // TODO(i18n)
         label: '[Date]',
         // label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
       },
@@ -110,6 +113,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const formattedCreatedAt = doc?.createdAt
   // const formattedCreatedAt = doc?.createdAt
+  // TODO(i18n)
   //   ? formatDate(doc.createdAt, dateFormat, i18n?.language)
   //   : ''
 

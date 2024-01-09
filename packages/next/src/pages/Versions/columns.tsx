@@ -1,5 +1,3 @@
-// import type { TFunction } from 'react-i18next'
-
 import React from 'react'
 
 import type {
@@ -15,6 +13,7 @@ import {
   SortColumn,
 } from '@payloadcms/ui'
 import Link from 'next/link'
+import { I18n } from '@payloadcms/translations'
 
 type CreatedAtCellProps = {
   config: SanitizedConfig
@@ -23,6 +22,7 @@ type CreatedAtCellProps = {
   date: string
   versionID: string
   docID: string
+  i18n: I18n
 }
 
 const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
@@ -32,6 +32,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   collectionConfig,
   // date,
   globalConfig,
+  i18n,
 }) => {
   const {
     routes: { admin },
@@ -47,6 +48,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   return (
     <Link href={to}>
       Date here
+      {/* TODO(i18n) */}
       {/* {date && formatDate(date, dateFormat, i18n?.language)} */}
     </Link>
   )
@@ -59,25 +61,21 @@ export const buildVersionColumns = ({
   collectionConfig,
   globalConfig,
   docID,
+  i18n: { t },
+  i18n,
 }: {
   config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   docID?: string
-  // t: TFunction,
+  i18n: I18n
 }): Column[] => [
   {
     name: '',
     accessor: 'updatedAt',
     active: true,
     components: {
-      Heading: (
-        <SortColumn
-          label="Updated At"
-          //  label={t('general:updatedAt')}
-          name="updatedAt"
-        />
-      ),
+      Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
       renderCell: (row, data) => (
         <CreatedAtCell
           config={config}
@@ -86,6 +84,7 @@ export const buildVersionColumns = ({
           globalConfig={globalConfig}
           versionID={row?.id}
           docID={docID}
+          i18n={i18n}
         />
       ),
     },
@@ -96,14 +95,7 @@ export const buildVersionColumns = ({
     accessor: 'id',
     active: true,
     components: {
-      Heading: (
-        <SortColumn
-          disable
-          label="ID"
-          //  label={t('versionID')}
-          name="id"
-        />
-      ),
+      Heading: <SortColumn disable label={t('version:versionID')} name="id" />,
       renderCell: (row, data) => <TextCell>{data}</TextCell>,
     },
     label: '',
@@ -113,40 +105,25 @@ export const buildVersionColumns = ({
     accessor: 'autosave',
     active: true,
     components: {
-      Heading: (
-        <SortColumn
-          disable
-          label="Type"
-          // label={t('type')}
-          name="autosave"
-        />
-      ),
+      Heading: <SortColumn disable label={t('version:type')} name="autosave" />,
       renderCell: (row) => (
         <TextCell>
           {row?.autosave && (
             <React.Fragment>
               <Pill>
                 Autosave
-                {/* {t('autosave')} */}
+                {t('version:autosave')}
               </Pill>
               &nbsp;&nbsp;
             </React.Fragment>
           )}
           {row?.version._status === 'published' && (
             <React.Fragment>
-              <Pill pillStyle="success">
-                Published
-                {/* {t('published')} */}
-              </Pill>
+              <Pill pillStyle="success">{t('version:published')}</Pill>
               &nbsp;&nbsp;
             </React.Fragment>
           )}
-          {row?.version._status === 'draft' && (
-            <Pill>
-              Draft
-              {/* {t('draft')} */}
-            </Pill>
-          )}
+          {row?.version._status === 'draft' && <Pill>{t('version:draft')}</Pill>}
         </TextCell>
       ),
     },

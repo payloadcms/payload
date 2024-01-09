@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { SelectAllStatus, useSelection } from '../../views/List/SelectionProvider'
 import './index.scss'
@@ -11,7 +11,7 @@ type Props = {
 }
 const ListSelection: React.FC<Props> = ({ label }) => {
   const { count, selectAll, toggleAll, totalDocs } = useSelection()
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   if (count === 0) {
     return null
@@ -19,18 +19,18 @@ const ListSelection: React.FC<Props> = ({ label }) => {
 
   return (
     <div className={baseClass}>
-      <span>{t('selectedCount', { count, label })}</span>
+      <span>{t('general:selectedCount', { count, label })}</span>
       {selectAll !== SelectAllStatus.AllAvailable && (
         <Fragment>
           {' '}
           &mdash;
           <button
-            aria-label={t('selectAll', { count, label })}
+            aria-label={t('general:selectAll', { count, label })}
             className={`${baseClass}__button`}
             onClick={() => toggleAll(true)}
             type="button"
           >
-            {t('selectAll', { count: totalDocs, label })}
+            {t('general:selectAll', { count: totalDocs, label })}
           </button>
         </Fragment>
       )}

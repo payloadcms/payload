@@ -1,23 +1,18 @@
-import type { Request } from 'express'
-
+import type { PayloadRequest } from '../exports/types'
 import type { File, FileData } from './types'
 
 import { APIError } from '../errors'
 
 type Args = {
   data: FileData
-  req: Request
+  req: PayloadRequest
 }
 export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
+  const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
   const { filename, url } = data
 
   if (typeof url === 'string') {
-    let fileURL = url
-    if (!url.startsWith('http')) {
-      const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
-      fileURL = `${baseUrl}${url}`
-    }
-
+    const fileURL = `${baseUrl}${url}`
     const { default: fetch } = (await import('node-fetch')) as any
 
     const res = await fetch(fileURL, {

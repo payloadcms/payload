@@ -17,8 +17,8 @@ import type { FileData, FileToSave, ProbedImageSize } from './types'
 import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
 import cropImage from './cropImage'
-import getFileByPath from './getFileByPath'
 import { getExternalFile } from './getExternalFile'
+import getFileByPath from './getFileByPath'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -76,7 +76,7 @@ export const generateFileData = async <T>({
         file = response as UploadedFile
         overwriteExistingFiles = true
       } else if (filename && url) {
-        file = (await getExternalFile({ req, data: data as FileData })) as UploadedFile
+        file = (await getExternalFile({ data: data as FileData, req })) as UploadedFile
         overwriteExistingFiles = true
       }
     } catch (err) {

@@ -1,7 +1,7 @@
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
 import type { User } from 'payload/auth'
-import type { Field as FieldSchema, SanitizedConfig } from 'payload/types'
+import type { Field as FieldSchema, PayloadRequest, SanitizedConfig } from 'payload/types'
 import type { Data, Fields } from '../types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { addFieldStatePromise } from './addFieldStatePromise'

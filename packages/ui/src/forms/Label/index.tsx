@@ -2,7 +2,7 @@ import React from 'react'
 
 import type { Props } from './types'
 
-// import { getTranslation } from 'payload/utilities'
+// import { getTranslation } from '@payloadcms/translations'
 import './index.scss'
 
 const Label: React.FC<Props> = (props) => {

@@ -1,8 +1,8 @@
 import React from 'react'
+import { getTranslation } from '@payloadcms/translations'
 
 import type { Props } from '../types'
 
-import { getTranslation } from 'payload/utilities'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
 import './index.scss'
@@ -37,6 +37,7 @@ const Text: React.FC<Props> = ({
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {typeof field.label === 'string' ? field.label : '[field-label]' /* TODO */}
+        // TODO(i18n)
         {/* {getTranslation(field.label, i18n)} */}
       </Label>
       <DiffViewer

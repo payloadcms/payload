@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { useConfig } from '../../providers/Config'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'

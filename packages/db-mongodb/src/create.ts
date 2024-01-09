@@ -6,6 +6,10 @@ import type { MongooseAdapter } from '.'
 import handleError from './utilities/handleError'
 import { withSession } from './withSession'
 
+import type { MongooseAdapter } from '.'
+
+import { withSession } from './withSession'
+
 export const create: Create = async function create(
   this: MongooseAdapter,
   { collection, data, req = {} as PayloadRequest },

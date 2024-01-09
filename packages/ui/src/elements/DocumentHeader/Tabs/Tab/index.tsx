@@ -2,9 +2,9 @@ import React, { Fragment } from 'react'
 
 import type { DocumentTabConfig } from '../types'
 import type { DocumentTabProps } from '../types'
+import { DocumentTabLink } from './TabLink'
 
 import './index.scss'
-import { DocumentTabLink } from './TabLink'
 
 const baseClass = 'doc-tab'
 
@@ -21,6 +21,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     label,
     newTab,
     pillLabel,
+    i18n,
   } = props
 
   const { routes } = config
@@ -45,22 +46,12 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     const labelToRender =
       typeof label === 'function'
         ? label({
-            // t
-            t: (str: string) => str,
+            t: i18n.t,
           })
         : label
 
-<<<<<<< HEAD
-  if (
-    !condition ||
-    (condition && Boolean(condition({ collection, config, documentInfo, global })))
-  ) {
-    const labelToRender = typeof label === 'function' ? label({ t }) : label
-    const pillToRender = typeof pillLabel === 'function' ? pillLabel({ versions }) : pillLabel
-=======
     const pillToRender =
       typeof pillLabel === 'function' ? pillLabel({ versions: undefined }) : pillLabel
->>>>>>> 3d5500e69 (chore(next): ssr versions view (#4645))
 
     return (
       <DocumentTabLink href={href} newTab={newTab} baseClass={baseClass} isActive={checkIsActive}>

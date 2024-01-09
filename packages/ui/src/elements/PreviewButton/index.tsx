@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 
 import type { GeneratePreviewURL } from 'payload/config'
@@ -56,7 +56,7 @@ const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL })
     routes: { api },
     serverURL,
   } = useConfig()
-  const { t } = useTranslation('version')
+  const { t } = useTranslation()
   const isGeneratingPreviewURL = useRef(false)
 
   // we need to regenerate the preview URL every time the button is clicked
@@ -95,7 +95,7 @@ const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL })
       componentProps={{
         DefaultButton: DefaultPreviewButton,
         disabled: isLoading || !generatePreviewURL,
-        label: isLoading ? t('general:loading') : t('preview'),
+        label: isLoading ? t('general:loading') : t('version:preview'),
         preview,
       }}
     />

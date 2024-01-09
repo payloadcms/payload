@@ -8,6 +8,7 @@ import type { Document } from '../../../types'
 import type { File } from '../../../uploads/types'
 
 import { APIError } from '../../../errors'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import getFileByPath from '../../../uploads/getFileByPath'
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import { createOperation } from '../create'
@@ -61,15 +62,8 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   }
 
   const req = createLocalReq(options, payload)
-  const fileToSet = (file ?? (await getFileByPath(filePath))) as UploadedFile
-  if (fileToSet) {
-    if (req?.files) {
-      req.files.file = fileToSet
-    } else {
-      req.files = {
-        file: fileToSet,
-      }
-    }
+  req.files = {
+    file: (file ?? (await getFileByPath(filePath))) as UploadedFile, // TODO(NATIVE_REQUEST): fix this type
   }
 
   return createOperation<TSlug>({

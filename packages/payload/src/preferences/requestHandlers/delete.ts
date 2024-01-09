@@ -1,6 +1,5 @@
 import httpStatus from 'http-status'
 
-// import formatSuccessResponse from '../../express/responses/formatSuccess'
 import deleteOperation from '../operations/delete'
 
 export const deleteHandler = async ({ params, req }): Promise<Response> => {
@@ -13,7 +12,7 @@ export const deleteHandler = async ({ params, req }): Promise<Response> => {
   return Response.json(
     {
       ...result,
-      // ...formatSuccessResponse(req.t('deletedSuccessfully'), 'message'),
+      message: req.t('general:deletedSuccessfully'),
     },
     {
       status: httpStatus.OK,

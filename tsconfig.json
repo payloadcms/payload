@@ -36,6 +36,7 @@
     { "path": "./packages/db-postgres" },
     { "path": "./packages/live-preview" },
     { "path": "./packages/live-preview-react" },
+    { "path": "./packages/next" },
     { "path": "./packages/payload" },
     { "path": "./packages/plugin-cloud-storage" },
     { "path": "./packages/plugin-cloud" },
@@ -47,7 +48,7 @@
     { "path": "./packages/plugin-stripe" },
     { "path": "./packages/richtext-slate" },
     { "path": "./packages/richtext-lexical" },
-    { "path": "./packages/next" },
+    { "path": "./packages/translations" },
     { "path": "./packages/ui" }
   ]
 }

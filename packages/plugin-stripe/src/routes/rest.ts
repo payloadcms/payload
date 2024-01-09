@@ -29,7 +29,7 @@ export const stripeREST = async (args: {
   try {
     if (!user) {
       // TODO: make this customizable from the config
-      throw new Forbidden()
+      throw new Forbidden(req.t)
     }
 
     const pluginRes = await stripeProxy({

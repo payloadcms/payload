@@ -1,4 +1,5 @@
-import type { GeneratedTypes, PayloadT, RequestContext } from '../../../'
+import type { PayloadT, RequestContext } from '../../..'
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 

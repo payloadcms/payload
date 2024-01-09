@@ -1,14 +1,15 @@
 'use client'
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 
+import React, { useCallback } from 'react'
+
+import { useTranslation } from '../../../providers/Translation'
 import type { OptionObject, Validate } from 'payload/types'
 import type { Option } from '../../../elements/ReactSelect/types'
-
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import ReactSelect from '../../../elements/ReactSelect'
-import './index.scss'
 import useField from '../../useField'
+
+import './index.scss'
 
 const SelectInput: React.FC<{
   readOnly: boolean

@@ -2,7 +2,7 @@
 import { useModal } from '@faceless-ui/modal'
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 
 import type { Permissions, User } from 'payload/auth'

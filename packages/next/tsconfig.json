@@ -23,6 +23,7 @@
     "src/**/*.spec.tsx"
   ],
   "include": [
+    "src/translations/*.json",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.d.ts",

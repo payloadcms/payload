@@ -1,15 +1,14 @@
-import type { TFunction } from 'i18next'
-
-import type { Payload } from '../payload'
+import type { PayloadT } from '..'
+import type { PayloadRequest } from '../exports/types'
 import type { FileToSave } from './types'
 
 import { FileUploadError } from '../errors'
 import saveBufferToFile from './saveBufferToFile'
 
 export const uploadFiles = async (
-  payload: Payload,
+  payload: PayloadT,
   files: FileToSave[],
-  t: TFunction,
+  req: PayloadRequest,
 ): Promise<void> => {
   try {
     await Promise.all(
@@ -19,6 +18,6 @@ export const uploadFiles = async (
     )
   } catch (err) {
     payload.logger.error(err)
-    throw new FileUploadError(t)
+    throw new FileUploadError(req.t)
   }
 }

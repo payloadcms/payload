@@ -1,16 +1,16 @@
 import type { i18n as Ii18n } from 'i18next'
 
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 import { DiffMethod } from 'react-diff-viewer-continued'
 
 import type { OptionObject, SelectField } from 'payload/types'
 import type { Props } from '../types'
-
-import { getTranslation } from 'payload/utilities'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
-import './index.scss'
 import { DiffViewer } from './DiffViewer'
+
+import './index.scss'
 
 const baseClass = 'select-diff'
 

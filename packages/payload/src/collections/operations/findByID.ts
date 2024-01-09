@@ -87,13 +87,13 @@ export const findByIDOperation = async <T extends TypeWithID>(
     // Find by ID
     // /////////////////////////////////////
 
-    if (!findOneArgs.where.and[0].id) throw new NotFound(t)
+    if (!findOneArgs.where.and[0].id) throw new NotFound(req.t)
 
     let result: T = await req.payload.db.findOne(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {
-        throw new NotFound(t)
+        throw new NotFound(req.t)
       }
 
       return null

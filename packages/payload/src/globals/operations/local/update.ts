@@ -1,7 +1,8 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes, PayloadT } from '../../../'
-import type { PayloadRequest, RequestContext } from '../../../types'
+import type { PayloadT, RequestContext } from '../../..'
+import type { GeneratedTypes } from '../../../'
+import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'

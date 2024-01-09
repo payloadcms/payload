@@ -1,6 +1,6 @@
 import type { Action, Option } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 
 const reduceToIDs = (options) =>
   options.reduce((ids, option) => {

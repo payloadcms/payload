@@ -29,7 +29,7 @@ export const APIView = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, user, locale, collectionConfig, globalConfig } = await initPage({
+  const { config, payload, user, locale, collectionConfig, globalConfig, i18n } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: true,
     collectionSlug,
@@ -140,8 +140,13 @@ export const APIView = async ({
         >
           <div className={`${baseClass}__form-fields`}>
             <div className={`${baseClass}__filter-query-checkboxes`}>
-              {draftsEnabled && <Checkbox name="draft" path="draft" label="Draft" />}
-              <Checkbox name="authenticated" path="authenticated" label="Authenticated" />
+              {draftsEnabled && <Checkbox i18n={i18n} name="draft" path="draft" label="Draft" />}
+              <Checkbox
+                i18n={i18n}
+                name="authenticated"
+                path="authenticated"
+                label="Authenticated"
+              />
             </div>
             {localeOptions && (
               <Select label="Locale" name="locale" options={localeOptions} path="locale" />

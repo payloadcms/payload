@@ -2,7 +2,6 @@ import httpStatus from 'http-status'
 
 import type { PayloadHandler } from '../../exports/config'
 import type { PayloadRequest } from '../../types'
-// import formatSuccessResponse from '../../express/responses/formatSuccess'
 
 import update from '../operations/update'
 
@@ -18,7 +17,7 @@ export const updateHandler: PayloadHandler = async ({ params, req }) => {
   return Response.json(
     {
       ...doc,
-      // message: formatSuccessResponse(req.t('general:updatedSuccessfully'), 'message'),
+      message: payloadRequest.t('general:updatedSuccessfully'),
     },
     {
       status: httpStatus.OK,

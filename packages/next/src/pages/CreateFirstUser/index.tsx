@@ -1,13 +1,13 @@
 import React from 'react'
 
 import type { Field } from 'payload/types'
-
+import { getNextT } from '../../utilities/getNextT'
 import { MinimalTemplate, FormSubmit, Form, RenderFields, fieldTypes } from '@payloadcms/ui'
-import './index.scss'
 import { SanitizedConfig } from 'payload/types'
-import i18n from 'i18next'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
+
+import './index.scss'
 
 const baseClass = 'create-first-user'
 
@@ -15,13 +15,18 @@ export const generateMetadata = async ({
   config,
 }: {
   config: Promise<SanitizedConfig>
-}): Promise<Metadata> =>
-  meta({
-    title: i18n.t('createFirstUser'),
-    description: i18n.t('createFirstUser'),
-    keywords: i18n.t('general:create'),
+}): Promise<Metadata> => {
+  const t = getNextT({
+    config: await config,
+  })
+
+  return meta({
+    title: t('createFirstUser'),
+    description: t('createFirstUser'),
+    keywords: t('general:create'),
     config,
   })
+}
 
 export const CreateFirstUser: React.FC<{
   config: Promise<SanitizedConfig>

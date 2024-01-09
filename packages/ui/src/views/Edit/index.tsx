@@ -5,8 +5,9 @@ import type { DefaultEditViewProps } from './types'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
 import { OperationProvider } from '../../providers/OperationProvider'
-import './index.scss'
 import { RenderCustomView } from './RenderCustomView'
+
+import './index.scss'
 
 const baseClass = 'collection-edit'
 

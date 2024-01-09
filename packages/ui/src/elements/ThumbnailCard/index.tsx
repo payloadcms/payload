@@ -1,10 +1,9 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
 import { formatDocTitle } from '../../utilities/formatDocTitle'
-import { useConfig } from '../../providers/Config'
 import Thumbnail from '../Thumbnail'
 import './index.scss'
 
@@ -21,8 +20,7 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     thumbnail,
   } = props
 
-  const { i18n, t } = useTranslation('general')
-  const config = useConfig()
+  const { i18n, t } = useTranslation()
 
   const classes = [
     baseClass,
@@ -40,10 +38,10 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
       formatDocTitle({
         useAsTitle: collection?.admin?.useAsTitle,
         doc,
-        // i18n,
+        i18n,
       }) ||
       (doc?.filename as string) ||
-      `[${t('untitled')}]`
+      `[${t('general:untitled')}]`
   }
 
   return (

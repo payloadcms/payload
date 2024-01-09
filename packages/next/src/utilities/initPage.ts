@@ -9,6 +9,9 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 import { redirect } from 'next/navigation'
+import { parseCookies } from './cookies'
+import { getNextI18n } from './getNextI18n'
+import { getRequestLanguage } from './getRequestLanguage'
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
 
 export const initPage = async ({
@@ -28,16 +31,20 @@ export const initPage = async ({
   permissions: Awaited<ReturnType<typeof auth>>['permissions']
   user: Awaited<ReturnType<typeof auth>>['user']
   config: SanitizedConfig
+  i18n: ReturnType<typeof getNextI18n>
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   locale: ReturnType<typeof findLocaleFromCode>
 }> => {
   const headers = getHeaders()
+  const cookies = parseCookies(headers)
 
   const { permissions, user } = await auth({
     headers,
     config: configPromise,
+    cookies,
   })
+  const language = getRequestLanguage({ cookies, headers })
 
   const config = await configPromise
 
@@ -52,6 +59,7 @@ export const initPage = async ({
     config: configPromise,
   })
 
+  const i18n = getNextI18n({ config, language })
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig
 
@@ -75,6 +83,7 @@ export const initPage = async ({
     permissions,
     user,
     config,
+    i18n,
     collectionConfig,
     globalConfig,
     locale,

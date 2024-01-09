@@ -1,14 +1,16 @@
 import React from 'react'
 
-import type { Props } from './types'
+import { getTranslation } from '@payloadcms/translations'
 
+import type { Props } from './types'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import { fieldBaseClass } from '../shared'
 import { CheckboxInput } from './Input'
 import DefaultLabel from '../../Label'
-import './index.scss'
 import { CheckboxWrapper } from './Wrapper'
+
+import './index.scss'
 
 const baseClass = 'checkbox'
 const inputBaseClass = 'checkbox-input'
@@ -31,6 +33,7 @@ const Checkbox: React.FC<Props> = (props) => {
     valid = true,
     errorMessage,
     value,
+    i18n,
   } = props
 
   const path = pathFromProps || name
@@ -65,8 +68,7 @@ const Checkbox: React.FC<Props> = (props) => {
           {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
           <CheckboxInput
             id={fieldID}
-            label={typeof label === 'string' ? label : undefined}
-            // label={getTranslation(label || name, i18n)}
+            label={getTranslation(label || name, i18n)}
             name={path}
             readOnly={readOnly}
             required={required}

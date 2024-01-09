@@ -1,0 +1,48 @@
+{
+  "name": "@payloadcms/translations",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "npx ts-node ./src/build.ts",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "exports": {
+    "./api": {
+      "import": "./src/all/index.ts",
+      "require": "./src/all/index.ts",
+      "types": "./src/all/index.ts"
+    },
+    "./client": {
+      "import": "./src/all/index.ts",
+      "require": "./src/all/index.ts",
+      "types": "./src/all/index.ts"
+    },
+    ".": {
+      "import": "./src/exports/index.ts",
+      "require": "./src/exports/index.ts",
+      "types": "./src/exports/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "@swc/core": "^1.3.102",
+    "@types/react": "^18"
+  },
+  "publishConfig": {
+    "exports": {
+      "./api": {
+        "import": "./dist/api/index.ts",
+        "require": "./dist/api/index.ts"
+      },
+      "./client": {
+        "import": "./dist/client/index.ts",
+        "require": "./dist/client/index.ts"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist"
+  ]
+}

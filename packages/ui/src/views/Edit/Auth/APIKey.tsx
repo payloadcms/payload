@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 import { v4 as uuidv4 } from 'uuid'
 
 import { text } from 'payload/fields/validations'

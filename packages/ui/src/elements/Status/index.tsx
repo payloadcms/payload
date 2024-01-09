@@ -1,7 +1,7 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 
 import type { Field } from 'payload/types'
@@ -28,7 +28,7 @@ const Status: React.FC = () => {
   const [processing, setProcessing] = useState(false)
   const { reset: resetForm } = useForm()
   const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation('version')
+  const { i18n, t } = useTranslation()
 
   const unPublishModalSlug = `confirm-un-publish-${id}`
   const revertModalSlug = `confirm-revert-${id}`
@@ -133,10 +133,10 @@ const Status: React.FC = () => {
 
   if (statusToRender) {
     return (
-      <div className={baseClass} title={`${t('status')}: ${t(statusToRender)}`}>
+      <div className={baseClass} title={`${t('version:status')}: ${t(statusToRender)}`}>
         <div className={`${baseClass}__value-wrap`}>
-          <span className={`${baseClass}__label`}>{t('status')}:&nbsp;</span>
-          <span className={`${baseClass}__value`}>{t(statusToRender)}</span>
+          <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
+          <span className={`${baseClass}__value`}>{t(`version:${statusToRender}`)}</span>
           {canUpdate && statusToRender === 'published' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
@@ -145,12 +145,12 @@ const Status: React.FC = () => {
                 className={`${baseClass}__action`}
                 onClick={() => toggleModal(unPublishModalSlug)}
               >
-                {t('unpublish')}
+                {t('version:unpublish')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
-                  <h1>{t('confirmUnpublish')}</h1>
-                  <p>{t('aboutToUnpublish')}</p>
+                  <h1>{t('version:confirmUnpublish')}</h1>
+                  <p>{t('version:aboutToUnpublish')}</p>
                   <Button
                     buttonStyle="secondary"
                     onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
@@ -159,7 +159,7 @@ const Status: React.FC = () => {
                     {t('general:cancel')}
                   </Button>
                   <Button onClick={processing ? undefined : () => performAction('unpublish')}>
-                    {t(processing ? 'unpublishing' : 'general:confirm')}
+                    {t(processing ? 'version:unpublishing' : 'general:confirm')}
                   </Button>
                 </MinimalTemplate>
               </Modal>
@@ -174,12 +174,12 @@ const Status: React.FC = () => {
                 id="action-revert-to-published"
                 onClick={() => toggleModal(revertModalSlug)}
               >
-                {t('revertToPublished')}
+                {t('version:revertToPublished')}
               </Button>
               <Modal className={`${baseClass}__modal`} slug={revertModalSlug}>
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
-                  <h1>{t('confirmRevertToSaved')}</h1>
-                  <p>{t('aboutToRevertToPublished')}</p>
+                  <h1>{t('version:confirmRevertToSaved')}</h1>
+                  <p>{t('version:aboutToRevertToPublished')}</p>
                   <Button
                     buttonStyle="secondary"
                     onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
@@ -191,7 +191,7 @@ const Status: React.FC = () => {
                     id="action-revert-to-published-confirm"
                     onClick={processing ? undefined : () => performAction('revert')}
                   >
-                    {t(processing ? 'reverting' : 'general:confirm')}
+                    {t(processing ? 'version:reverting' : 'general:confirm')}
                   </Button>
                 </MinimalTemplate>
               </Modal>

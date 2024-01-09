@@ -2,13 +2,14 @@ import * as Locales from 'date-fns/locale'
 import React from 'react'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
 import { getSupportedDateLocale } from '../../utilities/formatDate/getSupportedDateLocale'
 import { Calendar as CalendarIcon } from '../../icons/Calendar'
 import { X as XIcon } from '../../icons/X'
+import { useTranslation } from '../../providers/Translation'
+
 import './index.scss'
 
 const baseClass = 'date-time-picker'

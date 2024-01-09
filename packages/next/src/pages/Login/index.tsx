@@ -2,13 +2,13 @@ import React, { Fragment } from 'react'
 
 import { Logo } from '@payloadcms/ui/graphics'
 import { MinimalTemplate, LoginForm } from '@payloadcms/ui'
-import './index.scss'
 import type { SanitizedConfig } from 'payload/types'
-import i18n from 'i18next'
 import { meta } from '../../utilities/meta'
 import { Metadata } from 'next'
 import { initPage } from '../../utilities/initPage'
 import { redirect } from 'next/navigation'
+import { getNextT } from '../../utilities/getNextT'
+import './index.scss'
 
 const baseClass = 'login'
 
@@ -16,13 +16,18 @@ export const generateMetadata = async ({
   config,
 }: {
   config: Promise<SanitizedConfig>
-}): Promise<Metadata> =>
-  meta({
-    title: i18n.t('login'),
-    description: `${i18n.t('login')}`,
-    keywords: `${i18n.t('login')}`,
+}): Promise<Metadata> => {
+  const t = getNextT({
+    config: await config,
+  })
+
+  return meta({
+    title: t('authentication:login'),
+    description: `${t('authentication:login')}`,
+    keywords: `${t('authentication:login')}`,
     config,
   })
+}
 
 export const Login: React.FC<{
   config: Promise<SanitizedConfig>
@@ -49,9 +54,7 @@ export const Login: React.FC<{
           <Logo config={config} />
         </div>
         {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-        {!collectionConfig?.auth?.disableLocalStrategy && (
-          <LoginForm config={config} searchParams={searchParams} />
-        )}
+        {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
         {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
       </Fragment>
     </MinimalTemplate>

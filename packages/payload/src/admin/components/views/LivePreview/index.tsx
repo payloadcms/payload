@@ -1,3 +1,4 @@
+import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,7 +9,6 @@ import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 import type { FieldTypes } from '../../forms/field-types'
 import type { EditViewProps } from '../types'
 
-import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'

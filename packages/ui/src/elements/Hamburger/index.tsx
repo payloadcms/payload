@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { Chevron } from '../../icons/Chevron'
 import './index.scss'
@@ -11,7 +11,7 @@ export const Hamburger: React.FC<{
   closeIcon?: 'collapse' | 'x'
   isActive?: boolean
 }> = (props) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { closeIcon = 'x', isActive = false } = props
 
   return (
@@ -19,7 +19,7 @@ export const Hamburger: React.FC<{
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__icon`}>
           {!isActive && (
-            <div className={`${baseClass}__lines`} title={t('open')}>
+            <div className={`${baseClass}__lines`} title={t('general:open')}>
               <div className={`${baseClass}__line ${baseClass}__top`} />
               <div className={`${baseClass}__line ${baseClass}__middle`} />
               <div className={`${baseClass}__line ${baseClass}__bottom`} />
@@ -27,9 +27,9 @@ export const Hamburger: React.FC<{
           )}
           {isActive && (
             <div
-              aria-label={closeIcon === 'collapse' ? t('collapse') : t('close')}
+              aria-label={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
               className={`${baseClass}__close-icon`}
-              title={closeIcon === 'collapse' ? t('collapse') : t('close')}
+              title={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
             >
               {closeIcon === 'x' && (
                 <React.Fragment>

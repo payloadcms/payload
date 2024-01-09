@@ -3,7 +3,7 @@
 import isDeepEqual from 'deep-equal'
 import { serialize } from 'object-to-formdata'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
 
@@ -73,7 +73,7 @@ const Form: React.FC<Props> = (props) => {
   const { push } = useRouter()
 
   const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
 
@@ -308,7 +308,7 @@ const Form: React.FC<Props> = (props) => {
 
             push(redirect)
           } else if (!disableSuccessStatus) {
-            toast.success(json.message || t('submissionSuccessful'), { autoClose: 3000 })
+            toast.success(json.message || t('general:submissionSuccessful'), { autoClose: 3000 })
           }
         } else {
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form

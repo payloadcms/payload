@@ -1,11 +1,11 @@
 'use client'
 import { useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import type { StepNavItem } from '../../elements/StepNav/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useStepNav } from '../../elements/StepNav'
 import { useConfig } from '../../providers/Config'
 import { useEditDepth } from '../../providers/EditDepth'
@@ -41,7 +41,7 @@ export const SetStepNav: React.FC<{
 
   const { setStepNav } = useStepNav()
 
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const {
     routes: { admin },
@@ -65,7 +65,7 @@ export const SetStepNav: React.FC<{
         })
       } else {
         nav.push({
-          label: t('createNew'),
+          label: t('general:createNew'),
         })
       }
     } else if (globalSlug) {

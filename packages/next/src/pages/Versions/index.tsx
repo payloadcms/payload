@@ -20,7 +20,7 @@ export const VersionsView = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage({
+  const { config, payload, permissions, user, i18n } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: true,
     collectionSlug,
@@ -193,6 +193,7 @@ export const VersionsView = async ({
     user,
     versionsData,
     limit: limit ? parseInt(limit as string, 10) : undefined,
+    i18n,
   }
 
   return (

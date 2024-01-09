@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { OnChange, Theme } from '@payloadcms/ui'
 import { useTheme, RadioGroupInput } from '@payloadcms/ui'
@@ -11,7 +11,7 @@ export const ToggleTheme: React.FC = () => {
     setTheme,
     theme,
   } = useTheme()
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   const onChange = useCallback<OnChange<Theme>>(
     (newTheme) => {
@@ -22,20 +22,20 @@ export const ToggleTheme: React.FC = () => {
 
   return (
     <RadioGroupInput
-      label={t('adminTheme')}
+      label={t('general:adminTheme')}
       name="theme"
       onChange={onChange}
       options={[
         {
-          label: t('automatic'),
+          label: t('general:automatic'),
           value: 'auto',
         },
         {
-          label: t('light'),
+          label: t('general:light'),
           value: 'light',
         },
         {
-          label: t('dark'),
+          label: t('general:dark'),
           value: 'dark',
         },
       ]}

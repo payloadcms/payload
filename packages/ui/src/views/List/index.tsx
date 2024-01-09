@@ -5,7 +5,7 @@ import type { DefaultListViewProps } from './types'
 import './index.scss'
 import { SelectionProvider } from './SelectionProvider'
 import { Gutter } from '../../elements/Gutter'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import Pill from '../../elements/Pill'
 import { ListControls } from '../../elements/ListControls'
 import { StaggeredShimmers } from '../../elements/ShimmerEffect'
@@ -55,6 +55,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
     newDocumentURL,
     resetParams,
     titleField,
+    i18n,
   } = props
 
   const textFieldsToBeSearched = getTextFieldsToBeSearched(listSearchableFields, fields)
@@ -78,6 +79,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
     cellProps: [],
     config,
     collectionConfig,
+    i18n,
     columns: initialColumns.map((column) => ({
       accessor: column,
       active: true,

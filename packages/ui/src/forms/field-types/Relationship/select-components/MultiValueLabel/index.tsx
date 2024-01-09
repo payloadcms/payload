@@ -1,7 +1,7 @@
 import type { MultiValueProps } from 'react-select'
 
 import React, { Fragment, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../../providers/Translation'
 import { components } from 'react-select'
 
 import type { Option } from '../../types'
@@ -31,7 +31,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
 
   const { permissions } = useAuth()
   const [showTooltip, setShowTooltip] = useState(false)
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
@@ -66,7 +66,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
           >
             <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-              {t('editLabel', { label: '' })}
+              {t('general:editLabel', { label: '' })}
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>

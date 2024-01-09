@@ -1,4 +1,3 @@
-export { default as errorHandler } from '../express/middleware/errorHandler'
 export { default as APIError } from './APIError'
 export { default as AuthenticationError } from './AuthenticationError'
 export { default as DuplicateCollection } from './DuplicateCollection'

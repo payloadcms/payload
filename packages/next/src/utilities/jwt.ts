@@ -1,10 +1,9 @@
 import { AuthStrategyFunctionArgs } from 'payload/auth'
-import { parseCookies } from './cookies'
 
 export const extractJWT = (
-  args: Pick<AuthStrategyFunctionArgs, 'headers' | 'payload'>,
+  args: Pick<AuthStrategyFunctionArgs, 'headers' | 'payload' | 'cookies'>,
 ): null | string => {
-  const { headers, payload } = args
+  const { headers, payload, cookies } = args
 
   const jwtFromHeader = headers.get('Authorization')
   const origin = headers.get('Origin')
@@ -18,7 +17,6 @@ export const extractJWT = (
     return jwtFromHeader.replace('Bearer ', '')
   }
 
-  const cookies = parseCookies(headers)
   const tokenCookieName = `${payload.config.cookiePrefix}-token`
   const cookieToken = cookies?.get(tokenCookieName)
 

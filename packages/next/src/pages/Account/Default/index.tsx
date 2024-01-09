@@ -34,6 +34,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
     onSave: onSaveFromProps,
     permissions,
     user,
+    i18n,
   } = props
 
   const { auth, fields } = collectionConfig
@@ -71,6 +72,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
             config={config}
             collectionConfig={collectionConfig}
             data={data}
+            i18n={i18n}
           />
           <DocumentControls
             apiURL={apiURL}
@@ -80,6 +82,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
             hasSavePermission={hasSavePermission}
             isAccountView
             permissions={permissions}
+            i18n={i18n}
           />
           <DocumentFields
             AfterFields={<Settings className={`${baseClass}__settings`} />}

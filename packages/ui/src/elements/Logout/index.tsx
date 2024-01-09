@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { LogOut } from '../../icons/LogOut'
 import { useConfig } from '../../providers/Config'
@@ -12,7 +12,7 @@ const DefaultLogout: React.FC<{
   tabIndex?: number
   Link: React.ComponentType
 }> = ({ tabIndex, Link }) => {
-  const { t } = useTranslation('authentication')
+  const { t } = useTranslation()
   const config = useConfig()
 
   const {
@@ -24,7 +24,7 @@ const DefaultLogout: React.FC<{
 
   return (
     <LinkElement
-      aria-label={t('logOut')}
+      aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
       tabIndex={tabIndex}
       // to={`${admin}${logoutRoute}`} // for `react-router-dom`

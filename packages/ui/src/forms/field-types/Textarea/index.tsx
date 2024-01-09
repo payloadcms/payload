@@ -1,17 +1,17 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-
+import { getTranslation } from '@payloadcms/translations'
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { useTranslation } from '../../../providers/Translation'
 import { useConfig } from '../../../providers/Config'
 import { useLocale } from '../../../providers/Locale'
 import useField from '../../useField'
 import { isFieldRTL } from '../shared'
 import TextareaInput from './Input'
-import './index.scss'
 import { Validate } from 'payload/types'
+
+import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
   const {

@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import type { TFunction } from 'i18next'
+import type { TFunction } from '@payloadcms/translations'
 
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { NonPresentationalField, SanitizedConfig } from 'payload/types'
+import type { NonPresentationalField, PayloadRequest, SanitizedConfig } from 'payload/types'
 import type { Data, Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'

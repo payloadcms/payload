@@ -1,7 +1,7 @@
 'use client'
 import qs from 'qs'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import { useForm, useFormModified } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
@@ -52,7 +52,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
     routes: { api },
     serverURL,
   } = useConfig()
-  const { t } = useTranslation('version')
+  const { t } = useTranslation()
 
   const hasNewerVersions = unpublishedVersions?.totalDocs > 0
   const canPublish = modified || hasNewerVersions || !publishedDoc
@@ -114,7 +114,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
         DefaultButton: DefaultPublishButton,
         canPublish: hasPublishPermission,
         disabled: !canPublish,
-        label: t('publishChanges'),
+        label: t('version:publishChanges'),
         publish,
       }}
     />

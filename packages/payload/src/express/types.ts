@@ -1,12 +1,12 @@
+import type { TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { Request } from 'express'
 import type { UploadedFile } from 'express-fileupload'
-import type { i18n as Ii18n, TFunction } from 'i18next'
 
+import type { PayloadT } from '..'
 import type { User } from '../auth/types'
 import type { Collection, TypeWithID } from '../collections/config/types'
 import type { FindOneArgs } from '../database/types'
-import type { Payload } from '../payload'
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {
@@ -39,14 +39,14 @@ export declare type PayloadRequest<U = any> = Request & {
     }
   }
   /** I18next instance */
-  i18n: Ii18n
+  i18n: any // this file will be removed
   /**
    * The requested locale if specified
    * Only available for localised collections
    */
   locale?: string
   /** The global payload object */
-  payload: Payload
+  payload: PayloadT
   /** What triggered this request */
   payloadAPI?: 'GraphQL' | 'REST' | 'local'
   /** Optimized document loader */

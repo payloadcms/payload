@@ -123,8 +123,8 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       req,
     })
 
-    if (!docWithLocales && !hasWherePolicy) throw new NotFound(t)
-    if (!docWithLocales && hasWherePolicy) throw new Forbidden(t)
+    if (!docWithLocales && !hasWherePolicy) throw new NotFound(req.t)
+    if (!docWithLocales && hasWherePolicy) throw new Forbidden(req.t)
 
     const originalDoc = await afterRead({
       collection: collectionConfig,
@@ -206,7 +206,7 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // /////////////////////////////////////
 
     // if (!collectionConfig.upload.disableLocalStorage) {
-    //   await uploadFiles(payload, filesToUpload, t)
+    //   await uploadFiles(payload, filesToUpload, req)
     // }
 
     // /////////////////////////////////////

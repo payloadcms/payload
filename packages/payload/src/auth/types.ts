@@ -90,6 +90,7 @@ type GenerateForgotPasswordEmailSubject = (args?: {
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
+  cookies?: Map<string, string>
   headers: Request['headers']
   isGraphQL?: boolean
   payload: PayloadT

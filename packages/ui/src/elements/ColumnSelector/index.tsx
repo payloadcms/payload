@@ -1,16 +1,17 @@
 'use client'
 import React, { useId } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Plus } from '../../icons/Plus'
 import { X } from '../../icons/X'
 import { useEditDepth } from '../../providers/EditDepth'
 import DraggableSortable from '../DraggableSortable'
 import Pill from '../Pill'
 import { useTableColumns } from '../TableColumns'
+import { useTranslation } from '../../providers/Translation'
+
 import './index.scss'
 
 const baseClass = 'column-selector'

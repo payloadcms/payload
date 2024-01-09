@@ -1,7 +1,7 @@
 import type { MultiValueRemoveProps } from 'react-select'
 
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { Option as OptionType } from '../types'
 
@@ -21,11 +21,11 @@ export const MultiValueRemove: React.FC<
   } = props
 
   const [showTooltip, setShowTooltip] = React.useState(false)
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   return (
     <button
-      aria-label={t('remove')}
+      aria-label={t('general:remove')}
       className={[baseClass, className].filter(Boolean).join(' ')}
       onClick={(e) => {
         setShowTooltip(false)
@@ -37,7 +37,7 @@ export const MultiValueRemove: React.FC<
       type="button"
     >
       <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-        {t('remove')}
+        {t('general:remove')}
       </Tooltip>
       <X className={`${baseClass}__icon`} />
     </button>

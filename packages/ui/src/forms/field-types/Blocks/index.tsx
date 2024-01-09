@@ -1,10 +1,10 @@
 'use client'
 import React, { Fragment, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { scrollToID } from '../../../utilities/scrollToID'
 import Banner from '../../../elements/Banner'
 import { Button } from '../../../elements/Button'
@@ -29,7 +29,7 @@ import './index.scss'
 const baseClass = 'blocks-field'
 
 const BlocksField: React.FC<Props> = (props) => {
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
 
   const {
     name,
@@ -59,8 +59,8 @@ const BlocksField: React.FC<Props> = (props) => {
   const submitted = useFormSubmitted()
 
   const labels = {
-    plural: t('blocks'),
-    singular: t('block'),
+    plural: t('fields:blocks'),
+    singular: t('fields:block'),
     ...labelsFromProps,
   }
 
@@ -198,7 +198,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(true)}
                   type="button"
                 >
-                  {t('collapseAll')}
+                  {t('fields:collapseAll')}
                 </button>
               </li>
               <li>
@@ -207,7 +207,7 @@ const BlocksField: React.FC<Props> = (props) => {
                   onClick={() => toggleCollapseAll(false)}
                   type="button"
                 >
-                  {t('showAll')}
+                  {t('fields:showAll')}
                 </button>
               </li>
             </ul>
@@ -292,7 +292,7 @@ const BlocksField: React.FC<Props> = (props) => {
               iconPosition="left"
               iconStyle="with-border"
             >
-              {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+              {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
             </Button>
           </DrawerToggler>
           <BlocksDrawer

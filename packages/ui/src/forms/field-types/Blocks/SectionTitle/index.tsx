@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../providers/Translation'
 
 import type { Props } from './types'
 
@@ -16,7 +16,7 @@ const SectionTitle: React.FC<Props> = (props) => {
   const { customOnChange, customValue, path, readOnly } = props
 
   const { setValue, value } = useField({ path })
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   const classes = [baseClass].filter(Boolean).join(' ')
 
@@ -35,7 +35,7 @@ const SectionTitle: React.FC<Props> = (props) => {
         id={path}
         name={path}
         onChange={onChange}
-        placeholder={t('untitled')}
+        placeholder={t('general:untitled')}
         readOnly={readOnly}
         type="text"
         value={customValue || (value as string) || ''}

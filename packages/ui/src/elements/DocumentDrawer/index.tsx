@@ -1,10 +1,10 @@
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
 import { useEditDepth } from '../../providers/EditDepth'
 import { Drawer, DrawerToggler } from '../Drawer'
@@ -34,7 +34,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   drawerSlug,
   ...rest
 }) => {
-  const { i18n, t } = useTranslation(['fields', 'general'])
+  const { i18n, t } = useTranslation()
   const [collectionConfig] = useRelatedCollections(collectionSlug)
 
   return (
