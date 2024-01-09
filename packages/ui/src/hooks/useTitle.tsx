@@ -1,10 +1,10 @@
 'use client'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig, ClientConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import { useFormFields } from '../forms/Form/context'
 import { formatDocTitle } from '../utilities/formatDocTitle'
 import { useTranslation } from 'react-i18next'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 
 const useTitle = (args: {
   useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']

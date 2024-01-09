@@ -39,7 +39,7 @@ export const Document = async ({
   const id = (collectionSlug && !isCreating && params.segments[0]) || undefined
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
-  const { config, payload, permissions, user, collectionConfig, globalConfig, locale } =
+  const { config, payload, permissions, user, collectionConfig, globalConfig, locale, i18n } =
     await initPage({
       configPromise,
       redirectUnauthenticatedUser: true,
@@ -190,6 +190,7 @@ export const Document = async ({
     locale,
     params,
     searchParams,
+    i18n,
   }
 
   return (

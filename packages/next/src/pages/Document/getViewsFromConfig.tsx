@@ -35,6 +35,10 @@ export const getViewsFromConfig = async ({
     (globalConfig && globalConfig?.admin?.livePreview) ||
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
 
+  console.log('getViewsFromConfig', {
+    routeSegments,
+  })
+
   if (collectionConfig) {
     // `../:id`, or `../create`
     if (routeSegments?.length === 1) {
@@ -158,8 +162,12 @@ export const getViewsFromConfig = async ({
         }
 
         default: {
-          const path = `/${routeSegments[1]}`
-          CustomView = getCustomViewByPath(views, path)
+          if (docPermissions?.read?.permission) {
+            CustomView = getCustomViewByKey(views, 'Default')
+            DefaultView = lazy(() =>
+              import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
+            )
+          }
           break
         }
       }
