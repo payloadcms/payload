@@ -9,18 +9,19 @@ const getParents = async (
   doc: Record<string, unknown>,
   docs: Array<Record<string, unknown>> = [],
 ): Promise<Array<Record<string, unknown>>> => {
-  const parent = doc[pluginConfig?.parentFieldSlug || 'parent']
+  const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
+  const parent = doc[parentSlug]
   let retrievedParent
 
   if (parent) {
     // If not auto-populated, and we have an ID
     if (typeof parent === 'string' || typeof parent === 'number') {
       retrievedParent = await req.payload.findByID({
-        req,
         id: parent,
         collection: collection.slug,
         depth: 0,
         disableErrors: true,
+        req,
       })
     }
 
@@ -30,7 +31,7 @@ const getParents = async (
     }
 
     if (retrievedParent) {
-      if (retrievedParent.parent) {
+      if (retrievedParent[parentSlug]) {
         return getParents(req, pluginConfig, collection, retrievedParent, [
           retrievedParent,
           ...docs,

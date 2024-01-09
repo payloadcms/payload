@@ -107,7 +107,7 @@ export function mongooseAdapter({
     extendViteConfig(payload.config)
 
     if (transactionOptions === false) {
-      beginTransactionFunction = undefined
+      beginTransactionFunction = () => null
     }
 
     return createDatabaseAdapter<MongooseAdapter>({
