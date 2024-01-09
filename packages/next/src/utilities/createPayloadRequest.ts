@@ -101,6 +101,7 @@ export const createPayloadRequest = async ({
   const i18n = getNextI18n({
     config,
     language,
+    translationContext: 'api',
   })
 
   const customRequest: CustomPayloadRequest = {
