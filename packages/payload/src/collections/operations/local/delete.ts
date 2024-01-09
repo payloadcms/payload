@@ -5,6 +5,7 @@ import type { Document, Where } from '../../../types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
 import { deleteOperation } from '../delete'
@@ -80,15 +81,15 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
+  const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
+
   const req = {
     fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    i18n: {
-      fallbackLanguage: incomingReq?.i18n.fallbackLanguage || payload.config.i18n.fallbackLanguage,
-      language: incomingReq?.i18n.fallbackLanguage || payload.config.i18n.fallbackLanguage,
-    },
+    i18n,
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    t: i18n.t,
     transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
