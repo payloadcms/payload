@@ -37,6 +37,7 @@ const serverTranslationKeys = [
   'error:unableToUpdateCount',
   'error:unauthorized',
   'error:userLocked',
+  'error:valueMustBeUnique',
 
   'upload:width',
   'upload:height',
