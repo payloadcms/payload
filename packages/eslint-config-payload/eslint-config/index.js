@@ -42,6 +42,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-return': 'off',
     // This rule doesn't work well in .tsx files
     '@typescript-eslint/no-misused-promises': 'off',
+    '@typescript-eslint/prefer-ts-expect-error': 'warn',
     // Type-aware any rules end
     '@typescript-eslint/no-use-before-define': 'off',
     'arrow-body-style': 0,
