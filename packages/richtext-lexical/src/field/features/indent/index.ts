@@ -27,7 +27,7 @@ export const IndentFeature = (): FeatureProvider => {
                     if (
                       ('__indent' in node && (node.__indent as number) > 0) ||
                       (node.getParent() &&
-                        'indent' in node.getParent() &&
+                        '__indent' in node.getParent() &&
                         node.getParent().__indent > 0)
                     ) {
                       return true
