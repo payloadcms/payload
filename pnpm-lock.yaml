@@ -926,8 +926,8 @@ importers:
         specifier: 2.6.4
         version: 2.6.4
       '@types/nodemailer':
-        specifier: 6.4.8
-        version: 6.4.8
+        specifier: 6.4.14
+        version: 6.4.14
       '@types/passport':
         specifier: 1.0.12
         version: 1.0.12
@@ -1080,8 +1080,8 @@ importers:
         specifier: ^29.5.1
         version: 29.5.4
       '@types/nodemailer':
-        specifier: ^6.4.7
-        version: 6.4.8
+        specifier: 6.4.14
+        version: 6.4.14
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -6045,10 +6045,10 @@ packages:
   /@types/node@20.6.2:
     resolution: {integrity: sha512-Y+/1vGBHV/cYk6OI1Na/LHzwnlNCAfU3ZNGrc1LdRe/LAIbdDPTTv/HU3M7yXN448aTVDq3eKRm2cg7iKLb8gw==}
 
-  /@types/nodemailer@6.4.8:
-    resolution: {integrity: sha512-oVsJSCkqViCn8/pEu2hfjwVO+Gb3e+eTWjg3PcjeFKRItfKpKwHphQqbYmPQrlMk+op7pNNWPbsJIEthpFN/OQ==}
+  /@types/nodemailer@6.4.14:
+    resolution: {integrity: sha512-fUWthHO9k9DSdPCSPRqcu6TWhYyxTBg382vlNIttSe9M7XfsT06y0f24KHXtbnijPGGRIcVvdKHTNikOI6qiHA==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.58
     dev: true
 
   /@types/normalize-package-data@2.4.1:
