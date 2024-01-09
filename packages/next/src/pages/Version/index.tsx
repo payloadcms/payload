@@ -7,7 +7,7 @@ import { CollectionPermission, GlobalPermission } from 'payload/auth'
 import { notFound } from 'next/navigation'
 
 export const VersionView: React.FC<EditViewProps> = async (props) => {
-  const { config, permissions, payload, user, params } = props
+  const { config, permissions, payload, user, params, i18n } = props
 
   const versionID = params.segments[2]
 
@@ -146,6 +146,7 @@ export const VersionView: React.FC<EditViewProps> = async (props) => {
       versionID={versionID}
       docPermissions={docPermissions}
       locale="" // TODO
+      i18n={i18n}
     />
   )
 }

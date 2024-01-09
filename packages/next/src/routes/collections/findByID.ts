@@ -15,15 +15,26 @@ export const findByID = async ({
   const { searchParams } = new URL(req.url)
   const depth = searchParams.get('depth')
 
-  const result = await findByIDOperation({
-    id,
-    collection: req.collection,
-    depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: searchParams.get('draft') === 'true',
-    req,
-  })
+  try {
+    const result = await findByIDOperation({
+      id,
+      collection: req.collection,
+      depth: isNumber(depth) ? Number(depth) : undefined,
+      draft: searchParams.get('draft') === 'true',
+      req,
+    })
 
-  return Response.json(result, {
-    status: httpStatus.OK,
-  })
+    return Response.json(result, {
+      status: httpStatus.OK,
+    })
+  } catch (error) {
+    return Response.json(
+      {
+        message: req.t('error:notFound'),
+      },
+      {
+        status: httpStatus.NOT_FOUND,
+      },
+    )
+  }
 }

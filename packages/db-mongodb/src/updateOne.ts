@@ -2,7 +2,6 @@ import type { UpdateOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
 import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
 
 import type { MongooseAdapter } from '.'
 
@@ -40,7 +39,7 @@ export const updateOne: UpdateOne = async function updateOne(
               message: 'Value must be unique',
             },
           ],
-          req?.t ?? i18nInit(this.payload.config.i18n).t,
+          req.t,
         )
       : error
   }

@@ -1,14 +1,14 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { toast } from 'react-toastify'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 // import { requests } from '../../../api'
-import { Minimal as MinimalTemplate } from '../../templates/Minimal'
+import { MinimalTemplate } from '../../templates/Minimal'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
 import { SelectAllStatus, useSelection } from '../../views/List/SelectionProvider'
@@ -27,7 +27,7 @@ const PublishMany: React.FC<Props> = (props) => {
   } = useConfig()
   const { permissions } = useAuth()
   const { toggleModal } = useModal()
-  const { i18n, t } = useTranslation('version')
+  const { i18n, t } = useTranslation()
   const { count, getQueryParams, selectAll } = useSelection()
   const [submitted, setSubmitted] = useState(false)
 
@@ -102,12 +102,12 @@ const PublishMany: React.FC<Props> = (props) => {
           toggleModal(modalSlug)
         }}
       >
-        {t('publish')}
+        {t('version:publish')}
       </Pill>
       <Modal className={baseClass} slug={modalSlug}>
         <MinimalTemplate className={`${baseClass}__template`}>
-          <h1>{t('confirmPublish')}</h1>
-          <p>{t('aboutToPublishSelection', { label: getTranslation(plural, i18n) })}</p>
+          <h1>{t('version:confirmPublish')}</h1>
+          <p>{t('version:aboutToPublishSelection', { label: getTranslation(plural, i18n) })}</p>
           <Button
             buttonStyle="secondary"
             id="confirm-cancel"
@@ -117,7 +117,7 @@ const PublishMany: React.FC<Props> = (props) => {
             {t('general:cancel')}
           </Button>
           <Button id="confirm-publish" onClick={submitted ? undefined : handlePublish}>
-            {submitted ? t('publishing') : t('general:confirm')}
+            {submitted ? t('version:publishing') : t('general:confirm')}
           </Button>
         </MinimalTemplate>
       </Modal>

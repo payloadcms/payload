@@ -1,10 +1,10 @@
 'use client'
-import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 
+import React, { useCallback } from 'react'
+import { getTranslation } from '@payloadcms/translations'
 import type { SanitizedConfig, Validate } from 'payload/types'
 
-import { getTranslation } from 'payload/utilities'
+import { useTranslation } from '../../../providers/Translation'
 import { isFieldRTL } from '../shared'
 import './index.scss'
 import useField from '../../useField'

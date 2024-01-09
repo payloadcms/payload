@@ -57,7 +57,6 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     req: {
       payload: { config },
       payload,
-      t,
     },
     req,
     showHiddenFields,
@@ -101,15 +100,15 @@ export const deleteByIDOperation = async <TSlug extends keyof GeneratedTypes['co
       where: combineQueries({ id: { equals: id } }, accessResults),
     })
 
-    if (!docToDelete && !hasWhereAccess) throw new NotFound(t)
-    if (!docToDelete && hasWhereAccess) throw new Forbidden(t)
+    if (!docToDelete && !hasWhereAccess) throw new NotFound(req.t)
+    if (!docToDelete && hasWhereAccess) throw new Forbidden(req.t)
 
     await deleteAssociatedFiles({
       collectionConfig,
       config,
       doc: docToDelete,
       overrideDelete: true,
-      t,
+      req,
     })
 
     // /////////////////////////////////////

@@ -209,7 +209,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     // /////////////////////////////////////
 
     if (!collectionConfig.upload.disableLocalStorage) {
-      // await uploadFiles(payload, filesToUpload, req.t) // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
+      // await uploadFiles(payload, filesToUpload, req) // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
     }
 
     // /////////////////////////////////////

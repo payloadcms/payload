@@ -16,7 +16,7 @@ import { notFound } from 'next/navigation'
 const baseClass = 'versions'
 
 export const VersionsView: React.FC<EditViewProps> = async (props) => {
-  const { config, searchParams, payload, user } = props
+  const { config, searchParams, payload, user, i18n } = props
 
   const id = 'id' in props ? props.id : undefined
   const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
@@ -132,6 +132,7 @@ export const VersionsView: React.FC<EditViewProps> = async (props) => {
                   collectionConfig,
                   globalConfig,
                   docID: id,
+                  i18n,
                 })}
                 data={versionsData?.docs}
               />

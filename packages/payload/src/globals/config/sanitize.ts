@@ -1,3 +1,5 @@
+import { translations } from '@payloadcms/translations/api'
+
 import type { Config } from '../../config/types'
 import type { SanitizedGlobalConfig } from './types'
 
@@ -5,7 +7,6 @@ import defaultAccess from '../../auth/defaultAccess'
 import { sanitizeFields } from '../../fields/config/sanitize'
 import { fieldAffectsData } from '../../fields/config/types'
 import mergeBaseFields from '../../fields/mergeBaseFields'
-import translations from '../../translations'
 import { toWords } from '../../utilities/formatLabels'
 import baseVersionFields from '../../versions/baseFields'
 

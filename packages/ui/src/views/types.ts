@@ -6,6 +6,7 @@ import type {
   SanitizedGlobalConfig,
   PayloadT,
 } from 'payload/types'
+import type { I18n } from '@payloadcms/translations'
 import type { Fields } from '../forms/Form/types'
 import { FieldTypes } from '../exports'
 
@@ -45,4 +46,5 @@ export type EditViewProps = (
     global?: string
   }
   searchParams: { [key: string]: string | string[] | undefined }
+  i18n: I18n
 }

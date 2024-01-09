@@ -36,7 +36,7 @@ export const restoreVersionOperation = async <T extends TypeWithID = any>(
     depth,
     overrideAccess = false,
     req,
-    req: { locale, payload, t },
+    req: { locale, payload },
     showHiddenFields,
   } = args
 
@@ -62,7 +62,7 @@ export const restoreVersionOperation = async <T extends TypeWithID = any>(
     const [rawVersion] = versionDocs
 
     if (!rawVersion) {
-      throw new NotFound(t)
+      throw new NotFound(req.t)
     }
 
     const parentDocID = rawVersion.parent
@@ -89,8 +89,8 @@ export const restoreVersionOperation = async <T extends TypeWithID = any>(
 
     const doc = await req.payload.db.findOne(findOneArgs)
 
-    if (!doc && !hasWherePolicy) throw new NotFound(t)
-    if (!doc && hasWherePolicy) throw new Forbidden(t)
+    if (!doc && !hasWherePolicy) throw new NotFound(req.t)
+    if (!doc && hasWherePolicy) throw new Forbidden(req.t)
 
     // /////////////////////////////////////
     // fetch previousDoc

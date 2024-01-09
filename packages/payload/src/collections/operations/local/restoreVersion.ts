@@ -3,7 +3,7 @@ import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'
-import { i18nInit } from '../../../translations/init'
+import { getLocalI18n } from '../../../translations/getLocalI18n'
 import { setRequestContext } from '../../../utilities/setRequestContext'
 import { getDataLoader } from '../../dataloader'
 import { restoreVersionOperation } from '../restoreVersion'
@@ -52,7 +52,8 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     )
   }
 
-  const i18n = i18nInit(payload.config.i18n)
+  const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
+
   const req = {
     fallbackLocale,
     i18n,

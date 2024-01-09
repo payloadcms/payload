@@ -1,10 +1,10 @@
 'use client'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import './index.scss'
 
 const baseClass = 'radio-input'

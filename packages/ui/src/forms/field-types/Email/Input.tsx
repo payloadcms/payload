@@ -1,11 +1,12 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
+import { getTranslation } from '@payloadcms/translations'
 
 import useField from '../../useField'
-import './index.scss'
-import { getTranslation } from 'payload/utilities'
+import { useTranslation } from '../../../providers/Translation'
 import { Validate } from 'payload/types'
+
+import './index.scss'
 
 export const EmailInput: React.FC<{
   name: string

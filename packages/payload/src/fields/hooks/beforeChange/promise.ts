@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import merge from 'deepmerge'
 
 import type { SanitizedCollectionConfig } from '../../../collections/config/types'

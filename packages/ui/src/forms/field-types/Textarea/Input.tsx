@@ -1,12 +1,12 @@
 import type { ChangeEvent } from 'react'
 
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { TextareaField } from 'payload/types'
 import type { Description } from '../../FieldDescription/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'

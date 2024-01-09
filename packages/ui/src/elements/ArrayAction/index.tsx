@@ -1,5 +1,4 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
@@ -10,6 +9,8 @@ import { Plus } from '../../icons/Plus'
 import { X } from '../../icons/X'
 import Popup from '../Popup'
 import * as PopupList from '../Popup/PopupButtonList'
+import { useTranslation } from '../../providers/Translation'
+
 import './index.scss'
 
 const baseClass = 'array-actions'
@@ -23,7 +24,8 @@ export const ArrayAction: React.FC<Props> = ({
   removeRow,
   rowCount,
 }) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
+
   return (
     <Popup
       button={<MoreIcon />}
@@ -44,7 +46,7 @@ export const ArrayAction: React.FC<Props> = ({
                 <div className={`${baseClass}__action-chevron`}>
                   <Chevron direction="up" />
                 </div>
-                {t('moveUp')}
+                {t('general:moveUp')}
               </PopupList.Button>
             )}
             {index < rowCount - 1 && (
@@ -58,7 +60,7 @@ export const ArrayAction: React.FC<Props> = ({
                 <div className={`${baseClass}__action-chevron`}>
                   <Chevron />
                 </div>
-                {t('moveDown')}
+                {t('general:moveDown')}
               </PopupList.Button>
             )}
             {!hasMaxRows && (
@@ -71,7 +73,7 @@ export const ArrayAction: React.FC<Props> = ({
                   }}
                 >
                   <Plus />
-                  {t('addBelow')}
+                  {t('general:addBelow')}
                 </PopupList.Button>
                 <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__duplicate`}
@@ -81,7 +83,7 @@ export const ArrayAction: React.FC<Props> = ({
                   }}
                 >
                   <Copy />
-                  {t('duplicate')}
+                  {t('general:duplicate')}
                 </PopupList.Button>
               </React.Fragment>
             )}
@@ -93,7 +95,7 @@ export const ArrayAction: React.FC<Props> = ({
               }}
             >
               <X />
-              {t('remove')}
+              {t('general:remove')}
             </PopupList.Button>
           </PopupList.ButtonGroup>
         )

@@ -29,7 +29,7 @@ import vi from './vi.json'
 import zh from './zh.json'
 import zhTw from './zh-tw.json'
 
-export default {
+export const translations = {
   ar,
   az,
   bg,

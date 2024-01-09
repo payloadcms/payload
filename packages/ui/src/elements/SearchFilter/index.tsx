@@ -1,11 +1,11 @@
 import queryString from 'qs'
 import React, { useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import useDebounce from '../../hooks/useDebounce'
 import { Search } from '../../icons/Search'
 import { useSearchParams } from '../../providers/SearchParams'
@@ -24,12 +24,12 @@ const SearchFilter: React.FC<Props> = (props) => {
 
   const params = useSearchParams()
   const history = useHistory()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const [search, setSearch] = useState(typeof params?.search === 'string' ? params?.search : '')
   const [previousSearch, setPreviousSearch] = useState('')
 
-  const placeholder = useRef(t('searchBy', { label: getTranslation(fieldLabel, i18n) }))
+  const placeholder = useRef(t('general:searchBy', { label: getTranslation(fieldLabel, i18n) }))
 
   const debouncedSearch = useDebounce(search, 300)
 
@@ -64,15 +64,17 @@ const SearchFilter: React.FC<Props> = (props) => {
     if (listSearchableFields?.length > 0) {
       placeholder.current = listSearchableFields.reduce<string>((prev, curr, i) => {
         if (i === 0) {
-          return `${t('searchBy', { label: getTranslation(curr.label || curr.name, i18n) })}`
+          return `${t('general:searchBy', {
+            label: getTranslation(curr.label || curr.name, i18n),
+          })}`
         }
         if (i === listSearchableFields.length - 1) {
-          return `${prev} ${t('or')} ${getTranslation(curr.label || curr.name, i18n)}`
+          return `${prev} ${t('general:or')} ${getTranslation(curr.label || curr.name, i18n)}`
         }
         return `${prev}, ${getTranslation(curr.label || curr.name, i18n)}`
       }, '')
     } else {
-      placeholder.current = t('searchBy', { label: getTranslation(fieldLabel, i18n) })
+      placeholder.current = t('general:searchBy', { label: getTranslation(fieldLabel, i18n) })
     }
   }, [t, listSearchableFields, i18n, fieldLabel])
 

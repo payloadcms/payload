@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { FieldTypes } from '..'
 import type { SanitizedCollectionConfig } from 'payload/types'
@@ -9,7 +9,7 @@ import type { ListDrawerProps } from '../../../elements/ListDrawer/types'
 import type { Description } from '../../FieldDescription/types'
 import type { FilterOptionsResult } from '../Relationship/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Button } from '../../../elements/Button'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer'
 import FileDetails from '../../../elements/FileDetails'
@@ -68,7 +68,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     width,
   } = props
 
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
 
   const ErrorComp = Error || DefaultError
   const LabelComp = Label || DefaultLabel
@@ -178,14 +178,14 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
               <div className={`${baseClass}__buttons`}>
                 <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
                   <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                    {t('uploadNewLabel', {
+                    {t('fields:uploadNewLabel', {
                       label: getTranslation(collection.labels.singular, i18n),
                     })}
                   </Button>
                 </DocumentDrawerToggler>
                 <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
                   <Button buttonStyle="secondary" disabled={readOnly} el="div">
-                    {t('chooseFromExisting')}
+                    {t('fields:chooseFromExisting')}
                   </Button>
                 </ListDrawerToggler>
               </div>

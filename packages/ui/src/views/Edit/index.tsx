@@ -17,6 +17,8 @@ import './index.scss'
 import { EditViewProps } from '../types'
 import { fieldTypes } from '../../exports'
 
+import './index.scss'
+
 const baseClass = 'collection-edit'
 
 export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
@@ -31,6 +33,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     // onSave: onSaveFromProps,
     docPermissions,
     user,
+    i18n,
   } = props
 
   const collectionConfig = 'collectionConfig' in props ? props.collectionConfig : undefined
@@ -139,6 +142,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             id={id}
             isEditing={isEditing}
             permissions={docPermissions}
+            i18n={i18n}
           />
           <DocumentFields
             BeforeFields={

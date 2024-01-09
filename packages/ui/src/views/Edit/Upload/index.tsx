@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
@@ -32,7 +32,7 @@ const validate = (value) => {
 }
 
 export const UploadActions = ({ canEdit, showSizePreviews }) => {
-  const { t } = useTranslation('upload')
+  const { t } = useTranslation()
   return (
     <div className={`${baseClass}__file-mutation`}>
       {showSizePreviews && (
@@ -54,7 +54,7 @@ export const Upload: React.FC<Props> = (props) => {
   const { collection, internalState, onChange, updatedAt } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
-  const { t } = useTranslation(['upload', 'general'])
+  const { t } = useTranslation()
   const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({

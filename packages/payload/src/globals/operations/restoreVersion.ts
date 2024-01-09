@@ -27,7 +27,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     depth,
     globalConfig,
     overrideAccess,
-    req: { payload, t },
+    req: { payload },
     req,
     showHiddenFields,
   } = args
@@ -55,7 +55,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     })
 
     if (!versionDocs || versionDocs.length === 0) {
-      throw new NotFound(t)
+      throw new NotFound(req.t)
     }
 
     const rawVersion = versionDocs[0]

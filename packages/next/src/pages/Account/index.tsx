@@ -19,7 +19,7 @@ export const Account = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user } = await initPage({
+  const { config, payload, permissions, user, i18n } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: true,
   })
@@ -89,7 +89,7 @@ export const Account = async ({
       locale,
       operation: 'update',
       preferences,
-      // t,
+      t: i18n.t,
       user,
     })
 
@@ -107,6 +107,7 @@ export const Account = async ({
       user,
       updatedAt: '', // TODO
       id: user?.id,
+      i18n,
     }
 
     return (

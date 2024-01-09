@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useMemo, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { FieldType, Options } from './types'
 

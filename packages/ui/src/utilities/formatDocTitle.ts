@@ -1,15 +1,16 @@
 import { SanitizedCollectionConfig } from 'payload/types'
 import { FormField } from '../forms/Form/types'
 import { getObjectDotNotation } from 'payload/utilities'
+
+import type { I18n } from '@payloadcms/translations'
 import { formatDate } from './formatDate'
-import i18next from 'i18next'
 
 export const formatDocTitle = (args: {
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
   doc?: Record<string, any>
   field?: FormField
   dateFormat?: any
-  i18n: typeof i18next
+  i18n: I18n
   isDate?: boolean
 }): string => {
   const { useAsTitle, dateFormat, doc, field: fieldFromProps, i18n, isDate } = args

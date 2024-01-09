@@ -40,6 +40,8 @@
     "sass": "^1.69.5"
   },
   "dependencies": {
+    "@payloadcms/translations": "workspace:^",
+    "deepmerge": "^4.3.1",
     "@faceless-ui/modal": "2.0.1",
     "jsonwebtoken": "9.0.1",
     "path-to-regexp": "^6.2.1",

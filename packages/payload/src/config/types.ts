@@ -1,7 +1,7 @@
+import type { I18nOptions } from '@payloadcms/translations'
 import type { Express } from 'express'
 import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
 import type GraphQL from 'graphql'
-import type { InitOptions as i18nInitOptions } from 'i18next'
 import type { Transporter } from 'nodemailer'
 import type SMTPConnection from 'nodemailer/lib/smtp-connection'
 import type { DestinationStream, LoggerOptions } from 'pino'
@@ -616,20 +616,8 @@ export type Config = {
   hooks?: {
     afterError?: AfterErrorHook
   }
-  /**
-   * Control the behaviour of the admin internationalisation.
-   *
-   * See i18next options.
-   *
-   * @default
-   * {
-   *   fallbackLng: 'en',
-   *   debug: false,
-   *   supportedLngs: Object.keys(translations),
-   *   resources: translations,
-   * }
-   */
-  i18n?: i18nInitOptions
+  /** i18n config settings */
+  i18n?: I18nOptions
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**

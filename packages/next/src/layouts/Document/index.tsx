@@ -21,7 +21,7 @@ export const DocumentLayout = async ({
   collectionSlug?: string
   globalSlug?: string
 }) => {
-  const { config, collectionConfig, globalConfig } = await initPage({
+  const { config, collectionConfig, globalConfig, i18n } = await initPage({
     configPromise,
     collectionSlug,
     globalSlug,
@@ -30,6 +30,7 @@ export const DocumentLayout = async ({
   return (
     <Fragment>
       <DocumentHeader
+        i18n={i18n}
         config={config}
         collectionConfig={collectionConfig}
         globalConfig={globalConfig}

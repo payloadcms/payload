@@ -1,7 +1,6 @@
 import httpStatus from 'http-status'
 
 import type { PayloadRequest } from 'payload/types'
-
 import { isNumber } from 'payload/utilities'
 import { deleteByIDOperation } from 'payload/operations'
 
@@ -35,8 +34,8 @@ export const deleteByID = async ({
 
   return Response.json(
     {
-      ...doc,
-      // ...formatSuccessResponse(req.t('general:successfullyDeleted'), 'message'),
+      doc,
+      message: req.t('general:deletedSuccessfully'),
     },
     {
       status: httpStatus.OK,

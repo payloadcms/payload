@@ -1,11 +1,11 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import Form from '../../forms/Form'
 import { useForm } from '../../forms/Form/context'
 import RenderFields from '../../forms/RenderFields'
@@ -24,7 +24,7 @@ const baseClass = 'edit-many'
 
 const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
 
   const save = useCallback(() => {
     submit({
@@ -36,13 +36,13 @@ const Submit: React.FC<{ action: string; disabled: boolean }> = ({ action, disab
 
   return (
     <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
-      {t('save')}
+      {t('general:save')}
     </FormSubmit>
   )
 }
 const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
-  const { t } = useTranslation('version')
+  const { t } = useTranslation()
 
   const save = useCallback(() => {
     submit({
@@ -57,13 +57,13 @@ const Publish: React.FC<{ action: string; disabled: boolean }> = ({ action, disa
 
   return (
     <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
-      {t('publishChanges')}
+      {t('version:publishChanges')}
     </FormSubmit>
   )
 }
 const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
   const { submit } = useForm()
-  const { t } = useTranslation('version')
+  const { t } = useTranslation()
 
   const save = useCallback(() => {
     submit({
@@ -78,7 +78,7 @@ const SaveDraft: React.FC<{ action: string; disabled: boolean }> = ({ action, di
 
   return (
     <FormSubmit className={`${baseClass}__draft`} disabled={disabled} onClick={save}>
-      {t('saveDraft')}
+      {t('version:saveDraft')}
     </FormSubmit>
   )
 }
@@ -92,7 +92,7 @@ const EditMany: React.FC<Props> = (props) => {
     serverURL,
   } = useConfig()
   const { count, getQueryParams, selectAll } = useSelection()
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const [selected, setSelected] = useState([])
 
   const collectionPermissions = permissions?.collections?.[slug]
@@ -111,14 +111,14 @@ const EditMany: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <DrawerToggler
-        aria-label={t('edit')}
+        aria-label={t('general:edit')}
         className={`${baseClass}__toggle`}
         onClick={() => {
           setSelected([])
         }}
         slug={drawerSlug}
       >
-        {t('edit')}
+        {t('general:edit')}
       </DrawerToggler>
       <Drawer header={null} slug={drawerSlug}>
         <OperationContext.Provider value="update">
@@ -126,10 +126,10 @@ const EditMany: React.FC<Props> = (props) => {
             <div className={`${baseClass}__main`}>
               <div className={`${baseClass}__header`}>
                 <h2 className={`${baseClass}__header__title`}>
-                  {t('editingLabel', { count, label: getTranslation(plural, i18n) })}
+                  {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
                 </h2>
                 <button
-                  aria-label={t('close')}
+                  aria-label={t('general:close')}
                   className={`${baseClass}__header__close`}
                   id={`close-drawer__${drawerSlug}`}
                   onClick={() => closeModal(drawerSlug)}

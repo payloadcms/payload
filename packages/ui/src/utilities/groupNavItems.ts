@@ -1,10 +1,9 @@
-import type { i18n as Ii18n } from 'i18next'
-
 import type { Permissions } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { SanitizedGlobalConfig } from 'payload/types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 
 export enum EntityType {
   collection = 'collections',
@@ -29,7 +28,7 @@ export type Group = {
 export function groupNavItems(
   entities: EntityToGroup[],
   permissions: Permissions,
-  i18n: Ii18n,
+  i18n: I18n,
 ): Group[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
@@ -50,10 +49,9 @@ export function groupNavItems(
 
           matchedGroup.entities.push(entityToGroup)
         } else {
-          const defaultGroup = groups.find(
-            (group) =>
-              getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`),
-          ) as Group
+          const defaultGroup = groups.find((group) => {
+            return getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`)
+          }) as Group
           defaultGroup.entities.push(entityToGroup)
         }
       }

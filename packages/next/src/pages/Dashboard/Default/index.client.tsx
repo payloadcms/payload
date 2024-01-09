@@ -1,6 +1,5 @@
 'use client'
 import React, { Fragment, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { EntityToGroup, Group } from '@payloadcms/ui'
 import {
@@ -11,9 +10,10 @@ import {
   useAuth,
   useConfig,
   useActions,
+  useTranslation,
 } from '@payloadcms/ui'
+import { getTranslation } from '@payloadcms/translations'
 
-import { getTranslation } from 'payload/utilities'
 import './index.scss'
 
 const baseClass = 'dashboard'
@@ -37,7 +37,7 @@ export const DefaultDashboardClient: React.FC<{
 
   const { permissions, user } = useAuth()
 
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
 
   const [groups, setGroups] = useState<Group[]>([])
 
@@ -84,7 +84,7 @@ export const DefaultDashboardClient: React.FC<{
         i18n,
       ),
     )
-  }, [collectionsConfig, globalsConfig, i18n, permissions, user])
+  }, [collectionsConfig, globalsConfig, permissions, user])
 
   return (
     <Fragment>

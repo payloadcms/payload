@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 
 import useHotkey from '../../hooks/useHotkey'
 import { useForm, useFormModified } from '../../forms/Form/context'
@@ -71,7 +71,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   const { id, collection, global } = useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
-  const { t } = useTranslation('version')
+  const { t } = useTranslation()
 
   const canSaveDraft = modified
 
@@ -106,7 +106,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
       componentProps={{
         DefaultButton: DefaultSaveDraftButton,
         disabled: !canSaveDraft,
-        label: t('saveDraft'),
+        label: t('version:saveDraft'),
         saveDraft,
       }}
     />

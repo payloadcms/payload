@@ -16,7 +16,7 @@ import { RenderJSON } from './RenderJSON'
 const baseClass = 'query-inspector'
 
 export const APIView: React.FC<EditViewProps> = async (props) => {
-  const { config, searchParams, locale, data } = props
+  const { config, searchParams, locale, data, i18n } = props
 
   const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
   const globalConfig = 'globalConfig' in props && props?.globalConfig
@@ -110,8 +110,13 @@ export const APIView: React.FC<EditViewProps> = async (props) => {
         >
           <div className={`${baseClass}__form-fields`}>
             <div className={`${baseClass}__filter-query-checkboxes`}>
-              {draftsEnabled && <Checkbox name="draft" path="draft" label="Draft" />}
-              <Checkbox name="authenticated" path="authenticated" label="Authenticated" />
+              {draftsEnabled && <Checkbox i18n={i18n} name="draft" path="draft" label="Draft" />}
+              <Checkbox
+                i18n={i18n}
+                name="authenticated"
+                path="authenticated"
+                label="Authenticated"
+              />
             </div>
             {localeOptions && (
               <Select label="Locale" name="locale" options={localeOptions} path="locale" />

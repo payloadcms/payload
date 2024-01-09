@@ -30,8 +30,7 @@ export const tabs: Record<
     href: '',
     // isActive: ({ href, location }) =>
     // location.pathname === href || location.pathname === `${href}/create`,
-    label: 'Edit',
-    // label: ({ t }) => t('edit'),
+    label: ({ t }) => t('general:edit'),
     order: 0,
   },
   LivePreview: {
@@ -53,8 +52,7 @@ export const tabs: Record<
       return false
     },
     href: '/preview',
-    label: 'Live Preview',
-    // label: ({ t }) => t('livePreview'),
+    label: ({ t }) => t('general:livePreview'),
     order: 100,
   },
   References: {
@@ -70,8 +68,7 @@ export const tabs: Record<
     condition: ({ collectionConfig, globalConfig }) =>
       Boolean(collectionConfig?.versions || globalConfig?.versions),
     href: '/versions',
-    label: 'Versions',
-    // label: ({ t }) => t('version:versions'),
+    label: ({ t }) => t('version:versions'),
     order: 200,
     pillLabel: ({ versions }) =>
       typeof versions?.totalDocs === 'number' && versions?.totalDocs > 0

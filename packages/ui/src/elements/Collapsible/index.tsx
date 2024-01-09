@@ -1,14 +1,15 @@
 'use client'
 import React, { useState } from 'react'
 import AnimateHeight from 'react-animate-height'
-import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
 import { Chevron } from '../../icons/Chevron'
 import { DragHandle } from '../../icons/DragHandle'
-import './index.scss'
+import { useTranslation } from '../../providers/Translation'
 import { CollapsibleProvider, useCollapsible } from './provider'
+
+import './index.scss'
 
 const baseClass = 'collapsible'
 
@@ -26,7 +27,7 @@ export const Collapsible: React.FC<Props> = ({
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed))
   const [hoveringToggle, setHoveringToggle] = useState(false)
   const isNested = useCollapsible()
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
 
   const collapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal
 
@@ -72,7 +73,7 @@ export const Collapsible: React.FC<Props> = ({
             }}
             type="button"
           >
-            <span>{t('toggleBlock')}</span>
+            <span>{t('fields:toggleBlock')}</span>
           </button>
           {header && (
             <div

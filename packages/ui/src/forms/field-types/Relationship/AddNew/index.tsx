@@ -1,12 +1,12 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../../../providers/Translation'
 
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { EditViewProps } from '../../../../views/types'
 import type { Value } from '../types'
 import type { Props } from './types'
 
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
 import { Button } from '../../../../elements/Button'
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer'
 import Popup from '../../../../elements/Popup'
@@ -37,7 +37,7 @@ export const AddNewRelation: React.FC<Props> = ({
     !relatedToMany ? relatedCollections[0] : undefined,
   )
   const [popupOpen, setPopupOpen] = useState(false)
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
   const config = useConfig()
 
@@ -139,7 +139,7 @@ export const AddNewRelation: React.FC<Props> = ({
               onMouseLeave={() => setShowTooltip(false)}
             >
               <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                {t('addNewLabel', {
+                {t('fields:addNewLabel', {
                   label: getTranslation(relatedCollections[0].labels.singular, i18n),
                 })}
               </Tooltip>
@@ -155,7 +155,7 @@ export const AddNewRelation: React.FC<Props> = ({
                 <Button
                   buttonStyle="none"
                   className={`${baseClass}__add-button`}
-                  tooltip={popupOpen ? undefined : t('addNew')}
+                  tooltip={popupOpen ? undefined : t('fields:addNew')}
                 >
                   <Plus />
                 </Button>
