@@ -105,6 +105,7 @@ const clientTranslationKeys = [
   'authentication:verify',
   'authentication:verifyUser',
   'authentication:youAreInactive',
+
   'error:autosaving',
   'error:correctInvalidFields',
   'error:deletingTitle',
@@ -117,6 +118,7 @@ const clientTranslationKeys = [
   'error:unableToUpdateCount',
   'error:unknown',
   'error:unspecific',
+
   'fields:addLabel',
   'fields:addNew',
   'fields:addNewLabel',
@@ -133,6 +135,7 @@ const clientTranslationKeys = [
   'fields:selectFieldsToEdit',
   'fields:showAll',
   'fields:uploadNewLabel',
+
   'general:aboutToDeleteCount',
   'general:addBelow',
   'general:addFilter',
@@ -242,6 +245,7 @@ const clientTranslationKeys = [
   'general:updatedSuccessfully',
   'general:updating',
   'general:welcome',
+
   'upload:crop',
   'upload:cropToolDescription',
   'upload:dragAndDrop',
@@ -256,10 +260,12 @@ const clientTranslationKeys = [
   'upload:setFocalPoint',
   'upload:sizesFor',
   'upload:width',
+
   'validation:fieldHasNo',
   'validation:limitReached',
   'validation:required',
   'validation:requiresAtLeast',
+
   'version:aboutToPublishSelection',
   'version:aboutToRestore',
   'version:aboutToRestoreGlobal',
