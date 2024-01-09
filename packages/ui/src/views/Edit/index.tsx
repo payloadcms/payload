@@ -14,7 +14,7 @@ import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
 // import { Upload } from '../Upload'
 import './index.scss'
-import { CollectionEditViewProps, EditViewProps } from '../types'
+import { EditViewProps } from '../types'
 import { fieldTypes } from '../../exports'
 
 const baseClass = 'collection-edit'
@@ -24,25 +24,28 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     action,
     apiURL,
     config,
-    id,
     // customHeader,
     data,
-    hasSavePermission,
-    disableLeaveWithoutSaving,
     state,
-    isEditing,
     // isLoading,
     // onSave: onSaveFromProps,
     docPermissions,
     user,
-    disableActions,
   } = props
 
   const collectionConfig = 'collectionConfig' in props ? props.collectionConfig : undefined
   const globalConfig = 'globalConfig' in props ? props.globalConfig : undefined
-
-  const auth = collectionConfig && 'auth' in collectionConfig ? collectionConfig.auth : undefined
   const fields = collectionConfig?.fields || globalConfig?.fields || []
+  const auth = collectionConfig ? collectionConfig.auth : undefined
+  const id = 'id' in props ? props.id : undefined
+  const hasSavePermission = 'hasSavePermission' in props ? props.hasSavePermission : undefined
+  const isEditing = 'isEditing' in props ? props.isEditing : undefined
+  const disableActions = 'disableActions' in props ? props.disableActions : undefined
+
+  const preventLeaveWithoutSaving =
+    (!(collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
+      !(globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)) &&
+    !('disableLeaveWithoutSaving' in props && props.disableLeaveWithoutSaving)
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
@@ -118,8 +121,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
           i18n,
         )}`}
       /> */}
-          {!(collectionConfig.versions?.drafts && collectionConfig.versions?.drafts?.autosave) &&
-            !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
+          {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetStepNav
             collectionSlug={collectionConfig?.slug}
             useAsTitle={collectionConfig?.admin?.useAsTitle}

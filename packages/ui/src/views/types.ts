@@ -9,23 +9,22 @@ import type {
 import type { Fields } from '../forms/Form/types'
 import { FieldTypes } from '../exports'
 
-export type CollectionEditViewProps = BaseEditViewProps & {
-  collectionConfig?: SanitizedCollectionConfig
-  disableActions?: boolean
-  disableLeaveWithoutSaving?: boolean
-  hasSavePermission?: boolean
-  id: string
-  isEditing?: boolean
-  docPermissions: CollectionPermission | null
-}
-
-export type GlobalEditViewProps = BaseEditViewProps & {
-  globalConfig: SanitizedGlobalConfig
-  state?: Fields
-  docPermissions: GlobalPermission | null
-}
-
-export type BaseEditViewProps = {
+export type EditViewProps = (
+  | {
+      collectionConfig: SanitizedCollectionConfig
+      disableActions?: boolean
+      disableLeaveWithoutSaving?: boolean
+      hasSavePermission?: boolean
+      id: string
+      isEditing?: boolean
+      docPermissions: CollectionPermission | null
+    }
+  | {
+      globalConfig: SanitizedGlobalConfig
+      state?: Fields
+      docPermissions: GlobalPermission | null
+    }
+) & {
   config: SanitizedConfig
   action: string
   apiURL: string
@@ -47,5 +46,3 @@ export type BaseEditViewProps = {
   }
   searchParams: { [key: string]: string | string[] | undefined }
 }
-
-export type EditViewProps = CollectionEditViewProps | GlobalEditViewProps

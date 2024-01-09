@@ -15,7 +15,7 @@ import { notFound } from 'next/navigation'
 
 const baseClass = 'versions'
 
-export const VersionsView = async (props: EditViewProps) => {
+export const VersionsView: React.FC<EditViewProps> = async (props) => {
   const { config, searchParams, payload, user } = props
 
   const id = 'id' in props ? props.id : undefined

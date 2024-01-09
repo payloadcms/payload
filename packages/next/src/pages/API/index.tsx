@@ -11,13 +11,12 @@ import {
   EditViewProps,
 } from '@payloadcms/ui'
 import './index.scss'
-import { Document } from 'payload/types'
 import { RenderJSON } from './RenderJSON'
 
 const baseClass = 'query-inspector'
 
-export const APIView = async (props: EditViewProps) => {
-  const { config, searchParams, payload, locale, user } = props
+export const APIView: React.FC<EditViewProps> = async (props) => {
+  const { config, searchParams, locale, data } = props
 
   const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
   const globalConfig = 'globalConfig' in props && props?.globalConfig
@@ -39,34 +38,16 @@ export const APIView = async (props: EditViewProps) => {
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
-  let data: Document
   let draftsEnabled = false
   let docEndpoint = ''
 
   if (collectionConfig) {
-    try {
-      data = await payload.findByID({
-        collection: collectionSlug,
-        id,
-        depth: 0,
-        user,
-      })
-    } catch (error) {}
-
-    draftsEnabled = Boolean(collectionConfig.versions.drafts)
+    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
   if (globalConfig) {
-    try {
-      data = await payload.findGlobal({
-        slug: globalSlug,
-        depth: 0,
-        user,
-      })
-    } catch (error) {}
-
-    draftsEnabled = Boolean(globalConfig.versions.drafts)
+    draftsEnabled = Boolean(globalConfig.versions?.drafts)
     docEndpoint = `/globals/${globalSlug}`
   }
 

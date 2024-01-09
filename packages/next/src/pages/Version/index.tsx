@@ -6,7 +6,7 @@ import type { EditViewProps } from '@payloadcms/ui'
 import { CollectionPermission, GlobalPermission } from 'payload/auth'
 import { notFound } from 'next/navigation'
 
-export const VersionView = async (props: EditViewProps) => {
+export const VersionView: React.FC<EditViewProps> = async (props) => {
   const { config, permissions, payload, user, params } = props
 
   const versionID = params.segments[2]
