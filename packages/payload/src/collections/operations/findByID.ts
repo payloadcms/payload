@@ -102,7 +102,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
         isPromise: true,
         maxSize: 100,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore This is straight from their docs, bad typings
+        // @ts-expect-error This is straight from their docs, bad typings
         transformKey: JSON.stringify,
       })
     }

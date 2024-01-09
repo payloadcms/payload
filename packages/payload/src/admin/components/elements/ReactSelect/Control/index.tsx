@@ -18,7 +18,6 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
       {...props}
       innerProps={{
         ...innerProps,
-        // @ts-ignore
         onKeyDown: (e) => {
           if (disableKeyDown) {
             e.stopPropagation()

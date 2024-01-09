@@ -20,7 +20,6 @@ const dummyConfig: Config = {
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const fields: Field[] = [
       {
         label: 'some-collection',
@@ -29,7 +28,6 @@ describe('sanitizeFields', () => {
     ]
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       sanitizeFields({
         config: dummyConfig,
         fields,

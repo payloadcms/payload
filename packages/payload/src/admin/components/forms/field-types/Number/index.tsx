@@ -170,7 +170,7 @@ const NumberField: React.FC<Props> = (props) => {
             onChange={handleChange}
             onWheel={(e) => {
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
+              // @ts-expect-error
               e.target.blur()
             }}
             placeholder={getTranslation(placeholder, i18n)}

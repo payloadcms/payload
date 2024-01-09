@@ -6,6 +6,7 @@ import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
+import type { GroupField } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
@@ -29,7 +30,6 @@ import {
 import { tabsDoc } from './collections/Tabs/shared'
 import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
-import { GroupField } from './payload-types'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -113,7 +113,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
@@ -414,7 +414,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
