@@ -15,8 +15,17 @@ import './index.scss'
 const baseClass = 'versions'
 
 export const DefaultVersionsView: React.FC<DefaultVersionsViewProps> = (props) => {
-  const { id, config, collectionConfig, data, entityLabel, globalConfig, versionsData, limit } =
-    props
+  const {
+    id,
+    config,
+    collectionConfig,
+    data,
+    entityLabel,
+    globalConfig,
+    versionsData,
+    limit,
+    i18n,
+  } = props
 
   // const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
 
@@ -42,30 +51,35 @@ export const DefaultVersionsView: React.FC<DefaultVersionsViewProps> = (props) =
         globalSlug={globalConfig?.slug}
         id={id}
         isEditing
-        view="Versions" // TODO; i18n
+        view={i18n.t('general:versions')}
         pluralLabel={collectionConfig?.labels?.plural}
-        // view={t('versions')}
       />
       {/* <LoadingOverlayToggle name="versions" show={isLoadingVersions} /> */}
       <main className={baseClass}>
         {/* <Meta description={metaDesc} title={metaTitle} /> */}
         <Gutter className={`${baseClass}__wrap`}>
           {versionCount === 0 && (
-            <div className={`${baseClass}__no-versions`}>{/* {t('noFurtherVersionsFound')} */}</div>
+            <div className={`${baseClass}__no-versions`}>
+              {i18n.t('version:noFurtherVersionsFound')}
+            </div>
           )}
           {versionCount > 0 && (
             <React.Fragment>
-              {/* <div className={`${baseClass}__version-count`}>
-                {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', {
-                  count: versionCount,
-                })}
-              </div> */}
+              <div className={`${baseClass}__version-count`}>
+                {i18n.t(
+                  versionCount === 1 ? 'version:versionCount_one' : 'version:versionCount_many',
+                  {
+                    count: versionCount,
+                  },
+                )}
+              </div>
               <Table
                 columns={buildVersionColumns({
                   config,
                   collectionConfig,
                   globalConfig,
                   docID: id,
+                  t: i18n.t,
                 })}
                 data={versionsData?.docs}
               />
@@ -87,7 +101,7 @@ export const DefaultVersionsView: React.FC<DefaultVersionsViewProps> = (props) =
                       {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page
                         ? versionsData.limit * versionsData.page
                         : versionsData.totalDocs}{' '}
-                      {/* {t('of')} {versionsData.totalDocs} */}
+                      {i18n.t('general:of')} {versionsData.totalDocs}
                     </div>
                     <PerPage
                       limit={limit ? Number(limit) : 10}

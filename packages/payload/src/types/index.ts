@@ -1,5 +1,5 @@
+import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
-import type { i18n as Ii18n, TFunction } from 'i18next'
 
 import type payload from '../'
 import type { User } from '../auth/types'
@@ -32,14 +32,7 @@ export type CustomPayloadRequest<U = any> = {
       [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>
     }
   }
-  i18n: {
-    /** The fallback language */
-    fallbackLanguage: string
-    /** The language of the request */
-    language: string
-    /** Translate function */
-    t: (key: string, options?: Record<string, unknown>) => string
-  }
+  i18n: I18n
   /**
    * The requested locale if specified
    * Only available for localized collections
@@ -55,7 +48,7 @@ export type CustomPayloadRequest<U = any> = {
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
   /** Translate function - duplicate of i18n.t */
-  t: (key: string, options?: Record<string, unknown>) => string
+  t: TFunction
   /**
    * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
    */

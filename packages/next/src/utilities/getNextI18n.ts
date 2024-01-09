@@ -10,7 +10,7 @@ export const getNextI18n = ({
   language: string
 }): ReturnType<typeof initI18n> => {
   return initI18n({
-    config,
+    config: config.i18n,
     language,
     translations,
   })

@@ -31,6 +31,7 @@ export const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
     fieldTypes,
     config,
     user,
+    i18n,
   } = props
 
   // const { setViewActions } = useActions()
@@ -123,6 +124,7 @@ export const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
             hasSavePermission={hasSavePermission}
             isEditing
             permissions={permissions}
+            i18n={i18n}
           />
           <DocumentFields
             description={description}

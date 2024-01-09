@@ -5,10 +5,12 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
+import type { I18n } from '@payloadcms/translations'
 
 import { Gutter } from '../Gutter'
 import RenderTitle from '../RenderTitle'
 import { DocumentTabs } from './Tabs'
+
 import './index.scss'
 
 const baseClass = `doc-header`
@@ -22,9 +24,19 @@ export const DocumentHeader: React.FC<{
   globalConfig?: SanitizedGlobalConfig
   id?: string
   isEditing?: boolean
+  i18n: I18n
 }> = (props) => {
-  const { id, apiURL, config, collectionConfig, customHeader, data, globalConfig, isEditing } =
-    props
+  const {
+    id,
+    apiURL,
+    config,
+    collectionConfig,
+    customHeader,
+    data,
+    globalConfig,
+    isEditing,
+    i18n,
+  } = props
 
   const titleFieldConfig = collectionConfig?.fields?.find(
     (f) => 'name' in f && f?.name === collectionConfig?.admin?.useAsTitle,
@@ -47,7 +59,7 @@ export const DocumentHeader: React.FC<{
                 ? titleFieldConfig?.admin?.date?.displayFormat
                 : undefined
             }
-            // fallback={`[${t('untitled')}]`}
+            fallback={`[${i18n.t('general:untitled')}]`}
           />
           <DocumentTabs
             apiURL={apiURL}
@@ -56,6 +68,7 @@ export const DocumentHeader: React.FC<{
             globalConfig={globalConfig}
             id={id}
             isEditing={isEditing}
+            i18n={i18n}
           />
         </Fragment>
       )}

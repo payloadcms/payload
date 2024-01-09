@@ -6,10 +6,7 @@ import type { CellComponentProps } from '../../types'
 import { optionsAreObjects } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 
-const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, field }) => {
-  // TODO(i18n)
-  const i18n = undefined
-
+const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, field, i18n }) => {
   const findLabel = (items: string[]) =>
     items
       .map((i) => {

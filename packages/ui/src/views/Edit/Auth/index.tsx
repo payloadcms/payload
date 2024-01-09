@@ -13,6 +13,7 @@ import { Email } from '../../../forms/field-types/Email'
 import { Password } from '../../../forms/field-types/Password'
 import { useConfig } from '../../../providers/Config'
 import APIKey from './APIKey'
+
 import './index.scss'
 
 const baseClass = 'auth-fields'
@@ -146,6 +147,7 @@ const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
+            i18n={i18n}
             admin={{ readOnly }}
             label={t('authentication:enableAPIKey')}
             name="enableAPIKey"
@@ -154,7 +156,12 @@ const Auth: React.FC<Props> = (props) => {
         </div>
       )}
       {verify && (
-        <Checkbox admin={{ readOnly }} label={t('authentication:verified')} name="_verified" />
+        <Checkbox
+          i18n={i18n}
+          admin={{ readOnly }}
+          label={t('authentication:verified')}
+          name="_verified"
+        />
       )}
     </div>
   )

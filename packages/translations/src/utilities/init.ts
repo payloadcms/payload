@@ -1,6 +1,4 @@
-import type { PayloadRequest, SanitizedConfig } from 'payload/types'
-
-import { Translations } from '../types'
+import { I18n, Translations, InitTFunction } from '../types'
 import { deepMerge } from './deepMerge'
 
 /**
@@ -17,7 +15,7 @@ export const getTranslationString = ({
 }: {
   count?: number
   key: string
-  translations: SanitizedConfig['i18n']['translations'][0]
+  translations: Translations[0]
 }) => {
   const keys = key.split(':')
   let keySuffix = ''
@@ -181,35 +179,30 @@ export function matchLanguage(header: string): string | undefined {
   return undefined
 }
 
-export type TFunction = (key: string, options?: Record<string, any>) => string
-type initI18nArgs = {
-  config: SanitizedConfig
-  language?: string
-  translations?: Translations
+export const initTFunction: InitTFunction = (args) => (key, vars) => {
+  const { config, language, translations } = args
+
+  const mergedLanguages = deepMerge(config?.translations ?? {}, translations)
+  const languagePreference = matchLanguage(language)
+
+  return t({
+    key,
+    translations: mergedLanguages[languagePreference],
+    vars,
+  })
 }
-export const initTFunction =
-  (args: initI18nArgs): TFunction =>
-  (key, vars) => {
-    const { config, language, translations } = args
 
-    const mergedLanguages = deepMerge(config.i18n?.translations ?? {}, translations)
-    const languagePreference = matchLanguage(language)
-
-    return t({
-      key,
-      translations: mergedLanguages[languagePreference],
-      vars,
-    })
-  }
-
-export type I18n = PayloadRequest['i18n']
-export const initI18n = ({ config, language = 'en', translations }: initI18nArgs): I18n => {
+export const initI18n = ({
+  config,
+  language = 'en',
+  translations,
+}: Parameters<InitTFunction>[0]): I18n => {
   return {
-    fallbackLanguage: config.i18n.fallbackLanguage,
-    language: language || config.i18n.fallbackLanguage,
+    fallbackLanguage: config.fallbackLanguage,
+    language: language || config.fallbackLanguage,
     t: initTFunction({
       config,
-      language: language || config.i18n.fallbackLanguage,
+      language: language || config.fallbackLanguage,
       translations,
     }),
   }

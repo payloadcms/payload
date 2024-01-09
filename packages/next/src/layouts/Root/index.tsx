@@ -33,6 +33,11 @@ export const RootLayout = async ({
 
   const mergedTranslations = deepMerge(translations, clientConfig.i18n.translations)
 
+  const languageOptions = Object.entries(translations || {}).map(([language, translations]) => ({
+    label: translations.general.thisLanguage,
+    value: language,
+  }))
+
   return (
     <html lang={lang} dir={dir}>
       <body>
@@ -41,6 +46,7 @@ export const RootLayout = async ({
           translations={mergedTranslations[lang]}
           lang={lang}
           fallbackLang={clientConfig.i18n.fallbackLanguage}
+          languageOptions={languageOptions}
         >
           {children}
         </RootProvider>

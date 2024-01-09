@@ -55,6 +55,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
     newDocumentURL,
     resetParams,
     titleField,
+    i18n,
   } = props
 
   const textFieldsToBeSearched = getTextFieldsToBeSearched(listSearchableFields, fields)
@@ -78,6 +79,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
     cellProps: [],
     config,
     collectionConfig,
+    i18n,
     columns: initialColumns.map((column) => ({
       accessor: column,
       active: true,

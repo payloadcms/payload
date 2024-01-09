@@ -1,3 +1,4 @@
+import { I18n } from '@payloadcms/translations'
 import {
   CollectionPermission,
   FieldPermissions,
@@ -36,4 +37,5 @@ export type DefaultVersionsViewProps = {
   versionID?: string
   docPermissions: CollectionPermission | GlobalPermission
   locale: string
+  i18n: I18n
 }

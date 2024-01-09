@@ -3,11 +3,17 @@ import React, { createContext, useContext } from 'react'
 
 import { t } from '@payloadcms/translations'
 import type { I18n } from '@payloadcms/translations'
-import { ClientConfig, PayloadRequest } from 'payload/types'
+import { ClientConfig } from 'payload/types'
+
+export type LanguageOptions = {
+  label: string
+  value: string
+}[]
 
 const Context = createContext<{
   t: (key: string, vars?: Record<string, string | number>) => string
   i18n: I18n
+  languageOptions: LanguageOptions
 }>({
   t: () => '',
   i18n: {
@@ -15,6 +21,7 @@ const Context = createContext<{
     fallbackLanguage: 'en',
     t: () => '',
   },
+  languageOptions: undefined,
 })
 
 export type LanguageTranslations = {
@@ -27,7 +34,8 @@ export const TranslationProvider: React.FC<{
   translations: LanguageTranslations
   lang: string
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
-}> = ({ children, translations, lang, fallbackLang }) => {
+  languageOptions: LanguageOptions
+}> = ({ children, translations, lang, fallbackLang, languageOptions }) => {
   const nextT = (key: string, vars?: Record<string, string | number>): string =>
     t({
       key,
@@ -44,6 +52,7 @@ export const TranslationProvider: React.FC<{
           fallbackLanguage: fallbackLang,
           t: nextT,
         },
+        languageOptions,
       }}
     >
       {children}

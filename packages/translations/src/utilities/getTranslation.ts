@@ -1,4 +1,5 @@
-import { initI18n } from './init'
+import type { JSX } from 'react'
+import type { initI18n } from './init'
 
 export const getTranslation = (
   label: JSX.Element | Record<string, string> | string,

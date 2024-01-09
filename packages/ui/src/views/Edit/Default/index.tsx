@@ -34,6 +34,7 @@ export const DefaultCollectionEdit: React.FC<
     isEditing,
     permissions,
     user,
+    i18n,
   } = props
 
   const { auth, fields, upload } = collectionConfig
@@ -72,6 +73,7 @@ export const DefaultCollectionEdit: React.FC<
         id={id}
         isEditing={isEditing}
         permissions={permissions}
+        i18n={i18n}
       />
       <DocumentFields
         BeforeFields={

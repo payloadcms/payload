@@ -1,6 +1,5 @@
 import React from 'react'
 
-// TODO(i18n)
 import { getTranslation } from '@payloadcms/translations'
 
 import type { Props } from './types'
@@ -34,6 +33,7 @@ const Checkbox: React.FC<Props> = (props) => {
     valid = true,
     errorMessage,
     value,
+    i18n,
   } = props
 
   const path = pathFromProps || name
@@ -68,8 +68,7 @@ const Checkbox: React.FC<Props> = (props) => {
           {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
           <CheckboxInput
             id={fieldID}
-            label={typeof label === 'string' ? label : undefined}
-            // label={getTranslation(label || name, i18n)}
+            label={getTranslation(label || name, i18n)}
             name={path}
             readOnly={readOnly}
             required={required}

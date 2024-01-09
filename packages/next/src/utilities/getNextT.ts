@@ -18,7 +18,7 @@ export const getNextT = ({
 
   return initTFunction({
     language: lang,
-    config,
+    config: config.i18n,
     translations,
   })
 }

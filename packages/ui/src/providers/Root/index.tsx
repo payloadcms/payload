@@ -13,7 +13,8 @@ import { StepNavProvider } from '../../elements/StepNav'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay'
 import { NavProvider } from '../../elements/Nav/context'
 import { ActionsProvider } from '../ActionsProvider'
-import { LanguageTranslations, TranslationProvider } from '../Translation'
+import { TranslationProvider } from '../Translation'
+import type { LanguageOptions, LanguageTranslations } from '../Translation'
 
 type Props = {
   config: ClientConfig
@@ -21,6 +22,7 @@ type Props = {
   translations: LanguageTranslations
   lang: string
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
+  languageOptions: LanguageOptions
 }
 
 export const RootProvider: React.FC<Props> = ({
@@ -29,10 +31,16 @@ export const RootProvider: React.FC<Props> = ({
   children,
   lang,
   fallbackLang,
+  languageOptions,
 }) => {
   return (
     <ConfigProvider config={config}>
-      <TranslationProvider lang={lang} translations={translations} fallbackLang={fallbackLang}>
+      <TranslationProvider
+        lang={lang}
+        translations={translations}
+        fallbackLang={fallbackLang}
+        languageOptions={languageOptions}
+      >
         <WindowInfoProvider
           breakpoints={{
             l: '(max-width: 1440px)',

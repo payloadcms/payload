@@ -2,9 +2,9 @@ import React, { Fragment } from 'react'
 
 import type { DocumentTabConfig } from '../types'
 import type { DocumentTabProps } from '../types'
+import { DocumentTabLink } from './TabLink'
 
 import './index.scss'
-import { DocumentTabLink } from './TabLink'
 
 const baseClass = 'doc-tab'
 
@@ -21,6 +21,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     label,
     newTab,
     pillLabel,
+    i18n,
   } = props
 
   const { routes } = config
@@ -45,9 +46,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
     const labelToRender =
       typeof label === 'function'
         ? label({
-            // TODO(i18n)
-            // t
-            t: (str: string) => str,
+            t: i18n.t,
           })
         : label
 

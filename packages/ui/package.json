@@ -37,13 +37,9 @@
     "deep-equal": "2.2.2",
     "deepmerge": "4.3.1",
     "flatley": "5.2.0",
-    "i18next": "22.5.1",
-    "i18next-browser-languagedetector": "6.1.8",
-    "i18next-http-middleware": "3.3.2",
     "object-to-formdata": "4.5.1",
     "react-animate-height": "2.1.2",
     "react-datepicker": "4.16.0",
-    "react-i18next": "11.18.6",
     "react-select": "5.7.4",
     "react-toastify": "8.2.0",
     "use-context-selector": "1.4.1"

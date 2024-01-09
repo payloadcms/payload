@@ -20,6 +20,8 @@ import { Publish } from '../Publish'
 import { Save } from '../Save'
 import { SaveDraft } from '../SaveDraft'
 import Status from '../Status'
+import type { I18n } from '@payloadcms/translations'
+
 import './index.scss'
 
 const baseClass = 'doc-controls'
@@ -36,6 +38,7 @@ export const DocumentControls: React.FC<{
   permissions: CollectionPermission | GlobalPermission | null
   config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
+  i18n: I18n
 }> = (props) => {
   const {
     id,
@@ -48,6 +51,7 @@ export const DocumentControls: React.FC<{
     isAccountView,
     isEditing,
     permissions,
+    i18n,
   } = props
 
   const {
@@ -116,23 +120,13 @@ export const DocumentControls: React.FC<{
                     .filter(Boolean)
                     .join(' ')}
                   title={
-                    data?.updatedAt
-                      ? formatDate(
-                          data?.updatedAt,
-                          dateFormat,
-                          // i18n?.language
-                        )
-                      : ''
+                    data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n.language) : ''
                   }
                 >
                   <p className={`${baseClass}__label`}>{/* {t('lastModified')}:&nbsp; */}</p>
                   {data?.updatedAt && (
                     <p className={`${baseClass}__value`}>
-                      {formatDate(
-                        data.updatedAt,
-                        dateFormat,
-                        //  i18n?.language
-                      )}
+                      {formatDate(data.updatedAt, dateFormat, i18n.language)}
                     </p>
                   )}
                 </li>
@@ -141,23 +135,13 @@ export const DocumentControls: React.FC<{
                     .filter(Boolean)
                     .join(' ')}
                   title={
-                    data?.createdAt
-                      ? formatDate(
-                          data?.createdAt,
-                          dateFormat,
-                          // i18n?.language,
-                        )
-                      : ''
+                    data?.createdAt ? formatDate(data?.createdAt, dateFormat, i18n.language) : ''
                   }
                 >
                   <p className={`${baseClass}__label`}>{/* {t('created')}:&nbsp; */}</p>
                   {data?.createdAt && (
                     <p className={`${baseClass}__value`}>
-                      {formatDate(
-                        data?.createdAt,
-                        dateFormat,
-                        // i18n?.language,
-                      )}
+                      {formatDate(data?.createdAt, dateFormat, i18n.language)}
                     </p>
                   )}
                 </li>

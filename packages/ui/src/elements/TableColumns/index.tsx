@@ -16,6 +16,7 @@ import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
 
 import { usePreferences } from '../../providers/Preferences'
+import { useTranslation } from '../../providers/Translation'
 import formatFields from '../../views/List/formatFields'
 import buildColumns from './buildColumns'
 import { columnReducer } from './columnReducer'
@@ -50,6 +51,7 @@ export const TableColumnsProvider: React.FC<{
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>()
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
+  const { i18n } = useTranslation()
   const [formattedFields] = useState<Field[]>(() => formatFields(collectionConfig))
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
@@ -58,6 +60,7 @@ export const TableColumnsProvider: React.FC<{
     return buildColumns({
       cellProps,
       config,
+      i18n,
       collectionConfig,
       columns: initialColumns.map((column) => ({
         accessor: column,
@@ -85,6 +88,7 @@ export const TableColumnsProvider: React.FC<{
         dispatchTableColumns({
           payload: {
             cellProps,
+            i18n,
             collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
             columns: newCols.map((column) => {
               // 'string' is for backwards compatibility
@@ -137,6 +141,7 @@ export const TableColumnsProvider: React.FC<{
       dispatchTableColumns({
         payload: {
           // onSelect,
+          i18n,
           cellProps,
           collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
           columns: columns.map((column) => ({
@@ -157,6 +162,7 @@ export const TableColumnsProvider: React.FC<{
       dispatchTableColumns({
         payload: {
           cellProps,
+          i18n,
           collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
           fromIndex,
           toIndex,
@@ -172,6 +178,7 @@ export const TableColumnsProvider: React.FC<{
       dispatchTableColumns({
         payload: {
           cellProps,
+          i18n,
           collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
           column,
         },

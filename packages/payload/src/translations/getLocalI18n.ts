@@ -11,7 +11,7 @@ export const getLocalI18n = ({
   language?: string
 }): ReturnType<typeof initI18n> =>
   initI18n({
-    config,
+    config: config.i18n,
     language,
     translations,
   })

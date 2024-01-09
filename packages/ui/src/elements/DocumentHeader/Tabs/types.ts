@@ -3,6 +3,7 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
 } from 'payload/types'
+import type { I18n } from '@payloadcms/translations'
 import type { useDocumentInfo } from '../../../providers/DocumentInfo'
 import type { ContextType } from '../../../providers/DocumentInfo/types'
 
@@ -13,6 +14,7 @@ export type DocumentTabProps = {
   globalConfig?: SanitizedGlobalConfig
   id: string
   isEditing?: boolean
+  i18n: I18n
 }
 
 export type DocumentTabCondition = (args: {

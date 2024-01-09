@@ -1,8 +1,6 @@
 'use client'
 import React from 'react'
-import { useTranslation } from '../../../providers/Translation'
-
-import type { Translation } from 'payload/src/translations-new/type'
+import { useTranslation } from '@payloadcms/ui/providers'
 
 import { ReactSelect, Label } from '@payloadcms/ui'
 import { ToggleTheme } from '../ToggleTheme'
@@ -15,15 +13,7 @@ export const Settings: React.FC<{
 }> = (props) => {
   const { className } = props
 
-  const { i18n, t } = useTranslation()
-
-  // TODO: wire i18n options up
-  const languageOptions = Object.entries(i18n?.options?.resources || {}).map(
-    ([language, resource]) => ({
-      label: (resource as Translation).general.thisLanguage,
-      value: language,
-    }),
-  )
+  const { i18n, t, languageOptions } = useTranslation()
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -32,7 +22,8 @@ export const Settings: React.FC<{
         <Label htmlFor="language-select" label={t('general:language')} />
         <ReactSelect
           inputId="language-select"
-          // TODO: wire this back up onChange={({ value }) => i18n.changeLanguage(value)}
+          // TODO(i18n): wire up onChange / changeLanguage fn
+          // onChange={({ value }) => i18n.changeLanguage(value)}
           options={languageOptions}
           value={languageOptions.find((language) => language.value === i18n.language)}
         />
