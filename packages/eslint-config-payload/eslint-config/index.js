@@ -43,6 +43,8 @@ module.exports = {
     // This rule doesn't work well in .tsx files
     '@typescript-eslint/no-misused-promises': 'off',
     '@typescript-eslint/prefer-ts-expect-error': 'warn',
+    // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
+    'class-methods-use-this': 'off',
     // Type-aware any rules end
     '@typescript-eslint/no-use-before-define': 'off',
     'arrow-body-style': 0,
