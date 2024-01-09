@@ -67,16 +67,6 @@ export const Document = async ({
   let action: string
 
   if (collectionConfig) {
-    const views = collectionConfig.admin?.components?.views
-    const collectionViews = await getViewsFromConfig({
-      views,
-      routeSegments: params.segments,
-      isCollection: true,
-    })
-
-    CustomView = collectionViews.CustomView
-    DefaultView = collectionViews.DefaultView
-
     docPermissions = permissions?.collections?.[collectionSlug]
     fields = collectionConfig.fields
     action = `${serverURL}${api}/${collectionSlug}${isEditing ? `/${id}` : ''}`
@@ -88,6 +78,16 @@ export const Document = async ({
     apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
       collectionConfig.versions?.drafts ? '&draft=true' : ''
     }`
+
+    const collectionViews = await getViewsFromConfig({
+      routeSegments: params.segments,
+      collectionConfig,
+      config,
+      docPermissions,
+    })
+
+    CustomView = collectionViews.CustomView
+    DefaultView = collectionViews.DefaultView
 
     try {
       data = await payload.findByID({
@@ -105,16 +105,6 @@ export const Document = async ({
   }
 
   if (globalConfig) {
-    const views = globalConfig.admin?.components?.views
-    const globalViews = await getViewsFromConfig({
-      views,
-      routeSegments: params.segments,
-      isGlobal: true,
-    })
-
-    CustomView = globalViews.CustomView
-    DefaultView = globalViews.DefaultView
-
     docPermissions = permissions?.globals?.[globalSlug]
     fields = globalConfig.fields
     hasSavePermission = isEditing && docPermissions?.update?.permission
@@ -123,6 +113,16 @@ export const Document = async ({
     apiURL = `${serverURL}${api}/${globalSlug}?locale=${locale}${
       globalConfig.versions?.drafts ? '&draft=true' : ''
     }`
+
+    const globalViews = await getViewsFromConfig({
+      routeSegments: params.segments,
+      globalConfig,
+      config,
+      docPermissions,
+    })
+
+    CustomView = globalViews.CustomView
+    DefaultView = globalViews.DefaultView
 
     data = await payload.findGlobal({
       slug: globalSlug,
