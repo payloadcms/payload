@@ -158,12 +158,8 @@ export const getViewsFromConfig = async ({
         }
 
         default: {
-          if (docPermissions?.read?.permission) {
-            CustomView = getCustomViewByKey(views, 'Default')
-            DefaultView = lazy(() =>
-              import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
-            )
-          }
+          const path = `/${routeSegments[1]}`
+          CustomView = getCustomViewByPath(views, path)
           break
         }
       }
