@@ -22,7 +22,9 @@ const Blocks: React.FC<{
           const { blockName, blockType, form } = block
 
           const isFormBlock = blockType === 'formBlock'
-          /*@ts-expect-error*/
+          {
+            /*@ts-ignore*/
+          }
           const formID: string = isFormBlock && form && form.id
 
           if (blockType && blockType in blockComponents) {
@@ -30,7 +32,7 @@ const Blocks: React.FC<{
 
             return (
               <VerticalPadding key={isFormBlock ? formID : index} top="small" bottom="small">
-                {/*@ts-expect-error*/}
+                {/*@ts-ignore*/}
                 <Block id={toKebabCase(blockName)} {...block} />
               </VerticalPadding>
             )

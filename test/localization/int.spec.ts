@@ -848,6 +848,7 @@ describe('Localization', () => {
 
       // should return the value of the fallback locale
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       expect(updatedSpanishDoc.items[0].text).toStrictEqual(englishTitle)
     })
   })

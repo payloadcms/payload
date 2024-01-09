@@ -45,7 +45,7 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error - bad @swc/register types
+  // @ts-ignore - bad @swc/register types
   swcRegister({
     sourceMaps: 'inline',
     jsc: {

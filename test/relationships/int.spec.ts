@@ -267,7 +267,7 @@ describe('Relationships', () => {
           await expect(async () =>
             createPost({
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error Sending bad data to test error handling
+              // @ts-ignore Sending bad data to test error handling
               customIdRelation: 1234,
             }),
           ).rejects.toThrow('The following field is invalid: customIdRelation')
@@ -277,7 +277,7 @@ describe('Relationships', () => {
           await expect(async () =>
             createPost({
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error Sending bad data to test error handling
+              // @ts-ignore Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),
           ).rejects.toThrow('The following field is invalid: customIdNumberRelation')

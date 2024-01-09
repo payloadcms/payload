@@ -565,6 +565,7 @@ describe('Collections - Uploads', () => {
       expect(
         async () =>
           await payload.create({
+            // @ts-ignore
             collection: 'optional-file',
             data: {},
           }),
@@ -574,6 +575,7 @@ describe('Collections - Uploads', () => {
     it('should throw an error if no file and filesRequiredOnCreate is true', async () => {
       await expect(async () =>
         payload.create({
+          // @ts-ignore
           collection: 'required-file',
           data: {},
         }),
