@@ -5917,7 +5917,7 @@ packages:
   /@types/nodemailer@6.4.14:
     resolution: {integrity: sha512-fUWthHO9k9DSdPCSPRqcu6TWhYyxTBg382vlNIttSe9M7XfsT06y0f24KHXtbnijPGGRIcVvdKHTNikOI6qiHA==}
     dependencies:
-      '@types/node': 20.6.2
+      '@types/node': 16.18.58
     dev: true
 
   /@types/normalize-package-data@2.4.1:
