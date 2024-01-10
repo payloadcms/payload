@@ -15,10 +15,6 @@ export const HTMLConverterFeature = (props?: HTMLConverterFeatureProps): Feature
   if (!props) {
     props = {}
   }
-  /*const defaultConvertersWithConvertersFromFeatures = defaultConverters
-  defaultConvertersWithConver    tersFromFeatures.set(props?
-
-  */
 
   return {
     feature: () => {

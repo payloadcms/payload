@@ -21,7 +21,7 @@ Then you will need to add the [bundler](/docs/admin/bundlers) to your Payload co
 
 ```ts
 import { buildConfig } from '@payloadcms/config'
-import viteBundler from '@payloadcms/bundler-vite'
+import { viteBundler } from '@payloadcms/bundler-vite'
 
 export default buildConfig({
   collections: [],
@@ -60,17 +60,33 @@ export const buildConfig({
   collections: [],
   admin: {
     bundler: viteBundler(),
-    vite: (incomingViteConfig) => ({
-      ...incomingViteConfig,
-      resolve: {
-        ...(incomingViteConfig?.resolve || {}),
-        alias: {
-          ...(incomingViteConfig?.resolve?.alias || {}),
-          '../server-only-module': path.resolve(__dirname, './path/to/browser-safe-module.js'),
-          '../../server-only-module': path.resolve(__dirname, './path/to/browser-safe-module.js'),
-        }
+    vite: (incomingViteConfig) => {
+      const existingAliases = incomingViteConfig?.resolve?.alias || {};
+      let aliasArray: { find: string | RegExp; replacement: string; }[] = [];
+
+      // Pass the existing Vite aliases
+      if (Array.isArray(existingAliases)) {
+        aliasArray = existingAliases;
+      } else {
+        aliasArray = Object.values(existingAliases);
       }
-    })
+
+      // Add your own aliases using the find and replacement keys
+      aliasArray.push({
+        find: '../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+        find: '../../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+      });
+
+      return {
+        ...incomingViteConfig,
+        resolve: {
+          ...(incomingViteConfig?.resolve || {}),
+          alias: aliasArray,
+        }
+      };
+    },
   }
 })
 ```
@@ -90,7 +106,8 @@ That plugin should create an alias to support Vite as follows:
 ```ts
 {
   // aliases go here
-  'payload-plugin-cool': path.resolve(__dirname, './my-admin-plugin.js')
+  find: 'payload-plugin-cool',
+  replacement: path.resolve(__dirname, './my-admin-plugin.js')
 }
 
 ```
@@ -108,22 +125,36 @@ export const buildConfig({
   collections: [],
   admin: {
     bundler: viteBundler(),
-    vite: (incomingViteConfig) => ({
-      ...incomingViteConfig,
-      resolve: {
-        ...(incomingViteConfig?.resolve || {}),
-        alias: {
-          ...(incomingViteConfig?.resolve?.alias || {}),
-          // custom aliases go here
-          '../server-only-module': path.resolve(__dirname, './path/to/browser-safe-module.js'),
-        }
+    vite: (incomingViteConfig) => {
+      const existingAliases = incomingViteConfig?.resolve?.alias || {};
+      let aliasArray: { find: string | RegExp; replacement: string; }[] = [];
+
+      // Pass the existing Vite aliases
+      if (Array.isArray(existingAliases)) {
+        aliasArray = existingAliases;
+      } else {
+        aliasArray = Object.values(existingAliases);
       }
-    })
+
+      // Add your own aliases using the find and replacement keys
+      aliasArray.push({
+        find: '../server-only-module',
+        replacement: path.resolve(__dirname, './path/to/browser-safe-module.js')
+      });
+
+      return {
+        ...incomingViteConfig,
+        resolve: {
+          ...(incomingViteConfig?.resolve || {}),
+          alias: aliasArray,
+        }
+      };
+    },
   }
 })
 ```
 
-Learn more about [aliasing server-only modules](http://localhost:3000/docs/admin/excluding-server-code#aliasing-server-only-modules).
+Learn more about [aliasing server-only modules](https://payloadcms.com/docs/admin/excluding-server-code#aliasing-server-only-modules).
 
 Even though there is a new property for Vite configs specifically, we have implemented some "compatibility" between Webpack and Vite out-of-the-box.
 

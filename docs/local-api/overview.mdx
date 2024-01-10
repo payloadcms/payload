@@ -6,7 +6,9 @@ desc: The Payload Local API allows you to interact with your database and execut
 keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and can interact directly with your database.
+The Payload Local API gives you the ability to execute the same operations that are available through REST and GraphQL
+within Node, directly on your server. Here, you don't need to deal with server latency or network speed whatsoever and
+can interact directly with your database.
 
 <Banner type="success">
   <strong>Tip:</strong>
@@ -30,7 +32,9 @@ You can gain access to the currently running `payload` object via two ways:
 
 ##### Importing it
 
-You can import or require `payload` into your own files after it's been initialized, but you need to make sure that your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been initialized yet. That might be obvious. To us, it's usually not.
+You can import or require `payload` into your own files after it's been initialized, but you need to make sure that
+your `import` / `require` statements come **after** you call `payload.init()`—otherwise Payload won't have been
+initialized yet. That might be obvious. To us, it's usually not.
 
 Example:
 
@@ -47,7 +51,8 @@ const afterChangeHook: CollectionAfterChangeHook = async () => {
 
 ##### Accessing from the `req`
 
-Payload is available anywhere you have access to the Express `req` - including within your access control and hook functions.
+Payload is available anywhere you have access to the Express `req` - including within your access control and hook
+functions.
 
 Example:
 
@@ -61,10 +66,11 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ req: { payload } }) 
 
 ### Local options available
 
-You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are executed in.
+You can specify more options within the Local API vs. REST or GraphQL due to the server-only context that they are
+executed in.
 
 | Local Option       | Description                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `collection`       | Required for Collection operations. Specifies the Collection slug to operate against.                                                                                                                                                                                                                                                                                 |
 | `data`             | The data to use within the operation. Required for `create`, `update`.                                                                                                                                                                                                                                                                                                |
 | `depth`            | [Control auto-population](/docs/getting-started/concepts#depth) of nested relationship and upload fields.                                                                                                                                                                                                                                                             |
@@ -268,7 +274,8 @@ const result = await payload.delete({
 
 ## Auth Operations
 
-If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be available:
+If a collection has [`Authentication`](/docs/authentication/overview) enabled, additional Local API operations will be
+available:
 
 #### Login
 
@@ -319,10 +326,11 @@ const token = await payload.forgotPassword({
 //   token: 'o38jf0q34jfij43f3f...', // JWT used for auth
 //   user: { ... } // the user document that just logged in
 // }
-const result = await payload.forgotPassword({
+const result = await payload.resetPassword({
   collection: 'users', // required
   data: {
     // required
+    password: req.body.password, // the new password to set
     token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
   },
   req: req, // pass an Express `req` which will be provided to all hooks
@@ -349,7 +357,7 @@ const result = await payload.unlock({
 
 ```js
 // Returned result will be a boolean representing success or failure
-const result = await payload.verify({
+const result = await payload.verifyEmail({
   collection: 'users', // required
   token: 'afh3o2jf2p3f...', // the token saved on the user as `_verificationToken`
 })
@@ -402,7 +410,9 @@ const result = await payload.updateGlobal({
 
 ## Next.js Conflict with Local API
 
-There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes within a separate child process, and Payload has not been initalized yet in these instances. That means that unless you explicitly initialize Payload within your operation, it will not be running and return no data / an empty object.
+There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes within a
+separate child process, and Payload has not been initalized yet in these instances. That means that unless you
+explicitly initialize Payload within your operation, it will not be running and return no data / an empty object.
 
 As a workaround, we recommend leveraging the following pattern to determine and ensure Payload is initalized:
 
@@ -462,7 +472,8 @@ export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promis
 }
 ```
 
-To checkout how this works in a project, take a look at our [custom server example](https://github.com/payloadcms/payload/blob/master/examples/custom-server/src/getPayload.ts).
+To checkout how this works in a project, take a look at
+our [custom server example](https://github.com/payloadcms/payload/blob/master/examples/custom-server/src/getPayload.ts).
 
 ## Example Script using Local API
 

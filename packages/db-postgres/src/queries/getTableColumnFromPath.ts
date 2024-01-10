@@ -240,6 +240,7 @@ export const getTableColumnFromPath = ({
         let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
           newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
+          constraintPath = `${constraintPath}${field.name}.%.`
           let result
           const blockConstraints = []
           const blockSelectFields = {}
@@ -247,7 +248,7 @@ export const getTableColumnFromPath = ({
             result = getTableColumnFromPath({
               adapter,
               collectionPath,
-              constraintPath: '',
+              constraintPath,
               constraints: blockConstraints,
               fields: block.fields,
               joinAliases,
@@ -285,7 +286,7 @@ export const getTableColumnFromPath = ({
               adapter.tables[newTableName]._parentID,
             )
           }
-          return result
+          return true
         })
         if (hasBlockField) {
           return {
@@ -294,8 +295,11 @@ export const getTableColumnFromPath = ({
             field: blockTableColumn.field,
             pathSegments: pathSegments.slice(1),
             rawColumn: blockTableColumn.rawColumn,
-            table: adapter.tables[newTableName],
+            table: blockTableColumn.table,
           }
+        }
+        if (pathSegments[1] === 'blockType') {
+          throw new APIError('Querying on blockType is not supported')
         }
         break
       }

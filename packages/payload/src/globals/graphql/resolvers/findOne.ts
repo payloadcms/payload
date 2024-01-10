@@ -3,6 +3,7 @@
 import type { Document } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findOne from '../../operations/findOne'
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {
@@ -16,7 +17,7 @@ export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Do
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: context.req,
+      req: isolateObjectProperty(context.req, 'transactionID'),
       slug,
     }
 

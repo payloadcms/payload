@@ -1,12 +1,14 @@
 import type { i18n } from 'i18next'
 import type { LexicalEditor } from 'lexical'
 import type { MutableRefObject } from 'react'
+import type React from 'react'
 
 export class SlashMenuOption {
-  Icon: React.FC
-
-  displayName?: ({ i18n }: { i18n: i18n }) => string
   // Icon for display
+  Icon: () => Promise<React.FC>
+
+  displayName?: (({ i18n }: { i18n: i18n }) => string) | string
+  // Used for class names and, if displayName is not provided, for display.
   key: string
   // TBD
   keyboardShortcut?: string
@@ -17,24 +19,20 @@ export class SlashMenuOption {
 
   ref?: MutableRefObject<HTMLElement | null>
 
-  // What shows up in the editor
-  title: string
-
   constructor(
-    title: string,
+    key: string,
     options: {
-      Icon: React.FC
-      displayName?: ({ i18n }: { i18n: i18n }) => string
+      Icon: () => Promise<React.FC>
+      displayName?: (({ i18n }: { i18n: i18n }) => string) | string
       keyboardShortcut?: string
       keywords?: Array<string>
       onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
     },
   ) {
-    this.key = title
+    this.key = key
     this.ref = { current: null }
     this.setRefElement = this.setRefElement.bind(this)
 
-    this.title = title
     this.displayName = options.displayName
     this.keywords = options.keywords || []
     this.Icon = options.Icon
@@ -48,6 +46,8 @@ export class SlashMenuOption {
 }
 
 export class SlashMenuGroup {
+  // Used for class names and, if displayName is not provided, for display.
+  displayName?: (({ i18n }: { i18n: i18n }) => string) | string
+  key: string
   options: Array<SlashMenuOption>
-  title: string
 }

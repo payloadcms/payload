@@ -1,49 +1,49 @@
 import type { ArrayField, Field } from 'payload/types'
 
-const createBreadcrumbsField = (
+export const createBreadcrumbsField = (
   relationTo: string,
   overrides: Partial<ArrayField> = {},
 ): Field => ({
   name: 'breadcrumbs',
-  type: 'array',
   localized: true,
-  fields: [
-    {
-      name: 'doc',
-      type: 'relationship',
-      relationTo,
-      maxDepth: 0,
-      admin: {
-        disabled: true,
-      },
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'url',
-          label: 'URL',
-          type: 'text',
-          admin: {
-            width: '50%',
-          },
-        },
-        {
-          name: 'label',
-          type: 'text',
-          admin: {
-            width: '50%',
-          },
-        },
-      ],
-    },
-    ...(overrides?.fields || []),
-  ],
+  type: 'array',
+  ...(overrides || {}),
   admin: {
     readOnly: true,
     ...(overrides?.admin || {}),
   },
-  ...(overrides || {}),
+  fields: [
+    {
+      name: 'doc',
+      admin: {
+        disabled: true,
+      },
+      maxDepth: 0,
+      relationTo,
+      type: 'relationship',
+    },
+    {
+      fields: [
+        {
+          name: 'url',
+          admin: {
+            width: '50%',
+          },
+          label: 'URL',
+          type: 'text',
+        },
+        {
+          name: 'label',
+          admin: {
+            width: '50%',
+          },
+          type: 'text',
+        },
+      ],
+      type: 'row',
+    },
+    ...(overrides?.fields || []),
+  ],
 })
 
 export default createBreadcrumbsField

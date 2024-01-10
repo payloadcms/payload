@@ -6,31 +6,53 @@ import { mergeData } from '.'
 // Send this cached value to `mergeData`, instead of `eventData.fieldSchemaJSON` directly
 let payloadLivePreviewFieldSchema = undefined // TODO: type this from `fieldSchemaToJSON` return type
 
+// Each time the data is merged, cache the result as a `previousData` variable
+// This will ensure changes compound overtop of each other
+let payloadLivePreviewPreviousData = undefined
+
 export const handleMessage = async <T>(args: {
-  depth: number
+  apiRoute?: string
+  depth?: number
   event: MessageEvent
   initialData: T
   serverURL: string
 }): Promise<T> => {
-  const { depth, event, initialData, serverURL } = args
-  if (event.origin === serverURL && event.data) {
-    const eventData = JSON.parse(event?.data)
+  const { apiRoute, depth, event, initialData, serverURL } = args
 
-    if (eventData.type === 'payload-live-preview') {
-      if (!payloadLivePreviewFieldSchema && eventData.fieldSchemaJSON) {
-        payloadLivePreviewFieldSchema = eventData.fieldSchemaJSON
-      }
+  if (
+    event.origin === serverURL &&
+    event.data &&
+    typeof event.data === 'object' &&
+    event.data.type === 'payload-live-preview'
+  ) {
+    const { data, externallyUpdatedRelationship, fieldSchemaJSON } = event.data
 
-      const mergedData = await mergeData<T>({
-        depth,
-        fieldSchema: payloadLivePreviewFieldSchema,
-        incomingData: eventData.data,
-        initialData,
-        serverURL,
-      })
-
-      return mergedData
+    if (!payloadLivePreviewFieldSchema && fieldSchemaJSON) {
+      payloadLivePreviewFieldSchema = fieldSchemaJSON
     }
+
+    if (!payloadLivePreviewFieldSchema) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window. Unable to merge data.',
+      )
+
+      return initialData
+    }
+
+    const mergedData = await mergeData<T>({
+      apiRoute,
+      depth,
+      externallyUpdatedRelationship,
+      fieldSchema: payloadLivePreviewFieldSchema,
+      incomingData: data,
+      initialData: payloadLivePreviewPreviousData || initialData,
+      serverURL,
+    })
+
+    payloadLivePreviewPreviousData = mergedData
+
+    return mergedData
   }
 
   return initialData

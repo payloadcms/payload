@@ -324,7 +324,7 @@ The `useForm` hook returns an object with the following properties: |
       },
       {
         drawerTitle: 'addFieldRow',
-        drawerDescription: 'A useful method to programtically add a row to an array or block field.',
+        drawerDescription: 'A useful method to programmatically add a row to an array or block field.',
         drawerSlug: 'addFieldRow',
         drawerContent: (
 <>
@@ -434,7 +434,7 @@ export const CustomArrayManager = () => {
       },
       {
         drawerTitle: 'removeFieldRow',
-        drawerDescription: 'A useful method to programtically remove a row from an array or block field.',
+        drawerDescription: 'A useful method to programmatically remove a row from an array or block field.',
         drawerSlug: 'removeFieldRow',
         drawerContent: (
 <>
@@ -531,7 +531,7 @@ export const CustomArrayManager = () => {
       },
       {
         drawerTitle: 'replaceFieldRow',
-        drawerDescription: 'A useful method to programtically replace a row from an array or block field.',
+        drawerDescription: 'A useful method to programmatically replace a row from an array or block field.',
         drawerSlug: 'replaceFieldRow',
         drawerContent: (
 <>
@@ -758,3 +758,59 @@ const MyComponent: React.FC = () => {
 ### usePreferences
 
 Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).
+
+### useTableColumns
+
+Returns methods to manipulate table columns
+
+```tsx
+import { useTableColumns } from 'payload/components/hooks'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { setActiveColumns } = useTableColumns()
+
+  const resetColumns = () => {
+    setActiveColumns(['id', 'createdAt', 'updatedAt'])
+  }
+  // highlight-end
+
+  return (
+    <button
+      type="button"
+      onClick={resetColumns}
+    >
+      Reset columns
+    </button>
+  )
+}
+```
+
+### useDocumentEvents
+
+The `useDocumentEvents` hook provides a way of subscribing to cross-document events, such as updates made to nested documents within a drawer. This hook will report document events that are outside the scope of the document currently being edited. This hook provides the following:
+
+| Property                  | Description                                                                                                                               |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| **`mostRecentUpdate`**    | An object containing the most recently updated document. It contains the `entitySlug`, `id` (if collection), and `updatedAt` properties   |
+| **`reportUpdate`**        | A method used to report updates to documents. It accepts the same arguments as the `mostRecentUpdate` property.                           |
+
+**Example:**
+
+```tsx
+import { useDocumentEvents } from 'payload/components/hooks'
+
+const ListenForUpdates: React.FC = () => {
+  const { mostRecentUpdate } = useDocumentEvents()
+
+  return (
+    <span>
+      {JSON.stringify(mostRecentUpdate)}
+    </span>
+  )
+}
+```
+
+<Banner type="info">
+  Right now the `useDocumentEvents` hook only tracks recently updated documents, but in the future it will track more document-related events as needed, such as document creation, deletion, etc.
+</Banner>

@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextField, TextField } from 'payload/types'
+import type { Field, RichTextField, TextField } from 'payload/types'
 
 import type { LexicalRichTextAdapter, SanitizedEditorConfig } from '../../../../../index'
 import type { AdapterProps } from '../../../../../types'
@@ -44,10 +44,15 @@ export const consolidateHTMLConverters = ({
   return finalConverters
 }
 
-export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField = (
-  lexicalFieldName,
-  props,
-) => {
+export const lexicalHTML: (
+  /**
+   * A string which matches the lexical field name you want to convert to HTML.
+   *
+   * This has to be a SIBLING field of this lexicalHTML field - otherwise, it won't be able to find the lexical field.
+   **/
+  lexicalFieldName: string,
+  props: Props,
+) => TextField = (lexicalFieldName, props) => {
   const { name = 'lexicalHTML' } = props
   return {
     name: name,
@@ -56,9 +61,72 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
     },
     hooks: {
       afterRead: [
-        async ({ collection, context, data, originalDoc, siblingData }) => {
+        async ({ collection, field, global, siblingData }) => {
+          const fields = collection ? collection.fields : global.fields
+
+          // find the path of this field, as well as its sibling fields, by looking for this `field` in fields and traversing it recursively
+          function findFieldPathAndSiblingFields(
+            fields: Field[],
+            path: string[],
+          ): {
+            path: string[]
+            siblingFields: Field[]
+          } {
+            for (const curField of fields) {
+              if (curField === field) {
+                return {
+                  path: [...path, curField.name],
+                  siblingFields: fields,
+                }
+              }
+
+              if ('fields' in curField) {
+                const result = findFieldPathAndSiblingFields(
+                  curField.fields,
+                  'name' in curField ? [...path, curField.name] : [...path],
+                )
+                if (result) {
+                  return result
+                }
+              } else if ('tabs' in curField) {
+                for (const tab of curField.tabs) {
+                  const result = findFieldPathAndSiblingFields(
+                    tab.fields,
+                    'name' in tab ? [...path, tab.name] : [...path],
+                  )
+                  if (result) {
+                    return result
+                  }
+                }
+              } else if ('blocks' in curField) {
+                for (const block of curField.blocks) {
+                  if (block?.fields?.length) {
+                    const result = findFieldPathAndSiblingFields(block.fields, [
+                      ...path,
+                      curField.name,
+                      block.slug,
+                    ])
+                    if (result) {
+                      return result
+                    }
+                  }
+                }
+              }
+            }
+
+            return null
+          }
+
+          const foundSiblingFields = findFieldPathAndSiblingFields(fields, [])
+
+          if (!foundSiblingFields)
+            throw new Error(
+              `Could not find sibling fields of current lexicalHTML field with name ${field?.name}`,
+            )
+
+          const { siblingFields } = foundSiblingFields
           const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
-            collection.fields.find(
+            siblingFields.find(
               (field) => 'name' in field && field.name === lexicalFieldName,
             ) as RichTextField<SerializedEditorState, AdapterProps>
 
@@ -70,7 +138,7 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
 
           if (!lexicalField) {
             throw new Error(
-              'You cannot use the lexicalHTML field because the lexical field was not found',
+              'You cannot use the lexicalHTML field because the referenced lexical field was not found',
             )
           }
 
@@ -84,7 +152,7 @@ export const lexicalHTML: (lexicalFieldName: string, props: Props) => TextField 
 
           if (!config?.resolvedFeatureMap?.has('htmlConverter')) {
             throw new Error(
-              'You cannot use the lexicalHTML field because the htmlConverter feature was not found',
+              'You cannot use the lexicalHTML field because the linked lexical field does not have a HTMLConverterFeature',
             )
           }
 

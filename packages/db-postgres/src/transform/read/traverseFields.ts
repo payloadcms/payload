@@ -8,6 +8,7 @@ import type { BlocksMap } from '../../utilities/createBlocksMap'
 
 import { transformHasManyNumber } from './hasManyNumber'
 import { transformRelationship } from './relationship'
+import { transformHasManyText } from './hasManyText'
 
 type TraverseFieldsArgs = {
   /**
@@ -35,6 +36,10 @@ type TraverseFieldsArgs = {
    */
   fields: (Field | TabAsField)[]
   /**
+   * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
+   */
+  texts: Record<string, Record<string, unknown>[]>
+  /**
    * All hasMany number fields, as returned by Drizzle, keyed on an object by field path
    */
   numbers: Record<string, Record<string, unknown>[]>
@@ -61,6 +66,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   deletions,
   fieldPrefix,
   fields,
+  texts,
   numbers,
   path,
   relationships,
@@ -77,6 +83,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        texts,
         numbers,
         path,
         relationships,
@@ -96,6 +103,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.fields,
+        texts,
         numbers,
         path,
         relationships,
@@ -127,6 +135,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   deletions,
                   fieldPrefix: '',
                   fields: field.fields,
+                  texts,
                   numbers,
                   path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                   relationships,
@@ -151,6 +160,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 deletions,
                 fieldPrefix: '',
                 fields: field.fields,
+                texts,
                 numbers,
                 path: `${sanitizedPath}${field.name}.${i}`,
                 relationships,
@@ -194,6 +204,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     deletions,
                     fieldPrefix: '',
                     fields: block.fields,
+                    texts,
                     numbers,
                     path: `${blockFieldPath}.${row._order - 1}`,
                     relationships,
@@ -224,6 +235,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   deletions,
                   fieldPrefix: '',
                   fields: block.fields,
+                  texts,
                   numbers,
                   path: `${blockFieldPath}.${i}`,
                   relationships,
@@ -279,6 +291,40 @@ export const traverseFields = <T extends Record<string, unknown>>({
             field,
             ref: result,
             relations: relationPathMatch,
+          })
+        }
+
+        return result
+      }
+
+      if (field.type === 'text' && field?.hasMany) {
+        const textPathMatch = texts[`${sanitizedPath}${field.name}`]
+        if (!textPathMatch) return result
+
+        if (field.localized) {
+          result[field.name] = {}
+          const textsByLocale: Record<string, Record<string, unknown>[]> = {}
+
+          textPathMatch.forEach((row) => {
+            if (typeof row.locale === 'string') {
+              if (!textsByLocale[row.locale]) textsByLocale[row.locale] = []
+              textsByLocale[row.locale].push(row)
+            }
+          })
+
+          Object.entries(textsByLocale).forEach(([locale, texts]) => {
+            transformHasManyText({
+              field,
+              locale,
+              textRows: texts,
+              ref: result,
+            })
+          })
+        } else {
+          transformHasManyText({
+            field,
+            textRows: textPathMatch,
+            ref: result,
           })
         }
 
@@ -374,6 +420,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   deletions,
                   fieldPrefix: groupFieldPrefix,
                   fields: field.fields,
+                  texts,
                   numbers,
                   path: `${sanitizedPath}${field.name}`,
                   relationships,
@@ -390,11 +437,27 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 deletions,
                 fieldPrefix: groupFieldPrefix,
                 fields: field.fields,
+                texts,
                 numbers,
                 path: `${sanitizedPath}${field.name}`,
                 relationships,
                 table,
               })
+            }
+
+            break
+          }
+
+          case 'text': {
+            let val = fieldData
+            if (typeof fieldData === 'string') {
+              val = String(fieldData)
+            }
+
+            if (typeof locale === 'string') {
+              ref[locale] = val
+            } else {
+              result[field.name] = val
             }
 
             break

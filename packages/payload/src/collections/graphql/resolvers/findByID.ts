@@ -2,6 +2,7 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findByID from '../../operations/findByID'
 
 export type Resolver<T> = (
@@ -22,16 +23,20 @@ export default function findByIDResolver<T extends keyof GeneratedTypes['collect
   collection: Collection,
 ): Resolver<GeneratedTypes['collections'][T]> {
   return async function resolver(_, args, context) {
-    const { req } = context
-    if (args.locale) req.locale = args.locale
-    if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty(req, 'locale')
+    req = isolateObjectProperty(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
 
     const options = {
       id: args.id,
       collection,
       depth: 0,
       draft: args.draft,
-      req,
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await findByID(options)

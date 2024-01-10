@@ -1,6 +1,6 @@
 import type { Response } from 'express'
 
-import type { PayloadRequest } from '../../../express/types'
+import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { GeneratedTypes } from '../../../index'
 import type { Payload } from '../../../payload'
 import type { Result } from '../login'
@@ -13,6 +13,7 @@ import login from '../login'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
+  context?: RequestContext
   data: {
     email: string
     password: string
@@ -32,18 +33,25 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   const {
     collection: collectionSlug,
+    context,
     data,
     depth,
-    fallbackLocale,
-    locale,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
+    locale: localeArg = null,
     overrideAccess = true,
     req = {} as PayloadRequest,
     res,
     showHiddenFields,
   } = options
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
+  const locale = localeArg || req?.locale || defaultLocale
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
+    : null
 
   if (!collection) {
     throw new APIError(
@@ -54,8 +62,6 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   req.payloadAPI = req.payloadAPI || 'local'
   req.payload = payload
   req.i18n = i18nInit(payload.config.i18n)
-  req.locale = undefined
-  req.fallbackLocale = undefined
 
   if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
@@ -71,7 +77,10 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   if (locale) args.req.locale = locale
-  if (fallbackLocale) args.req.fallbackLocale = fallbackLocale
+  if (fallbackLocale) {
+    args.req.fallbackLocale =
+      typeof fallbackLocaleArg !== 'undefined' ? fallbackLocaleArg : fallbackLocale || defaultLocale
+  }
 
   return login<TSlug>(args)
 }

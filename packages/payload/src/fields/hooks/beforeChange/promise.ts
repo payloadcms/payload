@@ -58,7 +58,7 @@ export const promise = async ({
   skipValidation,
 }: Args): Promise<void> => {
   const passesCondition = field.admin?.condition
-    ? field.admin.condition(data, siblingData, { user: req.user })
+    ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
 
@@ -120,6 +120,7 @@ export const promise = async ({
         jsonError,
         operation,
         payload: req.payload,
+        req,
         siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         t: req.t,
         user: req.user,

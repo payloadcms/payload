@@ -13,6 +13,7 @@
 
   & > .field-type {
     margin-bottom: var(--spacing-field);
+    max-width: 100%;
 
     &[type='hidden'] {
       margin-bottom: 0;

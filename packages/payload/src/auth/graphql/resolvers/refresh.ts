@@ -1,5 +1,7 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import getExtractJWT from '../../getExtractJWT'
 import refresh from '../../operations/refresh'
 
@@ -17,7 +19,7 @@ function refreshResolver(collection: Collection) {
     const options = {
       collection,
       depth: 0,
-      req: context.req,
+      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
       res: context.res,
       token,
     }

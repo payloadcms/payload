@@ -67,6 +67,10 @@ export const DataHooksGlobal: GlobalConfig = {
 
         afterRead: [
           ({ global, field, context }) => {
+            if (context['field_beforeChange_GlobalAndField_override']) {
+              return context['field_beforeChange_GlobalAndField_override']
+            }
+
             return (
               (context['field_beforeChange_GlobalAndField'] as string) +
               JSON.stringify(global) +

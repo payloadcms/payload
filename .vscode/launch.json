@@ -48,6 +48,13 @@
       "type": "node-terminal"
     },
     {
+      "command": "pnpm run dev uploads",
+      "cwd": "${workspaceFolder}",
+      "name": "Run Dev Uploads",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "command": "PAYLOAD_BUNDLER=vite pnpm run dev fields",
       "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields (Vite)",
@@ -56,6 +63,20 @@
       "env": {
         "NODE_ENV": "production"
       }
+    },
+    {
+      "command": "pnpm run test:int live-preview",
+      "cwd": "${workspaceFolder}",
+      "name": "Live Preview Int Tests",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "pnpm run test:int plugin-search",
+      "cwd": "${workspaceFolder}",
+      "name": "Search Plugin Int Tests",
+      "request": "launch",
+      "type": "node-terminal"
     },
     {
       "command": "ts-node ./packages/payload/src/bin/index.ts build",

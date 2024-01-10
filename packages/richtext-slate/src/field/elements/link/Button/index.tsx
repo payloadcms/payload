@@ -1,3 +1,5 @@
+'use client'
+
 import type { Fields } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'

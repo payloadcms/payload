@@ -33,6 +33,16 @@ export const buildFindManyArgs = ({
     },
   }
 
+  if (adapter.tables[`${tableName}_texts`]) {
+    result.with._texts = {
+      columns: {
+        id: false,
+        parent: false,
+      },
+      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
+    }
+  }
+
   if (adapter.tables[`${tableName}_numbers`]) {
     result.with._numbers = {
       columns: {

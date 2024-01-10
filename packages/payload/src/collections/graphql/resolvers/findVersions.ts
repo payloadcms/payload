@@ -7,6 +7,7 @@ import type { PayloadRequest } from '../../../express/types'
 import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findVersions from '../../operations/findVersions'
 
 export type Resolver = (
@@ -27,15 +28,20 @@ export type Resolver = (
 
 export default function findVersionsResolver(collection: Collection): Resolver {
   async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty(req, 'locale')
+    req = isolateObjectProperty(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
 
     const options = {
       collection,
       depth: 0,
       limit: args.limit,
       page: args.page,
-      req: context.req,
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
       sort: args.sort,
       where: args.where,
     }

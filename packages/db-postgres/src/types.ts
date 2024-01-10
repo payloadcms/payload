@@ -56,8 +56,8 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   sessions: {
     [id: string]: {
       db: DrizzleTransaction
-      reject: () => void
-      resolve: () => void
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
     }
   }
   tables: Record<string, GenericTable>
@@ -86,8 +86,8 @@ declare module 'payload' {
     sessions: {
       [id: string]: {
         db: DrizzleTransaction
-        reject: () => void
-        resolve: () => void
+        reject: () => Promise<void>
+        resolve: () => Promise<void>
       }
     }
     tables: Record<string, GenericTable>

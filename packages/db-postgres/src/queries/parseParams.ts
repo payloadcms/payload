@@ -107,7 +107,11 @@ export async function parseParams({
                   }
                 })
 
-                if (['json', 'richText'].includes(field.type) && Array.isArray(pathSegments)) {
+                if (
+                  ['json', 'richText'].includes(field.type) &&
+                  Array.isArray(pathSegments) &&
+                  pathSegments.length > 1
+                ) {
                   const segments = pathSegments.slice(1)
                   segments.unshift(table[columnName].name)
 
@@ -121,12 +125,28 @@ export async function parseParams({
                     })
 
                     constraints.push(sql.raw(jsonQuery))
+                    break
                   }
 
-                  if (field.type === 'json') {
-                    const jsonQuery = convertPathToJSONTraversal(pathSegments)
-                    constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
+                  const jsonQuery = convertPathToJSONTraversal(pathSegments)
+                  const operatorKeys = {
+                    contains: { operator: 'ilike', wildcard: '%' },
+                    equals: { operator: '=', wildcard: '' },
+                    exists: { operator: val === true ? 'is not null' : 'is null' },
+                    like: { operator: 'like', wildcard: '%' },
+                    not_equals: { operator: '<>', wildcard: '' },
                   }
+                  let formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
+
+                  if (operator === 'exists') {
+                    formattedValue = ''
+                  }
+
+                  constraints.push(
+                    sql.raw(
+                      `${table[columnName].name}${jsonQuery} ${operatorKeys[operator].operator} ${formattedValue}`,
+                    ),
+                  )
 
                   break
                 }

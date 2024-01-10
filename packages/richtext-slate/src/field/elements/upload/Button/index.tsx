@@ -1,3 +1,5 @@
+'use client'
+
 import { useListDrawer } from 'payload/components/elements'
 import React, { Fragment, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'

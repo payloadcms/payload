@@ -1,0 +1,50 @@
+# Order matters. The last matching pattern takes precedence.
+
+### Catch-all ###
+* @denolfe @jmikrut @DanRibbens
+.* @denolfe @jmikrut @DanRibbens
+
+### Core ###
+/packages/payload/ @denolfe @jmikrut @DanRibbens
+/packages/payload/src/uploads/ @denolfe
+/packages/payload/src/admin/ @jmikrut @jacobsfletch @JarrodMFlesch
+
+### Adapters ###
+/packages/bundler-*/ @denolfe @jmikrut @DanRibbens @JarrodMFlesch
+/packages/db-*/ @denolfe @jmikrut @DanRibbens
+/packages/richtext-*/ @denolfe @jmikrut @DanRibbens @AlessioGr
+
+### Plugins ###
+/packages/plugin-*/ @denolfe @jmikrut @DanRibbens @jacobsfletch @JarrodMFlesch @AlessioGr
+/packages/plugin-cloud*/ @denolfe
+/packages/plugin-form-builder/ @jacobsfletch
+/packages/plugin-live-preview*/ @jacobsfletch
+/packages/plugin-nested-docs/ @jacobsfletch
+/packages/plugin-password-protection/ @jmikrut
+/packages/plugin-redirects/ @jacobsfletch
+/packages/plugin-search/ @jacobsfletch
+/packages/plugin-sentry/ @JessChowdhury
+/packages/plugin-seo/ @jacobsfletch
+/packages/plugin-stripe/ @jacobsfletch
+/packages/plugin-zapier/ @JarrodMFlesch
+
+### Examples ###
+/examples/ @jacobsfletch
+/examples/testing/ @JarrodMFlesch
+/examples/email/ @JessChowdhury
+/examples/whitelabel/ @JessChowdhury
+
+### Templates ###
+/templates/ @jacobsfletch
+/templates/blank/ @denolfe
+
+### Misc ###
+/packages/create-payload-app/ @denolfe
+/packages/eslint-config-payload/ @denolfe
+/packages/payload-admin-bar/ @jacobsfletch
+
+### Root ###
+/package.json @denolfe
+/scripts/ @denolfe
+/.github/ @denolfe
+/.github/CODEOWNERS @denolfe

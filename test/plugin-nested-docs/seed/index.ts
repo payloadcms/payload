@@ -1,7 +1,9 @@
 import type { Payload } from '../../../packages/payload/src'
+import type { PayloadRequest } from '../../../packages/payload/src/express/types'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
+  const req = {} as PayloadRequest
 
   try {
     await payload.create({
@@ -10,40 +12,49 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         email: 'demo@payloadcms.com',
         password: 'demo',
       },
+      req,
     })
 
     const { id: parentID } = await payload.create({
       collection: 'pages',
       data: {
-        title: 'Parent page',
         slug: 'parent-page',
+        title: 'Parent page',
+        _status: 'published',
       },
+      req,
     })
 
     const { id: childID } = await payload.create({
       collection: 'pages',
       data: {
-        title: 'Child page',
-        slug: 'child-page',
         parent: parentID,
+        slug: 'child-page',
+        title: 'Child page',
+        _status: 'published',
       },
+      req,
     })
 
     await payload.create({
       collection: 'pages',
       data: {
-        title: 'Grandchild page',
-        slug: 'grandchild-page',
         parent: childID,
+        slug: 'grandchild-page',
+        title: 'Grandchild page',
+        _status: 'published',
       },
+      req,
     })
 
     await payload.create({
       collection: 'pages',
       data: {
-        title: 'Sister page',
         slug: 'sister-page',
+        title: 'Sister page',
+        _status: 'published',
       },
+      req,
     })
     return true
   } catch (err) {

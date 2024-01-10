@@ -37,6 +37,7 @@ type FindArgs = {
   page?: number
   query?: Where
   slug?: string
+  sort?: string
 }
 
 type FindByIDArgs = {
@@ -102,8 +103,8 @@ type DocsResponse<T> = {
 }
 
 const headers = {
-  'Content-Type': 'application/json',
   Authorization: '',
+  'Content-Type': 'application/json',
 }
 
 type QueryResponse<T> = {
@@ -144,7 +145,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}`, options)
     const { status } = response
     const { doc } = await response.json()
-    return { status, doc }
+    return { doc, status }
   }
 
   async delete<T = any>(id: string, args?: DeleteArgs): Promise<DocResponse<T>> {
@@ -161,7 +162,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}/${id}`, options)
     const { status } = response
     const doc = await response.json()
-    return { status, doc }
+    return { doc, status }
   }
 
   async deleteMany<T = any>(args: DeleteManyArgs): Promise<DocsResponse<T>> {
@@ -188,7 +189,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options)
     const { status } = response
     const json = await response.json()
-    return { status, docs: json.docs, errors: json.errors }
+    return { docs: json.docs, errors: json.errors, status }
   }
 
   async endpoint<T = any>(
@@ -205,7 +206,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}${path}`, options)
     const { status } = response
     const data = await response.json()
-    return { status, data }
+    return { data, status }
   }
 
   async endpointWithAuth<T = any>(
@@ -226,7 +227,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}${path}`, options)
     const { status } = response
     const data = await response.json()
-    return { status, data }
+    return { data, status }
   }
 
   async find<T = any>(args?: FindArgs): Promise<QueryResponse<T>> {
@@ -243,6 +244,7 @@ export class RESTClient {
         ...(args?.query ? { where: args.query } : {}),
         limit: args?.limit,
         page: args?.page,
+        sort: args?.sort,
       },
       {
         addQueryPrefix: true,
@@ -254,7 +256,7 @@ export class RESTClient {
     const { status } = response
     const result = await response.json()
     if (result.errors) throw new Error(result.errors[0].message)
-    return { status, result }
+    return { result, status }
   }
 
   async findByID<T = any>(args: FindByIDArgs): Promise<DocResponse<T>> {
@@ -274,7 +276,7 @@ export class RESTClient {
     )
     const { status } = response
     const doc = await response.json()
-    return { status, doc }
+    return { doc, status }
   }
 
   async findGlobal<T = any>(args?: FindGlobalArgs): Promise<DocResponse<T>> {
@@ -290,14 +292,14 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options)
     const { status } = response
     const doc = await response.json()
-    return { status, doc }
+    return { doc, status }
   }
 
   async login(incomingArgs?: LoginArgs): Promise<string> {
     const args = incomingArgs ?? {
+      collection: 'users',
       email: devUser.email,
       password: devUser.password,
-      collection: 'users',
     }
 
     const response = await fetch(`${this.serverURL}/api/${args.collection}/login`, {
@@ -337,7 +339,7 @@ export class RESTClient {
   }
 
   async update<T = any>(args: UpdateArgs<T>): Promise<DocResponse<T>> {
-    const { id, query, data } = args
+    const { id, data, query } = args
 
     const options = {
       body: JSON.stringify(data),
@@ -354,7 +356,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, options)
     const { status } = response
     const json = await response.json()
-    return { status, doc: json.doc, errors: json.errors }
+    return { doc: json.doc, errors: json.errors, status }
   }
 
   async updateGlobal<T = any>(args: UpdateGlobalArgs): Promise<DocResponse<T>> {
@@ -373,7 +375,7 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options)
     const { status } = response
     const { result } = await response.json()
-    return { status, doc: result }
+    return { doc: result, status }
   }
 
   async updateMany<T = any>(args: UpdateManyArgs<T>): Promise<DocsResponse<T>> {
@@ -401,6 +403,6 @@ export class RESTClient {
     const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options)
     const { status } = response
     const json = await response.json()
-    return { status, docs: json.docs, errors: json.errors }
+    return { docs: json.docs, errors: json.errors, status }
   }
 }
