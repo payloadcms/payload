@@ -31,5 +31,5 @@
     "src/**/*.json",
     "../ui/src/createClientConfig.ts"
   ],
-  "references": [{ "path": "../payload" }, { "path": "../ui" }]
+  "references": [{ "path": "../payload" }, { "path": "../ui" }, { "path": "../translations" }]
 }
