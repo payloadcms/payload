@@ -8,10 +8,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
-    "clean": "rimraf dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
     "prepublishOnly": "yarn clean && yarn build"
   },
   "keywords": [
