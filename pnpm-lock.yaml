@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 importers:
 
   .:
@@ -461,8 +457,8 @@ importers:
         specifier: 1.0.9
         version: 1.0.9
       mongodb:
-        specifier: 4.17.1
-        version: 4.17.1
+        specifier: 6.0.0
+        version: 6.0.0
       mongodb-memory-server:
         specifier: ^9
         version: 9.1.4
@@ -4340,7 +4336,6 @@ packages:
     requiresBuild: true
     dependencies:
       sparse-bitfield: 3.0.3
-    optional: true
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -7479,6 +7474,11 @@ packages:
   /bson@5.5.1:
     resolution: {integrity: sha512-ix0EwukN2EpC0SRWIj/7B5+A6uQMQy6KMREI9qQqvgpkV2frH63T0UDVd1SYedL6dNCmDBYB3QtXi4ISk9YT+g==}
     engines: {node: '>=14.20.1'}
+    dev: true
+
+  /bson@6.2.0:
+    resolution: {integrity: sha512-ID1cI+7bazPDyL9wYy9GaQ8gEEohWvcUl/Yf0dIdutJxnmInEEyCsb4awy/OiBfall7zBA179Pahi3vCdFze3Q==}
+    engines: {node: '>=16.20.1'}
     dev: true
 
   /buffer-crc32@0.2.13:
@@ -13147,7 +13147,6 @@ packages:
   /memory-pager@1.5.0:
     resolution: {integrity: sha512-ZS4Bp4r/Zoeq6+NLJpP+0Zzm0pR8whtGPf1XExKLJBAczGMnSi3It14OiNCStjQjM6NU1okjQGSxgEZN8eBYKg==}
     requiresBuild: true
-    optional: true
 
   /meow@12.1.1:
     resolution: {integrity: sha512-BhXM0Au22RwUneMPwSCnyhTOizdWoIEPU9sp0Aqa1PnDMR5Wv2FGXYDjuzJEIX+Eo2Rb8xuYe5jrnm5QowQFkw==}
@@ -13446,6 +13445,38 @@ packages:
       socks: 2.7.1
     optionalDependencies:
       '@mongodb-js/saslprep': 1.1.0
+    dev: true
+
+  /mongodb@6.0.0:
+    resolution: {integrity: sha512-wUIYesF4DTyDccm0noE5TwGi9ISdXUAi9T2cQ4xPc+EUBZG44bfMVt2ecOG5Ypca7eCz3oRpJm6YI6c7jAnuNw==}
+    engines: {node: '>=16.20.1'}
+    peerDependencies:
+      '@aws-sdk/credential-providers': ^3.188.0
+      '@mongodb-js/zstd': ^1.1.0
+      gcp-metadata: ^5.2.0
+      kerberos: ^2.0.1
+      mongodb-client-encryption: '>=6.0.0 <7'
+      snappy: ^7.2.2
+      socks: ^2.7.1
+    peerDependenciesMeta:
+      '@aws-sdk/credential-providers':
+        optional: true
+      '@mongodb-js/zstd':
+        optional: true
+      gcp-metadata:
+        optional: true
+      kerberos:
+        optional: true
+      mongodb-client-encryption:
+        optional: true
+      snappy:
+        optional: true
+      socks:
+        optional: true
+    dependencies:
+      '@mongodb-js/saslprep': 1.1.0
+      bson: 6.2.0
+      mongodb-connection-string-url: 2.6.0
     dev: true
 
   /mongoose-aggregate-paginate-v2@1.0.6:
@@ -16611,7 +16642,6 @@ packages:
     requiresBuild: true
     dependencies:
       memory-pager: 1.5.0
-    optional: true
 
   /spdx-correct@3.2.0:
     resolution: {integrity: sha512-kN9dJbvnySHULIluDHy32WHRUu3Og7B9sbY7tsFLctQkIqnMh3hErYgdMjTYuqmcXX+lK5T1lnUt3G7zNswmZA==}
@@ -18375,3 +18405,7 @@ packages:
     name: readable-stream
     version: 0.3.1
     dev: true
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
