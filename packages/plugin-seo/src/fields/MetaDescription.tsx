@@ -1,7 +1,5 @@
 'use client'
 
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import Textarea from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
 import type { FieldType, Options } from '@payloadcms/ui'
 import type { TextareaField } from 'payload/types'
 
