@@ -22,7 +22,7 @@
       "payload-config": ["./src/payload.config.ts"],
       "@payloadcms/next/layouts/*": ["../next/src/layouts/*"],
       "@payloadcms/next/pages/*": ["../next/src/pages/*"],
-      "@payloadcms/next/routes/*": ["../next/src/routes/*"],
+      "@payloadcms/next/routes": ["../next/src/routes"],
       "@payloadcms/next/utilities/*": ["../next/src/utilities/*"],
       "@payloadcms/next/translations/*": ["../next/src/translations/*"]
     }

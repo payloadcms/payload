@@ -26,12 +26,10 @@
       "require": "./src/pages/*.ts",
       "types": "./src/pages/*.ts"
     },
-    "./routes/*": {
-      "import": "./src/routes/*.ts",
-      "require": "./src/routes/*.ts",
-      "types": "./src/routes/*.ts"
-    },
-    "./dist/routes/*": "./dist/routes/*.js"
+    "./routes": {
+      "import": "./src/routes/index.ts",
+      "require": "./src/routes/index.ts"
+    }
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -76,10 +74,10 @@
         "require": "./dist/app/*.js",
         "types": "./dist/app/*.d.ts"
       },
-      "./routes/*": {
-        "import": "./dist/routes/*.js",
-        "require": "./dist/routes/*.js",
-        "types": "./dist/routes/*.d.ts"
+      "./routes": {
+        "import": "./dist/routes/index.js",
+        "require": "./dist/routes/index.js",
+        "types": "./dist/routes/index.d.ts"
       }
     },
     "registry": "https://registry.npmjs.org/",
