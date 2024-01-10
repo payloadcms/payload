@@ -33,7 +33,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
-    "mongodb": "4.17.1",
+    "mongodb": "6.0.0",
     "mongodb-memory-server": "^9",
     "payload": "workspace:*"
   },
