@@ -85,10 +85,15 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  if (limit > 0) {
+  if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
     paginationOptions.options.limit = limit
+
+    // Disable pagination if limit is 0
+    if (limit === 0) {
+      paginationOptions.pagination = false
+    }
   }
 
   const result = await Model.paginate(query, paginationOptions)
