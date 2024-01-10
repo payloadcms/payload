@@ -2,6 +2,7 @@
   "name": "@payloadcms/translations",
   "version": "0.0.1",
   "private": true,
+  "main": "./dist/index.js",
   "scripts": {
     "build": "npx ts-node ./src/build.ts",
     "clean": "rimraf {dist,*.tsbuildinfo}",

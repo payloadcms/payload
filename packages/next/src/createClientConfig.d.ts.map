@@ -1,1 +1,0 @@
-{"version":3,"file":"createClientConfig.d.ts","sourceRoot":"","sources":["createClientConfig.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,KAAK,EAAE,YAAY,EAAE,eAAe,EAAE,MAAM,eAAe,CAAA;AAEzE,eAAO,MAAM,aAAa,iBAmBzB,CAAA;AAED,eAAO,MAAM,cAAc,WAAY,KAAK,EAAE,KAAG,KAAK,EAA+B,CAAA;AAErF,eAAO,MAAM,kBAAkB,kBACd,eAAe,GAAG,QAAQ,eAAe,CAAC,KACxD,QAAQ,YAAY,CA6BtB,CAAA"}

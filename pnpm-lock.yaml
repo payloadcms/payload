@@ -509,6 +509,9 @@ importers:
 
   packages/dev:
     dependencies:
+      '@payloadcms/next':
+        specifier: workspace:*
+        version: link:../next
       next:
         specifier: 14.0.2
         version: 14.0.2(@babel/core@7.22.20)(react-dom@18.3.0-canary-b36ae8d7a-20231207)(react@18.3.0-canary-b36ae8d7a-20231207)(sass@1.69.5)
@@ -522,9 +525,6 @@ importers:
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../db-mongodb
-      '@payloadcms/next':
-        specifier: workspace:*
-        version: link:../next
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../richtext-lexical
