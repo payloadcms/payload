@@ -1,4 +1,4 @@
-import type { PayloadT, RequestContext } from '../../..'
+import type { Payload, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../index'
 import type { PayloadRequest } from '../../../types'
 import type { Result } from '../login'
@@ -25,7 +25,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
 }
 
 async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   const {

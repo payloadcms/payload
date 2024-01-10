@@ -1,5 +1,5 @@
 import type { GeneratedTypes } from '../../../'
-import type { PayloadT } from '../../../'
+import type { Payload } from '../../../'
 import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document } from '../../../types'
 
@@ -29,7 +29,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
   const {

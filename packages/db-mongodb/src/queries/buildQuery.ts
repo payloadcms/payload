@@ -1,4 +1,4 @@
-import type { Field, PayloadT, Where } from 'payload/types'
+import type { Field, Payload, Where } from 'payload/types'
 
 import { QueryError } from 'payload/errors'
 
@@ -12,7 +12,7 @@ type GetBuildQueryPluginArgs = {
 export type BuildQueryArgs = {
   globalSlug?: string
   locale?: string
-  payload: PayloadT
+  payload: Payload
   where: Where
 }
 

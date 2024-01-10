@@ -1,4 +1,4 @@
-import type { GeneratedTypes, PayloadT } from '../../../'
+import type { GeneratedTypes, Payload } from '../../../'
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document, Where } from '../../../types'
@@ -31,7 +31,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['collections'][T]>>> {
   const {

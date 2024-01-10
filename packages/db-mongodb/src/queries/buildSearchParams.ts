@@ -1,5 +1,5 @@
 import type { PathToQuery } from 'payload/database'
-import type { Field, PayloadT } from 'payload/types'
+import type { Field, Payload } from 'payload/types'
 import type { Operator } from 'payload/types'
 
 import objectID from 'bson-objectid'
@@ -42,7 +42,7 @@ export async function buildSearchParam({
   incomingPath: string
   locale?: string
   operator: string
-  payload: PayloadT
+  payload: Payload
   val: unknown
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting

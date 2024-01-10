@@ -2,7 +2,7 @@
 import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLString } from 'graphql'
 import { singular } from 'pluralize'
 
-import type { PayloadT } from '../../'
+import type { Payload } from '../../'
 import type { Field } from '../../fields/config/types'
 import type { SanitizedGlobalConfig } from '../config/types'
 
@@ -21,7 +21,7 @@ import findVersionsResolver from './resolvers/findVersions'
 import restoreVersionResolver from './resolvers/restoreVersion'
 import updateResolver from './resolvers/update'
 
-function initGlobalsGraphQL(payload: PayloadT): void {
+function initGlobalsGraphQL(payload: Payload): void {
   Object.keys(payload.globals.config).forEach((slug) => {
     const global: SanitizedGlobalConfig = payload.globals.config[slug]
     const { fields, graphQL, versions } = global

@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { PayloadT, RequestContext } from '../../..'
+import type { Payload, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
@@ -26,7 +26,7 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
 }
 
 export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {

@@ -1,9 +1,9 @@
-import type { PayloadT } from '..'
+import type { Payload } from '..'
 import type { PayloadRequest } from '../types'
 
 type Args = {
   id?: number | string
-  payload: PayloadT
+  payload: Payload
   req?: PayloadRequest
   slug: string
 }

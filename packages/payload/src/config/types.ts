@@ -11,7 +11,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
-import type { PayloadT } from '..'
+import type { Payload } from '..'
 import type {
   DocumentTab,
   DocumentTabComponent,
@@ -114,7 +114,7 @@ export function hasTransportOptions(
 
 export type GraphQLExtension = (
   graphQL: typeof GraphQL,
-  payload: PayloadT,
+  payload: Payload,
 ) => Record<string, unknown>
 
 export type InitOptions = {
@@ -163,7 +163,7 @@ export type InitOptions = {
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
-  onInit?: (payload: PayloadT) => Promise<void> | void
+  onInit?: (payload: Payload) => Promise<void> | void
 }
 
 /**
@@ -528,7 +528,7 @@ export type Config = {
   custom?: Record<string, any>
 
   /** Pass in a database adapter for use on this project. */
-  db: (args: { payload: PayloadT }) => BaseDatabaseAdapter
+  db: (args: { payload: Payload }) => BaseDatabaseAdapter
   /** Enable to expose more detailed error information. */
   debug?: boolean
   /**
@@ -633,7 +633,7 @@ export type Config = {
    */
   maxDepth?: number
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
-  onInit?: (payload: PayloadT) => Promise<void> | void
+  onInit?: (payload: Payload) => Promise<void> | void
   /**
    * An array of Payload plugins.
    *

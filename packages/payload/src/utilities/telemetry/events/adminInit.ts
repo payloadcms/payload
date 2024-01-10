@@ -1,4 +1,4 @@
-import type { PayloadT } from '../../..'
+import type { Payload } from '../../..'
 import type { User } from '../../../auth'
 
 import { sendEvent } from '..'
@@ -12,7 +12,7 @@ export type AdminInitEvent = {
 
 type Args = {
   headers: Request['headers']
-  payload: PayloadT
+  payload: Payload
   user: User | null
 }
 export const adminInit = ({ headers, payload, user }: Args): void => {

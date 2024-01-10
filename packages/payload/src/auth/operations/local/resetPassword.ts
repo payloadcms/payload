@@ -1,4 +1,4 @@
-import type { PayloadT, RequestContext } from '../../..'
+import type { Payload, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 import type { Result } from '../resetPassword'
@@ -21,7 +21,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 async function localResetPassword<T extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<T>,
 ): Promise<Result> {
   const {

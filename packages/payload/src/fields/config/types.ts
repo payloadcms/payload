@@ -6,7 +6,7 @@ import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is r
 import type { TFunction } from '@payloadcms/translations'
 import type React from 'react'
 
-import type { PayloadT } from '../../'
+import type { Payload } from '../../'
 // TODO(JAKE): fix admin component imports since fields moved
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
 import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
@@ -124,7 +124,7 @@ export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
   data: Partial<TData>
   id?: number | string
   operation?: Operation
-  payload?: PayloadT
+  payload?: Payload
   req?: PayloadRequest
   siblingData: Partial<TSiblingData>
   t: TFunction

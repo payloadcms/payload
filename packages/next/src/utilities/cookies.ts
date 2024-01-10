@@ -1,4 +1,4 @@
-import type { PayloadT, SanitizedCollectionConfig } from 'payload/types'
+import type { Payload, SanitizedCollectionConfig } from 'payload/types'
 
 type CookieOptions = {
   domain?: string
@@ -71,7 +71,7 @@ type GeneratePayloadCookieArgs = {
   /* The auth collection config */
   collectionConfig: SanitizedCollectionConfig
   /* An instance of payload */
-  payload: PayloadT
+  payload: Payload
   /* The token to be stored in the cookie */
   token: string
 }
