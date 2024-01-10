@@ -1,18 +1,20 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "1.0.15",
+  "version": "2.0.0",
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-seo.git",
   "description": "SEO plugin for Payload",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
-    "clean": "rimraf dist",
-    "prepublishOnly": "yarn clean && yarn build"
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "keywords": [
     "payload",
@@ -26,13 +28,13 @@
   "author": "dev@payloadcms.com",
   "license": "MIT",
   "peerDependencies": {
-    "payload": "^0.18.5 || ^1.0.0 || ^2.0.0",
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "payload": "^2.7.0",
+    "react": "^18.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/express": "^4.17.9",
-    "@types/react": "18.0.21",
+    "@types/express": "4.17.17",
+    "@types/react": "18.2.15",
     "payload": "workspace:*",
     "react": "^18.0.0"
   },
