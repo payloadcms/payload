@@ -27,21 +27,23 @@ const batchAndLoadDocs =
     // We will replace nulls with injected docs as they are retrieved
     const docs: (TypeWithID | null)[] = keys.map(() => null)
 
-    // Batch IDs by their `find` args
-    // so we can make one find query per combination of collection, depth, locale, and fallbackLocale.
-
-    // Resulting shape will be as follows:
-
-    // {
-    //   // key is stringified set of find args
-    //   '[null,"pages",2,0,"es","en",false,false]': [
-    //     // value is array of IDs to find with these args
-    //     'q34tl23462346234524',
-    //     '435523540194324280',
-    //     '2346245j35l3j5234532li',
-    //   ],
-    //   // etc
-    // };
+    /**
+    * Batch IDs by their `find` args
+    * so we can make one find query per combination of collection, depth, locale, and fallbackLocale.
+    *
+    * Resulting shape will be as follows:
+      {
+        // key is stringified set of find args
+        '[null,"pages",2,0,"es","en",false,false]': [
+          // value is array of IDs to find with these args
+          'q34tl23462346234524',
+          '435523540194324280',
+          '2346245j35l3j5234532li',
+        ],
+        // etc
+      };
+    *
+    **/
 
     const batchByFindArgs = keys.reduce((batches, key) => {
       const [

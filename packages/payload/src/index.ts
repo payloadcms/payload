@@ -57,7 +57,7 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
 /**
  * @description Payload
  */
-export class Payload<TGeneratedTypes extends GeneratedTypes> {
+export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   Mutation: { fields: { [key: string]: any }; name: string } = { name: 'Mutation', fields: {} }
 
   Query: { fields: { [key: string]: any }; name: string } = { name: 'Query', fields: {} }
@@ -436,7 +436,7 @@ export const getPayload = async (options?: InitOptions): Promise<Payload<Generat
   }
 
   if (!cached.promise) {
-    cached.promise = new Payload<GeneratedTypes>().init(options)
+    cached.promise = new BasePayload<GeneratedTypes>().init(options)
   }
 
   try {
@@ -458,7 +458,7 @@ type GeneratedTypes = {
   }
 }
 
-type PayloadT = Payload<GeneratedTypes>
+type Payload = BasePayload<GeneratedTypes>
 
 interface RequestContext {
   [key: string]: unknown
@@ -466,4 +466,4 @@ interface RequestContext {
 
 // type DatabaseAdapter = BaseDatabaseAdapter
 
-export type { GeneratedTypes, PayloadT, RequestContext }
+export type { GeneratedTypes, Payload, RequestContext }

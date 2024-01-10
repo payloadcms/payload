@@ -1,4 +1,5 @@
-import type { GeneratedTypes, PayloadT } from '../../../'
+import type { Payload } from '../../..'
+import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest, RequestContext } from '../../../types'
 import type { Document, Where } from '../../../types'
 import type { BulkOperationResult } from '../../config/types'
@@ -38,19 +39,19 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> =
   | ManyOptions<TSlug>
 
 async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: ByIDOptions<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]>
 async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: ManyOptions<TSlug>,
 ): Promise<BulkOperationResult<TSlug>>
 async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
 async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {

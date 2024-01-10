@@ -3,7 +3,7 @@ import type DataLoader from 'dataloader'
 import type { Request } from 'express'
 import type { UploadedFile } from 'express-fileupload'
 
-import type { PayloadT } from '..'
+import type { Payload } from '..'
 import type { User } from '../auth/types'
 import type { Collection, TypeWithID } from '../collections/config/types'
 import type { FindOneArgs } from '../database/types'
@@ -46,7 +46,7 @@ export declare type PayloadRequest<U = any> = Request & {
    */
   locale?: string
   /** The global payload object */
-  payload: PayloadT
+  payload: Payload
   /** What triggered this request */
   payloadAPI?: 'GraphQL' | 'REST' | 'local'
   /** Optimized document loader */

@@ -1,6 +1,6 @@
 import { URL } from 'url'
 
-import type { PayloadT } from '..'
+import type { Payload } from '..'
 import type { Collection } from '../collections/config/types'
 import type { EmailOptions, SanitizedConfig } from '../config/types'
 import type { PayloadRequest } from '../types'
@@ -12,7 +12,7 @@ type Args = {
   disableEmail: boolean
   emailOptions: EmailOptions
   req: PayloadRequest
-  sendEmail: PayloadT['sendEmail']
+  sendEmail: Payload['sendEmail']
   token: string
   user: User
 }

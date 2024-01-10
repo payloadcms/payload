@@ -1,4 +1,4 @@
-import type { PayloadT } from '..'
+import type { Payload } from '..'
 import type { PayloadRequest } from '../exports/types'
 import type { FileToSave } from './types'
 
@@ -6,7 +6,7 @@ import { FileUploadError } from '../errors'
 import saveBufferToFile from './saveBufferToFile'
 
 export const uploadFiles = async (
-  payload: PayloadT,
+  payload: Payload,
   files: FileToSave[],
   req: PayloadRequest,
 ): Promise<void> => {

@@ -1,13 +1,13 @@
 import type { SanitizedConfig, PayloadRequest, CustomPayloadRequest } from 'payload/types'
 import { getAuthenticatedUser } from 'payload/auth'
-import { PayloadT, getPayload } from 'payload'
+import { Payload, getPayload } from 'payload'
 import { URL } from 'url'
 import { parseCookies } from './cookies'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getNextI18n } from './getNextI18n'
 
 type GetRequestLocalesArgs = {
-  localization: Exclude<PayloadT['config']['localization'], false>
+  localization: Exclude<Payload['config']['localization'], false>
   requestData?: Record<string, any>
   searchParams?: URLSearchParams
 }

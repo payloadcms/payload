@@ -1,4 +1,4 @@
-import type { PayloadT } from '..'
+import type { Payload } from '..'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
 import type { PayloadRequest } from '../types'
@@ -14,7 +14,7 @@ type Args = {
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
-  payload: PayloadT
+  payload: Payload
   req?: PayloadRequest
 }
 

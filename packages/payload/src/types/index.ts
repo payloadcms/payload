@@ -6,7 +6,7 @@ import type { User } from '../auth/types'
 import type { Collection, TypeWithID, TypeWithTimestamps } from '../collections/config/types'
 import type { FindOneArgs } from '../database/types'
 import type { validOperators } from './constants'
-export type { PayloadT } from '../'
+export type { Payload as Payload } from '../'
 
 export type CustomPayloadRequest<U = any> = {
   /**

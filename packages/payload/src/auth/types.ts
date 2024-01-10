@@ -1,6 +1,6 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { PayloadT } from '../'
+import type { Payload } from '../'
 import type { PayloadRequest, Where } from '../types'
 
 export type Permission = {
@@ -93,7 +93,7 @@ export type AuthStrategyFunctionArgs = {
   cookies?: Map<string, string>
   headers: Request['headers']
   isGraphQL?: boolean
-  payload: PayloadT
+  payload: Payload
 }
 export type AuthStrategyFunction = ({
   headers,

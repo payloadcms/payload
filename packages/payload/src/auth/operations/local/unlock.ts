@@ -1,4 +1,4 @@
-import type { PayloadT, RequestContext } from '../../..'
+import type { Payload, RequestContext } from '../../..'
 import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 
@@ -19,7 +19,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
 }
 
 async function localUnlock<T extends keyof GeneratedTypes['collections']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {
   const {

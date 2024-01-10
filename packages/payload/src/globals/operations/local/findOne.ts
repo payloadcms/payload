@@ -1,5 +1,5 @@
 import type { GeneratedTypes, RequestContext } from '../../..'
-import type { PayloadT } from '../../..'
+import type { Payload } from '../../..'
 import type { PayloadRequest } from '../../../types'
 import type { Document } from '../../../types'
 
@@ -23,7 +23,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
 }
 
 export default async function findOneLocal<T extends keyof GeneratedTypes['globals']>(
-  payload: PayloadT,
+  payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {
