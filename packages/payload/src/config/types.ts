@@ -262,7 +262,9 @@ export type AdminViewProps = {
   user: User | null | undefined
 }
 
-export type AdminViewComponent = React.ComponentType<AdminViewProps>
+export type AdminViewComponent =
+  | Promise<React.ComponentType<AdminViewProps>>
+  | React.ComponentType<AdminViewProps>
 
 export type AdminView = AdminViewComponent | AdminViewConfig
 

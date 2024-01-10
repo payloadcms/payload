@@ -1,8 +1,6 @@
 import React from 'react'
 
-import type { Props } from './types'
-
-export const RenderCustomComponent: React.FC<Props> = (props) => {
+export const RenderCustomComponent = (props) => {
   const { CustomComponent, DefaultComponent, componentProps } = props
 
   if (CustomComponent) {

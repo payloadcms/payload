@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
+import { useTranslation } from '@payloadcms/ui'
 
 import type { OnChange, Theme } from '@payloadcms/ui'
 import { useTheme, RadioGroupInput } from '@payloadcms/ui'

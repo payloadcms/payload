@@ -2,22 +2,39 @@
 import React from 'react'
 
 import Link from 'next/link'
-import { usePathname, useSelectedLayoutSegments } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
+import { SanitizedConfig } from 'payload/types'
 
 export const DocumentTabLink: React.FC<{
-  href: string
+  adminRoute: SanitizedConfig['routes']['admin']
+  isCollection?: boolean
   newTab?: boolean
+  href: string
   baseClass: string
   children?: React.ReactNode
   isActive?: boolean
-}> = ({ isActive: isActiveFromProps, baseClass, href: hrefFromProps, newTab, children }) => {
+}> = ({
+  isActive: isActiveFromProps,
+  baseClass,
+  href: hrefFromProps,
+  newTab,
+  children,
+  adminRoute,
+  isCollection,
+}) => {
   const pathname = usePathname()
-  const segments = useSelectedLayoutSegments()
+  const params = useParams()
+
+  const docHref = `${adminRoute}/${isCollection ? 'collections' : 'globals'}${
+    isCollection ? `/${params.collection}` : `/${params.global}`
+  }${isCollection ? `/${params.segments?.[0]}` : ''}`
+
+  const href = `${docHref}${hrefFromProps}`
 
   const isActive =
-    typeof isActiveFromProps === 'boolean' ? isActiveFromProps : pathname.endsWith(hrefFromProps)
-
-  const href = hrefFromProps ? `${pathname}${hrefFromProps}` : ''
+    (href === docHref && pathname === docHref) ||
+    (href !== docHref && pathname.startsWith(href)) ||
+    isActiveFromProps
 
   return (
     <li className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}>

@@ -1,6 +1,7 @@
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 import type { EditViewConfig } from 'payload/config'
 
+import { documentViewKeys } from './tabs'
 import { defaultGlobalViews } from '../../../views/Global/RenderCustomView'
 import { defaultCollectionViews } from '../../../views/Edit/RenderCustomView'
 

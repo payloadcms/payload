@@ -1,8 +1,19 @@
-import type { collectionViewType } from '../../../views/Edit/RenderCustomView'
 import type { DocumentTabConfig } from './types'
 
+export const documentViewKeys = [
+  'API',
+  'Default',
+  'LivePreview',
+  'References',
+  'Relationships',
+  'Version',
+  'Versions',
+]
+
+export type DocumentViewKey = (typeof documentViewKeys)[number]
+
 export const tabs: Record<
-  collectionViewType,
+  DocumentViewKey,
   DocumentTabConfig & {
     order?: number // TODO: expose this to the globalConfig config
   }
