@@ -18,10 +18,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
   return (
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
-        <Link href="/" legacyBehavior>
-          <a>
-            <Logo />
-          </a>
+        <Link href="/">
+          <Logo />
         </Link>
 
         {children}
