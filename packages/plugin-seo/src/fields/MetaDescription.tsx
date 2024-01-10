@@ -1,17 +1,14 @@
 'use client'
 
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
 import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 import type { TextareaField } from 'payload/types'
 
 import { TextareaInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
-
-import { useTranslation } from 'react-i18next'
 
 import { defaults } from '../defaults'
 import { LengthIndicator } from '../ui/LengthIndicator'
@@ -96,7 +93,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {t('lengthTipDescription', { minLength, maxLength })}
+          {t('lengthTipDescription', { maxLength, minLength })}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/snippet#meta-descriptions"
             rel="noopener noreferrer"
@@ -130,7 +127,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           width: '100%',
         }}
       >
-        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value as string} />
+        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value} />
       </div>
     </div>
   )
