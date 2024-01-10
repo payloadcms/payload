@@ -20,5 +20,5 @@
     "src/**/*.spec.tsx"
   ],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [{ "path": "../payload" }] // db-postgres depends on payload
+  "references": [{ "path": "../payload" }, { "path": "../translations" }] // db-postgres depends on payload
 }
