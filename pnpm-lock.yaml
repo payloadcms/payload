@@ -645,6 +645,15 @@ importers:
       '@faceless-ui/modal':
         specifier: 2.0.1
         version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
+      '@payloadcms/translations':
+        specifier: workspace:^
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
+      deepmerge:
+        specifier: ^4.3.1
+        version: 4.3.1
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -670,9 +679,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -703,6 +709,9 @@ importers:
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
+      '@payloadcms/translations':
+        specifier: workspace:^
+        version: link:../translations
       body-scroll-lock:
         specifier: 4.0.0-beta.0
         version: 4.0.0-beta.0
@@ -754,15 +763,6 @@ importers:
       http-status:
         specifier: 1.6.2
         version: 1.6.2
-      i18next:
-        specifier: 22.5.1
-        version: 22.5.1
-      i18next-browser-languagedetector:
-        specifier: 6.1.8
-        version: 6.1.8
-      i18next-http-middleware:
-        specifier: 3.3.2
-        version: 3.3.2
       is-hotkey:
         specifier: 0.2.0
         version: 0.2.0
@@ -829,9 +829,6 @@ importers:
       react-diff-viewer-continued:
         specifier: 3.2.6
         version: 3.2.6(react-dom@18.2.0)(react@18.2.0)
-      react-i18next:
-        specifier: 11.18.6
-        version: 11.18.6(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0)
       react-image-crop:
         specifier: 10.1.8
         version: 10.1.8(react@18.2.0)
@@ -1484,6 +1481,18 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/translations:
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      '@swc/core':
+        specifier: ^1.3.102
+        version: 1.3.107
+      '@types/react':
+        specifier: ^18
+        version: 18.2.15
+
   packages/ui:
     dependencies:
       '@dnd-kit/core':
@@ -1504,6 +1513,9 @@ importers:
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
+      '@payloadcms/translations':
+        specifier: workspace:^
+        version: link:../translations
       body-scroll-lock:
         specifier: 4.0.0-beta.0
         version: 4.0.0-beta.0
@@ -1522,15 +1534,6 @@ importers:
       flatley:
         specifier: 5.2.0
         version: 5.2.0
-      i18next:
-        specifier: 22.5.1
-        version: 22.5.1
-      i18next-browser-languagedetector:
-        specifier: 6.1.8
-        version: 6.1.8
-      i18next-http-middleware:
-        specifier: 3.3.2
-        version: 3.3.2
       next:
         specifier: ^14.0.0
         version: 14.0.2(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0)(sass@1.71.1)
@@ -1543,9 +1546,6 @@ importers:
       react-datepicker:
         specifier: 4.16.0
         version: 4.16.0(react-dom@18.2.0)(react@18.2.0)
-      react-i18next:
-        specifier: 11.18.6
-        version: 11.18.6(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0)
       react-select:
         specifier: 5.7.4
         version: 5.7.4(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
@@ -11541,16 +11541,6 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
     dev: true
-
-  /i18next-browser-languagedetector@6.1.8:
-    resolution: {integrity: sha512-Svm+MduCElO0Meqpj1kJAriTC6OhI41VhlT/A0UPjGoPZBhAHIaGE5EfsHlTpgdH09UVX7rcc72pSDDBeKSQQA==}
-    dependencies:
-      '@babel/runtime': 7.22.15
-    dev: false
-
-  /i18next-http-middleware@3.3.2:
-    resolution: {integrity: sha512-PSeLXQXr9Qiv9Q3GCWCoIJenKVbxCcVsXb7VMp/mOprV4gu+AMJT7VHw4+QEf6oYW6GU31QSLnfDpLNoSMtx3g==}
-    dev: false
 
   /i18next@22.5.1:
     resolution: {integrity: sha512-8TGPgM3pAD+VRsMtUMNknRz3kzqwp/gPALrWMsDnmC1mKqJwpWyooQRLMcbTwq8z8YwSmuj+ZYvc+xCuEpkssA==}
