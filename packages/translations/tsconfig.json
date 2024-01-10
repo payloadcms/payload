@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // "composite": true, // Make sure typescript knows that this module depends on their references
+    "composite": true, // Make sure typescript knows that this module depends on their references
     "noEmit": false /* Do not emit outputs. */,
     "emitDeclarationOnly": true,
     "esModuleInterop": true,

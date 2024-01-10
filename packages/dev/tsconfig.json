@@ -23,8 +23,7 @@
       "@payloadcms/next/layouts/*": ["../next/src/layouts/*"],
       "@payloadcms/next/pages/*": ["../next/src/pages/*"],
       "@payloadcms/next/routes": ["../next/src/routes"],
-      "@payloadcms/next/utilities/*": ["../next/src/utilities/*"],
-      "@payloadcms/next/translations/*": ["../next/src/translations/*"]
+      "@payloadcms/next/utilities/*": ["../next/src/utilities/*"]
     }
   },
   "include": [
@@ -36,5 +35,5 @@
   ],
   "exclude": ["node_modules"],
   "composite": true, // Make sure typescript knows that this module depends on their references
-  "references": [{ "path": "../payload" }, { "path": "../next" }]
+  "references": [{ "path": "../payload" }, { "path": "../next" }, { "path": "../translations" }]
 }
