@@ -32,6 +32,10 @@ export default buildConfig({
 
 NOTE: If your Payload config already has an email with transport, this will take precedence over Payload Cloud's email service.
 
+### From Domain
+
+After configuring, ensure that the `from` email address is from a domain you have access to. Payload Cloud will automatically give you permissions to use your deployed domain with the value available in `process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN`. If you have custom domains, your custom domains will also be whitelisted. Attempting to send from a domain you do not have access to will not succeed.
+
 ### Optional configuration
 
 If you wish to opt-out of any Payload cloud features, the plugin also accepts options to do so.
