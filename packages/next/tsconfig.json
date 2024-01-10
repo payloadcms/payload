@@ -7,7 +7,9 @@
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "paths": {
-      "payload-config": ["./src/config.ts"]
+      "payload-config": ["./src/config.ts"],
+      "@payloadcms/ui": ["../ui/src/exports/index.ts"],
+      "@payloadcms/translations/*": ["../translations/dist/*"]
     },
     "allowImportingTsExtensions": true
   },

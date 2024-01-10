@@ -19,21 +19,19 @@
       }
     ],
     "paths": {
+      "payload/*": ["../payload/src/exports/*"],
       "payload-config": ["./src/payload.config.ts"],
-      "@payloadcms/next/layouts/*": ["../next/src/layouts/*"],
-      "@payloadcms/next/pages/*": ["../next/src/pages/*"],
-      "@payloadcms/next/routes": ["../next/src/routes"],
-      "@payloadcms/next/utilities/*": ["../next/src/utilities/*"]
+      "@payloadcms/ui": ["../ui/src/exports/*"],
+      "@payloadcms/next/*": ["../next/src/*"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "../next/src/pages/Login/action.ts"
-  ],
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"],
   "composite": true, // Make sure typescript knows that this module depends on their references
-  "references": [{ "path": "../payload" }, { "path": "../next" }, { "path": "../translations" }]
+  "references": [
+    { "path": "../payload" },
+    { "path": "../next" },
+    { "path": "../ui" },
+    { "path": "../translations" }
+  ]
 }

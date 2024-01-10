@@ -2,6 +2,8 @@
   "name": "@payloadcms/next",
   "version": "0.0.1",
   "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.d.ts",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -37,10 +39,10 @@
     "sass": "^1.69.5"
   },
   "dependencies": {
+    "@faceless-ui/modal": "2.0.1",
     "@payloadcms/translations": "workspace:^",
     "@payloadcms/ui": "workspace:*",
     "deepmerge": "^4.3.1",
-    "@faceless-ui/modal": "2.0.1",
     "jsonwebtoken": "9.0.1",
     "path-to-regexp": "^6.2.1",
     "react-diff-viewer-continued": "3.2.6",
@@ -53,6 +55,8 @@
     "payload": "^2.0.0"
   },
   "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
       "./utilities/*": {
         "import": "./dist/utilities/*.js",
@@ -80,8 +84,7 @@
         "types": "./dist/routes/index.d.ts"
       }
     },
-    "registry": "https://registry.npmjs.org/",
-    "types": "./dist/index.d.ts"
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "dist"
