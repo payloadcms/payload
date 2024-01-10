@@ -8,34 +8,22 @@ import {
   Form,
   Select,
   Number as NumberInput,
+  EditViewProps,
 } from '@payloadcms/ui'
 import './index.scss'
-import { initPage } from '../../utilities/initPage'
-import { Document, SanitizedConfig } from 'payload/types'
 import { RenderJSON } from './RenderJSON'
 
 const baseClass = 'query-inspector'
 
-export const APIView = async ({
-  collectionSlug,
-  globalSlug,
-  id,
-  config: configPromise,
-  searchParams,
-}: {
-  collectionSlug?: string
-  globalSlug?: string
-  id?: string
-  config: Promise<SanitizedConfig>
-  searchParams: { [key: string]: string | string[] | undefined }
-}) => {
-  const { config, payload, user, locale, collectionConfig, globalConfig, i18n } = await initPage({
-    configPromise,
-    redirectUnauthenticatedUser: true,
-    collectionSlug,
-    globalSlug,
-  })
+export const APIView: React.FC<EditViewProps> = async (props) => {
+  const { config, searchParams, locale, data, i18n } = props
 
+  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
+  const globalConfig = 'globalConfig' in props && props?.globalConfig
+  const id = 'id' in props ? props.id : undefined
+
+  const collectionSlug = collectionConfig?.slug
+  const globalSlug = globalConfig?.slug
   const { depth, draft, authenticated } = searchParams
 
   const {
@@ -50,34 +38,16 @@ export const APIView = async ({
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
-  let data: Document
   let draftsEnabled = false
   let docEndpoint = ''
 
   if (collectionConfig) {
-    try {
-      data = await payload.findByID({
-        collection: collectionSlug,
-        id,
-        depth: 0,
-        user,
-      })
-    } catch (error) {}
-
-    draftsEnabled = Boolean(collectionConfig.versions.drafts)
+    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
   if (globalConfig) {
-    try {
-      data = await payload.findGlobal({
-        slug: globalSlug,
-        depth: 0,
-        user,
-      })
-    } catch (error) {}
-
-    draftsEnabled = Boolean(globalConfig.versions.drafts)
+    draftsEnabled = Boolean(globalConfig.versions?.drafts)
     docEndpoint = `/globals/${globalSlug}`
   }
 

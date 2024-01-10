@@ -54,7 +54,14 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
       typeof pillLabel === 'function' ? pillLabel({ versions: undefined }) : pillLabel
 
     return (
-      <DocumentTabLink href={href} newTab={newTab} baseClass={baseClass} isActive={checkIsActive}>
+      <DocumentTabLink
+        href={href}
+        newTab={newTab}
+        baseClass={baseClass}
+        isActive={checkIsActive}
+        adminRoute={routes.admin}
+        isCollection={!!collectionConfig && !globalConfig}
+      >
         <span className={`${baseClass}__label`}>
           {labelToRender}
           {pillToRender && (
