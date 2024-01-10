@@ -4,7 +4,6 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 
 import payload from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
 import {
   exactText,
@@ -898,6 +897,7 @@ describe('fields', () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-title a').click()
     }
+
     describe('cell', () => {
       test('ensure cells are smaller than 300px in height', async () => {
         const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
@@ -1384,13 +1384,9 @@ describe('fields', () => {
 
     afterEach(async () => {
       // delete all existing relationship documents
-      const allRelationshipDocs = await payload.find({
+      await payload.delete({
         collection: relationshipFieldsSlug,
-        limit: 100,
-      })
-      const relationshipIDs = allRelationshipDocs.docs.map((doc) => doc.id)
-      await mapAsync(relationshipIDs, async (id) => {
-        await payload.delete({ id, collection: relationshipFieldsSlug })
+        where: { id: { exists: true } },
       })
     })
 
