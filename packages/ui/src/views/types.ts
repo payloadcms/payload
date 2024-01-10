@@ -1,37 +1,32 @@
-import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
+import type { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
 import type {
   Document,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
+  PayloadT,
 } from 'payload/types'
 import type { I18n } from '@payloadcms/translations'
 import type { Fields } from '../forms/Form/types'
+import { FieldTypes } from '../exports'
 
-export type CollectionEditViewProps = BaseEditViewProps & {
+export type EditViewProps = (
+  | {
+      collectionConfig: SanitizedCollectionConfig
+      disableActions?: boolean
+      disableLeaveWithoutSaving?: boolean
+      hasSavePermission?: boolean
+      id: string
+      isEditing?: boolean
+      docPermissions: CollectionPermission | null
+    }
+  | {
+      globalConfig: SanitizedGlobalConfig
+      state?: Fields
+      docPermissions: GlobalPermission | null
+    }
+) & {
   config: SanitizedConfig
-  collectionConfig: SanitizedCollectionConfig
-  disableActions?: boolean
-  disableLeaveWithoutSaving?: boolean
-  hasSavePermission?: boolean
-  id: string
-  state?: Fields
-  isEditing?: boolean
-  permissions: CollectionPermission | null
-  data: Document
-  user: User
-  i18n: I18n
-}
-
-export type GlobalEditViewProps = BaseEditViewProps & {
-  config: SanitizedConfig
-  globalConfig: SanitizedGlobalConfig
-  state?: Fields
-  permissions: GlobalPermission | null
-  i18n: I18n
-}
-
-export type BaseEditViewProps = {
   action: string
   apiURL: string
   canAccessAdmin?: boolean
@@ -40,6 +35,16 @@ export type BaseEditViewProps = {
   onSave: (json: any) => void
   updatedAt: string
   user: User | null | undefined
+  fieldTypes: FieldTypes
+  payload: PayloadT
+  locale: string
+  state?: Fields
+  permissions: Permissions
+  params: {
+    segments: string[]
+    collection?: string
+    global?: string
+  }
+  searchParams: { [key: string]: string | string[] | undefined }
+  i18n: I18n
 }
-
-export type EditViewProps = CollectionEditViewProps | GlobalEditViewProps

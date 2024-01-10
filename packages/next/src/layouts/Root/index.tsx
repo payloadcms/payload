@@ -3,11 +3,11 @@ import { headers, cookies } from 'next/headers'
 import { translations } from '@payloadcms/translations/client'
 import { RootProvider } from '@payloadcms/ui/providers'
 import { SanitizedConfig } from 'payload/types'
-import { deepMerge } from 'payload/utilities'
-import { createClientConfig } from '../../createClientConfig'
-import { getRequestLanguage } from '../../utilities/getRequestLanguage'
+import { createClientConfig } from '../../utilities/createClientConfig'
 
 import '@payloadcms/ui/scss/app.scss'
+import { getRequestLanguage } from '../../utilities/getRequestLanguage'
+import { deepMerge } from 'payload/utilities'
 
 export const metadata = {
   title: 'Next.js',
