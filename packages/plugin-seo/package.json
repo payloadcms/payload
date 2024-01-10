@@ -4,14 +4,14 @@
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-seo.git",
   "description": "SEO plugin for Payload",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "lint": "eslint src",
     "lint:fix": "eslint --fix --ext .ts,.tsx src",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "prepublishOnly": "yarn clean && yarn build"
+    "prepublishOnly": "pnpm clean && pnpm build"
   },
   "keywords": [
     "payload",
