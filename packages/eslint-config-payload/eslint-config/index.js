@@ -43,6 +43,12 @@ module.exports = {
     // This rule doesn't work well in .tsx files
     '@typescript-eslint/no-misused-promises': 'off',
     // Type-aware any rules end
+    // ts-expect should always be preferred over ts-ignore
+    '@typescript-eslint/prefer-ts-expect-error': 'warn',
+    // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
+    'class-methods-use-this': 'off',
+    // By default, it errors for unused variables. This is annoying, warnings are enough.
+    '@typescript-eslint/no-unused-vars': 'warn',
     '@typescript-eslint/no-use-before-define': 'off',
     'arrow-body-style': 0,
     'import/prefer-default-export': 'off',
