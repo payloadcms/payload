@@ -23,7 +23,10 @@ export const LoadingOverlay: React.FC<Props> = ({
   overlayType,
   show = true,
 }) => {
-  const { t } = useTranslation('general')
+  const { i18n, t } = useTranslation('general')
+  const currentLanguage = i18n?.language
+  const scriptLanguages = ['ar', 'fa']
+  const isScriptLanguage = currentLanguage && scriptLanguages.includes(currentLanguage)
 
   return (
     <div
@@ -31,6 +34,7 @@ export const LoadingOverlay: React.FC<Props> = ({
         baseClass,
         show ? `${baseClass}--entering` : `${baseClass}--exiting`,
         overlayType ? `${baseClass}--${overlayType}` : '',
+        isScriptLanguage ? `${baseClass}--script` : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -59,25 +63,25 @@ type UseLoadingOverlayToggleT = {
 }
 export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({
   name: key,
+  type = 'fullscreen',
   loadingText,
   show,
-  type = 'fullscreen',
 }) => {
   const { toggleLoadingOverlay } = useLoadingOverlay()
 
   React.useEffect(() => {
     toggleLoadingOverlay({
+      type,
       isLoading: show,
       key,
       loadingText: loadingText || undefined,
-      type,
     })
 
     return () => {
       toggleLoadingOverlay({
+        type,
         isLoading: false,
         key,
-        type,
       })
     }
   }, [show, toggleLoadingOverlay, key, type, loadingText])
@@ -94,10 +98,10 @@ type FormLoadingOverlayToggleT = {
 }
 export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({
   name,
+  type = 'fullscreen',
   action,
   formIsLoading = false,
   loadingSuffix,
-  type = 'fullscreen',
 }) => {
   const isProcessing = useFormProcessing()
   const { i18n, t } = useTranslation('general')
