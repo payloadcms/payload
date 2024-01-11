@@ -1,8 +1,7 @@
-@import 'payload/scss';
-
 html[data-theme='light'] {
   .floating-select-toolbar-popup {
-    @include shadow-m;
+    // TODO: use CSS vars here
+    // @include shadow-m;
   }
 }
 

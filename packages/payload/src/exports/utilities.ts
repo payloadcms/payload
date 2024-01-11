@@ -1,4 +1,3 @@
-export { withMergedProps } from '../admin-old/components/utilities/WithMergedProps'
 export { promise as afterReadPromise } from '../fields/hooks/afterRead/promise'
 export { traverseFields as afterReadTraverseFields } from '../fields/hooks/afterRead/traverseFields'
 

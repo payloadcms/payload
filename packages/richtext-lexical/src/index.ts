@@ -55,7 +55,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       // @ts-expect-error
       import('./cell').then((module) => {
         const RichTextCell = module.RichTextCell
-        return import('payload/utilities').then((module2) =>
+        return import('@payloadcms/ui').then((module2) =>
           module2.withMergedProps({
             Component: RichTextCell,
             toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
@@ -67,7 +67,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       // @ts-expect-error
       import('./field').then((module) => {
         const RichTextField = module.RichTextField
-        return import('payload/utilities').then((module2) =>
+        return import('@payloadcms/ui').then((module2) =>
           module2.withMergedProps({
             Component: RichTextField,
             toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },

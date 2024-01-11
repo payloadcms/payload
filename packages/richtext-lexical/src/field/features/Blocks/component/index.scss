@@ -1,5 +1,3 @@
-@import 'payload/scss';
-
 .ContentEditable__root > div:has(.lexical-block) {
   // Fixes a bug where, if the block field has a Select field, the Select field's dropdown menu would be hidden behind the lexical editor.
   z-index: 1;
@@ -31,7 +29,7 @@
   &__heading-with-error {
     display: flex;
     align-items: center;
-    gap: base(0.5);
+    gap: calc(var(--base) * 0.5);
   }
 
   &--has-no-error {
@@ -60,7 +58,7 @@
   &__header-action {
     @extend %btn-reset;
     cursor: pointer;
-    margin-left: base(0.5);
+    margin-left: calc(var(--base) * 0.5);
 
     &:hover,
     &:focus-visible {
@@ -70,8 +68,8 @@
 
   .collapsible {
     &__header-wrap {
-      //  Make more space for the block header (default right: is base(3)) so that the remove button aligns nicely to the right
-      right: base(1.5);
+      //  Make more space for the block header (default right: is `calc(var(--base) * 3)`) so that the remove button aligns nicely to the right
+      right: calc(var(--base) * 1.5);
     }
   }
 
@@ -92,7 +90,7 @@
     display: flex;
     max-width: 100%;
     overflow: hidden;
-    gap: base(0.375);
+    gap: calc(var(--base) * 0.375);
     justify-content: space-between;
   }
 

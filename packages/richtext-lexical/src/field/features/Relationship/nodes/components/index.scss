@@ -1,14 +1,13 @@
-@import 'payload/scss';
-
 .lexical-relationship {
-  @extend %body;
-  @include shadow-sm;
-  padding: base(0.75);
+  // TODO: use CSS vars here
+  // @extend %body;
+  // @include shadow-sm;
+  padding: calc(var(--base) * 0.75);
   display: flex;
   align-items: center;
   background: var(--theme-input-bg);
   border: 1px solid var(--theme-elevation-100);
-  max-width: base(15);
+  max-width: calc(var(--base) * 15);
   font-family: var(--font-body);
   margin: 0 0 1.5em;
 
@@ -17,11 +16,11 @@
   }
 
   &[data-slate-node='element'] {
-    margin: base(0.625) 0;
+    margin: calc(var(--base) * 0.625) 0;
   }
 
   &__label {
-    margin-bottom: base(0.25);
+    margin-bottom: calc(var(--base) * 0.25);
   }
 
   &__title {
@@ -75,10 +74,10 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-left: base(0.5);
+    margin-left: calc(var(--base) * 0.5);
 
     & > *:not(:last-child) {
-      margin-right: base(0.25);
+      margin-right: calc(var(--base) * 0.25);
     }
   }
 

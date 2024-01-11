@@ -1,9 +1,10 @@
-@import 'payload/scss';
+@import '@payloadcms/ui/scss';
 
 .lexical-upload {
-  @extend %body;
-  @include shadow-sm;
-  max-width: base(15);
+  // TODO: use CSS vars here
+  // @extend %body;
+  // @include shadow-sm;
+  max-width: calc(var(--base) * 15);
   display: flex;
   align-items: center;
   background: var(--theme-input-bg);
@@ -21,11 +22,12 @@
   }
 
   &[data-slate-node='element'] {
-    margin: base(0.625) 0;
+    margin: calc(var(--base) * 0.625) 0;
   }
 
   &__card {
-    @include soft-shadow-bottom;
+    // TODO: use CSS vars here
+    // @include soft-shadow-bottom;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -36,7 +38,7 @@
   }
 
   &__thumbnail {
-    width: base(3.25);
+    width: calc(var(--base) * 3.25);
     height: auto;
     position: relative;
     overflow: hidden;
@@ -56,23 +58,23 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    padding: base(0.75);
+    padding: calc(var(--base) * 0.75);
     justify-content: space-between;
-    max-width: calc(100% - #{base(3.25)});
+    max-width: calc(100% - #{calc(var(--base) * 3.25)});
   }
 
   &__actions {
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-left: base(0.5);
+    margin-left: calc(var(--base) * 0.5);
 
     .lexical-upload__doc-drawer-toggler {
       pointer-events: all;
     }
 
     & > *:not(:last-child) {
-      margin-right: base(0.25);
+      margin-right: calc(var(--base) * 0.25);
     }
   }
 
@@ -80,7 +82,8 @@
     margin: 0;
 
     line {
-      stroke-width: $style-stroke-width-m;
+      // TODO: use CSS vars here
+      // stroke-width: $style-stroke-width-m;
     }
 
     &:disabled {
@@ -122,7 +125,7 @@
   }
 
   &__bottomRow {
-    padding: base(0.5);
+    padding: calc(var(--base) * 0.5);
     border-top: 1px solid var(--theme-elevation-100);
   }
 
@@ -133,20 +136,21 @@
   }
 
   &__wrap {
-    padding: base(0.5) base(0.5) base(0.5) base(1);
+    padding: calc(var(--base) * 0.5) calc(var(--base) * 0.5) calc(var(--base) * 0.5) var(--base);
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   &--selected {
-    box-shadow: $focus-box-shadow;
+    // TODO: use CSS vars here
+    // box-shadow: $focus-box-shadow;
     outline: none;
   }
 
   @include small-break {
     &__topRowRightPanel {
-      padding: base(0.75) base(0.5);
+      padding: calc(var(--base) * 0.75) calc(var(--base) * 0.5);
     }
   }
 }
