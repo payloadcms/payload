@@ -83,7 +83,7 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
   const { generateDrizzleJson } = require('drizzle-kit/utils')
 
   const start = Date.now()
-  const req = {} as PayloadRequest
+  const req = { payload } as PayloadRequest
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
