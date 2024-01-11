@@ -24,6 +24,7 @@
       "payload/*": ["../payload/src/exports/*"],
       "payload-config": ["./src/payload.config.ts"],
       "@payloadcms/db-mongodb": ["../db-mongodb/src"],
+      "@payloadcms/richtext-lexical": ["../richtext-lexical/src"],
       "@payloadcms/ui/*": ["../ui/src/exports/*"],
       "@payloadcms/translations/client": ["../translations/src/all"],
       "@payloadcms/translations/api": ["../translations/src/all"],
@@ -40,6 +41,7 @@
     { "path": "../ui" },
     { "path": "../translations" },
     { "path": "../db-mongodb" },
-    { "path": "../db-postgres" }
+    { "path": "../db-postgres" },
+    { "path": "../richtext-lexical" }
   ]
 }

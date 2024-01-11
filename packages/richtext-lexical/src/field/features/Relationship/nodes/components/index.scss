@@ -45,7 +45,8 @@
   }
 
   &--selected {
-    box-shadow: $focus-box-shadow;
+    // TODO: use CSS vars here
+    // box-shadow: $focus-box-shadow;
     outline: none;
   }
 
@@ -85,7 +86,8 @@
     margin: 0;
 
     line {
-      stroke-width: $style-stroke-width-m;
+      // TODO: use CSS vars here
+      // stroke-width: $style-stroke-width-m;
     }
 
     &:disabled {

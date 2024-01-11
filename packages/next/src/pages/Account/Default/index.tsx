@@ -1,6 +1,7 @@
 import React from 'react'
 
-import type { FieldTypes, CollectionEditViewProps } from '@payloadcms/ui'
+import type { CollectionEditViewProps } from '@payloadcms/ui'
+import type { FieldTypes } from 'payload/config'
 
 import {
   DocumentControls,
