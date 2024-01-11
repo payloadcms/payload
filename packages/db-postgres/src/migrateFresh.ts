@@ -47,7 +47,7 @@ export async function migrateFresh(this: PostgresAdapter): Promise<void> {
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const req = {} as PayloadRequest
+  const req = { payload } as PayloadRequest
   // Run all migrate up
   for (const migration of migrationFiles) {
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
