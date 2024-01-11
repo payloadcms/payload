@@ -10278,8 +10278,8 @@ packages:
       tabbable: 5.3.3
     dev: false
 
-  /follow-redirects@1.15.3(debug@4.3.4):
-    resolution: {integrity: sha512-1VzOtuEM8pC9SFU1E+8KfTjZyMztRsgEfwQl44z8A25uy13jSzTj6dyK2Df52iV0vgHCfBwLhDWevLn95w5v6Q==}
+  /follow-redirects@1.15.4(debug@4.3.4):
+    resolution: {integrity: sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -13253,7 +13253,7 @@ packages:
       camelcase: 6.3.0
       debug: 4.3.4(supports-color@5.5.0)
       find-cache-dir: 3.3.2
-      follow-redirects: 1.15.3(debug@4.3.4)
+      follow-redirects: 1.15.4(debug@4.3.4)
       https-proxy-agent: 7.0.2
       mongodb: 5.9.2
       new-find-package-json: 2.0.0
@@ -15600,7 +15600,7 @@ packages:
     resolution: {integrity: sha512-UcZnoo+AEM+ipqwOQ4JLxkIDYyWvOT3hvcal/fSL3VFFUKeHoHgC89gltJtekAejj+ji7dTe0TVb5mpj8/kt0g==}
     dependencies:
       process: 0.5.2
-      readable-stream: github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
+      readable-stream: git@github.com+Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f
     dev: true
 
   /readable-stream@1.0.34:
@@ -18208,8 +18208,8 @@ packages:
     resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
     dev: false
 
-  github.com/Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
-    resolution: {tarball: https://codeload.github.com/Raynos/readable-stream/tar.gz/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f}
+  git@github.com+Raynos/readable-stream/b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f:
+    resolution: {commit: b1a911ce6e4f4c5a7e2948cd23c2f9ee1ea0696f, repo: git@github.com:Raynos/readable-stream.git, type: git}
     name: readable-stream
     version: 0.3.1
     dev: true
