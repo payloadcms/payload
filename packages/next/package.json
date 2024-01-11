@@ -31,11 +31,6 @@
     "./routes": {
       "import": "./src/routes/index.ts",
       "require": "./src/routes/index.ts"
-    },
-    "./scss": {
-      "import": "./src/scss.scss",
-      "require": "./src/scss.scss",
-      "default": "./src/scss.scss"
     }
   },
   "devDependencies": {
