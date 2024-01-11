@@ -43,6 +43,8 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
+  customIdCollectionSlug,
+  customIdCollectionId,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -525,6 +527,24 @@ describe('admin', () => {
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+  })
+
+  describe('Custom IDs', () => {
+    test('should allow custom ID field nested inside an unnamed tab', async () => {
+      await page.goto(url.collection('customIdTab') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
+    })
+
+    test('should allow custom ID field nested inside a row', async () => {
+      await page.goto(url.collection('customIdRow') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
     })
   })
 

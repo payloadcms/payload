@@ -27,7 +27,7 @@ export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
     }
 
     const start = Date.now()
-    const req = {} as PayloadRequest
+    const req = { payload } as PayloadRequest
 
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
