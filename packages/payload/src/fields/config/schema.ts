@@ -416,6 +416,7 @@ export const blocks = baseField.keys({
             .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
         }),
         slug: joi.string().required(),
+        custom: joi.object().pattern(joi.string(), joi.any()),
       }),
     )
     .required(),
