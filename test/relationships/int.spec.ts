@@ -586,7 +586,7 @@ describe('Relationships', () => {
   })
 
   describe('Polymorphic Relationships', () => {
-    it('should allow Local API querying on polymorphic relationships', async () => {
+    it('should allow REST querying on polymorphic relationships', async () => {
       const movie = await payload.create({
         collection: 'movies',
         data: {
@@ -603,7 +603,7 @@ describe('Relationships', () => {
         },
       })
 
-      const query = await client.find({
+      const queryOne = await client.find({
         slug: 'polymorphic-relationships',
         query: {
           and: [
@@ -621,49 +621,26 @@ describe('Relationships', () => {
         },
       })
 
-      expect(query.result.docs).toHaveLength(1)
-    })
-
-    it('should allow REST querying on polymorphic relationships', async () => {
-      const movie = await payload.create({
-        collection: 'movies',
-        data: {
-          name: 'Pulp Fiction 2',
+      const queryTwo = await client.find({
+        slug: 'polymorphic-relationships',
+        query: {
+          and: [
+            {
+              'polymorphic.relationTo': {
+                equals: 'movies',
+              },
+            },
+            {
+              'polymorphic.value': {
+                equals: movie.id,
+              },
+            },
+          ],
         },
       })
 
-      const movieID = movie.id.toString()
-
-      await payload.create({
-        collection: 'polymorphic-relationships',
-        data: {
-          polymorphic: {
-            relationTo: 'movies',
-            value: movie.id,
-          },
-        },
-      })
-
-      const queryParams = new URLSearchParams({
-        locale: 'en',
-        depth: '0',
-        draft: 'true',
-        limit: '10',
-        page: '1',
-        [`where[or][0][and][0][polymorphic.relationTo][equals]`]: 'movies',
-        [`where[or][0][and][0][polymorphic.value][equals]`]: movieID,
-      })
-
-      const response = await fetch(`${apiUrl}/polymorphic-relationships?${queryParams}`, {
-        method: 'GET',
-        headers: {
-          ...headers,
-          Authorization: `JWT ${jwt}`,
-        },
-      })
-      const queryResult = await response.json()
-
-      expect(queryResult.docs).toHaveLength(1)
+      expect(queryOne.result.docs).toHaveLength(1)
+      expect(queryTwo.result.docs).toHaveLength(1)
     })
   })
 })
