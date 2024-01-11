@@ -85,11 +85,11 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ),
             [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-mongodb/mock.js',
+              '../packages/payload/src/bundlers/mocks/db-mongodb.js',
             ),
             [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-postgres/mock.js',
+              '../packages/payload/src/bundlers/mocks/db-postgres.js',
             ),
             react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },

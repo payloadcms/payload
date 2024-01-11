@@ -19,7 +19,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
     return
   }
 
-  const req = {} as PayloadRequest
+  const req = { payload } as PayloadRequest
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {

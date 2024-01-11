@@ -4,7 +4,6 @@ import type { FormField } from 'payload/types'
 
 import { useAllFormFields, useForm } from 'payload/components/forms'
 import React, { useCallback, useEffect, useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 
 import { defaults } from '../defaults'

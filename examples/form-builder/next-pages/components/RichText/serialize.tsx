@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
 import { Text } from 'slate'
@@ -79,9 +80,9 @@ const serialize = (children: Children): React.ReactElement[] =>
         return <li key={i}>{serialize(node.children)}</li>
       case 'link':
         return (
-          <a href={escapeHTML(node.url)} key={i}>
+          <Link href={escapeHTML(node.url)} key={i}>
             {serialize(node.children)}
-          </a>
+          </Link>
         )
 
       default:
