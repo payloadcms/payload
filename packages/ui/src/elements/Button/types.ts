@@ -1,6 +1,6 @@
 import type { ElementType, MouseEvent } from 'react'
 import type React from 'react'
-import { LinkType } from '../../types'
+import { LinkType } from '../../exports/types'
 
 export type Props = {
   'aria-label'?: string

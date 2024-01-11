@@ -24,6 +24,8 @@ export const Email: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
+    errorMessage,
+    valid,
   } = props
 
   const path = pathFromProps || name
@@ -47,10 +49,7 @@ export const Email: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <ErrorComp
-      // message={errorMessage}
-      // showError={showError}
-      />
+      <ErrorComp message={errorMessage} showError={!valid} />
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <div className="input-wrapper">
         {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}

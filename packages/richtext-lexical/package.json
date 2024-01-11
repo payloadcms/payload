@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "@lexical/headless": "0.12.5",
     "@lexical/link": "0.12.5",
     "@lexical/list": "0.12.5",

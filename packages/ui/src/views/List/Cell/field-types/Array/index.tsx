@@ -1,9 +1,9 @@
 import React from 'react'
 
 import type { ArrayField } from 'payload/types'
-import type { CellComponentProps } from '../../types'
 
 import { getTranslation } from '@payloadcms/translations'
+import type { CellComponentProps } from 'payload/types'
 
 const ArrayCell: React.FC<CellComponentProps<ArrayField, Record<string, unknown>>> = ({
   data,

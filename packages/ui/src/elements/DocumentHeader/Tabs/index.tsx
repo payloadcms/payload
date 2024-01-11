@@ -1,13 +1,12 @@
 import React from 'react'
 
-import type { DocumentTabProps } from './types'
-
 import { DocumentTab } from './Tab'
 import { getCustomViews } from './getCustomViews'
 import { getViewConfig } from './getViewConfig'
 import { tabs as defaultViews } from './tabs'
 
 import './index.scss'
+import { DocumentTabProps } from 'payload/types'
 
 const baseClass = 'doc-tabs'
 

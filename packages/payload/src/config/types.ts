@@ -12,13 +12,9 @@ import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
 import type { Payload } from '..'
-import type {
-  DocumentTab,
-  DocumentTabComponent,
-  DocumentTabConfig,
-} from '../admin/components/elements/DocumentHeader/Tabs/types'
-import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
-import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
+import type { RichTextAdapter } from '../admin/RichText'
+import type { DocumentTab } from '../admin/elements/Tab'
+import type { DocumentInfoContext } from '../admin/providers/DocumentInfo'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -27,7 +23,7 @@ import type {
   SanitizedCollectionConfig,
 } from '../collections/config/types'
 import type { BaseDatabaseAdapter } from '../database/types'
-import type { ClientConfigField, Field } from '../fields/config/types'
+import type { ClientConfigField } from '../fields/config/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { PayloadRequest } from '../types'
 import type { Where } from '../types'
@@ -66,7 +62,7 @@ export type LivePreviewConfig = {
   url?:
     | ((args: {
         data: Record<string, any>
-        documentInfo: ContextType
+        documentInfo: DocumentInfoContext
         locale: Locale
       }) => Promise<string> | string)
     | string

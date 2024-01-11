@@ -18,7 +18,7 @@ import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 /* eslint-disable no-use-before-define */
 import { GraphQLJSON } from 'graphql-type-json'
 
-import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
+import type { RichTextAdapter } from '../../admin-old/components/forms/field-types/RichText/types'
 import type {
   ArrayField,
   BlockField,

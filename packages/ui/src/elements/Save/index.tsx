@@ -7,16 +7,7 @@ import { useForm } from '../../forms/Form/context'
 import FormSubmit from '../../forms/Submit'
 import { useEditDepth } from '../../providers/EditDepth'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-
-export type CustomSaveButtonProps = React.ComponentType<
-  DefaultSaveButtonProps & {
-    DefaultButton: React.ComponentType<DefaultSaveButtonProps>
-  }
->
-type DefaultSaveButtonProps = {
-  label: string
-  save: () => void
-}
+import { CustomSaveButtonProps, DefaultSaveButtonProps } from 'payload/types'
 
 const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) => {
   const ref = useRef<HTMLButtonElement>(null)
@@ -40,6 +31,7 @@ const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) =>
 type Props = {
   CustomComponent?: CustomSaveButtonProps
 }
+
 export const Save: React.FC<Props> = ({ CustomComponent }) => {
   const { t } = useTranslation()
   const { submit } = useForm()

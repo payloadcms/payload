@@ -3,7 +3,7 @@ import { useTranslation } from '../../../providers/Translation'
 
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
 import type { Row } from '../../Form/types'
-import type { RowLabel as RowLabelType } from '../../RowLabel/types'
+import type { RowLabel as RowLabelType } from 'payload/types'
 import type { Props } from './types'
 
 import { getTranslation } from '@payloadcms/translations'

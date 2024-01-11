@@ -1,6 +1,7 @@
 'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
+import { useConfig } from '@payloadcms/ui'
 import {
   $getPreviousSelection,
   $getSelection,
@@ -10,7 +11,6 @@ import {
   type LexicalCommand,
   createCommand,
 } from 'lexical'
-import { useConfig } from 'payload/components/utilities'
 import React, { useEffect } from 'react'
 
 import type { RawUploadPayload } from '../nodes/UploadNode'

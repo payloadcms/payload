@@ -1,7 +1,6 @@
 import React from 'react'
 
-import type { CheckboxField } from 'payload/types'
-import type { CellComponentProps } from '../../types'
+import type { CellComponentProps, CheckboxField } from 'payload/types'
 
 import './index.scss'
 

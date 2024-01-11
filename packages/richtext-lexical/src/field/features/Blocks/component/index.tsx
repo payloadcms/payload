@@ -1,5 +1,13 @@
 'use client'
-import { Form, buildInitialState, useFormSubmitted } from 'payload/components/forms'
+import {
+  Form,
+  buildInitialState,
+  buildStateFromSchema,
+  useConfig,
+  useDocumentInfo,
+  useFormSubmitted,
+  useLocale,
+} from '@payloadcms/ui'
 import React, { useEffect, useMemo } from 'react'
 
 import { type BlockFields } from '../nodes/BlocksNode'
@@ -7,12 +15,6 @@ const baseClass = 'lexical-block'
 
 import type { Data } from 'payload/types'
 
-import {
-  buildStateFromSchema,
-  useConfig,
-  useDocumentInfo,
-  useLocale,
-} from 'payload/components/utilities'
 import { sanitizeFields } from 'payload/config'
 import { useTranslation } from 'react-i18next'
 

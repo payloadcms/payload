@@ -1,6 +1,0 @@
-export { default as AccountGraphic } from '../../admin/components/graphics/Account'
-export { default as DefaultBlockImageGraphic } from '../../admin/components/graphics/DefaultBlockImage'
-export { default as FileGraphic } from '../../admin/components/graphics/File'
-export { default as IconGraphic } from '../../admin/components/graphics/Icon'
-export { default as LogoGraphic } from '../../admin/components/graphics/Logo'
-export { default as SearchGraphic } from '../../admin/components/graphics/Search'

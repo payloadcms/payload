@@ -4,7 +4,7 @@ import React from 'react'
 import { useTranslation } from '../../../providers/Translation'
 
 import type { TextareaField } from 'payload/types'
-import type { Description } from '../../FieldDescription/types'
+import type { Description } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import DefaultError from '../../Error'

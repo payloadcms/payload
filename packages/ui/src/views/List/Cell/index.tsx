@@ -1,8 +1,7 @@
 import React from 'react'
 import Link from 'next/link' // TODO: abstract this out to support all routers
 
-import type { CodeField } from 'payload/types'
-import type { CellComponentProps, CellProps } from './types'
+import type { CodeField, CellComponentProps, CellProps } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'

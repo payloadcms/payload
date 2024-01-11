@@ -509,12 +509,21 @@ importers:
 
   packages/dev:
     dependencies:
+      '@payloadcms/db-mongodb':
+        specifier: workspace:*
+        version: link:../db-mongodb
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../next
+      '@payloadcms/richtext-lexical':
+        specifier: workspace:*
+        version: link:../richtext-lexical
       next:
         specifier: 14.0.2
         version: 14.0.2(@babel/core@7.22.20)(react-dom@18.3.0-canary-b36ae8d7a-20231207)(react@18.3.0-canary-b36ae8d7a-20231207)(sass@1.69.5)
+      payload:
+        specifier: workspace:*
+        version: link:../payload
       react:
         specifier: 18.3.0-canary-b36ae8d7a-20231207
         version: 18.3.0-canary-b36ae8d7a-20231207
@@ -522,12 +531,6 @@ importers:
         specifier: 18.3.0-canary-b36ae8d7a-20231207
         version: 18.3.0-canary-b36ae8d7a-20231207(react@18.3.0-canary-b36ae8d7a-20231207)
     devDependencies:
-      '@payloadcms/db-mongodb':
-        specifier: workspace:*
-        version: link:../db-mongodb
-      '@payloadcms/richtext-lexical':
-        specifier: workspace:*
-        version: link:../richtext-lexical
       '@types/node':
         specifier: ^20
         version: 20.6.2
@@ -537,9 +540,6 @@ importers:
       '@types/react-dom':
         specifier: ^18
         version: 18.2.7
-      payload:
-        specifier: workspace:*
-        version: link:../payload
       sass:
         specifier: ^1.69.5
         version: 1.69.5
@@ -1371,6 +1371,12 @@ importers:
       '@lexical/utils':
         specifier: 0.12.5
         version: 0.12.5(lexical@0.12.5)
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4

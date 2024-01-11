@@ -2,18 +2,18 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { CSSProperties } from 'react'
 
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { TFunction } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { Payload } from '../../'
-// TODO(JAKE): fix admin component imports since fields moved
-import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
-import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
-import type { Description } from '../../admin/components/forms/FieldDescription/types'
-import type { Props as LabelProps } from '../../admin/components/forms/Label/types'
-import type { RowLabel } from '../../admin/components/forms/RowLabel/types'
-import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
+import type { RichTextAdapter } from '../../admin/RichText'
+import type { ConditionalDateProps } from '../../admin/elements/DatePicker'
+import type { ErrorProps } from '../../admin/forms/Error'
+import type { Description } from '../../admin/forms/FieldDescription'
+import type { LabelProps } from '../../admin/forms/Label'
+import type { RowLabel } from '../../admin/forms/RowLabel'
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'

@@ -1,7 +1,7 @@
 import type { User } from 'payload/auth'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { useAuth, useConfig } from 'payload/components/utilities'
+import { useAuth, useConfig } from '@payloadcms/ui'
 import * as React from 'react'
 
 type options = {
