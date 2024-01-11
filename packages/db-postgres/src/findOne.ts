@@ -9,12 +9,13 @@ import { findMany } from './find/findMany'
 
 export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,
-  { collection, locale, req = {} as PayloadRequest, where: incomingWhere }: FindOneArgs,
+  { collection, depth, locale, req = {} as PayloadRequest, where: incomingWhere }: FindOneArgs,
 ): Promise<T> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const { docs } = await findMany({
     adapter: this,
+    depth,
     fields: collectionConfig.fields,
     limit: 1,
     locale,

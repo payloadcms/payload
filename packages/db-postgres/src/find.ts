@@ -11,6 +11,7 @@ export const find: Find = async function find(
   this: PostgresAdapter,
   {
     collection,
+    depth,
     limit: limitArg,
     locale,
     page = 1,
@@ -26,6 +27,7 @@ export const find: Find = async function find(
   return findMany({
     adapter: this,
     fields: collectionConfig.fields,
+    depth,
     limit: limitArg,
     locale,
     page,

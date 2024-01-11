@@ -12,6 +12,7 @@ export const findVersions: FindVersions = async function findVersions(
   this: PostgresAdapter,
   {
     collection,
+    depth,
     limit,
     locale,
     page,
@@ -30,6 +31,7 @@ export const findVersions: FindVersions = async function findVersions(
 
   return findMany({
     adapter: this,
+    depth,
     fields,
     limit,
     locale,

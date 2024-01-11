@@ -11,6 +11,7 @@ import { findMany } from './find/findMany'
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: PostgresAdapter,
   {
+    depth,
     global,
     limit,
     locale,
@@ -32,6 +33,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 
   return findMany({
     adapter: this,
+    depth,
     fields,
     limit,
     locale,

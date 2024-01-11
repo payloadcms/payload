@@ -20,6 +20,7 @@ type Args = Omit<FindArgs, 'collection'> & {
 export const findMany = async function find({
   adapter,
   fields,
+  depth,
   limit: limitArg,
   locale,
   page = 1,
@@ -64,7 +65,7 @@ export const findMany = async function find({
 
   const findManyArgs = buildFindManyArgs({
     adapter,
-    depth: 0,
+    depth,
     fields,
     tableName,
   })

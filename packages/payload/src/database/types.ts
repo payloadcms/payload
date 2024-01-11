@@ -170,6 +170,7 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 
 export type FindOneArgs = {
   collection: string
+  depth?: number
   locale?: string
   req: PayloadRequest
   where?: Where
@@ -179,6 +180,7 @@ export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | n
 
 export type FindArgs = {
   collection: string
+  depth?: number
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   locale?: string
@@ -194,6 +196,7 @@ export type FindArgs = {
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
 type BaseVersionArgs = {
+  depth?: number
   limit?: number
   locale?: string
   page?: number
@@ -218,6 +221,7 @@ export type FindGlobalVersionsArgs = BaseVersionArgs & {
 }
 
 export type FindGlobalArgs = {
+  depth?: number
   locale?: string
   req: PayloadRequest
   slug: string
