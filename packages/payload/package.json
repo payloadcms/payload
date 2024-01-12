@@ -109,6 +109,7 @@
     "@types/passport-local": "1.0.35",
     "@types/pluralize": "0.0.29",
     "@types/probe-image-size": "7.2.0",
+    "@types/react-datepicker": "4.11.2",
     "@types/sharp": "0.31.1",
     "confusing-browser-globals": "1.0.11",
     "copyfiles": "2.4.1",
