@@ -156,6 +156,8 @@ export type InitOptions = {
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
   onInit?: (payload: Payload) => Promise<void> | void
+  /** Secure string that Payload will use for any encryption workflows */
+  secret: string
 }
 
 /**
