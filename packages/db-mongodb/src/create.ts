@@ -2,7 +2,6 @@ import type { Create } from 'payload/database'
 import type { Document, PayloadRequest } from 'payload/types'
 
 import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
 
 import type { MongooseAdapter } from '.'
 
