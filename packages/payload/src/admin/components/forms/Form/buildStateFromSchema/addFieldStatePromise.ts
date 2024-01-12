@@ -20,6 +20,10 @@ type Args = {
   config: SanitizedConfig
   data: Data
   field: NonPresentationalField
+  /**
+   * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
+   */
+  forceFullValue?: boolean
   fullData: Data
   id: number | string
   /**
@@ -60,6 +64,7 @@ export const addFieldStatePromise = async ({
   config,
   data,
   field,
+  forceFullValue = false,
   fullData,
   includeParents = true,
   includeSchema = false,
@@ -148,6 +153,7 @@ export const addFieldStatePromise = async ({
                 config,
                 data: row,
                 fields: field.fields,
+                forceFullValue,
                 fullData,
                 includeParents,
                 includeSchema,
@@ -191,8 +197,8 @@ export const addFieldStatePromise = async ({
           fieldState.value = null
           fieldState.initialValue = null
         } else {
-          fieldState.value = arrayValue.length
-          fieldState.initialValue = arrayValue.length
+          fieldState.value = forceFullValue ? arrayValue : arrayValue.length
+          fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 
           if (arrayValue.length > 0) {
             fieldState.disableFormData = true
@@ -265,6 +271,7 @@ export const addFieldStatePromise = async ({
                   config,
                   data: row,
                   fields: block.fields,
+                  forceFullValue,
                   fullData,
                   includeParents,
                   includeSchema,
@@ -310,8 +317,8 @@ export const addFieldStatePromise = async ({
           fieldState.value = null
           fieldState.initialValue = null
         } else {
-          fieldState.value = blocksValue.length
-          fieldState.initialValue = blocksValue.length
+          fieldState.value = forceFullValue ? blocksValue : blocksValue.length
+          fieldState.initialValue = forceFullValue ? blocksValue : blocksValue.length
 
           if (blocksValue.length > 0) {
             fieldState.disableFormData = true
@@ -335,6 +342,7 @@ export const addFieldStatePromise = async ({
           config,
           data: data?.[field.name] || {},
           fields: field.fields,
+          forceFullValue,
           fullData,
           includeParents,
           includeSchema,
@@ -447,6 +455,7 @@ export const addFieldStatePromise = async ({
       config,
       data,
       fields: field.fields,
+      forceFullValue,
       fullData,
       includeParents,
       includeSchema,
@@ -470,6 +479,7 @@ export const addFieldStatePromise = async ({
         config,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         fields: tab.fields,
+        forceFullValue,
         fullData,
         includeParents,
         includeSchema,

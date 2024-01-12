@@ -19,6 +19,10 @@ type Args = {
   config?: SanitizedConfig
   data: Data
   fields: FieldSchema[]
+  /**
+   * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
+   */
+  forceFullValue?: boolean
   fullData: Data
   id?: number | string
   /**
@@ -71,6 +75,7 @@ export const iterateFields = async ({
   config,
   data,
   fields,
+  forceFullValue = false,
   fullData,
   includeParents = true,
   includeSchema = false,
@@ -105,6 +110,7 @@ export const iterateFields = async ({
           config,
           data,
           field,
+          forceFullValue,
           fullData,
           includeParents,
           includeSchema,
