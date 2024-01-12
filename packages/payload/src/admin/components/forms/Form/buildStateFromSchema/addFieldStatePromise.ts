@@ -58,6 +58,10 @@ type Args = {
   user: User
 }
 
+/**
+ * Flattens the fields schema and fields data.
+ * The output is the field path (e.g. array.0.name) mapped to a FormField object.
+ */
 export const addFieldStatePromise = async ({
   id,
   anyParentLocalized = false,
