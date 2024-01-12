@@ -433,7 +433,7 @@ describe('versions', () => {
 
       const field = page.locator('#field-relationToAutosaves')
 
-      await field.click({ delay: 100 })
+      await field.click()
 
       await expect(page.locator('.rs__option')).toHaveCount(1)
 
