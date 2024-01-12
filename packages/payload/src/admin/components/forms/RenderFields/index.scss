@@ -13,7 +13,6 @@
 
   & > .field-type {
     margin-bottom: var(--spacing-field);
-    max-width: 100%;
 
     &[type='hidden'] {
       margin-bottom: 0;
@@ -26,6 +25,9 @@
     &:last-child {
       margin-bottom: 0;
     }
+  }
+  & > .field-type:not(.tabs-field) {
+    max-width: 100%;
   }
 
   // at the top-level, add extra margins for the following field types
