@@ -78,7 +78,7 @@ export const addFieldStatePromise = async ({
   if (fieldAffectsData(field)) {
     const fieldState: FormField = {
       condition: field.admin?.condition,
-      fieldSchema: includeSchema ? field : null,
+      fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
       valid: true,
@@ -132,6 +132,9 @@ export const addFieldStatePromise = async ({
               (includeUnlocalizedFields || anyParentLocalized || field.localized)
             ) {
               state[`${rowPath}id`] = {
+                fieldSchema: includeSchema
+                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
+                  : undefined,
                 initialValue: row.id,
                 valid: true,
                 value: row.id,
@@ -222,18 +225,33 @@ export const addFieldStatePromise = async ({
                 (includeUnlocalizedFields || anyParentLocalized || field.localized)
               ) {
                 state[`${rowPath}id`] = {
+                  fieldSchema: includeSchema
+                    ? block.fields.find(
+                        (blockField) => 'name' in blockField && blockField.name === 'id',
+                      )
+                    : undefined,
                   initialValue: row.id,
                   valid: true,
                   value: row.id,
                 }
 
                 state[`${rowPath}blockType`] = {
+                  fieldSchema: includeSchema
+                    ? block.fields.find(
+                        (blockField) => 'name' in blockField && blockField.name === 'blockType',
+                      )
+                    : undefined,
                   initialValue: row.blockType,
                   valid: true,
                   value: row.blockType,
                 }
 
                 state[`${rowPath}blockName`] = {
+                  fieldSchema: includeSchema
+                    ? block.fields.find(
+                        (blockField) => 'name' in blockField && blockField.name === 'blockName',
+                      )
+                    : undefined,
                   initialValue: row.blockName,
                   valid: true,
                   value: row.blockName,
