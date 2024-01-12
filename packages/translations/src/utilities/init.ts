@@ -168,8 +168,8 @@ const acceptedLanguages = [
 export function matchLanguage(header: string): string | undefined {
   const parsedHeader = parseAcceptLanguage(header)
 
-  for (const acceptedLanguage of acceptedLanguages) {
-    for (const { language } of parsedHeader) {
+  for (const { language } of parsedHeader) {
+    for (const acceptedLanguage of acceptedLanguages) {
       if (language.startsWith(acceptedLanguage)) {
         return acceptedLanguage
       }
