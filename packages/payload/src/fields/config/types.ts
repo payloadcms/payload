@@ -8,12 +8,14 @@ import type { TFunction } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { Payload } from '../../'
-import type { RichTextAdapter } from '../../admin/RichText'
-import type { ConditionalDateProps } from '../../admin/elements/DatePicker'
-import type { ErrorProps } from '../../admin/forms/Error'
-import type { Description } from '../../admin/forms/FieldDescription'
-import type { LabelProps } from '../../admin/forms/Label'
-import type { RowLabel } from '../../admin/forms/RowLabel'
+import type {
+  ConditionalDateProps,
+  Description,
+  ErrorProps,
+  LabelProps,
+  RichTextAdapter,
+  RowLabel,
+} from '../../admin/types'
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'

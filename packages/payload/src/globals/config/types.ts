@@ -1,10 +1,12 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { CustomPreviewButtonProps } from '../../admin/elements/PreviewButton'
-import type { CustomPublishButtonProps } from '../../admin/elements/PublishButton'
-import type { CustomSaveButtonProps } from '../../admin/elements/SaveButton'
-import type { CustomSaveDraftButtonProps } from '../../admin/elements/SaveDraftButton'
+import type {
+  CustomPreviewButtonProps,
+  CustomPublishButtonProps,
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+} from '../../admin/types'
 import type { User } from '../../auth/types'
 import type {
   Access,
