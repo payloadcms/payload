@@ -1,6 +1,5 @@
 import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { Payload } from '../payload'
-import type { Document, PayloadRequest, Where } from '../types'
+import type { Document, Payload, PayloadRequest, Where } from '../types'
 
 import { docHasTimestamps } from '../types'
 

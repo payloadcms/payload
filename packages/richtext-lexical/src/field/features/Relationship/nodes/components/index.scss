@@ -1,7 +1,8 @@
+@import '@payloadcms/ui/scss';
+
 .lexical-relationship {
-  // TODO: use CSS vars here
-  // @extend %body;
-  // @include shadow-sm;
+  @extend %body;
+  @include shadow-sm;
   padding: calc(var(--base) * 0.75);
   display: flex;
   align-items: center;
@@ -45,8 +46,7 @@
   }
 
   &--selected {
-    // TODO: use CSS vars here
-    // box-shadow: $focus-box-shadow;
+    box-shadow: $focus-box-shadow;
     outline: none;
   }
 
@@ -86,8 +86,7 @@
     margin: 0;
 
     line {
-      // TODO: use CSS vars here
-      // stroke-width: $style-stroke-width-m;
+      stroke-width: $style-stroke-width-m;
     }
 
     &:disabled {

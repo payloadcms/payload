@@ -1,9 +1,8 @@
 @import '@payloadcms/ui/scss';
 
 .lexical-upload {
-  // TODO: use CSS vars here
-  // @extend %body;
-  // @include shadow-sm;
+  @extend %body;
+  @include shadow-sm;
   max-width: calc(var(--base) * 15);
   display: flex;
   align-items: center;
@@ -26,8 +25,7 @@
   }
 
   &__card {
-    // TODO: use CSS vars here
-    // @include soft-shadow-bottom;
+    @include soft-shadow-bottom;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -82,8 +80,7 @@
     margin: 0;
 
     line {
-      // TODO: use CSS vars here
-      // stroke-width: $style-stroke-width-m;
+      stroke-width: $style-stroke-width-m;
     }
 
     &:disabled {
@@ -143,8 +140,7 @@
   }
 
   &--selected {
-    // TODO: use CSS vars here
-    // box-shadow: $focus-box-shadow;
+    box-shadow: $focus-box-shadow;
     outline: none;
   }
 

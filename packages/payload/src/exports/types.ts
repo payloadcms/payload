@@ -27,6 +27,7 @@ export type { Data } from '../admin/forms/Form'
 export type { LabelProps } from '../admin/forms/Label'
 export type { RowLabel, RowLabelComponent } from '../admin/forms/RowLabel'
 export type { DocumentInfoContext } from '../admin/providers/DocumentInfo'
+export type { DocumentPermissions } from '../auth'
 
 export type { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
 

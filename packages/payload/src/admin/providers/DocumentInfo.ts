@@ -1,13 +1,11 @@
+import type { DocumentPermissions } from '../../auth'
 import type {
   SanitizedCollectionConfig,
   TypeWithID,
   TypeWithTimestamps,
 } from '../../collections/config/types'
-import type { CollectionPermission, GlobalPermission } from '../../exports/auth'
 import type { PaginatedDocs, TypeWithVersion } from '../../exports/database'
-import type { SanitizedGlobalConfig } from '../../exports/types'
-
-export type DocumentPermissions = CollectionPermission | GlobalPermission | null
+import type { SanitizedGlobalConfig } from '../../globals/config/types'
 
 export type DocumentInfoContext = {
   collectionSlug?: SanitizedCollectionConfig['slug']

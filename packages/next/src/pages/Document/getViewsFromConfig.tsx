@@ -35,10 +35,6 @@ export const getViewsFromConfig = async ({
     (globalConfig && globalConfig?.admin?.livePreview) ||
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
 
-  console.log('getViewsFromConfig', {
-    routeSegments,
-  })
-
   if (collectionConfig) {
     // `../:id`, or `../create`
     if (routeSegments?.length === 1) {

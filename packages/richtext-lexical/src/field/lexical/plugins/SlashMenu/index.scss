@@ -1,7 +1,8 @@
+@import '@payloadcms/ui/scss';
+
 html[data-theme='light'] {
   .slash-menu-popup {
-    // TODO: use CSS vars here
-    // @include shadow-m;
+    @include shadow-m;
   }
 }
 

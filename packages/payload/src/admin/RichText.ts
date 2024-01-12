@@ -1,7 +1,7 @@
 import type { JSONSchema4 } from 'json-schema'
 
 import type { RequestContext } from '../../dist'
-import type { PayloadRequest } from '../express/types'
+import type { PayloadRequest } from '../../types'
 import type { RichTextField, Validate } from '../fields/config/types'
 import type { CellComponentProps } from './elements/Cell'
 

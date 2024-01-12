@@ -7,7 +7,7 @@ import type SMTPConnection from 'nodemailer/lib/smtp-connection'
 import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
-// @ts-expect-error
+// @ts-ignore-next-line
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 

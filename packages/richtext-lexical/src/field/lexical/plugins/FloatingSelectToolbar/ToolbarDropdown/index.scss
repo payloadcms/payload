@@ -1,3 +1,5 @@
+@import '@payloadcms/ui/scss';
+
 .floating-select-toolbar-popup__dropdown {
   display: flex;
   align-items: center;
@@ -92,8 +94,7 @@ html[data-theme='light'] {
   .floating-select-toolbar-popup__dropdown {
     &-items {
       position: absolute;
-      // TODO: use CSS vars here
-      // @include shadow-m;
+      @include shadow-m;
     }
   }
 }

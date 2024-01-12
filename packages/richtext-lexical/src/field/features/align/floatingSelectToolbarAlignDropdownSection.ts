@@ -8,7 +8,7 @@ export const AlignDropdownSectionWithEntries = (
 ): FloatingToolbarSection => {
   return {
     ChildComponent: () =>
-      // @ts-expect-error
+      // @ts-ignore-next-line
       import('../../lexical/ui/icons/AlignLeft').then((module) => module.AlignLeftIcon),
     entries,
     key: 'dropdown-align',
