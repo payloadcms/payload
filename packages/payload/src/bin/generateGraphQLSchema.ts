@@ -16,7 +16,6 @@ export async function generateGraphQLSchema(): Promise<void> {
     disableDBConnect: true,
     disableOnInit: true,
     local: true,
-    secret: '--unused--',
   })
 
   logger.info('Compiling GraphQL schema...')

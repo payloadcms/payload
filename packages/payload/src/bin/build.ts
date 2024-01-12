@@ -5,7 +5,6 @@ export const build = async (): Promise<void> => {
     disableDBConnect: true,
     disableOnInit: true,
     local: true,
-    secret: '--unused--',
   })
 
   await payload.config.admin.bundler.build(payload.config)

@@ -40,7 +40,6 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
   await payload.init({
     disableOnInit: true,
     local: true,
-    secret: process.env.PAYLOAD_SECRET || '--unused--',
     ...prettySyncLogger,
   })
 
