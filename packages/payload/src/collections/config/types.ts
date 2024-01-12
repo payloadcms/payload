@@ -2,10 +2,12 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { DeepRequired } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../'
-import type { CustomPreviewButtonProps } from '../../admin/elements/PreviewButton'
-import type { CustomPublishButtonProps } from '../../admin/elements/PublishButton'
-import type { CustomSaveButtonProps } from '../../admin/elements/SaveButton'
-import type { CustomSaveDraftButtonProps } from '../../admin/elements/SaveDraftButton'
+import type {
+  CustomPreviewButtonProps,
+  CustomPublishButtonProps,
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+} from '../../admin/types'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
@@ -21,6 +23,7 @@ import type { PayloadRequest, RequestContext } from '../../types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
 import type { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types'
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils'
+
 export type HookOperationType =
   | 'autosave'
   | 'create'

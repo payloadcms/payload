@@ -1,32 +1,6 @@
 export * from './../types'
 
-export type { RichTextAdapter, RichTextFieldProps } from '../admin/RichText'
-export type { CellComponentProps, CellProps } from '../admin/elements/Cell'
-export type { DayPickerProps, SharedProps, TimePickerProps } from '../admin/elements/DatePicker'
-export type { DefaultPreviewButtonProps } from '../admin/elements/PreviewButton'
-export type { CustomPreviewButtonProps } from '../admin/elements/PreviewButton'
-export type { DefaultPublishButtonProps } from '../admin/elements/PublishButton'
-export type { CustomPublishButtonProps } from '../admin/elements/PublishButton'
-export type { DefaultSaveButtonProps } from '../admin/elements/SaveButton'
-export type { CustomSaveButtonProps } from '../admin/elements/SaveButton'
-export type { DefaultSaveDraftButtonProps } from '../admin/elements/SaveDraftButton'
-export type { CustomSaveDraftButtonProps } from '../admin/elements/SaveDraftButton'
-export type {
-  DocumentTabComponent,
-  DocumentTabCondition,
-  DocumentTabConfig,
-  DocumentTabProps,
-} from '../admin/elements/Tab'
-export type { ErrorProps } from '../admin/forms/Error'
-export type {
-  Description,
-  DescriptionComponent,
-  DescriptionFunction,
-} from '../admin/forms/FieldDescription'
-export type { Data } from '../admin/forms/Form'
-export type { LabelProps } from '../admin/forms/Label'
-export type { RowLabel, RowLabelComponent } from '../admin/forms/RowLabel'
-export type { DocumentInfoContext } from '../admin/providers/DocumentInfo'
+export * from '../admin/types'
 export type { DocumentPermissions } from '../auth'
 
 export type { FileData, ImageSize, IncomingUploadType } from '../uploads/types'

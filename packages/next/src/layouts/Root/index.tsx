@@ -1,7 +1,7 @@
 import React from 'react'
 import { headers, cookies } from 'next/headers'
 import { translations } from '@payloadcms/translations/client'
-import { RootProvider } from '@payloadcms/ui/providers'
+import { RootProvider } from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 import { createClientConfig } from '../../utilities/createClientConfig'
 
@@ -24,11 +24,13 @@ export const RootLayout = async ({
   config: Promise<SanitizedConfig>
 }) => {
   const clientConfig = await createClientConfig(configPromise)
+
   const lang =
     getRequestLanguage({
       headers: headers(),
       cookies: cookies(),
     }) ?? clientConfig.i18n.fallbackLanguage
+
   const dir = rtlLanguages.includes(lang) ? 'RTL' : 'LTR'
 
   const mergedTranslations = deepMerge(translations, clientConfig.i18n.translations)
@@ -50,6 +52,7 @@ export const RootLayout = async ({
         >
           {children}
         </RootProvider>
+        <div id="portal" />
       </body>
     </html>
   )
