@@ -21,8 +21,6 @@ import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { destroy } from './destroy'
-import { extendViteConfig } from './extendViteConfig'
-import { extendWebpackConfig } from './extendWebpackConfig'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -97,9 +95,6 @@ export function mongooseAdapter({
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
     mongoose.set('strictQuery', false)
-
-    extendWebpackConfig(payload.config)
-    extendViteConfig(payload.config)
 
     return createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
