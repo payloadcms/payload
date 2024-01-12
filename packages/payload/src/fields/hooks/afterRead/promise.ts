@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { RichTextAdapter } from '../../../admin/RichText'
+import type { RichTextAdapter } from '../../../admin/types'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { PayloadRequest, RequestContext } from '../../../types'

@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { Fragment } from 'react'
 import { ClientConfig } from 'payload/types'
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
@@ -15,6 +15,9 @@ import { NavProvider } from '../../elements/Nav/context'
 import { ActionsProvider } from '../ActionsProvider'
 import { TranslationProvider } from '../Translation'
 import type { LanguageOptions, LanguageTranslations } from '../Translation'
+import { Slide, ToastContainer } from 'react-toastify'
+import { DocumentEventsProvider } from '../DocumentEvents'
+import { CustomProvider } from '../CustomProvider'
 
 type Props = {
   config: ClientConfig
@@ -34,43 +37,50 @@ export const RootProvider: React.FC<Props> = ({
   languageOptions,
 }) => {
   return (
-    <ConfigProvider config={config}>
-      <TranslationProvider
-        lang={lang}
-        translations={translations}
-        fallbackLang={fallbackLang}
-        languageOptions={languageOptions}
-      >
-        <WindowInfoProvider
-          breakpoints={{
-            l: '(max-width: 1440px)',
-            m: '(max-width: 1024px)',
-            s: '(max-width: 768px)',
-            xs: '(max-width: 400px)',
-          }}
+    <Fragment>
+      <ConfigProvider config={config}>
+        <TranslationProvider
+          lang={lang}
+          translations={translations}
+          fallbackLang={fallbackLang}
+          languageOptions={languageOptions}
         >
-          <ScrollInfoProvider>
-            <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-              <AuthProvider>
-                <PreferencesProvider>
-                  <ThemeProvider>
-                    <LocaleProvider>
-                      <StepNavProvider>
-                        <LoadingOverlayProvider>
-                          <ActionsProvider>
-                            <NavProvider>{children}</NavProvider>
-                          </ActionsProvider>
-                        </LoadingOverlayProvider>
-                      </StepNavProvider>
-                    </LocaleProvider>
-                  </ThemeProvider>
-                </PreferencesProvider>
-                <ModalContainer />
-              </AuthProvider>
-            </ModalProvider>
-          </ScrollInfoProvider>
-        </WindowInfoProvider>
-      </TranslationProvider>
-    </ConfigProvider>
+          <WindowInfoProvider
+            breakpoints={{
+              l: '(max-width: 1440px)',
+              m: '(max-width: 1024px)',
+              s: '(max-width: 768px)',
+              xs: '(max-width: 400px)',
+            }}
+          >
+            <ScrollInfoProvider>
+              <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                <AuthProvider>
+                  <PreferencesProvider>
+                    <ThemeProvider>
+                      <LocaleProvider>
+                        <StepNavProvider>
+                          <LoadingOverlayProvider>
+                            <DocumentEventsProvider>
+                              <ActionsProvider>
+                                <NavProvider>
+                                  <CustomProvider>{children}</CustomProvider>
+                                </NavProvider>
+                              </ActionsProvider>
+                            </DocumentEventsProvider>
+                          </LoadingOverlayProvider>
+                        </StepNavProvider>
+                      </LocaleProvider>
+                    </ThemeProvider>
+                  </PreferencesProvider>
+                  <ModalContainer />
+                </AuthProvider>
+              </ModalProvider>
+            </ScrollInfoProvider>
+          </WindowInfoProvider>
+        </TranslationProvider>
+      </ConfigProvider>
+      <ToastContainer icon={false} position="bottom-center" transition={Slide} />
+    </Fragment>
   )
 }
