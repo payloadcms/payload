@@ -1,5 +1,3 @@
-@import 'payload/scss';
-
 .rich-text-lexical {
   .editor {
     position: relative;
@@ -10,7 +8,7 @@
     position: relative;
 
     font-family: var(--font-serif);
-    font-size: base(0.625);
+    font-size: calc(var(--base) * 0.625);
 
     h1,
     h2,

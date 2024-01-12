@@ -1,3 +1,4 @@
+'use client'
 import queryString from 'qs'
 import { useEffect, useState } from 'react'
 import { useTranslation } from '../providers/Translation'

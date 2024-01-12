@@ -3,9 +3,15 @@ import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'
-import type { PaginatedDocs } from 'payload/database'
-import type { TypeWithID, DocumentPreferences, Where } from 'payload/types'
-import type { ContextType, DocumentPermissions, Props, Version } from './types'
+import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
+import type {
+  TypeWithID,
+  DocumentPreferences,
+  Where,
+  DocumentPermissions,
+  DocumentInfoContext,
+} from 'payload/types'
+import type { Props } from './types'
 
 import { useTranslation } from '../../providers/Translation'
 import { useAuth } from '../Auth'
@@ -14,9 +20,9 @@ import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
 import { useParams } from 'next/navigation'
 
-const Context = createContext({} as ContextType)
+const Context = createContext({} as DocumentInfoContext)
 
-export const useDocumentInfo = (): ContextType => useContext(Context)
+export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
 
 export const DocumentInfoProvider: React.FC<Props> = ({
   id: idFromProps,
@@ -39,8 +45,9 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const { permissions } = useAuth()
   const { code } = useLocale()
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
-  const [versions, setVersions] = useState<PaginatedDocs<Version>>(null)
-  const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null)
+  const [versions, setVersions] = useState<PaginatedDocs<TypeWithVersion<any>>>(null)
+  const [unpublishedVersions, setUnpublishedVersions] =
+    useState<PaginatedDocs<TypeWithVersion<any>>>(null)
   const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const baseURL = `${serverURL}${api}`
@@ -222,7 +229,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     return getPreference<DocumentPreferences>(preferencesKey)
   }, [getPreference, preferencesKey])
 
-  const setDocFieldPreferences = useCallback<ContextType['setDocFieldPreferences']>(
+  const setDocFieldPreferences = useCallback<DocumentInfoContext['setDocFieldPreferences']>(
     async (path, fieldPreferences) => {
       const allPreferences = await getDocPreferences()
 
@@ -254,7 +261,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getDocPermissions()
   }, [getDocPermissions])
 
-  const value: ContextType = {
+  const value: DocumentInfoContext = {
     id,
     collectionSlug,
     docPermissions,

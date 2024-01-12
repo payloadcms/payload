@@ -1,7 +1,7 @@
 'use client'
 import type { SerializedEditorState } from 'lexical'
 
-import { Error, FieldDescription, Label, useField, withCondition } from 'payload/components/forms'
+import { Error, FieldDescription, Label, useField } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -44,7 +44,7 @@ const RichText: React.FC<FieldProps> = (props) => {
   )
 
   const fieldType = useField<SerializedEditorState>({
-    condition,
+    // condition,
     path,
     validate: memoizedValidate,
   })
@@ -111,4 +111,4 @@ function fallbackRender({ error }): JSX.Element {
   )
 }
 
-export default withCondition(RichText)
+export default RichText

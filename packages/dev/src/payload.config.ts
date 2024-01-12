@@ -5,6 +5,7 @@ import { buildConfig } from 'payload/config'
 import { Users } from './collections/Users'
 import { Settings } from './globals/Settings'
 import { Pages } from './collections/Pages'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export default buildConfig({
   db: mongooseAdapter({
@@ -15,11 +16,10 @@ export default buildConfig({
   //     connectionString: 'postgres://127.0.0.1:5432/payloadtests',
   //   },
   // }),
-  // editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET,
   collections: [Users, Pages],
   globals: [Settings],
-  editor: {},
+  editor: lexicalEditor({}),
   onInit: async (payload) => {
     // await payload.create({
     //   collection: 'users',

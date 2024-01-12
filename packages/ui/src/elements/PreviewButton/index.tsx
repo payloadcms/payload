@@ -11,19 +11,10 @@ import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { Button } from '../Button'
+import { CustomPreviewButtonProps, DefaultPreviewButtonProps } from 'payload/types'
 
 const baseClass = 'preview-btn'
 
-export type CustomPreviewButtonProps = React.ComponentType<
-  DefaultPreviewButtonProps & {
-    DefaultButton: React.ComponentType<DefaultPreviewButtonProps>
-  }
->
-export type DefaultPreviewButtonProps = {
-  disabled: boolean
-  label: string
-  preview: () => void
-}
 const DefaultPreviewButton: React.FC<DefaultPreviewButtonProps> = ({
   disabled,
   label,
@@ -46,8 +37,9 @@ type Props = {
   CustomComponent?: CustomPreviewButtonProps
   generatePreviewURL?: GeneratePreviewURL
 }
+
 const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL }) => {
-  const { id, collection, global } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const [isLoading, setIsLoading] = useState(false)
   const { code: locale } = useLocale()
@@ -70,8 +62,8 @@ const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL })
       setIsLoading(true)
 
       let url = `${serverURL}${api}`
-      if (collection) url = `${url}/${collection.slug}/${id}`
-      if (global) url = `${url}/globals/${global.slug}`
+      if (collectionSlug) url = `${url}/${collectionSlug}/${id}`
+      if (globalSlug) url = `${url}/globals/${globalSlug}`
 
       const data = await fetch(`${url}?draft=true&locale=${locale}&fallback-locale=null`).then(
         (res) => res.json(),
@@ -86,7 +78,7 @@ const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL })
       isGeneratingPreviewURL.current = false
       toast.error(t('error:previewing'))
     }
-  }, [serverURL, api, collection, global, id, generatePreviewURL, locale, token, t])
+  }, [serverURL, api, collectionSlug, globalSlug, id, generatePreviewURL, locale, token, t])
 
   return (
     <RenderCustomComponent

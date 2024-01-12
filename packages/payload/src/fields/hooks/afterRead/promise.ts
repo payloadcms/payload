@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
-// TODO(JAKE): fix RichText import since fields moved
-import type { RichTextAdapter } from '../../../admin/components/forms/field-types/RichText/types'
+import type { RichTextAdapter } from '../../../admin/RichText'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { PayloadRequest, RequestContext } from '../../../types'
@@ -152,6 +151,8 @@ export const promise = async ({
           flattenLocales,
           overrideAccess,
           populationPromises,
+          // TODO: JARROD `req` differs here
+          // @ts-ignore-next-line
           req,
           showHiddenFields,
           siblingDoc,

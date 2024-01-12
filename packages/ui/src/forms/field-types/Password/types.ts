@@ -1,7 +1,7 @@
 import type React from 'react'
 
 import type { Validate } from 'payload/types'
-import type { Description } from '../../FieldDescription/types'
+import type { Description } from 'payload/types'
 
 export type Props = {
   autoComplete?: string

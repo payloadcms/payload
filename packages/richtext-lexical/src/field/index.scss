@@ -1,4 +1,4 @@
-@import 'payload/scss';
+@import '@payloadcms/ui/scss';
 
 .rich-text-lexical {
   display: flex;
@@ -19,7 +19,7 @@
       .editor {
         background: var(--theme-elevation-200);
         color: var(--theme-elevation-450);
-        padding: base(0.5);
+        padding: calc(var(--base) * 0.5);
       }
     }
   }

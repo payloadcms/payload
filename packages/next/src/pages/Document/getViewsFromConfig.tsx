@@ -1,9 +1,9 @@
 import { AdminViewComponent } from 'payload/config'
 import { SanitizedCollectionConfig, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 import { lazy } from 'react'
-import { getCustomViewByKey } from './getCustomViewByKey.tsx'
-import { CollectionPermission, GlobalPermission, Permissions } from 'payload/auth'
-import { getCustomViewByPath } from './getCustomViewByPath.tsx'
+import { getCustomViewByKey } from './getCustomViewByKey'
+import { CollectionPermission, GlobalPermission } from 'payload/auth'
+import { getCustomViewByPath } from './getCustomViewByPath'
 
 export const getViewsFromConfig = async ({
   routeSegments,
@@ -34,10 +34,6 @@ export const getViewsFromConfig = async ({
     config?.admin?.livePreview?.collections?.includes(collectionConfig?.slug) ||
     (globalConfig && globalConfig?.admin?.livePreview) ||
     config?.admin?.livePreview?.globals?.includes(globalConfig?.slug)
-
-  console.log('getViewsFromConfig', {
-    routeSegments,
-  })
 
   if (collectionConfig) {
     // `../:id`, or `../create`

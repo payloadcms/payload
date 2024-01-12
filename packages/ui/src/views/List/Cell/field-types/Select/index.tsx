@@ -1,7 +1,6 @@
 import React from 'react'
 
-import type { OptionObject, SelectField } from 'payload/types'
-import type { CellComponentProps } from '../../types'
+import type { CellComponentProps, OptionObject, SelectField } from 'payload/types'
 
 import { optionsAreObjects } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'

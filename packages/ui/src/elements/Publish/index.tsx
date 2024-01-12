@@ -9,19 +9,8 @@ import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+import { CustomPublishButtonProps, DefaultPublishButtonProps } from 'payload/types'
 
-export type CustomPublishButtonProps = React.ComponentType<
-  DefaultPublishButtonProps & {
-    DefaultButton: React.ComponentType<DefaultPublishButtonProps>
-  }
->
-export type DefaultPublishButtonProps = {
-  canPublish: boolean
-  disabled: boolean
-  id?: string
-  label: string
-  publish: () => void
-}
 const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
   id,
   canPublish,
@@ -44,7 +33,7 @@ type Props = {
 
 export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const { code } = useLocale()
-  const { id, collection, global, publishedDoc, unpublishedVersions } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, publishedDoc, unpublishedVersions } = useDocumentInfo()
   const [hasPublishPermission, setHasPublishPermission] = React.useState(false)
   const { getData, submit } = useForm()
   const modified = useFormModified()
@@ -73,11 +62,11 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
       const params = {
         locale: code || undefined,
       }
-      if (global) {
-        docAccessURL = `/globals/${global.slug}/access`
-      } else if (collection) {
+      if (globalSlug) {
+        docAccessURL = `/globals/${globalSlug}/access`
+      } else if (collectionSlug) {
         if (!id) operation = 'create'
-        docAccessURL = `/${collection.slug}/access${id ? `/${id}` : ''}`
+        docAccessURL = `/${collectionSlug}/access${id ? `/${id}` : ''}`
       }
 
       if (docAccessURL) {
@@ -103,7 +92,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
     }
 
     void fetchPublishAccess()
-  }, [api, code, collection, getData, global, id, serverURL])
+  }, [api, code, collectionSlug, getData, globalSlug, id, serverURL])
 
   return (
     <RenderCustomComponent

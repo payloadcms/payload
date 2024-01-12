@@ -1,14 +1,21 @@
-import type { Block, Data, Field, Fields } from 'payload/types'
+import type { Fields } from '@payloadcms/ui'
+import type { Block, Data, Field } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { getTranslation } from '@payloadcms/translations'
+import {
+  Button,
+  Collapsible,
+  ErrorPill,
+  Pill,
+  RenderFields,
+  SectionTitle,
+  createNestedFieldPath,
+  useDocumentInfo,
+  useFormSubmitted,
+} from '@payloadcms/ui'
 import isDeepEqual from 'deep-equal'
 import { $getNodeByKey } from 'lexical'
-import { Button, ErrorPill, Pill } from 'payload/components'
-import { Collapsible } from 'payload/components/elements'
-import { SectionTitle } from 'payload/components/fields/Blocks'
-import { RenderFields, createNestedFieldPath, useFormSubmitted } from 'payload/components/forms'
-import { useDocumentInfo } from 'payload/components/utilities'
-import { getTranslation } from 'payload/utilities'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 

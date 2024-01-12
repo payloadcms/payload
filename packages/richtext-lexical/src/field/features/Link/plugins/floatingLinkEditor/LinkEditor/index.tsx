@@ -1,9 +1,20 @@
 'use client'
-import type { Data, Fields } from 'payload/types'
+import type { Fields } from '@payloadcms/ui'
+import type { Data } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
+import { getTranslation } from '@payloadcms/translations'
+import {
+  buildStateFromSchema,
+  formatDrawerSlug,
+  useAuth,
+  useConfig,
+  useDocumentInfo,
+  useEditDepth,
+  useLocale,
+} from '@payloadcms/ui'
 import {
   $getSelection,
   $isRangeSelection,
@@ -12,17 +23,7 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { formatDrawerSlug } from 'payload/components/elements'
-import {
-  buildStateFromSchema,
-  useAuth,
-  useConfig,
-  useDocumentInfo,
-  useEditDepth,
-  useLocale,
-} from 'payload/components/utilities'
 import { sanitizeFields } from 'payload/config'
-import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 

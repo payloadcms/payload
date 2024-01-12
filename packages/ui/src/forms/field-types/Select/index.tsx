@@ -63,10 +63,10 @@ export const Select: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <ErrorComp
-      // message={errorMessage}
-      // showError={showError}
-      />
+      {/* <ErrorComp
+      message={errorMessage}
+      showError={showError}
+      /> */}
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <SelectInput
         readOnly={readOnly}

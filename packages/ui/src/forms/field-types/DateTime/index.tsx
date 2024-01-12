@@ -51,10 +51,10 @@ const DateTime: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <ErrorComp
-        // message={errorMessage}
-        // showError={showError}
-        />
+        {/* <ErrorComp
+        message={errorMessage}
+        showError={showError}
+        /> */}
       </div>
       <LabelComp htmlFor={path} label={label} required={required} />
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>

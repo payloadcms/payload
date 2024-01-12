@@ -11,7 +11,6 @@ import {
   QueryParamTypes,
   HydrateClientUser,
   DocumentInfoProvider,
-  DocumentPermissions,
 } from '@payloadcms/ui'
 import type { EditViewProps } from '@payloadcms/ui'
 import queryString from 'qs'
@@ -19,6 +18,7 @@ import { notFound } from 'next/navigation'
 import { TFunction } from 'i18next'
 import { AdminViewComponent } from 'payload/config'
 import { getViewsFromConfig } from './getViewsFromConfig'
+import type { DocumentPermissions } from 'payload/types'
 
 export const Document = async ({
   params,
