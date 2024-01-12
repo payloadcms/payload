@@ -13,11 +13,27 @@ import getValueWithDefault from '../../../../../fields/getDefaultValue'
 import { iterateFields } from './iterateFields'
 
 type Args = {
+  /**
+   * if all parents are localized, then the field is localized
+   */
+  anyParentLocalized?: boolean
   config: SanitizedConfig
   data: Data
   field: NonPresentationalField
   fullData: Data
   id: number | string
+  /**
+   * Whether to include parent fields in the state
+   */
+  includeParents?: boolean
+  /**
+   * Whether the field schema should be included in the state
+   */
+  includeSchema?: boolean
+  /**
+   * Whether to include unlocalized fields in the state
+   */
+  includeUnlocalizedFields?: boolean
   locale: string
   operation: 'create' | 'update'
   passesCondition: boolean
@@ -25,6 +41,14 @@ type Args = {
   preferences: {
     [key: string]: unknown
   }
+  /**
+   * Whether to check the field's condition
+   */
+  shouldCheckConditions?: boolean
+  /**
+   * Whether to validate the field
+   */
+  shouldValidate?: boolean
   state: Fields
   t: TFunction
   user: User
@@ -32,15 +56,21 @@ type Args = {
 
 export const addFieldStatePromise = async ({
   id,
+  anyParentLocalized = false,
   config,
   data,
   field,
   fullData,
+  includeParents = true,
+  includeSchema = false,
+  includeUnlocalizedFields = true,
   locale,
   operation,
   passesCondition,
   path,
   preferences,
+  shouldCheckConditions = true,
+  shouldValidate = true,
   state,
   t,
   user,
@@ -48,6 +78,7 @@ export const addFieldStatePromise = async ({
   if (fieldAffectsData(field)) {
     const fieldState: FormField = {
       condition: field.admin?.condition,
+      fieldSchema: includeSchema ? field : null,
       initialValue: undefined,
       passesCondition,
       valid: true,
@@ -66,9 +97,9 @@ export const addFieldStatePromise = async ({
       data[field.name] = valueWithDefault
     }
 
-    let validationResult: boolean | string = true
+    let validationResult: string | true = true
 
-    if (typeof fieldState.validate === 'function') {
+    if (typeof fieldState.validate === 'function' && shouldValidate) {
       validationResult = await fieldState.validate(data?.[field.name], {
         ...field,
         id,
@@ -96,24 +127,35 @@ export const addFieldStatePromise = async ({
             const rowPath = `${path}${field.name}.${i}.`
             row.id = row?.id || new ObjectID().toHexString()
 
-            state[`${rowPath}id`] = {
-              initialValue: row.id,
-              valid: true,
-              value: row.id,
+            if (
+              includeParents &&
+              (includeUnlocalizedFields || anyParentLocalized || field.localized)
+            ) {
+              state[`${rowPath}id`] = {
+                initialValue: row.id,
+                valid: true,
+                value: row.id,
+              }
             }
 
             acc.promises.push(
               iterateFields({
                 id,
+                anyParentLocalized: field.localized || anyParentLocalized,
                 config,
                 data: row,
                 fields: field.fields,
                 fullData,
+                includeParents,
+                includeSchema,
+                includeUnlocalizedFields,
                 locale,
                 operation,
                 parentPassesCondition: passesCondition,
                 path: rowPath,
                 preferences,
+                shouldCheckConditions,
+                shouldValidate,
                 state,
                 t,
                 user,
@@ -157,7 +199,9 @@ export const addFieldStatePromise = async ({
         fieldState.rows = rowMetadata
 
         // Add field to state
-        state[`${path}${field.name}`] = fieldState
+        if (includeParents && (includeUnlocalizedFields || anyParentLocalized || field.localized)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -173,36 +217,47 @@ export const addFieldStatePromise = async ({
             if (block) {
               row.id = row?.id || new ObjectID().toHexString()
 
-              state[`${rowPath}id`] = {
-                initialValue: row.id,
-                valid: true,
-                value: row.id,
-              }
+              if (
+                includeParents &&
+                (includeUnlocalizedFields || anyParentLocalized || field.localized)
+              ) {
+                state[`${rowPath}id`] = {
+                  initialValue: row.id,
+                  valid: true,
+                  value: row.id,
+                }
 
-              state[`${rowPath}blockType`] = {
-                initialValue: row.blockType,
-                valid: true,
-                value: row.blockType,
-              }
+                state[`${rowPath}blockType`] = {
+                  initialValue: row.blockType,
+                  valid: true,
+                  value: row.blockType,
+                }
 
-              state[`${rowPath}blockName`] = {
-                initialValue: row.blockName,
-                valid: true,
-                value: row.blockName,
+                state[`${rowPath}blockName`] = {
+                  initialValue: row.blockName,
+                  valid: true,
+                  value: row.blockName,
+                }
               }
 
               acc.promises.push(
                 iterateFields({
                   id,
+                  anyParentLocalized: field.localized || anyParentLocalized,
                   config,
                   data: row,
                   fields: block.fields,
                   fullData,
+                  includeParents,
+                  includeSchema,
+                  includeUnlocalizedFields,
                   locale,
                   operation,
                   parentPassesCondition: passesCondition,
                   path: rowPath,
                   preferences,
+                  shouldCheckConditions,
+                  shouldValidate,
                   state,
                   t,
                   user,
@@ -248,7 +303,9 @@ export const addFieldStatePromise = async ({
         fieldState.rows = rowMetadata
 
         // Add field to state
-        state[`${path}${field.name}`] = fieldState
+        if (includeParents && (includeUnlocalizedFields || anyParentLocalized || field.localized)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -256,15 +313,21 @@ export const addFieldStatePromise = async ({
       case 'group': {
         await iterateFields({
           id,
+          anyParentLocalized: field.localized || anyParentLocalized,
           config,
           data: data?.[field.name] || {},
           fields: field.fields,
           fullData,
+          includeParents,
+          includeSchema,
+          includeUnlocalizedFields,
           locale,
           operation,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
           preferences,
+          shouldCheckConditions,
+          shouldValidate,
           state,
           t,
           user,
@@ -324,7 +387,9 @@ export const addFieldStatePromise = async ({
           fieldState.initialValue = relationshipValue
         }
 
-        state[`${path}${field.name}`] = fieldState
+        if (includeUnlocalizedFields || anyParentLocalized || field.localized) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -337,7 +402,9 @@ export const addFieldStatePromise = async ({
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
-        state[`${path}${field.name}`] = fieldState
+        if (includeUnlocalizedFields || anyParentLocalized || field.localized) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -347,7 +414,9 @@ export const addFieldStatePromise = async ({
         fieldState.initialValue = valueWithDefault
 
         // Add field to state
-        state[`${path}${field.name}`] = fieldState
+        if (includeUnlocalizedFields || anyParentLocalized || field.localized) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -356,15 +425,21 @@ export const addFieldStatePromise = async ({
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
+      anyParentLocalized: field.localized || anyParentLocalized,
       config,
       data,
       fields: field.fields,
       fullData,
+      includeParents,
+      includeSchema,
+      includeUnlocalizedFields,
       locale,
       operation,
       parentPassesCondition: passesCondition,
       path,
       preferences,
+      shouldCheckConditions,
+      shouldValidate,
       state,
       t,
       user,
@@ -373,15 +448,21 @@ export const addFieldStatePromise = async ({
     const promises = field.tabs.map((tab) =>
       iterateFields({
         id,
+        anyParentLocalized: tab.localized || anyParentLocalized,
         config,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         fields: tab.fields,
         fullData,
+        includeParents,
+        includeSchema,
+        includeUnlocalizedFields,
         locale,
         operation,
         parentPassesCondition: passesCondition,
         path: tabHasName(tab) ? `${path}${tab.name}.` : path,
         preferences,
+        shouldCheckConditions,
+        shouldValidate,
         state,
         t,
         user,
