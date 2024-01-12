@@ -5,6 +5,7 @@ import { serializeLexical } from '../../packages/plugin-form-builder/src/utiliti
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { formSubmissionsSlug, formsSlug } from './shared'
+import { ValidationError } from '../../packages/payload/src/errors'
 
 describe('Form Builder Plugin', () => {
   let form: Form
@@ -42,7 +43,7 @@ describe('Form Builder Plugin', () => {
 
     it('adds form submissions collection', async () => {
       const { docs: formSubmissions } = await payload.find({ collection: formSubmissionsSlug })
-      expect(formSubmissions).toHaveLength(0)
+      expect(formSubmissions).toHaveLength(1)
     })
   })
 
@@ -116,6 +117,25 @@ describe('Form Builder Plugin', () => {
       expect(formSubmission.submissionData).toHaveLength(1)
       expect(formSubmission.submissionData[0]).toHaveProperty('field', 'name')
       expect(formSubmission.submissionData[0]).toHaveProperty('value', 'Test Submission')
+    })
+
+    it('does not create a form submission for a non-existing form', async () => {
+      const req = async () =>
+        payload.create({
+          collection: formSubmissionsSlug,
+          data: {
+            form: '659c7c2f98ffb5d83df9dadb',
+            submissionData: [
+              {
+                field: 'name',
+                value: 'Test Submission',
+              },
+            ],
+          },
+          depth: 0,
+        })
+
+      await expect(req).rejects.toThrow(ValidationError)
     })
 
     it('replaces curly braces with data when using slate serializer', async () => {
