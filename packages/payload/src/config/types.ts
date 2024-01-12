@@ -8,8 +8,6 @@ import type { DestinationStream, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 // @ts-ignore-next-line
-import type { InlineConfig } from 'vite'
-import type { Configuration } from 'webpack'
 
 import type { Payload } from '..'
 import type { DocumentInfoContext, DocumentTab, RichTextAdapter } from '../admin/types'
@@ -165,6 +163,8 @@ export type InitOptions = {
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
   onInit?: (payload: Payload) => Promise<void> | void
+  /** Secure string that Payload will use for any encryption workflows */
+  secret: string
 }
 
 /**
@@ -505,10 +505,6 @@ export type Config = {
     }
     /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
     user?: string
-    /** Customize the Vite config that's used to generate the Admin panel. */
-    vite?: (config: InlineConfig) => InlineConfig
-    /** Customize the Webpack config that's used to generate the Admin panel. */
-    webpack?: (config: Configuration) => Configuration
   }
   /**
    * Manage the datamodel of your application
@@ -712,7 +708,7 @@ export type SanitizedConfig = Omit<
   }
 }
 
-export type ClientConfig = Omit<SanitizedConfig, 'db' | 'endpoints' | 'webpack'> & {
+export type ClientConfig = Omit<SanitizedConfig, 'db' | 'endpoints'> & {
   collections: (Omit<SanitizedCollectionConfig, 'access' | 'endpoints' | 'fields' | 'hooks'> & {
     fields: ClientConfigField[]
   })[]
