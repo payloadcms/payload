@@ -12,7 +12,7 @@
     "@payloadcms/live-preview-react": "latest",
     "@types/escape-html": "^1.0.2",
     "escape-html": "^1.0.3",
-    "next": "^13.4.8",
+    "next": "^13.5.1",
     "qs": "^6.11.0",
     "react": "^18.2.0",
     "react-cookie": "^6.1.1",

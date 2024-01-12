@@ -256,6 +256,7 @@ jobs:
           - plugin-nested-docs
           - plugin-search
           - plugin-sentry
+          - plugin-seo
 
     steps:
       - name: Use Node.js 18
