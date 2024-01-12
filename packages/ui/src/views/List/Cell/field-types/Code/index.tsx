@@ -1,7 +1,6 @@
 import React from 'react'
 
-import type { CodeField } from 'payload/types'
-import type { CellComponentProps } from '../../types'
+import type { CellComponentProps, CodeField } from 'payload/types'
 
 import './index.scss'
 

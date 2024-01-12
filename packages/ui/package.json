@@ -19,6 +19,11 @@
       "require": "./src/exports/*.ts",
       "types": "./src/exports/*.ts"
     },
+    "./scss": {
+      "import": "./src/scss.scss",
+      "require": "./src/scss.scss",
+      "default": "./src/scss.scss"
+    },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets/*": "./src/assets/*"
   },

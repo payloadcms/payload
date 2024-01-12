@@ -3,6 +3,7 @@ import type { Dispatch } from 'react'
 
 import type { User } from 'payload/auth'
 import type { Field, Field as FieldConfig, Validate } from 'payload/types'
+import type { Data } from 'payload/types'
 
 export type Row = {
   blockType?: string
@@ -25,10 +26,6 @@ export type FormField = {
 
 export type Fields = {
   [path: string]: FormField
-}
-
-export type Data = {
-  [key: string]: any
 }
 
 export type Preferences = {

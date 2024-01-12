@@ -32,7 +32,7 @@ import type {
   Options as UpdateOptions,
 } from './collections/operations/local/update'
 import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types'
-import type { PaginatedDocs } from './database/types'
+import type { BaseDatabaseAdapter, PaginatedDocs } from './database/types'
 import type { BuildEmailResult } from './email/types'
 import type { TypeWithID as GlobalTypeWithID, Globals } from './globals/config/types'
 import type { Options as FindGlobalOptions } from './globals/operations/local/findOne'
@@ -82,7 +82,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     return create<T>(this, options)
   }
 
-  db: DatabaseAdapter
+  db: BaseDatabaseAdapter
 
   decrypt = decrypt
 
@@ -419,7 +419,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   }
 }
 
-const initialized = new Payload()
+const initialized = new BasePayload()
 
 export default initialized
 
@@ -430,7 +430,7 @@ if (!cached) {
   cached = global._payload = { payload: null, promise: null }
 }
 
-export const getPayload = async (options?: InitOptions): Promise<Payload<GeneratedTypes>> => {
+export const getPayload = async (options?: InitOptions): Promise<BasePayload<GeneratedTypes>> => {
   if (cached.payload) {
     return cached.payload
   }

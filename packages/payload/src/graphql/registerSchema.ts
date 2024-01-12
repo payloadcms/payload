@@ -6,7 +6,7 @@ import queryComplexity, {
   simpleEstimator,
 } from 'graphql-query-complexity'
 
-import type { Payload } from '../payload'
+import type { Payload } from '../types'
 
 import accessResolver from '../auth/graphql/resolvers/access'
 import initCollections from '../collections/graphql/init'

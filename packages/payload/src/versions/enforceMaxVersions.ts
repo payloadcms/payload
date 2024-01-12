@@ -1,7 +1,6 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
-import type { Payload } from '../payload'
-import type { PayloadRequest } from '../types'
+import type { Payload, PayloadRequest } from '../types'
 import type { Where } from '../types'
 
 type Args = {

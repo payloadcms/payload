@@ -1,6 +1,6 @@
 import type { TypeWithID } from '../collections/config/types'
 import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types'
-import type { Payload } from '../payload'
+import type { Payload } from '../types'
 import type { Document, PayloadRequest, Where } from '../types'
 import type { TypeWithVersion } from '../versions/types'
 

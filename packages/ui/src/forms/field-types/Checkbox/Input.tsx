@@ -17,7 +17,7 @@ type CheckboxInputProps = {
   onChange?: (value: boolean) => void
   readOnly?: boolean
   required?: boolean
-  path: string
+  path?: string
   validate?: Validate
   partialChecked?: boolean
   iconClassName?: string

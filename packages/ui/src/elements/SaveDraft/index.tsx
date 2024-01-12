@@ -10,19 +10,10 @@ import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useEditDepth } from '../../providers/EditDepth'
 import { useLocale } from '../../providers/Locale'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+import { CustomSaveDraftButtonProps, DefaultSaveDraftButtonProps } from 'payload/types'
 
 const baseClass = 'save-draft'
 
-export type CustomSaveDraftButtonProps = React.ComponentType<
-  DefaultSaveDraftButtonProps & {
-    DefaultButton: React.ComponentType<DefaultSaveDraftButtonProps>
-  }
->
-export type DefaultSaveDraftButtonProps = {
-  disabled: boolean
-  label: string
-  saveDraft: () => void
-}
 const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({
   disabled,
   label,
@@ -68,7 +59,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
     serverURL,
   } = useConfig()
   const { submit } = useForm()
-  const { id, collection, global } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const { t } = useTranslation()
@@ -80,13 +71,13 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
     let action
     let method = 'POST'
 
-    if (collection) {
-      action = `${serverURL}${api}/${collection.slug}${id ? `/${id}` : ''}${search}`
+    if (collectionSlug) {
+      action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
       if (id) method = 'PATCH'
     }
 
-    if (global) {
-      action = `${serverURL}${api}/globals/${global.slug}${search}`
+    if (globalSlug) {
+      action = `${serverURL}${api}/globals/${globalSlug}${search}`
     }
 
     await submit({
@@ -97,7 +88,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
       },
       skipValidation: true,
     })
-  }, [submit, collection, global, serverURL, api, locale, id])
+  }, [submit, collectionSlug, globalSlug, serverURL, api, locale, id])
 
   return (
     <RenderCustomComponent

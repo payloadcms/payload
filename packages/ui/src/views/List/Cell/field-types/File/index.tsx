@@ -1,18 +1,17 @@
 import React from 'react'
 
-import type { CellComponentProps } from '../../types'
-
 import Thumbnail from '../../../../../elements/Thumbnail'
 import './index.scss'
+import { CellComponentProps } from 'payload/types'
 
 const baseClass = 'file'
 
-const File: React.FC<CellComponentProps<any, any>> = ({ collection, data, rowData }) => {
+const File: React.FC<CellComponentProps<any, any>> = ({ collectionConfig, data, rowData }) => {
   return (
     <div className={baseClass}>
       <Thumbnail
         className={`${baseClass}__thumbnail`}
-        collection={collection}
+        collection={collectionConfig}
         doc={{
           ...rowData,
           filename: data,

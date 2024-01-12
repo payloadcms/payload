@@ -1,8 +1,8 @@
 'use client'
 import React, { useMemo } from 'react'
 
-import type { RichTextField } from 'payload/types'
-import type { RichTextAdapter } from './types'
+import type { RichTextAdapter, RichTextField } from 'payload/types'
+
 const RichText: React.FC<RichTextField> = (fieldprops) => {
   // eslint-disable-next-line react/destructuring-assignment
   const editor: RichTextAdapter = fieldprops.editor

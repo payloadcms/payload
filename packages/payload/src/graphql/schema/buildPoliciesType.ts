@@ -4,7 +4,7 @@ import { GraphQLJSONObject } from 'graphql-type-json'
 import type { CollectionConfig, SanitizedCollectionConfig } from '../../collections/config/types'
 import type { Field } from '../../fields/config/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../../globals/config/types'
-import type { Payload } from '../../payload'
+import type { Payload } from '../../types'
 
 import { toWords } from '../../utilities/formatLabels'
 import formatName from '../utilities/formatName'

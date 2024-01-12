@@ -1,7 +1,8 @@
 import type { Block, BlockField } from 'payload/types'
 
+import { getTranslation } from '@payloadcms/translations'
 import { baseBlockFields } from 'payload/config'
-import { fieldsToJSONSchema, formatLabels, getTranslation } from 'payload/utilities'
+import { fieldsToJSONSchema, formatLabels } from 'payload/utilities'
 
 import type { FeatureProvider } from '../types'
 

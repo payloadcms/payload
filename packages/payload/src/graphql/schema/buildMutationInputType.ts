@@ -37,7 +37,7 @@ import type {
   TextareaField,
   UploadField,
 } from '../../fields/config/types'
-import type { Payload } from '../../payload'
+import type { Payload } from '../../types'
 
 import { fieldAffectsData, optionIsObject, tabHasName } from '../../fields/config/types'
 import { toWords } from '../../utilities/formatLabels'

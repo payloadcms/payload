@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react'
 
-import type { RichTextField } from 'payload/types'
-import type { RichTextAdapter } from '../../../../../forms/field-types/RichText/types'
-import type { CellComponentProps } from '../../types'
+import type { RichTextField, RichTextAdapter, CellComponentProps } from 'payload/types'
 
 const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment

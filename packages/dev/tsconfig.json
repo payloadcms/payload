@@ -12,16 +12,24 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "target": "ESNext",
     "composite": true, // Make sure typescript knows that this module depends on their references
+    "allowImportingTsExtensions": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
+      "payload": ["../payload/src"],
       "payload/*": ["../payload/src/exports/*"],
       "payload-config": ["./src/payload.config.ts"],
-      "@payloadcms/ui": ["../ui/src/exports/*"],
+      "@payloadcms/db-mongodb": ["../db-mongodb/src"],
+      "@payloadcms/richtext-lexical": ["../richtext-lexical/src"],
+      "@payloadcms/ui/*": ["../ui/src/exports/*"],
+      "@payloadcms/translations/client": ["../translations/src/all"],
+      "@payloadcms/translations/api": ["../translations/src/all"],
+      "@payloadcms/translations/*": ["../translations/src/*"],
       "@payloadcms/next/*": ["../next/src/*"]
     }
   },
@@ -32,6 +40,9 @@
     { "path": "../payload" },
     { "path": "../next" },
     { "path": "../ui" },
-    { "path": "../translations" }
+    { "path": "../translations" },
+    { "path": "../db-mongodb" },
+    { "path": "../db-postgres" },
+    { "path": "../richtext-lexical" }
   ]
 }

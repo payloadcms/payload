@@ -1,4 +1,4 @@
-import type { DocumentTabConfig } from './types'
+import type { DocumentTabConfig } from 'payload/types'
 
 export const documentViewKeys = [
   'API',

@@ -45,7 +45,7 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
               // @ts-expect-error
               import('./plugins').then((module) => {
                 const RelationshipPlugin = module.RelationshipPlugin
-                return import('payload/utilities').then((module2) =>
+                return import('@payloadcms/ui').then((module2) =>
                   module2.withMergedProps({
                     Component: RelationshipPlugin,
                     toMergeIntoProps: props,

@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '../../../providers/Translation'
 
-import type { FieldTypes } from '..'
-import type { SanitizedCollectionConfig } from 'payload/types'
-import type { FilterOptions, UploadField } from 'payload/types'
+import type { FieldTypes } from 'payload/config'
+import type {
+  SanitizedCollectionConfig,
+  Description,
+  FilterOptions,
+  UploadField,
+} from 'payload/types'
 import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
 import type { ListDrawerProps } from '../../../elements/ListDrawer/types'
-import type { Description } from '../../FieldDescription/types'
 import type { FilterOptionsResult } from '../Relationship/types'
 
 import { getTranslation } from '@payloadcms/translations'

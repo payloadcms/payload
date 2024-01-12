@@ -1,4 +1,4 @@
-import type { FieldTypes } from '..'
+import type { FieldTypes } from 'payload/config'
 import type { FieldPermissions } from 'payload/auth'
 import type { ArrayField } from 'payload/types'
 

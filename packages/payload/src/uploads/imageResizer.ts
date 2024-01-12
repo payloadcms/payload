@@ -6,7 +6,7 @@ import fs from 'fs'
 import sanitize from 'sanitize-filename'
 import sharp from 'sharp'
 
-import type { UploadEdits } from '../admin/components/views/collections/Edit/types'
+import type { UploadEdits } from '../admin-old/components/views/collections/Edit/types'
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { PayloadRequest } from '../types'
 import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types'

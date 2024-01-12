@@ -13,7 +13,7 @@ export const AlignFeature = (): FeatureProvider => {
             AlignDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../lexical/ui/icons/AlignLeft').then((module) => module.AlignLeftIcon),
                 isActive: () => false,
                 key: 'align-left',
@@ -27,7 +27,7 @@ export const AlignFeature = (): FeatureProvider => {
             AlignDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../lexical/ui/icons/AlignCenter').then(
                     (module) => module.AlignCenterIcon,
                   ),
@@ -43,7 +43,7 @@ export const AlignFeature = (): FeatureProvider => {
             AlignDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../lexical/ui/icons/AlignRight').then(
                     (module) => module.AlignRightIcon,
                   ),

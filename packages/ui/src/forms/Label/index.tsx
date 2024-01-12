@@ -1,11 +1,10 @@
 import React from 'react'
 
-import type { Props } from './types'
-
 // import { getTranslation } from '@payloadcms/translations'
 import './index.scss'
+import { LabelProps } from 'payload/types'
 
-const Label: React.FC<Props> = (props) => {
+const Label: React.FC<LabelProps> = (props) => {
   const { htmlFor, label, required = false } = props
   // const { i18n } = useTranslation()
 

@@ -1,7 +1,8 @@
-import type { Data, Fields } from 'payload/types'
+import type { Fields } from '@payloadcms/ui'
+import type { Data } from 'payload/types'
 import type React from 'react'
 
-import { reduceFieldsToValues, useAllFormFields } from 'payload/components/forms'
+import { reduceFieldsToValues, useAllFormFields } from '@payloadcms/ui'
 import { useEffect } from 'react'
 
 type Props = {

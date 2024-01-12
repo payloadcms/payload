@@ -4,7 +4,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-  PayloadT,
+  Payload,
 } from 'payload/types'
 import type { I18n } from '@payloadcms/translations'
 import type { Fields } from '../forms/Form/types'
@@ -36,7 +36,7 @@ export type EditViewProps = (
   updatedAt: string
   user: User | null | undefined
   fieldTypes: FieldTypes
-  payload: PayloadT
+  payload: Payload
   locale: string
   state?: Fields
   permissions: Permissions

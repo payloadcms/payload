@@ -1,7 +1,6 @@
 import React from 'react'
 
-import type { DateField } from 'payload/types'
-import type { CellComponentProps } from '../../types'
+import type { CellComponentProps, DateField } from 'payload/types'
 
 import { formatDate } from '../../../../../utilities/formatDate'
 

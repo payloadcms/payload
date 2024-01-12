@@ -1,7 +1,6 @@
 import React from 'react'
 
-import type { RadioField } from 'payload/types'
-import type { Description } from '../../FieldDescription/types'
+import type { RadioField, Description } from 'payload/types'
 import type { OnChange } from './types'
 
 import { optionIsObject } from 'payload/types'

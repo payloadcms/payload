@@ -1,7 +1,6 @@
 import React from 'react'
 
-import type { BlockField } from 'payload/types'
-import type { CellComponentProps } from '../../types'
+import type { BlockField, CellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 

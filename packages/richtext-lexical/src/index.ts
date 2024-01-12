@@ -51,160 +51,163 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     })
   }
 
-  return {
-    LazyCellComponent: () =>
-      // @ts-expect-error
-      import('./cell').then((module) => {
-        const RichTextCell = module.RichTextCell
-        return import('payload/utilities').then((module2) =>
-          module2.withMergedProps({
-            Component: RichTextCell,
-            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-          }),
-        )
-      }),
+  // TODO: re-implement this once migrated to RSC
+  return null
 
-    LazyFieldComponent: () =>
-      // @ts-expect-error
-      import('./field').then((module) => {
-        const RichTextField = module.RichTextField
-        return import('payload/utilities').then((module2) =>
-          module2.withMergedProps({
-            Component: RichTextField,
-            toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
-          }),
-        )
-      }),
-    afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
-      return new Promise<void>((resolve, reject) => {
-        const promises: Promise<void>[] = []
-
-        if (finalSanitizedEditorConfig?.features?.hooks?.afterReadPromises?.length) {
-          for (const afterReadPromise of finalSanitizedEditorConfig.features.hooks
-            .afterReadPromises) {
-            const promise = afterReadPromise({
-              field,
-              incomingEditorState,
-              siblingDoc,
-            })
-            if (promise) {
-              promises.push(promise)
-            }
-          }
-        }
-
-        Promise.all(promises)
-          .then(() => resolve())
-          .catch((error) => reject(error))
-      })
-    },
-    editorConfig: finalSanitizedEditorConfig,
-    outputSchema: ({ field, interfaceNameDefinitions, isRequired }) => {
-      let outputSchema: JSONSchema4 = {
-        // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
-        // In the future, we should
-        // 1) allow recursive children
-        // 2) Pass in all the different types for every node added to the editorconfig. This can be done with refs in the schema.
-        properties: {
-          root: {
-            additionalProperties: false,
-            properties: {
-              children: {
-                items: {
-                  additionalProperties: true,
-                  properties: {
-                    type: {
-                      type: 'string',
-                    },
-                    version: {
-                      type: 'integer',
-                    },
-                  },
-                  required: ['type', 'version'],
-                  type: 'object',
-                },
-                type: 'array',
-              },
-              direction: {
-                oneOf: [
-                  {
-                    enum: ['ltr', 'rtl'],
-                  },
-                  {
-                    type: 'null',
-                  },
-                ],
-              },
-              format: {
-                enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''], // ElementFormatType, since the root node is an element
-                type: 'string',
-              },
-              indent: {
-                type: 'integer',
-              },
-              type: {
-                type: 'string',
-              },
-              version: {
-                type: 'integer',
-              },
-            },
-            required: ['children', 'direction', 'format', 'indent', 'type', 'version'],
-            type: 'object',
-          },
-        },
-        required: ['root'],
-        type: withNullableJSONSchemaType('object', isRequired),
-      }
-      for (const modifyOutputSchema of finalSanitizedEditorConfig.features.generatedTypes
-        .modifyOutputSchemas) {
-        outputSchema = modifyOutputSchema({
-          currentSchema: outputSchema,
-          field,
-          interfaceNameDefinitions,
-          isRequired,
-        })
-      }
-
-      return outputSchema
-    },
-    populationPromise({
-      context,
-      currentDepth,
-      depth,
-      field,
-      findMany,
-      flattenLocales,
-      overrideAccess,
-      populationPromises,
-      req,
-      showHiddenFields,
-      siblingDoc,
-    }) {
-      // check if there are any features with nodes which have populationPromises for this field
-      if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
-        return richTextRelationshipPromise({
-          context,
-          currentDepth,
-          depth,
-          editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
-          field,
-          findMany,
-          flattenLocales,
-          overrideAccess,
-          populationPromises,
-          req,
-          showHiddenFields,
-          siblingDoc,
-        })
-      }
-
-      return null
-    },
-    validate: richTextValidateHOC({
-      editorConfig: finalSanitizedEditorConfig,
-    }),
-  }
+  // return {
+  //   LazyCellComponent: () =>
+  //     // @ts-expect-error
+  //     import('./cell').then((module) => {
+  //       const RichTextCell = module.RichTextCell
+  //       return import('payload/utilities').then((module2) =>
+  //         module2.withMergedProps({
+  //           Component: RichTextCell,
+  //           toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+  //         }),
+  //       )
+  //     }),
+  //
+  //   LazyFieldComponent: () =>
+  //     // @ts-expect-error
+  //     import('./field').then((module) => {
+  //       const RichTextField = module.RichTextField
+  //       return import('payload/utilities').then((module2) =>
+  //         module2.withMergedProps({
+  //           Component: RichTextField,
+  //           toMergeIntoProps: { editorConfig: finalSanitizedEditorConfig },
+  //         }),
+  //       )
+  //     }),
+  //   afterReadPromise: ({ field, incomingEditorState, siblingDoc }) => {
+  //     return new Promise<void>((resolve, reject) => {
+  //       const promises: Promise<void>[] = []
+  //
+  //       if (finalSanitizedEditorConfig?.features?.hooks?.afterReadPromises?.length) {
+  //         for (const afterReadPromise of finalSanitizedEditorConfig.features.hooks
+  //           .afterReadPromises) {
+  //           const promise = afterReadPromise({
+  //             field,
+  //             incomingEditorState,
+  //             siblingDoc,
+  //           })
+  //           if (promise) {
+  //             promises.push(promise)
+  //           }
+  //         }
+  //       }
+  //
+  //       Promise.all(promises)
+  //         .then(() => resolve())
+  //         .catch((error) => reject(error))
+  //     })
+  //   },
+  //   editorConfig: finalSanitizedEditorConfig,
+  //   outputSchema: ({ field, interfaceNameDefinitions, isRequired }) => {
+  //     let outputSchema: JSONSchema4 = {
+  //       // This schema matches the SerializedEditorState type so far, that it's possible to cast SerializedEditorState to this schema without any errors.
+  //       // In the future, we should
+  //       // 1) allow recursive children
+  //       // 2) Pass in all the different types for every node added to the editorconfig. This can be done with refs in the schema.
+  //       properties: {
+  //         root: {
+  //           additionalProperties: false,
+  //           properties: {
+  //             children: {
+  //               items: {
+  //                 additionalProperties: true,
+  //                 properties: {
+  //                   type: {
+  //                     type: 'string',
+  //                   },
+  //                   version: {
+  //                     type: 'integer',
+  //                   },
+  //                 },
+  //                 required: ['type', 'version'],
+  //                 type: 'object',
+  //               },
+  //               type: 'array',
+  //             },
+  //             direction: {
+  //               oneOf: [
+  //                 {
+  //                   enum: ['ltr', 'rtl'],
+  //                 },
+  //                 {
+  //                   type: 'null',
+  //                 },
+  //               ],
+  //             },
+  //             format: {
+  //               enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''], // ElementFormatType, since the root node is an element
+  //               type: 'string',
+  //             },
+  //             indent: {
+  //               type: 'integer',
+  //             },
+  //             type: {
+  //               type: 'string',
+  //             },
+  //             version: {
+  //               type: 'integer',
+  //             },
+  //           },
+  //           required: ['children', 'direction', 'format', 'indent', 'type', 'version'],
+  //           type: 'object',
+  //         },
+  //       },
+  //       required: ['root'],
+  //       type: withNullableJSONSchemaType('object', isRequired),
+  //     }
+  //     for (const modifyOutputSchema of finalSanitizedEditorConfig.features.generatedTypes
+  //       .modifyOutputSchemas) {
+  //       outputSchema = modifyOutputSchema({
+  //         currentSchema: outputSchema,
+  //         field,
+  //         interfaceNameDefinitions,
+  //         isRequired,
+  //       })
+  //     }
+  //
+  //     return outputSchema
+  //   },
+  //   populationPromise({
+  //     context,
+  //     currentDepth,
+  //     depth,
+  //     field,
+  //     findMany,
+  //     flattenLocales,
+  //     overrideAccess,
+  //     populationPromises,
+  //     req,
+  //     showHiddenFields,
+  //     siblingDoc,
+  //   }) {
+  //     // check if there are any features with nodes which have populationPromises for this field
+  //     if (finalSanitizedEditorConfig?.features?.populationPromises?.size) {
+  //       return richTextRelationshipPromise({
+  //         context,
+  //         currentDepth,
+  //         depth,
+  //         editorPopulationPromises: finalSanitizedEditorConfig.features.populationPromises,
+  //         field,
+  //         findMany,
+  //         flattenLocales,
+  //         overrideAccess,
+  //         populationPromises,
+  //         req,
+  //         showHiddenFields,
+  //         siblingDoc,
+  //       })
+  //     }
+  //
+  //     return null
+  //   },
+  //   validate: richTextValidateHOC({
+  //     editorConfig: finalSanitizedEditorConfig,
+  //   }),
+  // }
 }
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'

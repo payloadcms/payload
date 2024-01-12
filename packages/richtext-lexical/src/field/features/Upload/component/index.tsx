@@ -3,13 +3,18 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
+import { getTranslation } from '@payloadcms/translations'
+import {
+  Button,
+  DrawerToggler,
+  FileGraphic,
+  useConfig,
+  useDocumentDrawer,
+  useDrawerSlug,
+  usePayloadAPI,
+  useThumbnail,
+} from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
-import { Button } from 'payload/components'
-import { DrawerToggler, useDocumentDrawer, useDrawerSlug } from 'payload/components/elements'
-import { FileGraphic } from 'payload/components/graphics'
-import { usePayloadAPI, useThumbnail } from 'payload/components/hooks'
-import { useConfig } from 'payload/components/utilities'
-import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 

@@ -1,6 +1,6 @@
 import type { PayloadHandler, SanitizedConfig } from 'payload/config'
 
-import type { Payload } from '../payload'
+import type { Payload } from '../types'
 
 export interface PayloadBundler {
   build: (payloadConfig: SanitizedConfig) => Promise<void> // used in `payload build`

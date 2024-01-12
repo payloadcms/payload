@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from '../../../../../providers/Translation'
 
-import type { RelationshipField } from 'payload/types'
-import type { CellComponentProps } from '../../types'
+import type { CellComponentProps, RelationshipField } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useIntersect } from '../../../../../hooks/useIntersect'

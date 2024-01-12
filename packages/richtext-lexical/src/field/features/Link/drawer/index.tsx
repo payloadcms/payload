@@ -1,8 +1,4 @@
-import { Drawer } from 'payload/components/elements'
-import { Form } from 'payload/components/forms'
-import { RenderFields } from 'payload/components/forms'
-import { FormSubmit } from 'payload/components/forms'
-import { fieldTypes } from 'payload/components/forms'
+import { Drawer, Form, FormSubmit, RenderFields, fieldTypes } from '@payloadcms/ui'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 

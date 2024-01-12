@@ -1,4 +1,6 @@
-import { type Field, type Fields } from 'payload/types'
+import type { Fields } from '@payloadcms/ui'
+
+import { type Field } from 'payload/types'
 
 export interface Props {
   drawerSlug: string

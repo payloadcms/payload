@@ -2,12 +2,20 @@ import React from 'react'
 
 import type { Field } from 'payload/types'
 import { getNextT } from '../../utilities/getNextT'
-import { MinimalTemplate, FormSubmit, Form, RenderFields, fieldTypes } from '@payloadcms/ui'
+import {
+  MinimalTemplate,
+  FormSubmit,
+  Form,
+  RenderFields,
+  fieldTypes,
+  buildStateFromSchema,
+} from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
 
 import './index.scss'
+import { initPage } from '../../utilities/initPage'
 
 const baseClass = 'create-first-user'
 
@@ -31,7 +39,15 @@ export const generateMetadata = async ({
 export const CreateFirstUser: React.FC<{
   config: Promise<SanitizedConfig>
 }> = async ({ config: configPromise }) => {
-  const config = await configPromise
+  const {
+    config,
+    user,
+    locale,
+    i18n: { t },
+  } = await initPage({
+    configPromise,
+    redirectUnauthenticatedUser: false,
+  })
 
   const {
     admin: { user: userSlug },
@@ -74,16 +90,20 @@ export const CreateFirstUser: React.FC<{
     },
   ] as Field[]
 
+  const state = await buildStateFromSchema({
+    config,
+    fieldSchema: fields,
+    locale,
+    operation: 'create',
+    preferences: {},
+    t,
+    user,
+  })
+
   return (
     <MinimalTemplate className={baseClass}>
-      <h1>
-        Welcome
-        {/* {t('general:welcome')} */}
-      </h1>
-      <p>
-        Create your first user to get started
-        {/* {t('beginCreateFirstUser')} */}
-      </p>
+      <h1>{t('general:welcome')}</h1>
+      <p>{t('beginCreateFirstUser')}</p>
       <Form
         action={`${serverURL}${api}/${userSlug}/first-register`}
         method="POST"
@@ -91,11 +111,13 @@ export const CreateFirstUser: React.FC<{
         redirect={admin}
         validationOperation="create"
       >
-        <RenderFields fieldSchema={[...fields, ...userConfig.fields]} fieldTypes={fieldTypes} />
-        <FormSubmit>
-          Create
-          {/* {t('general:create')} */}
-        </FormSubmit>
+        <RenderFields
+          fieldSchema={[...fields, ...userConfig.fields]}
+          fieldTypes={fieldTypes}
+          user={user}
+          state={state}
+        />
+        <FormSubmit>{t('general:create')}</FormSubmit>
       </Form>
     </MinimalTemplate>
   )

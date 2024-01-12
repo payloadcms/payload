@@ -50,6 +50,7 @@ export type GlobalPermission = {
   update: Permission
 }
 
+export type DocumentPermissions = CollectionPermission | GlobalPermission
 export type Permissions = {
   canAccessAdmin: boolean
   collections: {
