@@ -1,6 +1,7 @@
 import type { Form } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical'
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { formSubmissionsSlug, formsSlug } from './shared'
@@ -142,6 +143,63 @@ describe('Form Builder Plugin', () => {
 
       expect(serializedEmail).toContain(mockName)
       expect(serializedEmail).toContain(mockEmail)
+    })
+
+    it('replaces curly braces with data when using lexical serializer', async () => {
+      const mockName = 'Test Submission'
+      const mockEmail = 'dev@payloadcms.com'
+
+      const serializedEmail = await serializeLexical(
+        {
+          root: {
+            type: 'root',
+            format: '',
+            indent: 0,
+            version: 1,
+            children: [
+              {
+                type: 'paragraph',
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Name: {{name}}',
+                    type: 'text',
+                    version: 1,
+                  },
+                  {
+                    type: 'linebreak',
+                    version: 1,
+                  },
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Email: {{email}}',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+              },
+            ],
+            direction: 'ltr',
+          },
+        },
+        [
+          { field: 'name', value: mockName },
+          { field: 'email', value: mockEmail },
+        ],
+      )
+
+      expect(serializedEmail).toContain(`Name: ${mockName}`)
+      expect(serializedEmail).toContain(`Email: ${mockEmail}`)
     })
   })
 })
