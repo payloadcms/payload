@@ -93,17 +93,12 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   migrationDir: migrationDirArg,
-  transactionOptions,
+  transactionOptions = {},
   url,
 }: Args): MongooseAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
-    let beginTransactionFunction = beginTransaction
     mongoose.set('strictQuery', false)
-
-    if (transactionOptions === false) {
-      beginTransactionFunction = () => null
-    }
 
     return createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
@@ -122,7 +117,7 @@ export function mongooseAdapter({
       versions: {},
 
       // DatabaseAdapter
-      beginTransaction: beginTransactionFunction,
+      beginTransaction: transactionOptions ? beginTransaction : undefined,
       commitTransaction,
       connect,
       create,
