@@ -2,7 +2,8 @@
   "name": "@payloadcms/translations",
   "version": "0.0.1",
   "private": true,
-  "main": "./dist/index.js",
+  "main": "./src/exports/index.ts",
+  "types": "./src/types.ts",
   "scripts": {
     "build": "npx ts-node ./src/build.ts",
     "clean": "rimraf {dist,*.tsbuildinfo}",
@@ -41,7 +42,9 @@
         "require": "./dist/client/index.ts"
       }
     },
-    "registry": "https://registry.npmjs.org/"
+    "main": "./dist/exports/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/types.d.ts"
   },
   "files": [
     "dist"
