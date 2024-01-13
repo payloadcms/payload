@@ -52,6 +52,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
   const formSchema = transformInputFormSchema(
     sanitizeFields({
+      // @ts-ignore-next-line TODO: Fix this
       config: payloadConfig,
       fields: unsanitizedFormSchema,
       validRelationships,
@@ -74,6 +75,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       const preferences = await getDocPreferences()
 
       const stateFromSchema = await buildStateFromSchema({
+        // @ts-ignore-next-line TODO: Fix this
         config,
         data: JSON.parse(JSON.stringify(formData)),
         fieldSchema: formSchema as any,
@@ -84,6 +86,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       })
 
       if (!initialStateRef.current) {
+        // @ts-ignore-next-line TODO: Fix this
         initialStateRef.current = buildInitialState(JSON.parse(JSON.stringify(formData)))
       }
 

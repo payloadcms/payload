@@ -121,7 +121,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <RenderFields
+        [RenderFields]
+        {/* <RenderFields
           className={`${baseClass}__fields`}
           fieldSchema={fields.map((field) => ({
             ...field,
@@ -133,7 +134,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           margins="small"
           permissions={permissions?.fields}
           readOnly={readOnly}
-        />
+        /> */}
       </Collapsible>
     </div>
   )

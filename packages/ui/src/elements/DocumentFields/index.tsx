@@ -1,8 +1,8 @@
 import React from 'react'
 
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { Description } from '../../forms/FieldDescription/types'
-import type { FieldTypes } from '../../forms/field-types'
+import type { Description } from 'payload/types'
+import type { FieldTypes } from 'payload/config'
 
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'

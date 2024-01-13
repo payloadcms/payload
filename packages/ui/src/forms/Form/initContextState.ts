@@ -1,7 +1,6 @@
 import type {
   Context,
   CreateFormData,
-  Data,
   DispatchFields,
   Fields,
   FormField,
@@ -13,6 +12,8 @@ import type {
   Submit,
   ValidateForm,
 } from './types'
+
+import type { Data } from 'payload/types'
 
 const submit: Submit = () => undefined
 const getSiblingData: GetSiblingData = () => undefined

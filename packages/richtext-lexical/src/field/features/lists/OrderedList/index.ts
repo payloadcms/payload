@@ -16,7 +16,7 @@ export const OrderedListFeature = (): FeatureProvider => {
             TextDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../../lexical/ui/icons/OrderedList').then(
                     (module) => module.OrderedListIcon,
                   ),
@@ -55,7 +55,7 @@ export const OrderedListFeature = (): FeatureProvider => {
           : [
               {
                 Component: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../plugin').then((module) => module.LexicalListPlugin),
                 position: 'normal',
               },
@@ -69,7 +69,7 @@ export const OrderedListFeature = (): FeatureProvider => {
               options: [
                 new SlashMenuOption('orderedlist', {
                   Icon: () =>
-                    // @ts-expect-error
+                    // @ts-ignore-next-line
                     import('../../../lexical/ui/icons/OrderedList').then(
                       (module) => module.OrderedListIcon,
                     ),

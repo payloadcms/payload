@@ -99,7 +99,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
         plugins: [
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugin').then((module) => module.UploadPlugin),
             position: 'normal',
           },
@@ -113,7 +113,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
               options: [
                 new SlashMenuOption('upload', {
                   Icon: () =>
-                    // @ts-expect-error
+                    // @ts-ignore-next-line
                     import('../../lexical/ui/icons/Upload').then((module) => module.UploadIcon),
                   displayName: 'Upload',
                   keywords: ['upload', 'image', 'file', 'img', 'picture', 'photo', 'media'],

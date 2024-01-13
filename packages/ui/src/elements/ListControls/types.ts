@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig, FieldAffectingData, Where } from 'payload/types'
-import type { Props as ListProps } from '../../views/List/types'
+import type { DefaultListViewProps } from '../../views/List/types'
 import type { Column } from '../Table/types'
 
 export type Props = {
@@ -11,7 +11,7 @@ export type Props = {
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
   modifySearchQuery?: boolean
-  resetParams?: ListProps['resetParams']
+  resetParams?: DefaultListViewProps['resetParams']
   titleField: FieldAffectingData
   textFieldsToBeSearched?: FieldAffectingData[]
 }

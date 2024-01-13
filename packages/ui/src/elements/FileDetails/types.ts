@@ -1,6 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload/types'
-import type { FileSizes } from '../../../../uploads/types'
-import type { Data } from '../../forms/Form/types'
+import type { SanitizedCollectionConfig, Data, FileSizes } from 'payload/types'
 
 export type Props = {
   canEdit?: boolean

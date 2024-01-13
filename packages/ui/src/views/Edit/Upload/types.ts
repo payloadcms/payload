@@ -1,5 +1,5 @@
-import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
-import type { Fields } from '../../../../forms/Form/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
+import type { Fields } from '../../..'
 
 export type Props = {
   collection: SanitizedCollectionConfig

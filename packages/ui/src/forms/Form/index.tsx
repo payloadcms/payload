@@ -50,7 +50,7 @@ import reduceFieldsToValues from './reduceFieldsToValues'
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { id, getDocPreferences } = useDocumentInfo()
 
   const {
     action,
@@ -470,6 +470,8 @@ const Form: React.FC<Props> = (props) => {
       if (rowSchema) {
         const subFieldState = await buildStateFromSchema({
           id,
+          // TODO: fix this
+          // @ts-ignore-next-line
           config,
           data,
           fieldSchema: rowSchema,
@@ -510,6 +512,8 @@ const Form: React.FC<Props> = (props) => {
       if (rowSchema) {
         const subFieldState = await buildStateFromSchema({
           id,
+          // TODO: fix this
+          // @ts-ignore-next-line
           config,
           data,
           fieldSchema: rowSchema,
@@ -578,6 +582,8 @@ const Form: React.FC<Props> = (props) => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
         id,
+        // TODO: fix this
+        // @ts-ignore-next-line
         config,
         data,
         fieldSchema,

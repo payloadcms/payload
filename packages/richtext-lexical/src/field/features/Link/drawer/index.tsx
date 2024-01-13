@@ -18,12 +18,13 @@ export const LinkDrawer: React.FC<Props> = ({
   return (
     <Drawer className={baseClass} slug={drawerSlug} title={t('editLink') ?? ''}>
       <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
-        <RenderFields
+        [RenderFields]
+        {/* <RenderFields
           fieldSchema={fieldSchema}
           fieldTypes={fieldTypes}
           forceRender
           readOnly={false}
-        />
+        /> */}
         <FormSubmit>{t('general:submit')}</FormSubmit>
       </Form>
     </Drawer>

@@ -24,17 +24,17 @@ type Props = {
 }
 
 const iconImports = {
-  // @ts-expect-error
+  // @ts-ignore-next-line
   h1: () => import('../../lexical/ui/icons/H1').then((module) => module.H1Icon),
-  // @ts-expect-error
+  // @ts-ignore-next-line
   h2: () => import('../../lexical/ui/icons/H2').then((module) => module.H2Icon),
-  // @ts-expect-error
+  // @ts-ignore-next-line
   h3: () => import('../../lexical/ui/icons/H3').then((module) => module.H3Icon),
-  // @ts-expect-error
+  // @ts-ignore-next-line
   h4: () => import('../../lexical/ui/icons/H4').then((module) => module.H4Icon),
-  // @ts-expect-error
+  // @ts-ignore-next-line
   h5: () => import('../../lexical/ui/icons/H5').then((module) => module.H5Icon),
-  // @ts-expect-error
+  // @ts-ignore-next-line
   h6: () => import('../../lexical/ui/icons/H6').then((module) => module.H6Icon),
 }
 

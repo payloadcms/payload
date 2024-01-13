@@ -14,7 +14,7 @@ export const InlineCodeTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../../lexical/ui/icons/Code').then((module) => module.CodeIcon),
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {

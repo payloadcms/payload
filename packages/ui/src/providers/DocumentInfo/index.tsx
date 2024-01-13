@@ -2,7 +2,7 @@
 import qs from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import type { TypeWithTimestamps } from 'payload/dist/collections/config/types'
+import type { TypeWithTimestamps } from 'payload/types'
 import type { PaginatedDocs, TypeWithVersion } from 'payload/database'
 import type {
   TypeWithID,
@@ -30,8 +30,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   collectionSlug,
   globalSlug,
   idFromParams: getIDFromParams,
-  draftsEnabled,
-  versionsEnabled,
+  versionsConfig,
 }) => {
   const { id: idFromParams } = useParams()
   const id = idFromProps || (getIDFromParams ? (idFromParams as string) : null)
@@ -73,7 +72,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
-    let shouldFetchVersions = versionsEnabled
+    let shouldFetchVersions = Boolean(versionsConfig)
     let unpublishedVersionJSON = null
     let versionJSON = null
     let shouldFetch = true
@@ -138,7 +137,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     if (shouldFetch) {
       let publishedJSON
 
-      if (draftsEnabled) {
+      if (versionsConfig?.drafts) {
         publishedJSON = await fetch(publishedFetchURL, {
           credentials: 'include',
           headers: {
@@ -196,7 +195,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, globalSlug, collectionSlug, id, baseURL, code, versionsEnabled, draftsEnabled])
+  }, [i18n, globalSlug, collectionSlug, id, baseURL, code, versionsConfig])
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
@@ -274,8 +273,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     setDocFieldPreferences,
     slug,
     unpublishedVersions,
-    versionsEnabled,
-    draftsEnabled,
+    versionsConfig,
+    versions,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>

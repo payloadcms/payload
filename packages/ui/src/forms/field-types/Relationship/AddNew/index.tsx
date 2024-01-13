@@ -66,6 +66,8 @@ export const AddNewRelation: React.FC<Props> = ({
         if (isNewValue) {
           dispatchOptions({
             collection: collectionConfig,
+            // TODO: fix this
+            // @ts-ignore-next-line
             config,
             docs: [doc],
             i18n,

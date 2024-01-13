@@ -139,7 +139,8 @@ const EditMany: React.FC<Props> = (props) => {
                 </button>
               </div>
               <FieldSelect fields={fields} setSelected={setSelected} />
-              <RenderFields fieldSchema={selected} fieldTypes={fieldTypes} />
+              [RenderFields]
+              {/* <RenderFields fieldSchema={selected} fieldTypes={fieldTypes} /> */}
               <div className={`${baseClass}__sidebar-wrap`}>
                 <div className={`${baseClass}__sidebar`}>
                   <div className={`${baseClass}__sidebar-sticky-wrap`}>

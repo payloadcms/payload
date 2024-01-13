@@ -16,7 +16,7 @@ export const UnorderedListFeature = (): FeatureProvider => {
             TextDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../../lexical/ui/icons/UnorderedList').then(
                     (module) => module.UnorderedListIcon,
                   ),
@@ -51,7 +51,7 @@ export const UnorderedListFeature = (): FeatureProvider => {
         plugins: [
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('../plugin').then((module) => module.LexicalListPlugin),
             position: 'normal',
           },
@@ -65,7 +65,7 @@ export const UnorderedListFeature = (): FeatureProvider => {
               options: [
                 new SlashMenuOption('unorderedlist', {
                   Icon: () =>
-                    // @ts-expect-error
+                    // @ts-ignore-next-line
                     import('../../../lexical/ui/icons/UnorderedList').then(
                       (module) => module.UnorderedListIcon,
                     ),

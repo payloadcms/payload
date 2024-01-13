@@ -13,7 +13,7 @@ export const IndentFeature = (): FeatureProvider => {
             IndentSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../lexical/ui/icons/IndentDecrease').then(
                     (module) => module.IndentDecreaseIcon,
                   ),
@@ -41,7 +41,7 @@ export const IndentFeature = (): FeatureProvider => {
             IndentSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../lexical/ui/icons/IndentIncrease').then(
                     (module) => module.IndentIncreaseIcon,
                   ),
@@ -59,7 +59,7 @@ export const IndentFeature = (): FeatureProvider => {
         plugins: [
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugin').then((module) => module.IndentPlugin),
             position: 'normal',
           },

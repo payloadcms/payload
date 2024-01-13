@@ -1,9 +1,8 @@
 export * from './../types'
+export type * from '../admin/types'
+export type * from '../uploads/types'
 
-export * from '../admin/types'
 export type { DocumentPermissions } from '../auth'
-
-export type { FileData, ImageSize, IncomingUploadType } from '../uploads/types'
 
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
@@ -23,6 +22,7 @@ export type {
   CollectionConfig,
   SanitizedCollectionConfig,
   TypeWithID,
+  TypeWithTimestamps,
 } from './../collections/config/types'
 
 export type { Access, AccessArgs, ClientConfig, SanitizedConfig } from './../config/types'

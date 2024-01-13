@@ -4,7 +4,7 @@ import type { Props } from './types'
 
 import { ShimmerEffect } from '../ShimmerEffect'
 
-// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
+// @ts-ignore-next-line Just TypeScript being broken // TODO: Open TypeScript issue
 const LazyEditor = lazy(() => import('./CodeEditor'))
 
 export const CodeEditor: React.FC<Props> = (props) => {

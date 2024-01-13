@@ -1,6 +1,7 @@
 import { unflatten as flatleyUnflatten } from 'flatley'
 
-import type { Data, Fields } from './types'
+import type { Fields } from './types'
+import { Data } from 'payload/types'
 
 const reduceFieldsToValues = (fields: Fields, unflatten?: boolean): Data => {
   const data = {}

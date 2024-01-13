@@ -25,7 +25,8 @@ const Row: React.FC<Props> = (props) => {
   return (
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
-        <RenderFields
+        [RenderFields]
+        {/* <RenderFields
           className={`${baseClass}__fields`}
           fieldSchema={fields.map((field) => ({
             ...field,
@@ -37,7 +38,7 @@ const Row: React.FC<Props> = (props) => {
           margins={false}
           permissions={permissions}
           readOnly={readOnly}
-        />
+        /> */}
       </div>
     </RowProvider>
   )
