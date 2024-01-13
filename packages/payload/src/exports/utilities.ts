@@ -1,6 +1,6 @@
+export { default as getDefaultValue } from '../fields/getDefaultValue'
 export { promise as afterReadPromise } from '../fields/hooks/afterRead/promise'
 export { traverseFields as afterReadTraverseFields } from '../fields/hooks/afterRead/traverseFields'
-
 export { extractTranslations } from '../translations/extractTranslations'
 export { default as isImage } from '../uploads/isImage'
 

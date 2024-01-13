@@ -8,7 +8,7 @@ import type { NonPresentationalField, Data, SanitizedConfig } from 'payload/type
 import type { Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
-import getValueWithDefault from 'payload/dist/fields/getDefaultValue' // TODO: replace with 'payload/fields/getDefaultValue'
+import { getDefaultValue } from 'payload/utilities'
 import { iterateFields } from './iterateFields'
 
 type Args = {
@@ -54,7 +54,7 @@ export const addFieldStatePromise = async ({
       value: undefined,
     }
 
-    const valueWithDefault = await getValueWithDefault({
+    const valueWithDefault = await getDefaultValue({
       defaultValue: field.defaultValue,
       locale,
       user,
