@@ -246,6 +246,22 @@ const BlockFields: CollectionConfig = {
             },
           ],
         },
+        {
+          slug: 'block-b',
+          fields: [
+            {
+              name: 'items',
+              type: 'array',
+              fields: [
+                {
+                  name: 'title2',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {

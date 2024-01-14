@@ -16,7 +16,11 @@ const getFlattenedFieldNames = (fields: Field[], prefix: string = ''): string[] 
   return fields.reduce((fieldsToUse, field) => {
     let fieldPrefix = prefix
 
-    if (field.type === 'blocks') {
+    if (
+      field.type === 'blocks' ||
+      field.type === 'array' ||
+      ('hasMany' in field && field.hasMany === true)
+    ) {
       return fieldsToUse
     }
 
@@ -54,29 +58,27 @@ export const validateExistingBlockIsIdentical = ({
   rootTableName,
   table,
 }: Args): void => {
-  if (table) {
-    const fieldNames = getFlattenedFieldNames(block.fields)
+  const fieldNames = getFlattenedFieldNames(block.fields)
 
-    const missingField =
-      // ensure every field from the config is in the matching table
-      fieldNames.find((name) => Object.keys(table).indexOf(name) === -1) ||
-      // ensure every table column is matched for every field from the config
-      Object.keys(table).find((fieldName) => {
-        if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
-          return fieldNames.indexOf(fieldName) === -1
-        }
-      })
+  const missingField =
+    // ensure every field from the config is in the matching table
+    fieldNames.find((name) => Object.keys(table).indexOf(name) === -1) ||
+    // ensure every table column is matched for every field from the config
+    Object.keys(table).find((fieldName) => {
+      if (!['_locale', '_order', '_parentID', '_path', '_uuid'].includes(fieldName)) {
+        return fieldNames.indexOf(fieldName) === -1
+      }
+    })
 
-    if (missingField) {
-      throw new InvalidConfiguration(
-        `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${missingField}, while the other block does not.`,
-      )
-    }
+  if (missingField) {
+    throw new InvalidConfiguration(
+      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One block includes the field ${missingField}, while the other block does not.`,
+    )
+  }
 
-    if (Boolean(localized) !== Boolean(table._locale)) {
-      throw new InvalidConfiguration(
-        `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One is localized, but another is not. Block schemas of the same name must match exactly.`,
-      )
-    }
+  if (Boolean(localized) !== Boolean(table._locale)) {
+    throw new InvalidConfiguration(
+      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One is localized, but another is not. Block schemas of the same name must match exactly.`,
+    )
   }
 }
