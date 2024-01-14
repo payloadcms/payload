@@ -17,8 +17,7 @@ const getFlattenedFieldNames = (fields: Field[], prefix: string = ''): string[] 
     let fieldPrefix = prefix
 
     if (
-      field.type === 'blocks' ||
-      field.type === 'array' ||
+      ['array', 'blocks', 'relationship', 'upload'].includes(field.type) ||
       ('hasMany' in field && field.hasMany === true)
     ) {
       return fieldsToUse
