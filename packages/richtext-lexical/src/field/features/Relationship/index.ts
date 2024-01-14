@@ -42,7 +42,7 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
         plugins: [
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugins').then((module) => {
                 const RelationshipPlugin = module.RelationshipPlugin
                 return import('@payloadcms/ui').then((module2) =>
@@ -64,7 +64,7 @@ export const RelationshipFeature = (props?: RelationshipFeatureProps): FeaturePr
               options: [
                 new SlashMenuOption('relationship', {
                   Icon: () =>
-                    // @ts-expect-error
+                    // @ts-ignore-next-line
                     import('../../lexical/ui/icons/Relationship').then(
                       (module) => module.RelationshipIcon,
                     ),

@@ -1,7 +1,7 @@
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { Props as ListProps } from '../../views/collections/List/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
+import type { DefaultListViewProps } from '../../views/List/types'
 
 export type Props = {
   collection: SanitizedCollectionConfig
-  resetParams: ListProps['resetParams']
+  resetParams: DefaultListViewProps['resetParams']
 }

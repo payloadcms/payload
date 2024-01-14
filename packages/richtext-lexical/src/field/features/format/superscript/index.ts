@@ -13,7 +13,7 @@ export const SuperscriptTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../../lexical/ui/icons/Superscript').then(
                     (module) => module.SuperscriptIcon,
                   ),

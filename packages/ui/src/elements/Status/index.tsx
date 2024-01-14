@@ -18,8 +18,15 @@ import './index.scss'
 const baseClass = 'status'
 
 const Status: React.FC = () => {
-  const { id, collection, docPermissions, getVersions, global, publishedDoc, unpublishedVersions } =
-    useDocumentInfo()
+  const {
+    id,
+    docPermissions,
+    getVersions,
+    publishedDoc,
+    unpublishedVersions,
+    collectionSlug,
+    globalSlug,
+  } = useDocumentInfo()
   const { toggleModal } = useModal()
   const {
     routes: { api },
@@ -61,12 +68,12 @@ const Status: React.FC = () => {
         body = publishedDoc
       }
 
-      if (collection) {
-        url = `${serverURL}${api}/${collection.slug}/${id}?locale=${locale}&fallback-locale=null`
+      if (collectionSlug) {
+        url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null`
         method = 'patch'
       }
-      if (global) {
-        url = `${serverURL}${api}/globals/${global.slug}?locale=${locale}&fallback-locale=null`
+      if (globalSlug) {
+        url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null`
         method = 'post'
       }
 
@@ -90,9 +97,9 @@ const Status: React.FC = () => {
           fields = global.fields
         }
 
-        if (collection) {
+        if (collectionSlug) {
           data = json.doc
-          fields = collection.fields
+          // fields = collection.fields
         }
 
         resetForm(fields, data)
@@ -112,8 +119,8 @@ const Status: React.FC = () => {
       }
     },
     [
-      collection,
-      global,
+      collectionSlug,
+      globalSlug,
       publishedDoc,
       serverURL,
       api,

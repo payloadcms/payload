@@ -179,7 +179,8 @@ const TabsField: React.FC<Props> = (props) => {
                   marginPlacement="bottom"
                   path={path}
                 />
-                <RenderFields
+                [RenderFields]
+                {/* <RenderFields
                   fieldSchema={activeTabConfig.fields.map((field) => {
                     const pathSegments = []
 
@@ -206,7 +207,7 @@ const TabsField: React.FC<Props> = (props) => {
                       : permissions
                   }
                   readOnly={readOnly}
-                />
+                /> */}
               </div>
             </React.Fragment>
           )}

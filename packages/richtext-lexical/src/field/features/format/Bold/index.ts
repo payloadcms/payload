@@ -25,7 +25,7 @@ export const BoldTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../../lexical/ui/icons/Bold').then((module) => module.BoldIcon),
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {

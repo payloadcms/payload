@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
 export type Props = {
   collection: SanitizedCollectionConfig

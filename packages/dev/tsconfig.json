@@ -27,9 +27,9 @@
       "@payloadcms/db-mongodb": ["../db-mongodb/src"],
       "@payloadcms/richtext-lexical": ["../richtext-lexical/src"],
       "@payloadcms/ui/*": ["../ui/src/exports/*"],
+      "@payloadcms/translations": ["../translations/src/exports/index.ts"],
       "@payloadcms/translations/client": ["../translations/src/all"],
       "@payloadcms/translations/api": ["../translations/src/all"],
-      "@payloadcms/translations/*": ["../translations/src/*"],
       "@payloadcms/next/*": ["../next/src/*"]
     }
   },

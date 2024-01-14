@@ -95,7 +95,7 @@ export const Document = async ({
         id,
         depth: 0,
         user,
-        locale,
+        locale: locale.code,
       })
     } catch (error) {}
 
@@ -128,7 +128,7 @@ export const Document = async ({
       slug: globalSlug,
       depth: 0,
       user,
-      locale,
+      locale: locale.code,
     })
 
     preferencesKey = `global-${globalSlug}`
@@ -154,7 +154,7 @@ export const Document = async ({
     config,
     data: data || {},
     fieldSchema: formatFields(fields, isEditing),
-    locale,
+    locale: locale.code,
     operation: isEditing ? 'update' : 'create',
     preferences,
     t: ((key: string) => key) as TFunction, // TODO: i18n
@@ -164,7 +164,7 @@ export const Document = async ({
   const formQueryParams: QueryParamTypes = {
     depth: 0,
     'fallback-locale': 'null',
-    locale,
+    locale: locale.code,
     uploadEdits: undefined,
   }
 
@@ -187,7 +187,7 @@ export const Document = async ({
     user,
     onSave: () => {},
     payload,
-    locale,
+    locale: locale.code,
     params,
     searchParams,
     i18n,
@@ -201,10 +201,7 @@ export const Document = async ({
         globalSlug={globalConfig?.slug}
         id={id}
         key={`${collectionSlug || globalSlug}-${locale}`}
-        versionsEnabled={Boolean(collectionConfig?.versions || globalConfig?.versions)}
-        draftsEnabled={Boolean(
-          collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts,
-        )}
+        versionsConfig={collectionConfig?.versions || globalConfig?.versions}
       >
         <EditDepthProvider depth={1}>
           <FormQueryParamsProvider formQueryParams={formQueryParams}>

@@ -1,4 +1,4 @@
-import type { Where } from '../../../../types'
+import type { Where } from 'payload/types'
 import type { Action } from './types'
 
 const reducer = (state: Where[], action: Action): Where[] => {

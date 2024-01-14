@@ -23,7 +23,7 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
     routes: { admin, api },
     serverURL,
   } = useConfig()
-  const { getVersions, versions } = useDocumentInfo()
+  const { getVersions, versionsConfig, versions } = useDocumentInfo()
   const [fields] = useAllFormFields()
   const modified = useFormModified()
   const { code: locale } = useLocale()
@@ -31,10 +31,8 @@ const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdated
   const { i18n, t } = useTranslation()
 
   let interval = 800
-  if (collection?.versions.drafts && collection.versions?.drafts?.autosave)
-    interval = collection.versions.drafts.autosave.interval
-  if (global?.versions.drafts && global.versions?.drafts?.autosave)
-    interval = global.versions.drafts.autosave.interval
+  if (versionsConfig.drafts && versionsConfig?.drafts?.autosave)
+    interval = versionsConfig.drafts.autosave.interval
 
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<number>()

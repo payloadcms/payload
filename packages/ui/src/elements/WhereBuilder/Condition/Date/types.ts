@@ -1,4 +1,5 @@
-import type { Props as DateType } from '../../../../../components/elements/DatePicker/types'
+import type { Props as DateType } from '../../../../elements/DatePicker/types'
+
 export type Props = {
   admin?: {
     date?: DateType

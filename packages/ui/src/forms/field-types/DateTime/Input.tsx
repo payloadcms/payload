@@ -39,8 +39,6 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = (props) => {
       onChange={(incomingDate) => {
         if (!readOnly) setValue(incomingDate?.toISOString() || null)
       }}
-      style={style}
-      width={width}
       placeholder={getTranslation(placeholder, i18n)}
       readOnly={readOnly}
       value={value}

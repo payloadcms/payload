@@ -125,7 +125,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <RenderFields
+        [RenderFields]
+        {/* <RenderFields
           className={`${baseClass}__fields`}
           fieldSchema={blockToRender.fields.map((field) => ({
             ...field,
@@ -137,7 +138,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           margins="small"
           permissions={permissions?.blocks?.[row.blockType]?.fields}
           readOnly={readOnly}
-        />
+        /> */}
       </Collapsible>
     </div>
   )

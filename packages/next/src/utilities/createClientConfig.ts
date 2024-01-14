@@ -77,8 +77,6 @@ export const createClientConfig = async (
 
   delete clientConfig.endpoints
   delete clientConfig.db
-  delete clientConfig.admin.webpack
-  delete clientConfig.admin.vite
   clientConfig.onInit = undefined
 
   clientConfig.collections = sanitizeCollections(clientConfig.collections)

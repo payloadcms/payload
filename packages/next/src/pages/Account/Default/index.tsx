@@ -1,6 +1,5 @@
 import React from 'react'
 
-import type { CollectionEditViewProps } from '@payloadcms/ui'
 import type { FieldTypes } from 'payload/config'
 
 import {
@@ -12,13 +11,14 @@ import {
   LeaveWithoutSaving,
   OperationProvider,
   Auth,
+  EditViewProps,
 } from '@payloadcms/ui'
 import { Settings } from './Settings'
 import './index.scss'
 
 const baseClass = 'account'
 
-export type DefaultAccountViewProps = CollectionEditViewProps & {
+export type DefaultAccountViewProps = EditViewProps & {
   fieldTypes: FieldTypes
 }
 
@@ -27,16 +27,17 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
     action,
     apiURL,
     config,
-    collectionConfig,
     data,
     fieldTypes,
-    hasSavePermission,
     state,
     onSave: onSaveFromProps,
-    permissions,
+    docPermissions,
     user,
     i18n,
   } = props
+
+  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
+  const hasSavePermission = 'hasSavePermission' in props && props?.hasSavePermission
 
   const { auth, fields } = collectionConfig
 
@@ -82,7 +83,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
             data={data}
             hasSavePermission={hasSavePermission}
             isAccountView
-            permissions={permissions}
+            permissions={docPermissions}
             i18n={i18n}
           />
           <DocumentFields
@@ -100,7 +101,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
             fieldTypes={fieldTypes}
             fields={fields}
             hasSavePermission={hasSavePermission}
-            permissions={permissions}
+            permissions={docPermissions}
             data={data}
             state={state}
             user={user}

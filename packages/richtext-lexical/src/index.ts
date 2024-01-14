@@ -56,7 +56,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
   // return {
   //   LazyCellComponent: () =>
-  //     // @ts-expect-error
+  //     // @ts-ignore-next-line
   //     import('./cell').then((module) => {
   //       const RichTextCell = module.RichTextCell
   //       return import('payload/utilities').then((module2) =>
@@ -68,7 +68,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
   //     }),
   //
   //   LazyFieldComponent: () =>
-  //     // @ts-expect-error
+  //     // @ts-ignore-next-line
   //     import('./field').then((module) => {
   //       const RichTextField = module.RichTextField
   //       return import('payload/utilities').then((module2) =>
@@ -252,7 +252,7 @@ export type { UploadFeatureProps } from './field/features/Upload'
 export {
   $createUploadNode,
   $isUploadNode,
-  RawUploadPayload,
+  type RawUploadPayload,
   type SerializedUploadNode,
   type UploadData,
   UploadNode,

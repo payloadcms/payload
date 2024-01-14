@@ -181,7 +181,8 @@ export const BlockContent: React.FC<Props> = (props) => {
                 className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                 pillStyle="white"
               >
-                {getTranslation(labels.singular, i18n)}
+                {typeof labels.singular === 'string' ? labels.singular : '[Singular Label]'}
+                {/* {getTranslation(labels.singular, i18n)} */}
               </Pill>
               <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
               {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}
@@ -208,7 +209,8 @@ export const BlockContent: React.FC<Props> = (props) => {
           onCollapsedChange()
         }}
       >
-        <RenderFields
+        [RenderFields]
+        {/* <RenderFields
           className={`${baseClass}__fields`}
           fieldSchema={fieldSchemaWithPath}
           fieldTypes={field.fieldTypes}
@@ -216,7 +218,7 @@ export const BlockContent: React.FC<Props> = (props) => {
           margins="small"
           permissions={field.permissions?.blocks?.[formData?.blockType]?.fields}
           readOnly={field.admin.readOnly}
-        />
+        /> */}
       </Collapsible>
 
       <FormSavePlugin onChange={onFormChange} />

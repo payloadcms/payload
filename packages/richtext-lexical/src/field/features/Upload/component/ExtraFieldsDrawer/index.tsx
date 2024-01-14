@@ -61,6 +61,8 @@ export const ExtraFieldsUploadDrawer: React.FC<
   // Sanitize custom fields here
   const validRelationships = config.collections.map((c) => c.slug) || []
   const fieldSchema = sanitizeFields({
+    // TODO: fix this
+    // @ts-ignore-next-line
     config: config,
     fields: fieldSchemaUnsanitized,
     validRelationships,
@@ -89,6 +91,8 @@ export const ExtraFieldsUploadDrawer: React.FC<
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fieldSchema = sanitizeFields({
+      // TODO: fix this
+      // @ts-ignore-next-line
       config: config,
       fields: fieldSchemaUnsanitized,
       validRelationships,
@@ -97,6 +101,8 @@ export const ExtraFieldsUploadDrawer: React.FC<
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        // TODO: fix this
+        // @ts-ignore-next-line
         config,
         data: deepCopyObject(fields || {}),
         fieldSchema,
@@ -116,11 +122,14 @@ export const ExtraFieldsUploadDrawer: React.FC<
     <Drawer
       slug={drawerSlug}
       title={t('general:editLabel', {
+        // TODO: fix this
+        // @ts-ignore-next-line
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
     >
       <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
+        [RenderFields]
+        {/* <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} /> */}
         <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>

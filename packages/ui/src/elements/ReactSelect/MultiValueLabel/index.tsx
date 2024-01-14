@@ -10,7 +10,7 @@ import './index.scss'
 const baseClass = 'multi-value-label'
 
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
-  // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
+  // @ts-ignore-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
   const { selectProps: { customProps: { draggableProps } = {} } = {} } = props
 
   return (

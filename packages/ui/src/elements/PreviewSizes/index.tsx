@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-import type { SanitizedCollectionConfig } from '../../../../exports/types'
-import type { FileSizes, Upload } from '../../../../uploads/types'
-import type { Data } from '../../forms/Form/types'
+import type { SanitizedCollectionConfig, FileSizes, Upload, Data } from 'payload/types'
 
 import Meta from '../FileDetails/Meta'
 import './index.scss'

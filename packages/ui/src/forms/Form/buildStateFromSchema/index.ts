@@ -1,17 +1,18 @@
 import type { TFunction } from '@payloadcms/translations'
 
 import type { User } from 'payload/auth'
-import type { Field as FieldSchema, PayloadRequest, SanitizedConfig } from 'payload/types'
-import type { Data, Fields } from '../types'
+import type { Field as FieldSchema, Data, SanitizedConfig } from 'payload/types'
+import type { Fields } from '../types'
 
 import { iterateFields } from './iterateFields'
+import { Locale } from 'payload/config'
 
 type Args = {
   config: SanitizedConfig
   data?: Data
   fieldSchema: FieldSchema[] | undefined
   id?: number | string
-  locale: string
+  locale: Locale['code']
   operation?: 'create' | 'update'
   preferences: {
     [key: string]: unknown

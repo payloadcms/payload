@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next'
 import ReactCrop, { type Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
-import type { Data } from '../../forms/Form/types'
+import type { Data } from 'payload/types'
 
-import Plus from '../../icons/Plus'
-import { useFormQueryParams } from '../../utilities/FormQueryParams'
-import { editDrawerSlug } from '../../views/collections/Edit/Upload'
-import Button from '../Button'
+import { Plus } from '../../icons/Plus'
+import { useFormQueryParams } from '../../providers/FormQueryParams'
+import { editDrawerSlug } from '../../views/Edit/Upload'
+import { Button } from '../Button'
 import './index.scss'
 
 const baseClass = 'edit-upload'

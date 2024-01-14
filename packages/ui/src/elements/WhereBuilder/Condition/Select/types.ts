@@ -1,5 +1,4 @@
-import type { Option } from '../../../../../../fields/config/types'
-import type { Operator } from '../../../../../../types'
+import type { Option, Operator } from 'payload/types'
 
 export type Props = {
   disabled?: boolean

@@ -13,7 +13,7 @@ export const SubscriptTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../../lexical/ui/icons/Subscript').then(
                     (module) => module.SubscriptIcon,
                   ),

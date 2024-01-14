@@ -1,6 +1,5 @@
 import { I18n } from '@payloadcms/translations'
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
-import type { Props as CellProps } from '../../views/collections/List/Cell/types'
+import type { SanitizedCollectionConfig, CellProps } from 'payload/types'
 import type { Column } from '../Table/types'
 
 import buildColumns from './buildColumns'
@@ -56,6 +55,8 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
 
       return buildColumns({
         cellProps,
+        // TODO: fix this
+        // @ts-ignore-next-line
         collection,
         i18n,
         columns: withToggledColumn,
@@ -70,6 +71,8 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
 
       return buildColumns({
         cellProps,
+        // TODO: fix this
+        // @ts-ignore-next-line
         collection,
         i18n,
         columns: withMovedColumn,
@@ -80,6 +83,8 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
 
       return buildColumns({
         cellProps,
+        // TODO: fix this
+        // @ts-ignore-next-line
         collection,
         i18n,
         columns,

@@ -19,7 +19,7 @@ export const Account = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user, i18n } = await initPage({
+  const { config, payload, permissions, user, i18n, locale } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: true,
   })
@@ -27,16 +27,8 @@ export const Account = async ({
   const {
     admin: { user: userSlug, components: { views: { Account: CustomAccountComponent } = {} } = {} },
     routes: { api },
-    localization,
     serverURL,
   } = config
-
-  const defaultLocale =
-    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
-
-  const localeCode = (searchParams?.locale as string) || defaultLocale
-
-  const locale = localization && findLocaleFromCode(localization, localeCode)
 
   const collectionPermissions = permissions?.collections?.[userSlug]
 
@@ -86,7 +78,7 @@ export const Account = async ({
       config,
       data: data || {},
       fieldSchema,
-      locale,
+      locale: locale.code,
       operation: 'update',
       preferences,
       t: i18n.t,
@@ -103,11 +95,15 @@ export const Account = async ({
       hasSavePermission: collectionPermissions?.update?.permission,
       state,
       onSave: () => {},
-      permissions: collectionPermissions,
+      permissions,
+      docPermissions: collectionPermissions,
       user,
       updatedAt: '', // TODO
       id: user?.id,
       i18n,
+      payload,
+      locale: locale.code,
+      searchParams,
     }
 
     return (

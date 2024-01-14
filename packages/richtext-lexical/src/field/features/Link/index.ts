@@ -59,7 +59,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             FeaturesSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../lexical/ui/icons/Link').then((module) => module.LinkIcon),
                 isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
@@ -164,25 +164,25 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         plugins: [
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugins/link').then((module) => module.LinkPlugin),
             position: 'normal',
           },
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugins/autoLink').then((module) => module.AutoLinkPlugin),
             position: 'normal',
           },
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugins/clickableLink').then((module) => module.ClickableLinkPlugin),
             position: 'normal',
           },
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugins/floatingLinkEditor').then((module) => {
                 const floatingLinkEditorPlugin = module.FloatingLinkEditorPlugin
                 return import('@payloadcms/ui').then((module) =>

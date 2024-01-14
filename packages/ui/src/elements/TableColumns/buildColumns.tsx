@@ -1,9 +1,8 @@
 import React from 'react'
 
-import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedConfig, CellProps } from 'payload/types'
 import { I18n } from '@payloadcms/translations'
 
-import type { CellProps } from '../../views/List/Cell/types'
 import type { Column } from '../Table/types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'

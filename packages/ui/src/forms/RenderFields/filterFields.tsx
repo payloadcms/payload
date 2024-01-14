@@ -2,7 +2,7 @@ import type React from 'react'
 
 import type { FieldPermissions } from 'payload/auth'
 import type { Field, FieldWithPath } from 'payload/types'
-import type { FieldTypes } from '../field-types'
+import type { FieldTypes } from 'payload/config'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 

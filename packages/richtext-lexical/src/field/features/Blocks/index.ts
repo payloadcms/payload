@@ -57,7 +57,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
         plugins: [
           {
             Component: () =>
-              // @ts-expect-error
+              // @ts-ignore-next-line
               import('./plugin').then((module) => module.BlocksPlugin),
             position: 'normal',
           },
@@ -72,9 +72,11 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
                 ...props.blocks.map((block) => {
                   return new SlashMenuOption('block-' + block.slug, {
                     Icon: () =>
-                      // @ts-expect-error
+                      // @ts-ignore-next-line
                       import('../../lexical/ui/icons/Block').then((module) => module.BlockIcon),
                     displayName: ({ i18n }) => {
+                      // TODO: fix this
+                      // @ts-ignore-next-line
                       return getTranslation(block.labels.singular, i18n)
                     },
                     keywords: ['block', 'blocks', block.slug],

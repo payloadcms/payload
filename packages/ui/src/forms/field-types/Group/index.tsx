@@ -84,7 +84,8 @@ const Group: React.FC<Props> = (props) => {
             )}
             {groupHasErrors && <ErrorPill count={errorCount} withMessage />}
           </div>
-          <RenderFields
+          [RenderFields]
+          {/* <RenderFields
             fieldSchema={fields.map((subField) => ({
               ...subField,
               path: createNestedFieldPath(path, subField),
@@ -95,7 +96,7 @@ const Group: React.FC<Props> = (props) => {
             margins="small"
             permissions={permissions?.fields}
             readOnly={readOnly}
-          />
+          /> */}
         </div>
       </GroupProvider>
     </div>

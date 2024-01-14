@@ -111,6 +111,8 @@ const Component: React.FC<ElementProps> = (props) => {
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>
+              {/* TODO: fix this */}
+              {/* @ts-ignore-next-line */}
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             {editor.isEditable() && (

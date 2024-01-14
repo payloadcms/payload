@@ -37,10 +37,16 @@ const getTranslatedOptions = (
   i18n: Ii18n,
 ): string => {
   if (Array.isArray(options)) {
-    return options
-      .map((option) => (typeof option === 'string' ? option : getTranslation(option.label, i18n)))
-      .join(', ')
+    return (
+      options
+        // TODO: fix this
+        // @ts-ignore-next-line
+        .map((option) => (typeof option === 'string' ? option : getTranslation(option.label, i18n)))
+        .join(', ')
+    )
   }
+  // TODO: fix this
+  // @ts-ignore-next-line
   return typeof options === 'string' ? options : getTranslation(options.label, i18n)
 }
 
@@ -67,6 +73,8 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, versio
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+        {/* TODO: fix this
+        @ts-ignore-next-line */}
         {getTranslation(field.label, i18n)}
       </Label>
       <DiffViewer

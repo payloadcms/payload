@@ -5,8 +5,8 @@ import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
 
-import Button from '../../elements/Button'
-import { useConfig } from '../../utilities/Config'
+import { Button } from '../../elements/Button'
+import { useConfig } from '../../providers/Config'
 import './index.scss'
 
 const baseClass = 'stay-logged-in'

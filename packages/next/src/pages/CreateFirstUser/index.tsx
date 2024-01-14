@@ -93,7 +93,7 @@ export const CreateFirstUser: React.FC<{
   const state = await buildStateFromSchema({
     config,
     fieldSchema: fields,
-    locale,
+    locale: locale.code,
     operation: 'create',
     preferences: {},
     t,

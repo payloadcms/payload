@@ -1,4 +1,4 @@
-import type { Where } from '../../../../types'
+import type { Where } from 'payload/types'
 
 /**
  * Something like [or][0][and][0][text][equals]=example%20post will work and pass through the validateWhereQuery check.

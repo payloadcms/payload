@@ -10,7 +10,7 @@ import React, {
 } from 'react'
 
 import type { SanitizedCollectionConfig, Field } from 'payload/types'
-import type { CellProps } from '../../views/List/Cell/types'
+import type { CellProps } from 'payload/types'
 import type { ListPreferences } from '../../views/List/types'
 import type { Column } from '../Table/types'
 import type { Action } from './columnReducer'
@@ -59,6 +59,8 @@ export const TableColumnsProvider: React.FC<{
 
     return buildColumns({
       cellProps,
+      // TODO: fix this
+      // @ts-ignore-next-line
       config,
       i18n,
       collectionConfig,
