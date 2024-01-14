@@ -89,6 +89,8 @@ const Component: React.FC<Props> = (props) => {
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
           {t('labelRelationship', {
+            // TODO: fix this
+            // @ts-ignore-next-line
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
         </p>

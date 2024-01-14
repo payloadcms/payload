@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
-import { FieldTypes } from '../../forms/field-types'
-import type { CollectionEditViewProps } from '../types'
+import { FieldTypes } from 'payload/config'
+import { EditViewProps } from '../types'
 
 export type IndexProps = {
   collection: SanitizedCollectionConfig
@@ -19,7 +19,7 @@ export type UploadEdits = {
   }
 }
 
-export type DefaultEditViewProps = CollectionEditViewProps & {
+export type DefaultEditViewProps = EditViewProps & {
   customHeader?: React.ReactNode
   disableRoutes?: boolean
   fieldTypes: FieldTypes

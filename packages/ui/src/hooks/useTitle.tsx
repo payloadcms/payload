@@ -22,12 +22,16 @@ const useTitle = (args: {
     title = formatDocTitle({
       useAsTitle,
       field,
+      // TODO: Fix this
+      // @ts-ignore-next-line
       i18n,
     })
   }
 
   if (globalLabel) {
     title = typeof globalLabel === 'string' ? globalLabel : globalSlug
+    // TODO: Fix this
+    // @ts-ignore-next-line
     title = getTranslation(globalLabel, i18n) || globalSlug
   }
 

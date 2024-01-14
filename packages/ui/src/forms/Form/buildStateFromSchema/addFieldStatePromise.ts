@@ -4,11 +4,11 @@ import type { TFunction } from '@payloadcms/translations'
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { NonPresentationalField, PayloadRequest, SanitizedConfig } from 'payload/types'
-import type { Data, Fields, FormField } from '../types'
+import type { NonPresentationalField, Data, SanitizedConfig } from 'payload/types'
+import type { Fields, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
-import getValueWithDefault from 'payload/dist/fields/getDefaultValue' // TODO: replace with 'payload/fields/getDefaultValue'
+import { getDefaultValue } from 'payload/utilities'
 import { iterateFields } from './iterateFields'
 
 type Args = {
@@ -54,7 +54,7 @@ export const addFieldStatePromise = async ({
       value: undefined,
     }
 
-    const valueWithDefault = await getValueWithDefault({
+    const valueWithDefault = await getDefaultValue({
       defaultValue: field.defaultValue,
       locale,
       user,

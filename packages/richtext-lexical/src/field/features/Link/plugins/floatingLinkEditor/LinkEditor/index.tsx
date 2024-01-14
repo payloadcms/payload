@@ -66,6 +66,8 @@ export function LinkEditor({
   const [fieldSchema] = useState(() => {
     const fieldsUnsanitized = transformExtraFields(
       customFieldSchema,
+      // TODO: fix this
+      // @ts-ignore-next-line
       config,
       i18n,
       enabledCollections,
@@ -74,6 +76,8 @@ export function LinkEditor({
     // Sanitize custom fields here
     const validRelationships = config.collections.map((c) => c.slug) || []
     const fields = sanitizeFields({
+      // TODO: fix this
+      // @ts-ignore-next-line
       config: config,
       fields: fieldsUnsanitized,
       validRelationships,
@@ -133,6 +137,8 @@ export function LinkEditor({
           (coll) => coll.slug === linkParent.getFields()?.doc?.relationTo,
         )
         const label = t('fields:linkedTo', {
+          // TODO: fix this
+          // @ts-ignore-next-line
           label: getTranslation(relatedField.labels.singular, i18n),
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(label)
@@ -142,6 +148,8 @@ export function LinkEditor({
       // values saved in the link node you clicked on.
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        // TODO: fix this
+        // @ts-ignore-next-line
         config,
         data,
         fieldSchema,

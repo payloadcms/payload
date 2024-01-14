@@ -1,3 +1,5 @@
+// TODO: fix this file
+// @ts-nocheck
 import { useModal } from '@faceless-ui/modal'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'

@@ -16,7 +16,6 @@ export async function generateTypes(): Promise<void> {
     disableDBConnect: true,
     disableOnInit: true,
     local: true,
-    secret: '--unused--',
   })
 
   logger.info('Compiling TS types for Collections and Globals...')

@@ -15,7 +15,7 @@ export const ParagraphFeature = (): FeatureProvider => {
             TextDropdownSectionWithEntries([
               {
                 ChildComponent: () =>
-                  // @ts-expect-error
+                  // @ts-ignore-next-line
                   import('../../lexical/ui/icons/Text').then((module) => module.TextIcon),
                 isActive: () => false,
                 key: 'normal-text',
@@ -42,7 +42,7 @@ export const ParagraphFeature = (): FeatureProvider => {
               options: [
                 new SlashMenuOption('paragraph', {
                   Icon: () =>
-                    // @ts-expect-error
+                    // @ts-ignore-next-line
                     import('../../lexical/ui/icons/Text').then((module) => module.TextIcon),
                   displayName: 'Paragraph',
                   keywords: ['normal', 'paragraph', 'p', 'text'],

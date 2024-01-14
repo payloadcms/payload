@@ -210,6 +210,8 @@ const Relationship: React.FC<Props> = (props) => {
 
                 dispatchOptions({
                   collection,
+                  // TODO: fix this
+                  // @ts-ignore-next-line
                   config,
                   docs: data.docs,
                   i18n,
@@ -221,6 +223,8 @@ const Relationship: React.FC<Props> = (props) => {
               setLastFullyLoadedRelation(relations.indexOf(relation))
               dispatchOptions({
                 collection,
+                // TODO: fix this
+                // @ts-ignore-next-line
                 config,
                 docs: [],
                 i18n,
@@ -324,6 +328,8 @@ const Relationship: React.FC<Props> = (props) => {
 
           dispatchOptions({
             collection,
+            // TODO: fix this
+            // @ts-ignore-next-line
             config,
             docs,
             i18n,
@@ -378,6 +384,8 @@ const Relationship: React.FC<Props> = (props) => {
     (args) => {
       dispatchOptions({
         collection: args.collectionConfig,
+        // TODO: fix this
+        // @ts-ignore-next-line
         config,
         doc: args.doc,
         i18n,

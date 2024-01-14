@@ -19,10 +19,10 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
 
+import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch'
 import type { MenuRenderFn, MenuResolution } from './LexicalMenu'
 import type { SlashMenuGroup, SlashMenuOption } from './types'
 
-import { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch'
 import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu'
 
 export const PUNCTUATION = '\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%\'"~=<>_:;'
@@ -279,4 +279,4 @@ export function LexicalTypeaheadMenuPlugin({
   )
 }
 
-export { MenuRenderFn, MenuResolution, MenuTextMatch, TriggerFn }
+export type { MenuRenderFn, MenuResolution, MenuTextMatch, TriggerFn }

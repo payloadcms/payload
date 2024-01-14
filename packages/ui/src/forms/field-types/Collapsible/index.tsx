@@ -112,7 +112,8 @@ const CollapsibleField: React.FC<Props> = (props) => {
         initCollapsed={collapsedOnMount}
         onToggle={onToggle}
       >
-        <RenderFields
+        [RenderFields]
+        {/* <RenderFields
           fieldSchema={fields.map((field) => ({
             ...field,
             path: createNestedFieldPath(path, field),
@@ -123,7 +124,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           margins="small"
           permissions={permissions}
           readOnly={readOnly}
-        />
+        /> */}
       </Collapsible>
       <FieldDescription description={description} path={path} />
     </div>

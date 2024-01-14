@@ -8,7 +8,7 @@ import type {
 } from 'payload/types'
 import type { I18n } from '@payloadcms/translations'
 import type { Fields } from '../forms/Form/types'
-import { FieldTypes } from '../exports'
+import type { FieldTypes, Locale } from 'payload/config'
 
 export type EditViewProps = (
   | {
@@ -37,11 +37,11 @@ export type EditViewProps = (
   user: User | null | undefined
   fieldTypes: FieldTypes
   payload: Payload
-  locale: string
+  locale: Locale['code']
   state?: Fields
   permissions: Permissions
-  params: {
-    segments: string[]
+  params?: {
+    segments?: string[]
     collection?: string
     global?: string
   }

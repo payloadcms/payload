@@ -46,7 +46,7 @@ export const defaultEditorFeatures: FeatureProvider[] = [
 export const defaultEditorConfig: EditorConfig = {
   features: defaultEditorFeatures,
   lexical: () =>
-    // @ts-expect-error
+    // @ts-ignore-next-line
     import('./defaultClient').then((module) => {
       const defaultEditorLexicalConfig = module.defaultEditorLexicalConfig
       return defaultEditorLexicalConfig

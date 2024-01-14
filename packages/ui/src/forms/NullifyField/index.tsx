@@ -60,7 +60,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
         checked={checked}
         id={`field-${path.replace(/\./g, '__')}`}
         label={t('general:fallbackToDefaultLocale')}
-        onToggle={onChange}
+        // onToggle={onChange}
       />
     </Banner>
   )

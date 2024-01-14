@@ -8,7 +8,7 @@ export const TextDropdownSectionWithEntries = (
 ): FloatingToolbarSection => {
   return {
     ChildComponent: () =>
-      // @ts-expect-error
+      // @ts-ignore-next-line
       import('../../../lexical/ui/icons/Text').then((module) => module.TextIcon),
     entries,
     key: 'dropdown-text',

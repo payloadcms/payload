@@ -1,6 +1,7 @@
 import { unflatten } from 'flatley'
 
-import type { Data, Fields } from './types'
+import type { Fields } from './types'
+import type { Data } from 'payload/types'
 
 import reduceFieldsToValues from './reduceFieldsToValues'
 

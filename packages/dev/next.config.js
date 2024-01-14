@@ -12,6 +12,8 @@ const nextConfig = {
       ...config,
       externals: [
         ...config.externals,
+        '@payloadcms/db-mongodb',
+        '@payloadcms/db-postgres',
         'drizzle-kit',
         'drizzle-kit/utils',
         'pino',

@@ -10,7 +10,6 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types'
 export type DocumentInfoContext = {
   collectionSlug?: SanitizedCollectionConfig['slug']
   docPermissions: DocumentPermissions
-  draftsEnabled?: boolean
   getDocPermissions: () => Promise<void>
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
   getVersions: () => Promise<void>
@@ -21,6 +20,7 @@ export type DocumentInfoContext = {
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   slug?: string
   unpublishedVersions?: PaginatedDocs<TypeWithVersion<any>>
+  versions?: PaginatedDocs<TypeWithVersion<any>>
+  versionsConfig?: SanitizedCollectionConfig['versions'] | SanitizedGlobalConfig['versions']
   versionsCount?: PaginatedDocs<TypeWithVersion<any>>
-  versionsEnabled?: boolean
 }

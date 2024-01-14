@@ -1,6 +1,5 @@
-import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
-import type { PaginatedDocs } from '../../../../../../database/types'
-import type { RelationshipField } from '../../../../../../fields/config/types'
+import type { SanitizedCollectionConfig, RelationshipField } from 'payload/types'
+import type { PaginatedDocs } from 'payload/database'
 import type { I18n } from '@payloadcms/translations'
 
 export type Props = {
