@@ -7,8 +7,8 @@ import { fieldAffectsData } from 'payload/types'
 import type { BlocksMap } from '../../utilities/createBlocksMap'
 
 import { transformHasManyNumber } from './hasManyNumber'
-import { transformRelationship } from './relationship'
 import { transformHasManyText } from './hasManyText'
+import { transformRelationship } from './relationship'
 
 type TraverseFieldsArgs = {
   /**
@@ -36,10 +36,6 @@ type TraverseFieldsArgs = {
    */
   fields: (Field | TabAsField)[]
   /**
-   * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
-   */
-  texts: Record<string, Record<string, unknown>[]>
-  /**
    * All hasMany number fields, as returned by Drizzle, keyed on an object by field path
    */
   numbers: Record<string, Record<string, unknown>[]>
@@ -55,6 +51,10 @@ type TraverseFieldsArgs = {
    * Data structure representing the nearest table from db
    */
   table: Record<string, unknown>
+  /**
+   * All hasMany text fields, as returned by Drizzle, keyed on an object by field path
+   */
+  texts: Record<string, Record<string, unknown>[]>
 }
 
 // Traverse fields recursively, transforming data
@@ -66,11 +66,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
   deletions,
   fieldPrefix,
   fields,
-  texts,
   numbers,
   path,
   relationships,
   table,
+  texts,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
 
@@ -83,11 +83,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        texts,
         numbers,
         path,
         relationships,
         table,
+        texts,
       })
     }
 
@@ -103,17 +103,22 @@ export const traverseFields = <T extends Record<string, unknown>>({
         deletions,
         fieldPrefix,
         fields: field.fields,
-        texts,
         numbers,
         path,
         relationships,
         table,
+        texts,
       })
     }
 
     if (fieldAffectsData(field)) {
       const fieldName = `${fieldPrefix || ''}${field.name}`
       const fieldData = table[fieldName]
+
+      if (fieldPrefix) {
+        deletions.push(() => delete table[fieldName])
+      }
+
       if (field.type === 'array') {
         if (Array.isArray(fieldData)) {
           if (field.localized) {
@@ -135,12 +140,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   deletions,
                   fieldPrefix: '',
                   fields: field.fields,
-                  texts,
                   numbers,
                   path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                   relationships,
                   table: row,
+                  texts,
                 })
+
+                if ('_order' in rowResult) {
+                  delete rowResult._order
+                }
 
                 arrayResult[locale].push(rowResult)
               }
@@ -153,6 +162,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 row.id = row._uuid
                 delete row._uuid
               }
+
+              if ('_order' in row) {
+                delete row._order
+              }
+
               return traverseFields<T>({
                 blocks,
                 config,
@@ -160,11 +174,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 deletions,
                 fieldPrefix: '',
                 fields: field.fields,
-                texts,
                 numbers,
                 path: `${sanitizedPath}${field.name}.${i}`,
                 relationships,
                 table: row,
+                texts,
               })
             })
           }
@@ -204,11 +218,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     deletions,
                     fieldPrefix: '',
                     fields: block.fields,
-                    texts,
                     numbers,
                     path: `${blockFieldPath}.${row._order - 1}`,
                     relationships,
                     table: row,
+                    texts,
                   })
 
                   delete blockResult._order
@@ -235,11 +249,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   deletions,
                   fieldPrefix: '',
                   fields: block.fields,
-                  texts,
                   numbers,
                   path: `${blockFieldPath}.${i}`,
                   relationships,
                   table: row,
+                  texts,
                 })
               }
 
@@ -316,15 +330,15 @@ export const traverseFields = <T extends Record<string, unknown>>({
             transformHasManyText({
               field,
               locale,
-              textRows: texts,
               ref: result,
+              textRows: texts,
             })
           })
         } else {
           transformHasManyText({
             field,
-            textRows: textPathMatch,
             ref: result,
+            textRows: textPathMatch,
           })
         }
 
@@ -420,13 +434,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   deletions,
                   fieldPrefix: groupFieldPrefix,
                   fields: field.fields,
-                  texts,
                   numbers,
                   path: `${sanitizedPath}${field.name}`,
                   relationships,
                   table,
+                  texts,
                 })
               })
+              if ('_order' in ref) {
+                delete ref._order
+              }
             } else {
               const groupData = {}
 
@@ -437,20 +454,15 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 deletions,
                 fieldPrefix: groupFieldPrefix,
                 fields: field.fields,
-                texts,
                 numbers,
                 path: `${sanitizedPath}${field.name}`,
                 relationships,
                 table,
+                texts,
               })
-
-              field.fields.forEach((field) => {
-                if ('name' in field && Boolean(field?.name)) {
-                  const fieldToDelete = `${groupFieldPrefix}${field.name}`
-
-                  deletions.push(() => delete ref[fieldToDelete])
-                }
-              })
+              if ('_order' in ref) {
+                delete ref._order
+              }
             }
 
             break

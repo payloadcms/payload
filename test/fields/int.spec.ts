@@ -6,6 +6,7 @@ import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
+import type { GroupField } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
@@ -29,7 +30,6 @@ import {
 import { tabsDoc } from './collections/Tabs/shared'
 import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
-import { GroupField } from './payload-types'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -644,6 +644,14 @@ describe('Fields', () => {
         collection,
       })
 
+      expect(result.items[0]).toMatchObject({
+        subArray: [
+          {
+            text: subArrayText,
+          },
+        ],
+        text: 'test',
+      })
       expect(result.items[0].subArray[0].text).toStrictEqual(subArrayText)
     })
 
@@ -706,7 +714,6 @@ describe('Fields', () => {
 
     it('should not have duplicate keys', async () => {
       expect(document.arrayOfGroups[0]).toMatchObject({
-        _order: 1,
         id: expect.any(String),
         groupItem: {
           text: 'Hello world',
