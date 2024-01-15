@@ -100,8 +100,8 @@ describe('Fields', () => {
       const { id } = await payload.create({
         collection: 'text-fields',
         data: {
-          text,
           localizedHasMany,
+          text,
         },
         locale: 'en',
       })
@@ -112,7 +112,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
@@ -257,6 +257,20 @@ describe('Fields', () => {
       expect(docs.map(({ id }) => id)).toContain(doc.id)
     })
 
+    it('should not error using invalid date query', async () => {
+      const { result, status } = await client.find({
+        slug: 'date-fields',
+        query: {
+          updatedAt: {
+            like: 'invalid',
+          },
+        },
+      })
+
+      expect(status).toStrictEqual(200)
+      expect(result.docs).toBeDefined()
+    })
+
     it('should query createdAt', async () => {
       const result = await payload.find({
         collection: 'date-fields',
@@ -268,7 +282,7 @@ describe('Fields', () => {
         },
       })
 
-      expect(result.docs[0].id).toEqual(doc.id)
+      expect(result.docs[0].id).toStrictEqual(doc.id)
     })
   })
 
@@ -413,7 +427,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
@@ -1183,8 +1197,8 @@ describe('Fields', () => {
       expect(nodes).toBeDefined()
       const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
       expect(child).toMatchObject({
-        linkType: 'internal',
         type: 'link',
+        linkType: 'internal',
       })
       expect(child.doc.relationTo).toEqual('array-fields')
 
