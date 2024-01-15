@@ -283,7 +283,7 @@ jobs:
         run: pnpm --filter ${{ matrix.pkg }} run test
         if: matrix.pkg != 'create-payload-app' # degit doesn't work within GitHub Actions
 
-  templates:
+  template-changes:
     needs: changes
     if: ${{ needs.changes.outputs.templates == 'true' }}
     runs-on: ubuntu-latest
@@ -311,6 +311,50 @@ jobs:
         run: |
           cd templates/${{ matrix.template }}
           cp .env.example .env
+          yarn install
+          yarn build
+          yarn generate:types
+
+  templates-consume-latest:
+    needs: core-build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [blank, website, ecommerce]
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 6.0
+
+      - name: Build Template
+        run: |
+          tsx scripts/pack-all-to-template.ts
+          cd templates/$dest
+          cp .env.example .env
+          yarn add -W
           yarn install
           yarn build
           yarn generate:types
