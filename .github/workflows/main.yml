@@ -351,6 +351,7 @@ jobs:
 
       - name: Build Template
         run: |
+          pnpm install
           tsx scripts/pack-all-to-template.ts
           cd templates/$dest
           cp .env.example .env
