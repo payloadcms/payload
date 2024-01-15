@@ -41,7 +41,7 @@ export default buildConfigWithDefaults({
                 {
                   name: 'blockTwoField',
                   type: 'text',
-                }
+                },
               ],
               custom: { description: 'The blockOne of this page' },
             },

@@ -577,7 +577,7 @@ export type Block = {
    */
   interfaceName?: string
   labels?: Labels
-  slug: string,
+  slug: string
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
 }
