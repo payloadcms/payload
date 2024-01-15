@@ -351,8 +351,7 @@ jobs:
 
       - name: Build Template
         run: |
-          pnpm install
-          tsx scripts/pack-all-to-template.ts
+          node ./node_modules/tsx/dist/cli.mjs scripts/pack-all-to-template.ts ${{ matrix.template }}
           cd templates/$dest
           cp .env.example .env
           yarn add -W
