@@ -6,6 +6,7 @@ import { useAllFormFields } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import type { PluginConfig } from '../types'
 
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
@@ -36,7 +37,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       if (typeof generateURL === 'function' && !href) {
         const newHref = await generateURL({
           ...docInfo,
-          doc: { fields },
+          doc: { ...fields },
           locale: typeof locale === 'object' ? locale?.code : locale,
         })
 

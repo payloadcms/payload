@@ -578,6 +578,8 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {

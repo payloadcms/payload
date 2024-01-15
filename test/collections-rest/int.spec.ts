@@ -1223,7 +1223,8 @@ describe('collections-rest', () => {
           })
 
           expect(status).toEqual(200)
-          expect(result.totalDocs).toEqual(50)
+          expect(result.docs).toHaveLength(50)
+          expect(result.totalPages).toEqual(1)
         })
       })
 

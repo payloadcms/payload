@@ -20,8 +20,6 @@ import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { destroy } from './destroy'
-import { extendViteConfig } from './extendViteConfig'
-import { extendWebpackConfig } from './extendWebpackConfig'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -95,20 +93,12 @@ export function mongooseAdapter({
   connectOptions,
   disableIndexHints = false,
   migrationDir: migrationDirArg,
-  transactionOptions,
+  transactionOptions = {},
   url,
 }: Args): MongooseAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
-    let beginTransactionFunction = beginTransaction
     mongoose.set('strictQuery', false)
-
-    extendWebpackConfig(payload.config)
-    extendViteConfig(payload.config)
-
-    if (transactionOptions === false) {
-      beginTransactionFunction = undefined
-    }
 
     return createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
@@ -127,7 +117,7 @@ export function mongooseAdapter({
       versions: {},
 
       // DatabaseAdapter
-      beginTransaction: beginTransactionFunction,
+      beginTransaction: transactionOptions ? beginTransaction : undefined,
       commitTransaction,
       connect,
       create,
