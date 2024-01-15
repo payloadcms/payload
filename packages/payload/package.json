@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "2.6.0",
+  "version": "2.8.1",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -166,7 +166,7 @@
     "@types/minimist": "1.2.2",
     "@types/mkdirp": "1.0.2",
     "@types/node-fetch": "2.6.4",
-    "@types/nodemailer": "6.4.8",
+    "@types/nodemailer": "6.4.14",
     "@types/passport": "1.0.12",
     "@types/passport-anonymous": "1.0.3",
     "@types/passport-jwt": "3.0.9",

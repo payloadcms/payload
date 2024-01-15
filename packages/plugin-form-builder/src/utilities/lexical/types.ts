@@ -4,11 +4,13 @@ export type HTMLConverter<T = any> = {
     converters,
     node,
     parent,
+    submissionData,
   }: {
     childIndex: number
     converters: HTMLConverter[]
     node: T
     parent: SerializedLexicalNodeWithParent
+    submissionData?: any
   }) => Promise<string> | string
   nodeTypes: string[]
 }

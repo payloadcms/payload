@@ -759,6 +759,32 @@ const MyComponent: React.FC = () => {
 
 Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).
 
+### useTheme
+
+Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
+
+```tsx
+import { useTheme } from 'payload/components/utilities'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { autoMode, setTheme, theme } = useTheme()
+  // highlight-end
+
+  return (
+    <>
+      <span>The current theme is {theme} and autoMode is {autoMode}</span>
+      <button 
+        type="button" 
+        onClick={() => setTheme(prev => prev === "light" ? "dark" : "light")}
+      >
+        Toggle theme
+      </button>
+    </>
+    )
+}
+```
+
 ### useTableColumns
 
 Returns methods to manipulate table columns

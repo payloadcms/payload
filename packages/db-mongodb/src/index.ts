@@ -20,8 +20,6 @@ import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { destroy } from './destroy'
-import { extendViteConfig } from './extendViteConfig'
-import { extendWebpackConfig } from './extendWebpackConfig'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -103,11 +101,8 @@ export function mongooseAdapter({
     let beginTransactionFunction = beginTransaction
     mongoose.set('strictQuery', false)
 
-    extendWebpackConfig(payload.config)
-    extendViteConfig(payload.config)
-
     if (transactionOptions === false) {
-      beginTransactionFunction = undefined
+      beginTransactionFunction = () => null
     }
 
     return createDatabaseAdapter<MongooseAdapter>({
