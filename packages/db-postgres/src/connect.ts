@@ -39,7 +39,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   )
     return
 
-  const { pushSchema } = require('drizzle-kit/utils')
+  const { pushSchema } = require('drizzle-kit/payload')
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
@@ -59,9 +59,9 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     const { confirm: acceptWarnings } = await prompts(
       {
         name: 'confirm',
+        type: 'confirm',
         initial: false,
         message,
-        type: 'confirm',
       },
       {
         onCancel: () => {
