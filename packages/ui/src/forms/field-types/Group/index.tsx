@@ -6,7 +6,7 @@ import { ErrorPill } from '../../../elements/ErrorPill'
 import FieldDescription from '../../FieldDescription'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import { checkStateForErrors } from '../../WatchChildErrors'
+import { checkStateForErrors } from '../../WatchChildErrors/checkStateForErrors'
 import './index.scss'
 import { GroupProvider } from './provider'
 import { GroupWrapper } from './Wrapper'
@@ -37,8 +37,6 @@ const Group: React.FC<Props> = (props) => {
   })
 
   const groupHasErrors = errorCount > 0
-
-  console.log(props)
 
   return (
     <GroupWrapper

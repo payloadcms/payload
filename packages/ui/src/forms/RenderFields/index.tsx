@@ -37,7 +37,9 @@ const RenderFields: React.FC<Props> = (props) => {
 
           const fieldState = formState?.[path]
 
-          if (!fieldState?.passesCondition) return null
+          // first check `fieldState` to let top-level group fields through, i.e. `myGroup`
+          // this will proceed to render its children, i.e. `myGroup.myField`
+          if (fieldState && !fieldState?.passesCondition) return null
 
           if (fieldIsPresentational) {
             return <FieldComponent key={fieldIndex} />
