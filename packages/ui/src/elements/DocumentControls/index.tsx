@@ -74,16 +74,12 @@ export const DocumentControls: React.FC<{
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
-                  Creating new{' '}
-                  {typeof collectionConfig?.labels?.singular === 'string'
-                    ? collectionConfig.labels.singular
-                    : 'Doc'}
-                  {/* {t('creatingNewLabel', {
+                  {i18n.t('creatingNewLabel', {
                     label:
                       typeof collectionConfig?.labels?.singular === 'string'
                         ? collectionConfig.labels.singular
                         : 'document',
-                  })} */}
+                  })}
                 </p>
               </li>
             )}
@@ -123,7 +119,7 @@ export const DocumentControls: React.FC<{
                     data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n.language) : ''
                   }
                 >
-                  <p className={`${baseClass}__label`}>{/* {t('lastModified')}:&nbsp; */}</p>
+                  <p className={`${baseClass}__label`}>{i18n.t('general:lastModified')}:&nbsp;</p>
                   {data?.updatedAt && (
                     <p className={`${baseClass}__value`}>
                       {formatDate(data.updatedAt, dateFormat, i18n.language)}
@@ -138,7 +134,7 @@ export const DocumentControls: React.FC<{
                     data?.createdAt ? formatDate(data?.createdAt, dateFormat, i18n.language) : ''
                   }
                 >
-                  <p className={`${baseClass}__label`}>{/* {t('created')}:&nbsp; */}</p>
+                  <p className={`${baseClass}__label`}>{i18n.t('general:created')}:&nbsp;</p>
                   {data?.createdAt && (
                     <p className={`${baseClass}__value`}>
                       {formatDate(data?.createdAt, dateFormat, i18n.language)}
@@ -213,8 +209,7 @@ export const DocumentControls: React.FC<{
                       id="action-create"
                       to={`${adminRoute}/collections/${collectionConfig?.slug}/create`}
                     >
-                      Create New
-                      {/* {t('createNew')} */}
+                      {i18n.t('general:createNew')}
                     </PopupList.Button>
                     {!collectionConfig?.admin?.disableDuplicate && isEditing && (
                       <DuplicateDocument

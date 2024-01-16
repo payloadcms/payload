@@ -39,7 +39,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
         useAsTitle,
       } = {},
       fields,
-      labels: { plural: pluralLabel },
+      labels: { plural: pluralLabel, singular: singularLabel } = {},
       slug: collectionSlug,
     },
     customHeader,
@@ -104,15 +104,15 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
             {customHeader && customHeader}
             {!customHeader && (
               <Fragment>
-                <h1>{typeof pluralLabel === 'string' ? pluralLabel : pluralLabel['en']}</h1>
-                {/* <h1>{getTranslation(pluralLabel, i18n)}</h1> */}
+                <h1>{getTranslation(pluralLabel, i18n)}</h1>
                 {hasCreatePermission && (
                   <Pill
-                    // aria-label={t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
+                    aria-label={i18n.t('general:createNewLabel', {
+                      label: getTranslation(singularLabel, i18n),
+                    })}
                     to={newDocumentURL}
                   >
-                    Create New
-                    {/* {t('createNew')} */}
+                    {i18n.t('general:createNew')}
                   </Pill>
                 )}
                 {/* {!smallBreak && (
@@ -152,11 +152,10 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
           )}
           {data.docs && data.docs.length === 0 && (
             <div className={`${baseClass}__no-results`}>
-              {/* <p>{t('noResults', { label: getTranslation(pluralLabel, i18n) })}</p> */}
+              <p>{i18n.t('general:noResults', { label: getTranslation(pluralLabel, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
                 <Button el="link" to={newDocumentURL}>
-                  Create New
-                  {/* {t('createNewLabel', { label: getTranslation(singularLabel, i18n) })} */}
+                  {i18n.t('general:createNewLabel', { label: getTranslation(singularLabel, i18n) })}
                 </Button>
               )}
             </div>
@@ -184,7 +183,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
                     {data.totalPages > 1 && data.totalPages !== data.page
                       ? data.limit * data.page
                       : data.totalDocs}{' '}
-                    {/* {t('of')} {data.totalDocs} */}
+                    {i18n.t('general:of')} {data.totalDocs}
                   </div>
                   <PerPage
                     handleChange={handlePerPageChange}

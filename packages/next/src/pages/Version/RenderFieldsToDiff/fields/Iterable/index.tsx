@@ -20,6 +20,8 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
   locales,
   permissions,
   version,
+  i18n,
+  config,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
@@ -30,8 +32,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
       {field.label && (
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {field.label}
-          {/* {getTranslation(field.label, i18n)} */}
+          {getTranslation(field.label, i18n)}
         </Label>
       )}
       {maxRows > 0 && (
@@ -48,8 +49,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
               subFields = [
                 {
                   name: 'blockType',
-                  label: 'Block Type', // TODO: i18n
-                  // label: t('fields:blockType'),
+                  label: i18n.t('fields:blockType'),
                   type: 'text',
                 },
               ]
@@ -86,6 +86,9 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
                   )}
                   locales={locales}
                   version={versionRow}
+                  i18n={i18n}
+                  locale={locale}
+                  config={config}
                 />
               </div>
             )
@@ -94,12 +97,11 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
       )}
       {maxRows === 0 && (
         <div className={`${baseClass}__no-rows`}>
-          No rows found
-          {/* {t('noRowsFound', {
+          {i18n.t('noRowsFound', {
             label: field.labels?.plural
               ? getTranslation(field.labels?.plural, i18n)
-              : t('general:rows'),
-          })} */}
+              : i18n.t('general:rows'),
+          })}
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ import Form from '../../forms/Form'
 import { OperationProvider } from '../../providers/OperationProvider'
 import './index.scss'
 
-// import { getTranslation } from 'payload/utilities'
+// import { getTranslation } from '@payloadcms/translations'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
@@ -114,12 +114,12 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
           />
 
           {/* <Meta
-        description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+        description={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
           collection.labels.singular,
           i18n,
         )}`}
         keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-        title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+        title={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
           collection.labels.singular,
           i18n,
         )}`}

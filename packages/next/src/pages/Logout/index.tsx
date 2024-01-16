@@ -3,10 +3,10 @@ import React from 'react'
 import { MinimalTemplate, Button } from '@payloadcms/ui'
 import { meta } from '../../utilities/meta'
 import './index.scss'
-import i18n from 'i18next'
 import { Metadata } from 'next'
 import { SanitizedConfig } from 'payload/types'
 import { LogoutClient } from './LogoutClient'
+import { getNextT } from '../../utilities/getNextT'
 
 const baseClass = 'logout'
 
@@ -14,13 +14,18 @@ export const generateMetadata = async ({
   config,
 }: {
   config: Promise<SanitizedConfig>
-}): Promise<Metadata> =>
-  meta({
-    title: i18n.t('logout'),
-    description: `${i18n.t('logoutUser')}`,
-    keywords: `${i18n.t('logout')}`,
+}): Promise<Metadata> => {
+  const t = getNextT({
+    config: await config,
+  })
+
+  return meta({
+    title: t('authentication:logout'),
+    description: `${t('authentication:logoutUser')}`,
+    keywords: `${t('authentication:logout')}`,
     config,
   })
+}
 
 export const Logout: React.FC<{
   inactivity?: boolean
