@@ -1404,8 +1404,8 @@ importers:
         specifier: 5.7.4
         version: 5.7.4(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
       react-toastify:
-        specifier: 8.2.0
-        version: 8.2.0(react-dom@18.2.0)(react@18.2.0)
+        specifier: 10.0.0
+        version: 10.0.0(react-dom@18.2.0)(react@18.2.0)
       use-context-selector:
         specifier: 1.4.1
         version: 1.4.1(react-dom@18.2.0)(react@18.2.0)(scheduler@0.23.0)
@@ -7918,6 +7918,11 @@ packages:
 
   /clsx@1.2.1:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+    dev: false
+
+  /clsx@2.1.0:
+    resolution: {integrity: sha512-m3iNNWpd9rl3jvvcBnu70ylMdrXt8Vlq4HYadnU5fwcOtvkSQWPmj7amUcDT2qYI7risszBjI5AUIUox9D16pg==}
     engines: {node: '>=6'}
     dev: false
 
@@ -15831,6 +15836,17 @@ packages:
       use-isomorphic-layout-effect: 1.1.2(@types/react@18.2.15)(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
+    dev: false
+
+  /react-toastify@10.0.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-nTKun8snjXcdmaYJIwgeXQ1IKkUBDkCt7O3K1y/XdrFh8o+MZwO1mY79cZ+qsXX92KFz6psUxHUZcLHCVkA/Sw==}
+    peerDependencies:
+      react: '>=16'
+      react-dom: '>=16'
+    dependencies:
+      clsx: 2.1.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-toastify@8.2.0(react-dom@18.2.0)(react@18.2.0):
