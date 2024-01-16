@@ -132,7 +132,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       <Gutter className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__header-wrap`}>
           <p className={`${baseClass}__created-at`}>
-            {i18n.t('versionCreatedOn', {
+            {i18n.t('version:versionCreatedOn', {
               version: i18n.t(doc?.autosave ? 'autosavedVersion' : 'version'),
             })}
           </p>

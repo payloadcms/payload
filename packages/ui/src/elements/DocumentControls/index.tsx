@@ -74,7 +74,7 @@ export const DocumentControls: React.FC<{
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
-                  {i18n.t('creatingNewLabel', {
+                  {i18n.t('general:creatingNewLabel', {
                     label:
                       typeof collectionConfig?.labels?.singular === 'string'
                         ? collectionConfig.labels.singular

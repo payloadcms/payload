@@ -97,7 +97,7 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
       )}
       {maxRows === 0 && (
         <div className={`${baseClass}__no-rows`}>
-          {i18n.t('noRowsFound', {
+          {i18n.t('version:noRowsFound', {
             label: field.labels?.plural
               ? getTranslation(field.labels?.plural, i18n)
               : i18n.t('general:rows'),
