@@ -31,7 +31,7 @@ export const formatDocTitle = (args: {
   }
 
   if (title && isDate) {
-    title = formatDate(title, dateFormat, i18n?.language)
+    title = formatDate(title, dateFormat, i18n.language)
   }
 
   return title

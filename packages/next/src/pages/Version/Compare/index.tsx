@@ -71,7 +71,7 @@ const CompareVersion: React.FC<Props> = (props) => {
           setOptions((existingOptions) => [
             ...existingOptions,
             ...data.docs.map((doc) => ({
-              label: formatDate(doc.updatedAt, dateFormat, i18n?.language),
+              label: formatDate(doc.updatedAt, dateFormat, i18n.language),
               value: doc.id,
             })),
           ])

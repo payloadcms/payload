@@ -11,7 +11,7 @@ const DateCell: React.FC<CellComponentProps<DateField, any>> = ({ config, data, 
 
   const dateFormat = field?.admin?.date?.displayFormat || dateFormatFromConfig
 
-  return <span>{data && formatDate(data, dateFormat, i18n?.language)}</span>
+  return <span>{data && formatDate(data, dateFormat, i18n.language)}</span>
 }
 
 export default DateCell
