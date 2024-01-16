@@ -37,7 +37,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       if (typeof generateURL === 'function' && !href) {
         const newHref = await generateURL({
           ...docInfo,
-          doc: { fields },
+          doc: { ...fields },
           locale: typeof locale === 'object' ? locale?.code : locale,
         })
 

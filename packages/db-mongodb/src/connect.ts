@@ -50,7 +50,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
 
     const client = this.connection.getClient()
 
-    if (!client.options.replicaSet || this.transactionOptions === false) {
+    if (!client.options.replicaSet) {
       this.transactionOptions = false
       this.beginTransaction = undefined
     }
