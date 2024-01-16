@@ -49,6 +49,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
       ],
     },
     { $unset: { latest: 1 } },
+    options,
   )
 
   const result: Document = JSON.parse(JSON.stringify(doc))

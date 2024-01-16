@@ -63,6 +63,7 @@ export const find: Find = async function find(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
+          ...options,
           hint: { _id: 1 },
         }),
       )
