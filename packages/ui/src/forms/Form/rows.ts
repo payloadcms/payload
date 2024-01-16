@@ -1,12 +1,12 @@
-import type { Fields } from './types'
+import type { FormState } from './types'
 
 type Result = {
-  remainingFields: Fields
-  rows: Fields[]
+  remainingFields: FormState
+  rows: FormState[]
 }
 
-export const separateRows = (path: string, fields: Fields): Result => {
-  const remainingFields: Fields = {}
+export const separateRows = (path: string, fields: FormState): Result => {
+  const remainingFields: FormState = {}
 
   const rows = Object.entries(fields).reduce((incomingRows, [fieldPath, field]) => {
     const newRows = incomingRows
@@ -28,7 +28,7 @@ export const separateRows = (path: string, fields: Fields): Result => {
   }
 }
 
-export const flattenRows = (path: string, rows: Fields[]): Fields => {
+export const flattenRows = (path: string, rows: FormState[]): FormState => {
   return rows.reduce(
     (fields, row, i) => ({
       ...fields,

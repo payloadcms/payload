@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import type { Field } from 'payload/types'
 import type {
   Context,
-  Fields,
+  FormState,
   Context as FormContextType,
   GetDataByPath,
   Props,
@@ -598,7 +598,7 @@ const Form: React.FC<Props> = (props) => {
   )
 
   const replaceState = useCallback(
-    (state: Fields) => {
+    (state: FormState) => {
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ state, type: 'REPLACE_STATE' })

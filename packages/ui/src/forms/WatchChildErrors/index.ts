@@ -1,39 +1,12 @@
 'use client'
 import React from 'react'
 
-import type { Field, TabAsField } from 'payload/types'
+import type { Field } from 'payload/types'
 
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAllFormFields, useFormSubmitted } from '../Form/context'
-
-const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] => {
-  const pathNames = fieldSchema.reduce((acc, subField) => {
-    if (fieldHasSubFields(subField) && fieldAffectsData(subField)) {
-      // group, block, array
-      acc.push(parentPath ? `${parentPath}.${subField.name}.` : `${subField.name}.`)
-    } else if (fieldHasSubFields(subField)) {
-      // rows, collapsibles, unnamed-tab
-      acc.push(...buildPathSegments(parentPath, subField.fields))
-    } else if (subField.type === 'tabs') {
-      // tabs
-      subField.tabs.forEach((tab: TabAsField) => {
-        let tabPath = parentPath
-        if (tabHasName(tab)) {
-          tabPath = parentPath ? `${parentPath}.${tab.name}` : tab.name
-        }
-        acc.push(...buildPathSegments(tabPath, tab.fields))
-      })
-    } else if (fieldAffectsData(subField)) {
-      // text, number, date, etc.
-      acc.push(parentPath ? `${parentPath}.${subField.name}` : subField.name)
-    }
-
-    return acc
-  }, [])
-
-  return pathNames
-}
+import { buildPathSegments } from './buildPathSegments'
+import { getFieldStateFromPaths } from './getFieldStateFromPaths'
 
 type TrackSubSchemaErrorCountProps = {
   /**
@@ -43,12 +16,13 @@ type TrackSubSchemaErrorCountProps = {
   path: string
   setErrorCount: (count: number) => void
 }
+
 export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
   fieldSchema,
   path,
   setErrorCount,
 }) => {
-  const [fields] = useAllFormFields()
+  const [formState] = useAllFormFields()
   const hasSubmitted = useFormSubmitted()
   const [pathSegments] = React.useState(() => {
     if (fieldSchema) {
@@ -60,28 +34,13 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
 
   useThrottledEffect(
     () => {
-      let errorCount = 0
       if (hasSubmitted) {
-        Object.entries(fields).forEach(([key]) => {
-          const matchingSegment = pathSegments.some((segment) => {
-            if (segment.endsWith('.')) {
-              return key.startsWith(segment)
-            }
-            return key === segment
-          })
-
-          if (matchingSegment) {
-            if ('valid' in fields[key] && !fields[key].valid) {
-              errorCount += 1
-            }
-          }
-        })
+        const { errorCount } = getFieldStateFromPaths({ formState, pathSegments })
+        setErrorCount(errorCount)
       }
-
-      setErrorCount(errorCount)
     },
     250,
-    [fields, hasSubmitted, pathSegments],
+    [formState, hasSubmitted, pathSegments],
   )
 
   return null

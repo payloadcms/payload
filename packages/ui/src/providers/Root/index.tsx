@@ -80,7 +80,7 @@ export const RootProvider: React.FC<Props> = ({
           </WindowInfoProvider>
         </TranslationProvider>
       </ConfigProvider>
-      <ToastContainer icon={false} position="bottom-center" transition={Slide} />
+      {/* <ToastContainer icon={false} position="bottom-center" transition={Slide} /> */}
     </Fragment>
   )
 }

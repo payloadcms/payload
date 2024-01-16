@@ -2,7 +2,7 @@ import type { TFunction } from '@payloadcms/translations'
 
 import type { User } from 'payload/auth'
 import type { Field as FieldSchema, Data, SanitizedConfig } from 'payload/types'
-import type { Fields } from '../types'
+import type { FormState } from '../types'
 
 import { iterateFields } from './iterateFields'
 import { Locale } from 'payload/config'
@@ -22,7 +22,7 @@ type Args = {
   user?: User | null
 }
 
-const buildStateFromSchema = async (args: Args): Promise<Fields> => {
+const buildStateFromSchema = async (args: Args): Promise<FormState> => {
   const {
     id,
     config,
@@ -36,7 +36,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
   } = args
 
   if (fieldSchema) {
-    const state: Fields = {}
+    const state: FormState = {}
 
     await iterateFields({
       id,

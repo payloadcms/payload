@@ -32,7 +32,7 @@ export const filterFields = (args: {
     fieldSchema,
     fieldTypes,
     filter,
-    operation,
+    operation = 'update',
     permissions,
     readOnly: readOnlyOverride,
   } = args

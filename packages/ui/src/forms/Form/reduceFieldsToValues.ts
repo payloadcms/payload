@@ -1,6 +1,6 @@
 import { unflatten as flatleyUnflatten } from 'flatley'
 
-import type { Fields } from './types'
+import type { FormState } from './types'
 import { Data } from 'payload/types'
 
 /**
@@ -11,7 +11,7 @@ import { Data } from 'payload/types'
  *
  */
 const reduceFieldsToValues = (
-  fields: Fields,
+  fields: FormState,
   unflatten?: boolean,
   ignoreDisableFormData?: boolean,
 ): Data => {

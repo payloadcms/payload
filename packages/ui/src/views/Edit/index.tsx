@@ -28,7 +28,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     config,
     // customHeader,
     data,
-    state,
+    formState,
     // isLoading,
     // onSave: onSaveFromProps,
     docPermissions,
@@ -97,7 +97,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
           action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
-          initialState={state}
+          initialState={formState}
           method={id ? 'PATCH' : 'POST'}
           // onSuccess={onSave}
         >
@@ -167,7 +167,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             hasSavePermission={hasSavePermission}
             permissions={docPermissions}
             data={data}
-            state={state}
+            formState={formState}
             user={user}
           />
         </Form>

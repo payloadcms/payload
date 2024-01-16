@@ -29,7 +29,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
     config,
     data,
     fieldTypes,
-    state,
+    formState,
     onSave: onSaveFromProps,
     docPermissions,
     user,
@@ -62,7 +62,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
         <Form
           action={action}
           disabled={!hasSavePermission}
-          initialState={state}
+          initialState={formState}
           method="PATCH"
           // onSuccess={onSave}
         >
@@ -103,7 +103,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
             hasSavePermission={hasSavePermission}
             permissions={docPermissions}
             data={data}
-            state={state}
+            formState={formState}
             user={user}
           />
         </Form>
