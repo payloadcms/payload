@@ -3,7 +3,7 @@ import type { FieldAffectingData } from 'payload/types'
 import type { StepNavItem } from '@payloadcms/ui'
 import type { DefaultVersionsViewProps } from './types'
 import { fieldAffectsData } from 'payload/types'
-import { Gutter, SetStepNav } from '@payloadcms/ui'
+import { Gutter, SetStepNav, formatDate } from '@payloadcms/ui'
 import RenderFieldsToDiff from '../RenderFieldsToDiff'
 import fieldComponents from '../RenderFieldsToDiff/fields'
 import Restore from '../Restore'
@@ -31,6 +31,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 }) => {
   const {
     routes: { admin },
+    admin: { dateFormat },
   } = config
 
   let nav: StepNavItem[] = []
@@ -74,8 +75,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         url: `${admin}/collections/${collectionConfig.slug}/${id}/versions`,
       },
       {
-        label: '[Date]', // TODO: fix this (see below)
-        // label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
+        label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
       },
     ]
   }
@@ -87,14 +87,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         url: `${admin}/globals/${globalConfig.slug}`,
       },
       {
-        // TODO(i18n)
-        label: 'Versions',
+        label: i18n.t('version:versions'),
         url: `${admin}/globals/${globalConfig.slug}/versions`,
       },
       {
-        // TODO(i18n)
-        label: '[Date]',
-        // label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
+        label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
       },
     ]
   }
@@ -110,10 +107,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   // }, [collectionConfig, globalConfig, setViewActions])
 
   const formattedCreatedAt = doc?.createdAt
-  // const formattedCreatedAt = doc?.createdAt
-  // TODO(i18n)
-  //   ? formatDate(doc.createdAt, dateFormat, i18n?.language)
-  //   : ''
+    ? formatDate(doc.createdAt, dateFormat, i18n.language)
+    : ''
 
   // TODO: this value should ultimately be dynamic based on the user's selection
   // This will come from URL params
