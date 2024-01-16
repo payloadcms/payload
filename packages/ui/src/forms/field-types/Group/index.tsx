@@ -6,7 +6,7 @@ import { ErrorPill } from '../../../elements/ErrorPill'
 import FieldDescription from '../../FieldDescription'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import { checkStateForErrors } from '../../WatchChildErrors/checkStateForErrors'
+import { getNestedFieldState } from '../../WatchChildErrors/getNestedFieldState'
 import './index.scss'
 import { GroupProvider } from './provider'
 import { GroupWrapper } from './Wrapper'
@@ -30,13 +30,18 @@ const Group: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
-  const errorCount = checkStateForErrors({
+  const { fieldState: nestedFieldState, errorCount } = getNestedFieldState({
     formState,
     path,
     fieldSchema: fields,
   })
 
   const groupHasErrors = errorCount > 0
+
+  const fieldSchema = fields.map((subField) => ({
+    ...subField,
+    path: createNestedFieldPath(path, subField),
+  }))
 
   return (
     <GroupWrapper
@@ -69,10 +74,7 @@ const Group: React.FC<Props> = (props) => {
             {groupHasErrors && <ErrorPill count={errorCount} withMessage />}
           </div>
           <RenderFields
-            fieldSchema={fields.map((subField) => ({
-              ...subField,
-              path: createNestedFieldPath(path, subField),
-            }))}
+            fieldSchema={fieldSchema}
             fieldTypes={fieldTypes}
             forceRender={forceRender}
             indexPath={indexPath}
@@ -80,7 +82,7 @@ const Group: React.FC<Props> = (props) => {
             permissions={permissions?.fields}
             readOnly={readOnly}
             user={user}
-            formState={formState}
+            formState={nestedFieldState}
           />
         </div>
       </GroupProvider>

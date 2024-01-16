@@ -24,6 +24,7 @@ export type Props = {
       fieldSchema: FieldWithPath[]
       filter?: (field: Field) => boolean
       indexPath?: string
+      operation?: 'create' | 'update'
     }
   | {
       // Pre-filtered fields to be simply rendered

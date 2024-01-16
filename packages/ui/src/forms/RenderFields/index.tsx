@@ -5,13 +5,29 @@ import type { Props } from './types'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import './index.scss'
 import { FormFieldBase } from '../field-types/shared'
+import { filterFields } from './filterFields'
 
 const baseClass = 'render-fields'
 
 const RenderFields: React.FC<Props> = (props) => {
   const { className, fieldTypes, forceRender, margins, data, user, formState } = props
 
-  if ('fields' in props) {
+  let fieldsToRender = 'fields' in props ? props?.fields : null
+
+  if (!fieldsToRender && 'fieldSchema' in props) {
+    const { fieldSchema, fieldTypes, filter, permissions, readOnly: readOnlyOverride } = props
+
+    fieldsToRender = filterFields({
+      fieldSchema,
+      fieldTypes,
+      filter,
+      operation: props?.operation,
+      permissions,
+      readOnly: readOnlyOverride,
+    })
+  }
+
+  if (fieldsToRender) {
     return (
       <div
         className={[
@@ -23,7 +39,7 @@ const RenderFields: React.FC<Props> = (props) => {
           .filter(Boolean)
           .join(' ')}
       >
-        {props?.fields?.map((reducedField, fieldIndex) => {
+        {fieldsToRender?.map((reducedField, fieldIndex) => {
           const {
             FieldComponent,
             field,

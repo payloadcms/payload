@@ -1,12 +1,16 @@
 import type { FormState } from '../Form/types'
 
-export const mapFieldsAndReturnErrorCount = ({
+export const getFieldStateFromPaths = ({
   formState,
   pathSegments,
 }: {
   formState: FormState
   pathSegments: string[]
-}): number => {
+}): {
+  fieldState: FormState
+  errorCount: number
+} => {
+  let fieldState: FormState = {}
   let errorCount = 0
 
   Object.entries(formState).forEach(([key]) => {
@@ -18,12 +22,16 @@ export const mapFieldsAndReturnErrorCount = ({
     })
 
     if (matchingSegment) {
-      const fieldState = formState[key]
-      if ('valid' in fieldState && !fieldState.valid) {
+      const pathState = formState[key]
+      fieldState[key] = pathState
+      if ('valid' in pathState && !pathState.valid) {
         errorCount += 1
       }
     }
   })
 
-  return errorCount
+  return {
+    fieldState,
+    errorCount,
+  }
 }

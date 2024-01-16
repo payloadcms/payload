@@ -6,7 +6,7 @@ import type { Field } from 'payload/types'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAllFormFields, useFormSubmitted } from '../Form/context'
 import { buildPathSegments } from './buildPathSegments'
-import { mapFieldsAndReturnErrorCount } from './mapFieldsAndReturnErrorCount'
+import { getFieldStateFromPaths } from './getFieldStateFromPaths'
 
 type TrackSubSchemaErrorCountProps = {
   /**
@@ -35,7 +35,7 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
   useThrottledEffect(
     () => {
       if (hasSubmitted) {
-        const errorCount = mapFieldsAndReturnErrorCount({ formState, pathSegments })
+        const { errorCount } = getFieldStateFromPaths({ formState, pathSegments })
         setErrorCount(errorCount)
       }
     },
