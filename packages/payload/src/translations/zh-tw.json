@@ -63,8 +63,8 @@
     "deletingFile": "刪除文件時出現了錯誤。",
     "deletingTitle": "刪除{{title}}時出現了錯誤。請檢查您的網路連線並重試。",
     "emailOrPasswordIncorrect": "提供的電子郵件或密碼不正確。",
-    "followingFieldsInvalid_one": "下面的字串是無效的：",
-    "followingFieldsInvalid_other": "以下字串是無效的：",
+    "followingFieldsInvalid_one": "下面的字串是無效的：{{field}}",
+    "followingFieldsInvalid_other": "以下字串是無效的：{{fields}}",
     "incorrectCollection": "不正確的集合",
     "invalidFileType": "無效的文件類型",
     "invalidFileTypeValue": "無效的文件類型： {{value}}",
@@ -317,8 +317,8 @@
     "trueOrFalse": "該字串只能等於是或否。",
     "validUploadID": "該字串不是有效的上傳ID。"
   },
-"version": {
-    "aboutToPublishSelection": "您確定即將發佈所選的 {{label}} 嗎？",  
+  "version": {
+    "aboutToPublishSelection": "您確定即將發佈所選的 {{label}} 嗎？",
     "aboutToRestore": "您將把這個文件{{label}}回復到{{versionDate}}時的狀態",
     "aboutToRestoreGlobal": "您要將痊域的{{label}}回復到{{versionDate}}時的狀態",
     "aboutToRevertToPublished": "您將要將這個文件的內容還原到它的發佈狀態。您確定嗎？",
@@ -370,5 +370,5 @@
     "viewingVersionGlobal": "正在查看全域{{entityLabel}}的版本",
     "viewingVersions": "正在查看{{entityLabel}} {{documentTitle}}的版本",
     "viewingVersionsGlobal": "正在查看全域{{entityLabel}}的版本"
-}
+  }
 }
