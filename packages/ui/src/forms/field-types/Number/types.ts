@@ -3,5 +3,5 @@ import type { FormFieldBase } from '../shared'
 
 export type Props = FormFieldBase &
   Omit<NumberField, 'type'> & {
-    value: number
+    value?: number
   }

@@ -73,7 +73,7 @@ export const Account = async ({
       },
     })
 
-    const state = await buildStateFromSchema({
+    const formState = await buildStateFromSchema({
       id: user?.id,
       config,
       data: data || {},
@@ -93,7 +93,7 @@ export const Account = async ({
       data,
       fieldTypes,
       hasSavePermission: collectionPermissions?.update?.permission,
-      state,
+      formState,
       onSave: () => {},
       permissions,
       docPermissions: collectionPermissions,

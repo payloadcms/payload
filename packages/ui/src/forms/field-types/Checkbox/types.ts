@@ -7,5 +7,5 @@ export type Props = FormFieldBase &
     disableFormData?: boolean
     onChange?: (val: boolean) => void
     i18n: I18n
-    value: boolean
+    value?: boolean
   }

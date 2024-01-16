@@ -3,12 +3,13 @@ import { FormState } from '../Form/types'
 import { User } from 'payload/auth'
 
 export const fieldBaseClass = 'field-type'
+
 export type FormFieldBase = {
-  formState: FormState
+  formState?: FormState
   path?: string
   valid?: boolean
   errorMessage?: string
-  user: User
+  user?: User
 }
 
 /**

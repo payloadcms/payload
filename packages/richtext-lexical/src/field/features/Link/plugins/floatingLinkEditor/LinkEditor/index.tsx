@@ -1,5 +1,5 @@
 'use client'
-import type { Fields } from '@payloadcms/ui'
+import type { FormState } from '@payloadcms/ui'
 import type { Data } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
@@ -61,7 +61,7 @@ export function LinkEditor({
 
   const { getDocPreferences } = useDocumentInfo()
 
-  const [initialState, setInitialState] = useState<Fields>({})
+  const [initialState, setInitialState] = useState<FormState>({})
 
   const [fieldSchema] = useState(() => {
     const fieldsUnsanitized = transformExtraFields(
@@ -329,7 +329,7 @@ export function LinkEditor({
       <LinkDrawer
         drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
-        handleModalSubmit={(fields: Fields, data: Data) => {
+        handleModalSubmit={(fields: FormState, data: Data) => {
           closeModal(drawerSlug)
 
           const newLinkPayload: LinkPayload = data as LinkPayload

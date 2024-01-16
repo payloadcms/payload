@@ -4,7 +4,7 @@ import type { FormFieldBase } from '../shared'
 export type Props = FormFieldBase &
   Omit<EmailField, 'type'> & {
     path?: string
-    value: string
+    value?: string
   }
 
 export type InputProps = Omit<EmailField, 'type' | 'admin'> & {

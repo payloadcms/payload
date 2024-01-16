@@ -1,4 +1,4 @@
-import type { Fields } from '@payloadcms/ui'
+import type { FormState } from '@payloadcms/ui'
 import type { Data } from 'payload/types'
 import type React from 'react'
 
@@ -10,7 +10,7 @@ type Props = {
     fullFieldsWithValues,
     newFormData,
   }: {
-    fullFieldsWithValues: Fields
+    fullFieldsWithValues: FormState
     newFormData: Data
   }) => void
 }
