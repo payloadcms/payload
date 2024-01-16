@@ -1,12 +1,16 @@
 'use client'
 
-import { Drawer } from 'payload/components/elements'
-import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
-import { fieldTypes } from 'payload/components/forms'
+import {
+  Drawer,
+  Form,
+  FormSubmit,
+  RenderFields,
+  fieldTypes,
+  useEditDepth,
+  useTranslation,
+} from '@payloadcms/ui'
 import { useHotkey } from 'payload/components/hooks'
-import { useEditDepth } from 'payload/components/utilities'
 import React, { useRef } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
@@ -20,10 +24,10 @@ export const LinkDrawer: React.FC<Props> = ({
   handleModalSubmit,
   initialState,
 }) => {
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('editLink')}>
+    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink')}>
       <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
         <RenderFields
           fieldSchema={fieldSchema}
@@ -38,7 +42,7 @@ export const LinkDrawer: React.FC<Props> = ({
 }
 
 const LinkSubmit: React.FC = () => {
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
   const ref = useRef<HTMLButtonElement>(null)
   const editDepth = useEditDepth()
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { Button } from '../Button'
 
 import './index.scss'
@@ -22,7 +22,7 @@ export const Dropzone: React.FC<Props> = ({ onChange, className, mimeTypes }) =>
   const [dragging, setDragging] = React.useState(false)
   const inputRef = React.useRef(null)
 
-  const { t } = useTranslation(['upload', 'general'])
+  const { t } = useTranslation()
 
   const handlePaste = React.useCallback(
     (e: ClipboardEvent) => {
@@ -107,7 +107,7 @@ export const Dropzone: React.FC<Props> = ({ onChange, className, mimeTypes }) =>
         }}
         className={`${baseClass}__file-button`}
       >
-        {t('selectFile')}
+        {t('upload:selectFile')}
       </Button>
 
       <input
@@ -119,7 +119,7 @@ export const Dropzone: React.FC<Props> = ({ onChange, className, mimeTypes }) =>
       />
 
       <p className={`${baseClass}__label`}>
-        {t('general:or')} {t('dragAndDrop')}
+        {t('general:or')} {t('upload:dragAndDrop')}
       </p>
     </div>
   )

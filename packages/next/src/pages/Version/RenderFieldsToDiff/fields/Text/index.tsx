@@ -17,12 +17,11 @@ const Text: React.FC<Props> = ({
   isRichText = false,
   locale,
   version,
+  i18n,
 }) => {
   let placeholder = ''
-  const t = (key: string) => key // TODO
-  const i18n = {} // TODO
 
-  if (version === comparison) placeholder = `[${t('noValue')}]`
+  if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
   let versionToRender = version
   let comparisonToRender = comparison
@@ -37,8 +36,7 @@ const Text: React.FC<Props> = ({
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {typeof field.label === 'string' ? field.label : '[field-label]' /* TODO */}
-        // TODO(i18n)
-        {/* {getTranslation(field.label, i18n)} */}
+        {getTranslation(field.label, i18n)}
       </Label>
       <DiffViewer
         comparisonToRender={comparisonToRender}

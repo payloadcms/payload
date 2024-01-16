@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import { Button, Gutter, useStepNav, useConfig } from '@payloadcms/ui'
+import { Button, Gutter, useStepNav, useConfig, useTranslation } from '@payloadcms/ui'
 // import Meta from '../../utilities/Meta'
 import './index.scss'
 
@@ -13,6 +13,7 @@ const NotFound: React.FC<{
   const { marginTop } = props
 
   const { setStepNav } = useStepNav()
+  const { t } = useTranslation()
 
   const {
     routes: { admin },
@@ -21,7 +22,7 @@ const NotFound: React.FC<{
   // useEffect(() => {
   //   setStepNav([
   //     {
-  //       label: t('notFound'),
+  //       label: t('general:notFound'),
   //     },
   //   ])
   // }, [setStepNav, t])
@@ -33,22 +34,15 @@ const NotFound: React.FC<{
         .join(' ')}
     >
       {/* <Meta
-        description={t('pageNotFound')}
-        keywords={`404 ${t('notFound')}`}
-        title={t('notFound')}
+        description={t('general:pageNotFound')}
+        keywords={`404 ${t('general:notFound')}`}
+        title={t('general:notFound')}
       /> */}
       <Gutter className={`${baseClass}__wrap`}>
-        <h1>
-          Nothing Found
-          {/* {t('nothingFound')} */}
-        </h1>
-        <p>
-          Sorry, we couldn't find what you were looking for.
-          {/* {t('sorryNotFound')} */}
-        </p>
+        <h1>{t('general:nothingFound')}</h1>
+        <p>{t('general:sorryNotFound')}</p>
         <Button className={`${baseClass}__button`} el="link" to={`${admin}`}>
-          Back to Dashboard
-          {/* {t('backToDashboard')} */}
+          {t('general:backToDashboard')}
         </Button>
       </Gutter>
     </div>

@@ -13,10 +13,10 @@ import {
   useDrawerSlug,
   usePayloadAPI,
   useThumbnail,
+  useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback, useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { UploadFeatureProps } from '..'
 import type { UploadData } from '../nodes/UploadNode'
@@ -55,7 +55,7 @@ const Component: React.FC<ElementProps> = (props) => {
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
   const { editorConfig, field } = useEditorConfigContext()
 
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() =>
     collections.find((coll) => coll.slug === relationTo),
@@ -147,7 +147,7 @@ const Component: React.FC<ElementProps> = (props) => {
                     })
                   }}
                   round
-                  tooltip={t('swapUpload')}
+                  tooltip={t('fields:swapUpload')}
                 />
                 <Button
                   buttonStyle="icon-label"
@@ -159,7 +159,7 @@ const Component: React.FC<ElementProps> = (props) => {
                     removeUpload()
                   }}
                   round
-                  tooltip={t('removeUpload')}
+                  tooltip={t('fields:removeUpload')}
                 />
               </div>
             )}

@@ -1,8 +1,6 @@
-'use client'
 import React from 'react'
 import { getTranslation } from '@payloadcms/translations'
 import ReactDiffViewer from 'react-diff-viewer-continued'
-import { useTranslation } from 'react-i18next'
 
 import type { RelationshipField, SanitizedCollectionConfig } from 'payload/types'
 import type { Props } from '../types'
@@ -10,7 +8,6 @@ import type { Props } from '../types'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import Label from '../../Label'
 import { diffStyles } from '../styles'
-import { useConfig, useLocale } from '@payloadcms/ui'
 
 import './index.scss'
 
@@ -72,14 +69,13 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({
   comparison,
   field,
   version,
+  i18n,
+  locale,
+  config: { collections },
 }) => {
-  const { collections } = useConfig()
-  const { i18n, t } = useTranslation('general')
-  const { code: locale } = useLocale()
-
   let placeholder = ''
 
-  if (version === comparison) placeholder = `[${t('noValue')}]`
+  if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
   let versionToRender = version
   let comparisonToRender = comparison
@@ -102,8 +98,7 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        // TODO(i18n)
-        {/* {getTranslation(field.label, i18n)} */}
+        {getTranslation(field.label, i18n)}
       </Label>
       <ReactDiffViewer
         hideLineNumbers

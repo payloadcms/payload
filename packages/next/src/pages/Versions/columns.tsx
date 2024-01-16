@@ -7,11 +7,7 @@ import type {
 } from 'payload/types'
 
 import type { Column } from '@payloadcms/ui'
-import {
-  Pill,
-  // formatDate,
-  SortColumn,
-} from '@payloadcms/ui'
+import { Pill, formatDate, SortColumn } from '@payloadcms/ui'
 import Link from 'next/link'
 import { I18n } from '@payloadcms/translations'
 
@@ -30,13 +26,13 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   docID,
   config,
   collectionConfig,
-  // date,
+  date,
   globalConfig,
   i18n,
 }) => {
   const {
     routes: { admin },
-    // admin: { dateFormat },
+    admin: { dateFormat },
   } = config
 
   let to: string
@@ -45,13 +41,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
     to = `${admin}/collections/${collectionConfig.slug}/${docID}/versions/${versionID}`
   if (globalConfig) to = `${admin}/globals/${globalConfig.slug}/versions/${versionID}`
 
-  return (
-    <Link href={to}>
-      Date here
-      {/* TODO(i18n) */}
-      {/* {date && formatDate(date, dateFormat, i18n?.language)} */}
-    </Link>
-  )
+  return <Link href={to}>{date && formatDate(date, dateFormat, i18n.language)}</Link>
 }
 
 const TextCell: React.FC<{ children?: React.ReactNode }> = ({ children }) => <span>{children}</span>

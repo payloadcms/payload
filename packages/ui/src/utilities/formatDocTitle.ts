@@ -24,7 +24,7 @@ export const formatDocTitle = (args: {
   let title = typeof field === 'string' ? field : (field?.value as string)
 
   if (title && isDate) {
-    title = formatDate(title, dateFormat, i18n?.language)
+    title = formatDate(title, dateFormat, i18n.language)
   }
 
   return title

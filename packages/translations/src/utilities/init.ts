@@ -50,7 +50,11 @@ export const getTranslationString = ({
     return undefined
   }, translations)
 
-  return translation
+  if (!translation) {
+    console.log('key not found: ', key)
+  }
+
+  return translation || key
 }
 
 /**
@@ -65,14 +69,22 @@ const replaceVars = ({
   vars,
 }: {
   translationString: string
-  vars: Record<string, string>
+  vars: {
+    [key: string]: any
+  }
 }) => {
-  return Object.keys(vars).reduce((acc, varKey) => {
-    if (acc) {
-      return acc.replace(`{{${varKey}}}`, vars[varKey])
-    }
-    return acc
-  }, translationString)
+  const parts = translationString.split(/({{.*?}})/)
+
+  return parts
+    .map((part) => {
+      if (part.startsWith('{{') && part.endsWith('}}')) {
+        const placeholder = part.substring(2, part.length - 2).trim()
+        return vars[placeholder] || part
+      } else {
+        return part
+      }
+    })
+    .join('')
 }
 
 /**

@@ -14,6 +14,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useLocale,
+  useTranslation,
 } from '@payloadcms/ui'
 import {
   $getSelection,
@@ -25,7 +26,6 @@ import {
 } from 'lexical'
 import { sanitizeFields } from 'payload/config'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { LinkFeatureProps } from '../../..'
 import type { LinkNode } from '../../../nodes/LinkNode'
@@ -57,7 +57,7 @@ export function LinkEditor({
 
   const { user } = useAuth()
   const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation(['fields', 'upload', 'general'])
+  const { i18n, t } = useTranslation()
 
   const { getDocPreferences } = useDocumentInfo()
 
@@ -137,8 +137,6 @@ export function LinkEditor({
           (coll) => coll.slug === linkParent.getFields()?.doc?.relationTo,
         )
         const label = t('fields:linkedTo', {
-          // TODO: fix this
-          // @ts-ignore-next-line
           label: getTranslation(relatedField.labels.singular, i18n),
         }).replace(/<[^>]*>?/g, '')
         setLinkLabel(label)

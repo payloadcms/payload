@@ -1,7 +1,7 @@
 'use client'
 import qs from 'qs'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@payloadcms/ui'
 
 import type { PaginatedDocs } from 'payload/database'
 import type { Where } from 'payload/types'
@@ -27,7 +27,7 @@ const CompareVersion: React.FC<Props> = (props) => {
   const [options, setOptions] = useState(baseOptions)
   const [lastLoadedPage, setLastLoadedPage] = useState(1)
   const [errorLoading, setErrorLoading] = useState('')
-  const { i18n, t } = useTranslation('version')
+  const { i18n, t } = useTranslation()
 
   const getResults = useCallback(
     async ({ lastLoadedPage: lastLoadedPageArg }) => {
@@ -71,7 +71,7 @@ const CompareVersion: React.FC<Props> = (props) => {
           setOptions((existingOptions) => [
             ...existingOptions,
             ...data.docs.map((doc) => ({
-              label: formatDate(doc.updatedAt, dateFormat, i18n?.language),
+              label: formatDate(doc.updatedAt, dateFormat, i18n.language),
               value: doc.id,
             })),
           ])
@@ -99,7 +99,7 @@ const CompareVersion: React.FC<Props> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <div className={`${baseClass}__label`}>{t('compareVersion')}</div>
+      <div className={`${baseClass}__label`}>{t('version:compareVersion')}</div>
       {!errorLoading && (
         <ReactSelect
           isClearable={false}
@@ -109,7 +109,7 @@ const CompareVersion: React.FC<Props> = (props) => {
             getResults({ lastLoadedPage: lastLoadedPage + 1 })
           }}
           options={options}
-          placeholder={t('selectVersionToCompare')}
+          placeholder={t('version:selectVersionToCompare')}
           value={value}
         />
       )}

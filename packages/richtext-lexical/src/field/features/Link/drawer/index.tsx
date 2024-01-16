@@ -1,6 +1,5 @@
-import { Drawer, Form, FormSubmit, RenderFields, fieldTypes } from '@payloadcms/ui'
+import { Drawer, Form, FormSubmit, RenderFields, fieldTypes, useTranslation } from '@payloadcms/ui'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 
 import './index.scss'
 import { type Props } from './types'
@@ -13,10 +12,10 @@ export const LinkDrawer: React.FC<Props> = ({
   handleModalSubmit,
   initialState,
 }) => {
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
 
   return (
-    <Drawer className={baseClass} slug={drawerSlug} title={t('editLink') ?? ''}>
+    <Drawer className={baseClass} slug={drawerSlug} title={t('fields:editLink') ?? ''}>
       <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
         [RenderFields]
         {/* <RenderFields

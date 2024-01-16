@@ -1,6 +1,6 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import { useHistory } from 'react-router-dom'
 
 import type { Props } from './types'
@@ -22,14 +22,14 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
     routes: { admin },
   } = config
   const { toggleModal } = useModal()
-  const { t } = useTranslation('authentication')
+  const { t } = useTranslation()
 
   return (
     <Modal className={baseClass} slug="stay-logged-in">
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          <h1>{t('stayLoggedIn')}</h1>
-          <p>{t('youAreInactive')}</p>
+          <h1>{t('authentication:stayLoggedIn')}</h1>
+          <p>{t('authentication:youAreInactive')}</p>
         </div>
         <div className={`${baseClass}__controls`}>
           <Button
@@ -39,7 +39,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
               history.push(`${admin}${logoutRoute}`)
             }}
           >
-            {t('logOut')}
+            {t('authentication:logOut')}
           </Button>
           <Button
             onClick={() => {
@@ -47,7 +47,7 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
               toggleModal(modalSlug)
             }}
           >
-            {t('stayLoggedIn')}
+            {t('authentication:stayLoggedIn')}
           </Button>
         </div>
       </div>

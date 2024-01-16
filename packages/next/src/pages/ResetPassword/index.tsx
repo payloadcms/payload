@@ -8,14 +8,15 @@ import {
   ConfirmPassword,
   HiddenInput,
   Password,
+  Translation,
 } from '@payloadcms/ui'
 import './index.scss'
 import { SanitizedConfig } from 'payload/types'
 import Link from 'next/link'
 import { initPage } from '../../utilities/initPage'
-import i18n from 'i18next'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
+import { getNextT } from '../../utilities/getNextT'
 
 const baseClass = 'reset-password'
 
@@ -23,19 +24,24 @@ export const generateMetadata = async ({
   config,
 }: {
   config: Promise<SanitizedConfig>
-}): Promise<Metadata> =>
-  meta({
-    title: i18n.t('resetPassword'),
-    description: i18n.t('resetPassword'),
-    keywords: i18n.t('resetPassword'),
+}): Promise<Metadata> => {
+  const t = getNextT({
+    config: await config,
+  })
+
+  return meta({
+    title: t('authentication:resetPassword'),
+    description: t('authentication:resetPassword'),
+    keywords: t('authentication:resetPassword'),
     config,
   })
+}
 
 export const ResetPassword: React.FC<{
   config: Promise<SanitizedConfig>
   token: string
 }> = async ({ config: configPromise, token }) => {
-  const { config, user } = await initPage({ configPromise })
+  const { config, user, i18n } = await initPage({ configPromise })
 
   const {
     admin: { logoutRoute, user: userSlug },
@@ -49,7 +55,7 @@ export const ResetPassword: React.FC<{
   //     history.push(`${admin}`)
   //   } else {
   //     history.push(`${admin}/login`)
-  //     toast.success(t('general:updatedSuccessfully'), { autoClose: 3000 })
+  //     toast.success(i18n.t('general:updatedSuccessfully'), { autoClose: 3000 })
   //   }
   // }
 
@@ -57,19 +63,19 @@ export const ResetPassword: React.FC<{
     return (
       <MinimalTemplate className={baseClass}>
         <div className={`${baseClass}__wrap`}>
-          <h1>
-            Already Logged In
-            {/* {t('alreadyLoggedIn')} */}
-          </h1>
+          <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
           <p>
-            {/* <Trans i18nKey="loginWithAnotherUser" t={t}> */}
-            <Link href={`${admin}${logoutRoute}`}>log out</Link>
-            {/* </Trans> */}
+            <Translation
+              t={i18n.t}
+              i18nKey="authentication:loggedInChangePassword"
+              elements={{
+                '0': ({ children }) => <Link href={`${admin}/account`} children={children} />,
+              }}
+            />
           </p>
           <br />
           <Button buttonStyle="secondary" el="link" to={admin}>
-            Back to Dashboard
-            {/* {t('general:backToDashboard')} */}
+            {i18n.t('general:backToDashboard')}
           </Button>
         </div>
       </MinimalTemplate>
@@ -79,8 +85,7 @@ export const ResetPassword: React.FC<{
   return (
     <MinimalTemplate className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        Reset Password
-        {/* <h1>{t('resetPassword')}</h1> */}
+        <h1>{i18n.t('authentication:resetPassword')}</h1>
         <Form
           action={`${serverURL}${api}/${userSlug}/reset-password`}
           method="POST"
@@ -89,17 +94,13 @@ export const ResetPassword: React.FC<{
         >
           <Password
             autoComplete="off"
-            label="New Password"
-            // label={t('newPassword')}
+            label={i18n.t('authentication:newPassword')}
             name="password"
             required
           />
           <ConfirmPassword />
           <HiddenInput name="token" value={token} />
-          <FormSubmit>
-            Reset Password
-            {/* {t('resetPassword')} */}
-          </FormSubmit>
+          <FormSubmit>{i18n.t('authentication:resetPassword')}</FormSubmit>
         </Form>
       </div>
     </MinimalTemplate>

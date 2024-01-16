@@ -3,12 +3,13 @@ import type { FieldAffectingData } from 'payload/types'
 import type { StepNavItem } from '@payloadcms/ui'
 import type { DefaultVersionsViewProps } from './types'
 import { fieldAffectsData } from 'payload/types'
-import { Gutter, SetStepNav } from '@payloadcms/ui'
+import { Gutter, SetStepNav, formatDate } from '@payloadcms/ui'
 import RenderFieldsToDiff from '../RenderFieldsToDiff'
 import fieldComponents from '../RenderFieldsToDiff/fields'
 import Restore from '../Restore'
 import './index.scss'
 import { mostRecentVersionOption } from '../shared'
+import { getTranslation } from '@payloadcms/translations'
 
 const baseClass = 'view-version'
 
@@ -30,6 +31,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 }) => {
   const {
     routes: { admin },
+    admin: { dateFormat },
   } = config
 
   let nav: StepNavItem[] = []
@@ -52,8 +54,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             docLabel = mostRecentDoc[useAsTitle]
           }
         } else {
-          docLabel = 'Untitled'
-          // docLabel = `[${t('general:untitled')}]`
+          docLabel = `[${i18n.t('general:untitled')}]`
         }
       } else {
         docLabel = mostRecentDoc.id
@@ -62,9 +63,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
     nav = [
       {
-        label:
-          typeof collectionConfig.labels.plural === 'string' ? collectionConfig.labels.plural : '', // TODO: fix this (see below)
-        // label: getTranslation(collectionConfig.labels.plural, i18n),
+        label: getTranslation(collectionConfig.labels.plural, i18n),
         url: `${admin}/collections/${collectionConfig.slug}`,
       },
       {
@@ -76,8 +75,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         url: `${admin}/collections/${collectionConfig.slug}/${id}/versions`,
       },
       {
-        label: '[Date]', // TODO: fix this (see below)
-        // label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
+        label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
       },
     ]
   }
@@ -89,14 +87,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         url: `${admin}/globals/${globalConfig.slug}`,
       },
       {
-        // TODO(i18n)
-        label: 'Versions',
+        label: i18n.t('version:versions'),
         url: `${admin}/globals/${globalConfig.slug}/versions`,
       },
       {
-        // TODO(i18n)
-        label: '[Date]',
-        // label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
+        label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
       },
     ]
   }
@@ -112,10 +107,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   // }, [collectionConfig, globalConfig, setViewActions])
 
   const formattedCreatedAt = doc?.createdAt
-  // const formattedCreatedAt = doc?.createdAt
-  // TODO(i18n)
-  //   ? formatDate(doc.createdAt, dateFormat, i18n?.language)
-  //   : ''
+    ? formatDate(doc.createdAt, dateFormat, i18n.language)
+    : ''
 
   // TODO: this value should ultimately be dynamic based on the user's selection
   // This will come from URL params
@@ -139,10 +132,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       <Gutter className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__header-wrap`}>
           <p className={`${baseClass}__created-at`}>
-            Version Created On
-            {/* {t('versionCreatedOn', {
-              version: t(doc?.autosave ? 'autosavedVersion' : 'version'),
-            })} */}
+            {i18n.t('version:versionCreatedOn', {
+              version: i18n.t(doc?.autosave ? 'autosavedVersion' : 'version'),
+            })}
           </p>
           <header className={`${baseClass}__header`}>
             <h2>{formattedCreatedAt}</h2>
@@ -184,6 +176,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 : []
             }
             version={doc?.version}
+            i18n={i18n}
+            locale={locale}
+            config={config}
           />
         )}
       </Gutter>

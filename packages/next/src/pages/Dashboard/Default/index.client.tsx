@@ -102,7 +102,7 @@ export const DefaultDashboardClient: React.FC<{
 
                 if (type === EntityType.collection) {
                   title = getTranslation(entity.labels.plural, i18n)
-                  buttonAriaLabel = t('showAllLabel', { label: title })
+                  buttonAriaLabel = t('general:showAllLabel', { label: title })
                   href = `${admin}/collections/${entity.slug}`
                   createHREF = `${admin}/collections/${entity.slug}/create`
                   hasCreatePermission = permissions?.collections?.[entity.slug]?.create?.permission
@@ -110,7 +110,9 @@ export const DefaultDashboardClient: React.FC<{
 
                 if (type === EntityType.global) {
                   title = getTranslation(entity.label, i18n)
-                  buttonAriaLabel = t('editLabel', { label: getTranslation(entity.label, i18n) })
+                  buttonAriaLabel = t('general:editLabel', {
+                    label: getTranslation(entity.label, i18n),
+                  })
                   href = `${admin}/globals/${entity.slug}`
                 }
 
@@ -120,7 +122,7 @@ export const DefaultDashboardClient: React.FC<{
                       actions={
                         hasCreatePermission && type === EntityType.collection ? (
                           <Button
-                            aria-label={t('createNewLabel', {
+                            aria-label={t('general:createNewLabel', {
                               label: getTranslation(entity.labels.singular, i18n),
                             })}
                             buttonStyle="icon-label"

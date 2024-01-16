@@ -1,7 +1,7 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { BlocksDrawer, formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
+import { BlocksDrawer, formatDrawerSlug, useEditDepth, useTranslation } from '@payloadcms/ui'
 import {
   $getNodeByKey,
   COMMAND_PRIORITY_EDITOR,
@@ -10,7 +10,6 @@ import {
   createCommand,
 } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { BlocksFeatureProps } from '..'
 
@@ -60,12 +59,12 @@ export const BlocksDrawerComponent: React.FC = () => {
 
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
   const editDepth = useEditDepth()
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
   const { openModal } = useModal()
 
   const labels = {
-    plural: t('blocks') || 'Blocks',
-    singular: t('block') || 'Block',
+    plural: t('fields:blocks') || 'Blocks',
+    singular: t('fields:block') || 'Block',
   }
 
   const addRow = useCallback(

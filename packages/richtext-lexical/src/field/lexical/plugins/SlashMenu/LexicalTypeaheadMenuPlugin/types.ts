@@ -1,4 +1,4 @@
-import type { i18n } from 'i18next'
+import type { I18n } from '@payloadcms/translations'
 import type { LexicalEditor } from 'lexical'
 import type { MutableRefObject } from 'react'
 import type React from 'react'
@@ -7,7 +7,7 @@ export class SlashMenuOption {
   // Icon for display
   Icon: () => Promise<React.FC>
 
-  displayName?: (({ i18n }: { i18n: i18n }) => string) | string
+  displayName?: (({ i18n }: { i18n: I18n }) => string) | string
   // Used for class names and, if displayName is not provided, for display.
   key: string
   // TBD
@@ -23,7 +23,7 @@ export class SlashMenuOption {
     key: string,
     options: {
       Icon: () => Promise<React.FC>
-      displayName?: (({ i18n }: { i18n: i18n }) => string) | string
+      displayName?: (({ i18n }: { i18n: I18n }) => string) | string
       keyboardShortcut?: string
       keywords?: Array<string>
       onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
@@ -47,7 +47,7 @@ export class SlashMenuOption {
 
 export class SlashMenuGroup {
   // Used for class names and, if displayName is not provided, for display.
-  displayName?: (({ i18n }: { i18n: i18n }) => string) | string
+  displayName?: (({ i18n }: { i18n: I18n }) => string) | string
   key: string
   options: Array<SlashMenuOption>
 }
