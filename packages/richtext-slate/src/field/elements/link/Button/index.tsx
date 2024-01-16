@@ -1,20 +1,20 @@
 'use client'
 
-import type { Fields } from 'payload/types'
+import type { Fields } from '@payloadcms/ui'
 
 import { useModal } from '@faceless-ui/modal'
-import { useDrawerSlug } from 'payload/components/elements'
-import { reduceFieldsToValues } from 'payload/components/forms'
 import {
   buildStateFromSchema,
+  reduceFieldsToValues,
   useAuth,
   useConfig,
   useDocumentInfo,
+  useDrawerSlug,
   useLocale,
-} from 'payload/components/utilities'
+  useTranslation,
+} from '@payloadcms/ui'
 import { sanitizeFields } from 'payload/config'
 import React, { Fragment, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
@@ -73,7 +73,7 @@ export const LinkButton: React.FC<{
   const { code: locale } = useLocale()
   const [initialState, setInitialState] = useState<Fields>({})
 
-  const { i18n, t } = useTranslation(['upload', 'general'])
+  const { i18n, t } = useTranslation()
   const editor = useSlate()
   const config = useConfig()
 

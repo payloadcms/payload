@@ -1,8 +1,7 @@
 'use client'
 
-import { useListDrawer } from 'payload/components/elements'
+import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ReactEditor, useSlate } from 'slate-react'
 
 import UploadIcon from '../../../icons/Upload'
@@ -34,7 +33,7 @@ type ButtonProps = {
 }
 
 const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
-  const { t } = useTranslation(['upload', 'general'])
+  const { t } = useTranslation()
   const editor = useSlate()
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer }] = useListDrawer({

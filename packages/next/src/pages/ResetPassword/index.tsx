@@ -8,6 +8,7 @@ import {
   ConfirmPassword,
   HiddenInput,
   Password,
+  Translation,
 } from '@payloadcms/ui'
 import './index.scss'
 import { SanitizedConfig } from 'payload/types'
@@ -62,9 +63,13 @@ export const ResetPassword: React.FC<{
             {/* {t('alreadyLoggedIn')} */}
           </h1>
           <p>
-            {/* <Trans i18nKey="loginWithAnotherUser" t={t}> */}
-            <Link href={`${admin}${logoutRoute}`}>log out</Link>
-            {/* </Trans> */}
+            <Translation
+              t={i18n.t}
+              i18nKey="authentication:loggedInChangePassword"
+              elements={{
+                '0': ({ children }) => <Link href={`${admin}/account`} children={children} />,
+              }}
+            />
           </p>
           <br />
           <Button buttonStyle="secondary" el="link" to={admin}>

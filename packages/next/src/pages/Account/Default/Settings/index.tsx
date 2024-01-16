@@ -18,6 +18,7 @@ export const Settings: React.FC<{
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <h3>{t('general:payloadSettings')}</h3>
+
       <div className={`${baseClass}__language`}>
         <Label htmlFor="language-select" label={t('general:language')} />
         <ReactSelect

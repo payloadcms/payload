@@ -1,23 +1,26 @@
 'use client'
 
-import type { Fields } from 'payload/types'
+import type { Fields } from '@payloadcms/ui'
 import type { HTMLAttributes } from 'react'
 
 import { useModal } from '@faceless-ui/modal'
-import { Button, Popup } from 'payload/components'
-import { useDrawerSlug } from 'payload/components/elements'
-import { reduceFieldsToValues } from 'payload/components/forms'
+import { getTranslation } from '@payloadcms/translations'
 import {
+  Button,
+  Popup,
+  Translation,
   buildStateFromSchema,
+  reduceFieldsToValues,
   useAuth,
   useConfig,
   useDocumentInfo,
+  useDrawerSlug,
   useLocale,
-} from 'payload/components/utilities'
+  useTranslation,
+} from '@payloadcms/ui'
 import { sanitizeFields } from 'payload/config'
-import { deepCopyObject, getTranslation } from 'payload/utilities'
+import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
@@ -73,7 +76,7 @@ export const LinkElement: React.FC<{
   const config = useConfig()
   const { user } = useAuth()
   const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
   const { closeModal, openModal, toggleModal } = useModal()
   const [renderModal, setRenderModal] = useState(false)
   const [renderPopup, setRenderPopup] = useState(false)
@@ -155,26 +158,30 @@ export const LinkElement: React.FC<{
           render={() => (
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
-                <Trans
+                <Translation
+                  elements={{
+                    '0': ({ children }) => (
+                      <a
+                        className={`${baseClass}__link-label`}
+                        href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
+                        rel="noreferrer"
+                        target="_blank"
+                        title={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
+                      >
+                        {children}
+                      </a>
+                    ),
+                  }}
                   i18nKey="fields:linkedTo"
-                  values={{
+                  t={t}
+                  variables={{
                     label: getTranslation(
                       config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels
                         ?.singular,
                       i18n,
                     ),
                   }}
-                >
-                  <a
-                    className={`${baseClass}__link-label`}
-                    href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
-                    rel="noreferrer"
-                    target="_blank"
-                    title={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
-                  >
-                    label
-                  </a>
-                </Trans>
+                />
               )}
               {(element.linkType === 'custom' || !element.linkType) && (
                 <a

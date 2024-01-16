@@ -2,10 +2,10 @@
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useTranslation } from '@payloadcms/ui'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { useTranslation } from 'react-i18next'
 
 import type { SlashMenuGroup, SlashMenuOption } from './LexicalTypeaheadMenuPlugin/types'
 
@@ -28,7 +28,7 @@ function SlashMenuItem({
   onMouseEnter: () => void
   option: SlashMenuOption
 }) {
-  const { i18n } = useTranslation('fields')
+  const { i18n } = useTranslation()
 
   let className = `${baseClass}__item ${baseClass}__item-${option.key}`
   if (isSelected) {
@@ -87,7 +87,7 @@ export function SlashMenuPlugin({
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()
-  const { i18n } = useTranslation('fields')
+  const { i18n } = useTranslation()
 
   const checkForTriggerMatch = useMenuTriggerMatch('/', {
     minLength: 0,

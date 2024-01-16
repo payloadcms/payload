@@ -13,11 +13,11 @@ import {
   createNestedFieldPath,
   useDocumentInfo,
   useFormSubmitted,
+  useTranslation,
 } from '@payloadcms/ui'
 import isDeepEqual from 'deep-equal'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { FieldProps } from '../../../../types'
 import type { BlockFields, BlockNode } from '../nodes/BlocksNode'
@@ -181,8 +181,9 @@ export const BlockContent: React.FC<Props> = (props) => {
                 className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                 pillStyle="white"
               >
-                {typeof labels.singular === 'string' ? labels.singular : '[Singular Label]'}
-                {/* {getTranslation(labels.singular, i18n)} */}
+                {typeof labels.singular === 'string'
+                  ? getTranslation(labels.singular, i18n)
+                  : '[Singular Label]'}
               </Pill>
               <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
               {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}

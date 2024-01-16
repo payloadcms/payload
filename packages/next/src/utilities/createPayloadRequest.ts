@@ -118,11 +118,11 @@ export const createPayloadRequest = async ({
 
     // need to add:
     // ------------
+    // - files
     // - transactionID
     // - findByID
     // - payloadDataLoader
     // - payloadUploadSizes
-    // - files
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)

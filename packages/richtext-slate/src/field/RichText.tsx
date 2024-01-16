@@ -4,12 +4,17 @@ import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
+import { getTranslation } from '@payloadcms/translations'
+import {
+  Error,
+  FieldDescription,
+  Label,
+  useEditDepth,
+  useField,
+  useTranslation,
+} from '@payloadcms/ui'
 import isHotkey from 'is-hotkey'
-import { Error, FieldDescription, Label, useField, withCondition } from 'payload/components/forms'
-import { useEditDepth } from 'payload/components/utilities'
-import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'

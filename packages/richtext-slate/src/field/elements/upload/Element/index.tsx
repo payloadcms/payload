@@ -3,19 +3,20 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
 import type { HTMLAttributes } from 'react'
 
-import { Button } from 'payload/components'
+import { getTranslation } from '@payloadcms/translations'
 import {
+  Button,
   DrawerToggler,
+  FileGraphic,
+  useConfig,
   useDocumentDrawer,
   useDrawerSlug,
   useListDrawer,
-} from 'payload/components/elements'
-import { FileGraphic } from 'payload/components/graphics'
-import { usePayloadAPI, useThumbnail } from 'payload/components/hooks'
-import { useConfig } from 'payload/components/utilities'
-import { getTranslation } from 'payload/utilities'
+  usePayloadAPI,
+  useThumbnail,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback, useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
@@ -54,7 +55,7 @@ const Element: React.FC<ElementProps> = (props) => {
     routes: { api },
     serverURL,
   } = useConfig()
-  const { i18n, t } = useTranslation('fields')
+  const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() =>
     collections.find((coll) => coll.slug === relationTo),
@@ -187,7 +188,7 @@ const Element: React.FC<ElementProps> = (props) => {
                     // do nothing
                   }}
                   round
-                  tooltip={t('swapUpload')}
+                  tooltip={t('fields:swapUpload')}
                 />
               </ListDrawerToggler>
               <Button
@@ -200,7 +201,7 @@ const Element: React.FC<ElementProps> = (props) => {
                   removeUpload()
                 }}
                 round
-                tooltip={t('removeUpload')}
+                tooltip={t('fields:removeUpload')}
               />
             </div>
           </div>

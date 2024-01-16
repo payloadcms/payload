@@ -135,6 +135,7 @@ const clientTranslationKeys = [
   'fields:searchForBlock',
   'fields:selectFieldsToEdit',
   'fields:showAll',
+  'fields:swapRelationship',
   'fields:uploadNewLabel',
 
   'general:aboutToDeleteCount',

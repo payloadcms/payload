@@ -9,6 +9,7 @@ import { MinimalTemplate } from '../../templates/Minimal'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { Button } from '../Button'
 import './index.scss'
+import { Translation } from '../Translation'
 
 const baseClass = 'generate-confirmation'
 
@@ -43,11 +44,13 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('authentication:confirmGeneration')}</h1>
           <p>
-            <strong>{t('authentication:generatingNewAPIKeyWillInvalidate')}</strong>
-            {/* <Trans i18nKey="generatingNewAPIKeyWillInvalidate" t={t}>
-              generatingNewAPIKeyWillInvalidate
-              <strong>invalidate</strong>
-            </Trans> */}
+            <Translation
+              t={t}
+              i18nKey="authentication:generatingNewAPIKeyWillInvalidate"
+              elements={{
+                1: ({ children }) => <strong children={children} />,
+              }}
+            />
           </p>
 
           <Button

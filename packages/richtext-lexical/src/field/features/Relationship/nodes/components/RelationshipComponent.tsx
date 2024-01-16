@@ -2,10 +2,9 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { getTranslation } from '@payloadcms/translations'
-import { Button, useConfig, useDocumentDrawer, usePayloadAPI } from '@payloadcms/ui'
+import { Button, useConfig, useDocumentDrawer, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { $getNodeByKey, type ElementFormatType } from 'lexical'
 import React, { useCallback, useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { RelationshipData } from '../RelationshipNode'
 
@@ -50,7 +49,7 @@ const Component: React.FC<Props> = (props) => {
     collections.find((coll) => coll.slug === relationTo),
   )
 
-  const { i18n, t } = useTranslation(['fields', 'general'])
+  const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${id}`,
@@ -88,9 +87,7 @@ const Component: React.FC<Props> = (props) => {
     >
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
-          {t('labelRelationship', {
-            // TODO: fix this
-            // @ts-ignore-next-line
+          {t('fields:labelRelationship', {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
         </p>
@@ -114,7 +111,7 @@ const Component: React.FC<Props> = (props) => {
               })
             }}
             round
-            tooltip={t('swapRelationship')}
+            tooltip={t('fields:swapRelationship')}
           />
           <Button
             buttonStyle="icon-label"

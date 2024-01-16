@@ -11,15 +11,15 @@ export type LanguageOptions = {
 }[]
 
 const Context = createContext<{
-  t: (key: string, vars?: Record<string, string | number>) => string
+  t: (key: string, vars?: Record<string, any>) => string
   i18n: I18n
   languageOptions: LanguageOptions
 }>({
-  t: () => '',
+  t: (key) => key,
   i18n: {
     language: 'en',
     fallbackLanguage: 'en',
-    t: () => '',
+    t: (key) => key,
   },
   languageOptions: undefined,
 })
@@ -36,7 +36,7 @@ export const TranslationProvider: React.FC<{
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   languageOptions: LanguageOptions
 }> = ({ children, translations, lang, fallbackLang, languageOptions }) => {
-  const nextT = (key: string, vars?: Record<string, string | number>): string =>
+  const nextT = (key: string, vars?: Record<string, any>): string =>
     t({
       key,
       vars,

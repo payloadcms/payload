@@ -2,13 +2,16 @@
 
 import type { HTMLAttributes } from 'react'
 
-import { Button } from 'payload/components'
-import { useDocumentDrawer, useListDrawer } from 'payload/components/elements'
-import { usePayloadAPI } from 'payload/components/hooks'
-import { useConfig } from 'payload/components/utilities'
-import { getTranslation } from 'payload/utilities'
+import { getTranslation } from '@payloadcms/translations'
+import {
+  Button,
+  useConfig,
+  useDocumentDrawer,
+  useListDrawer,
+  usePayloadAPI,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useCallback, useReducer, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
@@ -53,7 +56,7 @@ const Element: React.FC<Props> = (props) => {
   )
   const selected = useSelected()
   const focused = useFocused()
-  const { i18n, t } = useTranslation(['fields', 'general'])
+  const { i18n, t } = useTranslation()
   const editor = useSlateStatic()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
@@ -141,7 +144,7 @@ const Element: React.FC<Props> = (props) => {
     >
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
-          {t('labelRelationship', {
+          {t('fields:labelRelationship', {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
         </p>
@@ -165,7 +168,7 @@ const Element: React.FC<Props> = (props) => {
               // do nothing
             }}
             round
-            tooltip={t('swapRelationship')}
+            tooltip={t('fields:swapRelationship')}
           />
         </ListDrawerToggler>
         <Button

@@ -3,19 +3,23 @@
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
-import { Drawer } from 'payload/components/elements'
-import { Form, FormSubmit, RenderFields, fieldTypes } from 'payload/components/forms'
+import { getTranslation } from '@payloadcms/translations'
 import {
+  Drawer,
+  Form,
+  FormSubmit,
+  RenderFields,
   buildStateFromSchema,
+  fieldTypes,
   useAuth,
   useConfig,
   useDocumentInfo,
   useLocale,
-} from 'payload/components/utilities'
+  useTranslation,
+} from '@payloadcms/ui'
 import { sanitizeFields } from 'payload/config'
-import { deepCopyObject, getTranslation } from 'payload/utilities'
+import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 

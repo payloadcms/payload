@@ -7,6 +7,7 @@ import {
   useDocumentInfo,
   useFormSubmitted,
   useLocale,
+  useTranslation,
 } from '@payloadcms/ui'
 import React, { useEffect, useMemo } from 'react'
 
@@ -16,7 +17,6 @@ const baseClass = 'lexical-block'
 import type { Data } from 'payload/types'
 
 import { sanitizeFields } from 'payload/config'
-import { useTranslation } from 'react-i18next'
 
 import type { BlocksFeatureProps } from '..'
 
@@ -63,7 +63,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const initialStateRef = React.useRef<Data>(null) // Store initial value in a ref, so it doesn't change on re-render and only gets initialized once
 
   const config = useConfig()
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { code: locale } = useLocale()
   const { getDocPreferences } = useDocumentInfo()
 
