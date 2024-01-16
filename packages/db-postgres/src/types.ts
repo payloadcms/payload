@@ -1,6 +1,7 @@
 import type {
   ColumnBaseConfig,
   ColumnDataType,
+  DrizzleConfig,
   ExtractTablesWithRelations,
   Relation,
   Relations,
@@ -16,6 +17,7 @@ export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 export type Args = {
   migrationDir?: string
   pool: PoolConfig
+  logger?: DrizzleConfig['logger']
   push?: boolean
 }
 
@@ -47,6 +49,7 @@ export type DrizzleTransaction = PgTransaction<
 
 export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
+  logger: DrizzleConfig['logger']
   enums: Record<string, GenericEnum>
   pool: Pool
   poolOptions: Args['pool']
