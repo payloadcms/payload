@@ -1,7 +1,7 @@
 import ObjectID from 'bson-objectid'
 import equal from 'deep-equal'
 
-import type { FieldAction, Fields, FormField } from './types'
+import type { FieldAction, FormState, FormField } from './types'
 
 import { deepCopyObject } from 'payload/utilities'
 import { flattenRows, separateRows } from './rows'
@@ -9,7 +9,7 @@ import { flattenRows, separateRows } from './rows'
 /**
  * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.
  */
-export function fieldReducer(state: Fields, action: FieldAction): Fields {
+export function fieldReducer(state: FormState, action: FieldAction): FormState {
   switch (action.type) {
     case 'REPLACE_STATE': {
       const newState = {}
@@ -79,7 +79,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       rows.splice(rowIndex, 1)
       rowsMetadata.splice(rowIndex, 1)
 
-      const newState: Fields = {
+      const newState: FormState = {
         ...remainingFields,
         [path]: {
           ...state[path],
@@ -123,7 +123,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
       siblingRows.splice(rowIndex, 0, subFieldState)
 
-      const newState: Fields = {
+      const newState: FormState = {
         ...remainingFields,
         ...flattenRows(path, siblingRows),
         [path]: {
@@ -161,7 +161,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       // replace form _field state_
       siblingRows[rowIndex] = subFieldState
 
-      const newState: Fields = {
+      const newState: FormState = {
         ...remainingFields,
         ...flattenRows(path, siblingRows),
         [path]: {

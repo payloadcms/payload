@@ -1,4 +1,7 @@
 import type { NumberField } from 'payload/types'
-import { FormFieldBase } from '../Text/types'
+import type { FormFieldBase } from '../shared'
 
-export type Props = FormFieldBase & Omit<NumberField, 'type'>
+export type Props = FormFieldBase &
+  Omit<NumberField, 'type'> & {
+    value?: number
+  }

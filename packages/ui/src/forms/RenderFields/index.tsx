@@ -5,18 +5,35 @@ import type { Props } from './types'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 
 import './index.scss'
+import { FormFieldBase } from '../field-types/shared'
+import { filterFields } from './filterFields'
 import { getTranslation } from '@payloadcms/translations'
 
 const baseClass = 'render-fields'
 
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender, margins, data, user, state, i18n } = props
+  const { className, fieldTypes, forceRender, margins, data, user, formState, i18n } = props
 
-  if ('fields' in props) {
-    if (!i18n) {
-      console.error('Need to implement i18n when calling RenderFields')
-    }
+  if (!i18n) {
+    console.error('Need to implement i18n when calling RenderFields')
+  }
 
+  let fieldsToRender = 'fields' in props ? props?.fields : null
+
+  if (!fieldsToRender && 'fieldSchema' in props) {
+    const { fieldSchema, fieldTypes, filter, permissions, readOnly: readOnlyOverride } = props
+
+    fieldsToRender = filterFields({
+      fieldSchema,
+      fieldTypes,
+      filter,
+      operation: props?.operation,
+      permissions,
+      readOnly: readOnlyOverride,
+    })
+  }
+
+  if (fieldsToRender) {
     return (
       <div
         className={[
@@ -28,7 +45,7 @@ const RenderFields: React.FC<Props> = (props) => {
           .filter(Boolean)
           .join(' ')}
       >
-        {props?.fields?.map((reducedField, fieldIndex) => {
+        {fieldsToRender?.map((reducedField, fieldIndex) => {
           const {
             FieldComponent,
             field,
@@ -40,16 +57,18 @@ const RenderFields: React.FC<Props> = (props) => {
 
           const path = field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
 
-          const fieldState = state?.[path]
+          const fieldState = formState?.[path]
 
-          if (!fieldState?.passesCondition) return null
+          // first check `fieldState` to let top-level group fields through, i.e. `myGroup`
+          // this will proceed to render its children, i.e. `myGroup.myField`
+          if (fieldState && !fieldState?.passesCondition) return null
 
           if (fieldIsPresentational) {
             return <FieldComponent key={fieldIndex} />
           }
 
           // TODO: type this, i.e. `componentProps: FieldComponentProps`
-          const componentProps = {
+          const componentProps: FormFieldBase & Record<string, any> = {
             ...field,
             admin: {
               ...(field.admin || {}),
@@ -62,6 +81,7 @@ const RenderFields: React.FC<Props> = (props) => {
             permissions: fieldPermissions,
             data,
             user,
+            formState,
             valid: fieldState?.valid,
             errorMessage: fieldState?.errorMessage,
           }

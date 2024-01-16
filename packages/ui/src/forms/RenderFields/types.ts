@@ -1,7 +1,7 @@
 import type { FieldPermissions, User } from 'payload/auth'
 import type { Document, Field, FieldWithPath } from 'payload/types'
 import type { ReducedField } from './filterFields'
-import { Fields } from '../Form/types'
+import { FormState } from '../Form/types'
 import { FieldTypes } from 'payload/config'
 import { I18n } from '@payloadcms/translations'
 
@@ -11,7 +11,7 @@ export type Props = {
   forceRender?: boolean
   margins?: 'small' | false
   data?: Document
-  state: Fields
+  formState: FormState
   user: User
   permissions?:
     | {
@@ -22,10 +22,11 @@ export type Props = {
   i18n?: I18n
 } & (
   | {
-      // Fields to be filtered by the component
+      // FormState to be filtered by the component
       fieldSchema: FieldWithPath[]
       filter?: (field: Field) => boolean
       indexPath?: string
+      operation?: 'create' | 'update'
     }
   | {
       // Pre-filtered fields to be simply rendered

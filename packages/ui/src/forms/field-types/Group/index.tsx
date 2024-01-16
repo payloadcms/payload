@@ -1,29 +1,22 @@
-'use client'
 import React from 'react'
-import { useTranslation } from '../../../providers/Translation'
 
 import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
-import { useCollapsible } from '../../../elements/Collapsible/provider'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import FieldDescription from '../../FieldDescription'
-import { useFormSubmitted } from '../../Form/context'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import { WatchChildErrors } from '../../WatchChildErrors'
-import { useRow } from '../Row/provider'
-import { useTabs } from '../Tabs/provider'
-import { fieldBaseClass } from '../shared'
+import { getNestedFieldState } from '../../WatchChildErrors/getNestedFieldState'
 import './index.scss'
-import { GroupProvider, useGroup } from './provider'
+import { GroupProvider } from './provider'
+import { GroupWrapper } from './Wrapper'
 
 const baseClass = 'group-field'
 
 const Group: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, description, hideGutter = false, readOnly, style, width },
+    admin: { description, className, hideGutter = false, readOnly, style, width },
     fieldTypes,
     fields,
     forceRender = false,
@@ -31,49 +24,45 @@ const Group: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     permissions,
+    formState,
+    user,
   } = props
 
-  const isWithinCollapsible = useCollapsible()
-  const isWithinGroup = useGroup()
-  const isWithinRow = useRow()
-  const isWithinTab = useTabs()
-  const { i18n } = useTranslation()
-  const submitted = useFormSubmitted()
-  const [errorCount, setErrorCount] = React.useState(undefined)
-  const groupHasErrors = submitted && errorCount > 0
-
   const path = pathFromProps || name
-  const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
+
+  const { fieldState: nestedFieldState, errorCount } = getNestedFieldState({
+    formState,
+    path,
+    fieldSchema: fields,
+  })
+
+  const groupHasErrors = errorCount > 0
+
+  const fieldSchema = fields.map((subField) => ({
+    ...subField,
+    path: createNestedFieldPath(path, subField),
+  }))
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        baseClass,
-        isTopLevel && `${baseClass}--top-level`,
-        isWithinCollapsible && `${baseClass}--within-collapsible`,
-        isWithinGroup && `${baseClass}--within-group`,
-        isWithinRow && `${baseClass}--within-row`,
-        isWithinTab && `${baseClass}--within-tab`,
-        !hideGutter && isWithinGroup && `${baseClass}--gutter`,
-        groupHasErrors && `${baseClass}--has-error`,
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      id={`field-${path.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
+    <GroupWrapper
+      name={name}
+      path={path}
+      className={className}
+      hideGutter={hideGutter}
+      style={style}
+      width={width}
     >
-      <WatchChildErrors fieldSchema={fields} path={path} setErrorCount={setErrorCount} />
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
             {(label || description) && (
               <header>
-                {label && <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>}
+                {label && (
+                  <h3 className={`${baseClass}__title`}>
+                    {typeof label === 'string' ? label : 'Group Title'}
+                    {/* {getTranslation(label, i18n)} */}
+                  </h3>
+                )}
                 <FieldDescription
                   className={`field-description-${path.replace(/\./g, '__')}`}
                   description={description}
@@ -84,22 +73,20 @@ const Group: React.FC<Props> = (props) => {
             )}
             {groupHasErrors && <ErrorPill count={errorCount} withMessage />}
           </div>
-          [RenderFields]
-          {/* <RenderFields
-            fieldSchema={fields.map((subField) => ({
-              ...subField,
-              path: createNestedFieldPath(path, subField),
-            }))}
+          <RenderFields
+            fieldSchema={fieldSchema}
             fieldTypes={fieldTypes}
             forceRender={forceRender}
             indexPath={indexPath}
             margins="small"
             permissions={permissions?.fields}
             readOnly={readOnly}
-          /> */}
+            user={user}
+            formState={nestedFieldState}
+          />
         </div>
       </GroupProvider>
-    </div>
+    </GroupWrapper>
   )
 }
 

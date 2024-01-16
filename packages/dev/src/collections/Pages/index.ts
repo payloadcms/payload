@@ -43,5 +43,37 @@ export const Pages: CollectionConfig = {
         condition: (data) => data.enableConditionalField,
       },
     },
+    {
+      name: 'number',
+      label: 'Number',
+      type: 'number',
+    },
+    {
+      name: 'select',
+      label: 'Select',
+      type: 'select',
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option-1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option-2',
+        },
+      ],
+    },
+    {
+      name: 'group',
+      label: 'Group',
+      type: 'group',
+      fields: [
+        {
+          name: 'groupText',
+          label: 'Group Text',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }

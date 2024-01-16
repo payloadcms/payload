@@ -1,9 +1,9 @@
 import { unflatten as flatleyUnflatten } from 'flatley'
 
-import type { Fields } from './types'
+import type { FormState } from './types'
 import { Data } from 'payload/types'
 
-const reduceFieldsToValues = (fields: Fields, unflatten?: boolean): Data => {
+const reduceFieldsToValues = (fields: FormState, unflatten?: boolean): Data => {
   const data = {}
 
   Object.keys(fields).forEach((key) => {

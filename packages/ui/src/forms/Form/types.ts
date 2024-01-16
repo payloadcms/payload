@@ -23,7 +23,7 @@ export type FormField = {
   validate?: Validate
 }
 
-export type Fields = {
+export type FormState = {
   [path: string]: FormField
 }
 
@@ -44,10 +44,10 @@ export type Props = {
    */
   fields?: Field[]
   handleResponse?: (res: Response) => void
-  initialState?: Fields
+  initialState?: FormState
   log?: boolean
   method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
-  onSubmit?: (fields: Fields, data: Data) => void
+  onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => void
   redirect?: string
   submitted?: boolean
@@ -69,7 +69,7 @@ export type Submit = (
 ) => Promise<void>
 export type ValidateForm = () => Promise<boolean>
 export type CreateFormData = (overrides?: any) => FormData
-export type GetFields = () => Fields
+export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
 export type GetSiblingData = (path: string) => Data
@@ -81,7 +81,7 @@ export type SetProcessing = (processing: boolean) => void
 export type Reset = (fieldSchema: FieldConfig[], data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
-  state: Fields
+  state: FormState
   type: 'REPLACE_STATE'
 }
 
@@ -112,7 +112,7 @@ export type ADD_ROW = {
   blockType?: string
   path: string
   rowIndex?: number
-  subFieldState?: Fields
+  subFieldState?: FormState
   type: 'ADD_ROW'
 }
 
@@ -120,7 +120,7 @@ export type REPLACE_ROW = {
   blockType?: string
   path: string
   rowIndex: number
-  subFieldState?: Fields
+  subFieldState?: FormState
   type: 'REPLACE_ROW'
 }
 
@@ -165,7 +165,7 @@ export type FieldAction =
   | SET_ROW_COLLAPSED
   | UPDATE
 
-export type FormFieldsContext = [Fields, Dispatch<FieldAction>]
+export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
 export type Context = {
   addFieldRow: ({
@@ -187,7 +187,7 @@ export type Context = {
   /**
    * @deprecated Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
    */
-  fields: Fields
+  fields: FormState
   formRef: React.MutableRefObject<HTMLFormElement>
   getData: GetData
   getDataByPath: GetDataByPath
@@ -204,7 +204,7 @@ export type Context = {
     path: string
     rowIndex: number
   }) => Promise<void>
-  replaceState: (state: Fields) => void
+  replaceState: (state: FormState) => void
   reset: Reset
   setModified: SetModified
   setProcessing: SetProcessing

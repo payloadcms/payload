@@ -1,4 +1,4 @@
-import type { Fields } from '@payloadcms/ui'
+import type { FormState } from '@payloadcms/ui'
 import type { Block, Data, Field } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -89,7 +89,7 @@ export const BlockContent: React.FC<Props> = (props) => {
       fullFieldsWithValues,
       newFormData,
     }: {
-      fullFieldsWithValues: Fields
+      fullFieldsWithValues: FormState
       newFormData: Data
     }) => {
       // Recursively remove all undefined values from even being present in formData, as they will
