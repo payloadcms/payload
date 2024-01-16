@@ -56,7 +56,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
 
   return (
     <React.Fragment>
-      {/* <Meta description={t('accountOfCurrentUser')} keywords={t('account')} title={t('account')} /> */}
+      {/* <Meta description={i18n.t('authentication:accountOfCurrentUser')} keywords={t('authentication:account')} title={t('authentication:account')} /> */}
       {/* <LoadingOverlayToggle name="account" show={isLoading} type="withoutNav" /> */}
       <OperationProvider operation="update">
         <Form

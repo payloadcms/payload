@@ -29,8 +29,8 @@ export const generateMetadata = async ({
   })
 
   return meta({
-    title: t('createFirstUser'),
-    description: t('createFirstUser'),
+    title: t('authentication:createFirstUser'),
+    description: t('authentication:createFirstUser'),
     keywords: t('general:create'),
     config,
   })
@@ -69,22 +69,19 @@ export const CreateFirstUser: React.FC<{
   const fields = [
     {
       name: 'email',
-      label: 'Email Address',
-      // label: t('general:emailAddress'),
+      label: t('general:emailAddress'),
       required: true,
       type: 'email',
     },
     {
       name: 'password',
-      label: 'Password',
-      // label: t('general:password'),
+      label: t('general:password'),
       required: true,
       type: 'password',
     },
     {
       name: 'confirm-password',
-      label: 'Confirm Password',
-      // label: t('confirmPassword'),
+      label: t('authentication:confirmPassword'),
       required: true,
       type: 'confirmPassword',
     },
@@ -103,7 +100,7 @@ export const CreateFirstUser: React.FC<{
   return (
     <MinimalTemplate className={baseClass}>
       <h1>{t('general:welcome')}</h1>
-      <p>{t('beginCreateFirstUser')}</p>
+      <p>{t('authentication:beginCreateFirstUser')}</p>
       <Form
         action={`${serverURL}${api}/${userSlug}/first-register`}
         method="POST"

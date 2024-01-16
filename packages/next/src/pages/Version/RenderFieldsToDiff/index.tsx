@@ -18,6 +18,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   fields,
   locales,
   version,
+  i18n,
+  locale,
+  config,
 }) => {
   return (
     <div className={baseClass}>
@@ -60,6 +63,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                             locales={locales}
                             permissions={subFieldPermissions}
                             version={versionLocaleValue}
+                            i18n={i18n}
+                            config={config}
                           />
                         </div>
                       </div>
@@ -80,6 +85,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                   locales={locales}
                   permissions={subFieldPermissions}
                   version={versionValue}
+                  i18n={i18n}
+                  locale={locale}
+                  config={config}
                 />
               </div>
             )
@@ -96,6 +104,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 key={i}
                 locales={locales}
                 version={version}
+                i18n={i18n}
+                locale={locale}
+                config={config}
               />
             )
           }
@@ -112,6 +123,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 locales={locales}
                 permissions={fieldPermissions}
                 version={version}
+                i18n={i18n}
+                locale={locale}
+                config={config}
               />
             )
           }

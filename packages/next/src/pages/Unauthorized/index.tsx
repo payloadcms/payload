@@ -1,22 +1,28 @@
 import React from 'react'
 
-import { MinimalTemplate, Button } from '@payloadcms/ui'
+import { MinimalTemplate } from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 import { meta } from '../../utilities/meta'
 import { Metadata } from 'next'
-import i18n from 'i18next'
+import { getNextT } from '../../utilities/getNextT'
+import { UnauthorizedClient } from './UnauthorizedClient'
 
 export const generateMetadata = async ({
   config,
 }: {
   config: Promise<SanitizedConfig>
-}): Promise<Metadata> =>
-  meta({
-    title: i18n.t('error:unauthorized'),
-    description: i18n.t('error:unauthorized'),
-    keywords: i18n.t('error:unauthorized'),
+}): Promise<Metadata> => {
+  const t = getNextT({
+    config: await config,
+  })
+
+  return meta({
+    title: t('error:unauthorized'),
+    description: t('error:unauthorized'),
+    keywords: t('error:unauthorized'),
     config,
   })
+}
 
 export const Unauthorized: React.FC<{
   config: Promise<SanitizedConfig>
@@ -30,19 +36,7 @@ export const Unauthorized: React.FC<{
 
   return (
     <MinimalTemplate className="unauthorized">
-      <h2>
-        Unauthorized
-        {/* {t('error:unauthorized')} */}
-      </h2>
-      <p>
-        Not Allowed
-        {/* {t('error:notAllowedToAccessPage')} */}
-      </p>
-      <br />
-      <Button el="link" to={`${admin}${logoutRoute}`}>
-        Log out
-        {/* {t('authentication:logOut')} */}
-      </Button>
+      <UnauthorizedClient logoutRoute={`${admin}${logoutRoute}`} />
     </MinimalTemplate>
   )
 }

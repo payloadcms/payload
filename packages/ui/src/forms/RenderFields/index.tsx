@@ -1,16 +1,22 @@
 import React from 'react'
 
+import { fieldAffectsData } from 'payload/types'
 import type { Props } from './types'
-
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
+
 import './index.scss'
+import { getTranslation } from '@payloadcms/translations'
 
 const baseClass = 'render-fields'
 
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender, margins, data, user, state } = props
+  const { className, fieldTypes, forceRender, margins, data, user, state, i18n } = props
 
   if ('fields' in props) {
+    if (!i18n) {
+      console.error('Need to implement i18n when calling RenderFields')
+    }
+
     return (
       <div
         className={[
@@ -73,11 +79,13 @@ const RenderFields: React.FC<Props> = (props) => {
 
           return (
             <div className="missing-field" key={fieldIndex}>
-              {/* {t('error:noMatchedField', {
-                  label: fieldAffectsData(field)
-                    ? getTranslation(field.label || field.name, i18n)
-                    : field.path,
-                })} */}
+              {i18n
+                ? i18n.t('error:noMatchedField', {
+                    label: fieldAffectsData(field)
+                      ? getTranslation(field.label || field.name, i18n)
+                      : field.path,
+                  })
+                : 'Need to implement i18n when calling RenderFields'}
             </div>
           )
         })}

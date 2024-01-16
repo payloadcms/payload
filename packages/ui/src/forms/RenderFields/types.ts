@@ -3,6 +3,7 @@ import type { Document, Field, FieldWithPath } from 'payload/types'
 import type { ReducedField } from './filterFields'
 import { Fields } from '../Form/types'
 import { FieldTypes } from 'payload/config'
+import { I18n } from '@payloadcms/translations'
 
 export type Props = {
   className?: string
@@ -18,6 +19,7 @@ export type Props = {
       }
     | FieldPermissions
   readOnly?: boolean
+  i18n?: I18n
 } & (
   | {
       // Fields to be filtered by the component

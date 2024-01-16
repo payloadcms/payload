@@ -15,6 +15,9 @@ const Tabs: React.FC<Props & { field: TabsField }> = ({
   locales,
   permissions,
   version,
+  i18n,
+  config,
+  locale,
 }) => (
   <div className={baseClass}>
     <div className={`${baseClass}__wrap`}>
@@ -29,6 +32,9 @@ const Tabs: React.FC<Props & { field: TabsField }> = ({
               locales={locales}
               permissions={permissions}
               version={version?.[tab.name]}
+              i18n={i18n}
+              config={config}
+              locale={locale}
             />
           )
         }
@@ -42,6 +48,9 @@ const Tabs: React.FC<Props & { field: TabsField }> = ({
             key={i}
             locales={locales}
             version={version}
+            i18n={i18n}
+            config={config}
+            locale={locale}
           />
         )
       })}

@@ -6,8 +6,8 @@ import { initPage } from '../../utilities/initPage'
 import { SanitizedConfig } from 'payload/types'
 import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
-import i18n from 'i18next'
 import { meta } from '../../utilities/meta'
+import { getNextT } from '../../utilities/getNextT'
 
 const baseClass = 'verify'
 
@@ -15,13 +15,18 @@ export const generateMetadata = async ({
   config,
 }: {
   config: Promise<SanitizedConfig>
-}): Promise<Metadata> =>
-  meta({
-    description: i18n.t('verifyUser'),
-    keywords: i18n.t('verify'),
-    title: i18n.t('verify'),
+}): Promise<Metadata> => {
+  const t = getNextT({
+    config: await config,
+  })
+
+  return meta({
+    description: t('authentication:verifyUser'),
+    keywords: t('authentication:verify'),
+    title: t('authentication:verify'),
     config,
   })
+}
 
 export const Verify: React.FC<{
   config: Promise<SanitizedConfig>
@@ -30,7 +35,7 @@ export const Verify: React.FC<{
   config: configPromise,
   // token
 }) => {
-  const { config, user } = await initPage({ configPromise })
+  const { config, user, i18n } = await initPage({ configPromise })
 
   const {
     admin: { user: userSlug },
@@ -60,10 +65,9 @@ export const Verify: React.FC<{
   }
 
   const getText = () => {
-    return 'Verify'
-    // if (verifyResult?.status === 200) return t('verifiedSuccessfully')
-    // if (verifyResult?.status === 202) return t('alreadyActivated')
-    // return t('unableToVerify')
+    if (verifyResult?.status === 200) return i18n.t('authentication:verifiedSuccessfully')
+    if (verifyResult?.status === 202) return i18n.t('authentication:alreadyActivated')
+    return i18n.t('authentication:unableToVerify')
   }
 
   return (
@@ -74,8 +78,7 @@ export const Verify: React.FC<{
       <h2>{getText()}</h2>
       {verifyResult?.status === 200 && (
         <Button buttonStyle="secondary" el="link" to={`${adminRoute}/login`}>
-          Login
-          {/* {t('login')} */}
+          {i18n.t('authentication:login')}
         </Button>
       )}
     </MinimalTemplate>

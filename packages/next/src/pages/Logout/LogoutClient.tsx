@@ -1,7 +1,7 @@
 'use client'
 import React, { Fragment, useEffect } from 'react'
 import { useAuth } from '../../../../ui/src/providers/Auth'
-import { Button } from '@payloadcms/ui'
+import { Button, useTranslation } from '@payloadcms/ui'
 
 export const LogoutClient: React.FC<{
   inactivity?: boolean
@@ -11,8 +11,8 @@ export const LogoutClient: React.FC<{
   const { inactivity, adminRoute, redirect } = props
 
   const [isLoggingOut, setIsLoggingOut] = React.useState<boolean | undefined>(undefined)
-  const [hasLoggedOut, setHasLoggedOut] = React.useState<boolean | undefined>(undefined)
-  const { logOut, user } = useAuth()
+  const { logOut } = useAuth()
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (!isLoggingOut) {
@@ -24,18 +24,8 @@ export const LogoutClient: React.FC<{
   if (isLoggingOut) {
     return (
       <Fragment>
-        {inactivity && (
-          <h2>
-            Logged Out Due To Inactivity
-            {/* {t('loggedOutInactivity')} */}
-          </h2>
-        )}
-        {!inactivity && (
-          <h2>
-            Logged Out Successfully
-            {/* {t('loggedOutSuccessfully')} */}
-          </h2>
-        )}
+        {inactivity && <h2>{t('authentication:loggedOutInactivity')}</h2>}
+        {!inactivity && <h2>{t('authentication:loggedOutSuccessfully')}</h2>}
         <Button
           buttonStyle="secondary"
           el="link"
@@ -43,12 +33,12 @@ export const LogoutClient: React.FC<{
             redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
           }`}
         >
-          Log Back In
-          {/* {t('logBackIn')} */}
+          {t('authentication:logBackIn')}
         </Button>
       </Fragment>
     )
   }
 
+  // TODO(i18n): needs translation in all languages
   return <Fragment>Logging Out...</Fragment>
 }

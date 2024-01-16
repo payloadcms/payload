@@ -19,17 +19,15 @@ const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
   locales,
   permissions,
   version,
+  i18n,
+  config,
 }) => {
-  // const { i18n } = useTranslation()
-
   return (
     <div className={baseClass}>
       {field.label && (
         <Label>
           {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {field.label}
-          // TODO(i18n)
-          {/* {getTranslation(field.label, i18n)} */}
+          {getTranslation(field.label, i18n)}
         </Label>
       )}
       <div
@@ -44,6 +42,9 @@ const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
           fields={field.fields}
           locales={locales}
           version={version}
+          i18n={i18n}
+          locale={locale}
+          config={config}
         />
       </div>
     </div>

@@ -181,15 +181,15 @@ const validateArrayLength: any = (
   if (!required && arrayLength === 0) return true
 
   if (minRows && arrayLength < minRows) {
-    return t('validation:requiresAtLeast', { count: minRows, label: t('rows') })
+    return t('validation:requiresAtLeast', { count: minRows, label: t('general:rows') })
   }
 
   if (maxRows && arrayLength > maxRows) {
-    return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') })
+    return t('validation:requiresNoMoreThan', { count: maxRows, label: t('general:rows') })
   }
 
   if (required && !arrayLength) {
-    return t('validation:requiresAtLeast', { count: 1, label: t('row') })
+    return t('validation:requiresAtLeast', { count: 1, label: t('general:row') })
   }
 
   return true
@@ -218,11 +218,11 @@ export const number: Validate<unknown, unknown, NumberField> = (
     const numberValue = parseFloat(number as unknown as string)
 
     if (typeof max === 'number' && numberValue > max) {
-      return t('validation:greaterThanMax', { label: t('value'), max, value })
+      return t('validation:greaterThanMax', { label: t('general:value'), max, value })
     }
 
     if (typeof min === 'number' && numberValue < min) {
-      return t('validation:lessThanMin', { label: t('value'), min, value })
+      return t('validation:lessThanMin', { label: t('general:value'), min, value })
     }
   }
 
@@ -382,11 +382,19 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
 
   if (Array.isArray(value) && value.length > 0) {
     if (minRows && value.length < minRows) {
-      return t('validation:lessThanMin', { label: t('rows'), min: minRows, value: value.length })
+      return t('validation:lessThanMin', {
+        label: t('general:rows'),
+        min: minRows,
+        value: value.length,
+      })
     }
 
     if (maxRows && value.length > maxRows) {
-      return t('validation:greaterThanMax', { label: t('rows'), max: maxRows, value: value.length })
+      return t('validation:greaterThanMax', {
+        label: t('general:rows'),
+        max: maxRows,
+        value: value.length,
+      })
     }
   }
 

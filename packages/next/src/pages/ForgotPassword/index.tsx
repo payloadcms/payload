@@ -5,8 +5,8 @@ import { SanitizedConfig } from 'payload/types'
 import Link from 'next/link'
 import { initPage } from '../../utilities/initPage'
 import { meta } from '../../utilities/meta'
-import i18n from 'i18next'
 import { Metadata } from 'next'
+import { getNextT } from '../../utilities/getNextT'
 
 const baseClass = 'forgot-password'
 
@@ -14,13 +14,18 @@ export const generateMetadata = async ({
   config,
 }: {
   config: Promise<SanitizedConfig>
-}): Promise<Metadata> =>
-  meta({
-    title: i18n.t('forgotPassword'),
-    description: i18n.t('forgotPassword'),
-    keywords: i18n.t('forgotPassword'),
+}): Promise<Metadata> => {
+  const t = getNextT({
+    config: await config,
+  })
+
+  return meta({
+    title: t('authentication:forgotPassword'),
+    description: t('authentication:forgotPassword'),
+    keywords: t('authentication:forgotPassword'),
     config,
   })
+}
 
 export const ForgotPassword: React.FC<{
   config: Promise<SanitizedConfig>
@@ -39,7 +44,7 @@ export const ForgotPassword: React.FC<{
   //       setHasSubmitted(true)
   //     },
   //     () => {
-  //       toast.error(t('emailNotValid'))
+  //       toast.error(i18n.t('authentication:emailNotValid'))
   //     },
   //   )
   // }
@@ -68,8 +73,8 @@ export const ForgotPassword: React.FC<{
   // if (hasSubmitted) {
   //   return (
   //     <MinimalTemplate className={baseClass}>
-  //       <h1>{t('emailSent')}</h1>
-  //       <p>{t('checkYourEmailForPasswordReset')}</p>
+  //       <h1>{i18n.t('authentication:emailSent')}</h1>
+  //       <p>{i18n.t('authentication:checkYourEmailForPasswordReset')}</p>
   //     </MinimalTemplate>
   //   )
   // }
@@ -81,30 +86,17 @@ export const ForgotPassword: React.FC<{
         // handleResponse={handleResponse}
         method="POST"
       >
-        <h1>
-          Forgot Password
-          {/* {t('forgotPassword')} */}
-        </h1>
-        <p>
-          Enter your email address and we will send you a link to reset your password.
-          {/* {t('forgotPasswordEmailInstructions')} */}
-        </p>
+        <h1>{i18n.t('authentication:forgotPassword')}</h1>
+        <p>{i18n.t('authentication:forgotPasswordEmailInstructions')}</p>
         <Email
           admin={{ autoComplete: 'email' }}
-          label="Email Address"
-          // label={t('general:emailAddress')}
+          label={i18n.t('general:emailAddress')}
           name="email"
           required
         />
-        <FormSubmit>
-          Submit
-          {/* {t('general:submit')} */}
-        </FormSubmit>
+        <FormSubmit>{i18n.t('general:submit')}</FormSubmit>
       </Form>
-      <Link href={`${admin}/login`}>
-        Back to Login
-        {/* {t('backToLogin')} */}
-      </Link>
+      <Link href={`${admin}/login`}>{i18n.t('authentication:backToLogin')}</Link>
     </MinimalTemplate>
   )
 }

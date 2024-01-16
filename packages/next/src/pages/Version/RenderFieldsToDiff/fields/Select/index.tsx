@@ -1,6 +1,4 @@
-import type { i18n as Ii18n } from 'i18next'
-
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation, I18n } from '@payloadcms/translations'
 import React from 'react'
 import { DiffMethod } from 'react-diff-viewer-continued'
 
@@ -34,31 +32,21 @@ const getOptionsToRender = (
 
 const getTranslatedOptions = (
   options: (OptionObject | string)[] | OptionObject | string,
-  i18n: Ii18n,
+  i18n: I18n,
 ): string => {
   if (Array.isArray(options)) {
-    return (
-      options
-        // TODO: fix this
-        // @ts-ignore-next-line
-        .map((option) => (typeof option === 'string' ? option : getTranslation(option.label, i18n)))
-        .join(', ')
-    )
+    return options
+      .map((option) => (typeof option === 'string' ? option : getTranslation(option.label, i18n)))
+      .join(', ')
   }
-  // TODO: fix this
-  // @ts-ignore-next-line
+
   return typeof options === 'string' ? options : getTranslation(options.label, i18n)
 }
 
-const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, version }) => {
+const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, version, i18n }) => {
   let placeholder = ''
-  // const { i18n, t } = useTranslation('general')
-  const t = (key: string) => key // TODO
-  const i18n = {
-    options: {},
-  } as Ii18n // TODO
 
-  if (version === comparison) placeholder = `[${t('noValue')}]`
+  if (version === comparison) placeholder = `[${i18n.t('general:noValue')}]`
 
   const comparisonToRender =
     typeof comparison !== 'undefined'
@@ -73,8 +61,6 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, versio
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {/* TODO: fix this
-        @ts-ignore-next-line */}
         {getTranslation(field.label, i18n)}
       </Label>
       <DiffViewer

@@ -6,12 +6,13 @@ import {
   PerPage,
   Table,
   SetDocumentStepNav as SetStepNav,
+  EditViewProps,
 } from '@payloadcms/ui'
 import { buildVersionColumns } from './columns'
 import './index.scss'
 
-import { EditViewProps } from '@payloadcms/ui'
 import { notFound } from 'next/navigation'
+import { getTranslation } from '@payloadcms/translations'
 
 const baseClass = 'versions'
 
@@ -58,7 +59,7 @@ export const VersionsView: React.FC<EditViewProps> = async (props) => {
     }
 
     docURL = `${serverURL}${api}/${slug}/${id}`
-    // entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
+    entityLabel = getTranslation(collectionConfig.labels.singular, i18n)
     editURL = `${admin}/collections/${collectionSlug}/${id}`
   }
 
@@ -85,7 +86,7 @@ export const VersionsView: React.FC<EditViewProps> = async (props) => {
     }
 
     docURL = `${serverURL}${api}/globals/${globalSlug}`
-    // entityLabel = getTranslation(globalConfig.label, i18n)
+    entityLabel = getTranslation(globalConfig.label, i18n)
     editURL = `${admin}/globals/${globalSlug}`
   }
 
@@ -108,24 +109,28 @@ export const VersionsView: React.FC<EditViewProps> = async (props) => {
         globalSlug={globalConfig?.slug}
         id={id}
         isEditing
-        view="Versions" // TODO; i18n
         pluralLabel={collectionConfig?.labels?.plural}
-        // view={t('versions')}
+        view={i18n.t('version:versions')}
       />
       {/* <LoadingOverlayToggle name="versions" show={isLoadingVersions} /> */}
       <main className={baseClass}>
         {/* <Meta description={metaDesc} title={metaTitle} /> */}
         <Gutter className={`${baseClass}__wrap`}>
           {versionCount === 0 && (
-            <div className={`${baseClass}__no-versions`}>{/* {t('noFurtherVersionsFound')} */}</div>
+            <div className={`${baseClass}__no-versions`}>
+              {i18n.t('version:noFurtherVersionsFound')}
+            </div>
           )}
           {versionCount > 0 && (
             <React.Fragment>
-              {/* <div className={`${baseClass}__version-count`}>
-                {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', {
-                  count: versionCount,
-                })}
-              </div> */}
+              <div className={`${baseClass}__version-count`}>
+                {i18n.t(
+                  versionCount === 1 ? 'version:versionCount_one' : 'version:versionCount_many',
+                  {
+                    count: versionCount,
+                  },
+                )}
+              </div>
               <Table
                 columns={buildVersionColumns({
                   config,
@@ -154,7 +159,7 @@ export const VersionsView: React.FC<EditViewProps> = async (props) => {
                       {versionsData.totalPages > 1 && versionsData.totalPages !== versionsData.page
                         ? versionsData.limit * versionsData.page
                         : versionsData.totalDocs}{' '}
-                      {/* {t('of')} {versionsData.totalDocs} */}
+                      {i18n.t('general:of')} {versionsData.totalDocs}
                     </div>
                     <PerPage
                       limit={limit ? Number(limit) : 10}
