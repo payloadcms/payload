@@ -1,7 +1,7 @@
 import type { FieldPermissions, User } from 'payload/auth'
 import type { Document, Field, FieldWithPath } from 'payload/types'
 import type { ReducedField } from './filterFields'
-import { Fields } from '../Form/types'
+import { FormState } from '../Form/types'
 import { FieldTypes } from 'payload/config'
 
 export type Props = {
@@ -10,7 +10,7 @@ export type Props = {
   forceRender?: boolean
   margins?: 'small' | false
   data?: Document
-  state: Fields
+  formState: FormState
   user: User
   permissions?:
     | {
@@ -20,7 +20,7 @@ export type Props = {
   readOnly?: boolean
 } & (
   | {
-      // Fields to be filtered by the component
+      // FormState to be filtered by the component
       fieldSchema: FieldWithPath[]
       filter?: (field: Field) => boolean
       indexPath?: string

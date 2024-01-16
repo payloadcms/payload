@@ -1,8 +1,8 @@
 import { unflatten } from 'flatley'
 
-import type { Fields } from './types'
+import type { FormState } from './types'
 
-const getDataByPath = <T = unknown>(fields: Fields, path: string): T => {
+const getDataByPath = <T = unknown>(fields: FormState, path: string): T => {
   const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1)
   const name = path.split('.').pop()
 

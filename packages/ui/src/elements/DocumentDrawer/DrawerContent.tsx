@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
 import type { CollectionPermission } from 'payload/auth'
-import type { Fields } from '../../forms/Form/types'
+import type { FormState } from '../../forms/Form/types'
 import type { DocumentDrawerProps } from './types'
 
 import { baseClass } from '.'
@@ -44,7 +44,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { closeModal, modalState, toggleModal } = useModal()
   const { code: locale } = useLocale()
   const { user } = useAuth()
-  const [internalState, setInternalState] = useState<Fields>()
+  const [internalState, setInternalState] = useState<FormState>()
   const { i18n, t } = useTranslation()
   const hasInitializedState = useRef(false)
   const [isOpen, setIsOpen] = useState(false)

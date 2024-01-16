@@ -5,7 +5,7 @@ import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
 import type { NonPresentationalField, Data, SanitizedConfig } from 'payload/types'
-import type { Fields, FormField } from '../types'
+import type { FormState, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'
@@ -24,7 +24,7 @@ type Args = {
   preferences: {
     [key: string]: unknown
   }
-  state: Fields
+  state: FormState
   t: TFunction
   user: User
 }

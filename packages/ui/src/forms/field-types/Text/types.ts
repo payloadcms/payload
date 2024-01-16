@@ -1,14 +1,9 @@
 import type { TextField } from 'payload/types'
-
-export type FormFieldBase = {
-  path?: string
-  value?: string
-  valid?: boolean
-  errorMessage?: string
-}
+import type { FormFieldBase } from '../shared'
 
 export type Props = FormFieldBase &
   Omit<TextField, 'type'> & {
     inputRef?: React.MutableRefObject<HTMLInputElement>
     onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+    value: string
   }

@@ -6,8 +6,9 @@ import type { Field, TabAsField } from 'payload/types'
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAllFormFields, useFormSubmitted } from '../Form/context'
+import type { FormState } from '../Form/types'
 
-const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] => {
+export const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] => {
   const pathNames = fieldSchema.reduce((acc, subField) => {
     if (fieldHasSubFields(subField) && fieldAffectsData(subField)) {
       // group, block, array
@@ -35,6 +36,47 @@ const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] =
   return pathNames
 }
 
+export const mapFieldsAndReturnErrorCount = ({
+  formState,
+  pathSegments,
+}: {
+  formState: FormState
+  pathSegments: string[]
+}): number => {
+  let errorCount = 0
+
+  Object.entries(formState).forEach(([key]) => {
+    const matchingSegment = pathSegments.some((segment) => {
+      if (segment.endsWith('.')) {
+        return key.startsWith(segment)
+      }
+      return key === segment
+    })
+
+    if (matchingSegment) {
+      const fieldState = formState[key]
+      if ('valid' in fieldState && !fieldState.valid) {
+        errorCount += 1
+      }
+    }
+  })
+
+  return errorCount
+}
+
+export const checkStateForErrors = ({
+  formState,
+  fieldSchema,
+  path,
+}: {
+  formState: FormState
+  fieldSchema: Field[]
+  path: string
+}): number => {
+  const pathSegments = buildPathSegments(path, fieldSchema)
+  return mapFieldsAndReturnErrorCount({ formState, pathSegments })
+}
+
 type TrackSubSchemaErrorCountProps = {
   /**
    * Only for collapsibles, and unnamed-tabs
@@ -43,12 +85,13 @@ type TrackSubSchemaErrorCountProps = {
   path: string
   setErrorCount: (count: number) => void
 }
+
 export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
   fieldSchema,
   path,
   setErrorCount,
 }) => {
-  const [fields] = useAllFormFields()
+  const [formState] = useAllFormFields()
   const hasSubmitted = useFormSubmitted()
   const [pathSegments] = React.useState(() => {
     if (fieldSchema) {
@@ -60,28 +103,13 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
 
   useThrottledEffect(
     () => {
-      let errorCount = 0
       if (hasSubmitted) {
-        Object.entries(fields).forEach(([key]) => {
-          const matchingSegment = pathSegments.some((segment) => {
-            if (segment.endsWith('.')) {
-              return key.startsWith(segment)
-            }
-            return key === segment
-          })
-
-          if (matchingSegment) {
-            if ('valid' in fields[key] && !fields[key].valid) {
-              errorCount += 1
-            }
-          }
-        })
+        const errorCount = mapFieldsAndReturnErrorCount({ formState, pathSegments })
+        setErrorCount(errorCount)
       }
-
-      setErrorCount(errorCount)
     },
     250,
-    [fields, hasSubmitted, pathSegments],
+    [formState, hasSubmitted, pathSegments],
   )
 
   return null

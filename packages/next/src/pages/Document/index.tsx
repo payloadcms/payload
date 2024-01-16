@@ -149,7 +149,7 @@ export const Document = async ({
     },
   })
 
-  const state = await buildStateFromSchema({
+  const formState = await buildStateFromSchema({
     id,
     config,
     data: data || {},
@@ -179,7 +179,7 @@ export const Document = async ({
     data,
     fieldTypes,
     hasSavePermission,
-    state,
+    formState,
     isEditing,
     permissions,
     docPermissions,

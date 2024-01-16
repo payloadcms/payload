@@ -2,7 +2,7 @@ import type { TFunction } from '@payloadcms/translations'
 
 import type { User } from 'payload/auth'
 import type { Field as FieldSchema, SanitizedConfig, Data } from 'payload/types'
-import type { Fields } from '../types'
+import type { FormState } from '../types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { addFieldStatePromise } from './addFieldStatePromise'
 
@@ -19,7 +19,7 @@ type Args = {
   preferences: {
     [key: string]: unknown
   }
-  state: Fields
+  state: FormState
   t: TFunction
   user: User
 }

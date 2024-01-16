@@ -1,11 +1,11 @@
 import { unflatten } from 'flatley'
 
-import type { Fields } from './types'
+import type { FormState } from './types'
 import type { Data } from 'payload/types'
 
 import reduceFieldsToValues from './reduceFieldsToValues'
 
-const getSiblingData = (fields: Fields, path: string): Data => {
+const getSiblingData = (fields: FormState, path: string): Data => {
   if (path.indexOf('.') === -1) {
     return reduceFieldsToValues(fields, true)
   }

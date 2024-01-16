@@ -9,7 +9,7 @@ import { filterFields } from '../../forms/RenderFields/filterFields'
 import { Gutter } from '../Gutter'
 import './index.scss'
 import { Document, FieldWithPath } from 'payload/types'
-import { Fields } from '../../forms/Form/types'
+import { FormState } from '../../forms/Form/types'
 
 const baseClass = 'document-fields'
 
@@ -23,7 +23,7 @@ export const DocumentFields: React.FC<{
   hasSavePermission: boolean
   permissions: CollectionPermission | GlobalPermission
   data: Document
-  state: Fields
+  formState: FormState
   user: User
 }> = (props) => {
   const {
@@ -36,7 +36,7 @@ export const DocumentFields: React.FC<{
     hasSavePermission,
     permissions,
     data,
-    state,
+    formState,
     user,
   } = props
 
@@ -86,7 +86,7 @@ export const DocumentFields: React.FC<{
               // permissions={permissions.fields}
               readOnly={!hasSavePermission}
               data={data}
-              state={state}
+              formState={formState}
               user={user}
             />
             {AfterFields || null}
@@ -102,7 +102,7 @@ export const DocumentFields: React.FC<{
                   // permissions={permissions.fields}
                   readOnly={!hasSavePermission}
                   data={data}
-                  state={state}
+                  formState={formState}
                   user={user}
                 />
               </div>

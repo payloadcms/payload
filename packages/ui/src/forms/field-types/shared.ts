@@ -1,6 +1,15 @@
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
+import { FormState } from '../Form/types'
+import { User } from 'payload/auth'
 
 export const fieldBaseClass = 'field-type'
+export type FormFieldBase = {
+  formState: FormState
+  path?: string
+  valid?: boolean
+  errorMessage?: string
+  user: User
+}
 
 /**
  * Determines whether a field should be displayed as right-to-left (RTL) based on its configuration, payload's localization configuration and the adming user's currently enabled locale.
