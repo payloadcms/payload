@@ -1,6 +1,6 @@
 import { useModal } from '@faceless-ui/modal'
 import React, { useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../../providers/Translation'
 import ReactCrop, { type Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
@@ -34,7 +34,7 @@ export const EditUpload: React.FC<{
   showFocalPoint?: boolean
 }> = ({ fileName, fileSrc, imageCacheTag, showCrop, showFocalPoint }) => {
   const { closeModal } = useModal()
-  const { t } = useTranslation(['general', 'upload'])
+  const { t } = useTranslation()
   const { formQueryParams, setFormQueryParams } = useFormQueryParams()
   const { uploadEdits } = formQueryParams || {}
   const [crop, setCrop] = useState<CropType>({
@@ -117,7 +117,7 @@ export const EditUpload: React.FC<{
         </h2>
         <div className={`${baseClass}__actions`}>
           <Button
-            aria-label={t('cancel')}
+            aria-label={t('general:cancel')}
             buttonStyle="secondary"
             className={`${baseClass}__cancel`}
             onClick={() => closeModal(editDrawerSlug)}

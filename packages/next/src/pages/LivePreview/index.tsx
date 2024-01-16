@@ -1,6 +1,6 @@
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@payloadcms/ui'
 
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 import type { LivePreviewConfig } from '../../../../exports/config'
@@ -31,7 +31,7 @@ const PreviewView: React.FC<
     fieldTypes: FieldTypes
   }
 > = (props) => {
-  const { i18n, t } = useTranslation('general')
+  const { i18n, t } = useTranslation()
   const { previewWindowType } = useLivePreviewContext()
 
   const { apiURL, data, fieldTypes, permissions } = props
@@ -69,9 +69,9 @@ const PreviewView: React.FC<
     <Fragment>
       {collection && (
         <Meta
-          description={t('editing')}
+          description={t('general:editing')}
           keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-          title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+          title={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
             collection.labels.singular,
             i18n,
           )}`}
@@ -92,7 +92,7 @@ const PreviewView: React.FC<
         global={global}
         id={id}
         isEditing={isEditing}
-        view={t('livePreview')}
+        view={t('general:livePreview')}
       />
       <DocumentControls
         apiURL={apiURL}

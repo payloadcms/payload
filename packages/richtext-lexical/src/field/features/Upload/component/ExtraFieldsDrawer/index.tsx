@@ -14,12 +14,12 @@ import {
   useConfig,
   useDocumentInfo,
   useLocale,
+  useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
 import { sanitizeFields } from 'payload/config'
 import { deepCopyObject } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { ElementProps } from '..'
 import type { UploadFeatureProps } from '../..'
@@ -122,8 +122,6 @@ export const ExtraFieldsUploadDrawer: React.FC<
     <Drawer
       slug={drawerSlug}
       title={t('general:editLabel', {
-        // TODO: fix this
-        // @ts-ignore-next-line
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
     >

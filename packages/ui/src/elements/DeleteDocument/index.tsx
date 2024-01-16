@@ -16,6 +16,7 @@ import { Button } from '../Button'
 import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 import { useRouter } from 'next/navigation'
+import { Translation } from '../Translation'
 
 const baseClass = 'delete-document'
 
@@ -112,18 +113,17 @@ const DeleteDocument: React.FC<Props> = (props) => {
           <MinimalTemplate className={`${baseClass}__template`}>
             <h1>{t('general:confirmDeletion')}</h1>
             <p>
-              {t('general:aboutToDelete', {
-                label: getTranslation(singularLabel, i18n),
-                title: titleToRender,
-              })}
-              {/* <Trans
-                i18nKey="aboutToDelete"
+              <Translation
                 t={t}
-                values={{ label: getTranslation(singularLabel, i18n), title: titleToRender }}
-              >
-                aboutToDelete
-                <strong>{titleToRender}</strong>
-              </Trans> */}
+                i18nKey="general:aboutToDelete"
+                variables={{
+                  label: getTranslation(singularLabel, i18n),
+                  title: titleToRender,
+                }}
+                elements={{
+                  '1': ({ children }) => <strong children={children} />,
+                }}
+              />
             </p>
             <div className={`${baseClass}__actions`}>
               <Button

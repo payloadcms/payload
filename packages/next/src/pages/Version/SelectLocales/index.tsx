@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '@payloadcms/ui'
 
 import type { Props } from './types'
 
@@ -9,7 +9,7 @@ import './index.scss'
 const baseClass = 'select-version-locales'
 
 const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
-  const { t } = useTranslation('version')
+  const { t } = useTranslation()
   const { code } = useLocale()
 
   const format = (items) => {
@@ -26,12 +26,12 @@ const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__label`}>{t('showLocales')}</div>
+      <div className={`${baseClass}__label`}>{t('version:showLocales')}</div>
       <ReactSelect
         isMulti
         onChange={onChange}
         options={format(options)}
-        placeholder={t('selectLocales')}
+        placeholder={t('version:selectLocales')}
         value={format(value)}
       />
     </div>

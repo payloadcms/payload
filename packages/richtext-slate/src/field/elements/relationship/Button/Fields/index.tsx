@@ -1,11 +1,14 @@
 'use client'
 
-import { RelationshipComponent } from 'payload/components/fields/Relationship'
-import { SelectComponent } from 'payload/components/fields/Select'
-import { useFormFields } from 'payload/components/forms'
-import { useAuth, useConfig } from 'payload/components/utilities'
+import {
+  RelationshipComponent,
+  SelectComponent,
+  useAuth,
+  useConfig,
+  useFormFields,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { Fragment, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 const createOptions = (collections, permissions) =>
   collections.reduce((options, collection) => {
@@ -28,7 +31,7 @@ const createOptions = (collections, permissions) =>
 const RelationshipFields = () => {
   const { collections } = useConfig()
   const { permissions } = useAuth()
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
 
   const [options, setOptions] = useState(() => createOptions(collections, permissions))
   const relationTo = useFormFields<string>(([fields]) => fields.relationTo?.value as string)
@@ -39,10 +42,15 @@ const RelationshipFields = () => {
 
   return (
     <Fragment>
-      <SelectComponent label={t('relationTo')} name="relationTo" options={options} required />
+      <SelectComponent
+        label={t('fields:relationTo')}
+        name="relationTo"
+        options={options}
+        required
+      />
       {relationTo && (
         <RelationshipComponent
-          label={t('relatedDocument')}
+          label={t('fields:relatedDocument')}
           name="value"
           relationTo={relationTo}
           required

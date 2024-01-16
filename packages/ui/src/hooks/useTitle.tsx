@@ -3,7 +3,7 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/t
 
 import { useFormFields } from '../forms/Form/context'
 import { formatDocTitle } from '../utilities/formatDocTitle'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from '../providers/Translation'
 import { getTranslation } from '@payloadcms/translations'
 
 const useTitle = (args: {

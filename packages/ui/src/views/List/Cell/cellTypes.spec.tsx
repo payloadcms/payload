@@ -13,7 +13,7 @@ jest.mock('../../../../utilities/Config', () => ({
   useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
 }))
 
-jest.mock('react-i18next', () => ({
+jest.mock('../../../../providers/Translation', () => ({
   useTranslation: () => ({ t: (string) => string }),
 }))
 

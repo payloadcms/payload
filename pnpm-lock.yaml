@@ -1245,9 +1245,6 @@ importers:
       deep-equal:
         specifier: 2.2.3
         version: 2.2.3
-      i18next:
-        specifier: 22.5.1
-        version: 22.5.1
       lexical:
         specifier: 0.12.5
         version: 0.12.5
@@ -1263,9 +1260,6 @@ importers:
       react-error-boundary:
         specifier: ^4.0.11
         version: 4.0.11(react@18.2.0)
-      react-i18next:
-        specifier: 11.18.6
-        version: 11.18.6(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0)
       ts-essentials:
         specifier: 7.0.3
         version: 7.0.3(typescript@5.2.2)
@@ -1288,18 +1282,18 @@ importers:
       '@faceless-ui/modal':
         specifier: 2.0.1
         version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
-      i18next:
-        specifier: 22.5.1
-        version: 22.5.1
+      '@payloadcms/translations':
+        specifier: workspace:^
+        version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:^
+        version: link:../ui
       is-hotkey:
         specifier: 0.2.0
         version: 0.2.0
       react:
         specifier: 18.2.0
         version: 18.2.0
-      react-i18next:
-        specifier: 11.18.6
-        version: 11.18.6(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0)
       slate:
         specifier: 0.91.4
         version: 0.91.4

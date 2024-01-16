@@ -1,8 +1,7 @@
 'use client'
 
-import { useListDrawer } from 'payload/components/elements'
+import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ReactEditor, useSlate } from 'slate-react'
 
 import RelationshipIcon from '../../../icons/Relationship'
@@ -33,7 +32,7 @@ type Props = {
   path: string
 }
 const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
-  const { t } = useTranslation('fields')
+  const { t } = useTranslation()
   const editor = useSlate()
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(
     () => enabledCollectionSlugs[0],
@@ -72,7 +71,7 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
           onClick={() => {
             // do nothing
           }}
-          tooltip={t('addRelationship')}
+          tooltip={t('fields:addRelationship')}
         >
           <RelationshipIcon />
         </ElementButton>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Button, Form, FormSubmit, Email, MinimalTemplate } from '@payloadcms/ui'
+import { Button, Form, FormSubmit, Email, MinimalTemplate, Translation } from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 import Link from 'next/link'
 import { initPage } from '../../utilities/initPage'
@@ -25,7 +25,7 @@ export const generateMetadata = async ({
 export const ForgotPassword: React.FC<{
   config: Promise<SanitizedConfig>
 }> = async ({ config: configPromise }) => {
-  const { config, user } = await initPage({ configPromise })
+  const { config, user, i18n } = await initPage({ configPromise })
 
   const {
     admin: { user: userSlug },
@@ -47,19 +47,19 @@ export const ForgotPassword: React.FC<{
   if (user) {
     return (
       <MinimalTemplate className={baseClass}>
-        <h1>
-          {/* {t('alreadyLoggedIn')} */}
-          Already Logged In
-        </h1>
+        <h1>{i18n.t('authentication:alreadyLoggedIn')}</h1>
         <p>
-          {/* <Trans i18nKey="loggedInChangePassword" t={t}> */}
-          <Link href={`${admin}/account`}>account</Link>
-          {/* </Trans> */}
+          <Translation
+            t={i18n.t}
+            i18nKey="authentication:loggedInChangePassword"
+            elements={{
+              '0': ({ children }) => <Link href={`${admin}/account`} children={children} />,
+            }}
+          />
         </p>
         <br />
         <Button buttonStyle="secondary" el="link" to={admin}>
-          Back to Dashboard
-          {/* {t('general:backToDashboard')} */}
+          {i18n.t('general:backToDashboard')}
         </Button>
       </MinimalTemplate>
     )
