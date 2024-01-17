@@ -1,5 +1,5 @@
 import { I18n, getTranslation } from '@payloadcms/translations'
-import { Tab, tabHasName } from 'payload/types'
+import { Field, Tab } from 'payload/types'
 import React from 'react'
 import { ErrorPill } from '../../../../elements/ErrorPill'
 import { getNestedFieldState } from '../../../WatchChildErrors/getNestedFieldState'
@@ -13,14 +13,15 @@ type TabProps = {
   tab: Tab
   i18n: I18n
   formState: FormState
+  fieldSchema: Field[]
 }
 
 const baseClass = 'tabs-field__tab-button'
 
 export const TabComponent: React.FC<TabProps> = (props) => {
-  const { isActive, parentPath, setIsActive, tab, i18n, formState } = props
+  const { isActive, parentPath, setIsActive, tab, i18n, formState, fieldSchema } = props
 
-  const isNamedTab = tabHasName(tab)
+  const isNamedTab = 'name' in tab
 
   const pathSegments = []
 
@@ -29,17 +30,13 @@ export const TabComponent: React.FC<TabProps> = (props) => {
 
   const path = pathSegments.join('.')
 
-  let errorCount = 0
+  const nestedFieldState = getNestedFieldState({
+    formState,
+    path,
+    fieldSchema,
+  })
 
-  if (isNamedTab) {
-    const nestedFieldState = getNestedFieldState({
-      formState,
-      path,
-      fieldSchema: tab.fields,
-    })
-
-    errorCount = nestedFieldState.errorCount
-  }
+  const errorCount = nestedFieldState.errorCount || 0
 
   const tabHasErrors = errorCount > 0
 

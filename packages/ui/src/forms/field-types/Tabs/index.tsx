@@ -2,7 +2,6 @@ import React from 'react'
 
 import type { Props } from './types'
 
-import { tabHasName } from 'payload/types'
 import FieldDescription from '../../FieldDescription'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
@@ -12,8 +11,23 @@ import { TabComponent } from './Tab'
 import { Wrapper } from './Wrapper'
 import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
+import { Tab } from 'payload/types'
 
 const baseClass = 'tabs-field'
+
+const getTabFieldSchema = ({ tabConfig, path }: { tabConfig: Tab; path }) => {
+  return tabConfig.fields.map((field) => {
+    const pathSegments = []
+
+    if (path) pathSegments.push(path)
+    if ('name' in tabConfig) pathSegments.push(tabConfig.name)
+
+    return {
+      ...field,
+      path: createNestedFieldPath(pathSegments.join('.'), field),
+    }
+  })
+}
 
 const TabsField: React.FC<Props> = async (props) => {
   const {
@@ -36,6 +50,8 @@ const TabsField: React.FC<Props> = async (props) => {
   const activeTabIndex = docPreferences?.fields?.[path || tabsPrefKey]?.tabIndex || 0
 
   const activeTabConfig = tabs[activeTabIndex]
+
+  const isNamedTab = activeTabConfig && 'name' in activeTabConfig
 
   // TODO: make this a server action
   // const handleTabChange = useCallback(
@@ -75,7 +91,7 @@ const TabsField: React.FC<Props> = async (props) => {
       <TabsProvider>
         <div className={`${baseClass}__tabs-wrap`}>
           <div className={`${baseClass}__tabs`}>
-            {tabs.map((tab, tabIndex) => {
+            {tabs.map((tabConfig, tabIndex) => {
               return (
                 <TabComponent
                   isActive={activeTabIndex === tabIndex}
@@ -83,9 +99,10 @@ const TabsField: React.FC<Props> = async (props) => {
                   parentPath={path}
                   setIsActive={undefined}
                   // setIsActive={() => handleTabChange(tabIndex)}
-                  tab={tab}
+                  tab={tabConfig}
                   i18n={i18n}
                   formState={formState}
+                  fieldSchema={getTabFieldSchema({ tabConfig, path })}
                 />
               )
             })}
@@ -112,17 +129,7 @@ const TabsField: React.FC<Props> = async (props) => {
                   path={path}
                 />
                 <RenderFields
-                  fieldSchema={activeTabConfig.fields.map((field) => {
-                    const pathSegments = []
-
-                    if (path) pathSegments.push(path)
-                    if (tabHasName(activeTabConfig)) pathSegments.push(activeTabConfig.name)
-
-                    return {
-                      ...field,
-                      path: createNestedFieldPath(pathSegments.join('.'), field),
-                    }
-                  })}
+                  fieldSchema={getTabFieldSchema({ tabConfig: activeTabConfig, path })}
                   fieldTypes={fieldTypes}
                   forceRender={forceRender}
                   indexPath={indexPath}
@@ -133,7 +140,7 @@ const TabsField: React.FC<Props> = async (props) => {
                   }
                   margins="small"
                   permissions={
-                    tabHasName(activeTabConfig) && permissions?.[activeTabConfig.name]
+                    isNamedTab && permissions?.[activeTabConfig.name]
                       ? permissions[activeTabConfig.name].fields
                       : permissions
                   }
