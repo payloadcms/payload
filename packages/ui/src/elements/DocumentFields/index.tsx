@@ -1,7 +1,7 @@
 import React from 'react'
 
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { Description } from 'payload/types'
+import type { Description, DocumentPreferences, Payload } from 'payload/types'
 import type { FieldTypes } from 'payload/config'
 
 import RenderFields from '../../forms/RenderFields'
@@ -10,6 +10,7 @@ import { Gutter } from '../Gutter'
 import './index.scss'
 import { Document, FieldWithPath } from 'payload/types'
 import { FormState } from '../../forms/Form/types'
+import { I18n } from '@payloadcms/translations'
 
 const baseClass = 'document-fields'
 
@@ -21,10 +22,13 @@ export const DocumentFields: React.FC<{
   fields: FieldWithPath[]
   forceSidebarWrap?: boolean
   hasSavePermission: boolean
-  permissions: CollectionPermission | GlobalPermission
+  docPermissions: CollectionPermission | GlobalPermission
+  docPreferences: DocumentPreferences
   data: Document
   formState: FormState
   user: User
+  i18n: I18n
+  payload: Payload
 }> = (props) => {
   const {
     AfterFields,
@@ -34,17 +38,20 @@ export const DocumentFields: React.FC<{
     fields,
     forceSidebarWrap,
     hasSavePermission,
-    permissions,
+    docPermissions,
+    docPreferences,
     data,
     formState,
     user,
+    i18n,
+    payload,
   } = props
 
   const mainFields = filterFields({
     fieldSchema: fields,
     fieldTypes,
     filter: (field) => !field?.admin?.position || field?.admin?.position !== 'sidebar',
-    permissions: permissions.fields,
+    permissions: docPermissions.fields,
     readOnly: !hasSavePermission,
   })
 
@@ -52,7 +59,7 @@ export const DocumentFields: React.FC<{
     fieldSchema: fields,
     fieldTypes,
     filter: (field) => field?.admin?.position === 'sidebar',
-    permissions: permissions.fields,
+    permissions: docPermissions.fields,
     readOnly: !hasSavePermission,
   })
 
@@ -88,6 +95,9 @@ export const DocumentFields: React.FC<{
               data={data}
               formState={formState}
               user={user}
+              i18n={i18n}
+              payload={payload}
+              docPreferences={docPreferences}
             />
             {AfterFields || null}
           </Gutter>
@@ -104,6 +114,8 @@ export const DocumentFields: React.FC<{
                   data={data}
                   formState={formState}
                   user={user}
+                  i18n={i18n}
+                  payload={payload}
                 />
               </div>
             </div>

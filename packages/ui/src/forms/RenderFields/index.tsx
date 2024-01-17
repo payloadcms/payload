@@ -12,7 +12,18 @@ import { getTranslation } from '@payloadcms/translations'
 const baseClass = 'render-fields'
 
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender, margins, data, user, formState, i18n } = props
+  const {
+    className,
+    fieldTypes,
+    forceRender,
+    margins,
+    data,
+    user,
+    formState,
+    i18n,
+    payload,
+    docPreferences,
+  } = props
 
   if (!i18n) {
     console.error('Need to implement i18n when calling RenderFields')
@@ -84,6 +95,9 @@ const RenderFields: React.FC<Props> = (props) => {
             formState,
             valid: fieldState?.valid,
             errorMessage: fieldState?.errorMessage,
+            i18n,
+            payload,
+            docPreferences,
           }
 
           if (field) {

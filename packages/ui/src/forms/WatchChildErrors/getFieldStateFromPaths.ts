@@ -14,7 +14,7 @@ export const getFieldStateFromPaths = ({
   let errorCount = 0
 
   Object.entries(formState).forEach(([key]) => {
-    const matchingSegment = pathSegments.some((segment) => {
+    const matchingSegment = pathSegments?.some((segment) => {
       if (segment.endsWith('.')) {
         return key.startsWith(segment)
       }
