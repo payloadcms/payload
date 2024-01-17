@@ -105,5 +105,26 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'rowText1',
+          label: 'Row Text',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'rowText2',
+          label: 'Row Text',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
 }
