@@ -85,12 +85,6 @@
     font-size: base(0.65);
     letter-spacing: 3px;
   }
-
-  &.loading-overlay--script {
-    & > * {
-      letter-spacing: 0;
-    }
-  }
 }
 
 @keyframes animate-bar--even {

@@ -23,18 +23,13 @@ export const LoadingOverlay: React.FC<Props> = ({
   overlayType,
   show = true,
 }) => {
-  const { i18n, t } = useTranslation('general')
-  const currentLanguage = i18n?.language
-  const scriptLanguages = ['ar', 'fa']
-  const isScriptLanguage = currentLanguage && scriptLanguages.includes(currentLanguage)
-
+  const { t } = useTranslation('general')
   return (
     <div
       className={[
         baseClass,
         show ? `${baseClass}--entering` : `${baseClass}--exiting`,
         overlayType ? `${baseClass}--${overlayType}` : '',
-        isScriptLanguage ? `${baseClass}--script` : '',
       ]
         .filter(Boolean)
         .join(' ')}
