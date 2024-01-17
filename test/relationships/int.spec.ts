@@ -22,6 +22,7 @@ import config, {
   defaultAccessRelSlug,
   relationSlug,
   slug,
+  treeSlug,
 } from './config'
 
 let apiUrl
@@ -552,6 +553,64 @@ describe('Relationships', () => {
         })
 
         expect(stanleyNeverMadeMovies.movies).toHaveLength(0)
+      })
+    })
+
+    describe('Hierarchy', () => {
+      it('finds 1 root item with equals', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { equals: null },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('root')
+      })
+
+      it('finds 1 root item with exists', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { exists: false },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('root')
+      })
+
+      it('finds 1 sub item with equals', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { not_equals: null },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('sub')
+      })
+
+      it('finds 1 sub item with exists', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { exists: true },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('sub')
       })
     })
   })

@@ -77,6 +77,7 @@ export const sanitizeQueryValue = ({
     // Object equality requires the value to be the first key in the object that is being queried.
     if (
       operator === 'equals' &&
+      formattedValue &&
       typeof formattedValue === 'object' &&
       formattedValue.value &&
       formattedValue.relationTo
