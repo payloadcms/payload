@@ -84,8 +84,8 @@ const TabsField: React.FC<Props> = async (props) => {
                   setIsActive={undefined}
                   // setIsActive={() => handleTabChange(tabIndex)}
                   tab={tab}
-                  baseClass={baseClass}
                   i18n={i18n}
+                  formState={formState}
                 />
               )
             })}

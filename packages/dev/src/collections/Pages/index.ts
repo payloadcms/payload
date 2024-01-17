@@ -88,6 +88,7 @@ export const Pages: CollectionConfig = {
               name: 'tab1Text',
               label: 'Tab 1 Text',
               type: 'text',
+              required: true,
             },
           ],
         },

@@ -1,5 +1,4 @@
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
 
 import type { Props } from './types'
 
@@ -8,9 +7,8 @@ import './index.scss'
 const baseClass = 'error-pill'
 
 export const ErrorPill: React.FC<Props> = (props) => {
-  const { className, count, withMessage } = props
+  const { className, count, withMessage, i18n } = props
   const lessThan3Chars = !withMessage && count < 99
-  const { t } = useTranslation()
 
   const classes = [baseClass, lessThan3Chars && `${baseClass}--fixed-width`, className && className]
     .filter(Boolean)
@@ -22,7 +20,7 @@ export const ErrorPill: React.FC<Props> = (props) => {
     <div className={classes}>
       <div className={`${baseClass}__content`}>
         <span className={`${baseClass}__count`}>{count}</span>
-        {withMessage && ` ${count > 1 ? t('general:errors') : t('general:error')}`}
+        {withMessage && ` ${count > 1 ? i18n.t('general:errors') : i18n.t('general:error')}`}
       </div>
     </div>
   )
