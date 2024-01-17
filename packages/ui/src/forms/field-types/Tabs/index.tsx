@@ -10,10 +10,12 @@ import './index.scss'
 import { TabsProvider } from './provider'
 import { TabComponent } from './Tab'
 import { Wrapper } from './Wrapper'
+import { getTranslation } from '@payloadcms/translations'
+import { toKebabCase } from 'payload/utilities'
 
 const baseClass = 'tabs-field'
 
-const TabsField: React.FC<Props> = (props) => {
+const TabsField: React.FC<Props> = async (props) => {
   const {
     admin: { className, readOnly },
     fieldTypes,
@@ -24,21 +26,18 @@ const TabsField: React.FC<Props> = (props) => {
     tabs,
     formState,
     user,
+    i18n,
+    payload,
+    docPreferences,
   } = props
 
   const tabsPrefKey = `tabs-${indexPath}`
 
-  // useEffect(() => {
-  //   const getInitialPref = async () => {
-  //     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
-  //     const initialIndex = path
-  //       ? existingPreferences?.fields?.[path]?.tabIndex
-  //       : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
-  //     setActiveTabIndex(initialIndex || 0)
-  //   }
-  //   void getInitialPref()
-  // }, [path, indexPath, getPreference, preferencesKey, tabsPrefKey])
+  const activeTabIndex = docPreferences?.fields?.[path || tabsPrefKey]?.tabIndex || 0
 
+  const activeTabConfig = tabs[activeTabIndex]
+
+  // TODO: make this a server action
   // const handleTabChange = useCallback(
   //   async (incomingTabIndex: number) => {
   //     setActiveTabIndex(incomingTabIndex)
@@ -71,11 +70,6 @@ const TabsField: React.FC<Props> = (props) => {
   //   [preferencesKey, getPreference, setPreference, path, tabsPrefKey],
   // )
 
-  // TODO: wire this in
-  const activeTabIndex = 0
-
-  const activeTabConfig = tabs[activeTabIndex]
-
   return (
     <Wrapper className={className}>
       <TabsProvider>
@@ -90,6 +84,8 @@ const TabsField: React.FC<Props> = (props) => {
                   setIsActive={undefined}
                   // setIsActive={() => handleTabChange(tabIndex)}
                   tab={tab}
+                  baseClass={baseClass}
+                  i18n={i18n}
                 />
               )
             })}
@@ -101,10 +97,10 @@ const TabsField: React.FC<Props> = (props) => {
               <div
                 className={[
                   `${baseClass}__tab`,
-                  // activeTabConfig.label &&
-                  //   `${baseClass}__tabConfigLabel-${toKebabCase(
-                  //     getTranslation(activeTabConfig.label, i18n),
-                  //   )}`,
+                  activeTabConfig.label &&
+                    `${baseClass}__tabConfigLabel-${toKebabCase(
+                      getTranslation(activeTabConfig.label, i18n),
+                    )}`,
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -132,7 +128,7 @@ const TabsField: React.FC<Props> = (props) => {
                   indexPath={indexPath}
                   key={
                     activeTabConfig.label
-                      ? activeTabConfig.label // ? getTranslation(activeTabConfig.label, i18n)
+                      ? getTranslation(activeTabConfig.label, i18n)
                       : activeTabConfig['name']
                   }
                   margins="small"
@@ -144,6 +140,8 @@ const TabsField: React.FC<Props> = (props) => {
                   readOnly={readOnly}
                   user={user}
                   formState={formState}
+                  i18n={i18n}
+                  payload={payload}
                 />
               </div>
             </React.Fragment>

@@ -1,4 +1,9 @@
-import type { Document as DocumentType, Field, SanitizedConfig } from 'payload/types'
+import type {
+  DocumentPreferences,
+  Document as DocumentType,
+  Field,
+  SanitizedConfig,
+} from 'payload/types'
 import React, { Fragment } from 'react'
 import { initPage } from '../../utilities/initPage'
 import {
@@ -134,20 +139,16 @@ export const Document = async ({
     preferencesKey = `global-${globalSlug}`
   }
 
-  const {
-    docs: [preferences],
-  } = await payload.find({
+  const { docs: [{ value: docPreferences }] = [{}] } = (await payload.find({
     collection: 'payload-preferences',
     depth: 0,
-    pagination: false,
-    user,
-    limit: 1,
     where: {
       key: {
         equals: preferencesKey,
       },
     },
-  })
+    limit: 1,
+  })) as any as { docs: { value: DocumentPreferences }[] }
 
   const formState = await buildStateFromSchema({
     id,
@@ -156,7 +157,7 @@ export const Document = async ({
     fieldSchema: formatFields(fields, isEditing),
     locale: locale.code,
     operation: isEditing ? 'update' : 'create',
-    preferences,
+    preferences: docPreferences,
     t: i18n.t,
     user,
   })
@@ -183,6 +184,7 @@ export const Document = async ({
     isEditing,
     permissions,
     docPermissions,
+    docPreferences,
     updatedAt: data?.updatedAt?.toString(),
     user,
     onSave: () => {},

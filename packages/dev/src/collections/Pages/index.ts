@@ -91,16 +91,16 @@ export const Pages: CollectionConfig = {
             },
           ],
         },
-        // {
-        //   label: 'Tab 2 (Unnamed)',
-        //   fields: [
-        //     {
-        //       name: 'tab2Text',
-        //       label: 'Tab 2 Text',
-        //       type: 'text',
-        //     },
-        //   ],
-        // },
+        {
+          label: 'Tab 2 (Unnamed)',
+          fields: [
+            {
+              name: 'tab2Text',
+              label: 'Tab 2 Text',
+              type: 'text',
+            },
+          ],
+        },
       ],
     },
   ],

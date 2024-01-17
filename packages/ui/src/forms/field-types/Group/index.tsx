@@ -26,6 +26,8 @@ const Group: React.FC<Props> = (props) => {
     permissions,
     formState,
     user,
+    i18n,
+    payload,
   } = props
 
   const path = pathFromProps || name
@@ -83,6 +85,8 @@ const Group: React.FC<Props> = (props) => {
             readOnly={readOnly}
             user={user}
             formState={nestedFieldState}
+            i18n={i18n}
+            payload={payload}
           />
         </div>
       </GroupProvider>

@@ -125,6 +125,7 @@ const PreviewView: React.FC<
             forceSidebarWrap
             hasSavePermission={hasSavePermission}
             permissions={permissions}
+            i18n={i18n}
           />
         </div>
         <LivePreview {...props} />
