@@ -32,7 +32,7 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
     }
 
     const start = Date.now()
-    const req = {} as PayloadRequest
+    const req = { payload } as PayloadRequest
 
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })

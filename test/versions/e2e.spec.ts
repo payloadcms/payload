@@ -49,6 +49,7 @@ import {
   disablePublishSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  postCollectionSlug,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -60,6 +61,7 @@ describe('versions', () => {
   let autosaveURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
+  let postURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
@@ -407,6 +409,35 @@ describe('versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
       await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+  })
+  describe('posts collection', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
+      customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
+      postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
+    })
+
+    test('should show documents title in relationship even if draft document', async () => {
+      await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'some title',
+        },
+        draft: true,
+      })
+
+      await page.goto(postURL.create)
+
+      const field = page.locator('#field-relationToAutosaves')
+
+      await field.click()
+
+      await expect(page.locator('.rs__option')).toHaveCount(1)
+
+      await expect(page.locator('.rs__option')).toHaveText('some title')
     })
   })
 })

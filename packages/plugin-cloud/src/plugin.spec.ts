@@ -6,10 +6,6 @@ import { defaults } from 'payload/config'
 import { payloadCloud } from './plugin'
 
 describe('plugin', () => {
-  beforeAll(() => {
-    jest.mock('resend')
-  })
-
   describe('not in Payload Cloud', () => {
     // eslint-disable-next-line jest/expect-expect
     it('should return unmodified config, with webpack aliases', () => {
@@ -135,7 +131,7 @@ function assertNoCloudStorage(config: Config) {
 function assertCloudEmail(config: Config) {
   expect(config.admin).toHaveProperty('webpack')
   if (config.email && 'transport' in config.email) {
-    expect(config.email?.transport?.transporter.name).toEqual('payload-cloud')
+    expect(config.email?.transport?.transporter.name).toEqual('SMTP')
   }
 }
 
@@ -147,7 +143,7 @@ function assertNoCloudEmail(config: Config) {
   if (!config.email) return
 
   if ('transport' in config.email) {
-    expect(config.email?.transport?.transporter.name).not.toEqual('payload-cloud')
+    expect(config.email?.transport?.transporter.name).not.toEqual('SMTP')
   }
 }
 

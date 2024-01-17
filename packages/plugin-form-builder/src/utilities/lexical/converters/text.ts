@@ -1,10 +1,15 @@
 import type { HTMLConverter } from '../types'
 
+import { replaceDoubleCurlys } from '../../replaceDoubleCurlys'
 import { NodeFormat } from '../nodeFormat'
 
 export const TextHTMLConverter: HTMLConverter<any> = {
-  converter({ node }) {
+  converter({ node, submissionData }) {
     let text = node.text
+
+    if (submissionData) {
+      text = replaceDoubleCurlys(text, submissionData)
+    }
 
     if (node.format & NodeFormat.IS_BOLD) {
       text = `<strong>${text}</strong>`

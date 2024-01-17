@@ -31,6 +31,9 @@ describe('SEO Plugin', () => {
       data: {
         title: 'Test page',
         slug: 'test-page',
+        meta: {
+          title: 'Test page',
+        },
       },
       depth: 0,
     })

@@ -31,7 +31,7 @@ export async function migrateRefresh(this: PostgresAdapter) {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  const req = {} as PayloadRequest
+  const req = { payload } as PayloadRequest
 
   // Reverse order of migrations to rollback
   existingMigrations.reverse()

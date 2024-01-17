@@ -25,7 +25,7 @@ type MetaTitleProps = TextFieldType & {
 }
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
-  const { name, label, path, pluginConfig } = props || {}
+  const { name, label, path, pluginConfig, required } = props || {}
 
   const { t } = useTranslation('plugin-seo')
 
@@ -39,7 +39,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
-  const { setValue, showError, value } = field
+  const { setValue, showError, value, errorMessage } = field
 
   const regenerateTitle = useCallback(async () => {
     const { generateTitle } = pluginConfig
@@ -70,6 +70,18 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
       >
         <div>
           {label && typeof label === 'string' && label}
+
+          {required && (
+            <span
+              style={{
+                marginLeft: '5px',
+                color: 'var(--theme-error-500)',
+              }}
+            >
+              *
+            </span>
+          )}
+
           {typeof pluginConfig.generateTitle === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -121,6 +133,8 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
           style={{
             marginBottom: 0,
           }}
+          errorMessage={errorMessage}
+          required={required}
           value={value}
         />
       </div>

@@ -1,1 +1,1 @@
-module.exports = require('./dist/types');
+module.exports = require('./dist/types')

@@ -78,6 +78,15 @@ describe('SEO Plugin', () => {
       await expect(metaTitle).toHaveValue('Website.com — Test Page')
     })
 
+    // todo: Re-enable this test once required attributes are fixed
+    /* test('Title should be required as per custom override', async () => {
+      const metaTitleClass = '#field-title'
+
+      const metaTitle = page.locator(metaTitleClass).nth(0)
+
+      await expect(metaTitle).toHaveAttribute('required', '')
+    }) */
+
     test('Indicator should be orangered and characters counted', async () => {
       const indicatorClass =
         '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(3) > div'
