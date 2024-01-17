@@ -75,5 +75,33 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
+    {
+      label: 'Tabs',
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'tab1',
+          label: 'Tab 1 (Named)',
+          validate: (value) => true,
+          fields: [
+            {
+              name: 'tab1Text',
+              label: 'Tab 1 Text',
+              type: 'text',
+            },
+          ],
+        },
+        // {
+        //   label: 'Tab 2 (Unnamed)',
+        //   fields: [
+        //     {
+        //       name: 'tab2Text',
+        //       label: 'Tab 2 Text',
+        //       type: 'text',
+        //     },
+        //   ],
+        // },
+      ],
+    },
   ],
 }
