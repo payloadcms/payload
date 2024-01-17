@@ -139,7 +139,7 @@ export const Document = async ({
     preferencesKey = `global-${globalSlug}`
   }
 
-  const { docs: [{ value: docPreferences }] = [{}] } = (await payload.find({
+  const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await payload.find({
     collection: 'payload-preferences',
     depth: 0,
     where: {
