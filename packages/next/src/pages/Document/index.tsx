@@ -157,7 +157,7 @@ export const Document = async ({
     locale: locale.code,
     operation: isEditing ? 'update' : 'create',
     preferences,
-    t: ((key: string) => key) as TFunction, // TODO: i18n
+    t: i18n.t,
     user,
   })
 
