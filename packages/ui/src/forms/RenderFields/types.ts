@@ -1,8 +1,15 @@
 import type { FieldPermissions, User } from 'payload/auth'
-import type { Document, DocumentPreferences, Field, FieldWithPath, Payload } from 'payload/types'
+import type {
+  Document,
+  DocumentPreferences,
+  Field,
+  FieldWithPath,
+  Payload,
+  SanitizedConfig,
+} from 'payload/types'
 import type { ReducedField } from './filterFields'
 import { FormState } from '../Form/types'
-import { FieldTypes } from 'payload/config'
+import { FieldTypes, Locale } from 'payload/config'
 import { I18n } from '@payloadcms/translations'
 
 export type Props = {
@@ -22,6 +29,8 @@ export type Props = {
   readOnly?: boolean
   i18n: I18n
   payload: Payload
+  locale?: Locale
+  config: SanitizedConfig
 } & (
   | {
       // FormState to be filtered by the component

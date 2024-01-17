@@ -1,8 +1,8 @@
 import React from 'react'
 
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { Description, DocumentPreferences, Payload } from 'payload/types'
-import type { FieldTypes } from 'payload/config'
+import type { Description, DocumentPreferences, Payload, SanitizedConfig } from 'payload/types'
+import type { FieldTypes, Locale } from 'payload/config'
 
 import RenderFields from '../../forms/RenderFields'
 import { filterFields } from '../../forms/RenderFields/filterFields'
@@ -29,6 +29,8 @@ export const DocumentFields: React.FC<{
   user: User
   i18n: I18n
   payload: Payload
+  locale?: Locale
+  config: SanitizedConfig
 }> = (props) => {
   const {
     AfterFields,
@@ -45,6 +47,8 @@ export const DocumentFields: React.FC<{
     user,
     i18n,
     payload,
+    locale,
+    config,
   } = props
 
   const mainFields = filterFields({
@@ -98,6 +102,8 @@ export const DocumentFields: React.FC<{
               i18n={i18n}
               payload={payload}
               docPreferences={docPreferences}
+              config={config}
+              locale={locale}
             />
             {AfterFields || null}
           </Gutter>
@@ -116,6 +122,8 @@ export const DocumentFields: React.FC<{
                   user={user}
                   i18n={i18n}
                   payload={payload}
+                  locale={locale}
+                  config={config}
                 />
               </div>
             </div>

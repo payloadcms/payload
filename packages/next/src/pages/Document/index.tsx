@@ -189,7 +189,7 @@ export const Document = async ({
     user,
     onSave: () => {},
     payload,
-    locale: locale.code,
+    locale,
     params,
     searchParams,
     i18n,

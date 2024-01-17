@@ -38,7 +38,7 @@ export type EditViewProps = (
   user: User | null | undefined
   fieldTypes: FieldTypes
   payload: Payload
-  locale: Locale['code']
+  locale: Locale
   formState?: FormState
   permissions: Permissions
   params?: {

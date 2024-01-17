@@ -36,6 +36,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     user,
     i18n,
     payload,
+    locale,
   } = props
 
   const collectionConfig = 'collectionConfig' in props ? props.collectionConfig : undefined
@@ -174,6 +175,8 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             user={user}
             i18n={i18n}
             payload={payload}
+            locale={locale}
+            config={config}
           />
         </Form>
       </OperationProvider>

@@ -1,4 +1,4 @@
-import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
+import type { Locale, SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
 import { FormState } from '../Form/types'
 import { User } from 'payload/auth'
 import { I18n } from '@payloadcms/translations'
@@ -16,6 +16,8 @@ export type FormFieldBase = {
   i18n: I18n
   payload: Payload
   docPreferences: DocumentPreferences
+  locale?: Locale
+  config: SanitizedConfig
 }
 
 /**
