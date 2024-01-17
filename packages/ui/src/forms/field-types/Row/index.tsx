@@ -1,4 +1,3 @@
-'use client'
 import React from 'react'
 
 import type { Props } from './types'
@@ -20,13 +19,16 @@ const Row: React.FC<Props> = (props) => {
     indexPath,
     path,
     permissions,
+    formState,
+    user,
+    i18n,
+    payload,
   } = props
 
   return (
     <RowProvider>
       <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
-        [RenderFields]
-        {/* <RenderFields
+        <RenderFields
           className={`${baseClass}__fields`}
           fieldSchema={fields.map((field) => ({
             ...field,
@@ -38,7 +40,11 @@ const Row: React.FC<Props> = (props) => {
           margins={false}
           permissions={permissions}
           readOnly={readOnly}
-        /> */}
+          formState={formState}
+          user={user}
+          i18n={i18n}
+          payload={payload}
+        />
       </div>
     </RowProvider>
   )
