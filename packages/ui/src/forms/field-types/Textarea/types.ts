@@ -1,5 +1,8 @@
 import type { TextareaField } from 'payload/types'
+import { FormFieldBase } from '../shared'
 
-export type Props = Omit<TextareaField, 'type'> & {
-  path?: string
-}
+export type Props = FormFieldBase &
+  Omit<TextareaField, 'type'> & {
+    path?: string
+    value: string
+  }

@@ -1,16 +1,10 @@
-'use client'
-import React, { useCallback } from 'react'
-import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
 import type { Props } from './types'
-
-import { useTranslation } from '../../../providers/Translation'
-import { useConfig } from '../../../providers/Config'
-import { useLocale } from '../../../providers/Locale'
-import useField from '../../useField'
-import { isFieldRTL } from '../shared'
+import { fieldBaseClass, isFieldRTL } from '../shared'
 import TextareaInput from './Input'
-import { Validate } from 'payload/types'
-
+import DefaultError from '../../Error'
+import DefaultLabel from '../../Label'
+import FieldDescription from '../../FieldDescription'
 import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
@@ -33,16 +27,15 @@ const Textarea: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    validate,
+    valid,
+    errorMessage,
+    value,
+    locale,
+    config: { localization },
   } = props
-
-  const { i18n } = useTranslation()
 
   const path = pathFromProps || name
 
-  const locale = useLocale()
-
-  const { localization } = useConfig()
   const isRTL = isFieldRTL({
     fieldLocalized: localized,
     fieldRTL: rtl,
@@ -50,44 +43,41 @@ const Textarea: React.FC<Props> = (props) => {
     localizationConfig: localization || undefined,
   })
 
-  const memoizedValidate: Validate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function')
-        return validate(value, { ...options, maxLength, minLength, required })
-    },
-    [validate, required],
-  )
-
-  const { errorMessage, setValue, showError, value } = useField({
-    path,
-    validate: memoizedValidate,
-  })
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   return (
-    <TextareaInput
-      Error={Error}
-      Label={Label}
-      afterInput={afterInput}
-      beforeInput={beforeInput}
-      className={className}
-      description={description}
-      errorMessage={errorMessage}
-      label={label}
-      name={name}
-      onChange={(e) => {
-        setValue(e.target.value)
+    <div
+      className={[fieldBaseClass, 'textarea', className, !valid && 'error', readOnly && 'read-only']
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
       }}
-      path={path}
-      placeholder={getTranslation(placeholder, i18n)}
-      readOnly={readOnly}
-      required={required}
-      rows={rows}
-      rtl={isRTL}
-      showError={showError}
-      style={style}
-      value={value as string}
-      width={width}
-    />
+    >
+      <ErrorComp message={errorMessage} showError={!valid} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
+        <div className="textarea-inner">
+          <div className="textarea-clone" data-value={value || placeholder || ''} />
+          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
+          <TextareaInput
+            name={name}
+            path={path}
+            placeholder={placeholder}
+            readOnly={readOnly}
+            required={required}
+            rows={rows}
+            rtl={isRTL}
+            maxLength={maxLength}
+            minLength={minLength}
+          />
+          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+        </div>
+      </label>
+      <FieldDescription description={description} path={path} value={value} />
+    </div>
   )
 }
 export default Textarea

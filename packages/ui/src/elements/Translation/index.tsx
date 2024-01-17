@@ -16,7 +16,7 @@ const RecursiveTranslation: React.FC<{
           const regex = new RegExp(`<${index}>(.*?)<\/${index}>`, 'g')
           const children = section.replace(regex, (_, group) => group)
           return (
-            <Element>
+            <Element key={index}>
               <RecursiveTranslation translationString={children} />
             </Element>
           )

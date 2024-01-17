@@ -23,6 +23,8 @@ const RenderFields: React.FC<Props> = (props) => {
     i18n,
     payload,
     docPreferences,
+    locale,
+    config,
   } = props
 
   if (!i18n) {
@@ -98,6 +100,8 @@ const RenderFields: React.FC<Props> = (props) => {
             i18n,
             payload,
             docPreferences,
+            locale,
+            config,
           }
 
           if (field) {

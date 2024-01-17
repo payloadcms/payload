@@ -64,6 +64,14 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      type: 'textarea',
+      name: 'textarea',
+      label: 'Textarea',
+      admin: {
+        rows: 10,
+      },
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',
