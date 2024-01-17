@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import qs from 'qs'
 
-import type { Post } from './payload-types'
+import type { Geo, Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
@@ -36,12 +36,15 @@ import {
 } from './shared'
 import {
   customViews2CollectionSlug,
+  geoCollectionSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
+  customIdCollectionSlug,
+  customIdCollectionId,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -51,12 +54,14 @@ const description = 'Description'
 
 describe('admin', () => {
   let page: Page
+  let geoUrl: AdminUrlUtil
   let url: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
   let serverURL: string
 
   beforeAll(async ({ browser }) => {
     serverURL = (await initPayloadE2E(__dirname)).serverURL
+    geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     url = new AdminUrlUtil(serverURL, postsCollectionSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
 
@@ -250,6 +255,13 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
+    test('collection - sidebar fields should respond to permission', async () => {
+      const { id } = await createPost()
+      await page.goto(url.edit(id))
+
+      await expect(page.locator('#field-sidebarField')).toBeDisabled()
+    })
+
     test('global - should not show API tab when disabled in config', async () => {
       await page.goto(url.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
@@ -258,6 +270,62 @@ describe('admin', () => {
     test('global - should not enable API route when disabled in config', async () => {
       await page.goto(`${url.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
+    })
+  })
+
+  describe('app-header', () => {
+    test('should show admin level action in admin panel', async () => {
+      await page.goto(url.admin)
+      // Check if the element with the class .admin-button exists
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show admin level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show admin level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show collection list view level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+    })
+
+    test('should show collection edit view level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .collection-edit-button')).toHaveCount(1)
+    })
+
+    test('should show collection api view level action in collection api view', async () => {
+      const { id } = await createGeo()
+      await page.goto(`${geoUrl.edit(id)}/api`)
+      await expect(page.locator('.app-header .collection-api-button')).toHaveCount(1)
+    })
+
+    test('should show global edit view level action in globals edit view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(globalWithPreview.global(globalSlug))
+      await expect(page.locator('.app-header .global-edit-button')).toHaveCount(1)
+    })
+
+    test('should show global api view level action in globals api view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
+      await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
+    })
+
+    test('should reset actions array when navigating from view with actions to view without actions', async () => {
+      await page.goto(geoUrl.list)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
+      await page.locator(`#nav-posts`).click()
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
     })
   })
 
@@ -462,6 +530,24 @@ describe('admin', () => {
     })
   })
 
+  describe('Custom IDs', () => {
+    test('should allow custom ID field nested inside an unnamed tab', async () => {
+      await page.goto(url.collection('customIdTab') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
+    })
+
+    test('should allow custom ID field nested inside a row', async () => {
+      await page.goto(url.collection('customIdRow') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
+    })
+  })
+
   describe('i18n', () => {
     test('should allow changing language', async () => {
       await page.goto(url.account)
@@ -549,12 +635,16 @@ describe('admin', () => {
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
-      test('search by id', async () => {
-        // delete all posts created by the seed
-        await deleteAllPosts()
-
+      test('search by id with listSearchableFields', async () => {
         const { id } = await createPost()
-        await page.locator('.search-filter__input').fill(id)
+        await page.goto(`${url.list}?limit=10&page=1&search=${id}`)
+        const tableItems = page.locator(tableRowLocator)
+        await expect(tableItems).toHaveCount(1)
+      })
+
+      test('search by id without listSearchableFields', async () => {
+        const { id } = await createGeo()
+        await page.goto(`${geoUrl.list}?limit=10&page=1&search=${id}`)
         const tableItems = page.locator(tableRowLocator)
         await expect(tableItems).toHaveCount(1)
       })
@@ -1206,4 +1296,14 @@ async function deleteAllPosts() {
       })
     }),
   ])
+}
+
+async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
+  return payload.create({
+    collection: geoCollectionSlug,
+    data: {
+      point: [4, -4],
+      ...overrides,
+    },
+  }) as unknown as Promise<Geo>
 }

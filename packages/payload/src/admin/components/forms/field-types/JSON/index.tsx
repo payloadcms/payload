@@ -39,6 +39,7 @@ const JSONField: React.FC<Props> = (props) => {
   const path = pathFromProps || name
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
+  const [hasLoadedValue, setHasLoadedValue] = useState(false)
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -55,11 +56,11 @@ const JSONField: React.FC<Props> = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (readOnly) return
-      setStringValue(val)
-
       try {
-        setValue(JSON.parse(val.trim() || '{}'))
+        if (readOnly) return
+        setStringValue(val)
+
+        setValue(val ? JSON.parse(val) : '')
         setJsonError(undefined)
       } catch (e) {
         setJsonError(e)
@@ -69,8 +70,18 @@ const JSONField: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
-    setStringValue(JSON.stringify(value ? value : initialValue, null, 2))
-  }, [initialValue, value])
+    try {
+      const hasValue = value && value.toString().length > 0
+      if (hasLoadedValue) {
+        setStringValue(hasValue ? JSON.stringify(value, null, 2) : '')
+      } else {
+        setStringValue(JSON.stringify(hasValue ? value : initialValue, null, 2))
+        setHasLoadedValue(true)
+      }
+    } catch (e) {
+      setJsonError(e)
+    }
+  }, [initialValue, value, hasLoadedValue])
 
   return (
     <div

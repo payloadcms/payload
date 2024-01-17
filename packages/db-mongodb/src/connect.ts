@@ -48,6 +48,13 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
   try {
     this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
 
+    const client = this.connection.getClient()
+
+    if (!client.options.replicaSet) {
+      this.transactionOptions = false
+      this.beginTransaction = undefined
+    }
+
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING DATABASE ----')
       await mongoose.connection.dropDatabase()

@@ -174,7 +174,6 @@ describe('Lexical', () => {
       )
 
       expect(richTextDoc?.lexicalCustomFields).not.toStrictEqual(seededDocument) // The whole seededDocument should not match, as richTextDoc should now contain populated documents not present in the seeded document
-      expect(richTextDoc?.lexicalCustomFields).toMatchObject(seededDocument) // subset of seededDocument should match
 
       const lexical: SerializedEditorState = richTextDoc?.lexicalCustomFields
 

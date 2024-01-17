@@ -7,6 +7,7 @@ export const relationSpanishTitle2 = `${relationSpanishTitle}2`
 
 export const defaultLocale = 'en'
 export const spanishLocale = 'es'
+export const portugueseLocale = 'pt'
 
 // Slugs
 export const localizedPostsSlug = 'localized-posts'

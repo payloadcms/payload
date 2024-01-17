@@ -14,7 +14,8 @@ export const SlateLinkConverter: SlateNodeConverter = {
       }),
       direction: 'ltr',
       fields: {
-        doc: slateNode.doc || undefined,
+        ...(slateNode.fields || {}),
+        doc: slateNode.doc || null,
         linkType: slateNode.linkType || 'custom',
         newTab: slateNode.newTab || false,
         url: slateNode.url || undefined,
@@ -22,7 +23,7 @@ export const SlateLinkConverter: SlateNodeConverter = {
       format: '',
       indent: 0,
       type: 'link',
-      version: 1,
+      version: 2,
     } as const as SerializedLinkNode
   },
   nodeTypes: ['link'],

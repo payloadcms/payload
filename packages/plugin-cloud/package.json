@@ -1,7 +1,7 @@
 {
   "name": "@payloadcms/plugin-cloud",
   "description": "The official Payload Cloud plugin",
-  "version": "2.2.6",
+  "version": "3.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -22,13 +22,12 @@
     "@aws-sdk/credential-providers": "^3.289.0",
     "@aws-sdk/lib-storage": "^3.267.0",
     "amazon-cognito-identity-js": "^6.1.2",
-    "nodemailer": "^6.9.1",
-    "resend": "^0.17.2"
+    "nodemailer": "6.9.8"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
     "@types/jest": "^29.5.1",
-    "@types/nodemailer": "^6.4.7",
+    "@types/nodemailer": "6.4.14",
     "payload": "workspace:*",
     "ts-jest": "^29.1.0",
     "webpack": "^5.78.0"

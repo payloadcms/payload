@@ -1,6 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../../'
+import type { GeneratedTypes, RequestContext } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Document } from '../../../types'
@@ -12,6 +12,7 @@ import { i18nInit } from '../../../translations/init'
 import update from '../update'
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
+  context?: RequestContext
   data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
   depth?: number
   draft?: boolean
@@ -29,10 +30,11 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
+    context,
     data,
     depth,
     draft,
-    fallbackLocale = null,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     req: incomingReq,
@@ -42,6 +44,13 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = payload?.config?.localization
+    ? payload?.config?.localization?.defaultLocale
+    : null
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
+    : null
   const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
@@ -49,7 +58,10 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   }
 
   const req = {
-    fallbackLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     i18n,
     locale,
     payload,
@@ -58,7 +70,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 

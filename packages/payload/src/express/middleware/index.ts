@@ -48,15 +48,15 @@ const middleware = (payload: Payload): any => {
     qsMiddleware({ arrayLimit: 1000, depth: 10 }),
     bodyParser.urlencoded({ extended: true }),
     compression(payload.config.express.compression),
-    localizationMiddleware(payload.config.localization),
+    localizationMiddleware,
     express.json(payload.config.express.json),
     fileUpload({
       parseNested: true,
       ...payload.config.upload,
     }),
     convertPayload,
-    corsHeaders(payload.config),
     authenticate(payload.config),
+    corsHeaders(payload.config),
     ...(payload.config.express.middleware || []),
     ...(payload.config.express.postMiddleware || []),
   ]

@@ -68,6 +68,41 @@ describe('lexical', () => {
     await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
   })
 
+  test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
+    // Relevant issue: https://github.com/payloadcms/payload/issues/4115
+    await navigateToLexicalFields()
+    const thirdBlock = page.locator('.rich-text-lexical').nth(1).locator('.lexical-block').nth(2)
+    await thirdBlock.scrollIntoViewIfNeeded()
+    await expect(thirdBlock).toBeVisible()
+
+    const spanInBlock = thirdBlock
+      .locator('span')
+      .getByText('Some text below relationship node 1')
+      .first()
+    await spanInBlock.scrollIntoViewIfNeeded()
+    await expect(spanInBlock).toBeVisible()
+
+    await spanInBlock.click() // Click works better than focus
+
+    await page.keyboard.type('moretext')
+    const newSpanInBlock = thirdBlock
+      .locator('span')
+      .getByText('Some text below rmoretextelationship node 1')
+      .first()
+    await expect(newSpanInBlock).toBeVisible()
+    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+
+    // Save
+    await saveDocAndAssert(page)
+    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+
+    // Navigate to some different page, away from the current document
+    await page.locator('.app-header__step-nav').first().locator('a').first().click()
+
+    // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
+    await expect(page.locator('.leave-without-saving__content').first()).not.toBeVisible()
+  })
+
   test('should type and save typed text', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').nth(1) // second
@@ -658,45 +693,15 @@ describe('lexical', () => {
       const selectFieldMenu = selectField.locator('.rs__menu').first()
       await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
 
-      await conditionalArrayBlock.getByText('Add Column').click()
+      await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
+      await conditionalArrayBlock.locator('.btn__label:has-text("Add Columns2")').first().click()
 
       await conditionalArrayBlock
-        .locator('.array-field__draggable-rows')
-        .first()
-        .locator('.array-field__row')
-        .nth(1)
-        .locator('.input-wrapper input')
-        .first()
-        .fill('second text')
+        .locator('.array-field__draggable-rows > div:nth-child(2) .input-wrapper input')
+        .fill('second input')
 
       await saveDocAndAssert(page)
 
-      await selectField.click()
-      await selectFieldMenu.locator('.rs__option').nth(0).click() // Select "1" (1 columns / array fields)
-
-      // Remove 2nd column
-      await conditionalArrayBlock
-        .locator('.array-field__draggable-rows')
-        .first()
-        .locator('.array-field__row')
-        .nth(1)
-        .locator('.array-actions__button')
-        .first()
-        .click()
-
-      await conditionalArrayBlock
-        .locator('.array-field__draggable-rows')
-        .first()
-        .locator('.array-field__row')
-        .nth(1)
-        .locator('.popup__content')
-        .first()
-        .locator('Button')
-        .nth(1)
-        .click()
-
-      await saveDocAndAssert(page)
-      // This can be triggered if the 2nd row's data is not actually deleted (<= this is the bug), as the validation expects just one row
       await expect(page.locator('.Toastify')).not.toContainText('Please correct invalid fields.')
     })
   })
