@@ -1,6 +1,9 @@
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import { FormState } from '../Form/types'
 import { User } from 'payload/auth'
+import { I18n } from '@payloadcms/translations'
+import { Payload } from 'payload'
+import { DocumentPreferences } from 'payload/types'
 
 export const fieldBaseClass = 'field-type'
 
@@ -10,6 +13,9 @@ export type FormFieldBase = {
   valid?: boolean
   errorMessage?: string
   user?: User
+  i18n: I18n
+  payload: Payload
+  docPreferences: DocumentPreferences
 }
 
 /**

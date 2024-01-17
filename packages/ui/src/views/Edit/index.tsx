@@ -31,9 +31,11 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     formState,
     // isLoading,
     // onSave: onSaveFromProps,
+    docPreferences,
     docPermissions,
     user,
     i18n,
+    payload,
   } = props
 
   const collectionConfig = 'collectionConfig' in props ? props.collectionConfig : undefined
@@ -165,10 +167,13 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             fieldTypes={fieldTypes}
             fields={fields}
             hasSavePermission={hasSavePermission}
-            permissions={docPermissions}
+            docPermissions={docPermissions}
+            docPreferences={docPreferences}
             data={data}
             formState={formState}
             user={user}
+            i18n={i18n}
+            payload={payload}
           />
         </Form>
       </OperationProvider>

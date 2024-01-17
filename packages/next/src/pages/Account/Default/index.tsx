@@ -105,6 +105,7 @@ export const DefaultAccount: React.FC<DefaultAccountViewProps> = (props) => {
             data={data}
             formState={formState}
             user={user}
+            i18n={i18n}
           />
         </Form>
       </OperationProvider>

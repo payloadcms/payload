@@ -12,6 +12,10 @@ export const sanitizeField = (f) => {
     field.fields = sanitizeFields(field.fields)
   }
 
+  if ('tabs' in field) {
+    field.tabs = field.tabs.map((tab) => sanitizeField(tab))
+  }
+
   if ('admin' in field) {
     field.admin = { ...field.admin }
 

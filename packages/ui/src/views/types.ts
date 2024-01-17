@@ -5,6 +5,7 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
   Payload,
+  DocumentPreferences,
 } from 'payload/types'
 import type { I18n } from '@payloadcms/translations'
 import type { FormState } from '../forms/Form/types'
@@ -30,6 +31,7 @@ export type EditViewProps = (
   apiURL: string
   canAccessAdmin?: boolean
   data: Document
+  docPreferences: DocumentPreferences
   // isLoading: boolean
   onSave: (json: any) => void
   updatedAt: string

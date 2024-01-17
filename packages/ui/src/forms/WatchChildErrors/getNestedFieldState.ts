@@ -19,7 +19,7 @@ export const getNestedFieldState = ({
 } => {
   let pathSegments = pathSegmentsFromProps
 
-  if (!pathSegments && path && fieldSchema) {
+  if (!pathSegments && fieldSchema) {
     pathSegments = buildPathSegments(path, fieldSchema)
   }
 

@@ -43,7 +43,9 @@ export const CreateFirstUser: React.FC<{
     config,
     user,
     locale,
+    i18n,
     i18n: { t },
+    payload,
   } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: false,
@@ -113,6 +115,8 @@ export const CreateFirstUser: React.FC<{
           fieldTypes={fieldTypes}
           user={user}
           formState={formState}
+          i18n={i18n}
+          payload={payload}
         />
         <FormSubmit>{t('general:create')}</FormSubmit>
       </Form>
