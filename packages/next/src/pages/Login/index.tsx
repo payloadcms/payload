@@ -55,7 +55,7 @@ export const Login: React.FC<{
           <Logo config={config} />
         </div>
         {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
-        {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm />}
+        {!collectionConfig?.auth?.disableLocalStrategy && <LoginForm searchParams={searchParams} />}
         {Array.isArray(afterLogin) && afterLogin.map((Component, i) => <Component key={i} />)}
       </Fragment>
     </MinimalTemplate>
