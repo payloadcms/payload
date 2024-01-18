@@ -18,11 +18,11 @@ const bundlerAdapters = {
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    migrationDir: path.resolve(__dirname, '../packages/db-mongodb/migrations'),
+    migrationDir: path.resolve(process.env.PAYLOAD_CONFIG_PATH, '../migrations'),
     url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
-    migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
+    migrationDir: path.resolve(process.env.PAYLOAD_CONFIG_PATH, '../migrations'),
     pool: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
