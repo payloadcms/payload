@@ -31,8 +31,15 @@ export type Preferences = {
   [key: string]: unknown
 }
 
-export type Props = {
-  action?: string | ((formData: FormData) => Promise<void>)
+export type Props = (
+  | {
+      action?: string
+      method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
+    }
+  | {
+      action: (formData: FormData) => Promise<void>
+    }
+) & {
   children?: React.ReactNode
   className?: string
   disableSuccessStatus?: boolean
@@ -46,13 +53,13 @@ export type Props = {
   handleResponse?: (res: Response) => void
   initialState?: FormState
   log?: boolean
-  method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => void
   redirect?: string
   submitted?: boolean
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
+  onChange?: ((args: { formState: FormState }) => Promise<FormState | void>)[]
 }
 
 export type SubmitOptions = {

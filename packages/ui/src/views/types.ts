@@ -27,7 +27,7 @@ export type EditViewProps = (
     }
 ) & {
   config: SanitizedConfig
-  action: string
+  action: (formData: FormData) => Promise<void>
   apiURL: string
   canAccessAdmin?: boolean
   data: Document

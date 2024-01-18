@@ -1,0 +1,8 @@
+.login__form {
+  &__inputWrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+    margin-bottom: calc(var(--base) / 4);
+  }
+}

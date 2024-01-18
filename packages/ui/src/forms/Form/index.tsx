@@ -59,13 +59,16 @@ const Form: React.FC<Props> = (props) => {
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
-    method,
     onSubmit,
     onSuccess,
     redirect,
     submitted: submittedFromProps,
     waitForAutocomplete,
+    onChange,
   } = props
+
+  // Form with `action` server functions cannot define a `method`
+  const method = 'method' in props ? props.method : undefined
 
   const { push } = useRouter()
 
@@ -652,13 +655,41 @@ const Form: React.FC<Props> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
+  useThrottledEffect(
+    () => {
+      const executeOnChange = async () => {
+        if (Array.isArray(onChange)) {
+          let newFormState
+
+          await onChange.reduce(async (priorOnChange, onChangeFn) => {
+            await priorOnChange
+
+            const result = await onChangeFn({
+              formState: fields,
+            })
+
+            newFormState = result
+          }, Promise.resolve())
+
+          if (newFormState) {
+            dispatchFields({ state: newFormState, type: 'REPLACE_STATE' })
+          }
+        }
+      }
+
+      executeOnChange()
+    },
+    300,
+    [fields],
+  )
+
   return (
     <form
       action={action}
       className={classes}
       method={method}
       noValidate
-      onSubmit={(e) => contextRef.current.submit({}, e)}
+      // onSubmit={(e) => contextRef.current.submit({}, e)}
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>

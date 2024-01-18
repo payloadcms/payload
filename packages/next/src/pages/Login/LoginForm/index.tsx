@@ -1,36 +1,37 @@
 'use client'
+import {
+  Email,
+  Form,
+  FormLoadingOverlayToggle,
+  FormSubmit,
+  Password,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
 import React from 'react'
 
-import { FormLoadingOverlayToggle } from '../../elements/Loading'
-import Form from '../../forms/Form'
-import FormSubmit from '../../forms/Submit'
-import { Email } from '../../forms/field-types/Email'
-import { Password } from '../../forms/field-types/Password'
-import Link from 'next/link'
-import { useTranslation } from '../../providers/Translation'
-import { useConfig } from '../../providers/Config'
+import { loginAction } from './action'
+
+const baseClass = 'login__form'
 
 import './index.scss'
+import Link from 'next/link'
 
-const baseClass = 'login-form'
-
-export const LoginForm: React.FC<{
-  action?: (formData: FormData) => Promise<void> | string
-  searchParams: { [key: string]: string | string[] | undefined }
-}> = async ({ searchParams }) => {
+export const LoginForm = () => {
   const config = useConfig()
+
   const {
-    admin: { autoLogin, user: userSlug },
+    admin: { autoLogin },
     routes: { admin, api },
   } = config
 
-  const { t } = useTranslation()
-
   const prefillForm = autoLogin && autoLogin.prefillOnly
+
+  const { t } = useTranslation()
 
   return (
     <Form
-      action={`${api}/${userSlug}/login`}
+      action={loginAction}
       className={`${baseClass}__form`}
       disableSuccessStatus
       initialState={{
@@ -45,8 +46,6 @@ export const LoginForm: React.FC<{
           valid: true,
         },
       }}
-      method="POST"
-      redirect={`${admin}${searchParams?.redirect || ''}`}
       waitForAutocomplete
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />
