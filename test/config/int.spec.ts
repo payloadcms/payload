@@ -1,6 +1,7 @@
+import type { BlockField } from 'payload/types';
+
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { BlockField } from 'payload/dist/fields/config/types'
 
 require('isomorphic-fetch')
 
