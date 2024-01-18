@@ -48,6 +48,7 @@ export const LoginForm: React.FC<{
       }}
       redirect={`${admin}${searchParams?.redirect || ''}`}
       waitForAutocomplete
+      method="POST"
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />
       <div className={`${baseClass}__inputWrap`}>
