@@ -69,12 +69,12 @@ export const Document = async ({
   let fields: Field[]
   let hasSavePermission: boolean
   let apiURL: string
-  let action
+  let action: string
 
   if (collectionConfig) {
     docPermissions = permissions?.collections?.[collectionSlug]
     fields = collectionConfig.fields
-    // action = `${serverURL}${api}/${collectionSlug}${isEditing ? `/${id}` : ''}`
+    action = `${serverURL}${api}/${collectionSlug}${isEditing ? `/${id}` : ''}`
 
     hasSavePermission =
       (isEditing && permissions?.collections?.[collectionSlug]?.update?.permission) ||
@@ -113,7 +113,7 @@ export const Document = async ({
     docPermissions = permissions?.globals?.[globalSlug]
     fields = globalConfig.fields
     hasSavePermission = isEditing && docPermissions?.update?.permission
-    // action = `${serverURL}${api}/${globalSlug}`
+    action = `${serverURL}${api}/${globalSlug}`
 
     apiURL = `${serverURL}${api}/${globalSlug}?locale=${locale}${
       globalConfig.versions?.drafts ? '&draft=true' : ''
@@ -171,8 +171,7 @@ export const Document = async ({
 
   const componentProps: EditViewProps = {
     id,
-    action,
-    // action: `${action}?${queryString.stringify(formQueryParams)}`,
+    action: `${action}?${queryString.stringify(formQueryParams)}`,
     apiURL,
     canAccessAdmin: permissions?.canAccessAdmin,
     config,

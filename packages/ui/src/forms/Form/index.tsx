@@ -689,7 +689,7 @@ const Form: React.FC<Props> = (props) => {
       className={classes}
       method={method}
       noValidate
-      // onSubmit={(e) => contextRef.current.submit({}, e)}
+      onSubmit={(e) => contextRef.current.submit({}, e)}
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>

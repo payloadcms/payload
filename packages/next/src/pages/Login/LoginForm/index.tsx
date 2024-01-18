@@ -10,18 +10,18 @@ import {
 } from '@payloadcms/ui'
 import React from 'react'
 
-import { loginAction } from './action'
-
 const baseClass = 'login__form'
 
 import './index.scss'
 import Link from 'next/link'
 
-export const LoginForm = () => {
+export const LoginForm: React.FC<{
+  searchParams: { [key: string]: string | string[] | undefined }
+}> = ({ searchParams }) => {
   const config = useConfig()
 
   const {
-    admin: { autoLogin },
+    admin: { autoLogin, user: userSlug },
     routes: { admin, api },
   } = config
 
@@ -31,7 +31,7 @@ export const LoginForm = () => {
 
   return (
     <Form
-      action={loginAction}
+      action={`${api}/${userSlug}/login`}
       className={`${baseClass}__form`}
       disableSuccessStatus
       initialState={{
@@ -46,6 +46,7 @@ export const LoginForm = () => {
           valid: true,
         },
       }}
+      redirect={`${admin}${searchParams?.redirect || ''}`}
       waitForAutocomplete
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />
