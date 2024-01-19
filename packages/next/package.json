@@ -43,6 +43,8 @@
     "@payloadcms/translations": "workspace:^",
     "@payloadcms/ui": "workspace:*",
     "deep-equal": "2.2.2",
+    "@types/busboy": "^1.5.3",
+    "busboy": "^1.6.0",
     "path-to-regexp": "^6.2.1",
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "8.2.0"

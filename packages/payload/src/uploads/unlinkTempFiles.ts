@@ -15,7 +15,6 @@ type Args = {
   req: PayloadRequest
 }
 /**
- * TODO(NATIVE_REQUEST): remove temp files??
  * Remove temp files if enabled, as express-fileupload does not do this automatically
  */
 export const unlinkTempFiles: (args: Args) => Promise<void> = async ({

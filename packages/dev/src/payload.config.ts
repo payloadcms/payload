@@ -6,6 +6,7 @@ import { Users } from './collections/Users'
 import { Settings } from './globals/Settings'
 import { Pages } from './collections/Pages'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { Media } from './collections/Media'
 
 export default buildConfig({
   db: mongooseAdapter({
@@ -17,7 +18,7 @@ export default buildConfig({
   //   },
   // }),
   secret: process.env.PAYLOAD_SECRET,
-  collections: [Users, Pages],
+  collections: [Users, Pages, Media],
   globals: [Settings],
   editor: lexicalEditor({}),
   onInit: async (payload) => {

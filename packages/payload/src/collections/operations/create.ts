@@ -1,8 +1,6 @@
 import type { MarkOptional } from 'ts-essentials'
 
 import crypto from 'crypto'
-// import fs from 'fs'
-// import { promisify } from 'util'
 
 import type { GeneratedTypes } from '../../'
 import type { PayloadRequest } from '../../types'
@@ -21,9 +19,9 @@ import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
-// import { generateFileData } from '../../uploads/generateFileData'
-// import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
-// import { uploadFiles } from '../../uploads/uploadFiles' TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
+import { generateFileData } from '../../uploads/generateFileData'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
+import { uploadFiles } from '../../uploads/uploadFiles'
 import { commitTransaction } from '../../utilities/commitTransaction'
 import flattenFields from '../../utilities/flattenTopLevelFields'
 import { initTransaction } from '../../utilities/initTransaction'
@@ -31,8 +29,6 @@ import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import { saveVersion } from '../../versions/saveVersion'
 import { buildAfterOperation } from './utils'
-
-// const unlinkFile = promisify(fs.unlink)
 
 export type CreateUpdateType = { [field: number | string | symbol]: unknown }
 
@@ -126,18 +122,17 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
-    // const { data: newFileData, files: filesToUpload } = await generateFileData({
-    //   collection,
-    //   config,
-    //   data,
-    //   overwriteExistingFiles,
-    //   req,
-    //   throwOnMissingFile:
-    //     !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
-    // })
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection,
+      config,
+      data,
+      overwriteExistingFiles,
+      req,
+      throwOnMissingFile:
+        !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
+    })
 
-    // data = newFileData
+    data = newFileData
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -220,7 +215,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
     // /////////////////////////////////////
 
     if (!collectionConfig.upload.disableLocalStorage) {
-      // await uploadFiles(payload, filesToUpload, req) // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
+      await uploadFiles(payload, filesToUpload, req)
     }
 
     // /////////////////////////////////////
@@ -370,7 +365,7 @@ export const createOperation = async <TSlug extends keyof GeneratedTypes['collec
       result,
     })
 
-    // await unlinkTempFiles({ collectionConfig, config, req }) // TODO: this was temporarily commented out bc it throws Sharp compilation errors in Next.js
+    await unlinkTempFiles({ collectionConfig, config, req })
 
     // /////////////////////////////////////
     // Return results

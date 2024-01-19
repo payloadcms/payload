@@ -9,7 +9,7 @@ export function getIncomingFiles({
   data: Partial<FileData>
   req: PayloadRequest
 }): File[] {
-  const file = req.files?.file
+  const file = req.file
 
   let files: File[] = []
 

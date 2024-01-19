@@ -1,49 +1,11 @@
 import type { SanitizedConfig, PayloadRequest, CustomPayloadRequest } from 'payload/types'
 import { getAuthenticatedUser } from 'payload/auth'
-import { Payload, getPayload } from 'payload'
+import { getPayload } from 'payload'
 import { URL } from 'url'
 import { parseCookies } from './cookies'
 import { getRequestLanguage } from './getRequestLanguage'
+import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
-
-type GetRequestLocalesArgs = {
-  localization: Exclude<Payload['config']['localization'], false>
-  requestData?: Record<string, any>
-  searchParams?: URLSearchParams
-}
-function getRequestLocales({ localization, searchParams, requestData }: GetRequestLocalesArgs): {
-  locale: string
-  fallbackLocale: string
-} {
-  let locale = searchParams.get('locale')
-  let fallbackLocale = searchParams.get('fallback-locale')
-
-  if (requestData) {
-    if (requestData?.locale) {
-      locale = requestData.locale
-    }
-    if (requestData?.['fallback-locale']) {
-      fallbackLocale = requestData['fallback-locale']
-    }
-  }
-
-  if (fallbackLocale === 'none') {
-    fallbackLocale = 'null'
-  } else if (!localization.localeCodes.includes(fallbackLocale)) {
-    fallbackLocale = localization.defaultLocale
-  }
-
-  if (locale === '*') {
-    locale = 'all'
-  } else if (!localization.localeCodes.includes(locale)) {
-    locale = localization.defaultLocale
-  }
-
-  return {
-    locale,
-    fallbackLocale,
-  }
-}
 
 type Args = {
   request: Request
@@ -70,13 +32,47 @@ export const createPayloadRequest = async ({
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
   let requestData
+  let requestFile: CustomPayloadRequest['file'] = undefined
+
   const contentType = request.headers.get('Content-Type')
   if (request.body && contentType === 'application/json') {
     requestData = await request.json()
   } else if (contentType?.startsWith('multipart/form-data')) {
-    const formData = (await request.formData()).get('_payload')
-    if (typeof formData === 'string') {
-      requestData = JSON.parse(formData)
+    // possible upload request
+    if (collection.config.upload) {
+      // load file in memory
+      if (!config.upload?.useTempFiles) {
+        const formData = await request.formData()
+        const file = formData.get('file')
+
+        if (file && file instanceof File) {
+          const bytes = await file.arrayBuffer()
+          const buffer = Buffer.from(bytes)
+
+          requestFile.name = file.name
+          requestFile.data = buffer
+          requestFile.mimetype = file.type
+          requestFile.size = file.size
+        }
+
+        const payloadData = formData.get('_payload')
+
+        if (typeof payloadData === 'string') {
+          requestData = JSON.parse(payloadData)
+        }
+      } else {
+        // store file on disk
+        // TODO: handle request as stream
+        // need to get file and fields out of the request body if they exist
+      }
+    } else {
+      // non upload request
+      const formData = await request.formData()
+      const payloadData = formData.get('_payload')
+
+      if (typeof payloadData === 'string') {
+        requestData = JSON.parse(payloadData)
+      }
     }
   }
 
@@ -115,6 +111,7 @@ export const createPayloadRequest = async ({
     fallbackLocale: requestFallbackLocale,
     i18n,
     t: i18n.t,
+    file: requestFile,
 
     // need to add:
     // ------------
@@ -136,12 +133,3 @@ export const createPayloadRequest = async ({
 
   return req
 }
-
-// Express specific functionality
-// to search for and replace:
-// -------------------------------
-// req.params
-// req.query
-// req.body
-// req.files
-// express/responses/formatSuccess

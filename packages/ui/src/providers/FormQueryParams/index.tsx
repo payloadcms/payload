@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useContext, useState } from 'react'
 
-import type { UploadEdits } from '../../views/Edit/types'
+import type { UploadEdits } from 'payload/types'
 
 export type QueryParamTypes = {
   depth: number
