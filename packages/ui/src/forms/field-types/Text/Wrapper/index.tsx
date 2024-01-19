@@ -1,7 +1,8 @@
 'use client'
 import React from 'react'
+
 import { fieldBaseClass } from '../../shared'
-import useField from '../../../useField'
+import { useFormFields } from '../../../Form/context'
 
 import './index.scss'
 
@@ -13,7 +14,7 @@ export const TextInputWrapper: React.FC<{
   path?: string
   readOnly?: boolean
 }> = ({ children, className, style, width, path, readOnly }) => {
-  const { valid } = useField({ path })
+  const { valid } = useFormFields(([fields]) => fields[path])
 
   return (
     <div

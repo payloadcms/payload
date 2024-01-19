@@ -78,7 +78,7 @@ const Checkbox: React.FC<Props> = (props) => {
           />
           {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
-        {label && <LabelComp htmlFor={fieldID} label={label} required={required} />}
+        {label && <LabelComp htmlFor={fieldID} label={label} required={required} i18n={i18n} />}
       </CheckboxWrapper>
       <FieldDescription description={description} path={path} value={value} i18n={i18n} />
     </div>

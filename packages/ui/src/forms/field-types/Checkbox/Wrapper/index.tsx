@@ -10,7 +10,9 @@ export const CheckboxWrapper: React.FC<{
 }> = (props) => {
   const { path, children, readOnly, baseClass } = props
 
-  const { value: checked } = useFormFields(([fields]) => fields[path])
+  const field = useFormFields(([fields]) => fields[path])
+
+  const { value: checked } = field || {}
 
   return (
     <div

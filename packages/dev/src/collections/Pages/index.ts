@@ -43,96 +43,96 @@ export const Pages: CollectionConfig = {
         condition: (data) => data.enableConditionalField,
       },
     },
-    {
-      name: 'number',
-      label: 'Number',
-      type: 'number',
-    },
-    {
-      name: 'select',
-      label: 'Select',
-      type: 'select',
-      options: [
-        {
-          label: 'Option 1',
-          value: 'option-1',
-        },
-        {
-          label: 'Option 2',
-          value: 'option-2',
-        },
-      ],
-    },
-    {
-      type: 'textarea',
-      name: 'textarea',
-      label: 'Textarea',
-      admin: {
-        rows: 10,
-      },
-    },
-    {
-      name: 'group',
-      label: 'Group',
-      type: 'group',
-      fields: [
-        {
-          name: 'groupText',
-          label: 'Group Text',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      label: 'Tabs',
-      type: 'tabs',
-      tabs: [
-        {
-          name: 'tab1',
-          label: 'Tab 1 (Named)',
-          validate: (value) => true,
-          fields: [
-            {
-              name: 'tab1Text',
-              label: 'Tab 1 Text',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-        {
-          label: 'Tab 2 (Unnamed)',
-          fields: [
-            {
-              name: 'tab2Text',
-              label: 'Tab 2 Text',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'rowText1',
-          label: 'Row Text',
-          type: 'text',
-          admin: {
-            width: '50%',
-          },
-        },
-        {
-          name: 'rowText2',
-          label: 'Row Text',
-          type: 'text',
-          admin: {
-            width: '50%',
-          },
-        },
-      ],
-    },
+    // {
+    //   name: 'number',
+    //   label: 'Number',
+    //   type: 'number',
+    // },
+    // {
+    //   name: 'select',
+    //   label: 'Select',
+    //   type: 'select',
+    //   options: [
+    //     {
+    //       label: 'Option 1',
+    //       value: 'option-1',
+    //     },
+    //     {
+    //       label: 'Option 2',
+    //       value: 'option-2',
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'textarea',
+    //   name: 'textarea',
+    //   label: 'Textarea',
+    //   admin: {
+    //     rows: 10,
+    //   },
+    // },
+    // {
+    //   name: 'group',
+    //   label: 'Group',
+    //   type: 'group',
+    //   fields: [
+    //     {
+    //       name: 'groupText',
+    //       label: 'Group Text',
+    //       type: 'text',
+    //     },
+    //   ],
+    // },
+    // {
+    //   label: 'Tabs',
+    //   type: 'tabs',
+    //   tabs: [
+    //     {
+    //       name: 'tab1',
+    //       label: 'Tab 1 (Named)',
+    //       validate: (value) => true,
+    //       fields: [
+    //         {
+    //           name: 'tab1Text',
+    //           label: 'Tab 1 Text',
+    //           type: 'text',
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       label: 'Tab 2 (Unnamed)',
+    //       fields: [
+    //         {
+    //           name: 'tab2Text',
+    //           label: 'Tab 2 Text',
+    //           type: 'text',
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'row',
+    //   fields: [
+    //     {
+    //       name: 'rowText1',
+    //       label: 'Row Text',
+    //       type: 'text',
+    //       admin: {
+    //         width: '50%',
+    //       },
+    //     },
+    //     {
+    //       name: 'rowText2',
+    //       label: 'Row Text',
+    //       type: 'text',
+    //       admin: {
+    //         width: '50%',
+    //       },
+    //     },
+    //   ],
+    // },
   ],
 }

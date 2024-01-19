@@ -3,7 +3,7 @@ import React from 'react'
 
 import { Tooltip } from '../../elements/Tooltip'
 import type { ErrorProps } from 'payload/types'
-import useField from '../useField'
+import { useFormFields } from '../Form/context'
 
 import './index.scss'
 
@@ -17,7 +17,9 @@ const Error: React.FC<ErrorProps> = (props) => {
     showError: showErrorFromProps,
   } = props
 
-  const { valid, errorMessage } = useField({ path })
+  const field = useFormFields(([fields]) => fields[path])
+
+  const { valid, errorMessage } = field || {}
 
   const message = messageFromProps || errorMessage
   const showMessage = showErrorFromProps || !valid

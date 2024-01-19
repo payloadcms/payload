@@ -26,8 +26,6 @@ const Text: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    valid = true,
-    errorMessage,
     value,
     i18n,
   } = props
@@ -40,7 +38,12 @@ const Text: React.FC<Props> = (props) => {
   return (
     <TextInputWrapper className={className} style={style} width={width} path={path}>
       <ErrorComp path={path} />
-      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <LabelComp
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
+        label={label}
+        required={required}
+        i18n={i18n}
+      />
       <div>
         {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
         <TextInput

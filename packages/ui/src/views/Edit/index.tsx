@@ -127,7 +127,6 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             }`}
             type="withoutNav"
           />
-
           {/* <Meta
         description={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
           collection.labels.singular,
