@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment } from 'react'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
@@ -15,7 +15,6 @@ import { SetStepNav } from './SetStepNav'
 // import { Upload } from '../Upload'
 import './index.scss'
 import { EditViewProps } from '../types'
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'
 import { getFormStateFromServer } from './action'
 
@@ -99,11 +98,10 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     collectionSlug: collectionConfig?.slug,
     id: id || undefined,
     locale,
+    language: i18n.language,
     operation,
     docPreferences,
     user,
-    // TODO: this is not possible, the `t` function is not serializable
-    // i18n
   })
 
   return (

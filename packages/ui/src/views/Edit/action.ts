@@ -8,8 +8,9 @@ import { reduceFieldsToValues } from '../..'
 import { DocumentPreferences } from 'payload/types'
 import { Locale } from 'payload/config'
 import { User } from 'payload/auth'
-import { I18n } from '@payloadcms/translations'
+import { initTFunction } from '@payloadcms/translations'
 import isDeepEqual from 'deep-equal'
+import { translations } from '@payloadcms/translations/api'
 
 let lastFormState: FormState | null = null
 
@@ -21,8 +22,7 @@ export const getFormStateFromServer = async (
     id?: string
     operation: 'create' | 'update'
     user: User
-    // TODO: the `t` function cannot be passed through to this action
-    i18n: I18n
+    language: string
   },
   {
     formState,
@@ -30,7 +30,7 @@ export const getFormStateFromServer = async (
     formState: FormState
   },
 ) => {
-  const { collectionSlug, docPreferences, locale, id, operation, user, i18n } = args
+  const { collectionSlug, docPreferences, locale, id, operation, user, language } = args
 
   const payload = await getPayload({
     config: configPromise,
@@ -40,6 +40,9 @@ export const getFormStateFromServer = async (
 
   const data = reduceFieldsToValues(formState, true)
 
+  // TODO: memoize the creation of this function based on language
+  const t = initTFunction({ config: payload.config.i18n, language, translations })
+
   const result = await buildStateFromSchema({
     id,
     config: payload.config,
@@ -48,8 +51,7 @@ export const getFormStateFromServer = async (
     locale: locale.code,
     operation,
     preferences: docPreferences,
-    // TODO: see note above
-    t: i18n?.t || ((key: string) => key),
+    t,
     user,
   })
 
@@ -57,7 +59,5 @@ export const getFormStateFromServer = async (
 
   lastFormState = result
 
-  if (hasChanged) return result
-
-  return null
+  return hasChanged ? result : null
 }
