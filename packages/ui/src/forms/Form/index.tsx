@@ -43,6 +43,7 @@ import getDataByPathFunc from './getDataByPath'
 import getSiblingDataFunc from './getSiblingData'
 import initContextState from './initContextState'
 import reduceFieldsToValues from './reduceFieldsToValues'
+import useDebounce from '../../hooks/useDebounce'
 
 const baseClass = 'form'
 
@@ -67,7 +68,6 @@ const Form: React.FC<Props> = (props) => {
     onChange,
   } = props
 
-  // Form with `action` server functions cannot define a `method`
   const method = 'method' in props ? props.method : undefined
 
   const { push } = useRouter()
@@ -91,6 +91,8 @@ const Form: React.FC<Props> = (props) => {
    * which calls the fieldReducer, which then updates the state.
    */
   const [fields, dispatchFields] = fieldsReducer
+
+  const debouncedFields = useDebounce(fields, 300)
 
   contextRef.current.fields = fields
   contextRef.current.dispatchFields = dispatchFields
@@ -655,33 +657,29 @@ const Form: React.FC<Props> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  useThrottledEffect(
-    () => {
-      const executeOnChange = async () => {
-        if (Array.isArray(onChange)) {
-          let newFormState
+  useEffect(() => {
+    const executeOnChange = async () => {
+      if (Array.isArray(onChange)) {
+        let newFormState
 
-          await onChange.reduce(async (priorOnChange, onChangeFn) => {
-            await priorOnChange
+        await onChange.reduce(async (priorOnChange, onChangeFn) => {
+          await priorOnChange
 
-            const result = await onChangeFn({
-              formState: fields,
-            })
+          const result = await onChangeFn({
+            formState: fields,
+          })
 
-            newFormState = result
-          }, Promise.resolve())
+          newFormState = result
+        }, Promise.resolve())
 
-          if (newFormState) {
-            dispatchFields({ state: newFormState, type: 'REPLACE_STATE' })
-          }
+        if (newFormState) {
+          dispatchFields({ state: newFormState, type: 'REPLACE_STATE' })
         }
       }
+    }
 
-      executeOnChange()
-    },
-    300,
-    [fields],
-  )
+    executeOnChange()
+  }, [debouncedFields])
 
   return (
     <form
