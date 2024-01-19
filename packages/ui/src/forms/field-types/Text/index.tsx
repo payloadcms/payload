@@ -1,12 +1,11 @@
 import React from 'react'
 
 import type { Props } from './types'
-
-import { fieldBaseClass } from '../shared'
 import { TextInput } from './Input'
 import FieldDescription from '../../FieldDescription'
 import DefaultError from '../../Error'
 import DefaultLabel from '../../Label'
+import { TextInputWrapper } from './Wrapper'
 
 const Text: React.FC<Props> = (props) => {
   const {
@@ -29,6 +28,8 @@ const Text: React.FC<Props> = (props) => {
     required,
     valid = true,
     errorMessage,
+    value,
+    i18n,
   } = props
 
   const path = pathFromProps || name
@@ -37,18 +38,10 @@ const Text: React.FC<Props> = (props) => {
   const LabelComp = Label || DefaultLabel
 
   return (
-    <div
-      className={[fieldBaseClass, 'text', className, !valid && 'error', readOnly && 'read-only']
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <ErrorComp message={errorMessage} showError={!valid} />
+    <TextInputWrapper className={className} style={style} width={width} path={path}>
+      <ErrorComp path={path} />
       <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-      <div className="input-wrapper">
+      <div>
         {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
         <TextInput
           path={path}
@@ -66,9 +59,10 @@ const Text: React.FC<Props> = (props) => {
         className={`field-description-${path.replace(/\./g, '__')}`}
         description={description}
         path={path}
-        // value={value}
+        value={value}
+        i18n={i18n}
       />
-    </div>
+    </TextInputWrapper>
   )
 }
 

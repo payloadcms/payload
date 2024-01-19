@@ -2,14 +2,14 @@ import React from 'react'
 
 import type { Props } from './types'
 
-// import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { isComponent } from './types'
 import './index.scss'
 
 const baseClass = 'field-description'
 
 const FieldDescription: React.FC<Props> = (props) => {
-  const { className, description, marginPlacement, path, value } = props
+  const { className, description, marginPlacement, path, value, i18n } = props
 
   if (isComponent(description)) {
     const Description = description
@@ -27,14 +27,12 @@ const FieldDescription: React.FC<Props> = (props) => {
           .filter(Boolean)
           .join(' ')}
       >
-        {
-          typeof description === 'function'
-            ? description({
-                path,
-                value,
-              })
-            : '' // : getTranslation(description, i18n)
-        }
+        {typeof description === 'function'
+          ? description({
+              path,
+              value,
+            })
+          : getTranslation(description, i18n)}
       </div>
     )
   }
