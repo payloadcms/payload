@@ -12,8 +12,6 @@ import { initTFunction } from '@payloadcms/translations'
 import isDeepEqual from 'deep-equal'
 import { translations } from '@payloadcms/translations/api'
 
-let lastFormState: FormState | null = null
-
 export const getFormStateFromServer = async (
   args: {
     collectionSlug: string
@@ -55,9 +53,5 @@ export const getFormStateFromServer = async (
     user,
   })
 
-  const hasChanged = !isDeepEqual(lastFormState, result)
-
-  lastFormState = result
-
-  return hasChanged ? result : null
+  return !isDeepEqual(formState, result) ? result : null
 }
