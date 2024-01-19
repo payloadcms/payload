@@ -47,11 +47,13 @@ export const Pages: CollectionConfig = {
       name: 'number',
       label: 'Number',
       type: 'number',
+      required: true,
     },
     {
       name: 'select',
       label: 'Select',
       type: 'select',
+      required: true,
       options: [
         {
           label: 'Option 1',
@@ -67,6 +69,7 @@ export const Pages: CollectionConfig = {
       type: 'textarea',
       name: 'textarea',
       label: 'Textarea',
+      required: true,
       admin: {
         rows: 10,
       },
@@ -80,6 +83,7 @@ export const Pages: CollectionConfig = {
           name: 'groupText',
           label: 'Group Text',
           type: 'text',
+          required: true,
         },
       ],
     },

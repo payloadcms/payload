@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 
 import { Logo } from '@payloadcms/ui/graphics'
-import { MinimalTemplate, LoginForm } from '@payloadcms/ui'
+import { MinimalTemplate } from '@payloadcms/ui'
 import type { SanitizedConfig } from 'payload/types'
 import { meta } from '../../utilities/meta'
 import { Metadata } from 'next'
@@ -9,6 +9,7 @@ import { initPage } from '../../utilities/initPage'
 import { redirect } from 'next/navigation'
 import { getNextT } from '../../utilities/getNextT'
 import './index.scss'
+import { LoginForm } from './LoginForm'
 
 const baseClass = 'login'
 
@@ -36,7 +37,7 @@ export const Login: React.FC<{
   const { config, user } = await initPage({ configPromise })
 
   const {
-    admin: { components: { afterLogin, beforeLogin } = {}, logoutRoute, user: userSlug },
+    admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
     routes: { admin },
     collections,
   } = config

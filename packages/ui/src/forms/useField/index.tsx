@@ -24,9 +24,11 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const { user } = useAuth()
   const { id } = useDocumentInfo()
   const operation = useOperation()
-  const field = useFormFields(([fields]) => fields[path])
+  const { field, dispatchField } = useFormFields(([fields, dispatch]) => ({
+    field: fields[path],
+    dispatchField: dispatch,
+  }))
   const { t } = useTranslation()
-  const dispatchField = useFormFields(([_, dispatch]) => dispatch)
   const config = useConfig()
 
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()

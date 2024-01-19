@@ -43,6 +43,7 @@ import getDataByPathFunc from './getDataByPath'
 import getSiblingDataFunc from './getSiblingData'
 import initContextState from './initContextState'
 import reduceFieldsToValues from './reduceFieldsToValues'
+import useDebounce from '../../hooks/useDebounce'
 
 const baseClass = 'form'
 
@@ -59,13 +60,15 @@ const Form: React.FC<Props> = (props) => {
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
-    method,
     onSubmit,
     onSuccess,
     redirect,
     submitted: submittedFromProps,
     waitForAutocomplete,
+    onChange,
   } = props
+
+  const method = 'method' in props ? props.method : undefined
 
   const { push } = useRouter()
 
@@ -88,6 +91,8 @@ const Form: React.FC<Props> = (props) => {
    * which calls the fieldReducer, which then updates the state.
    */
   const [fields, dispatchFields] = fieldsReducer
+
+  const debouncedFields = useDebounce(fields, 150)
 
   contextRef.current.fields = fields
   contextRef.current.dispatchFields = dispatchFields
@@ -651,6 +656,30 @@ const Form: React.FC<Props> = (props) => {
   }, [locale])
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
+
+  useEffect(() => {
+    const executeOnChange = async () => {
+      if (Array.isArray(onChange)) {
+        let newFormState
+
+        await onChange.reduce(async (priorOnChange, onChangeFn) => {
+          await priorOnChange
+
+          const result = await onChangeFn({
+            formState: debouncedFields,
+          })
+
+          newFormState = result
+        }, Promise.resolve())
+
+        if (!isDeepEqual(debouncedFields, newFormState)) {
+          dispatchFields({ state: newFormState, type: 'REPLACE_STATE' })
+        }
+      }
+    }
+
+    executeOnChange()
+  }, [debouncedFields])
 
   return (
     <form

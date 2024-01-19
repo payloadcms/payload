@@ -1,13 +1,11 @@
 'use client'
 import React, { useCallback } from 'react'
-import { useTranslation } from '../../../providers/Translation'
+import { useTranslation } from '../../../../providers/Translation'
 
 import type { TextareaField, Validate } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
-import useField from '../../useField'
-
-import './index.scss'
+import useField from '../../../useField'
 
 export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   className?: string

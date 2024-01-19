@@ -15,7 +15,8 @@ import { SetStepNav } from './SetStepNav'
 // import { Upload } from '../Upload'
 import './index.scss'
 import { EditViewProps } from '../types'
-import { fieldTypes } from '../../exports'
+import { fieldTypes } from '../../forms/field-types'
+import { getFormStateFromServer } from './action'
 
 import './index.scss'
 
@@ -93,15 +94,26 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
   //   setViewActions(defaultActions)
   // }, [id, location.pathname, collectionConfig?.admin?.components?.views?.Edit, setViewActions])
 
+  const onChange = getFormStateFromServer.bind(null, {
+    collectionSlug: collectionConfig?.slug,
+    id: id || undefined,
+    locale,
+    language: i18n.language,
+    operation,
+    docPreferences,
+    user,
+  })
+
   return (
     <main className={classes}>
       <OperationProvider operation={operation}>
         <Form
-          action={action}
+          // action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
           initialState={formState}
           method={id ? 'PATCH' : 'POST'}
+          onChange={[onChange]}
           // onSuccess={onSave}
         >
           <FormLoadingOverlayToggle
@@ -115,7 +127,6 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             }`}
             type="withoutNav"
           />
-
           {/* <Meta
         description={`${isEditing ? t('general:editing') : t('general:creating')} - ${getTranslation(
           collection.labels.singular,
