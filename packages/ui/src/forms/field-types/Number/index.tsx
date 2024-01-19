@@ -8,6 +8,7 @@ import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import { NumberInput } from './Input'
 import { NumberInputWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -104,4 +105,4 @@ const NumberField: React.FC<Props> = (props) => {
   )
 }
 
-export default NumberField
+export default withCondition(NumberField)

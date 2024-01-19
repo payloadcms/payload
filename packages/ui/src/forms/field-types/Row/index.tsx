@@ -5,8 +5,10 @@ import type { Props } from './types'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import { fieldBaseClass } from '../shared'
-import './index.scss'
 import { RowProvider } from './provider'
+import { withCondition } from '../../withCondition'
+
+import './index.scss'
 
 const baseClass = 'row'
 
@@ -23,6 +25,7 @@ const Row: React.FC<Props> = (props) => {
     user,
     i18n,
     payload,
+    config,
   } = props
 
   return (
@@ -44,9 +47,11 @@ const Row: React.FC<Props> = (props) => {
           user={user}
           i18n={i18n}
           payload={payload}
+          config={config}
         />
       </div>
     </RowProvider>
   )
 }
-export default Row
+
+export default withCondition(Row)

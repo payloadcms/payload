@@ -6,6 +6,7 @@ import DefaultError from '../../Error'
 import DefaultLabel from '../../Label'
 import FieldDescription from '../../FieldDescription'
 import { TextareaInputWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -84,4 +85,5 @@ const Textarea: React.FC<Props> = (props) => {
     </TextareaInputWrapper>
   )
 }
-export default Textarea
+
+export default withCondition(Textarea)

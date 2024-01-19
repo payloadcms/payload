@@ -8,6 +8,7 @@ import RenderFields from '../../RenderFields'
 import { getNestedFieldState } from '../../WatchChildErrors/getNestedFieldState'
 import { GroupProvider } from './provider'
 import { GroupWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -98,4 +99,4 @@ const Group: React.FC<Props> = (props) => {
   )
 }
 
-export default Group
+export default withCondition(Group)

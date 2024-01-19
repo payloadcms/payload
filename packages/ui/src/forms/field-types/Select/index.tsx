@@ -7,6 +7,7 @@ import DefaultLabel from '../../Label'
 import FieldDescription from '../../FieldDescription'
 import SelectInput from './Input'
 import { SelectFieldWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -77,4 +78,4 @@ export const Select: React.FC<Props> = (props) => {
   )
 }
 
-export default Select
+export default withCondition(Select)
