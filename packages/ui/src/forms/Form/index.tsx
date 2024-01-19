@@ -92,7 +92,7 @@ const Form: React.FC<Props> = (props) => {
    */
   const [fields, dispatchFields] = fieldsReducer
 
-  const debouncedFields = useDebounce(fields, 300)
+  const debouncedFields = useDebounce(fields, 150)
 
   contextRef.current.fields = fields
   contextRef.current.dispatchFields = dispatchFields
