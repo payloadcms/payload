@@ -61,7 +61,7 @@ export const createPayloadRequest = async ({
           requestData = JSON.parse(payloadData)
         }
       } else {
-        // store file on disk
+        // store temp file on disk
         // TODO: handle request as stream
         // need to get file and fields out of the request body if they exist
       }
