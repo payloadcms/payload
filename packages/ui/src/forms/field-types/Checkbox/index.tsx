@@ -13,7 +13,8 @@ import { CheckboxWrapper } from './Wrapper'
 import './index.scss'
 
 const baseClass = 'checkbox'
-const inputBaseClass = 'checkbox-input'
+
+export const inputBaseClass = 'checkbox-input'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
@@ -61,7 +62,7 @@ const Checkbox: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <ErrorComp alignCaret="left" message={errorMessage} showError={!valid} />
+        <ErrorComp alignCaret="left" path={path} />
       </div>
       <CheckboxWrapper path={path} readOnly={readOnly} baseClass={inputBaseClass}>
         <div className={`${inputBaseClass}__input`}>
@@ -79,7 +80,7 @@ const Checkbox: React.FC<Props> = (props) => {
         </div>
         {label && <LabelComp htmlFor={fieldID} label={label} required={required} />}
       </CheckboxWrapper>
-      <FieldDescription description={description} path={path} value={value} />
+      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
     </div>
   )
 }

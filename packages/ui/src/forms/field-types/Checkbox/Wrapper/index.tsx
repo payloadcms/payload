@@ -1,8 +1,6 @@
 'use client'
 import React from 'react'
-import { useFormFields } from '../../Form/context'
-
-import './index.scss'
+import { useFormFields } from '../../../Form/context'
 
 export const CheckboxWrapper: React.FC<{
   path: string

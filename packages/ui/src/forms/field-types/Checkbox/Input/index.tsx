@@ -1,10 +1,10 @@
 'use client'
 import React, { Fragment, useCallback } from 'react'
 
-import useField from '../../useField'
+import useField from '../../../useField'
 import { Validate } from 'payload/types'
-import { Check } from '../../../icons/Check'
-import { Line } from '../../../icons/Line'
+import { Check } from '../../../../icons/Check'
+import { Line } from '../../../../icons/Line'
 
 type CheckboxInputProps = {
   'aria-label'?: string
