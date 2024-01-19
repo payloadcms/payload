@@ -111,7 +111,8 @@ describe('database', () => {
       expect(migration.batch).toStrictEqual(1)
     })
 
-    it('should run migrate:down', async () => {
+    // known issue: https://github.com/payloadcms/payload/issues/4597
+    it.skip('should run migrate:down', async () => {
       let error
       const args = {
         _: ['migrate:down'],
@@ -121,9 +122,21 @@ describe('database', () => {
       } catch (e) {
         error = e
       }
-      // known issue that this is not working see:
-      // https://github.com/payloadcms/payload/issues/4597
-      // expect(error).toBeUndefined()
+      expect(error).toBeUndefined()
+    })
+
+    // known issue: https://github.com/payloadcms/payload/issues/4597
+    it.skip('should run migrate:refresh', async () => {
+      let error
+      const args = {
+        _: ['migrate:refresh'],
+      }
+      try {
+        await migrate(args)
+      } catch (e) {
+        error = e
+      }
+      expect(error).toBeUndefined()
     })
   })
 
