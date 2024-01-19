@@ -12,6 +12,7 @@ import { Wrapper } from './Wrapper'
 import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
 import { Tab } from 'payload/types'
+import { withCondition } from '../../withCondition'
 
 const baseClass = 'tabs-field'
 
@@ -43,6 +44,7 @@ const TabsField: React.FC<Props> = async (props) => {
     i18n,
     payload,
     docPreferences,
+    config,
   } = props
 
   const tabsPrefKey = `tabs-${indexPath}`
@@ -127,6 +129,7 @@ const TabsField: React.FC<Props> = async (props) => {
                   description={activeTabConfig.description}
                   marginPlacement="bottom"
                   path={path}
+                  i18n={i18n}
                 />
                 <RenderFields
                   fieldSchema={getTabFieldSchema({ tabConfig: activeTabConfig, path })}
@@ -149,6 +152,7 @@ const TabsField: React.FC<Props> = async (props) => {
                   formState={formState}
                   i18n={i18n}
                   payload={payload}
+                  config={config}
                 />
               </div>
             </React.Fragment>
@@ -159,4 +163,4 @@ const TabsField: React.FC<Props> = async (props) => {
   )
 }
 
-export default TabsField
+export default withCondition(TabsField)

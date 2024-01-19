@@ -1,13 +1,14 @@
 import React from 'react'
 
 import { fieldAffectsData } from 'payload/types'
+import { getTranslation } from '@payloadcms/translations'
+
 import type { Props } from './types'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-
-import './index.scss'
 import { FormFieldBase } from '../field-types/shared'
 import { filterFields } from './filterFields'
-import { getTranslation } from '@payloadcms/translations'
+
+import './index.scss'
 
 const baseClass = 'render-fields'
 
@@ -71,10 +72,6 @@ const RenderFields: React.FC<Props> = (props) => {
           const path = field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
 
           const fieldState = formState?.[path]
-
-          // first check `fieldState` to let top-level group fields through, i.e. `myGroup`
-          // this will proceed to render its children, i.e. `myGroup.myField`
-          if (fieldState && !fieldState?.passesCondition) return null
 
           if (fieldIsPresentational) {
             return <FieldComponent key={fieldIndex} />

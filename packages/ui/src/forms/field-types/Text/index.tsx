@@ -6,6 +6,7 @@ import FieldDescription from '../../FieldDescription'
 import DefaultError from '../../Error'
 import DefaultLabel from '../../Label'
 import { TextInputWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 const Text: React.FC<Props> = (props) => {
   const {
@@ -75,4 +76,4 @@ const Text: React.FC<Props> = (props) => {
   )
 }
 
-export default Text
+export default withCondition(Text)
