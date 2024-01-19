@@ -4,9 +4,7 @@ import React from 'react'
 import { fieldBaseClass } from '../../shared'
 import { useFormFields } from '../../../Form/context'
 
-import './index.scss'
-
-export const TextInputWrapper: React.FC<{
+export const TextareaInputWrapper: React.FC<{
   children: React.ReactNode
   className?: string
   style?: React.CSSProperties
@@ -22,7 +20,7 @@ export const TextInputWrapper: React.FC<{
 
   return (
     <div
-      className={[fieldBaseClass, 'text', className, !valid && 'error', readOnly && 'read-only']
+      className={[fieldBaseClass, 'textarea', className, !valid && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
       style={{

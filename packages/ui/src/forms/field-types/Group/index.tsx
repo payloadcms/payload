@@ -1,15 +1,15 @@
 import React from 'react'
 
 import type { Props } from './types'
-
 import { ErrorPill } from '../../../elements/ErrorPill'
 import FieldDescription from '../../FieldDescription'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import { getNestedFieldState } from '../../WatchChildErrors/getNestedFieldState'
-import './index.scss'
 import { GroupProvider } from './provider'
 import { GroupWrapper } from './Wrapper'
+
+import './index.scss'
 
 const baseClass = 'group-field'
 
@@ -28,6 +28,8 @@ const Group: React.FC<Props> = (props) => {
     user,
     i18n,
     payload,
+    config,
+    value,
   } = props
 
   const path = pathFromProps || name
@@ -69,11 +71,12 @@ const Group: React.FC<Props> = (props) => {
                   className={`field-description-${path.replace(/\./g, '__')}`}
                   description={description}
                   path={path}
-                  value={null}
+                  value={value}
+                  i18n={i18n}
                 />
               </header>
             )}
-            {groupHasErrors && <ErrorPill count={errorCount} withMessage />}
+            {groupHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
           </div>
           <RenderFields
             fieldSchema={fieldSchema}
@@ -87,6 +90,7 @@ const Group: React.FC<Props> = (props) => {
             formState={nestedFieldState}
             i18n={i18n}
             payload={payload}
+            config={config}
           />
         </div>
       </GroupProvider>

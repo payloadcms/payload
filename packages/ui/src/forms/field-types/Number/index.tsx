@@ -1,15 +1,15 @@
 import React from 'react'
 
 import type { Props } from './types'
-
 import { isNumber } from 'payload/utilities'
 import ReactSelect from '../../../elements/ReactSelect'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
-import { fieldBaseClass } from '../shared'
-import './index.scss'
 import { NumberInput } from './Input'
+import { NumberInputWrapper } from './Wrapper'
+
+import './index.scss'
 
 const NumberField: React.FC<Props> = (props) => {
   const {
@@ -26,14 +26,12 @@ const NumberField: React.FC<Props> = (props) => {
     } = {},
     hasMany,
     label,
-    max,
     maxRows,
     min,
-    minRows,
     path: pathFromProps,
     required,
     valid = true,
-    errorMessage,
+    i18n,
     value,
   } = props
 
@@ -43,24 +41,21 @@ const NumberField: React.FC<Props> = (props) => {
   const path = pathFromProps || name
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        'number',
-        className,
-        // showError && 'error',
-        readOnly && 'read-only',
-        hasMany && 'has-many',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+    <NumberInputWrapper
+      className={className}
+      readOnly={readOnly}
+      hasMany={hasMany}
+      style={style}
+      width={width}
+      path={path}
     >
-      <ErrorComp message={errorMessage} showError={!valid} />
-      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp path={path} />
+      <LabelComp
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
+        label={label}
+        required={required}
+        i18n={i18n}
+      />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}
@@ -89,7 +84,7 @@ const NumberField: React.FC<Props> = (props) => {
           // value={valueToRender as Option[]}
         />
       ) : (
-        <div className="input-wrapper">
+        <div>
           {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
           <NumberInput
             path={path}
@@ -104,8 +99,8 @@ const NumberField: React.FC<Props> = (props) => {
           {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
       )}
-      <FieldDescription description={description} value={value} />
-    </div>
+      <FieldDescription description={description} value={value} i18n={i18n} />
+    </NumberInputWrapper>
   )
 }
 

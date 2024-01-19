@@ -1,13 +1,13 @@
 import React from 'react'
 
 import type { Props } from './types'
-
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
-import { fieldBaseClass } from '../shared'
-import './index.scss'
 import { EmailInput } from './Input'
+import { EmailInputWrapper } from './Wrapper'
+
+import './index.scss'
 
 export const Email: React.FC<Props> = (props) => {
   const {
@@ -24,8 +24,8 @@ export const Email: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    errorMessage,
-    valid,
+    i18n,
+    value,
   } = props
 
   const path = pathFromProps || name
@@ -34,24 +34,21 @@ export const Email: React.FC<Props> = (props) => {
   const LabelComp = Label || DefaultLabel
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        'email',
-        className,
-        // showError && 'error',
-        readOnly && 'read-only',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+    <EmailInputWrapper
+      className={className}
+      readOnly={readOnly}
+      style={style}
+      width={width}
+      path={path}
     >
-      <ErrorComp message={errorMessage} showError={!valid} />
-      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
-      <div className="input-wrapper">
+      <ErrorComp path={path} />
+      <LabelComp
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
+        label={label}
+        required={required}
+        i18n={i18n}
+      />
+      <div>
         {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
         <EmailInput
           name={name}
@@ -62,12 +59,8 @@ export const Email: React.FC<Props> = (props) => {
         />
         {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
       </div>
-      <FieldDescription
-        description={description}
-        path={path}
-        // value={value}
-      />
-    </div>
+      <FieldDescription description={description} path={path} i18n={i18n} value={value} />
+    </EmailInputWrapper>
   )
 }
 

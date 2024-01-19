@@ -36,7 +36,13 @@ const Text: React.FC<Props> = (props) => {
   const LabelComp = Label || DefaultLabel
 
   return (
-    <TextInputWrapper className={className} style={style} width={width} path={path}>
+    <TextInputWrapper
+      className={className}
+      style={style}
+      width={width}
+      path={path}
+      readOnly={readOnly}
+    >
       <ErrorComp path={path} />
       <LabelComp
         htmlFor={`field-${path.replace(/\./g, '__')}`}

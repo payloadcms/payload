@@ -9,7 +9,6 @@ import { DocumentPreferences } from 'payload/types'
 import { Locale } from 'payload/config'
 import { User } from 'payload/auth'
 import { initTFunction } from '@payloadcms/translations'
-import isDeepEqual from 'deep-equal'
 import { translations } from '@payloadcms/translations/api'
 
 export const getFormStateFromServer = async (
@@ -53,5 +52,5 @@ export const getFormStateFromServer = async (
     user,
   })
 
-  return !isDeepEqual(formState, result) ? result : null
+  return result
 }

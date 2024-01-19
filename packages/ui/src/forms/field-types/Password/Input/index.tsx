@@ -1,8 +1,7 @@
 'use client'
 import React, { useCallback } from 'react'
 
-import useField from '../../useField'
-import './index.scss'
+import useField from '../../../useField'
 import { Validate } from 'payload/types'
 
 export const PasswordInput: React.FC<{

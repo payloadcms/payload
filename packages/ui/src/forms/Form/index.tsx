@@ -666,13 +666,13 @@ const Form: React.FC<Props> = (props) => {
           await priorOnChange
 
           const result = await onChangeFn({
-            formState: fields,
+            formState: debouncedFields,
           })
 
           newFormState = result
         }, Promise.resolve())
 
-        if (newFormState) {
+        if (!isDeepEqual(debouncedFields, newFormState)) {
           dispatchFields({ state: newFormState, type: 'REPLACE_STATE' })
         }
       }

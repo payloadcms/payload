@@ -1,10 +1,12 @@
 import React from 'react'
 import type { Props } from './types'
-import { fieldBaseClass, isFieldRTL } from '../shared'
+import { isFieldRTL } from '../shared'
 import TextareaInput from './Input'
 import DefaultError from '../../Error'
 import DefaultLabel from '../../Label'
 import FieldDescription from '../../FieldDescription'
+import { TextareaInputWrapper } from './Wrapper'
+
 import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
@@ -27,11 +29,10 @@ const Textarea: React.FC<Props> = (props) => {
     minLength,
     path: pathFromProps,
     required,
-    valid,
-    errorMessage,
     value,
     locale,
     config: { localization },
+    i18n,
   } = props
 
   const path = pathFromProps || name
@@ -47,17 +48,20 @@ const Textarea: React.FC<Props> = (props) => {
   const LabelComp = Label || DefaultLabel
 
   return (
-    <div
-      className={[fieldBaseClass, 'textarea', className, !valid && 'error', readOnly && 'read-only']
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+    <TextareaInputWrapper
+      className={className}
+      readOnly={readOnly}
+      style={style}
+      width={width}
+      path={path}
     >
-      <ErrorComp message={errorMessage} showError={!valid} />
-      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp path={path} />
+      <LabelComp
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
+        label={label}
+        required={required}
+        i18n={i18n}
+      />
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
           <div className="textarea-clone" data-value={value || placeholder || ''} />
@@ -76,8 +80,8 @@ const Textarea: React.FC<Props> = (props) => {
           {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
       </label>
-      <FieldDescription description={description} path={path} value={value} />
-    </div>
+      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
+    </TextareaInputWrapper>
   )
 }
 export default Textarea

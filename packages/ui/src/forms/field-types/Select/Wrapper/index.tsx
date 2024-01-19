@@ -4,17 +4,15 @@ import React from 'react'
 import { fieldBaseClass } from '../../shared'
 import { useFormFields } from '../../../Form/context'
 
-import './index.scss'
-
-export const TextInputWrapper: React.FC<{
-  children: React.ReactNode
+export const SelectFieldWrapper: React.FC<{
   className?: string
-  style?: React.CSSProperties
   width?: string
-  path?: string
+  style?: React.CSSProperties
   readOnly?: boolean
+  children: React.ReactNode
+  path: string
 }> = (props) => {
-  const { children, className, style, width, path, readOnly } = props
+  const { className, readOnly, style, width, children, path } = props
 
   const field = useFormFields(([fields]) => fields[path])
 
@@ -22,9 +20,10 @@ export const TextInputWrapper: React.FC<{
 
   return (
     <div
-      className={[fieldBaseClass, 'text', className, !valid && 'error', readOnly && 'read-only']
+      className={[fieldBaseClass, 'select', className, !valid && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,

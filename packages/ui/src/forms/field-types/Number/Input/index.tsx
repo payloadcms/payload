@@ -1,10 +1,9 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from '../../../providers/Translation'
+import { useTranslation } from '../../../../providers/Translation'
 
 import { getTranslation } from '@payloadcms/translations'
-import useField from '../../useField'
-import './index.scss'
+import useField from '../../../useField'
 import { Validate } from 'payload/types'
 
 export const NumberInput: React.FC<{
