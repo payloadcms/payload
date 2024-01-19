@@ -53,7 +53,7 @@ export const generateFileData = async <T>({
     }
   }
 
-  let file = req.files?.file || undefined
+  let file = req.file
 
   const { searchParams } = new URL(req.url)
   const uploadEdits = searchParams.get('uploadEdits') || {}
@@ -73,7 +73,7 @@ export const generateFileData = async <T>({
       if (url && url.startsWith('/') && !disableLocalStorage) {
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
-        file = response as UploadedFile
+        file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
         file = (await getExternalFile({ data: data as FileData, req })) as UploadedFile
@@ -207,7 +207,7 @@ export const generateFileData = async <T>({
       if (file.tempFilePath) {
         await fs.promises.writeFile(file.tempFilePath, croppedImage) // write fileBuffer to the temp path
       } else {
-        req.files.file = fileForResize
+        req.file = fileForResize
       }
     } else {
       filesToSave.push({
@@ -221,7 +221,7 @@ export const generateFileData = async <T>({
           await fs.promises.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
         } else {
           // Assign the _possibly modified_ file to the request object
-          req.files.file = {
+          req.file = {
             ...file,
             data: fileBuffer?.data || file.data,
             size: fileBuffer?.info.size,

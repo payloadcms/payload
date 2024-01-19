@@ -8,6 +8,19 @@ import type { FindOneArgs } from '../database/types'
 import type { validOperators } from './constants'
 export type { Payload as Payload } from '../'
 
+export type UploadEdits = {
+  crop?: {
+    height?: number
+    width?: number
+    x?: number
+    y?: number
+  }
+  focalPoint?: {
+    x?: number
+    y?: number
+  }
+}
+
 export type CustomPayloadRequest<U = any> = {
   /**
    * The collection being interacted with
@@ -23,6 +36,13 @@ export type CustomPayloadRequest<U = any> = {
    * TODO: Files with Standard Request
    * The files that were uploaded during this request
    */
+  file?: {
+    data: Buffer
+    mimetype: string
+    name: string
+    size: number
+    tempFilePath?: string
+  }
   files?: {
     // placeholder
   }

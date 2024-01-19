@@ -8,6 +8,11 @@ const nextConfig = {
   },
   // transpilePackages: ['@payloadcms/db-mongodb', 'mongoose'],
   webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      sharp$: false, // serverComponentsExternalPackages not working with pnpm workspaces: https://github.com/vercel/next.js/issues/43433
+    }
+
     return {
       ...config,
       externals: [

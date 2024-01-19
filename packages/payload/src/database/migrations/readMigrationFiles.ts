@@ -33,10 +33,11 @@ export const readMigrationFiles = async ({
       return path.resolve(payload.db.migrationDir, file)
     })
 
-  return files.map((filePath) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const migration = require(filePath) as Migration
-    migration.name = path.basename(filePath).split('.')?.[0]
-    return migration
-  })
+  return Promise.all(
+    files.map(async (filePath) => {
+      const migration = (await import(`${filePath}`)) as Migration
+      migration.name = path.basename(filePath).split('.')?.[0]
+      return migration
+    }),
+  )
 }

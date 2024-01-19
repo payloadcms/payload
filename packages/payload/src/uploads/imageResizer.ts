@@ -1,4 +1,3 @@
-import type { UploadedFile } from 'express-fileupload'
 import type { OutputInfo } from 'sharp'
 
 import { fromBuffer } from 'file-type'
@@ -6,9 +5,9 @@ import fs from 'fs'
 import sanitize from 'sanitize-filename'
 import sharp from 'sharp'
 
-import type { UploadEdits } from '../admin-old/components/views/collections/Edit/types'
 import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { PayloadRequest } from '../types'
+import type { UploadEdits } from '../exports/types'
+import type { CustomPayloadRequest, PayloadRequest } from '../types'
 import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types'
 
 import { isNumber } from '../utilities/isNumber'
@@ -17,7 +16,7 @@ import fileExists from './fileExists'
 type ResizeArgs = {
   config: SanitizedCollectionConfig
   dimensions: ProbedImageSize
-  file: UploadedFile
+  file: CustomPayloadRequest['file']
   mimeType: string
   req: PayloadRequest & {
     query?: {
