@@ -1,12 +1,12 @@
 import React from 'react'
 
 import type { Props } from './types'
-
 import Error from '../../Error'
 import Label from '../../Label'
-import './index.scss'
-import { fieldBaseClass } from '../shared'
 import { PasswordInput } from './Input'
+import { PasswordInputWrapper } from './Wrapper'
+
+import './index.scss'
 
 export const Password: React.FC<Props> = (props) => {
   const {
@@ -19,33 +19,22 @@ export const Password: React.FC<Props> = (props) => {
     required,
     style,
     width,
+    i18n,
   } = props
 
   const path = pathFromProps || name
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        'password',
-        className,
-        // showError && 'error'/
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <Error
-        message=""
-        // message={errorMessage}
-        // showError={showError}
+    <PasswordInputWrapper className={className} style={style} width={width} path={path}>
+      <Error path={path} />
+      <Label
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
+        label={label}
+        required={required}
+        i18n={i18n}
       />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <PasswordInput name={name} autoComplete={autoComplete} disabled={disabled} path={path} />
-    </div>
+    </PasswordInputWrapper>
   )
 }
 

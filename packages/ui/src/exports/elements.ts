@@ -1,7 +1,6 @@
 export { Card } from '../elements/Card'
 export { Button } from '../elements/Button'
 export { RenderCustomComponent } from '../elements/RenderCustomComponent'
-export { LoginForm } from '../elements/LoginForm'
 export { TableColumnsProvider } from '../elements/TableColumns'
 export { HydrateClientUser } from '../elements/HydrateClientUser'
 export { DocumentHeader } from '../elements/DocumentHeader'

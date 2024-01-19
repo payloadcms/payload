@@ -42,6 +42,7 @@
     "@faceless-ui/modal": "2.0.1",
     "@payloadcms/translations": "workspace:^",
     "@payloadcms/ui": "workspace:*",
+    "deep-equal": "2.2.2",
     "path-to-regexp": "^6.2.1",
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "8.2.0"

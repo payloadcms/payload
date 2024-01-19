@@ -2,14 +2,12 @@
 
 import React, { useCallback } from 'react'
 
-import { useTranslation } from '../../../providers/Translation'
+import { useTranslation } from '../../../../providers/Translation'
 import type { OptionObject, Validate } from 'payload/types'
-import type { Option } from '../../../elements/ReactSelect/types'
+import type { Option } from '../../../../elements/ReactSelect/types'
 import { getTranslation } from '@payloadcms/translations'
-import ReactSelect from '../../../elements/ReactSelect'
-import useField from '../../useField'
-
-import './index.scss'
+import ReactSelect from '../../../../elements/ReactSelect'
+import useField from '../../../useField'
 
 const SelectInput: React.FC<{
   readOnly: boolean
@@ -31,7 +29,7 @@ const SelectInput: React.FC<{
     [validate, required],
   )
 
-  const { errorMessage, setValue, showError, value } = useField({
+  const { setValue, showError, value } = useField({
     path,
     validate: memoizedValidate,
   })

@@ -4,11 +4,10 @@ import React, { useCallback } from 'react'
 import { getTranslation } from '@payloadcms/translations'
 import type { SanitizedConfig, Validate } from 'payload/types'
 
-import { useTranslation } from '../../../providers/Translation'
-import { isFieldRTL } from '../shared'
-import './index.scss'
-import useField from '../../useField'
-import { useLocale } from '../../../providers/Locale'
+import { useTranslation } from '../../../../providers/Translation'
+import { isFieldRTL } from '../../shared'
+import useField from '../../../useField'
+import { useLocale } from '../../../../providers/Locale'
 
 export const TextInput: React.FC<{
   name: string
@@ -24,6 +23,7 @@ export const TextInput: React.FC<{
   minLength?: number
   validate?: Validate
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  inputRef?: React.MutableRefObject<HTMLInputElement>
 }> = (props) => {
   const {
     path,
@@ -37,6 +37,7 @@ export const TextInput: React.FC<{
     validate,
     required,
     onKeyDown,
+    inputRef,
   } = props
 
   const { i18n } = useTranslation()
@@ -50,12 +51,10 @@ export const TextInput: React.FC<{
     [validate, minLength, maxLength, required],
   )
 
-  const field = useField({
+  const { setValue, value } = useField({
     path,
     validate: memoizedValidate,
   })
-
-  const { setValue, value } = field
 
   const renderRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -75,7 +74,7 @@ export const TextInput: React.FC<{
       }}
       onKeyDown={onKeyDown}
       placeholder={getTranslation(placeholder, i18n)}
-      // ref={inputRef}
+      ref={inputRef}
       type="text"
       value={(value as string) || ''}
     />

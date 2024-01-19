@@ -13,11 +13,11 @@ export type FormFieldBase = {
   valid?: boolean
   errorMessage?: string
   user?: User
-  i18n: I18n
-  payload: Payload
-  docPreferences: DocumentPreferences
+  i18n?: I18n
+  payload?: Payload
+  docPreferences?: DocumentPreferences
   locale?: Locale
-  config: SanitizedConfig
+  config?: SanitizedConfig
 }
 
 /**

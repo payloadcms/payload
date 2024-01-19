@@ -31,7 +31,8 @@
     "src/**/*.tsx",
     "src/**/*.d.ts",
     "src/**/*.json",
-    "../ui/src/createClientConfig.ts"
+    "../ui/src/createClientConfig.ts",
+    "../dev/src/app/(payload)/admin/login/action.ts"
   ],
   "references": [{ "path": "../payload" }, { "path": "../ui" }, { "path": "../translations" }]
 }

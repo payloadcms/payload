@@ -2,11 +2,9 @@
 import React, { useCallback } from 'react'
 import { getTranslation } from '@payloadcms/translations'
 
-import useField from '../../useField'
-import { useTranslation } from '../../../providers/Translation'
+import useField from '../../../useField'
+import { useTranslation } from '../../../../providers/Translation'
 import { Validate } from 'payload/types'
-
-import './index.scss'
 
 export const EmailInput: React.FC<{
   name: string
