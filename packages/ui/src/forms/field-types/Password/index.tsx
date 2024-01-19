@@ -5,6 +5,7 @@ import Error from '../../Error'
 import Label from '../../Label'
 import { PasswordInput } from './Input'
 import { PasswordInputWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -38,4 +39,4 @@ export const Password: React.FC<Props> = (props) => {
   )
 }
 
-export default Password
+export default withCondition(Password)

@@ -9,6 +9,7 @@ import { fieldBaseClass } from '../shared'
 import { CheckboxInput } from './Input'
 import DefaultLabel from '../../Label'
 import { CheckboxWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -85,4 +86,4 @@ const Checkbox: React.FC<Props> = (props) => {
   )
 }
 
-export default Checkbox
+export default withCondition(Checkbox)

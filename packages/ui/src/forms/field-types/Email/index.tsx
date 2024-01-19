@@ -6,6 +6,7 @@ import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
 import { EmailInput } from './Input'
 import { EmailInputWrapper } from './Wrapper'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -64,4 +65,4 @@ export const Email: React.FC<Props> = (props) => {
   )
 }
 
-export default Email
+export default withCondition(Email)
