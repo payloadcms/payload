@@ -692,6 +692,10 @@ export function fieldIsBlockType(field: Field): field is BlockField {
   return field.type === 'blocks'
 }
 
+export function fieldIsGroupType(field: Field): field is GroupField {
+  return field.type === 'group'
+}
+
 export function optionIsObject(option: Option): option is OptionObject {
   return typeof option === 'object'
 }
