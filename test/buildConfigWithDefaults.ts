@@ -18,7 +18,9 @@ const bundlerAdapters = {
 
 const [testSuiteDir] = process.argv.slice(4)
 const migrationDir = path.resolve(
-  process.env.PAYLOAD_CONFIG_PATH ? path.join(process.env.PAYLOAD_CONFIG_PATH, '..') : testSuiteDir,
+  (process.env.PAYLOAD_CONFIG_PATH
+    ? path.join(process.env.PAYLOAD_CONFIG_PATH, '..')
+    : testSuiteDir) || __dirname,
   'migrations',
 )
 
