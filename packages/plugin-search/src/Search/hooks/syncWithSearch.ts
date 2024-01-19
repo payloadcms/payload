@@ -14,6 +14,8 @@ const syncWithSearch: SyncWithSearch = async (args) => {
 
   const { beforeSync, defaultPriorities, deleteDrafts, syncDrafts } = searchConfig as SearchConfig // todo fix SyncWithSearch type, see note in ./types.ts
 
+  const searchCollectionSlug = searchConfig.searchOverrides?.slug || 'search';
+
   let dataToSave: DocToSync = {
     doc: {
       relationTo: collection,
@@ -55,7 +57,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
       if (doSync) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         payload.create({
-          collection: 'search',
+          collection: searchCollectionSlug,
           data: {
             ...dataToSave,
             priority: defaultPriority,
@@ -68,7 +70,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
       try {
         // find the correct doc to sync with
         const searchDocQuery = await payload.find({
-          collection: 'search',
+          collection: searchCollectionSlug,
           depth: 0,
           where: {
             'doc.value': {
@@ -93,7 +95,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
               duplicativeDocs.map(({ id: duplicativeDocID }) =>
                 payload.delete({
                   id: duplicativeDocID,
-                  collection: 'search',
+                  collection: searchCollectionSlug,
                 }),
               ), // eslint-disable-line function-paren-newline
             )
@@ -111,7 +113,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
               // eslint-disable-next-line @typescript-eslint/no-floating-promises
               payload.update({
                 id: searchDocID,
-                collection: 'search',
+                collection: searchCollectionSlug,
                 data: {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
@@ -127,7 +129,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
               // eslint-disable-next-line @typescript-eslint/no-floating-promises
               payload.delete({
                 id: searchDocID,
-                collection: 'search',
+                collection: searchCollectionSlug,
               })
             } catch (err: unknown) {
               payload.logger.error(`Error deleting search document: ${err}`)
@@ -137,7 +139,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           try {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             payload.create({
-              collection: 'search',
+              collection: searchCollectionSlug,
               data: {
                 ...dataToSave,
                 priority: defaultPriority,

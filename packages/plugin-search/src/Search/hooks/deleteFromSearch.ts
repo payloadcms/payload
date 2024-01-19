@@ -1,10 +1,12 @@
 import type { CollectionAfterDeleteHook } from 'payload/types'
 
-const deleteFromSearch: CollectionAfterDeleteHook = ({ doc, req: { payload } }) => {
+const deleteFromSearch: CollectionAfterDeleteHook = ({ doc, req: { payload }, searchConfig }) => {
+  const searchCollectionSlug = searchConfig.searchOverrides?.slug || 'search';
+
   try {
     const deleteSearchDoc = async (): Promise<any> => {
       const searchDocQuery = await payload.find({
-        collection: 'search',
+        collection: searchCollectionSlug,
         depth: 0,
         where: {
           'doc.value': {
@@ -16,7 +18,7 @@ const deleteFromSearch: CollectionAfterDeleteHook = ({ doc, req: { payload } }) 
       if (searchDocQuery?.docs?.[0]) {
         payload.delete({
           id: searchDocQuery?.docs?.[0]?.id,
-          collection: 'search',
+          collection: searchCollectionSlug,
         })
       }
     }
