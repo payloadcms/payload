@@ -16,19 +16,19 @@ const bundlerAdapters = {
   webpack: webpackBundler(),
 }
 
+const [testSuiteDir] = process.argv.slice(4)
+const migrationDir = path.resolve(
+  process.env.PAYLOAD_CONFIG_PATH ? path.join(process.env.PAYLOAD_CONFIG_PATH, '..') : testSuiteDir,
+  'migrations',
+)
+
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    migrationDir: path.resolve(
-      process.env.PAYLOAD_CONFIG_PATH || '../packages/db-mongodb',
-      'migrations',
-    ),
+    migrationDir,
     url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
-    migrationDir: path.resolve(
-      process.env.PAYLOAD_CONFIG_PATH || '../packages/db-postgres',
-      'migrations',
-    ),
+    migrationDir,
     pool: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
