@@ -75,6 +75,12 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      type: 'point',
+      name: 'point',
+      label: 'Point',
+      required: true,
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',
