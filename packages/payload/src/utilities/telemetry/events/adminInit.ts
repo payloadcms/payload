@@ -20,8 +20,8 @@ export const adminInit = (req: PayloadRequest): void => {
     domainID = oneWayHash(host, payload.secret)
   }
 
-  if (user && typeof user?.id === 'string') {
-    userID = oneWayHash(user.id, payload.secret)
+  if (user?.id) {
+    userID = oneWayHash(String(user.id), payload.secret)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-floating-promises

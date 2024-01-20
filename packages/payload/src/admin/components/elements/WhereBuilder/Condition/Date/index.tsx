@@ -6,10 +6,14 @@ import DatePicker from '../../../DatePicker'
 
 const baseClass = 'condition-value-date'
 
-const DateField: React.FC<Props> = ({ disabled, onChange, value }) => (
-  <div className={baseClass}>
-    <DatePicker onChange={onChange} readOnly={disabled} value={value} />
-  </div>
-)
+const DateField: React.FC<Props> = ({ admin, disabled, onChange, value }) => {
+  const { date } = admin || {}
+
+  return (
+    <div className={baseClass}>
+      <DatePicker {...date} onChange={onChange} readOnly={disabled} value={value} />
+    </div>
+  )
+}
 
 export default DateField

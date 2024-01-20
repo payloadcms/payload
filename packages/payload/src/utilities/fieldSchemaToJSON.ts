@@ -74,7 +74,7 @@ export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
             tabFields.push({
               name: tab.name,
               fields: fieldSchemaToJSON(tab.fields),
-              type: 'tab',
+              type: field.type,
             })
             return
           }

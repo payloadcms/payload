@@ -11,11 +11,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
-import type {
-  DocumentTab,
-  DocumentTabComponent,
-  DocumentTabConfig,
-} from '../admin/components/elements/DocumentHeader/Tabs/types'
+import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
 import type { User } from '../auth/types'
@@ -63,7 +59,11 @@ export type LivePreviewConfig = {
    Use the `useLivePreview` hook to get started in React applications.
    */
   url?:
-    | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
+    | ((args: {
+        data: Record<string, any>
+        documentInfo: ContextType
+        locale: Locale
+      }) => Promise<string> | string)
     | string
 }
 
@@ -268,6 +268,9 @@ export type EditViewConfig =
       Component: AdminViewComponent
       path: string
     }
+  | {
+      actions?: React.ComponentType<any>[]
+    }
 
 /**
  * Override existing views
@@ -284,6 +287,10 @@ export type Locale = {
    * @example "en"
    */
   code: string
+  /**
+   * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
+   */
+  fallbackLocale?: string
   /**
    * label of supported locale
    * @example "English"
@@ -393,6 +400,10 @@ export type Config = {
        * Replace the navigation with a custom component
        */
       Nav?: React.ComponentType<any>
+      /**
+       * Add custom components to the top right of the Admin Panel
+       */
+      actions?: React.ComponentType<any>[]
       /**
        * Add custom components after the collection overview
        */

@@ -28,18 +28,21 @@ export const PostHero: React.FC<{
           <div className={classes.leader}>
             <div className={classes.categories}>
               {categories?.map((category, index) => {
-                const { title: categoryTitle } = category
+                if (typeof category === 'object' && category !== null) {
+                  const { title: categoryTitle } = category
 
-                const titleToUse = categoryTitle || 'Untitled category'
+                  const titleToUse = categoryTitle || 'Untitled category'
 
-                const isLast = index === categories.length - 1
+                  const isLast = index === categories.length - 1
 
-                return (
-                  <Fragment key={index}>
-                    {titleToUse}
-                    {!isLast && <Fragment>, &nbsp;</Fragment>}
-                  </Fragment>
-                )
+                  return (
+                    <Fragment key={index}>
+                      {titleToUse}
+                      {!isLast && <Fragment>, &nbsp;</Fragment>}
+                    </Fragment>
+                  )
+                }
+                return null
               })}
             </div>
           </div>

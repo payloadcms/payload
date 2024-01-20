@@ -1,24 +1,22 @@
 import type { fieldSchemaToJSON } from 'payload/utilities'
 
-import { promise } from './promise'
+import type { PopulationsByCollection, UpdatedDocument } from './types'
+
+import { traverseRichText } from './traverseRichText'
 
 export const traverseFields = <T>(args: {
-  apiRoute?: string
-  depth?: number
+  externallyUpdatedRelationship?: UpdatedDocument
   fieldSchema: ReturnType<typeof fieldSchemaToJSON>
   incomingData: T
-  populationPromises: Promise<void>[]
+  populationsByCollection: PopulationsByCollection
   result: T
-  serverURL: string
 }): void => {
   const {
-    apiRoute,
-    depth,
+    externallyUpdatedRelationship,
     fieldSchema: fieldSchemas,
     incomingData,
-    populationPromises,
+    populationsByCollection,
     result,
-    serverURL,
   } = args
 
   fieldSchemas.forEach((fieldSchema) => {
@@ -26,6 +24,16 @@ export const traverseFields = <T>(args: {
       const fieldName = fieldSchema.name
 
       switch (fieldSchema.type) {
+        case 'richText':
+          result[fieldName] = traverseRichText({
+            externallyUpdatedRelationship,
+            incomingData: incomingData[fieldName],
+            populationsByCollection,
+            result: result[fieldName],
+          })
+
+          break
+
         case 'array':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingRow, i) => {
@@ -38,18 +46,17 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
-                apiRoute,
-                depth,
+                externallyUpdatedRelationship,
                 fieldSchema: fieldSchema.fields,
                 incomingData: incomingRow,
-                populationPromises,
+                populationsByCollection,
                 result: result[fieldName][i],
-                serverURL,
               })
 
               return result[fieldName][i]
             })
           }
+
           break
 
         case 'blocks':
@@ -72,13 +79,11 @@ export const traverseFields = <T>(args: {
               }
 
               traverseFields({
-                apiRoute,
-                depth,
+                externallyUpdatedRelationship,
                 fieldSchema: incomingBlockJSON.fields,
                 incomingData: incomingBlock,
-                populationPromises,
+                populationsByCollection,
                 result: result[fieldName][i],
-                serverURL,
               })
 
               return result[fieldName][i]
@@ -96,13 +101,11 @@ export const traverseFields = <T>(args: {
           }
 
           traverseFields({
-            apiRoute,
-            depth,
+            externallyUpdatedRelationship,
             fieldSchema: fieldSchema.fields,
             incomingData: incomingData[fieldName] || {},
-            populationPromises,
+            populationsByCollection,
             result: result[fieldName],
-            serverURL,
           })
 
           break
@@ -111,7 +114,7 @@ export const traverseFields = <T>(args: {
         case 'relationship':
           // Handle `hasMany` relationships
           if (fieldSchema.hasMany && Array.isArray(incomingData[fieldName])) {
-            if (!result[fieldName]) {
+            if (!result[fieldName] || !incomingData[fieldName].length) {
               result[fieldName] = []
             }
 
@@ -131,33 +134,39 @@ export const traverseFields = <T>(args: {
                 const newID = incomingRelation.value
                 const newRelation = incomingRelation.relationTo
 
-                if (oldID !== newID || oldRelation !== newRelation) {
-                  populationPromises.push(
-                    promise({
-                      id: incomingRelation.value,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: newRelation,
-                      depth,
-                      ref: result[fieldName][i],
-                      serverURL,
-                    }),
-                  )
+                const hasChanged = newID !== oldID || newRelation !== oldRelation
+                const hasUpdated =
+                  newRelation === externallyUpdatedRelationship?.entitySlug &&
+                  newID === externallyUpdatedRelationship?.id
+
+                if (hasChanged || hasUpdated) {
+                  if (!populationsByCollection[newRelation]) {
+                    populationsByCollection[newRelation] = []
+                  }
+
+                  populationsByCollection[newRelation].push({
+                    id: incomingRelation.value,
+                    accessor: 'value',
+                    ref: result[fieldName][i],
+                  })
                 }
               } else {
                 // Handle `hasMany` monomorphic
-                if (result[fieldName][i]?.id !== incomingRelation) {
-                  populationPromises.push(
-                    promise({
-                      id: incomingRelation,
-                      accessor: i,
-                      apiRoute,
-                      collection: String(fieldSchema.relationTo),
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                const hasChanged = incomingRelation !== result[fieldName][i]?.id
+                const hasUpdated =
+                  fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
+                  incomingRelation === externallyUpdatedRelationship?.id
+
+                if (hasChanged || hasUpdated) {
+                  if (!populationsByCollection[fieldSchema.relationTo]) {
+                    populationsByCollection[fieldSchema.relationTo] = []
+                  }
+
+                  populationsByCollection[fieldSchema.relationTo].push({
+                    id: incomingRelation,
+                    accessor: i,
+                    ref: result[fieldName],
+                  })
                 }
               }
             })
@@ -197,23 +206,26 @@ export const traverseFields = <T>(args: {
               const newRelation = hasNewValue ? incomingData[fieldName].relationTo : ''
               const oldRelation = hasOldValue ? result[fieldName].relationTo : ''
 
+              const hasChanged = newID !== oldID || newRelation !== oldRelation
+              const hasUpdated =
+                newRelation === externallyUpdatedRelationship?.entitySlug &&
+                newID === externallyUpdatedRelationship?.id
+
               // if the new value/relation is different from the old value/relation
               // populate the new value, otherwise leave it alone
-              if (newID !== oldID || newRelation !== oldRelation) {
+              if (hasChanged || hasUpdated) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  populationPromises.push(
-                    promise({
-                      id: newID,
-                      accessor: 'value',
-                      apiRoute,
-                      collection: newRelation,
-                      depth,
-                      ref: result[fieldName],
-                      serverURL,
-                    }),
-                  )
+                  if (!populationsByCollection[newRelation]) {
+                    populationsByCollection[newRelation] = []
+                  }
+
+                  populationsByCollection[newRelation].push({
+                    id: newID,
+                    accessor: 'value',
+                    ref: result[fieldName],
+                  })
                 } else {
                   result[fieldName] = null
                 }
@@ -232,23 +244,26 @@ export const traverseFields = <T>(args: {
                   result[fieldName].id) ||
                 result[fieldName]
 
+              const hasChanged = newID !== oldID
+              const hasUpdated =
+                fieldSchema.relationTo === externallyUpdatedRelationship?.entitySlug &&
+                newID === externallyUpdatedRelationship?.id
+
               // if the new value is different from the old value
               // populate the new value, otherwise leave it alone
-              if (newID !== oldID) {
+              if (hasChanged || hasUpdated) {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  populationPromises.push(
-                    promise({
-                      id: newID,
-                      accessor: fieldName,
-                      apiRoute,
-                      collection: String(fieldSchema.relationTo),
-                      depth,
-                      ref: result as Record<string, unknown>,
-                      serverURL,
-                    }),
-                  )
+                  if (!populationsByCollection[fieldSchema.relationTo]) {
+                    populationsByCollection[fieldSchema.relationTo] = []
+                  }
+
+                  populationsByCollection[fieldSchema.relationTo].push({
+                    id: newID,
+                    accessor: fieldName,
+                    ref: result as Record<string, unknown>,
+                  })
                 } else {
                   result[fieldName] = null
                 }

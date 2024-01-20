@@ -10,6 +10,7 @@ const TextFields: CollectionConfig = {
   admin: {
     useAsTitle: 'text',
   },
+  defaultSort: 'id',
   fields: [
     {
       name: 'text',
@@ -109,6 +110,35 @@ const TextFields: CollectionConfig = {
         },
       },
       type: 'text',
+    },
+    {
+      name: 'hasMany',
+      type: 'text',
+      hasMany: true,
+    },
+    {
+      name: 'validatesHasMany',
+      type: 'text',
+      hasMany: true,
+      minLength: 3,
+    },
+    {
+      name: 'localizedHasMany',
+      type: 'text',
+      hasMany: true,
+      localized: true,
+    },
+    {
+      name: 'withMinRows',
+      type: 'text',
+      hasMany: true,
+      minRows: 2,
+    },
+    {
+      name: 'withMaxRows',
+      type: 'text',
+      hasMany: true,
+      maxRows: 4,
     },
   ],
   slug: textFieldsSlug,

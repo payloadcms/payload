@@ -1,14 +1,14 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
-
-const baseClass = 'floating-select-toolbar-popup__button'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { mergeRegister } from '@lexical/utils'
 import { $getSelection } from 'lexical'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { FloatingToolbarSectionEntry } from '../types'
 
 import './index.scss'
+
+const baseClass = 'floating-select-toolbar-popup__button'
 
 export const ToolbarButton = ({
   children,
@@ -61,7 +61,12 @@ export const ToolbarButton = ({
 
   useEffect(() => {
     setClassName(
-      [baseClass, enabled === false ? 'disabled' : '', active ? 'active' : '']
+      [
+        baseClass,
+        enabled === false ? 'disabled' : '',
+        active ? 'active' : '',
+        entry?.key ? `${baseClass}-` + entry.key : '',
+      ]
         .filter(Boolean)
         .join(' '),
     )

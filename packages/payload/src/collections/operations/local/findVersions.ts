@@ -39,9 +39,9 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     limit,
-    locale = null,
+    locale: localeArg = null,
     overrideAccess = true,
     page,
     req: incomingReq,
@@ -52,8 +52,11 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
+  const locale = localeArg || incomingReq?.locale || defaultLocale
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
     : null
 
   if (!collection) {
@@ -64,9 +67,12 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
 
   const i18n = i18nInit(payload.config.i18n)
   const req = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     i18n,
-    locale: locale ?? defaultLocale,
+    locale,
     payload,
     payloadAPI: 'local',
     transactionID: incomingReq?.transactionID,

@@ -19,7 +19,8 @@ type ObjectTypeFields = {
 
 const buildFields = (label, fieldsToBuild) =>
   fieldsToBuild.reduce((builtFields, field) => {
-    if (!field.hidden) {
+    const includeField = !field.hidden && field.type !== 'ui'
+    if (includeField) {
       if (field.name) {
         const fieldName = formatName(field.name)
 

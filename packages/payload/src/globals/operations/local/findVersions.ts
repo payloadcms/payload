@@ -1,4 +1,4 @@
-import type { GeneratedTypes } from '../../../'
+import type { GeneratedTypes, RequestContext } from '../../../'
 import type { PaginatedDocs } from '../../../database/types'
 import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
@@ -12,6 +12,7 @@ import { i18nInit } from '../../../translations/init'
 import findVersions from '../findVersions'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
+  context?: RequestContext
   depth?: number
   fallbackLocale?: string
   limit?: number
@@ -31,8 +32,9 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
   const {
+    context,
     depth,
-    fallbackLocale = null,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     limit,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
@@ -46,6 +48,13 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = payload?.config?.localization
+    ? payload?.config?.localization?.defaultLocale
+    : null
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
+    : null
   const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
@@ -53,7 +62,10 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   }
 
   const req = {
-    fallbackLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     i18n,
     locale,
     payload,
@@ -62,7 +74,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
-  setRequestContext(req)
+  setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 

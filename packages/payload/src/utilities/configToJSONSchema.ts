@@ -99,6 +99,15 @@ function fieldsToJSONSchema(
         let fieldSchema: JSONSchema4
         switch (field.type) {
           case 'text':
+            if (field.hasMany === true) {
+              fieldSchema = {
+                items: { type: 'string' },
+                type: withNullableJSONSchemaType('array', isRequired),
+              }
+            } else {
+              fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
+            }
+            break
           case 'textarea':
           case 'code':
           case 'email':
@@ -132,10 +141,20 @@ function fieldsToJSONSchema(
           }
 
           case 'richText': {
-            fieldSchema = field.editor.outputSchema({
-              field,
-              isRequired,
-            })
+            if (field.editor.outputSchema) {
+              fieldSchema = field.editor.outputSchema({
+                field,
+                isRequired,
+              })
+            } else {
+              // Maintain backwards compatibility with existing rich text editors
+              fieldSchema = {
+                items: {
+                  type: 'object',
+                },
+                type: withNullableJSONSchemaType('array', isRequired),
+              }
+            }
 
             break
           }

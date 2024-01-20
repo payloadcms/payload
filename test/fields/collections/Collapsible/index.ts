@@ -55,8 +55,7 @@ const CollapsibleFields: CollectionConfig = {
           type: 'text',
         },
         {
-          // TODO: change group name, to not be a duplicate of the above collapsible
-          name: 'group',
+          name: 'group2',
           type: 'group',
           fields: [
             {

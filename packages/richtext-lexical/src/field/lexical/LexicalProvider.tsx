@@ -2,6 +2,7 @@
 import type { InitialConfigType } from '@lexical/react/LexicalComposer'
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { LexicalEditor } from 'lexical'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import * as React from 'react'
@@ -16,12 +17,32 @@ export type LexicalProviderProps = {
   editorConfig: SanitizedEditorConfig
   fieldProps: FieldProps
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
+  path: string
   readOnly: boolean
   value: SerializedEditorState
 }
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, fieldProps, onChange, readOnly } = props
+  const { editorConfig, fieldProps, onChange, path, readOnly } = props
   let { value } = props
+
+  const [initialConfig, setInitialConfig] = React.useState<InitialConfigType | null>(null)
+
+  // set lexical config in useffect async:
+  React.useEffect(() => {
+    void editorConfig.lexical().then((lexicalConfig: LexicalEditorConfig) => {
+      const newInitialConfig: InitialConfigType = {
+        editable: readOnly !== true,
+        editorState: value != null ? JSON.stringify(value) : undefined,
+        namespace: lexicalConfig.namespace,
+        nodes: [...getEnabledNodes({ editorConfig })],
+        onError: (error: Error) => {
+          throw error
+        },
+        theme: lexicalConfig.theme,
+      }
+      setInitialConfig(newInitialConfig)
+    })
+  }, [editorConfig, readOnly, value])
 
   if (editorConfig?.features?.hooks?.load?.length) {
     editorConfig.features.hooks.load.forEach((hook) => {
@@ -48,19 +69,12 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     )
   }
 
-  const initialConfig: InitialConfigType = {
-    editable: readOnly === true ? false : true,
-    editorState: value != null ? JSON.stringify(value) : undefined,
-    namespace: editorConfig.lexical.namespace,
-    nodes: [...getEnabledNodes({ editorConfig })],
-    onError: (error: Error) => {
-      throw error
-    },
-    theme: editorConfig.lexical.theme,
+  if (!initialConfig) {
+    return <p>Loading...</p>
   }
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
+    <LexicalComposer initialConfig={initialConfig} key={path}>
       <EditorConfigProvider editorConfig={editorConfig} fieldProps={fieldProps}>
         <div className="editor-shell">
           <LexicalEditorComponent editorConfig={editorConfig} onChange={onChange} />

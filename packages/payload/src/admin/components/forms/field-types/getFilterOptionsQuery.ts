@@ -15,6 +15,13 @@ export const getFilterOptionsQuery = async (
           typeof filterOptions === 'function'
             ? await filterOptions({ ...options, relationTo: relation })
             : filterOptions
+        if (query[relation] === true) {
+          query[relation] = {}
+        }
+        // this is an ugly way to prevent results from being returned
+        if (query[relation] === false) {
+          query[relation] = { id: { exists: false } }
+        }
       }),
     )
   }

@@ -9,9 +9,12 @@ import { CollectionGroup1B } from './collections/Group1B'
 import { CollectionGroup2A } from './collections/Group2A'
 import { CollectionGroup2B } from './collections/Group2B'
 import { CollectionHidden } from './collections/Hidden'
+import { CustomIdTab } from './collections/CustomIdTab'
+import { CustomIdRow } from './collections/CustomIdRow'
 import { CollectionNoApiView } from './collections/NoApiView'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
+import AdminButton from './components/AdminButton'
 import AfterDashboard from './components/AfterDashboard'
 import AfterNavLinks from './components/AfterNavLinks'
 import BeforeLogin from './components/BeforeLogin'
@@ -35,6 +38,7 @@ export default buildConfigWithDefaults({
     css: path.resolve(__dirname, 'styles.scss'),
     components: {
       // providers: [CustomProvider, CustomProvider],
+      actions: [AdminButton],
       afterDashboard: [AfterDashboard],
       beforeLogin: [BeforeLogin],
       logout: {
@@ -114,6 +118,8 @@ export default buildConfigWithDefaults({
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
+    CustomIdTab,
+    CustomIdRow,
   ],
   globals: [
     GlobalHidden,

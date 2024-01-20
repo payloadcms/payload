@@ -48,6 +48,10 @@ const useThumbnail = (
       return `${pathURL}/${sizes[adminThumbnail].filename}`
     }
 
+    if (url) {
+      return url as string
+    }
+
     return `${pathURL}/${filename}`
   }
 

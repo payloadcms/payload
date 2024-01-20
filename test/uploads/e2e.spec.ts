@@ -195,6 +195,22 @@ describe('uploads', () => {
     expect(await audioUploadImage.getAttribute('src')).toContain(adminThumbnailSrc)
   })
 
+  test('Should detect correct mimeType', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(__dirname, './image.png'))
+    await saveDocAndAssert(page)
+
+    const imageID = page.url().split('/').pop()
+
+    const { doc: uploadedImage } = await client.findByID({
+      id: imageID,
+      slug: mediaSlug,
+      auth: true,
+    })
+
+    expect(uploadedImage.mimeType).toEqual('image/png')
+  })
+
   describe('image manipulation', () => {
     test('should crop image correctly', async () => {
       const positions = {

@@ -16,7 +16,8 @@ import { sanitizeQueryValue } from './sanitizeQueryValue'
 
 type SearchParam = {
   path?: string
-  value: unknown
+  rawQuery?: unknown
+  value?: unknown
 }
 
 const subQueryOptions = {
@@ -92,13 +93,19 @@ export async function buildSearchParam({
   const [{ field, path }] = paths
 
   if (path) {
-    const formattedValue = sanitizeQueryValue({
+    const {
+      operator: formattedOperator,
+      rawQuery,
+      val: formattedValue,
+    } = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
       path,
       val,
     })
+
+    if (rawQuery) return { value: rawQuery }
 
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints
@@ -125,7 +132,7 @@ export async function buildSearchParam({
               payload,
               where: {
                 [subPath]: {
-                  [operator]: val,
+                  [formattedOperator]: val,
                 },
               },
             })
@@ -183,8 +190,8 @@ export async function buildSearchParam({
       return relationshipQuery
     }
 
-    if (operator && validOperators.includes(operator as Operator)) {
-      const operatorKey = operatorMap[operator]
+    if (formattedOperator && validOperators.includes(formattedOperator as Operator)) {
+      const operatorKey = operatorMap[formattedOperator]
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
@@ -227,7 +234,7 @@ export async function buildSearchParam({
         }
       }
 
-      if (operator === 'like' && typeof formattedValue === 'string') {
+      if (formattedOperator === 'like' && typeof formattedValue === 'string') {
         const words = formattedValue.split(' ')
 
         const result = {

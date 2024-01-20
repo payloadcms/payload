@@ -11,6 +11,7 @@ export interface Config {
     users: User
     pages: Page
     posts: Post
+    tenants: Tenant
     categories: Category
     media: Media
     'payload-preferences': PayloadPreference
@@ -37,6 +38,7 @@ export interface User {
 export interface Page {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
@@ -61,10 +63,15 @@ export interface Page {
                   link: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('primary' | 'secondary') | null
@@ -90,10 +97,15 @@ export interface Page {
                   link?: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('default' | 'primary' | 'secondary') | null
@@ -142,25 +154,77 @@ export interface Page {
           }
       )[]
     | null
-  meta?: {
-    title?: string | null
-    description?: string | null
-    image?: string | Media | null
-  }
+  relationshipAsUpload?: string | Media | null
+  relationshipMonoHasOne?: (string | null) | Post
+  relationshipMonoHasMany?: (string | Post)[] | null
+  relationshipPolyHasOne?: {
+    relationTo: 'posts'
+    value: string | Post
+  } | null
   relationshipPolyHasMany?:
     | {
         relationTo: 'posts'
         value: string | Post
       }[]
     | null
-  relationshipMonoHasMany?: (string | Post)[] | null
-  relationshipMonoHasOne?: (string | null) | Post
   arrayOfRelationships?:
     | {
-        relationshipWithinArray?: (string | null) | Post
+        uploadInArray?: string | Media | null
+        richTextInArray?:
+          | {
+              [k: string]: unknown
+            }[]
+          | null
+        relationshipInArrayMonoHasOne?: (string | null) | Post
+        relationshipInArrayMonoHasMany?: (string | Post)[] | null
+        relationshipInArrayPolyHasOne?: {
+          relationTo: 'posts'
+          value: string | Post
+        } | null
+        relationshipInArrayPolyHasMany?:
+          | {
+              relationTo: 'posts'
+              value: string | Post
+            }[]
+          | null
         id?: string | null
       }[]
     | null
+  richTextSlate?:
+    | {
+        [k: string]: unknown
+      }[]
+    | null
+  richTextLexical?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
+  tab: {
+    relationshipInTab?: (string | null) | Post
+  }
+  meta?: {
+    title?: string | null
+    description?: string | null
+    image?: string | Media | null
+  }
+  updatedAt: string
+  createdAt: string
+}
+export interface Tenant {
+  id: string
+  title: string
+  clientURL: string
   updatedAt: string
   createdAt: string
 }
@@ -181,15 +245,10 @@ export interface Media {
   width?: number | null
   height?: number | null
 }
-export interface Category {
-  id: string
-  title?: string | null
-  updatedAt: string
-  createdAt: string
-}
 export interface Post {
   id: string
   slug: string
+  tenant?: (string | null) | Tenant
   title: string
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact'
@@ -214,10 +273,15 @@ export interface Post {
                   link: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('primary' | 'secondary') | null
@@ -243,10 +307,15 @@ export interface Post {
                   link?: {
                     type?: ('reference' | 'custom') | null
                     newTab?: boolean | null
-                    reference?: {
-                      relationTo: 'pages'
-                      value: string | Page
-                    } | null
+                    reference?:
+                      | ({
+                          relationTo: 'posts'
+                          value: string | Post
+                        } | null)
+                      | ({
+                          relationTo: 'pages'
+                          value: string | Page
+                        } | null)
                     url?: string | null
                     label: string
                     appearance?: ('default' | 'primary' | 'secondary') | null
@@ -304,6 +373,12 @@ export interface Post {
   updatedAt: string
   createdAt: string
 }
+export interface Category {
+  id: string
+  title?: string | null
+  updatedAt: string
+  createdAt: string
+}
 export interface PayloadPreference {
   id: string
   user: {
@@ -337,10 +412,15 @@ export interface Header {
         link: {
           type?: ('reference' | 'custom') | null
           newTab?: boolean | null
-          reference?: {
-            relationTo: 'pages'
-            value: string | Page
-          } | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
           url?: string | null
           label: string
           appearance?: ('default' | 'primary' | 'secondary') | null
@@ -358,10 +438,15 @@ export interface Footer {
         link: {
           type?: ('reference' | 'custom') | null
           newTab?: boolean | null
-          reference?: {
-            relationTo: 'pages'
-            value: string | Page
-          } | null
+          reference?:
+            | ({
+                relationTo: 'posts'
+                value: string | Post
+              } | null)
+            | ({
+                relationTo: 'pages'
+                value: string | Page
+              } | null)
           url?: string | null
           label: string
           appearance?: ('default' | 'primary' | 'secondary') | null

@@ -4,7 +4,7 @@ import {
   BlocksFeature,
   HTMLConverterFeature,
   LinkFeature,
-  TreeviewFeature,
+  TreeViewFeature,
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
@@ -34,7 +34,7 @@ const RichTextFields: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
-          TreeviewFeature(),
+          TreeViewFeature(),
           HTMLConverterFeature({}),
           LinkFeature({
             fields: [
@@ -102,7 +102,7 @@ const RichTextFields: CollectionConfig = {
         },
       },
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, TreeviewFeature()],
+        features: ({ defaultFeatures }) => [...defaultFeatures, TreeViewFeature()],
       }),
     },
     {

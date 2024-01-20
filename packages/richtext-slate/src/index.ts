@@ -9,9 +9,7 @@ import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
 import { richTextValidate } from './data/validation'
 import RichTextField from './field'
 
-export function slateEditor(
-  args: AdapterArguments,
-): RichTextAdapter<any[], AdapterArguments, AdapterArguments> {
+export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], AdapterArguments, any> {
   return {
     CellComponent: withMergedProps({
       Component: RichTextCell,
@@ -30,10 +28,14 @@ export function slateEditor(
       }
     },
     populationPromise({
+      context,
       currentDepth,
       depth,
       field,
+      findMany,
+      flattenLocales,
       overrideAccess,
+      populationPromises,
       req,
       showHiddenFields,
       siblingDoc,
@@ -45,10 +47,14 @@ export function slateEditor(
         !field?.admin?.elements
       ) {
         return richTextRelationshipPromise({
+          context,
           currentDepth,
           depth,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,

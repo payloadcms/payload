@@ -4,7 +4,7 @@ import type { PayloadRequest } from '../../../express/types'
 import type { Document, Where } from '../../../types'
 import type { SanitizedGlobalConfig } from '../../config/types'
 
-import isolateTransactionID from '../../../utilities/isolateTransactionID'
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findVersions from '../../operations/findVersions'
 
 export type Resolver = (
@@ -30,7 +30,7 @@ export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig
       globalConfig,
       limit: args.limit,
       page: args.page,
-      req: isolateTransactionID(context.req),
+      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
       sort: args.sort,
       where: args.where,
     }

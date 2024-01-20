@@ -1,5 +1,6 @@
 import type { SlateNodeConverter } from './types'
 
+import { SlateBlockquoteConverter } from './converters/blockquote'
 import { SlateHeadingConverter } from './converters/heading'
 import { SlateIndentConverter } from './converters/indent'
 import { SlateLinkConverter } from './converters/link'
@@ -18,6 +19,7 @@ export const defaultSlateConverters: SlateNodeConverter[] = [
   SlateRelationshipConverter,
   SlateListItemConverter,
   SlateLinkConverter,
+  SlateBlockquoteConverter,
   SlateHeadingConverter,
   SlateIndentConverter,
 ]

@@ -8,6 +8,8 @@ import { createPortal } from 'react-dom'
 
 import type { FloatingToolbarSectionEntry } from '../types'
 
+const baseClass = 'floating-select-toolbar-popup__dropdown-item'
+
 interface DropDownContextType {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void
 }
@@ -26,7 +28,7 @@ export function DropDownItem({
   const [editor] = useLexicalComposerContext()
   const [enabled, setEnabled] = useState<boolean>(true)
   const [active, setActive] = useState<boolean>(false)
-  const [className, setClassName] = useState<string>('item')
+  const [className, setClassName] = useState<string>(baseClass)
 
   const updateStates = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -67,11 +69,16 @@ export function DropDownItem({
 
   useEffect(() => {
     setClassName(
-      ['item', enabled === false ? 'disabled' : '', active ? 'active' : '']
+      [
+        baseClass,
+        enabled === false ? 'disabled' : '',
+        active ? 'active' : '',
+        entry?.key ? `${baseClass}-${entry.key}` : '',
+      ]
         .filter(Boolean)
         .join(' '),
     )
-  }, [enabled, active, className])
+  }, [enabled, active, className, entry.key])
 
   const ref = useRef<HTMLButtonElement>(null)
 
@@ -178,7 +185,7 @@ function DropDownItems({
   return (
     <DropDownContext.Provider value={contextValue}>
       <div
-        className="floating-select-toolbar-popup__dropdown--items"
+        className="floating-select-toolbar-popup__dropdown-items"
         onKeyDown={handleKeyDown}
         ref={dropDownRef}
       >
@@ -270,7 +277,7 @@ export function DropDown({
         type="button"
       >
         <Icon />
-        <i className={`${buttonClassName}--caret`} />
+        <i className="floating-select-toolbar-popup__dropdown-caret" />
       </button>
 
       {showDropDown &&

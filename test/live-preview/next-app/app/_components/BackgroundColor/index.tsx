@@ -3,7 +3,7 @@ import React from 'react'
 import classes from './index.module.scss'
 
 type Props = {
-  invert?: boolean
+  invert?: boolean | null
   className?: string
   children?: React.ReactNode
   id?: string

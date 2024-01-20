@@ -31,6 +31,7 @@ import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import { saveVersion } from '../../versions/saveVersion'
 import { buildAfterOperation } from './utils'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 
 const unlinkFile = promisify(fs.unlink)
 
@@ -108,10 +109,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
     // Custom id
     // /////////////////////////////////////
-
+    // @todo: Refactor code to store 'customId' on the collection configuration itself so we don't need to repeat flattenFields
     const hasIdField =
-      collectionConfig.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
-      -1
+      flattenFields(collectionConfig.fields).findIndex((field) => field.name === 'id') > -1
+
     if (hasIdField) {
       data = {
         _id: data.id,
@@ -171,14 +172,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     )
 
     // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req.t)
-    }
-
-    // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
@@ -210,6 +203,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       skipValidation: shouldSaveDraft,
     })
+
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req.t)
+    }
 
     // /////////////////////////////////////
     // Create

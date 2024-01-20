@@ -36,7 +36,9 @@ export interface Config {
     'payload-preferences': PayloadPreference
     'payload-migrations': PayloadMigration
   }
-  globals: {}
+  globals: {
+    tabsWithRichText: TabsWithRichText
+  }
 }
 export interface LexicalField {
   id: string
@@ -78,6 +80,21 @@ export interface LexicalMigrateField {
   id: string
   title: string
   lexicalWithLexicalPluginData?: {
+    root: {
+      children: {
+        type: string
+        version: number
+        [k: string]: unknown
+      }[]
+      direction: ('ltr' | 'rtl') | null
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+      indent: number
+      type: string
+      version: number
+    }
+    [k: string]: unknown
+  } | null
+  lexicalWithSlateData?: {
     root: {
       children: {
         type: string
@@ -166,8 +183,15 @@ export interface User {
 }
 export interface ArrayField {
   id: string
+  title?: string | null
   items: {
     text: string
+    subArray?:
+      | {
+          text?: string | null
+          id?: string | null
+        }[]
+      | null
     id?: string | null
   }[]
   collapsedArray?:
@@ -417,6 +441,35 @@ export interface BlockField {
           }
       )[]
     | null
+  relationshipBlocks?:
+    | {
+        relationship?: (string | null) | TextField
+        id?: string | null
+        blockName?: string | null
+        blockType: 'relationships'
+      }[]
+    | null
+  updatedAt: string
+  createdAt: string
+}
+export interface TextField {
+  id: string
+  text: string
+  localizedText?: string | null
+  i18nText?: string | null
+  defaultFunction?: string | null
+  defaultAsync?: string | null
+  overrideLength?: string | null
+  fieldWithDefaultValue?: string | null
+  dependentOnFieldWithDefaultValue?: string | null
+  customLabel?: string | null
+  customError?: string | null
+  beforeAndAfterInput?: string | null
+  hasMany?: string[] | null
+  validatesHasMany?: string[] | null
+  localizedHasMany?: string[] | null
+  withMinRows?: string[] | null
+  withMaxRows?: string[] | null
   updatedAt: string
   createdAt: string
 }
@@ -446,6 +499,12 @@ export interface CollapsibleField {
     }
   }
   someText?: string | null
+  group2?: {
+    textWithinGroup?: string | null
+    subGroup?: {
+      textWithinSubGroup?: string | null
+    }
+  }
   functionTitleField?: string | null
   componentTitleField?: string | null
   nestedTitle?: string | null
@@ -677,22 +736,6 @@ export interface RelationshipField {
   updatedAt: string
   createdAt: string
 }
-export interface TextField {
-  id: string
-  text: string
-  localizedText?: string | null
-  i18nText?: string | null
-  defaultFunction?: string | null
-  defaultAsync?: string | null
-  overrideLength?: string | null
-  fieldWithDefaultValue?: string | null
-  dependentOnFieldWithDefaultValue?: string | null
-  customLabel?: string | null
-  customError?: string | null
-  beforeAndAfterInput?: string | null
-  updatedAt: string
-  createdAt: string
-}
 export interface RichTextField {
   id: string
   title: string
@@ -837,6 +880,15 @@ export interface TabsField {
   }
   textInRow: string
   numberInRow: number
+  json?:
+    | {
+        [k: string]: unknown
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null
   tab: {
     array: {
       text: string
@@ -941,6 +993,45 @@ export interface PayloadMigration {
   batch?: number | null
   updatedAt: string
   createdAt: string
+}
+export interface TabsWithRichText {
+  id: string
+  tab1: {
+    rt1?: {
+      root: {
+        children: {
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        type: string
+        version: number
+      }
+      [k: string]: unknown
+    } | null
+  }
+  tab2: {
+    rt2?: {
+      root: {
+        children: {
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        type: string
+        version: number
+      }
+      [k: string]: unknown
+    } | null
+  }
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
 declare module 'payload' {

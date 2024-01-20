@@ -256,6 +256,7 @@ jobs:
           - plugin-nested-docs
           - plugin-search
           - plugin-sentry
+          - plugin-seo
 
     steps:
       - name: Use Node.js 18
@@ -306,9 +307,10 @@ jobs:
         with:
           mongodb-version: 6.0
 
-      - name: Build Website
+      - name: Build Template
         run: |
           cd templates/${{ matrix.template }}
           cp .env.example .env
           yarn install
           yarn build
+          yarn generate:types

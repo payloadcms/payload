@@ -61,18 +61,21 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale,
-    locale = null,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
+    locale: localeArg = null,
     overrideAccess = true,
-    req: incomingReq,
+    req: incomingReq = {} as PayloadRequest,
     showHiddenFields,
     user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
+  const locale = localeArg || incomingReq?.locale || defaultLocale
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
     : null
 
   if (!collection) {
@@ -82,9 +85,12 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   const req = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     i18n: i18nInit(payload.config.i18n),
-    locale: locale ?? defaultLocale,
+    locale: locale,
     payload,
     payloadAPI: 'local',
     transactionID: incomingReq?.transactionID,

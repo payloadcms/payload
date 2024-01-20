@@ -116,8 +116,8 @@ export interface BaseDatabaseAdapter {
   sessions?: {
     [id: string]: {
       db: unknown
-      reject: () => void
-      resolve: () => void
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
     }
   }
 
@@ -377,8 +377,8 @@ export type DeleteManyArgs = {
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = MigrationData & {
-  down: ({ payload }: { payload }) => Promise<boolean>
-  up: ({ payload }: { payload }) => Promise<boolean>
+  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
+  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
 }
 
 export type MigrationData = {

@@ -25,6 +25,12 @@ $header-height: base(5);
     }
   }
 
+  [dir='rtl']
+  &__actions {
+    margin-right: auto;
+    margin-left: unset;
+  }
+
   &__actions {
     min-width: 350px;
     margin-left: auto;

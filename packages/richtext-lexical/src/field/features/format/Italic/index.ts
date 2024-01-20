@@ -2,20 +2,21 @@ import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
-import { ItalicIcon } from '../../../lexical/ui/icons/Italic'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers'
 
 export const ItalicTextFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: ItalicIcon,
-                isActive: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/Italic').then((module) => module.ItalicIcon),
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('italic')
                   }

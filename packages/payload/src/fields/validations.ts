@@ -27,23 +27,39 @@ import { isValidID } from '../utilities/isValidID'
 import { fieldAffectsData } from './config/types'
 
 export const text: Validate<unknown, unknown, TextField> = (
-  value: string,
-  { config, maxLength: fieldMaxLength, minLength, required, t },
+  value: string | string[],
+  { config, hasMany, maxLength: fieldMaxLength, maxRows, minLength, minRows, required, t },
 ) => {
   let maxLength: number
 
-  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
-  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
-  if (value && maxLength && value.length > maxLength) {
-    return t('validation:shorterThanMax', { maxLength })
+  if (!required) {
+    if (!value) return true
   }
 
-  if (value && minLength && value?.length < minLength) {
-    return t('validation:longerThanMin', { minLength })
+  if (hasMany === true) {
+    const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
+    if (typeof lengthValidationResult === 'string') return lengthValidationResult
+  }
+
+  if (typeof config?.defaultMaxTextLength === 'number') maxLength = config.defaultMaxTextLength
+  if (typeof fieldMaxLength === 'number') maxLength = fieldMaxLength
+
+  const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
+
+  for (const stringValue of stringsToValidate) {
+    const length = stringValue?.length || 0
+
+    if (typeof maxLength === 'number' && length > maxLength) {
+      return t('validation:shorterThanMax', { label: t('value'), maxLength, stringValue })
+    }
+
+    if (typeof minLength === 'number' && length < minLength) {
+      return t('validation:longerThanMin', { label: t('value'), minLength, stringValue })
+    }
   }
 
   if (required) {
-    if (typeof value !== 'string' || value?.length === 0) {
+    if (!(typeof value === 'string' || Array.isArray(value)) || value?.length === 0) {
       return t('validation:required')
     }
   }
@@ -205,8 +221,11 @@ export const number: Validate<unknown, unknown, NumberField> = (
     if (typeof lengthValidationResult === 'string') return lengthValidationResult
   }
 
-  if (!value && required) return t('validation:required')
-  if (!value && !required) return true
+  if (!value && !isNumber(value)) {
+    // if no value is present, validate based on required
+    if (required) return t('validation:required')
+    if (!required) return true
+  }
 
   const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
 
@@ -250,12 +269,13 @@ const validateFilterOptions: Validate = async (
       [collection: string]: (number | string)[]
     } = {}
 
+    const falseCollections: string[] = []
     const collections = typeof relationTo === 'string' ? [relationTo] : relationTo
     const values = Array.isArray(value) ? value : [value]
 
     await Promise.all(
       collections.map(async (collection) => {
-        const optionFilter =
+        let optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
@@ -265,6 +285,10 @@ const validateFilterOptions: Validate = async (
                 user,
               })
             : filterOptions
+
+        if (optionFilter === true) {
+          optionFilter = null
+        }
 
         const valueIDs: (number | string)[] = []
 
@@ -284,6 +308,10 @@ const validateFilterOptions: Validate = async (
           }
 
           if (optionFilter) findWhere.and.push(optionFilter)
+
+          if (optionFilter === false) {
+            falseCollections.push(optionFilter)
+          }
 
           const result = await payload.find({
             collection,
@@ -316,6 +344,10 @@ const validateFilterOptions: Validate = async (
       if (Array.isArray(relationTo) && typeof val === 'object' && val?.relationTo) {
         collection = val.relationTo
         requestedID = val.value
+      }
+
+      if (falseCollections.find((slug) => relationTo === slug)) {
+        return true
       }
 
       return options[collection].indexOf(requestedID) === -1

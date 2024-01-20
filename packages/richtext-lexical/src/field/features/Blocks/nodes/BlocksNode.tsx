@@ -14,7 +14,6 @@ import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
 import ObjectID from 'bson-objectid'
 import React from 'react'
 
-import { BlockComponent } from '../component'
 import { transformInputFormData } from '../utils/transformInputFormData'
 
 export type BlockFields = {
@@ -24,6 +23,13 @@ export type BlockFields = {
   blockType: string
   id: string
 }
+
+const BlockComponent = React.lazy(() =>
+  // @ts-expect-error TypeScript being dumb
+  import('../component').then((module) => ({
+    default: module.BlockComponent,
+  })),
+)
 
 export type SerializedBlockNode = Spread<
   {
@@ -70,7 +76,7 @@ export class BlockNode extends DecoratorBlockNode {
       serializedNode = {
         ...serializedNode,
         fields: {
-          ...(serializedNode as any).data.fields,
+          ...(serializedNode as any).fields.data,
         },
         version: 2,
       }
@@ -107,8 +113,8 @@ export class BlockNode extends DecoratorBlockNode {
   exportJSON(): SerializedBlockNode {
     return {
       ...super.exportJSON(),
-      fields: this.getFields(),
       type: this.getType(),
+      fields: this.getFields(),
       version: 2,
     }
   }
@@ -117,9 +123,6 @@ export class BlockNode extends DecoratorBlockNode {
     return this.getLatest().__fields
   }
 
-  getId(): string {
-    return this.__id
-  }
   getTextContent(): string {
     return `Block Field`
   }

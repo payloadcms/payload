@@ -48,6 +48,16 @@ describe('Field Validations', () => {
       const result = text(val, { ...options, minLength: 10 })
       expect(result).toBe(true)
     })
+    it('should validate an array of texts', async () => {
+      const val = ['test']
+      const result = text(val, { ...options, hasMany: true })
+      expect(result).toBe(true)
+    })
+    it('should handle required array of texts', async () => {
+      const val = ['test']
+      const result = text(val, { ...options, hasMany: true, required: true })
+      expect(result).toBe(true)
+    })
   })
 
   describe('textarea', () => {
@@ -411,6 +421,11 @@ describe('Field Validations', () => {
     it('should validate', () => {
       const val = 1
       const result = number(val, numberOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate 0', () => {
+      const val = 0
+      const result = number(val, { ...numberOptions, required: true })
       expect(result).toBe(true)
     })
     it('should validate 2', () => {

@@ -44,10 +44,12 @@ import { titleToDelete } from './shared'
 import {
   autoSaveGlobalSlug,
   autosaveCollectionSlug,
+  customIDSlug,
   disablePublishGlobalSlug,
   disablePublishSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  postCollectionSlug,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -58,6 +60,8 @@ describe('versions', () => {
   let serverURL: string
   let autosaveURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
+  let customIDURL: AdminUrlUtil
+  let postURL: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
@@ -77,6 +81,7 @@ describe('versions', () => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
+      customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
     })
 
     // This test has to run before bulk updates that will rename the title
@@ -229,6 +234,21 @@ describe('versions', () => {
       expect(page.url()).toMatch(/\/versions$/)
     })
 
+    test('should show collection versions view level action in collection versions view', async () => {
+      await page.goto(url.list)
+      await page.locator('tbody tr .cell-title a').first().click()
+      await page.goto(`${page.url()}/versions`)
+      await expect(page.locator('.app-header .collection-versions-button')).toHaveCount(1)
+    })
+
+    test('should show global versions view level action in globals versions view', async () => {
+      const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
+      await page.goto(`${global.global(draftGlobalSlug)}/versions`)
+      await expect(page.locator('.app-header .global-versions-button')).toHaveCount(1)
+    })
+
+    // TODO: Check versions/:version-id view for collections / globals
+
     test('global - has versions tab', async () => {
       const global = new AdminUrlUtil(serverURL, draftGlobalSlug)
       await page.goto(global.global(draftGlobalSlug))
@@ -350,6 +370,19 @@ describe('versions', () => {
       await expect(page.locator('#field-description')).toHaveValue('first post description')
     })
 
+    test('should save versions with custom IDs', async () => {
+      await page.goto(customIDURL.create)
+      await page.locator('#field-id').fill('custom')
+      await page.locator('#field-title').fill('title')
+      await page.locator('#action-save').click()
+
+      await page.goto(customIDURL.list)
+      await page.locator('tbody tr .cell-id a').click()
+
+      await expect(page.locator('div.id-label')).toHaveText(/custom/)
+      await expect(page.locator('#field-title')).toHaveValue('title')
+    })
+
     test('should hide publish when access control prevents updating on globals', async () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
@@ -376,6 +409,35 @@ describe('versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
       await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+  })
+  describe('posts collection', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+      autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
+      customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
+      postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
+    })
+
+    test('should show documents title in relationship even if draft document', async () => {
+      await payload.create({
+        collection: autosaveCollectionSlug,
+        data: {
+          title: 'some title',
+        },
+        draft: true,
+      })
+
+      await page.goto(postURL.create)
+
+      const field = page.locator('#field-relationToAutosaves')
+
+      await field.click()
+
+      await expect(page.locator('.rs__option')).toHaveCount(1)
+
+      await expect(page.locator('.rs__option')).toHaveText('some title')
     })
   })
 })

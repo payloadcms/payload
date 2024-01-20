@@ -2,20 +2,21 @@ import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
-import { CodeIcon } from '../../../lexical/ui/icons/Code'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { INLINE_CODE } from './markdownTransformers'
 
 export const InlineCodeTextFeature = (): FeatureProvider => {
   return {
-    feature: ({ featureProviderMap }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: CodeIcon,
-                isActive: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/Code').then((module) => module.CodeIcon),
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('code')
                   }

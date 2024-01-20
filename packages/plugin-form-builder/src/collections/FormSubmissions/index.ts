@@ -7,6 +7,8 @@ import sendEmail from './hooks/sendEmail'
 
 // all settings can be overridden by the config
 export const generateSubmissionCollection = (formConfig: PluginConfig): CollectionConfig => {
+  const formSlug = formConfig?.formOverrides?.slug || 'forms'
+
   const newConfig: CollectionConfig = {
     ...(formConfig?.formSubmissionOverrides || {}),
     access: {
@@ -25,9 +27,28 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
         admin: {
           readOnly: true,
         },
-        relationTo: formConfig?.formOverrides?.slug || 'forms',
+        relationTo: formSlug,
         required: true,
         type: 'relationship',
+        validate: async (value, { payload }) => {
+          /* Don't run in the client side */
+          if (!payload) return true
+
+          if (payload) {
+            let existingForm
+
+            try {
+              existingForm = await payload.findByID({
+                id: value,
+                collection: formSlug,
+              })
+
+              return true
+            } catch (error) {
+              return 'Cannot create this submission because this form does not exist.'
+            }
+          }
+        },
       },
       {
         name: 'submissionData',

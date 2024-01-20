@@ -3,6 +3,7 @@ import type { CollectionConfig } from '../../../packages/payload/src/collections
 import { slateEditor } from '../../../packages/richtext-slate/src'
 import DemoUIFieldCell from '../components/DemoUIField/Cell'
 import DemoUIFieldField from '../components/DemoUIField/Field'
+import { FieldDescriptionComponent, FieldDescriptionFunction } from '../components/FieldDescription'
 import { slugPluralLabel, slugSingularLabel } from '../shared'
 import { postsCollectionSlug } from '../slugs'
 
@@ -14,7 +15,7 @@ export const Posts: CollectionConfig = {
   },
   admin: {
     description: 'Description',
-    listSearchableFields: ['title', 'description', 'number'],
+    listSearchableFields: ['id', 'title', 'description', 'number'],
     group: 'One',
     useAsTitle: 'title',
     defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
@@ -91,6 +92,30 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
+      },
+      access: {
+        update: () => false,
+      },
+    },
+    {
+      name: 'descriptionAsString',
+      type: 'text',
+      admin: {
+        description: 'Static field description.',
+      },
+    },
+    {
+      name: 'descriptionAsFunction',
+      type: 'text',
+      admin: {
+        description: FieldDescriptionFunction,
+      },
+    },
+    {
+      name: 'descriptionAsComponent',
+      type: 'text',
+      admin: {
+        description: FieldDescriptionComponent,
       },
     },
   ],

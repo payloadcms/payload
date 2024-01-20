@@ -42,6 +42,9 @@ export const defaultAccessRelSlug = 'strict-access'
 export const chainedRelSlug = 'chained'
 export const customIdSlug = 'custom-id'
 export const customIdNumberSlug = 'custom-id-number'
+export const polymorphicRelationshipsSlug = 'polymorphic-relationships'
+export const treeSlug = 'tree'
+
 export default buildConfigWithDefaults({
   collections: [
     {
@@ -199,6 +202,63 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      fields: [
+        {
+          name: 'movieReviewer',
+          relationTo: 'users',
+          required: true,
+          type: 'relationship',
+        },
+        {
+          name: 'likes',
+          hasMany: true,
+          relationTo: 'users',
+          type: 'relationship',
+        },
+        {
+          name: 'visibility',
+          options: [
+            {
+              label: 'followers',
+              value: 'followers',
+            },
+            {
+              label: 'public',
+              value: 'public',
+            },
+          ],
+          required: true,
+          type: 'radio',
+        },
+      ],
+
+      slug: 'movieReviews',
+    },
+    {
+      slug: polymorphicRelationshipsSlug,
+      fields: [
+        {
+          type: 'relationship',
+          name: 'polymorphic',
+          relationTo: ['movies'],
+        },
+      ],
+    },
+    {
+      slug: treeSlug,
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: 'tree',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -290,6 +350,21 @@ export default buildConfigWithDefaults({
         customIdRelation: customIdRelation.id,
         customIdNumberRelation: customIdNumberRelation.id,
         filteredRelation: filteredRelation.id,
+      },
+    })
+
+    const root = await payload.create({
+      collection: 'tree',
+      data: {
+        text: 'root',
+      },
+    })
+
+    await payload.create({
+      collection: 'tree',
+      data: {
+        text: 'sub',
+        parent: root.id,
       },
     })
   },

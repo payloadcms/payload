@@ -3,7 +3,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 import {
   BlocksFeature,
   LinkFeature,
-  TreeviewFeature,
+  TreeViewFeature,
   UploadFeature,
   lexicalEditor,
 } from '../../../../packages/richtext-lexical/src'
@@ -12,6 +12,7 @@ import {
   ConditionalLayoutBlock,
   RadioButtonsBlock,
   RelationshipBlock,
+  RelationshipHasManyBlock,
   RichTextBlock,
   SelectFieldBlock,
   SubBlockBlock,
@@ -41,7 +42,7 @@ export const LexicalFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           //TestRecorderFeature(),
-          TreeviewFeature(),
+          TreeViewFeature(),
           BlocksFeature({
             blocks: [
               RichTextBlock,
@@ -49,6 +50,7 @@ export const LexicalFields: CollectionConfig = {
               UploadAndRichTextBlock,
               SelectFieldBlock,
               RelationshipBlock,
+              RelationshipHasManyBlock,
               SubBlockBlock,
               RadioButtonsBlock,
               ConditionalLayoutBlock,
@@ -65,7 +67,7 @@ export const LexicalFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           //TestRecorderFeature(),
-          TreeviewFeature(),
+          TreeViewFeature(),
           //HTMLConverterFeature(),
           LinkFeature({
             fields: [
@@ -102,6 +104,7 @@ export const LexicalFields: CollectionConfig = {
               UploadAndRichTextBlock,
               SelectFieldBlock,
               RelationshipBlock,
+              RelationshipHasManyBlock,
               SubBlockBlock,
               RadioButtonsBlock,
               ConditionalLayoutBlock,

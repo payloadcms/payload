@@ -57,6 +57,7 @@ export const createVersion: CreateVersion = async function createVersion(
       ],
     },
     { $unset: { latest: 1 } },
+    options,
   )
 
   const result: Document = JSON.parse(JSON.stringify(doc))

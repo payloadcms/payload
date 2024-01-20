@@ -3,6 +3,8 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 
+import type { RelationshipField, TextField } from './payload-types'
+
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
@@ -118,6 +120,25 @@ describe('fields', () => {
       })
       const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
       expect(nextSiblingText).toEqual('#after-input')
+    })
+
+    test('should create hasMany with multiple texts', async () => {
+      const input = 'five'
+      const furtherInput = 'six'
+
+      await page.goto(url.create)
+      const requiredField = page.locator('#field-text')
+      const field = page.locator('.field-hasMany')
+
+      await requiredField.fill(String(input))
+      await field.click()
+      await page.keyboard.type(input)
+      await page.keyboard.press('Enter')
+      await page.keyboard.type(furtherInput)
+      await page.keyboard.press('Enter')
+      await saveDocAndAssert(page)
+      await expect(field.locator('.rs__value-container')).toContainText(input)
+      await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
     })
   })
 
@@ -805,12 +826,14 @@ describe('fields', () => {
     test('should fill and retain a new value within a tab while switching tabs', async () => {
       const textInRowValue = 'hello'
       const numberInRowValue = '23'
+      const jsonValue = '{ "foo": "bar"}'
 
       await page.goto(url.create)
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('#field-numberInRow').fill(numberInRowValue)
+      await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(300)
 
@@ -821,16 +844,19 @@ describe('fields', () => {
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
       await expect(page.locator('#field-numberInRow')).toHaveValue(numberInRowValue)
+      await expect(page.locator('.json-field .lines-content')).toContainText(jsonValue)
     })
 
     test('should retain updated values within tabs while switching between tabs', async () => {
       const textInRowValue = 'new value'
+      const jsonValue = '{ "new": "value"}'
       await page.goto(url.list)
       await page.locator('.cell-id a').click()
 
       // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
+      await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(250)
 
@@ -839,6 +865,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
+      await expect(page.locator('.json-field .lines-content')).toContainText(jsonValue)
 
       // Go to array tab, save the doc
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
@@ -1352,6 +1379,7 @@ describe('fields', () => {
 
   describe('relationship', () => {
     let url: AdminUrlUtil
+    const tableRowLocator = 'table > tbody > tr'
 
     beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields')
@@ -1660,6 +1688,61 @@ describe('fields', () => {
       await page.click('#action-save', { delay: 100 })
       await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
     })
+
+    test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationship')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Another text document')
+    })
+
+    test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationHasManyPolymorphic')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Seeded text document')
+    })
+
+    test('should allow filtering by relationship field / equals', async () => {
+      const textDoc = await createTextFieldDoc()
+      await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
+
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+      await dropdownOperatorOptions.locator('text=equals').click()
+
+      const valueField = page.locator('.condition__value')
+      await valueField.click()
+      const dropdownValueOptions = valueField.locator('.rs__option')
+      await dropdownValueOptions.locator('text=some text').click()
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
   })
 
   describe('upload', () => {
@@ -1901,3 +1984,27 @@ describe('fields', () => {
     })
   })
 })
+
+async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextField> {
+  return payload.create({
+    collection: 'text-fields',
+    data: {
+      text: 'some text',
+      localizedText: 'some localized text',
+      ...overrides,
+    },
+  }) as unknown as Promise<TextField>
+}
+
+async function createRelationshipFieldDoc(
+  relationship: RelationshipField['relationship'],
+  overrides?: Partial<RelationshipField>,
+): Promise<RelationshipField> {
+  return payload.create({
+    collection: 'relationship-fields',
+    data: {
+      relationship,
+      ...overrides,
+    },
+  }) as unknown as Promise<RelationshipField>
+}

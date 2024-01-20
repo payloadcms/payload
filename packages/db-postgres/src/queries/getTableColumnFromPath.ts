@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
 
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, like, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { APIError } from 'payload/errors'
 import { fieldAffectsData, tabHasName } from 'payload/types'
@@ -240,6 +240,7 @@ export const getTableColumnFromPath = ({
         let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
           newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
+          constraintPath = `${constraintPath}${field.name}.%.`
           let result
           const blockConstraints = []
           const blockSelectFields = {}
@@ -247,7 +248,7 @@ export const getTableColumnFromPath = ({
             result = getTableColumnFromPath({
               adapter,
               collectionPath,
-              constraintPath: '',
+              constraintPath,
               constraints: blockConstraints,
               fields: block.fields,
               joinAliases,
@@ -285,7 +286,7 @@ export const getTableColumnFromPath = ({
               adapter.tables[newTableName]._parentID,
             )
           }
-          return result
+          return true
         })
         if (hasBlockField) {
           return {
@@ -294,8 +295,11 @@ export const getTableColumnFromPath = ({
             field: blockTableColumn.field,
             pathSegments: pathSegments.slice(1),
             rawColumn: blockTableColumn.rawColumn,
-            table: adapter.tables[newTableName],
+            table: blockTableColumn.table,
           }
+        }
+        if (pathSegments[1] === 'blockType') {
+          throw new APIError('Querying on blockType is not supported')
         }
         break
       }
@@ -313,20 +317,14 @@ export const getTableColumnFromPath = ({
 
         // Join in the relationships table
         joinAliases.push({
-          condition: eq(
-            (aliasTable || adapter.tables[rootTableName]).id,
-            aliasRelationshipTable.parent,
+          condition: and(
+            eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+            like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
           ),
           table: aliasRelationshipTable,
         })
 
         selectFields[`${relationTableName}.path`] = aliasRelationshipTable.path
-
-        constraints.push({
-          columnName: 'path',
-          table: aliasRelationshipTable,
-          value: `${constraintPath}${field.name}`,
-        })
 
         let newAliasTable
 
@@ -424,7 +422,7 @@ export const getTableColumnFromPath = ({
             columnName: `${columnPrefix}${field.name}`,
             constraints,
             field,
-            pathSegments: pathSegments,
+            pathSegments,
             table: targetTable,
           }
         }

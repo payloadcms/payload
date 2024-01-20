@@ -97,7 +97,7 @@ const RelationshipField: React.FC<Props> = (props) => {
                 }
               }
             } else {
-              setErrorLoading(t('errors:unspecific'))
+              setErrorLoading(t('error:unspecific'))
             }
           }
         }, Promise.resolve())
