@@ -274,7 +274,7 @@ describe('Relationships', () => {
         expect(query.totalDocs).toEqual(2)
       })
 
-      it('should allow querying by hasMany relationship field', async () => {
+      it('should allow querying using "contains" by hasMany relationship field', async () => {
         const movie = await payload.create({
           collection: 'movies',
           data: {
@@ -301,6 +301,61 @@ describe('Relationships', () => {
         })
 
         expect(query.totalDocs).toEqual(1)
+      })
+
+      it('should allow querying using "in" by hasMany relationship field', async () => {
+        const tree1 = await payload.create({
+          collection: treeSlug,
+          data: {
+            text: 'Tree 1',
+          },
+        })
+
+        const tree2 = await payload.create({
+          collection: treeSlug,
+          data: {
+            text: 'Tree 2',
+            parent: tree1.id,
+          },
+        })
+
+        const tree3 = await payload.create({
+          collection: treeSlug,
+          data: {
+            text: 'Tree 3',
+            parent: tree2.id,
+          },
+        })
+
+        const tree4 = await payload.create({
+          collection: treeSlug,
+          data: {
+            text: 'Tree 4',
+            parent: tree3.id,
+          },
+        })
+
+        const validParents = [tree2.id, tree3.id]
+
+        console.log('VALID PARENTS', validParents)
+
+        const query = await payload.find({
+          collection: treeSlug,
+          depth: 0,
+          sort: 'createdAt',
+          where: {
+            parent: {
+              in: validParents,
+            },
+          },
+        })
+        // should only return tree3 and tree4
+
+        console.log('QUERY', JSON.stringify(query, null, 2))
+
+        expect(query.totalDocs).toEqual(2)
+        expect(query.docs[0].text).toEqual('Tree 3')
+        expect(query.docs[1].text).toEqual('Tree 4')
       })
 
       describe('Custom ID', () => {
