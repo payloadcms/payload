@@ -168,7 +168,7 @@ export async function parseParams({
                   break
                 }
 
-                if (field.type === 'relationship') {
+                if (field.type === 'relationship' && operator === 'contains') {
                   operator = 'equals'
                 }
 
