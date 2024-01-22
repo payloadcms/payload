@@ -6,6 +6,9 @@ import { parseCookies } from './cookies'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
+import fs from 'fs'
+import path from 'path'
+import busboy from 'busboy'
 
 type Args = {
   request: Request
@@ -34,44 +37,86 @@ export const createPayloadRequest = async ({
   let requestData
   let requestFile: CustomPayloadRequest['file'] = undefined
 
-  const contentType = request.headers.get('Content-Type')
-  if (request.body && contentType === 'application/json') {
-    requestData = await request.json()
-  } else if (contentType?.startsWith('multipart/form-data')) {
-    // possible upload request
-    if (collection.config.upload) {
-      // load file in memory
-      if (!config.upload?.useTempFiles) {
-        const formData = await request.formData()
-        const file = formData.get('file')
+  const [contentType, ...contentTypeVarStrings] = request.headers.get('Content-Type').split(';')
+  const boundaryString = contentTypeVarStrings
+    .find((varString) => varString.includes('boundary'))
+    ?.split('=')?.[1]
+    ?.trim()
 
-        if (file && file instanceof File) {
-          const bytes = await file.arrayBuffer()
-          const buffer = Buffer.from(bytes)
+  if (request.body) {
+    if (contentType === 'application/json') {
+      requestData = await request.json()
+    } else if (contentType === 'multipart/form-data') {
+      // possible upload request
+      if (collection.config.upload) {
+        // load file in memory
+        if (!config.upload?.useTempFiles) {
+          const formData = await request.formData()
+          const file = formData.get('file')
 
-          requestFile.name = file.name
-          requestFile.data = buffer
-          requestFile.mimetype = file.type
-          requestFile.size = file.size
+          if (file && file instanceof File) {
+            const bytes = await file.arrayBuffer()
+            const buffer = Buffer.from(bytes)
+
+            requestFile.name = file.name
+            requestFile.data = buffer
+            requestFile.mimetype = file.type
+            requestFile.size = file.size
+          }
+
+          const payloadData = formData.get('_payload')
+
+          if (typeof payloadData === 'string') {
+            requestData = JSON.parse(payloadData)
+          }
+        } else {
+          // store temp file on disk
+          const headersObject = {}
+          request.headers.forEach((value, name) => {
+            headersObject[name] = value
+          })
+
+          const saveToFolder = path.join(process.cwd(), config.upload.tempFileDir)
+
+          if (!fs.existsSync(saveToFolder)) {
+            fs.mkdirSync(saveToFolder)
+          }
+
+          const bb = busboy({ headers: headersObject })
+
+          bb.on('file', (fieldname, file, info) => {
+            const { filename, encoding, mimeType: mime } = info
+            const saveTo = path.join(process.cwd(), 'tmp', filename)
+            const writeStream = fs.createWriteStream(saveTo)
+
+            file.on('data', (data) => {
+              writeStream.write(data)
+            })
+
+            file.on('end', () => {
+              writeStream.end()
+            })
+          })
+
+          const reader = request.body.getReader()
+          while (true) {
+            const { done, value } = await reader.read()
+
+            if (done) {
+              return
+            }
+
+            bb.write(value)
+          }
         }
-
+      } else {
+        // non upload request
+        const formData = await request.formData()
         const payloadData = formData.get('_payload')
 
         if (typeof payloadData === 'string') {
           requestData = JSON.parse(payloadData)
         }
-      } else {
-        // store temp file on disk
-        // TODO: handle request as stream
-        // need to get file and fields out of the request body if they exist
-      }
-    } else {
-      // non upload request
-      const formData = await request.formData()
-      const payloadData = formData.get('_payload')
-
-      if (typeof payloadData === 'string') {
-        requestData = JSON.parse(payloadData)
       }
     }
   }

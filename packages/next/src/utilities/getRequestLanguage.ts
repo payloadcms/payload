@@ -17,7 +17,7 @@ export const getRequestLanguage = ({
 
   let reqLanguage =
     acceptLanguage ||
-    (typeof cookieLanguage === 'string' ? cookieLanguage : cookieLanguage.value) ||
+    (typeof cookieLanguage === 'string' ? cookieLanguage : cookieLanguage?.value) ||
     defaultLanguage
 
   return matchLanguage(reqLanguage)
