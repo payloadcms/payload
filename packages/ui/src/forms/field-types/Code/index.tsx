@@ -1,22 +1,12 @@
-'use client'
-import React, { useCallback } from 'react'
+import React from 'react'
 
 import type { Props } from './types'
 
-import { CodeEditor } from '../../../elements/CodeEditor'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
-import useField from '../../useField'
-import { fieldBaseClass } from '../shared'
-import './index.scss'
-
-const prismToMonacoLanguageMap = {
-  js: 'javascript',
-  ts: 'typescript',
-}
-
-const baseClass = 'code-field'
+import { CodeInputWrapper } from './Wrapper'
+import { CodeInput } from './Input'
 
 const Code: React.FC<Props> = (props) => {
   const {
@@ -34,7 +24,8 @@ const Code: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate,
+    i18n,
+    value,
   } = props
 
   const ErrorComp = Error || DefaultError
@@ -42,45 +33,26 @@ const Code: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
-  const memoizedValidate = useCallback(
-    (value, options) => {
-      return validate(value, { ...options, required })
-    },
-    [validate, required],
-  )
-
-  const { errorMessage, setValue, showError, value } = useField({
-    path,
-    validate: memoizedValidate,
-  })
-
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        baseClass,
-        className,
-        showError && 'error',
-        readOnly && 'read-only',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+    <CodeInputWrapper
+      className={className}
+      path={path}
+      readOnly={readOnly}
+      style={style}
+      width={width}
     >
-      <ErrorComp message={errorMessage} showError={showError} />
-      <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
-      <CodeEditor
-        defaultLanguage={prismToMonacoLanguageMap[language] || language}
-        onChange={readOnly ? () => null : (val) => setValue(val)}
-        options={editorOptions}
+      <ErrorComp path={path} />
+      <LabelComp htmlFor={`field-${path}`} label={label} required={required} i18n={i18n} />
+      <CodeInput
+        path={path}
+        required={required}
         readOnly={readOnly}
-        value={(value as string) || ''}
+        name={name}
+        language={language}
+        editorOptions={editorOptions}
       />
-      <FieldDescription description={description} path={path} value={value} />
-    </div>
+      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
+    </CodeInputWrapper>
   )
 }
 
