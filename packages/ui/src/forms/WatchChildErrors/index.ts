@@ -19,7 +19,7 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
 
   useThrottledEffect(
     () => {
-      if (true) {
+      if (hasSubmitted) {
         const { errorCount } = getFieldStateFromPaths({ formState, pathSegments })
         setErrorCount(errorCount)
       }
