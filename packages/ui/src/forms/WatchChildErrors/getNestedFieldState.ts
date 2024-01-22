@@ -16,6 +16,7 @@ export const getNestedFieldState = ({
 }): {
   errorCount: number
   fieldState: FormState
+  pathSegments: string[]
 } => {
   let pathSegments = pathSegmentsFromProps
 
@@ -25,5 +26,8 @@ export const getNestedFieldState = ({
 
   const result = getFieldStateFromPaths({ formState, pathSegments })
 
-  return result
+  return {
+    ...result,
+    pathSegments,
+  }
 }

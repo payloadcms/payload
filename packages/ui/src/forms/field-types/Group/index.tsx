@@ -1,14 +1,15 @@
 import React from 'react'
 
 import type { Props } from './types'
-import { ErrorPill } from '../../../elements/ErrorPill'
 import FieldDescription from '../../FieldDescription'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import { getNestedFieldState } from '../../WatchChildErrors/getNestedFieldState'
 import { GroupProvider } from './provider'
 import { GroupWrapper } from './Wrapper'
 import { withCondition } from '../../withCondition'
+import { getNestedFieldState } from '../../WatchChildErrors/getNestedFieldState'
+import { GroupFieldErrors } from './Errors'
+import { buildPathSegments } from '../../WatchChildErrors/buildPathSegments'
 
 import './index.scss'
 
@@ -35,18 +36,18 @@ const Group: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name
 
-  const { fieldState: nestedFieldState, errorCount } = getNestedFieldState({
+  const { fieldState: nestedFieldState } = getNestedFieldState({
     formState,
     path,
     fieldSchema: fields,
   })
 
-  const groupHasErrors = errorCount > 0
-
   const fieldSchema = fields.map((subField) => ({
     ...subField,
     path: createNestedFieldPath(path, subField),
   }))
+
+  const pathSegments = buildPathSegments(path, fieldSchema)
 
   return (
     <GroupWrapper
@@ -77,7 +78,7 @@ const Group: React.FC<Props> = (props) => {
                 />
               </header>
             )}
-            {groupHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+            <GroupFieldErrors pathSegments={pathSegments} />
           </div>
           <RenderFields
             fieldSchema={fieldSchema}

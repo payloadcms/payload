@@ -7,6 +7,7 @@ export const sanitizeField = (f) => {
   if ('hooks' in field) delete field.hooks
   if ('validate' in field) delete field.validate
   if ('defaultValue' in field) delete field.defaultValue
+  if ('label' in field) delete field.label
 
   if ('fields' in field) {
     field.fields = sanitizeFields(field.fields)
@@ -25,6 +26,10 @@ export const sanitizeField = (f) => {
 
     if ('condition' in field.admin) {
       delete field.admin.condition
+    }
+
+    if ('description' in field.admin) {
+      delete field.admin.description
     }
   }
 

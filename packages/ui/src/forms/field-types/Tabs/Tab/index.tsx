@@ -1,42 +1,30 @@
-import { I18n, getTranslation } from '@payloadcms/translations'
-import { Field, Tab } from 'payload/types'
+'use client'
+import { getTranslation } from '@payloadcms/translations'
+import { NamedTab, Tab } from 'payload/types'
 import React from 'react'
 import { ErrorPill } from '../../../../elements/ErrorPill'
-import { getNestedFieldState } from '../../../WatchChildErrors/getNestedFieldState'
-import { FormState } from '../../../Form/types'
+import { WatchChildErrors } from '../../../WatchChildErrors'
+import { useTranslation } from '../../../..'
+
 import './index.scss'
 
 type TabProps = {
   isActive?: boolean
-  parentPath: string
   setIsActive: () => void
-  tab: Tab
-  i18n: I18n
-  formState: FormState
-  fieldSchema: Field[]
+  pathSegments: string[]
+  path: string
+  label: Tab['label']
+  name: NamedTab['name']
 }
 
 const baseClass = 'tabs-field__tab-button'
 
 export const TabComponent: React.FC<TabProps> = (props) => {
-  const { isActive, parentPath, setIsActive, tab, i18n, formState, fieldSchema } = props
+  const { isActive, setIsActive, pathSegments, name, label } = props
 
-  const isNamedTab = 'name' in tab
+  const { i18n } = useTranslation()
 
-  const pathSegments = []
-
-  if (parentPath) pathSegments.push(parentPath)
-  if (isNamedTab) pathSegments.push(tab.name)
-
-  const path = pathSegments.join('.')
-
-  const nestedFieldState = getNestedFieldState({
-    formState,
-    path,
-    fieldSchema,
-  })
-
-  const errorCount = nestedFieldState.errorCount || 0
+  const [errorCount, setErrorCount] = React.useState(0)
 
   const tabHasErrors = errorCount > 0
 
@@ -52,7 +40,8 @@ export const TabComponent: React.FC<TabProps> = (props) => {
       onClick={setIsActive}
       type="button"
     >
-      {tab.label ? getTranslation(tab.label, i18n) : isNamedTab && tab.name}
+      <WatchChildErrors pathSegments={pathSegments} setErrorCount={setErrorCount} />
+      {label ? getTranslation(label, i18n) : name}
       {tabHasErrors && <ErrorPill i18n={i18n} count={errorCount} />}
     </button>
   )

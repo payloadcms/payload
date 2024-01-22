@@ -1,8 +1,7 @@
 'use client'
 import React from 'react'
-import { useCollapsible } from '../../../elements/Collapsible/provider'
-import { fieldBaseClass } from '../shared'
-import './index.scss'
+import { useCollapsible } from '../../../../elements/Collapsible/provider'
+import { fieldBaseClass } from '../../shared'
 
 const baseClass = 'tabs-field'
 
