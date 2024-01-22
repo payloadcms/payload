@@ -1,35 +1,16 @@
-'use client'
 import React from 'react'
-import { useTranslation } from '../../providers/Translation'
-
-import type { Props } from './types'
-
+import { Props, isComponent } from './types'
+import getSiblingData from '../Form/getSiblingData'
+import getDataByPath from '../Form/getDataByPath'
 import { getTranslation } from '@payloadcms/translations'
-import { useWatchForm } from '../Form/context'
-import { isComponent } from './types'
 
 const baseClass = 'row-label'
 
-export const RowLabel: React.FC<Props> = ({ className, ...rest }) => {
-  return (
-    <span
-      className={[baseClass, className].filter(Boolean).join(' ')}
-      style={{
-        pointerEvents: 'none',
-      }}
-    >
-      <RowLabelContent {...rest} />
-    </span>
-  )
-}
+export const RowLabel: React.FC<Props> = (props) => {
+  const { className, label, path, rowNumber, data: dataFromProps, i18n } = props
 
-const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
-  const { label, path, rowNumber } = props
-
-  const { i18n } = useTranslation()
-  const { getDataByPath, getSiblingData } = useWatchForm()
-  const collapsibleData = getSiblingData(path)
-  const arrayData = getDataByPath(path)
+  const collapsibleData = getSiblingData(dataFromProps, path)
+  const arrayData = getDataByPath(dataFromProps, path)
   const data = arrayData || collapsibleData
 
   if (isComponent(label)) {
@@ -38,7 +19,12 @@ const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
   }
 
   return (
-    <React.Fragment>
+    <span
+      className={[baseClass, className].filter(Boolean).join(' ')}
+      style={{
+        pointerEvents: 'none',
+      }}
+    >
       {typeof label === 'function'
         ? label({
             data,
@@ -46,6 +32,6 @@ const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
             path,
           })
         : getTranslation(label, i18n)}
-    </React.Fragment>
+    </span>
   )
 }

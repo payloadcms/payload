@@ -5,7 +5,6 @@ import type { Props } from './types'
 import FieldDescription from '../../FieldDescription'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import './index.scss'
 import { TabsProvider } from './provider'
 import { TabComponent } from './Tab'
 import { Wrapper } from './Wrapper'
@@ -13,6 +12,9 @@ import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
 import { Tab } from 'payload/types'
 import { withCondition } from '../../withCondition'
+
+import './index.scss'
+import { buildPathSegments } from '../../WatchChildErrors/buildPathSegments'
 
 const baseClass = 'tabs-field'
 
@@ -93,18 +95,20 @@ const TabsField: React.FC<Props> = async (props) => {
       <TabsProvider>
         <div className={`${baseClass}__tabs-wrap`}>
           <div className={`${baseClass}__tabs`}>
-            {tabs.map((tabConfig, tabIndex) => {
+            {tabs.map((tab, tabIndex) => {
+              const tabPath = [path, 'name' in tab && tab.name].filter(Boolean)?.join('.')
+              const pathSegments = buildPathSegments(tabPath, tab.fields)
+
               return (
                 <TabComponent
+                  path={tabPath}
                   isActive={activeTabIndex === tabIndex}
                   key={tabIndex}
-                  parentPath={path}
                   setIsActive={undefined}
                   // setIsActive={() => handleTabChange(tabIndex)}
-                  tab={tabConfig}
-                  i18n={i18n}
-                  formState={formState}
-                  fieldSchema={getTabFieldSchema({ tabConfig, path })}
+                  pathSegments={pathSegments}
+                  name={'name' in tab && tab.name}
+                  label={tab.label}
                 />
               )
             })}
