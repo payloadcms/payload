@@ -81,6 +81,22 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
+      type: 'radio',
+      name: 'radio',
+      label: 'Radio',
+      required: true,
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option-1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option-2',
+        },
+      ],
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',
