@@ -103,6 +103,15 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
+      name: 'hidden',
+      label: 'Hidden',
+      type: 'text',
+      required: true,
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',
