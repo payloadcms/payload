@@ -97,6 +97,12 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'json',
+      label: 'JSON',
+      type: 'json',
+      required: true,
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',

@@ -1,18 +1,12 @@
-'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 
 import type { Props } from './types'
 
-import { CodeEditor } from '../../../elements/CodeEditor'
 import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import DefaultLabel from '../../Label'
-import useField from '../../useField'
-import { fieldBaseClass } from '../shared'
-import './index.scss'
-import { Validate } from 'payload/types'
-
-const baseClass = 'json-field'
+import { JSONInputWrapper } from './Wrapper'
+import { JSONInput } from './Input'
 
 const JSONField: React.FC<Props> = (props) => {
   const {
@@ -29,78 +23,33 @@ const JSONField: React.FC<Props> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate,
+    i18n,
+    value,
   } = props
 
   const ErrorComp = Error || DefaultError
   const LabelComp = Label || DefaultLabel
 
   const path = pathFromProps || name
-  const [stringValue, setStringValue] = useState<string>()
-  const [jsonError, setJsonError] = useState<string>()
-  const [hasLoadedValue, setHasLoadedValue] = useState(false)
-
-  const memoizedValidate: Validate = useCallback(
-    (value, options) => {
-      if (typeof validate === 'function')
-        return validate(value, { ...options, jsonError, required })
-    },
-    [validate, required],
-  )
-
-  const { errorMessage, initialValue, setValue, showError, value } = useField<string>({
-    path,
-    validate: memoizedValidate,
-  })
-
-  const handleChange = useCallback(
-    (val) => {
-      if (readOnly) return
-      setStringValue(val)
-
-      try {
-        setValue(JSON.parse(val))
-        setJsonError(undefined)
-      } catch (e) {
-        setJsonError(e)
-      }
-    },
-    [readOnly, setValue, setStringValue],
-  )
-
-  useEffect(() => {
-    if (hasLoadedValue) return
-    setStringValue(JSON.stringify(value ? value : initialValue, null, 2))
-    setHasLoadedValue(true)
-  }, [initialValue, value])
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        baseClass,
-        className,
-        showError && 'error',
-        readOnly && 'read-only',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      style={{
-        ...style,
-        width,
-      }}
+    <JSONInputWrapper
+      className={className}
+      path={path}
+      readOnly={readOnly}
+      width={width}
+      style={style}
     >
-      <ErrorComp message={errorMessage} showError={showError} />
-      <LabelComp htmlFor={`field-${path}`} label={label} required={required} />
-      <CodeEditor
-        defaultLanguage="json"
-        onChange={handleChange}
-        options={editorOptions}
+      <ErrorComp path={path} />
+      <LabelComp htmlFor={`field-${path}`} label={label} required={required} i18n={i18n} />
+      <JSONInput
+        path={path}
+        required={required}
         readOnly={readOnly}
-        value={stringValue}
+        editorOptions={editorOptions}
       />
-      <FieldDescription description={description} path={path} value={value} />
-    </div>
+      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
+    </JSONInputWrapper>
   )
 }
 
