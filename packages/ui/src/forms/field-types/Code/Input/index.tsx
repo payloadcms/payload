@@ -26,7 +26,9 @@ export const CodeInput: React.FC<{
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      return validate(value, { ...options, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, required })
+      }
     },
     [validate, required],
   )
