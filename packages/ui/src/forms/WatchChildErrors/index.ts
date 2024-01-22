@@ -6,9 +6,6 @@ import { useAllFormFields, useFormSubmitted } from '../Form/context'
 import { getFieldStateFromPaths } from './getFieldStateFromPaths'
 
 type TrackSubSchemaErrorCountProps = {
-  /**
-   * Only for collapsibles, and unnamed-tabs
-   */
   pathSegments?: string[]
   setErrorCount: (count: number) => void
 }
@@ -22,7 +19,7 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
 
   useThrottledEffect(
     () => {
-      if (hasSubmitted) {
+      if (true) {
         const { errorCount } = getFieldStateFromPaths({ formState, pathSegments })
         setErrorCount(errorCount)
       }
