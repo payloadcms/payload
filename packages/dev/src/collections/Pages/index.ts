@@ -120,6 +120,9 @@ export const Pages: CollectionConfig = {
     {
       label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
       type: 'collapsible',
+      admin: {
+        initCollapsed: true,
+      },
       fields: [
         {
           name: 'collapsibleText',

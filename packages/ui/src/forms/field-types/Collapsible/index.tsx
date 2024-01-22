@@ -16,7 +16,7 @@ const baseClass = 'collapsible-field'
 
 const CollapsibleField: React.FC<Props> = (props) => {
   const {
-    admin: { className, description, initCollapsed, readOnly },
+    admin: { className, description, initCollapsed: initCollapsedFromProps, readOnly },
     fieldTypes,
     fields,
     indexPath,
@@ -28,6 +28,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     payload,
     user,
     formState,
+    docPreferences,
   } = props
 
   const { fieldState: nestedFieldState, pathSegments } = getNestedFieldState({
@@ -37,6 +38,12 @@ const CollapsibleField: React.FC<Props> = (props) => {
   })
 
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`
+
+  const initCollapsed = Boolean(
+    docPreferences
+      ? docPreferences?.fields?.[path || fieldPreferencesKey]?.collapsed
+      : initCollapsedFromProps,
+  )
 
   return (
     <CollapsibleFieldWrapper

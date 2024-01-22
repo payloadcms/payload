@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 
 import type { DocumentPreferences } from 'payload/types'
 
@@ -24,7 +24,6 @@ export const CollapsibleInput: React.FC<{
 
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
-  const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
   const [errorCount, setErrorCount] = useState(0)
   const { i18n } = useTranslation()
 
@@ -58,24 +57,6 @@ export const CollapsibleInput: React.FC<{
     [preferencesKey, fieldPreferencesKey, getPreference, setPreference, path],
   )
 
-  useEffect(() => {
-    const fetchInitialState = async () => {
-      const preferences = await getPreference(preferencesKey)
-      if (preferences) {
-        const initCollapsedFromPref = path
-          ? preferences?.fields?.[path]?.collapsed
-          : preferences?.fields?.[fieldPreferencesKey]?.collapsed
-        setCollapsedOnMount(Boolean(initCollapsedFromPref))
-      } else {
-        setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
-      }
-    }
-
-    fetchInitialState()
-  }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
-
-  if (typeof collapsedOnMount !== 'boolean') return null
-
   return (
     <Fragment>
       <WatchChildErrors pathSegments={pathSegments} setErrorCount={setErrorCount} />
@@ -88,7 +69,7 @@ export const CollapsibleInput: React.FC<{
             {errorCount > 0 && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
           </div>
         }
-        initCollapsed={collapsedOnMount}
+        initCollapsed={initCollapsed}
         onToggle={onToggle}
       >
         {children}
