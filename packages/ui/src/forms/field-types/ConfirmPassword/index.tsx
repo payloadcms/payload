@@ -9,14 +9,15 @@ import Error from '../../Error'
 import { useFormFields } from '../../Form/context'
 import Label from '../../Label'
 import useField from '../../useField'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+
+import './index.scss'
 
 const ConfirmPassword: React.FC<Props> = (props) => {
   const { disabled } = props
 
   const password = useFormFields<FormField>(([fields]) => fields.password)
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const validate = useCallback(
     (value: string) => {
@@ -33,9 +34,11 @@ const ConfirmPassword: React.FC<Props> = (props) => {
     [password, t],
   )
 
+  const path = 'confirm-password'
+
   const { errorMessage, setValue, showError, value } = useField({
     disableFormData: true,
-    path: 'confirm-password',
+    path,
     validate,
   })
 
@@ -45,11 +48,12 @@ const ConfirmPassword: React.FC<Props> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <Error message={errorMessage} showError={showError} />
+      <Error path={path} />
       <Label
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
         required
+        i18n={i18n}
       />
       <input
         autoComplete="off"
