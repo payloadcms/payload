@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentPreferences } from 'payload/types'
 
@@ -8,6 +8,7 @@ import { ErrorPill } from '../../../../elements/ErrorPill'
 import { useDocumentInfo } from '../../../../providers/DocumentInfo'
 import { usePreferences } from '../../../../providers/Preferences'
 import { useTranslation } from '../../../..'
+import { WatchChildErrors } from '../../../WatchChildErrors'
 
 export const CollapsibleInput: React.FC<{
   initCollapsed?: boolean
@@ -16,8 +17,10 @@ export const CollapsibleInput: React.FC<{
   baseClass: string
   RowLabel?: React.ReactNode
   fieldPreferencesKey?: string
+  pathSegments?: string[]
 }> = (props) => {
-  const { initCollapsed, children, path, baseClass, RowLabel, fieldPreferencesKey } = props
+  const { initCollapsed, children, path, baseClass, RowLabel, fieldPreferencesKey, pathSegments } =
+    props
 
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
@@ -74,19 +77,22 @@ export const CollapsibleInput: React.FC<{
   if (typeof collapsedOnMount !== 'boolean') return null
 
   return (
-    <Collapsible
-      className={`${baseClass}__collapsible`}
-      collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
-      header={
-        <div className={`${baseClass}__row-label-wrap`}>
-          {RowLabel}
-          {errorCount > 0 && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
-        </div>
-      }
-      initCollapsed={collapsedOnMount}
-      onToggle={onToggle}
-    >
-      {children}
-    </Collapsible>
+    <Fragment>
+      <WatchChildErrors pathSegments={pathSegments} setErrorCount={setErrorCount} />
+      <Collapsible
+        className={`${baseClass}__collapsible`}
+        collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
+        header={
+          <div className={`${baseClass}__row-label-wrap`}>
+            {RowLabel}
+            {errorCount > 0 && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+          </div>
+        }
+        initCollapsed={collapsedOnMount}
+        onToggle={onToggle}
+      >
+        {children}
+      </Collapsible>
+    </Fragment>
   )
 }

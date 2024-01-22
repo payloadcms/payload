@@ -30,7 +30,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     formState,
   } = props
 
-  const { fieldState: nestedFieldState } = getNestedFieldState({
+  const { fieldState: nestedFieldState, pathSegments } = getNestedFieldState({
     formState,
     path,
     fieldSchema: fields,
@@ -50,6 +50,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
         RowLabel={<RowLabel data={formState} label={label} path={path} i18n={i18n} />}
         path={path}
         fieldPreferencesKey={fieldPreferencesKey}
+        pathSegments={pathSegments}
       >
         <RenderFields
           fieldSchema={fields.map((field) => ({
