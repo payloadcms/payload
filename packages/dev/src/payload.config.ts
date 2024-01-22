@@ -44,4 +44,8 @@ export default buildConfig({
     //   },
     // })
   },
+  upload: {
+    useTempFiles: true,
+    tempFileDir: '/tmp',
+  },
 })
