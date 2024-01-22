@@ -5,6 +5,7 @@ import type { FormField, UIField } from 'payload/types'
 import { useAllFormFields } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
 
@@ -17,6 +18,8 @@ export const Preview: React.FC<PreviewProps> = (props) => {
   const {
     pluginConfig: { generateURL },
   } = props || {}
+
+  const { t } = useTranslation('plugin-seo')
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -34,7 +37,7 @@ export const Preview: React.FC<PreviewProps> = (props) => {
       if (typeof generateURL === 'function' && !href) {
         const newHref = await generateURL({
           ...docInfo,
-          doc: { fields },
+          doc: { ...fields },
           locale: typeof locale === 'object' ? locale?.code : locale,
         })
 
@@ -47,14 +50,14 @@ export const Preview: React.FC<PreviewProps> = (props) => {
 
   return (
     <div>
-      <div>Preview</div>
+      <div>{t('preview')}</div>
       <div
         style={{
           color: '#9A9A9A',
           marginBottom: '5px',
         }}
       >
-        Exact result listings may vary based on content and search relevancy.
+        {t('previewDescription')}
       </div>
       <div
         style={{

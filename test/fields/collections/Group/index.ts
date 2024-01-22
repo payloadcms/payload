@@ -61,6 +61,24 @@ const GroupFields: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayOfGroups',
+      type: 'array',
+      defaultValue: [
+        {
+          groupItem: {
+            text: 'Hello world',
+          },
+        },
+      ],
+      fields: [
+        {
+          name: 'groupItem',
+          type: 'group',
+          fields: [{ name: 'text', type: 'text' }],
+        },
+      ],
+    },
+    {
       name: 'potentiallyEmptyGroup',
       type: 'group',
       fields: [

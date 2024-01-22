@@ -3,7 +3,7 @@ import type { HTMLConverter } from '../types'
 import { convertLexicalNodesToHTML } from '../serializeLexical'
 
 export const ListHTMLConverter: HTMLConverter<any> = {
-  converter: async ({ converters, node, parent }) => {
+  converter: async ({ converters, node, parent, submissionData }) => {
     const childrenText = await convertLexicalNodesToHTML({
       converters,
       lexicalNodes: node.children,
@@ -11,6 +11,7 @@ export const ListHTMLConverter: HTMLConverter<any> = {
         ...node,
         parent,
       },
+      submissionData,
     })
 
     return `<${node?.tag} class="${node?.listType}">${childrenText}</${node?.tag}>`

@@ -226,7 +226,24 @@ export type TextField = FieldBase & {
   maxLength?: number
   minLength?: number
   type: 'text'
-}
+} & (
+    | {
+        /** Makes this field an ordered array of strings instead of just a single string. */
+        hasMany: true
+        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+        maxRows?: number
+        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+        minRows?: number
+      }
+    | {
+        /** Makes this field an ordered array of strings instead of just a single string. */
+        hasMany?: false | undefined
+        /** Maximum number of strings in the strings array, if `hasMany` is set to true. */
+        maxRows?: undefined
+        /** Minimum number of strings in the strings array, if `hasMany` is set to true. */
+        minRows?: undefined
+      }
+  )
 
 export type EmailField = FieldBase & {
   admin?: Admin & {
@@ -561,6 +578,8 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {
@@ -671,6 +690,10 @@ export function fieldIsArrayType(field: Field): field is ArrayField {
 
 export function fieldIsBlockType(field: Field): field is BlockField {
   return field.type === 'blocks'
+}
+
+export function fieldIsGroupType(field: Field): field is GroupField {
+  return field.type === 'group'
 }
 
 export function optionIsObject(option: Option): option is OptionObject {

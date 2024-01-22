@@ -534,14 +534,13 @@ When swapping out the `Field` component, you'll be responsible for sending and r
 ```tsx
 import { useField } from 'payload/components/forms'
 
-type Props = { path: string }
-
-const CustomTextField: React.FC<Props> = ({ path }) => {
+const CustomTextField: React.FC<{ path: string }> = ({ path }) => {
   // highlight-start
-  const { value, setValue } = useField<Props>({ path })
+  const { value, setValue } = useField<string>({ path })
   // highlight-end
 
-  return <input onChange={(e) => setValue(e.target.value)} value={value.path} />
+
+  return <input onChange={(e) => setValue(e.target.value)} value={value} />
 }
 ```
 

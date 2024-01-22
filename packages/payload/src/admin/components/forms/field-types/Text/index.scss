@@ -3,8 +3,10 @@
 .field-type.text {
   position: relative;
 
-  input {
-    @include formInput;
+  &:not(.has-many) {
+    input {
+      @include formInput;
+    }
   }
 }
 

@@ -30,6 +30,26 @@ Payload Cloud gives you S3 file storage backed by Cloudflare as a CDN, and this 
 
 AWS Cognito is used for authentication to your S3 bucket. The [Payload Cloud Plugin](https://github.com/payloadcms/plugin-cloud) will automatically pick up these values. These values are only if you'd like to access your files directly, outside of Payload Cloud.
 
+#### Accessing Files Outside of Payload Cloud
+
+If you'd like to access your files outside of Payload Cloud, you'll need to retrieve some values from your project's settings and put them into your environment variables. In Payload Cloud, navigate to the File Storage tab and copy the values using the copy button. Put these values in your .env file. Also copy the Cognito Password value separately and put into your .env file as well.
+
+When you are done, you should have the following values in your .env file:
+
+```env
+PAYLOAD_CLOUD=true
+PAYLOAD_CLOUD_ENVIRONMENT=prod
+PAYLOAD_CLOUD_COGNITO_USER_POOL_CLIENT_ID=
+PAYLOAD_CLOUD_COGNITO_USER_POOL_ID=
+PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID=
+PAYLOAD_CLOUD_PROJECT_ID=
+PAYLOAD_CLOUD_BUCKET=
+PAYLOAD_CLOUD_BUCKET_REGION=
+PAYLOAD_CLOUD_COGNITO_PASSWORD=
+```
+
+The plugin will pick up these values and use them to access your files.
+
 ### Build Settings
 
 You can update settings from your Project’s Settings tab. Changes to your build settings will trigger a redeployment of your project.

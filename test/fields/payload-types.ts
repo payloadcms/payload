@@ -237,12 +237,6 @@ export interface ArrayField {
         id?: string | null
       }[]
     | null
-  arrayWithNestedAfterChange?:
-    | {
-        text?: string | null
-        id?: string | null
-      }[]
-    | null
   updatedAt: string
   createdAt: string
 }
@@ -455,14 +449,6 @@ export interface BlockField {
         blockType: 'relationships'
       }[]
     | null
-  blocksWithNestedAfterChange?:
-    | {
-        text?: string | null
-        id?: string | null
-        blockName?: string | null
-        blockType: 'block-after-change'
-      }[]
-    | null
   updatedAt: string
   createdAt: string
 }
@@ -479,6 +465,11 @@ export interface TextField {
   customLabel?: string | null
   customError?: string | null
   beforeAndAfterInput?: string | null
+  hasMany?: string[] | null
+  validatesHasMany?: string[] | null
+  localizedHasMany?: string[] | null
+  withMinRows?: string[] | null
+  withMaxRows?: string[] | null
   updatedAt: string
   createdAt: string
 }
@@ -607,9 +598,6 @@ export interface GroupField {
       }
     }
   }
-  groupWithNestedAfterChange?: {
-    text?: string | null
-  }
   updatedAt: string
   createdAt: string
 }
@@ -620,7 +608,6 @@ export interface RowField {
   field_with_width_b?: string | null
   field_within_collapsible_a?: string | null
   field_within_collapsible_b?: string | null
-  nestedText?: string | null
   updatedAt: string
   createdAt: string
 }
@@ -924,9 +911,6 @@ export interface TabsField {
     beforeChange?: boolean | null
     afterChange?: boolean | null
     afterRead?: boolean | null
-  }
-  tabWithNestedAfterChange: {
-    text?: string | null
   }
   textarea?: string | null
   anotherText: string

@@ -29,6 +29,15 @@ export default buildConfigWithDefaults({
       },
     }),
   },
+  i18n: {
+    resources: {
+      es: {
+        'plugin-seo': {
+          autoGenerate: 'Auto-génerar',
+        },
+      },
+    },
+  },
   plugins: [
     seoPlugin({
       collections: ['pages', 'posts'],
@@ -42,6 +51,11 @@ export default buildConfigWithDefaults({
           label: 'og:title',
         },
       ],
+      fieldOverrides: {
+        title: {
+          required: true,
+        },
+      },
       generateTitle: (data: any) => `Website.com — ${data?.doc?.title?.value}`,
       generateDescription: ({ doc }: any) => doc?.excerpt?.value,
       generateURL: ({ doc, locale }: any) =>

@@ -2,7 +2,9 @@
 import type { PayloadRequest } from 'payload/types'
 
 import { getMigrations, readMigrationFiles } from 'payload/database'
-import { DatabaseError } from 'pg'
+import { commitTransaction } from 'payload/dist/utilities/commitTransaction'
+import { initTransaction } from 'payload/dist/utilities/initTransaction'
+import { killTransaction } from 'payload/dist/utilities/killTransaction'
 
 import type { PostgresAdapter } from './types'
 
@@ -29,7 +31,7 @@ export async function migrateRefresh(this: PostgresAdapter) {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  let transactionID
+  const req = { payload } as PayloadRequest
 
   // Reverse order of migrations to rollback
   existingMigrations.reverse()
@@ -43,8 +45,8 @@ export async function migrateRefresh(this: PostgresAdapter) {
 
       payload.logger.info({ msg: `Migrating down: ${migration.name}` })
       const start = Date.now()
-      transactionID = await this.beginTransaction()
-      await migrationFile.down({ payload })
+      await initTransaction(req)
+      await migrationFile.down({ payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
       })
@@ -53,9 +55,7 @@ export async function migrateRefresh(this: PostgresAdapter) {
       if (tableExists) {
         await payload.delete({
           collection: 'payload-migrations',
-          req: {
-            transactionID,
-          } as PayloadRequest,
+          req,
           where: {
             name: {
               equals: migration.name,
@@ -63,8 +63,9 @@ export async function migrateRefresh(this: PostgresAdapter) {
           },
         })
       }
+      await commitTransaction(req)
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       payload.logger.error({
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
@@ -78,23 +79,21 @@ export async function migrateRefresh(this: PostgresAdapter) {
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
     try {
       const start = Date.now()
-      transactionID = await this.beginTransaction()
-      await migration.up({ payload })
+      await initTransaction(req)
+      await migration.up({ payload, req })
       await payload.create({
         collection: 'payload-migrations',
         data: {
           name: migration.name,
           executed: true,
         },
-        req: {
-          transactionID,
-        } as PayloadRequest,
+        req,
       })
-      await this.commitTransaction(transactionID)
+      await commitTransaction(req)
 
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       payload.logger.error({
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
