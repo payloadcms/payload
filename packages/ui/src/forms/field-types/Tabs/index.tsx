@@ -5,7 +5,6 @@ import type { Props } from './types'
 import FieldDescription from '../../FieldDescription'
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import './index.scss'
 import { TabsProvider } from './provider'
 import { TabComponent } from './Tab'
 import { Wrapper } from './Wrapper'
@@ -13,6 +12,8 @@ import { getTranslation } from '@payloadcms/translations'
 import { toKebabCase } from 'payload/utilities'
 import { Tab } from 'payload/types'
 import { withCondition } from '../../withCondition'
+
+import './index.scss'
 
 const baseClass = 'tabs-field'
 

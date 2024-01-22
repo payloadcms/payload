@@ -118,6 +118,18 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
+      label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
+      type: 'collapsible',
+      fields: [
+        {
+          name: 'collapsibleText',
+          label: 'Collapsible Text',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',

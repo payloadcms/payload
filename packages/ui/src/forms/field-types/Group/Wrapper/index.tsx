@@ -1,15 +1,13 @@
 'use client'
 import React from 'react'
 
-import { useCollapsible } from '../../../elements/Collapsible/provider'
-import { useFormSubmitted } from '../../Form/context'
-import { useRow } from '../Row/provider'
-import { useTabs } from '../Tabs/provider'
-import { fieldBaseClass } from '../shared'
-import { useGroup } from './provider'
+import { useCollapsible } from '../../../../elements/Collapsible/provider'
+import { useFormSubmitted } from '../../../Form/context'
+import { useRow } from '../../Row/provider'
+import { useTabs } from '../../Tabs/provider'
+import { fieldBaseClass } from '../../shared'
+import { useGroup } from '../provider'
 import { GroupField } from 'payload/types'
-
-import './index.scss'
 
 const baseClass = 'group-field'
 
