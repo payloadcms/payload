@@ -104,8 +104,8 @@ describe('Fields', () => {
       const { id } = await payload.create({
         collection: 'text-fields',
         data: {
-          text,
           localizedHasMany,
+          text,
         },
         locale: 'en',
       })
@@ -706,8 +706,8 @@ describe('Fields', () => {
 
     it('should call afterChange hook with correct value and previousValue', async () => {
       doc = await payload.update({
-        collection: arrayFieldsSlug,
         id: doc.id,
+        collection: arrayFieldsSlug,
         data: {
           arrayWithNestedAfterChange: [
             {
@@ -718,8 +718,8 @@ describe('Fields', () => {
       })
 
       expect(arrayAfterChangeMock).toHaveBeenLastCalledWith({
-        value: 'changedNestedValue',
         previousValue: 'defaultNestedValue',
+        value: 'changedNestedValue',
       })
     })
   })
@@ -741,8 +741,8 @@ describe('Fields', () => {
 
     it('should call afterChange hook with correct value and previousValue', async () => {
       document = await payload.update({
-        collection: groupFieldsSlug,
         id: document.id,
+        collection: groupFieldsSlug,
         data: {
           groupWithNestedAfterChange: {
             text: 'changedNestedValue',
@@ -751,8 +751,8 @@ describe('Fields', () => {
       })
 
       expect(groupAfterChangeMock).toHaveBeenLastCalledWith({
-        value: 'changedNestedValue',
         previousValue: 'defaultNestedValue',
+        value: 'changedNestedValue',
       })
     })
   })
@@ -772,21 +772,25 @@ describe('Fields', () => {
 
     it('should call afterChange hook with correct value and previousValue', async () => {
       document = await payload.update({
-        collection: rowFieldsSlug,
         id: document.id,
+        collection: rowFieldsSlug,
         data: {
           nestedText: 'changedNestedValue',
         },
       })
 
       expect(rowAfterChangeMock).toHaveBeenLastCalledWith({
-        value: 'changedNestedValue',
         previousValue: 'defaultNestedValue',
+        value: 'changedNestedValue',
       })
     })
 
     it('should not have duplicate keys', async () => {
-      expect(document.arrayOfGroups[0]).toMatchObject({
+      const documentDefaults = await payload.create({
+        collection: groupFieldsSlug,
+        data: {},
+      })
+      expect(documentDefaults.arrayOfGroups[0]).toMatchObject({
         id: expect.any(String),
         groupItem: {
           text: 'Hello world',
@@ -857,8 +861,8 @@ describe('Fields', () => {
 
     it('should call afterChange hook with correct value and previousValue', async () => {
       document = await payload.update({
-        collection: tabsFieldsSlug,
         id: document.id,
+        collection: tabsFieldsSlug,
         data: {
           tabWithNestedAfterChange: {
             text: 'changedNestedValue',
@@ -867,8 +871,8 @@ describe('Fields', () => {
       })
 
       expect(tabAfterChangeMock).toHaveBeenLastCalledWith({
-        value: 'changedNestedValue',
         previousValue: 'initialNestedValue',
+        value: 'changedNestedValue',
       })
     })
   })
@@ -1078,8 +1082,8 @@ describe('Fields', () => {
       })
 
       await payload.update({
-        collection: blockFieldsSlug,
         id: document.id,
+        collection: blockFieldsSlug,
         data: {
           blocksWithNestedAfterChange: [
             {
@@ -1091,8 +1095,8 @@ describe('Fields', () => {
       })
 
       expect(blockAfterChangeMock).toHaveBeenLastCalledWith({
-        value: 'changedNestedValue',
         previousValue: 'initialNestedValue',
+        value: 'changedNestedValue',
       })
     })
   })
@@ -1318,8 +1322,8 @@ describe('Fields', () => {
       expect(nodes).toBeDefined()
       const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
       expect(child).toMatchObject({
-        linkType: 'internal',
         type: 'link',
+        linkType: 'internal',
       })
       expect(child.doc.relationTo).toEqual('array-fields')
 
