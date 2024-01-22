@@ -75,6 +75,49 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      type: 'point',
+      name: 'point',
+      label: 'Point',
+      required: true,
+    },
+    {
+      type: 'radio',
+      name: 'radio',
+      label: 'Radio',
+      required: true,
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option-1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option-2',
+        },
+      ],
+    },
+    {
+      name: 'json',
+      label: 'JSON',
+      type: 'json',
+      required: true,
+    },
+    {
+      name: 'hidden',
+      label: 'Hidden',
+      type: 'text',
+      required: true,
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'code',
+      label: 'Code',
+      type: 'code',
+      required: true,
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',
