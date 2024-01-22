@@ -112,6 +112,12 @@ export const Pages: CollectionConfig = {
       },
     },
     {
+      name: 'code',
+      label: 'Code',
+      type: 'code',
+      required: true,
+    },
+    {
       name: 'group',
       label: 'Group',
       type: 'group',
