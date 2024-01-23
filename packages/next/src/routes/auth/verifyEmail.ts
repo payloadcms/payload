@@ -18,6 +18,7 @@ export const verifyEmail = async ({
 
   return Response.json(
     {
+      // TODO(translate)
       message: 'Email verified successfully.',
     },
     {

@@ -4,7 +4,6 @@ import { resetPasswordOperation } from 'payload/operations'
 import { generatePayloadCookie } from '../../utilities/cookies'
 import { PayloadRequest } from 'payload/types'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const resetPassword = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const { searchParams } = new URL(req.url)
   const depth = searchParams.get('depth')
@@ -27,6 +26,7 @@ export const resetPassword = async ({ req }: { req: PayloadRequest }): Promise<R
 
   return Response.json(
     {
+      // TODO(translate)
       message: 'Password reset successfully.',
       token: result.token,
       user: result.user,

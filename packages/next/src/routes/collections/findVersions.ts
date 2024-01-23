@@ -4,7 +4,6 @@ import { PayloadRequest, Where } from 'payload/types'
 import { findVersionsOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const findVersions = async ({
   req,
   id,

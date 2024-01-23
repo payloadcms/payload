@@ -6,6 +6,7 @@ import { tempFileHandler, memHandler } from './handlers'
 import { processNested } from './processNested'
 import { isFunc, debugLog, buildFields, parseFileName } from './utilities'
 import { NextFileUploadOptions, NextFileUploadResponse } from '.'
+import APIError from 'payload/dist/errors/APIError'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
 
@@ -18,7 +19,6 @@ export const processMultipart: ProcessMultipart = async ({ request, options }) =
   let result: NextFileUploadResponse = {
     fields: undefined,
     files: undefined,
-    error: undefined,
   }
 
   const headersObject = {}
@@ -71,14 +71,8 @@ export const processMultipart: ProcessMultipart = async ({ request, options }) =
       if (options.abortOnLimit) {
         debugLog(options, `Aborting upload because of size limit ${field}->${filename}.`)
         cleanup()
-        result = {
-          ...result,
-          error: {
-            code: 413,
-            message: options.responseOnLimit,
-          },
-        }
         parsingRequest = false
+        throw new APIError(options.responseOnLimit, 413, { size: getFileSize() })
       }
     })
 
@@ -151,13 +145,7 @@ export const processMultipart: ProcessMultipart = async ({ request, options }) =
   busboy.on('error', (err) => {
     debugLog(options, `Busboy error`)
     parsingRequest = false
-    result = {
-      ...result,
-      error: {
-        code: 500,
-        message: 'Busboy error parsing multipart request',
-      },
-    }
+    throw new APIError('Busboy error parsing multipart request', 500)
   })
 
   const reader = request.body.getReader()

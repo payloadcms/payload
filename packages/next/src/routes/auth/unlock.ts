@@ -3,7 +3,6 @@ import httpStatus from 'http-status'
 import { unlockOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const unlock = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   await unlockOperation({
     collection: req.collection,
@@ -13,6 +12,7 @@ export const unlock = async ({ req }: { req: PayloadRequest }): Promise<Response
 
   return Response.json(
     {
+      // TODO(translate)
       message: 'Success',
     },
     {

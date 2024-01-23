@@ -4,7 +4,6 @@ import type { PayloadRequest } from 'payload/types'
 import { isNumber } from 'payload/utilities'
 import { deleteByIDOperation } from 'payload/operations'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const deleteByID = async ({
   req,
   id,
@@ -24,7 +23,7 @@ export const deleteByID = async ({
   if (!doc) {
     return Response.json(
       {
-        message: 'Not Found',
+        message: req.t('general:notFound'),
       },
       {
         status: httpStatus.NOT_FOUND,

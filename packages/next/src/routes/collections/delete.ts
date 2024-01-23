@@ -5,7 +5,6 @@ import { isNumber } from 'payload/utilities'
 import { getTranslation } from '@payloadcms/translations'
 import { deleteOperation } from 'payload/operations'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const deleteDoc = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const { searchParams } = new URL(req.url)
   const depth = searchParams.get('depth')
@@ -38,24 +37,20 @@ export const deleteDoc = async ({ req }: { req: PayloadRequest }): Promise<Respo
     )
   }
 
-  // const total = result.docs.length + result.errors.length
-  // const message = req.t('error:unableToDeleteCount', {
-  //   count: result.errors.length,
-  //   label: getTranslation(
-  //     req.collection.config.labels[total > 1 ? 'plural' : 'singular'],
-  //     req.i18n,
-  //   ),
-  //   total,
-  // })
-
-  // res.status(httpStatus.BAD_REQUEST).json({
-  //   message,
-  //   ...result,
-  // })
+  const total = result.docs.length + result.errors.length
+  const message = req.t('error:unableToDeleteCount', {
+    count: result.errors.length,
+    label: getTranslation(
+      req.collection.config.labels[total > 1 ? 'plural' : 'singular'],
+      req.i18n,
+    ),
+    total,
+  })
 
   return Response.json(
     {
       ...result,
+      message,
     },
     {
       status: httpStatus.BAD_REQUEST,

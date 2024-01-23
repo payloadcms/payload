@@ -5,7 +5,6 @@ import type { PayloadRequest } from 'payload/types'
 import { isNumber } from 'payload/utilities'
 import { updateByIDOperation } from 'payload/operations'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const updateByID = async ({
   req,
   id,
@@ -35,7 +34,7 @@ export const updateByID = async ({
 
   return Response.json(
     {
-      // ...formatSuccessResponse(message, 'message'),
+      message,
       doc,
     },
     {
