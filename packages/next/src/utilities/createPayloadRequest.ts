@@ -1,4 +1,9 @@
-import type { SanitizedConfig, PayloadRequest, CustomPayloadRequest } from 'payload/types'
+import type {
+  SanitizedConfig,
+  PayloadRequest,
+  CustomPayloadRequest,
+  Collection,
+} from 'payload/types'
 import { getAuthenticatedUser } from 'payload/auth'
 import { getPayload } from 'payload'
 import { URL } from 'url'
@@ -6,9 +11,7 @@ import { parseCookies } from './cookies'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
-import fs from 'fs'
-import path from 'path'
-import busboy from 'busboy'
+import { nextFileUpload } from '../next-fileupload'
 
 type Args = {
   request: Request
@@ -26,7 +29,7 @@ export const createPayloadRequest = async ({
   const payload = await getPayload({ config: configPromise })
   const { collections, config } = payload
 
-  let collection = undefined
+  let collection: Collection = undefined
   if (params?.collection && collections?.[params.collection]) {
     collection = collections[params.collection]
   }
@@ -37,11 +40,7 @@ export const createPayloadRequest = async ({
   let requestData
   let requestFile: CustomPayloadRequest['file'] = undefined
 
-  const [contentType, ...contentTypeVarStrings] = request.headers.get('Content-Type').split(';')
-  const boundaryString = contentTypeVarStrings
-    .find((varString) => varString.includes('boundary'))
-    ?.split('=')?.[1]
-    ?.trim()
+  const [contentType] = request.headers.get('Content-Type').split(';')
 
   if (request.body) {
     if (contentType === 'application/json') {
@@ -54,14 +53,16 @@ export const createPayloadRequest = async ({
           const formData = await request.formData()
           const file = formData.get('file')
 
-          if (file && file instanceof File) {
+          if (file instanceof Blob) {
             const bytes = await file.arrayBuffer()
             const buffer = Buffer.from(bytes)
 
-            requestFile.name = file.name
-            requestFile.data = buffer
-            requestFile.mimetype = file.type
-            requestFile.size = file.size
+            requestFile = {
+              name: file.name,
+              data: buffer,
+              mimetype: file.type,
+              size: file.size,
+            }
           }
 
           const payloadData = formData.get('_payload')
@@ -71,42 +72,19 @@ export const createPayloadRequest = async ({
           }
         } else {
           // store temp file on disk
-          const headersObject = {}
-          request.headers.forEach((value, name) => {
-            headersObject[name] = value
+          const { fields, files, error } = await nextFileUpload({
+            options: config.upload as any,
+            request,
           })
 
-          const saveToFolder = path.join(process.cwd(), config.upload.tempFileDir)
-
-          if (!fs.existsSync(saveToFolder)) {
-            fs.mkdirSync(saveToFolder)
+          if (error) {
+            throw new Error(error.message)
           }
 
-          const bb = busboy({ headers: headersObject })
+          if (files?.file) requestFile = files.file
 
-          bb.on('file', (fieldname, file, info) => {
-            const { filename, encoding, mimeType: mime } = info
-            const saveTo = path.join(process.cwd(), 'tmp', filename)
-            const writeStream = fs.createWriteStream(saveTo)
-
-            file.on('data', (data) => {
-              writeStream.write(data)
-            })
-
-            file.on('end', () => {
-              writeStream.end()
-            })
-          })
-
-          const reader = request.body.getReader()
-          while (true) {
-            const { done, value } = await reader.read()
-
-            if (done) {
-              return
-            }
-
-            bb.write(value)
+          if (fields?._payload && typeof fields._payload === 'string') {
+            requestData = JSON.parse(fields._payload)
           }
         }
       } else {
@@ -160,7 +138,6 @@ export const createPayloadRequest = async ({
 
     // need to add:
     // ------------
-    // - files
     // - transactionID
     // - findByID
     // - payloadDataLoader

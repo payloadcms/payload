@@ -4,6 +4,7 @@ import type { SendMailOptions } from 'nodemailer'
 import type pino from 'pino'
 
 import crypto from 'crypto'
+import path from 'path'
 
 import type { AuthStrategy } from './auth'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword'
@@ -46,6 +47,7 @@ import { decrypt, encrypt } from './auth/crypto'
 import { APIKeyAuthentication } from './auth/strategies/apiKey'
 import { JWTAuthentication } from './auth/strategies/jwt'
 import localOperations from './collections/operations/local'
+import findConfig from './config/find'
 import buildEmail from './email/build'
 import { defaults as emailDefaults } from './email/defaults'
 import sendEmail from './email/sendEmail'
@@ -308,6 +310,17 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 
     this.config = await options.config
+
+    // TODO(JARROD/JAMES): can we keep this?
+    const configPath = findConfig()
+    this.config = {
+      ...this.config,
+      paths: {
+        config: configPath,
+        configDir: path.dirname(configPath),
+        rawConfig: configPath,
+      },
+    }
 
     if (!this.config.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')

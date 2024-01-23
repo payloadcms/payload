@@ -7,6 +7,7 @@ import { Settings } from './globals/Settings'
 import { Pages } from './collections/Pages'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { Media } from './collections/Media'
+import path from 'path'
 
 export default buildConfig({
   db: mongooseAdapter({
@@ -46,6 +47,8 @@ export default buildConfig({
   },
   upload: {
     useTempFiles: true,
-    tempFileDir: '/tmp',
+    tempFileDir: path.join(__dirname, '../temp'),
+    limits: { fileSize: 200 * 1024 },
+    abortOnLimit: true,
   },
 })
