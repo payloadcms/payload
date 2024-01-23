@@ -2,13 +2,13 @@ import { fromFile } from 'file-type'
 import fs from 'fs'
 import path from 'path'
 
-import type { File } from './types'
+import type { CustomPayloadRequest } from '../exports/types'
 
 const mimeTypeEstimate = {
   svg: 'image/svg+xml',
 }
 
-const getFileByPath = async (filePath: string): Promise<File> => {
+const getFileByPath = async (filePath: string): Promise<CustomPayloadRequest['file']> => {
   if (typeof filePath === 'string') {
     const data = fs.readFileSync(filePath)
     const mimetype = fromFile(filePath)

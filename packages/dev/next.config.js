@@ -18,6 +18,7 @@ const nextConfig = {
         'pino',
         'pino-pretty',
         'mongoose',
+        'sharp',
       ],
     }
   },

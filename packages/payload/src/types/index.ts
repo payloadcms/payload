@@ -8,6 +8,19 @@ import type { FindOneArgs } from '../database/types'
 import type { validOperators } from './constants'
 export type { Payload as Payload } from '../'
 
+export type UploadEdits = {
+  crop?: {
+    height?: number
+    width?: number
+    x?: number
+    y?: number
+  }
+  focalPoint?: {
+    x?: number
+    y?: number
+  }
+}
+
 export type CustomPayloadRequest<U = any> = {
   /**
    * The collection being interacted with
@@ -20,17 +33,14 @@ export type CustomPayloadRequest<U = any> = {
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string
   /**
-   * TODO: Files with Standard Request
    * The files that were uploaded during this request
    */
-  files?: {
-    // placeholder
-  }
-  /** Cache of documents related to the current request */
-  findByID?: {
-    [transactionID: string]: {
-      [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>
-    }
+  file?: {
+    data: Buffer
+    mimetype: string
+    name: string
+    size: number
+    tempFilePath?: string
   }
   i18n: I18n
   /**

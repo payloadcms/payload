@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
-    "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "next": "14.1.0",
     "payload": "workspace:*",

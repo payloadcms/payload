@@ -1,49 +1,17 @@
-import type { SanitizedConfig, PayloadRequest, CustomPayloadRequest } from 'payload/types'
+import type {
+  SanitizedConfig,
+  PayloadRequest,
+  CustomPayloadRequest,
+  Collection,
+} from 'payload/types'
 import { getAuthenticatedUser } from 'payload/auth'
-import { Payload, getPayload } from 'payload'
+import { getPayload } from 'payload'
 import { URL } from 'url'
 import { parseCookies } from './cookies'
 import { getRequestLanguage } from './getRequestLanguage'
+import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
-
-type GetRequestLocalesArgs = {
-  localization: Exclude<Payload['config']['localization'], false>
-  requestData?: Record<string, any>
-  searchParams?: URLSearchParams
-}
-function getRequestLocales({ localization, searchParams, requestData }: GetRequestLocalesArgs): {
-  locale: string
-  fallbackLocale: string
-} {
-  let locale = searchParams.get('locale')
-  let fallbackLocale = searchParams.get('fallback-locale')
-
-  if (requestData) {
-    if (requestData?.locale) {
-      locale = requestData.locale
-    }
-    if (requestData?.['fallback-locale']) {
-      fallbackLocale = requestData['fallback-locale']
-    }
-  }
-
-  if (fallbackLocale === 'none') {
-    fallbackLocale = 'null'
-  } else if (!localization.localeCodes.includes(fallbackLocale)) {
-    fallbackLocale = localization.defaultLocale
-  }
-
-  if (locale === '*') {
-    locale = 'all'
-  } else if (!localization.localeCodes.includes(locale)) {
-    locale = localization.defaultLocale
-  }
-
-  return {
-    locale,
-    fallbackLocale,
-  }
-}
+import { getDataAndFiles } from './getDataAndFiles'
 
 type Args = {
   request: Request
@@ -58,10 +26,11 @@ export const createPayloadRequest = async ({
   config: configPromise,
   params,
 }: Args): Promise<PayloadRequest> => {
+  const cookies = parseCookies(request.headers)
   const payload = await getPayload({ config: configPromise })
   const { collections, config } = payload
 
-  let collection = undefined
+  let collection: Collection = undefined
   if (params?.collection && collections?.[params.collection]) {
     collection = collections[params.collection]
   }
@@ -69,16 +38,11 @@ export const createPayloadRequest = async ({
   const { searchParams, pathname } = new URL(request.url)
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
-  let requestData
-  const contentType = request.headers.get('Content-Type')
-  if (request.body && contentType === 'application/json') {
-    requestData = await request.json()
-  } else if (contentType?.startsWith('multipart/form-data')) {
-    const formData = (await request.formData()).get('_payload')
-    if (typeof formData === 'string') {
-      requestData = JSON.parse(formData)
-    }
-  }
+  const { data, file } = await getDataAndFiles({
+    request,
+    collection,
+    config,
+  })
 
   let requestFallbackLocale
   let requestLocale
@@ -86,13 +50,12 @@ export const createPayloadRequest = async ({
     const locales = getRequestLocales({
       localization: config.localization,
       searchParams,
-      requestData,
+      data,
     })
     requestLocale = locales.locale
     requestFallbackLocale = locales.fallbackLocale
   }
 
-  const cookies = parseCookies(request.headers)
   const language = getRequestLanguage({
     headers: request.headers,
     cookies,
@@ -110,17 +73,16 @@ export const createPayloadRequest = async ({
     context: {},
     collection,
     payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
-    data: requestData,
+    data,
     locale: requestLocale,
     fallbackLocale: requestFallbackLocale,
     i18n,
     t: i18n.t,
+    file,
 
     // need to add:
     // ------------
-    // - files
     // - transactionID
-    // - findByID
     // - payloadDataLoader
     // - payloadUploadSizes
   }
@@ -136,12 +98,3 @@ export const createPayloadRequest = async ({
 
   return req
 }
-
-// Express specific functionality
-// to search for and replace:
-// -------------------------------
-// req.params
-// req.query
-// req.body
-// req.files
-// express/responses/formatSuccess
