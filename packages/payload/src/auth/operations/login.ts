@@ -18,8 +18,8 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import isLocked from '../isLocked'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts'
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts'
 import { getFieldsToSign } from './getFieldsToSign'
-import unlock from './unlock'
 
 export type Result = {
   exp?: number
@@ -119,12 +119,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     }
 
     if (maxLoginAttemptsEnabled) {
-      await unlock({
-        collection: {
-          config: collectionConfig,
-        },
-        data,
-        overrideAccess: true,
+      await resetLoginAttempts({
+        collection: collectionConfig,
+        doc: user,
+        payload: req.payload,
         req,
       })
     }
