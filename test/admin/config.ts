@@ -9,6 +9,8 @@ import { CollectionGroup1B } from './collections/Group1B'
 import { CollectionGroup2A } from './collections/Group2A'
 import { CollectionGroup2B } from './collections/Group2B'
 import { CollectionHidden } from './collections/Hidden'
+import { CustomIdTab } from './collections/CustomIdTab'
+import { CustomIdRow } from './collections/CustomIdRow'
 import { CollectionNoApiView } from './collections/NoApiView'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
@@ -116,6 +118,8 @@ export default buildConfigWithDefaults({
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
+    CustomIdTab,
+    CustomIdRow,
   ],
   globals: [
     GlobalHidden,

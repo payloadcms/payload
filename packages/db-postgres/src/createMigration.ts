@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/utils'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/payload'
 import type { CreateMigration } from 'payload/database'
 
 import fs from 'fs'
@@ -60,7 +60,7 @@ export const createMigration: CreateMigration = async function createMigration(
     fs.mkdirSync(dir)
   }
 
-  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/utils')
+  const { generateDrizzleJson, generateMigration } = require('drizzle-kit/payload')
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -99,9 +99,9 @@ export const createMigration: CreateMigration = async function createMigration(
     const { confirm: shouldCreateBlankMigration } = await prompts(
       {
         name: 'confirm',
+        type: 'confirm',
         initial: false,
         message: 'No schema changes detected. Would you like to create a blank migration file?',
-        type: 'confirm',
       },
       {
         onCancel: () => {

@@ -11,6 +11,7 @@ import type {
 } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import config, {
@@ -20,17 +21,38 @@ import config, {
   defaultAccessRelSlug,
   relationSlug,
   slug,
+  treeSlug,
 } from './config'
 
+let apiUrl
+let jwt
 let client: RESTClient
+
+const headers = {
+  'Content-Type': 'application/json',
+}
+const { email, password } = devUser
 
 type EasierChained = { id: string; relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
+    apiUrl = `${serverURL}/api`
     client = new RESTClient(config, { defaultSlug: slug, serverURL })
     await client.login()
+
+    const response = await fetch(`${apiUrl}/users/login`, {
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers,
+      method: 'post',
+    })
+
+    const data = await response.json()
+    jwt = data.token
   })
 
   afterAll(async () => {
@@ -532,6 +554,64 @@ describe('Relationships', () => {
         expect(stanleyNeverMadeMovies.movies).toHaveLength(0)
       })
     })
+
+    describe('Hierarchy', () => {
+      it('finds 1 root item with equals', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { equals: null },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('root')
+      })
+
+      it('finds 1 root item with exists', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { exists: false },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('root')
+      })
+
+      it('finds 1 sub item with equals', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { not_equals: null },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('sub')
+      })
+
+      it('finds 1 sub item with exists', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { exists: true },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('sub')
+      })
+    })
   })
 
   describe('Creating', () => {
@@ -581,7 +661,7 @@ describe('Relationships', () => {
         },
       })
 
-      const query = await client.find({
+      const queryOne = await client.find({
         slug: 'polymorphic-relationships',
         query: {
           and: [
@@ -599,7 +679,26 @@ describe('Relationships', () => {
         },
       })
 
-      expect(query.result.docs).toHaveLength(1)
+      const queryTwo = await client.find({
+        slug: 'polymorphic-relationships',
+        query: {
+          and: [
+            {
+              'polymorphic.relationTo': {
+                equals: 'movies',
+              },
+            },
+            {
+              'polymorphic.value': {
+                equals: movie.id,
+              },
+            },
+          ],
+        },
+      })
+
+      expect(queryOne.result.docs).toHaveLength(1)
+      expect(queryTwo.result.docs).toHaveLength(1)
     })
   })
 })

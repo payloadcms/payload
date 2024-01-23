@@ -578,6 +578,8 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {
@@ -688,6 +690,10 @@ export function fieldIsArrayType(field: Field): field is ArrayField {
 
 export function fieldIsBlockType(field: Field): field is BlockField {
   return field.type === 'blocks'
+}
+
+export function fieldIsGroupType(field: Field): field is GroupField {
+  return field.type === 'group'
 }
 
 export function optionIsObject(option: Option): option is OptionObject {

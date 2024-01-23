@@ -1,17 +1,14 @@
 'use client'
 
-import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import UploadInput from 'payload/dist/admin/components/forms/field-types/Upload/Input'
 import type { Props as UploadInputProps } from 'payload/components/fields/Upload'
+import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 
 import { UploadInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useConfig, useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
-
-import { useTranslation } from 'react-i18next'
 
 import { Pill } from '../ui/Pill'
 
@@ -22,7 +19,7 @@ type MetaImageProps = UploadInputProps & {
 }
 
 export const MetaImage: React.FC<MetaImageProps> = (props) => {
-  const { name, fieldTypes, label, pluginConfig, relationTo } = props || {}
+  const { name, fieldTypes, label, pluginConfig, relationTo, required } = props || {}
 
   const field: FieldType<string> = useField(props as Options)
 
@@ -32,7 +29,7 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
-  const { setValue, showError, value } = field
+  const { setValue, showError, value, errorMessage } = field
 
   const regenerateImage = useCallback(async () => {
     const { generateImage } = pluginConfig
@@ -71,6 +68,18 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
       >
         <div>
           {label && typeof label === 'string' && label}
+
+          {required && (
+            <span
+              style={{
+                marginLeft: '5px',
+                color: 'var(--theme-error-500)',
+              }}
+            >
+              *
+            </span>
+          )}
+
           {typeof pluginConfig.generateImage === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -113,6 +122,8 @@ export const MetaImage: React.FC<MetaImageProps> = (props) => {
           collection={collection}
           fieldTypes={fieldTypes}
           filterOptions={{}}
+          errorMessage={errorMessage}
+          required={required}
           label={undefined}
           name={name}
           onChange={(incomingImage) => {

@@ -24,7 +24,7 @@ export async function migrateReset(this: PostgresAdapter): Promise<void> {
     return
   }
 
-  const req = {} as PayloadRequest
+  const req = { payload } as PayloadRequest
 
   // Rollback all migrations in order
   for (const migration of existingMigrations) {
