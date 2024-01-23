@@ -4,7 +4,6 @@ import { PayloadRequest } from 'payload/types'
 import { restoreVersionOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const restoreVersion = async ({
   req,
   id,
@@ -25,7 +24,7 @@ export const restoreVersion = async ({
   return Response.json(
     {
       ...result,
-      // ...formatSuccessResponse(req.t('version:restoredSuccessfully'), 'message'),
+      message: req.t('version:restoredSuccessfully'),
     },
     {
       status: httpStatus.OK,

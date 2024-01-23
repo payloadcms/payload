@@ -5,7 +5,6 @@ import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 import { findVersionByIDOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const findVersionByID = async ({
   req,
   globalConfig,

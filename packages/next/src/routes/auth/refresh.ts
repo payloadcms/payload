@@ -4,13 +4,13 @@ import { PayloadRequest } from 'payload/types'
 import httpStatus from 'http-status'
 import { generatePayloadCookie } from '../../utilities/cookies'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const refresh = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)
 
   if (!token) {
     return Response.json(
       {
+        // TODO(translate)
         message: 'Token not provided.',
       },
       {
@@ -34,6 +34,7 @@ export const refresh = async ({ req }: { req: PayloadRequest }): Promise<Respons
   return Response.json(
     {
       exp: result.exp,
+      // TODO(translate)
       message: 'Token refresh successful',
       token: result.refreshedToken,
       user: result.user,

@@ -2,7 +2,6 @@ import { forgotPasswordOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import httpStatus from 'http-status'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const forgotPassword = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   await forgotPasswordOperation({
     collection: req.collection,
@@ -16,6 +15,7 @@ export const forgotPassword = async ({ req }: { req: PayloadRequest }): Promise<
 
   return Response.json(
     {
+      // TODO(translate)
       message: 'Success',
     },
     {

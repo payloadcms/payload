@@ -3,7 +3,6 @@ import { registerFirstUserOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import { generatePayloadCookie } from '../../utilities/cookies'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const registerFirstUser = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const result = await registerFirstUserOperation({
     collection: req.collection,
@@ -23,6 +22,7 @@ export const registerFirstUser = async ({ req }: { req: PayloadRequest }): Promi
   return Response.json(
     {
       exp: result.exp,
+      // TODO(translate)
       message: 'Successfully registered first user.',
       token: result.token,
       user: result.user,

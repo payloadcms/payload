@@ -5,7 +5,6 @@ import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 import { updateOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const update = async ({
   req,
   globalConfig,
@@ -33,7 +32,13 @@ export const update = async ({
   if (draft) message = req.t('version:draftSavedSuccessfully')
   if (autosave) message = req.t('version:autosavedSuccessfully')
 
-  return Response.json(result, {
-    status: httpStatus.OK,
-  })
+  return Response.json(
+    {
+      message,
+      result,
+    },
+    {
+      status: httpStatus.OK,
+    },
+  )
 }

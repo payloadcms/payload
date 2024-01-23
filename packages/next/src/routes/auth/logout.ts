@@ -3,7 +3,6 @@ import { logoutOperation } from 'payload/operations'
 import { PayloadRequest } from 'payload/types'
 import { generateExpiredPayloadCookie } from '../../utilities/cookies'
 
-// TODO(JARROD): pattern to catch errors and return correct Response
 export const logout = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
   const result = logoutOperation({
     collection: req.collection,
@@ -28,6 +27,7 @@ export const logout = async ({ req }: { req: PayloadRequest }): Promise<Response
 
   return Response.json(
     {
+      // TODO(translate)
       message: 'Logout successful.',
     },
     {
