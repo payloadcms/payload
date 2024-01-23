@@ -1,6 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-import memoize from 'micro-memoize'
-
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../types'
 import type { Collection, TypeWithID } from '../config/types'
@@ -63,7 +61,6 @@ export const findByIDOperation = async <T extends TypeWithID>(
 
   try {
     const shouldCommit = await initTransaction(req)
-    const { transactionID } = req
 
     // /////////////////////////////////////
     // Access
@@ -91,25 +88,7 @@ export const findByIDOperation = async <T extends TypeWithID>(
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(req.t)
 
-    if (!req.findByID) {
-      req.findByID = { [transactionID]: {} }
-    } else if (!req.findByID[transactionID]) {
-      req.findByID[transactionID] = {}
-    }
-
-    if (!req.findByID[transactionID][collectionConfig.slug]) {
-      const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query)
-
-      req.findByID[transactionID][collectionConfig.slug] = memoize(nonMemoizedFindByID, {
-        isPromise: true,
-        maxSize: 100,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore This is straight from their docs, bad typings
-        transformKey: JSON.stringify,
-      })
-    }
-
-    let result = (await req.findByID[transactionID][collectionConfig.slug](findOneArgs)) as T
+    let result = await req.payload.db.findOne<T>(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {
