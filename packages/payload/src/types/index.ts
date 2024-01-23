@@ -33,7 +33,6 @@ export type CustomPayloadRequest<U = any> = {
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: string
   /**
-   * TODO: Files with Standard Request
    * The files that were uploaded during this request
    */
   file?: {
@@ -42,15 +41,6 @@ export type CustomPayloadRequest<U = any> = {
     name: string
     size: number
     tempFilePath?: string
-  }
-  files?: {
-    // placeholder
-  }
-  /** Cache of documents related to the current request */
-  findByID?: {
-    [transactionID: string]: {
-      [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>
-    }
   }
   i18n: I18n
   /**

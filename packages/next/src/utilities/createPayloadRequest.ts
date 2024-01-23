@@ -11,7 +11,7 @@ import { parseCookies } from './cookies'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
-import { nextFileUpload } from '../next-fileupload'
+import { getDataAndFiles } from './getDataAndFiles'
 
 type Args = {
   request: Request
@@ -26,6 +26,7 @@ export const createPayloadRequest = async ({
   config: configPromise,
   params,
 }: Args): Promise<PayloadRequest> => {
+  const cookies = parseCookies(request.headers)
   const payload = await getPayload({ config: configPromise })
   const { collections, config } = payload
 
@@ -37,67 +38,11 @@ export const createPayloadRequest = async ({
   const { searchParams, pathname } = new URL(request.url)
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
-  let requestData
-  let requestFile: CustomPayloadRequest['file'] = undefined
-
-  const [contentType] = request.headers.get('Content-Type').split(';')
-
-  if (request.body) {
-    if (contentType === 'application/json') {
-      requestData = await request.json()
-    } else if (contentType === 'multipart/form-data') {
-      // possible upload request
-      if (collection.config.upload) {
-        // load file in memory
-        if (!config.upload?.useTempFiles) {
-          const formData = await request.formData()
-          const file = formData.get('file')
-
-          if (file instanceof Blob) {
-            const bytes = await file.arrayBuffer()
-            const buffer = Buffer.from(bytes)
-
-            requestFile = {
-              name: file.name,
-              data: buffer,
-              mimetype: file.type,
-              size: file.size,
-            }
-          }
-
-          const payloadData = formData.get('_payload')
-
-          if (typeof payloadData === 'string') {
-            requestData = JSON.parse(payloadData)
-          }
-        } else {
-          // store temp file on disk
-          const { fields, files, error } = await nextFileUpload({
-            options: config.upload as any,
-            request,
-          })
-
-          if (error) {
-            throw new Error(error.message)
-          }
-
-          if (files?.file) requestFile = files.file
-
-          if (fields?._payload && typeof fields._payload === 'string') {
-            requestData = JSON.parse(fields._payload)
-          }
-        }
-      } else {
-        // non upload request
-        const formData = await request.formData()
-        const payloadData = formData.get('_payload')
-
-        if (typeof payloadData === 'string') {
-          requestData = JSON.parse(payloadData)
-        }
-      }
-    }
-  }
+  const { data, file } = await getDataAndFiles({
+    request,
+    collection,
+    config,
+  })
 
   let requestFallbackLocale
   let requestLocale
@@ -105,13 +50,12 @@ export const createPayloadRequest = async ({
     const locales = getRequestLocales({
       localization: config.localization,
       searchParams,
-      requestData,
+      data,
     })
     requestLocale = locales.locale
     requestFallbackLocale = locales.fallbackLocale
   }
 
-  const cookies = parseCookies(request.headers)
   const language = getRequestLanguage({
     headers: request.headers,
     cookies,
@@ -129,17 +73,16 @@ export const createPayloadRequest = async ({
     context: {},
     collection,
     payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
-    data: requestData,
+    data,
     locale: requestLocale,
     fallbackLocale: requestFallbackLocale,
     i18n,
     t: i18n.t,
-    file: requestFile,
+    file,
 
     // need to add:
     // ------------
     // - transactionID
-    // - findByID
     // - payloadDataLoader
     // - payloadUploadSizes
   }
