@@ -11,7 +11,7 @@ import { parseCookies } from './cookies'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
-import { getDataAndFiles } from './getDataAndFiles'
+import { getDataAndFile } from './getDataAndFile'
 
 type Args = {
   request: Request
@@ -38,7 +38,7 @@ export const createPayloadRequest = async ({
   const { searchParams, pathname } = new URL(request.url)
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
-  const { data, file } = await getDataAndFiles({
+  const { data, file } = await getDataAndFile({
     request,
     collection,
     config,
