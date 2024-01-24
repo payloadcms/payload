@@ -45,7 +45,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
     }
 
-    // TODO: https://github.com/payloadcms/payload/discussions/4901
+    // WIP: https://github.com/payloadcms/payload/discussions/4901
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
