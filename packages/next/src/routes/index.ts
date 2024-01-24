@@ -92,18 +92,20 @@ const endpoints = {
 const handleCustomEndpoints = ({
   entitySlug,
   endpoints,
-  request,
+  originalRequest,
   payloadRequest,
 }: {
   entitySlug?: string
   endpoints: Endpoint[]
-  request: Request
+  originalRequest: Request
   payloadRequest: PayloadRequest
 }): Promise<Response> => {
   if (endpoints && endpoints.length > 0) {
     let handlerParams = {}
-    const { pathname } = new URL(request.url)
-    const pathPrefix = entitySlug ? `${payloadRequest.payload.config.routes.api}/${entitySlug}` : ''
+    const { pathname } = new URL(payloadRequest.url)
+    const pathPrefix =
+      payloadRequest.payload.config.routes.api + (entitySlug ? `/${entitySlug}` : '')
+
     const customEndpoint = endpoints.find((endpoint) => {
       if (endpoint.method === payloadRequest.method.toLowerCase()) {
         const pathMatchFn = match(`${pathPrefix}${endpoint.path}`, {
@@ -119,7 +121,7 @@ const handleCustomEndpoints = ({
 
     if (customEndpoint) {
       return customEndpoint.handler({
-        req: customEndpoint.root ? request : payloadRequest,
+        req: customEndpoint.root && originalRequest ? originalRequest : payloadRequest,
         params: handlerParams,
       })
     }
@@ -132,6 +134,7 @@ export const GET = async (
   request: Request,
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
+  const originalRequest = request.clone()
   const [slug1, slug2, slug3, slug4] = slug
 
   try {
@@ -147,7 +150,7 @@ export const GET = async (
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
@@ -183,7 +186,7 @@ export const GET = async (
         const customEndpointResponse = await handleCustomEndpoints({
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
-          request,
+          originalRequest,
           endpoints: globalConfig?.endpoints || [],
         })
         if (customEndpointResponse) return customEndpointResponse
@@ -207,7 +210,7 @@ export const GET = async (
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.payload.config.endpoints,
       })
       if (customEndpointResponse) return customEndpointResponse
@@ -227,6 +230,7 @@ export const POST = async (
   request: Request,
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
+  const originalRequest = request.clone()
   const [slug1, slug2, slug3, slug4] = slug
 
   try {
@@ -236,7 +240,7 @@ export const POST = async (
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
@@ -272,7 +276,7 @@ export const POST = async (
         const customEndpointResponse = await handleCustomEndpoints({
           entitySlug: `${slug1}/${slug2}`,
           payloadRequest: req,
-          request,
+          originalRequest,
           endpoints: globalConfig?.endpoints || [],
         })
         if (customEndpointResponse) return customEndpointResponse
@@ -295,7 +299,7 @@ export const POST = async (
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.payload.config.endpoints,
       })
       if (customEndpointResponse) return customEndpointResponse
@@ -309,6 +313,7 @@ export const DELETE = async (
   request: Request,
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
+  const originalRequest = request.clone()
   const [slug1, slug2] = slug
 
   try {
@@ -324,7 +329,7 @@ export const DELETE = async (
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
@@ -343,7 +348,7 @@ export const DELETE = async (
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.payload.config.endpoints,
       })
       if (customEndpointResponse) return customEndpointResponse
@@ -357,6 +362,7 @@ export const PATCH = async (
   request: Request,
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
+  const originalRequest = request.clone()
   const [slug1, slug2] = slug
 
   try {
@@ -372,7 +378,7 @@ export const PATCH = async (
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
@@ -391,7 +397,7 @@ export const PATCH = async (
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
         payloadRequest: req,
-        request,
+        originalRequest,
         endpoints: req.payload.config.endpoints,
       })
       if (customEndpointResponse) return customEndpointResponse
