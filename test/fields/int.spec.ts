@@ -705,19 +705,30 @@ describe('Fields', () => {
     })
 
     it('should call afterChange hook with correct value and previousValue', async () => {
+      arrayAfterChangeMock.mockReset()
+
       doc = await payload.update({
         id: doc.id,
         collection: arrayFieldsSlug,
         data: {
           arrayWithNestedAfterChange: [
             {
+              text: 'newNestedValue',
+            },
+            {
+              id: doc.arrayWithNestedAfterChange[0].id,
               text: 'changedNestedValue',
             },
           ],
         },
       })
 
-      expect(arrayAfterChangeMock).toHaveBeenLastCalledWith({
+      expect(arrayAfterChangeMock).toHaveBeenCalledTimes(2)
+      expect(arrayAfterChangeMock).toHaveBeenCalledWith({
+        previousValue: undefined,
+        value: 'newNestedValue',
+      })
+      expect(arrayAfterChangeMock).toHaveBeenCalledWith({
         previousValue: 'defaultNestedValue',
         value: 'changedNestedValue',
       })

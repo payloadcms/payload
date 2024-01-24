@@ -5,6 +5,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'
+import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc'
 import { traverseFields } from './traverseFields'
 
 type Args = {
@@ -95,6 +96,8 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
+          const nextSiblingData = siblingData?.[field.name]?.[i] || {}
+
           promises.push(
             traverseFields({
               collection,
@@ -105,10 +108,12 @@ export const promise = async ({
               global,
               operation,
               previousDoc,
-              previousSiblingDoc:
-                previousSiblingDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
+              previousSiblingDoc: getExistingRowDoc(
+                nextSiblingData,
+                previousSiblingDoc?.[field.name],
+              ),
               req,
-              siblingData: siblingData?.[field.name]?.[i] || {},
+              siblingData: nextSiblingData,
               siblingDoc: { ...row } || {},
             }),
           )
