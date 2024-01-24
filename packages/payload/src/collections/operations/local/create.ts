@@ -80,9 +80,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   req.payload = payload
   req.i18n = i18n
   req.t = i18n.t
-  req.files = {
-    file: (file ?? (await getFileByPath(filePath))) as UploadedFile, // TODO(NATIVE_REQUEST): fix this type
-  }
+  req.file = file ?? (await getFileByPath(filePath))
 
   if (typeof user !== 'undefined') req.user = user
 

@@ -98,11 +98,9 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
 
   const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
 
-  const req = {
+  const req: PayloadRequest = {
     fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    files: {
-      file: file ?? (await getFileByPath(filePath)),
-    },
+    file: file ?? (await getFileByPath(filePath)),
     i18n,
     locale: locale ?? defaultLocale,
     payload,
@@ -110,7 +108,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     t: i18n.t,
     transactionID: incomingReq?.transactionID,
     user,
-  } as unknown as PayloadRequest
+  } as PayloadRequest
   setRequestContext(req, context)
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)

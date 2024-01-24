@@ -16,10 +16,10 @@ import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
-// import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
-// import { generateFileData } from '../../uploads/generateFileData'
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
-// import { uploadFiles } from '../../uploads/uploadFiles'
+import { uploadFiles } from '../../uploads/uploadFiles'
 import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -138,29 +138,29 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    // const { data: newFileData, files: filesToUpload } = await generateFileData({
-    //   collection,
-    //   config,
-    //   data,
-    //   overwriteExistingFiles,
-    //   req,
-    //   throwOnMissingFile: false,
-    // })
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      collection,
+      config,
+      data,
+      overwriteExistingFiles,
+      req,
+      throwOnMissingFile: false,
+    })
 
-    // data = newFileData
+    data = newFileData
 
     // /////////////////////////////////////
     // Delete any associated files
     // /////////////////////////////////////
 
-    // await deleteAssociatedFiles({
-    //   collectionConfig,
-    //   config,
-    //   doc: docWithLocales,
-    //   files: filesToUpload,
-    //   overrideDelete: false,
-    //   t,
-    // })
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -200,9 +200,9 @@ export const updateByIDOperation = async <TSlug extends keyof GeneratedTypes['co
     // Write files to local storage
     // /////////////////////////////////////
 
-    // if (!collectionConfig.upload.disableLocalStorage) {
-    //   await uploadFiles(payload, filesToUpload, req)
-    // }
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req)
+    }
 
     // /////////////////////////////////////
     // beforeChange - Collection

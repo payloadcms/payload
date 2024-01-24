@@ -83,7 +83,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
 
   const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
 
-  const req = {
+  const req: PayloadRequest = {
     fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     i18n,
     locale: locale ?? defaultLocale,
