@@ -5,7 +5,7 @@ import { GraphQLClient } from 'graphql-request'
 import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
 import type { SanitizedConfig } from '../../packages/payload/src/config/types'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
-import type { RichTextField } from './payload-types'
+import type { GroupField, RichTextField } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
@@ -29,7 +29,6 @@ import {
 import { tabsDoc } from './collections/Tabs/shared'
 import { defaultText } from './collections/Text/shared'
 import { clearAndSeedEverything } from './seed'
-import { GroupField } from './payload-types'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
@@ -113,7 +112,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
@@ -414,7 +413,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
@@ -644,6 +643,14 @@ describe('Fields', () => {
         collection,
       })
 
+      expect(result.items[0]).toMatchObject({
+        subArray: [
+          {
+            text: subArrayText,
+          },
+        ],
+        text: 'test',
+      })
       expect(result.items[0].subArray[0].text).toStrictEqual(subArrayText)
     })
 
@@ -680,7 +687,12 @@ describe('Fields', () => {
         id,
         collection,
         locale: 'all',
-      })) as unknown as { localized: { en: unknown; es: unknown } }
+      })) as unknown as {
+        localized: {
+          en: unknown
+          es: unknown
+        }
+      }
 
       expect(enDoc.localized[0].text).toStrictEqual(enText)
       expect(esDoc.localized[0].text).toStrictEqual(esText)
@@ -702,6 +714,15 @@ describe('Fields', () => {
     it('should create with defaultValue', async () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue)
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild)
+    })
+
+    it('should not have duplicate keys', async () => {
+      expect(document.arrayOfGroups[0]).toMatchObject({
+        id: expect.any(String),
+        groupItem: {
+          text: 'Hello world',
+        },
+      })
     })
   })
 
@@ -1005,6 +1026,125 @@ describe('Fields', () => {
       })
 
       expect(updatedJsonFieldsDoc.json.state).toEqual({})
+    })
+
+    describe('querying', () => {
+      let fooBar
+      let bazBar
+
+      beforeEach(async () => {
+        fooBar = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { foo: 'foobar', number: 5 },
+          },
+        })
+        bazBar = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { baz: 'bar', number: 10 },
+          },
+        })
+      })
+
+      it('should query nested properties - like', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { like: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - equals', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { equals: 'foobar' },
+          },
+        })
+
+        const notEquals = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { equals: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+        expect(notEquals.docs).toHaveLength(0)
+      })
+
+      it('should query nested numbers - equals', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.number': { equals: 5 },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - exists', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.foo': { exists: true },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query - exists', async () => {
+        const nullJSON = await payload.create({
+          collection: 'json-fields',
+          data: {},
+        })
+        const hasJSON = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: [],
+          },
+        })
+
+        const docsExistsFalse = await payload.find({
+          collection: 'json-fields',
+          where: {
+            json: { exists: false },
+          },
+        })
+        const docsExistsTrue = await payload.find({
+          collection: 'json-fields',
+          where: {
+            json: { exists: true },
+          },
+        })
+
+        const existFalseIDs = docsExistsFalse.docs.map(({ id }) => id)
+        const existTrueIDs = docsExistsTrue.docs.map(({ id }) => id)
+
+        expect(existFalseIDs).toContain(nullJSON.id)
+        expect(existTrueIDs).not.toContain(nullJSON.id)
+
+        expect(existTrueIDs).toContain(hasJSON.id)
+        expect(existFalseIDs).not.toContain(hasJSON.id)
+      })
     })
   })
 

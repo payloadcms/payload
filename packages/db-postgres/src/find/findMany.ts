@@ -164,7 +164,7 @@ export const findMany = async function find({
         .where(where),
     })
     totalDocs = Number(countResult[0].count)
-    totalPages = typeof limit === 'number' ? Math.ceil(totalDocs / limit) : 1
+    totalPages = typeof limit === 'number' && limit !== 0 ? Math.ceil(totalDocs / limit) : 1
     hasPrevPage = page > 1
     hasNextPage = totalPages > page
     pagingCounter = (page - 1) * limit + 1

@@ -41,6 +41,7 @@ import findVersionByIDResolver from './resolvers/findVersionByID'
 import findVersionsResolver from './resolvers/findVersions'
 import restoreVersionResolver from './resolvers/restoreVersion'
 import updateResolver from './resolvers/update'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 
 function initCollectionsGraphQL(payload: Payload): void {
   Object.keys(payload.collections).forEach((slug) => {
@@ -76,14 +77,17 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     collection.graphQL = {} as Collection['graphQL']
 
-    const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+    const hasIDField =
+      flattenFields(fields).findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
+      -1
+
     const idType = getCollectionIDType(payload, config)
 
     const baseFields: ObjectTypeConfig = {}
 
     const whereInputFields = [...fields]
 
-    if (!idField) {
+    if (!hasIDField) {
       baseFields.id = { type: idType }
       whereInputFields.push({
         name: 'id',

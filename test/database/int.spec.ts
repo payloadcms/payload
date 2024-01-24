@@ -17,7 +17,6 @@ describe('database', () => {
   const collection = 'posts'
   const title = 'title'
   let user: TypeWithID & Record<string, unknown>
-  let useTransactions = true
   let checkSchema = true
 
   beforeAll(async () => {
@@ -27,7 +26,6 @@ describe('database', () => {
     client = new GraphQLClient(url)
     if (payload.db.name === 'mongoose') {
       checkSchema = false
-      useTransactions = false
     }
 
     const loginResult = await payload.login({
@@ -100,15 +98,13 @@ describe('database', () => {
           req,
         })
 
-        if (useTransactions) {
-          await expect(() =>
-            payload.findByID({
-              id: first.id,
-              collection,
-              // omitting req for isolation
-            }),
-          ).rejects.toThrow('The requested resource was not found.')
-        }
+        await expect(() =>
+          payload.findByID({
+            id: first.id,
+            collection,
+            // omitting req for isolation
+          }),
+        ).rejects.toThrow('The requested resource was not found.')
 
         const second = await payload.create({
           collection,
@@ -223,15 +219,13 @@ describe('database', () => {
         // this should not do anything but is needed to be certain about the next assertion
         await commitTransaction(req)
 
-        if (useTransactions) {
-          await expect(() =>
-            payload.findByID({
-              id: first.id,
-              collection,
-              req,
-            }),
-          ).rejects.toThrow('The requested resource was not found.')
-        }
+        await expect(() =>
+          payload.findByID({
+            id: first.id,
+            collection,
+            req,
+          }),
+        ).rejects.toThrow('The requested resource was not found.')
       })
     })
   })

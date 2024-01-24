@@ -13,6 +13,7 @@ type ResaveArgs = {
 }
 
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
+  const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
   const parentDocIsPublished = doc._status === 'published'
 
   const children = await req.payload.find({
@@ -22,11 +23,13 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
     locale: req.locale,
     req,
     where: {
-      parent: {
+      [parentSlug]: {
         equals: doc.id,
       },
     },
   })
+
+  const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
 
   try {
     await children.docs.reduce(async (priorSave, child) => {
@@ -44,7 +47,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         collection: collection.slug,
         data: {
           ...child,
-          breadcrumbs: await populateBreadcrumbs(req, pluginConfig, collection, child),
+          [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
         },
         depth: 0,
         draft: !childIsPublished,

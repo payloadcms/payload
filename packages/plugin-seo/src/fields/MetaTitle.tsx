@@ -1,7 +1,5 @@
 'use client'
 
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import TextInput from 'payload/dist/admin/components/forms/field-types/Text/Input'
 import type {
   FieldType as FieldType,
   Options,
@@ -11,9 +9,9 @@ import type { TextField as TextFieldType } from 'payload/types'
 import { TextInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
-import { useTranslation } from 'react-i18next'
 
 import { defaults } from '../defaults'
 import { LengthIndicator } from '../ui/LengthIndicator'
@@ -27,7 +25,7 @@ type MetaTitleProps = TextFieldType & {
 }
 
 export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
-  const { name, label, path, pluginConfig } = props || {}
+  const { name, label, path, pluginConfig, required } = props || {}
 
   const { t } = useTranslation('plugin-seo')
 
@@ -41,7 +39,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
   const [fields] = useAllFormFields()
   const docInfo = useDocumentInfo()
 
-  const { setValue, showError, value } = field
+  const { setValue, showError, value, errorMessage } = field
 
   const regenerateTitle = useCallback(async () => {
     const { generateTitle } = pluginConfig
@@ -72,6 +70,18 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
       >
         <div>
           {label && typeof label === 'string' && label}
+
+          {required && (
+            <span
+              style={{
+                marginLeft: '5px',
+                color: 'var(--theme-error-500)',
+              }}
+            >
+              *
+            </span>
+          )}
+
           {typeof pluginConfig.generateTitle === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -98,7 +108,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {t('lengthTipTitle', { minLength, maxLength })}
+          {t('lengthTipTitle', { maxLength, minLength })}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/title-link#page-titles"
             rel="noopener noreferrer"
@@ -123,6 +133,8 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
           style={{
             marginBottom: 0,
           }}
+          errorMessage={errorMessage}
+          required={required}
           value={value}
         />
       </div>
@@ -133,7 +145,7 @@ export const MetaTitle: React.FC<MetaTitleProps> = (props) => {
           width: '100%',
         }}
       >
-        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value as string} />
+        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value} />
       </div>
     </div>
   )
