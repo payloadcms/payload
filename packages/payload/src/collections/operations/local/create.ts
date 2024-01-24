@@ -1,4 +1,3 @@
-import type { UploadedFile } from 'express-fileupload'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { Payload } from '../../..'
@@ -8,7 +7,6 @@ import type { Document } from '../../../types'
 import type { File } from '../../../uploads/types'
 
 import { APIError } from '../../../errors'
-import { getLocalI18n } from '../../../translations/getLocalI18n'
 import getFileByPath from '../../../uploads/getFileByPath'
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import { createOperation } from '../create'
@@ -62,9 +60,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   }
 
   const req = createLocalReq(options, payload)
-  req.files = {
-    file: (file ?? (await getFileByPath(filePath))) as UploadedFile, // TODO(NATIVE_REQUEST): fix this type
-  }
+  req.file = file ?? (await getFileByPath(filePath))
 
   return createOperation<TSlug>({
     collection,

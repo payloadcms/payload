@@ -55,7 +55,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
 
   const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
 
-  const req = {
+  const req: PayloadRequest = {
     fallbackLocale,
     i18n,
     locale,

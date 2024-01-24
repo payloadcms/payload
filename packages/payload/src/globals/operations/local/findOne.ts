@@ -49,7 +49,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
 
   const i18n = options.req?.i18n ?? getLocalI18n({ config: payload.config })
 
-  const req = {
+  const req: PayloadRequest = {
     fallbackLocale: fallbackLocale ?? options.req?.fallbackLocale ?? defaultLocale,
     i18n,
     locale: locale ?? options.req?.locale ?? defaultLocale,

@@ -82,7 +82,6 @@ export const createPayloadRequest = async ({
 
     // need to add:
     // ------------
-    // - transactionID
     // - payloadDataLoader
     // - payloadUploadSizes
   }

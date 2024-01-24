@@ -8,6 +8,9 @@ export async function getFilePrefix({
   req: PayloadRequest
 }): Promise<string> {
   const imageSizes = (collection?.upload as IncomingUploadType)?.imageSizes || []
+  const { searchParams } = new URL(req.url)
+  const filename = searchParams.get('filename')
+
   const files = await req.payload.find({
     collection: collection.slug,
     depth: 0,
@@ -16,10 +19,10 @@ export async function getFilePrefix({
     where: {
       or: [
         {
-          filename: { equals: req.params.filename },
+          filename: { equals: filename },
         },
         ...imageSizes.map((imageSize) => ({
-          [`sizes.${imageSize.name}.filename`]: { equals: req.params.filename },
+          [`sizes.${imageSize.name}.filename`]: { equals: filename },
         })),
       ],
     },
