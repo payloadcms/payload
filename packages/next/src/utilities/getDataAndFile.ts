@@ -9,7 +9,7 @@ type GetDataAndFile = (args: {
   data: Record<string, any>
   file: CustomPayloadRequest['file']
 }>
-export const getDataAndFiles: GetDataAndFile = async ({ request, collection, config }) => {
+export const getDataAndFile: GetDataAndFile = async ({ request, collection, config }) => {
   let data: Record<string, any> = undefined
   let file: CustomPayloadRequest['file'] = undefined
 
