@@ -103,7 +103,7 @@ type PromiseArgs = {
   siblingDoc: Record<string, any>
 }
 
-const relationshipPopulationPromise = async ({
+export const relationshipPopulationPromise = async ({
   currentDepth,
   depth,
   fallbackLocale,
@@ -211,5 +211,3 @@ const relationshipPopulationPromise = async ({
   }
   await Promise.all(rowPromises)
 }
-
-export default relationshipPopulationPromise
