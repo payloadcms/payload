@@ -1,4 +1,4 @@
-import type { BlockField } from 'payload/types';
+import type { BlockField } from 'payload/types'
 
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
