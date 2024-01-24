@@ -115,6 +115,8 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
         })
       }
 
+      if (shouldCommit) await commitTransaction(req)
+
       throw new AuthenticationError(req.t)
     }
 
