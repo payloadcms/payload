@@ -7,7 +7,7 @@ import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'
 import getValueWithDefault from '../../getDefaultValue'
-import relationshipPopulationPromise from './relationshipPopulationPromise'
+import { relationshipPopulationPromise } from './relationshipPopulationPromise'
 import { traverseFields } from './traverseFields'
 
 type Args = {

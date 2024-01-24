@@ -311,7 +311,7 @@ export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
 
 export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
   admin?: Admin & {
-    initCollapsed?: boolean | false
+    initCollapsed?: boolean
   }
   fields: Field[]
   label: RowLabel
@@ -517,7 +517,7 @@ export type ArrayField = FieldBase & {
     components?: {
       RowLabel?: RowLabel
     } & Admin['components']
-    initCollapsed?: boolean | false
+    initCollapsed?: boolean
   }
   fields: Field[]
   /** Customize generated GraphQL and Typescript schema names.
@@ -566,7 +566,7 @@ export type Block = {
 
 export type BlockField = FieldBase & {
   admin?: Admin & {
-    initCollapsed?: boolean | false
+    initCollapsed?: boolean
   }
   blocks: Block[]
   defaultValue?: unknown
