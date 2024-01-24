@@ -3,7 +3,7 @@ import httpStatus from 'http-status'
 
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../express/types'
-import type { Collection, TypeWithID } from '../config/types'
+import type { Collection, TypeWithID, BeforeOperationHook } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'
 import { hasWhereAccessResult } from '../../auth/types'
@@ -44,6 +44,26 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     if (!id) {
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
     }
+
+    // TODO: https://github.com/payloadcms/payload/discussions/4901
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'update',
+          })) || args
+      },
+      Promise.resolve(),
+    )
 
     // /////////////////////////////////////
     // Retrieve original raw version
