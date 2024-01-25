@@ -37,8 +37,8 @@ export const createLocalReq: CreateLocalReq = (
 ) => {
   const i18n = req?.i18n || getLocalI18n({ config: payload.config })
 
-  if (payload?.config?.localization) {
-    const defaultLocale = payload?.config?.localization.defaultLocale
+  if (payload.config?.localization) {
+    const defaultLocale = payload.config.localization.defaultLocale
     req.locale = locale || req?.locale || defaultLocale
     req.fallbackLocale = fallbackLocale || req?.fallbackLocale || defaultLocale
   } else {
