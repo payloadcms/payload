@@ -303,9 +303,7 @@ export default async function resizeAndTransformImageSizes({
 
       const sanitizedImage = getSanitizedImageData(savedFilename)
 
-      if (req.payloadUploadSizes) {
-        req.payloadUploadSizes[imageResizeConfig.name] = bufferData
-      }
+      req.payloadUploadSizes[imageResizeConfig.name] = bufferData
 
       const mimeInfo = await fromBuffer(bufferData)
 

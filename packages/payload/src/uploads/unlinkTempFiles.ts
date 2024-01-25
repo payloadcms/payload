@@ -15,7 +15,7 @@ type Args = {
   req: PayloadRequest
 }
 /**
- * Remove temp files if enabled, as express-fileupload does not do this automatically
+ * Cleanup temp files after operation lifecycle
  */
 export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
   collectionConfig,

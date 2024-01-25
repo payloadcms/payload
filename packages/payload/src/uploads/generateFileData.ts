@@ -1,4 +1,3 @@
-import type { UploadedFile } from 'express-fileupload'
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fromBuffer } from 'file-type'
@@ -76,7 +75,7 @@ export const generateFileData = async <T>({
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
-        file = (await getExternalFile({ data: data as FileData, req })) as UploadedFile
+        file = await getExternalFile({ data: data as FileData, req })
         overwriteExistingFiles = true
       }
     } catch (err) {
