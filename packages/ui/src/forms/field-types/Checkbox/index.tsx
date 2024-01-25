@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
@@ -7,7 +8,6 @@ import { Validate } from 'payload/types'
 import useField from '../../useField'
 import { Check } from '../../../icons/Check'
 import { Line } from '../../../icons/Line'
-import { useTranslation } from '../../../providers/Translation'
 
 import './index.scss'
 
@@ -33,9 +33,9 @@ const Checkbox: React.FC<Props> = (props) => {
     checked: checkedFromProps,
     disableFormData,
     id,
+    path: pathFromProps,
+    name,
   } = props
-
-  const { i18n } = useTranslation()
 
   const memoizedValidate: Validate = useCallback(
     (value, options) => {
@@ -47,6 +47,7 @@ const Checkbox: React.FC<Props> = (props) => {
   const { setValue, value, showError, path } = useField({
     disableFormData,
     validate: memoizedValidate,
+    path: pathFromProps || name,
   })
 
   const onToggle = useCallback(() => {
@@ -78,11 +79,18 @@ const Checkbox: React.FC<Props> = (props) => {
       }}
     >
       <div className={`${baseClass}__error-wrap`}>{Error}</div>
-      <div>
+      <div
+        className={[
+          inputBaseClass,
+          checked && `${inputBaseClass}--checked`,
+          readOnly && `${inputBaseClass}--read-only`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <div className={`${inputBaseClass}__input`}>
           {BeforeInput}
           <input
-            className={className}
             aria-label=""
             defaultChecked={Boolean(checked)}
             disabled={readOnly}

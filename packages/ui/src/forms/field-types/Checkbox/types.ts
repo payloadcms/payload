@@ -6,4 +6,6 @@ export type Props = FormFieldBase & {
   partialChecked?: boolean
   checked?: boolean
   id?: string
+  path?: string
+  name?: string
 }

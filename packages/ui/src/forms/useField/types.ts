@@ -5,6 +5,10 @@ export type Options = {
   disableFormData?: boolean
   hasRows?: boolean
   validate?: Validate
+  /**
+   * If you do not provide a path, this hook will look for one using the `useFieldPath` hook.
+   **/
+  path?: string
 }
 
 export type FieldType<T> = {

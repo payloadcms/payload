@@ -20,7 +20,9 @@ import { useFieldPath } from '../FieldPathProvider'
 const useField = <T,>(options: Options): FieldType<T> => {
   const { disableFormData = false, hasRows, validate } = options
 
-  const path = useFieldPath()
+  const pathFromContext = useFieldPath()
+
+  const path = options.path || pathFromContext
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()

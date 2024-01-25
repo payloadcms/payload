@@ -32,6 +32,8 @@ const Text: React.FC<Props> = (props) => {
     onKeyDown,
     placeholder,
     rtl,
+    name,
+    path: pathFromProps,
   } = props
 
   const { i18n } = useTranslation()
@@ -50,6 +52,7 @@ const Text: React.FC<Props> = (props) => {
 
   const { setValue, value, path, showError } = useField({
     validate: memoizedValidate,
+    path: pathFromProps || name,
   })
 
   const renderRTL = isFieldRTL({

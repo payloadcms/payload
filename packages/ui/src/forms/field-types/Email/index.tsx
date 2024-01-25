@@ -1,67 +1,77 @@
-import React from 'react'
+'use client'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types'
-import DefaultError from '../../Error'
-import FieldDescription from '../../FieldDescription'
-import DefaultLabel from '../../Label'
-import { EmailInput } from './Input'
-import { EmailInputWrapper } from './Wrapper'
 import { withCondition } from '../../withCondition'
+import { fieldBaseClass } from '../shared'
+import { useTranslation } from '../../../providers/Translation'
+import { Validate } from 'payload/types'
+import useField from '../../useField'
+import { getTranslation } from '@payloadcms/translations'
 
 import './index.scss'
 
 export const Email: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      components: { Error, Label, afterInput, beforeInput } = {},
-      description,
-      autoComplete,
-      readOnly,
-      style,
-      width,
-    } = {},
-    label,
+    className,
     path: pathFromProps,
+    autoComplete,
+    readOnly,
+    style,
+    width,
+    Error,
+    Label,
+    BeforeInput,
+    AfterInput,
+    Description,
     required,
-    i18n,
-    value,
+    validate,
+    placeholder,
   } = props
 
-  const path = pathFromProps || name
+  const { i18n } = useTranslation()
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
+
+  const { setValue, showError, value, path } = useField({
+    validate: memoizedValidate,
+    path: pathFromProps || name,
+  })
 
   return (
-    <EmailInputWrapper
-      className={className}
-      readOnly={readOnly}
-      style={style}
-      width={width}
-      path={path}
+    <div
+      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
     >
-      <ErrorComp path={path} />
-      <LabelComp
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-        i18n={i18n}
-      />
+      {Error}
+      {Label}
       <div>
-        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
-        <EmailInput
-          name={name}
+        {BeforeInput}
+        <input
           autoComplete={autoComplete}
-          readOnly={readOnly}
-          path={path}
-          required={required}
+          disabled={Boolean(readOnly)}
+          id={`field-${path.replace(/\./g, '__')}`}
+          name={path}
+          onChange={setValue}
+          placeholder={getTranslation(placeholder, i18n)}
+          type="email"
+          value={(value as string) || ''}
         />
-        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+        {AfterInput}
       </div>
-      <FieldDescription description={description} path={path} i18n={i18n} value={value} />
-    </EmailInputWrapper>
+      {Description}
+    </div>
   )
 }
 
