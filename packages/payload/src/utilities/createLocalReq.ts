@@ -40,7 +40,11 @@ export const createLocalReq: CreateLocalReq = (
   if (payload.config?.localization) {
     const defaultLocale = payload.config.localization.defaultLocale
     req.locale = locale || req?.locale || defaultLocale
-    req.fallbackLocale = fallbackLocale || req?.fallbackLocale || defaultLocale
+    const fallbackLocaleFromConfig = payload.config.localization.locales.find(
+      ({ code }) => req.locale === code,
+    )?.fallbackLocale
+    req.fallbackLocale =
+      fallbackLocale || req?.fallbackLocale || fallbackLocaleFromConfig || defaultLocale
   }
 
   req.context = getRequestContext(req, context)

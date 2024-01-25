@@ -304,6 +304,10 @@ export type Locale = {
    */
   code: string
   /**
+   * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
+   */
+  fallbackLocale?: string
+  /**
    * label of supported locale
    * @example "English"
    */
