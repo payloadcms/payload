@@ -158,21 +158,23 @@ export const Pages: CollectionConfig = {
       type: 'code',
       required: true,
     },
-    // {
-    //   label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
-    //   type: 'collapsible',
-    //   admin: {
-    //     initCollapsed: true,
-    //   },
-    //   fields: [
-    //     {
-    //       name: 'collapsibleText',
-    //       label: 'Collapsible Text',
-    //       type: 'text',
-    //       required: true,
-    //     },
-    //   ],
-    // },
+    {
+      // TODO: fix this
+      // label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
+      label: 'Hello',
+      type: 'collapsible',
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'collapsibleText',
+          label: 'Collapsible Text',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
     {
       name: 'group',
       label: 'Group',

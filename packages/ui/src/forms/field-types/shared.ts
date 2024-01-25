@@ -1,6 +1,14 @@
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import { User } from 'payload/auth'
-import { CodeField, DocumentPreferences, JSONField, RowLabel, Tab, Validate } from 'payload/types'
+import {
+  CodeField,
+  DateField,
+  DocumentPreferences,
+  JSONField,
+  RowLabel,
+  Tab,
+  Validate,
+} from 'payload/types'
 import { createFieldMap } from '../RenderFields/createFieldMap'
 import { Option } from 'payload/types'
 
@@ -64,6 +72,14 @@ export type FormFieldBase = {
       // For `json` fields
       editorOptions?: JSONField['admin']['editorOptions']
     }
+  | {
+      // For `collapsible` fields
+      initCollapsed?: boolean
+    }
+  | {
+      // For `date` fields
+      date?: DateField['admin']['date']
+    }
 )
 
 /**
@@ -87,6 +103,7 @@ export function isFieldRTL({
     localizationConfig &&
     localizationConfig.locales &&
     localizationConfig.locales.length > 1
+
   const isCurrentLocaleDefaultLocale = locale?.code === localizationConfig?.defaultLocale
 
   return (
