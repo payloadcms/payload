@@ -11,10 +11,10 @@ export const Entities: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    // Children - A Virtual Field
     // - This field is populated by setting the query parameter 'children=true'
     // - This is a virtual field used to track a child relationship
-    // - Data about this relationship is not stored in this field
+    // - Only relationship information is returned by this field
+    // - Data beyond relationships is not stored in this field
     {
       name: 'children',
       type: 'relationship',
@@ -53,13 +53,13 @@ export const Entities: CollectionConfig = {
             })
 
             return [
-              ...entities.docs.map((entity) => {
+              ...entities.docs.map(entity => {
                 return {
                   relationTo: 'entity',
                   value: entity,
                 }
               }),
-              ...people.docs.map((person) => {
+              ...people.docs.map(person => {
                 return {
                   relationTo: 'people',
                   value: person,
