@@ -10,22 +10,17 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type { PgColumn, PgEnum, PgTableWithColumns, PgTransaction } from 'drizzle-orm/pg-core'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
-import type { BaseCollectionConfig } from 'payload/dist/collections/config/types'
-import type {
-  BaseArrayField,
-  BaseBlock,
-  BaseRadioField,
-  BaseSelectField,
-} from 'payload/dist/fields/config/types'
+import type { CustomName } from 'payload/dist/database/types'
+import type { BaseArrayField, BaseBlock, BaseSelectField } from 'payload/dist/fields/config/types'
 import type { BaseGlobalConfig } from 'payload/dist/globals/config/types'
 import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
+  logger?: DrizzleConfig['logger']
   migrationDir?: string
   pool: PoolConfig
-  logger?: DrizzleConfig['logger']
   push?: boolean
 }
 
@@ -57,13 +52,13 @@ export type DrizzleTransaction = PgTransaction<
 
 export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
-  logger: DrizzleConfig['logger']
   enums: Record<string, GenericEnum>
   /**
    * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  logger: DrizzleConfig['logger']
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -81,8 +76,12 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
-export type MigrateUpArgs = { payload: Payload }
-export type MigrateDownArgs = { payload: Payload }
+export type MigrateUpArgs = {
+  payload: Payload
+}
+export type MigrateDownArgs = {
+  payload: Payload
+}
 
 declare module 'payload' {
   export interface DatabaseAdapter
@@ -107,49 +106,31 @@ declare module 'payload' {
 }
 
 declare module 'payload/types' {
-  export interface CollectionConfig extends BaseCollectionConfig {
-    /**
-     * Customize the SQL table name
-     */
-    tableName?: string
-  }
-
   export interface GlobalConfig extends BaseGlobalConfig {
     /**
      * Customize the SQL table name
      */
-    tableName?: string
+    dbName?: CustomName
   }
 
   export interface ArrayField extends BaseArrayField {
     /**
      * Customize the SQL table name
      */
-    tableName?: string
-  }
-
-  export interface RadioField extends BaseRadioField {
-    /**
-     * Customize the SQL enum name
-     */
-    enumName?: string
+    dbName?: CustomName
   }
 
   export interface Block extends BaseBlock {
     /**
      * Customize the SQL table name
      */
-    tableName?: string
+    dbName?: CustomName
   }
 
   export interface SelectField extends BaseSelectField {
     /**
-     * Customize the SQL enum name
-     */
-    enumName?: string
-    /**
      * Customize the SQL table name when using `hasMany: true`
      */
-    tableName?: string
+    dbName?: CustomName
   }
 }

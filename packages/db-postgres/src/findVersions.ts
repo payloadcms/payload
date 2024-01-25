@@ -25,7 +25,7 @@ export const findVersions: FindVersions = async function findVersions(
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
 
-  const tableName = `_${getTableName(collectionConfig)}_v`
+  const tableName = getTableName({ config: collectionConfig, versions: true })
   const fields = buildVersionCollectionFields(collectionConfig)
 
   return findMany({

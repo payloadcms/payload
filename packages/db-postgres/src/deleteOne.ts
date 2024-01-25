@@ -14,7 +14,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName(collectionConfig)
+  const tableName = getTableName({ config: collectionConfig })
 
   const { where } = await buildQuery({
     adapter: this,

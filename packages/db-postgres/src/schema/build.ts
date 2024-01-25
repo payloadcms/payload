@@ -27,9 +27,9 @@ type Args = {
   adapter: PostgresAdapter
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
-  buildTexts?: boolean
   buildNumbers?: boolean
   buildRelationships?: boolean
+  buildTexts?: boolean
   disableNotNull: boolean
   disableUnique: boolean
   fields: Field[]
@@ -42,8 +42,8 @@ type Args = {
 }
 
 type Result = {
-  hasManyTextField: 'index' | boolean
   hasManyNumberField: 'index' | boolean
+  hasManyTextField: 'index' | boolean
   relationsToBuild: Map<string, string>
 }
 
@@ -51,9 +51,9 @@ export const buildTable = ({
   adapter,
   baseColumns = {},
   baseExtraConfig = {},
-  buildTexts,
   buildNumbers,
   buildRelationships,
+  buildTexts,
   disableNotNull,
   disableUnique = false,
   fields,
@@ -100,16 +100,16 @@ export const buildTable = ({
   columns.id = idColTypeMap[idColType]('id').primaryKey()
   ;({
     hasLocalizedField,
-    hasLocalizedManyTextField,
     hasLocalizedManyNumberField,
+    hasLocalizedManyTextField,
     hasLocalizedRelationshipField,
-    hasManyTextField,
     hasManyNumberField,
+    hasManyTextField,
   } = traverseFields({
     adapter,
-    buildTexts,
     buildNumbers,
     buildRelationships,
+    buildTexts,
     columns,
     disableNotNull,
     disableUnique,
@@ -196,12 +196,12 @@ export const buildTable = ({
     const textsTableName = `${rootTableName}_texts`
     const columns: Record<string, PgColumnBuilder> = {
       id: serial('id').primaryKey(),
-      text: varchar('text'),
       order: integer('order').notNull(),
       parent: parentIDColumnMap[idColType]('parent_id')
         .references(() => table.id, { onDelete: 'cascade' })
         .notNull(),
       path: varchar('path').notNull(),
+      text: varchar('text'),
     }
 
     if (hasLocalizedManyTextField) {
@@ -297,7 +297,9 @@ export const buildTable = ({
 
       relationships.forEach((relationTo) => {
         const relationshipConfig = adapter.payload.collections[relationTo].config
-        const formattedRelationTo = getTableName(relationshipConfig)
+        const formattedRelationTo = getTableName({
+          config: relationshipConfig,
+        })
         let colType = 'integer'
         const relatedCollectionCustomID = relationshipConfig.fields.find(
           (field) => fieldAffectsData(field) && field.name === 'id',
@@ -338,7 +340,9 @@ export const buildTable = ({
         }
 
         relationships.forEach((relationTo) => {
-          const relatedTableName = getTableName(adapter.payload.collections[relationTo].config)
+          const relatedTableName = getTableName({
+            config: adapter.payload.collections[relationTo].config,
+          })
           const idColumnName = `${relationTo}ID`
           result[idColumnName] = one(adapter.tables[relatedTableName], {
             fields: [relationshipsTable[idColumnName]],
@@ -382,5 +386,5 @@ export const buildTable = ({
 
   adapter.relations[`relations_${tableName}`] = tableRelations
 
-  return { hasManyTextField, hasManyNumberField, relationsToBuild }
+  return { hasManyNumberField, hasManyTextField, relationsToBuild }
 }

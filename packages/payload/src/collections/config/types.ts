@@ -21,6 +21,7 @@ import type {
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
+import type { CustomName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
@@ -104,7 +105,9 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  query: { [key: string]: any }
+  query: {
+    [key: string]: any
+  }
   req: PayloadRequest
 }) => any
 
@@ -114,7 +117,9 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   findMany?: boolean
-  query?: { [key: string]: any }
+  query?: {
+    [key: string]: any
+  }
   req: PayloadRequest
 }) => any
 
@@ -145,7 +150,10 @@ export type AfterErrorHook = (
   context: RequestContext,
   /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
   collection: SanitizedCollectionConfig | null,
-) => { response: any; status: number } | void
+) => {
+  response: any
+  status: number
+} | void
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
@@ -357,6 +365,10 @@ export type BaseCollectionConfig = {
   auth?: IncomingAuthType | boolean
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+  /**
+   * Custom database name
+   */
+  dbName?: CustomName
   /**
    * Default field to sort by in collection list view
    */

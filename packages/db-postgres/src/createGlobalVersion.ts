@@ -16,8 +16,10 @@ export async function createGlobalVersion<T extends TypeWithID>(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
-  const globalTableName = getTableName(global)
-  const tableName = `_${globalTableName}_v`
+  const tableName = getTableName({
+    config: global,
+    versions: true,
+  })
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
@@ -37,9 +39,9 @@ export async function createGlobalVersion<T extends TypeWithID>(
 
   if (global.versions.drafts) {
     await db.execute(sql`
-      UPDATE ${table}
-      SET latest = false
-      WHERE ${table.id} != ${result.id};
+        UPDATE ${table}
+        SET latest = false
+        WHERE ${table.id} != ${result.id};
     `)
   }
 

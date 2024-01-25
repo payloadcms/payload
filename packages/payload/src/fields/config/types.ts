@@ -1,10 +1,7 @@
 /* eslint-disable no-use-before-define */
 import type { EditorProps } from '@monaco-editor/react'
 import type { TFunction } from 'i18next'
-import type { CSSProperties } from 'react'
-
-import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
-import type React from 'react'
+import type React, { CSSProperties } from 'react'
 
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
 import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
@@ -15,6 +12,7 @@ import type { RichTextAdapter } from '../../admin/components/forms/field-types/R
 import type { User } from '../../auth'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
 import type { SanitizedConfig } from '../../config/types'
+import type { CustomName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 import type { Payload } from '../../payload'
@@ -77,7 +75,11 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
 export type Condition<T extends TypeWithID = any, P = any> = (
   data: Partial<T>,
   siblingData: Partial<P>,
-  { user }: { user: User },
+  {
+    user,
+  }: {
+    user: User
+  },
 ) => boolean
 
 export type FilterOptionsProps<T = any> = {
@@ -442,6 +444,10 @@ export type BaseSelectField = FieldBase & {
     isClearable?: boolean
     isSortable?: boolean
   }
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: CustomName
   hasMany?: boolean
   options: Option[]
   type: 'select'
@@ -493,7 +499,9 @@ type RelationshipAdmin = Admin & {
 }
 export type PolymorphicRelationshipField = SharedRelationshipProperties & {
   admin?: RelationshipAdmin & {
-    sortOptions?: { [collectionSlug: string]: string }
+    sortOptions?: {
+      [collectionSlug: string]: string
+    }
   }
   relationTo: string[]
 }
@@ -561,6 +569,10 @@ export type BaseRadioField = FieldBase & {
     }
     layout?: 'horizontal' | 'vertical'
   }
+  /**
+   * Customize the DB enum name
+   */
+  enumName?: CustomName
   options: Option[]
   type: 'radio'
 }
@@ -587,6 +599,8 @@ export type BaseBlock = {
 }
 
 export type Block = {
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>
   fields: Field[]
   /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
@@ -603,8 +617,6 @@ export type Block = {
   interfaceName?: string
   labels?: Labels
   slug: string
-  /** Extension point to add your custom data. */
-  custom?: Record<string, any>
 }
 
 export type BlockField = FieldBase & {

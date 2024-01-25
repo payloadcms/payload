@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
 import type { BlockField } from 'payload/types'
 
+import toSnakeCase from 'to-snake-case'
+
 import type { PostgresAdapter } from '../../types'
 import type { BlockRowToInsert, RelationshipToDelete } from './types'
 
-import { getTableName } from '../../utilities/getTableName'
 import { traverseFields } from './traverseFields'
 
 type Args = {
@@ -17,7 +18,6 @@ type Args = {
   data: Record<string, unknown>[]
   field: BlockField
   locale?: string
-  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
@@ -25,6 +25,7 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  texts: Record<string, unknown>[]
 }
 export const transformBlocks = ({
   adapter,
@@ -34,18 +35,18 @@ export const transformBlocks = ({
   data,
   field,
   locale,
-  texts,
   numbers,
   path,
   relationships,
   relationshipsToDelete,
   selects,
+  texts,
 }: Args) => {
   data.forEach((blockRow, i) => {
     if (typeof blockRow.blockType !== 'string') return
     const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
     if (!matchedBlock) return
-    const blockType = getTableName(matchedBlock)
+    const blockType = toSnakeCase(blockRow.blockType)
 
     if (!blocks[blockType]) blocks[blockType] = []
 
@@ -85,7 +86,6 @@ export const transformBlocks = ({
       fieldPrefix: '',
       fields: matchedBlock.fields,
       locales: newRow.locales,
-      texts,
       numbers,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
@@ -93,6 +93,7 @@ export const transformBlocks = ({
       relationshipsToDelete,
       row: newRow.row,
       selects,
+      texts,
     })
 
     blocks[blockType].push(newRow)

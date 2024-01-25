@@ -8,10 +8,10 @@ import { getTableName } from './utilities/getTableName'
 
 export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,
-  { collection, locale, req = {} as PayloadRequest, where: incomingWhere }: FindOneArgs,
+  { collection, locale, req = {} as PayloadRequest, where }: FindOneArgs,
 ): Promise<T> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName(collectionConfig)
+  const tableName = getTableName({ config: collectionConfig })
 
   const { docs } = await findMany({
     adapter: this,
@@ -23,7 +23,7 @@ export async function findOne<T extends TypeWithID>(
     req,
     sort: undefined,
     tableName,
-    where: incomingWhere,
+    where,
   })
 
   return docs?.[0] || null

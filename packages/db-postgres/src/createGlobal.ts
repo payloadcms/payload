@@ -8,7 +8,7 @@ import { getTableName } from './utilities/getTableName'
 
 export async function createGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
-  { data, req = {} as PayloadRequest, slug }: CreateGlobalArgs,
+  { slug, data, req = {} as PayloadRequest }: CreateGlobalArgs,
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
@@ -20,7 +20,9 @@ export async function createGlobal<T extends TypeWithID>(
     fields: globalConfig.fields,
     operation: 'create',
     req,
-    tableName: getTableName(globalConfig),
+    tableName: getTableName({
+      config: globalConfig,
+    }),
   })
 
   return result

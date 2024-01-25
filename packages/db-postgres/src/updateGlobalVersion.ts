@@ -25,7 +25,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     ({ slug }) => slug === global,
   )
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${getTableName(globalConfig)}_v`
+  const tableName = getTableName({ config: globalConfig, versions: true })
   const fields = buildVersionGlobalFields(globalConfig)
 
   const { where } = await buildQuery({

@@ -20,13 +20,13 @@ export const init: Init = async function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const tableName = getTableName(collection)
+    const tableName = getTableName({ config: collection })
 
     buildTable({
       adapter: this,
-      buildTexts: true,
       buildNumbers: true,
       buildRelationships: true,
+      buildTexts: true,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.fields,
@@ -42,9 +42,9 @@ export const init: Init = async function init(this: PostgresAdapter) {
 
       buildTable({
         adapter: this,
-        buildTexts: true,
         buildNumbers: true,
         buildRelationships: true,
+        buildTexts: true,
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,
@@ -55,13 +55,13 @@ export const init: Init = async function init(this: PostgresAdapter) {
   })
 
   this.payload.config.globals.forEach((global) => {
-    const tableName = getTableName(global)
+    const tableName = getTableName({ config: global })
 
     buildTable({
       adapter: this,
-      buildTexts: true,
       buildNumbers: true,
       buildRelationships: true,
+      buildTexts: true,
       disableNotNull: !!global?.versions?.drafts,
       disableUnique: false,
       fields: global.fields,
@@ -70,14 +70,14 @@ export const init: Init = async function init(this: PostgresAdapter) {
     })
 
     if (global.versions) {
-      const versionsTableName = `_${tableName}_v`
+      const versionsTableName = getTableName({ config: global, versions: true })
       const versionFields = buildVersionGlobalFields(global)
 
       buildTable({
         adapter: this,
-        buildTexts: true,
         buildNumbers: true,
         buildRelationships: true,
+        buildTexts: true,
         disableNotNull: !!global.versions?.drafts,
         disableUnique: true,
         fields: versionFields,

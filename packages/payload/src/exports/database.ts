@@ -12,6 +12,7 @@ export {
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
+  CustomName,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,

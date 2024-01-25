@@ -2,7 +2,6 @@
 import type { Field } from 'payload/types'
 
 import { fieldAffectsData, tabHasName } from 'payload/types'
-import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types'
 import type { Result } from './buildFindManyArgs'
@@ -80,9 +79,18 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = `${currentTableName}_${getTableName(field)}`
+          const arrayTableName = getTableName({
+            config: field,
+            parentTableName: currentTableName,
+          })
 
-          if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales
+          const arrayTableNameWithLocales = getTableName({
+            config: field,
+            locales: true,
+            parentTableName: currentTableName,
+          })
+
+          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
@@ -130,9 +138,21 @@ export const traverseFields = ({
                 with: {},
               }
 
-              const tableName = `${topLevelTableName}_blocks_${getTableName(block)}`
+              const tableName = getTableName({
+                config: block,
+                parentTableName: topLevelTableName,
+                prefix: `${topLevelTableName}_blocks_`,
+              })
 
-              if (adapter.tables[`${tableName}_locales`]) withBlock.with._locales = _locales
+              if (
+                adapter.tables[
+                  getTableName({
+                    config: block,
+                    locales: true,
+                  })
+                ]
+              )
+                withBlock.with._locales = _locales
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({

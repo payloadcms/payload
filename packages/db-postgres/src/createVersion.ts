@@ -21,8 +21,10 @@ export async function createVersion<T extends TypeWithID>(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const collectionTableName = getTableName(collection)
-  const tableName = `_${collectionTableName}_v`
+  const tableName = getTableName({
+    config: collection,
+    versions: true,
+  })
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
@@ -40,17 +42,24 @@ export async function createVersion<T extends TypeWithID>(
   })
 
   const table = this.tables[tableName]
-  const relationshipsTable = this.tables[`${tableName}_rels`]
+  const relationshipsTable =
+    this.tables[
+      getTableName({
+        config: collection,
+        relationships: true,
+        versions: true,
+      })
+    ]
 
   if (collection.versions.drafts) {
     await db.execute(sql`
-      UPDATE ${table}
-      SET latest = false
-      FROM ${relationshipsTable}
-      WHERE ${table.id} = ${relationshipsTable.parent}
-        AND ${relationshipsTable.path} = ${'parent'}
-        AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
-        AND ${table.id} != ${result.id};
+        UPDATE ${table}
+        SET latest = false
+        FROM ${relationshipsTable}
+        WHERE ${table.id} = ${relationshipsTable.parent}
+          AND ${relationshipsTable.path} = ${'parent'}
+          AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
+          AND ${table.id} != ${result.id};
     `)
   }
 

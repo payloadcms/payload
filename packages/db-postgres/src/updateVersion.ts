@@ -23,7 +23,7 @@ export async function updateVersion<T extends TypeWithID>(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${getTableName(collectionConfig)}_v`
+  const tableName = getTableName({ config: collectionConfig, versions: true })
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { where } = await buildQuery({

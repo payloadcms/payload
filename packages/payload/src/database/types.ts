@@ -399,3 +399,5 @@ export type PaginatedDocs<T = any> = {
   totalDocs: number
   totalPages: number
 }
+
+export type CustomName = ((Args: { tableName: string }) => string) | string

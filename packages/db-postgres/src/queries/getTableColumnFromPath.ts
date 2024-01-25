@@ -168,7 +168,11 @@ export const getTableColumnFromPath = ({
 
       case 'group': {
         if (locale && field.localized && adapter.payload.config.localization) {
-          newTableName = `${tableName}_locales`
+          newTableName = `${getTableName({
+            config: field,
+            parentTableName: tableName,
+            prefix: `${tableName}_`,
+          })}_locales`
 
           joins[tableName] = eq(
             adapter.tables[tableName].id,
@@ -201,7 +205,7 @@ export const getTableColumnFromPath = ({
       }
 
       case 'array': {
-        newTableName = `${tableName}_${getTableName(field)}`
+        newTableName = getTableName({ config: field, prefix: `${tableName}_` })
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
@@ -241,7 +245,10 @@ export const getTableColumnFromPath = ({
         let blockTableColumn: TableColumn
         let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
-          newTableName = `${tableName}_blocks_${getTableName(block)}`
+          newTableName = getTableName({
+            config: block,
+            prefix: `${tableName}_blocks_`,
+          })
           constraintPath = `${constraintPath}${field.name}.%.`
           let result
           const blockConstraints = []
@@ -332,7 +339,9 @@ export const getTableColumnFromPath = ({
 
         if (typeof field.relationTo === 'string') {
           const relationshipConfig = adapter.payload.collections[field.relationTo].config
-          newTableName = getTableName(relationshipConfig)
+          newTableName = getTableName({
+            config: relationshipConfig,
+          })
           // parent to relationship join table
           relationshipFields = relationshipConfig.fields
 
@@ -354,9 +363,9 @@ export const getTableColumnFromPath = ({
         } else if (newCollectionPath === 'value') {
           const tableColumnsNames = field.relationTo.map(
             (relationTo) =>
-              `"${aliasRelationshipTableName}"."${getTableName(
-                adapter.payload.collections[relationTo].config,
-              )}_id"`,
+              `"${aliasRelationshipTableName}"."${getTableName({
+                config: adapter.payload.collections[relationTo].config,
+              })}_id"`,
           )
           return {
             constraints,

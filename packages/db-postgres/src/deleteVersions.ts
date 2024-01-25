@@ -16,7 +16,10 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
-  const tableName = `_${getTableName(collectionConfig)}_v`
+  const tableName = getTableName({
+    config: collectionConfig,
+    versions: true,
+  })
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { docs } = await findMany({

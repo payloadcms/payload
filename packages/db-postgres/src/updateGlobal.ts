@@ -8,11 +8,11 @@ import { getTableName } from './utilities/getTableName'
 
 export async function updateGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
-  { data, req = {} as PayloadRequest, slug }: UpdateGlobalArgs,
+  { slug, data, req = {} as PayloadRequest }: UpdateGlobalArgs,
 ): Promise<T> {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-  const tableName = getTableName(globalConfig)
+  const tableName = getTableName({ config: globalConfig })
 
   const existingGlobal = await db.query[tableName].findFirst({})
 

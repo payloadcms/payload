@@ -7,10 +7,10 @@ import { getTableName } from './utilities/getTableName'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: PostgresAdapter,
-  { locale, req, slug, where },
+  { slug, locale, req, where },
 ) {
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-  const tableName = getTableName(globalConfig)
+  const tableName = getTableName({ config: globalConfig })
 
   const {
     docs: [doc],

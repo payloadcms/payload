@@ -33,9 +33,9 @@ import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdent
 
 type Args = {
   adapter: PostgresAdapter
-  buildTexts: boolean
   buildNumbers: boolean
   buildRelationships: boolean
+  buildTexts: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
   disableNotNull: boolean
@@ -57,18 +57,18 @@ type Args = {
 
 type Result = {
   hasLocalizedField: boolean
-  hasLocalizedManyTextField: boolean
   hasLocalizedManyNumberField: boolean
+  hasLocalizedManyTextField: boolean
   hasLocalizedRelationshipField: boolean
-  hasManyTextField: 'index' | boolean
   hasManyNumberField: 'index' | boolean
+  hasManyTextField: 'index' | boolean
 }
 
 export const traverseFields = ({
   adapter,
-  buildTexts,
   buildNumbers,
   buildRelationships,
+  buildTexts,
   columnPrefix,
   columns,
   disableNotNull,
@@ -215,7 +215,11 @@ export const traverseFields = ({
 
       case 'radio':
       case 'select': {
-        const enumName = `enum_${newTableName}_${getTableName(field, { prefer: 'enumName' })}`
+        const enumName = getTableName({
+          config: field,
+          parentTableName: newTableName,
+          prefix: `enum_${newTableName}_`,
+        })
 
         adapter.enums[enumName] = pgEnum(
           enumName,
@@ -229,7 +233,10 @@ export const traverseFields = ({
         )
 
         if (field.type === 'select' && field.hasMany) {
-          const selectTableName = `${newTableName}_${getTableName(field, { prefer: 'tableName' })}`
+          const selectTableName = getTableName({
+            config: field,
+            parentTableName: newTableName,
+          })
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
             parent: parentIDColumnMap[parentIDColType]('parent_id')
@@ -293,7 +300,10 @@ export const traverseFields = ({
       case 'array': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        const arrayTableName = `${newTableName}_${getTableName(field)}`
+        const arrayTableName = getTableName({
+          config: field,
+          parentTableName: newTableName,
+        })
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
           _parentID: parentIDColumnMap[parentIDColType]('_parent_id')
@@ -315,8 +325,8 @@ export const traverseFields = ({
         }
 
         const {
-          hasManyTextField: subHasManyTextField,
           hasManyNumberField: subHasManyNumberField,
+          hasManyTextField: subHasManyTextField,
           relationsToBuild: subRelationsToBuild,
         } = buildTable({
           adapter,
@@ -371,7 +381,11 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         field.blocks.forEach((block) => {
-          const blockTableName = `${rootTableName}_blocks_${getTableName(block)}`
+          const blockTableName = getTableName({
+            config: field,
+            parentTableName: rootTableName,
+            prefix: `${rootTableName}_blocks_`,
+          })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
               _order: integer('_order').notNull(),
@@ -396,8 +410,8 @@ export const traverseFields = ({
             }
 
             const {
-              hasManyTextField: subHasManyTextField,
               hasManyNumberField: subHasManyNumberField,
+              hasManyTextField: subHasManyTextField,
               relationsToBuild: subRelationsToBuild,
             } = buildTable({
               adapter,
@@ -466,16 +480,16 @@ export const traverseFields = ({
         if (!('name' in field)) {
           const {
             hasLocalizedField: groupHasLocalizedField,
-            hasLocalizedManyTextField: groupHasLocalizedManyTextField,
             hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
+            hasLocalizedManyTextField: groupHasLocalizedManyTextField,
             hasLocalizedRelationshipField: groupHasLocalizedRelationshipField,
-            hasManyTextField: groupHasManyTextField,
             hasManyNumberField: groupHasManyNumberField,
+            hasManyTextField: groupHasManyTextField,
           } = traverseFields({
             adapter,
-            buildTexts,
             buildNumbers,
             buildRelationships,
+            buildTexts,
             columnPrefix,
             columns,
             disableNotNull,
@@ -508,16 +522,16 @@ export const traverseFields = ({
 
         const {
           hasLocalizedField: groupHasLocalizedField,
-          hasLocalizedManyTextField: groupHasLocalizedManyTextField,
           hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: groupHasLocalizedManyTextField,
           hasLocalizedRelationshipField: groupHasLocalizedRelationshipField,
-          hasManyTextField: groupHasManyTextField,
           hasManyNumberField: groupHasManyNumberField,
+          hasManyTextField: groupHasManyTextField,
         } = traverseFields({
           adapter,
-          buildTexts,
           buildNumbers,
           buildRelationships,
+          buildTexts,
           columnPrefix: `${columnName}_`,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -551,16 +565,16 @@ export const traverseFields = ({
 
         const {
           hasLocalizedField: tabHasLocalizedField,
-          hasLocalizedManyTextField: tabHasLocalizedManyTextField,
           hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: tabHasLocalizedManyTextField,
           hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
-          hasManyTextField: tabHasManyTextField,
           hasManyNumberField: tabHasManyNumberField,
+          hasManyTextField: tabHasManyTextField,
         } = traverseFields({
           adapter,
-          buildTexts,
           buildNumbers,
           buildRelationships,
+          buildTexts,
           columnPrefix,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -594,16 +608,16 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
         const {
           hasLocalizedField: rowHasLocalizedField,
-          hasLocalizedManyTextField: rowHasLocalizedManyTextField,
           hasLocalizedManyNumberField: rowHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: rowHasLocalizedManyTextField,
           hasLocalizedRelationshipField: rowHasLocalizedRelationshipField,
-          hasManyTextField: rowHasManyTextField,
           hasManyNumberField: rowHasManyNumberField,
+          hasManyTextField: rowHasManyTextField,
         } = traverseFields({
           adapter,
-          buildTexts,
           buildNumbers,
           buildRelationships,
+          buildTexts,
           columnPrefix,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -664,10 +678,10 @@ export const traverseFields = ({
 
   return {
     hasLocalizedField,
-    hasLocalizedManyTextField,
     hasLocalizedManyNumberField,
+    hasLocalizedManyTextField,
     hasLocalizedRelationshipField,
-    hasManyTextField,
     hasManyNumberField,
+    hasManyTextField,
   }
 }

@@ -17,7 +17,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   where,
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = `_${getTableName(collectionConfig)}_v`
+  const tableName = getTableName({ config: collectionConfig, versions: true })
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)

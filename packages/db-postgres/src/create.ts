@@ -19,7 +19,9 @@ export const create: Create = async function create(
     fields: collection.fields,
     operation: 'create',
     req,
-    tableName: getTableName(collection),
+    tableName: getTableName({
+      config: collection,
+    }),
   })
 
   return result

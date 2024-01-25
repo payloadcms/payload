@@ -14,7 +14,7 @@ export const updateOne: UpdateOne = async function updateOne(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = getTableName(collection)
+  const tableName = getTableName({ config: collection })
   const whereToUse = whereArg || { id: { equals: id } }
 
   const { joinAliases, joins, selectFields, where } = await buildQuery({
