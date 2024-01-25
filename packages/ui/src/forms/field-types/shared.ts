@@ -1,6 +1,6 @@
 import type { Locale, SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
 import { User } from 'payload/auth'
-import { DocumentPreferences, GroupField, RowLabel } from 'payload/types'
+import { DocumentPreferences, GroupField, RowLabel, Validate } from 'payload/types'
 import { createFieldMap } from '../RenderFields/createFieldMap'
 
 export const fieldBaseClass = 'field-type'
@@ -20,6 +20,14 @@ export type FormFieldBase = {
   width?: string
   className?: string
   label?: RowLabel
+  readOnly?: boolean
+  rtl?: boolean
+  maxLength?: number
+  minLength?: number
+  required?: boolean
+  placeholder?: string
+  localized?: boolean
+  validate?: Validate
 }
 
 /**

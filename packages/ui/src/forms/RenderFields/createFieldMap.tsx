@@ -1,22 +1,14 @@
 import React, { Fragment } from 'react'
 
 import type { FieldPermissions } from 'payload/auth'
-import type { Description, Field, FieldWithPath } from 'payload/types'
+import type { Field, FieldWithPath } from 'payload/types'
 import DefaultError from '../Error'
 import DefaultLabel from '../Label'
 import DefaultDescription from '../FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { fieldTypes } from '../field-types'
-
-type FieldComponentProps = {
-  Error: React.ReactNode
-  Label: React.ReactNode
-  BeforeInput: React.ReactNode
-  AfterInput: React.ReactNode
-}
-export function isComponent(description: Description): boolean {
-  return React.isValidElement(description)
-}
+import { FieldPathProvider } from '../FieldPathProvider'
+import { FormFieldBase } from '../field-types/shared'
 
 export type ReducedField = {
   Field: React.ReactNode
@@ -38,6 +30,7 @@ export const createFieldMap = (args: {
       }
     | FieldPermissions
   readOnly?: boolean
+  parentPath?: string
 }): ReducedField[] => {
   const {
     fieldSchema,
@@ -45,10 +38,10 @@ export const createFieldMap = (args: {
     operation = 'update',
     permissions,
     readOnly: readOnlyOverride,
+    parentPath,
   } = args
 
   return fieldSchema.reduce((acc, field): ReducedField[] => {
-    // if (!acc) console.log('acc is undefined', field)
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let FieldComponent = field.admin?.components?.Field || fieldTypes[field.type]
 
@@ -59,12 +52,17 @@ export const createFieldMap = (args: {
         }
 
         const isFieldAffectingData = fieldAffectsData(field)
+
+        const path = `${parentPath ? `${parentPath}.` : ''}${
+          field.path || (isFieldAffectingData && 'name' in field ? field.name : '')
+        }`
+
         const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : permissions
 
         // if the user cannot read the field, then filter it out
-        // if (fieldPermissions?.read?.permission === false) {
-        //   return acc
-        // }
+        if (fieldPermissions?.read?.permission === false) {
+          return acc
+        }
 
         // readOnly from field config
         let readOnly = field.admin && 'readOnly' in field.admin ? field.admin.readOnly : undefined
@@ -88,6 +86,8 @@ export const createFieldMap = (args: {
         const Label = (
           <LabelComponent
             htmlFor="TODO"
+            // TODO: fix types
+            // @ts-ignore-next-line
             label={'label' in field ? field.label : null}
             required={'required' in field ? field.required : undefined}
           />
@@ -104,7 +104,7 @@ export const createFieldMap = (args: {
         const DescriptionComponent =
           ('description' in field.admin &&
             field.admin.description &&
-            isComponent(field.admin.description) &&
+            typeof field.admin.description === 'function' &&
             (field.admin.description as React.FC<any>)) ||
           DefaultDescription
 
@@ -149,21 +149,27 @@ export const createFieldMap = (args: {
             operation,
             permissions,
             readOnly: readOnlyOverride,
+            parentPath: path,
           })
 
+        const fieldComponentProps: FormFieldBase = {
+          Error,
+          Label,
+          BeforeInput,
+          AfterInput,
+          Description,
+          fieldMap: nestedFieldMap,
+          className: 'className' in field.admin ? field?.admin?.className : undefined,
+          style: 'style' in field.admin ? field?.admin?.style : undefined,
+          width: 'width' in field.admin ? field?.admin?.width : undefined,
+          // TODO: fix types
+          // label: 'label' in field ? field.label : undefined,
+        }
+
         const Field = (
-          <FieldComponent
-            Error={Error}
-            Label={Label}
-            BeforeInput={BeforeInput}
-            AfterInput={AfterInput}
-            Description={Description}
-            fieldMap={nestedFieldMap}
-            className={'className' in field.admin ? field?.admin?.className : undefined}
-            style={'style' in field.admin ? field?.admin?.style : undefined}
-            width={'width' in field.admin ? field?.admin?.width : undefined}
-            label={'label' in field ? field.label : undefined}
-          />
+          <FieldPathProvider path={path}>
+            <FieldComponent {...fieldComponentProps} />
+          </FieldPathProvider>
         )
 
         const reducedField: ReducedField = {
@@ -181,5 +187,7 @@ export const createFieldMap = (args: {
         }
       }
     }
+
+    return acc
   }, [])
 }

@@ -12,13 +12,16 @@ import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
 import { useFormSubmitted } from '../../../forms/Form/context'
 import { fieldBaseClass } from '../shared'
+import { useFieldPath } from '../../FieldPathProvider'
 
 import './index.scss'
 
 const baseClass = 'group-field'
 
 const Group: React.FC<Props> = (props) => {
-  const { className, style, width, fieldMap, Description, hideGutter, path, label } = props
+  const { className, style, width, fieldMap, Description, hideGutter, label } = props
+
+  const path = useFieldPath()
 
   const { i18n } = useTranslation()
 

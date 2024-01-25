@@ -6,7 +6,7 @@ import { withCondition } from '../../withCondition'
 import { fieldBaseClass, isFieldRTL } from '../shared'
 import useField from '../../useField'
 import { useTranslation } from '../../../providers/Translation'
-import { useConfig, useFormSubmitted, useLocale } from '../../..'
+import { useConfig, useLocale } from '../../..'
 import { Validate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 
@@ -14,8 +14,7 @@ import './index.scss'
 
 const Text: React.FC<Props> = (props) => {
   const {
-    name,
-    admin: { className, placeholder, readOnly, rtl, style, width } = {},
+    className,
     localized,
     maxLength,
     minLength,
@@ -25,21 +24,21 @@ const Text: React.FC<Props> = (props) => {
     Description,
     BeforeInput,
     AfterInput,
-    path: pathFromProps,
     validate,
     inputRef,
+    readOnly,
+    width,
+    style,
     onKeyDown,
+    placeholder,
+    rtl,
   } = props
-
-  const path = pathFromProps || name
 
   const { i18n } = useTranslation()
 
   const locale = useLocale()
 
   const { localization: localizationConfig } = useConfig()
-
-  const hasSubmitted = useFormSubmitted()
 
   const memoizedValidate: Validate = useCallback(
     (value, options) => {
@@ -49,8 +48,7 @@ const Text: React.FC<Props> = (props) => {
     [validate, minLength, maxLength, required],
   )
 
-  const { setValue, value, valid } = useField({
-    path,
+  const { setValue, value, path, showError } = useField({
     validate: memoizedValidate,
   })
 
@@ -63,13 +61,7 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={[
-        fieldBaseClass,
-        'text',
-        className,
-        hasSubmitted && !valid && 'error',
-        readOnly && 'read-only',
-      ]
+      className={[fieldBaseClass, 'text', className, showError && 'error', readOnly && 'read-only']
         .filter(Boolean)
         .join(' ')}
       style={{

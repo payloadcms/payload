@@ -4,7 +4,6 @@ import type { Row } from '../Form/types'
 export type Options = {
   disableFormData?: boolean
   hasRows?: boolean
-  path: string
   validate?: Validate
 }
 
@@ -18,4 +17,5 @@ export type FieldType<T> = {
   showError: boolean
   valid?: boolean
   value: T
+  path: string
 }

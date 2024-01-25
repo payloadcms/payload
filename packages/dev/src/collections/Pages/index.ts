@@ -30,8 +30,8 @@ export const Pages: CollectionConfig = {
   },
   fields: [
     {
-      name: 'title',
-      label: 'Title',
+      name: 'titleWithCustomComponents',
+      label: 'Title With Custom Components',
       type: 'text',
       required: true,
       admin: {
@@ -44,8 +44,17 @@ export const Pages: CollectionConfig = {
       },
     },
     {
-      name: 'customTitle',
-      label: 'Custom Title',
+      name: 'title',
+      label: 'Title',
+      type: 'text',
+      required: true,
+      admin: {
+        description: 'This is a description',
+      },
+    },
+    {
+      name: 'titleWithCustomField',
+      label: 'Title With Custom Field',
       type: 'text',
       admin: {
         components: {
@@ -62,19 +71,19 @@ export const Pages: CollectionConfig = {
         position: 'sidebar',
       },
     },
-    // {
-    //   name: 'enableConditionalField',
-    //   label: 'Enable Conditional Field',
-    //   type: 'checkbox',
-    // },
-    // {
-    //   name: 'conditionalField',
-    //   label: 'Conditional Field',
-    //   type: 'text',
-    //   admin: {
-    //     condition: (data) => data.enableConditionalField,
-    //   },
-    // },
+    {
+      name: 'enableConditionalField',
+      label: 'Enable Conditional Field',
+      type: 'checkbox',
+    },
+    {
+      name: 'conditionalField',
+      label: 'Conditional Field',
+      type: 'text',
+      admin: {
+        condition: (data) => data.enableConditionalField,
+      },
+    },
     // {
     //   name: 'number',
     //   label: 'Number',
