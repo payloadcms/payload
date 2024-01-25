@@ -4,9 +4,7 @@ import type { Document } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 
 import { APIError } from '../../../errors'
-import { getLocalI18n } from '../../../translations/getLocalI18n'
-import { setRequestContext } from '../../../utilities/setRequestContext'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import { findVersionByIDOperation } from '../findVersionByID'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -34,21 +32,13 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   const {
     id,
     collection: collectionSlug,
-    context,
     depth,
     disableErrors = false,
-    fallbackLocale,
-    locale = null,
     overrideAccess = true,
-    req = {} as PayloadRequest,
     showHiddenFields,
   } = options
-  setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -58,34 +48,13 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     )
   }
 
-  let fallbackLocaleToUse = defaultLocale
-
-  if (typeof req.fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = req.fallbackLocale
-  }
-
-  if (typeof fallbackLocale !== 'undefined') {
-    fallbackLocaleToUse = fallbackLocale
-  }
-
-  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
-
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocaleToUse
-  req.i18n = i18n
-  req.t = i18n.t
-  req.payload = payload
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
   return findVersionByIDOperation({
     id,
     collection,
     depth,
     disableErrors,
     overrideAccess,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
   })
 }
