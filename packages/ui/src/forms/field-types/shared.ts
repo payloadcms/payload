@@ -1,23 +1,25 @@
 import type { Locale, SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
-import { FormState } from '../Form/types'
 import { User } from 'payload/auth'
-import { I18n } from '@payloadcms/translations'
-import { Payload } from 'payload'
-import { DocumentPreferences } from 'payload/types'
+import { DocumentPreferences, GroupField, RowLabel } from 'payload/types'
+import { createFieldMap } from '../RenderFields/createFieldMap'
 
 export const fieldBaseClass = 'field-type'
 
 export type FormFieldBase = {
-  formState?: FormState
   path?: string
-  valid?: boolean
-  errorMessage?: string
   user?: User
-  i18n?: I18n
-  payload?: Payload
   docPreferences?: DocumentPreferences
   locale?: Locale
-  config?: SanitizedConfig
+  BeforeInput?: React.ReactNode
+  AfterInput?: React.ReactNode
+  Label?: React.ReactNode
+  Description?: React.ReactNode
+  Error?: React.ReactNode
+  fieldMap?: ReturnType<typeof createFieldMap>
+  style?: React.CSSProperties
+  width?: string
+  className?: string
+  label?: RowLabel
 }
 
 /**

@@ -5,5 +5,4 @@ export type Props = FormFieldBase &
   Omit<TextField, 'type'> & {
     inputRef?: React.MutableRefObject<HTMLInputElement>
     onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
-    value: string
   }
