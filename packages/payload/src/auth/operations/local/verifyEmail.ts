@@ -3,8 +3,7 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../types'
 
 import { APIError } from '../../../errors'
-import { getLocalI18n } from '../../../translations/getLocalI18n'
-import { setRequestContext } from '../../../utilities/setRequestContext'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import { verifyEmailOperation } from '../verifyEmail'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -18,8 +17,7 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {
-  const { collection: collectionSlug, context, req = {} as PayloadRequest, token } = options
-  setRequestContext(req, context)
+  const { collection: collectionSlug, token } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -29,16 +27,9 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
-
-  req.payload = payload
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.i18n = i18n
-  req.t = i18n.t
-
   return verifyEmailOperation({
     collection,
-    req,
+    req: createLocalReq(options, payload),
     token,
   })
 }

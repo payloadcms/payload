@@ -39,15 +39,13 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     )
   }
 
-  const req = createLocalReq(options, payload)
-
   const args = {
     id,
     collection,
     depth,
     overrideAccess,
     payload,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
   }
 

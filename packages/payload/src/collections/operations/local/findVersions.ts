@@ -51,15 +51,13 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     )
   }
 
-  const req = createLocalReq(options, payload)
-
   return findVersionsOperation({
     collection,
     depth,
     limit,
     overrideAccess,
     page,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
     sort,
     where,

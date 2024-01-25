@@ -48,15 +48,13 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     )
   }
 
-  const req = createLocalReq(options, payload)
-
   return findVersionByIDOperation({
     id,
     collection,
     depth,
     disableErrors,
     overrideAccess,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
   })
 }

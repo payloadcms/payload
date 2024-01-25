@@ -1,8 +1,8 @@
-import type { PayloadT, RequestContext } from '..'
+import type { Payload, RequestContext } from '..'
 import type { PayloadRequest } from '../exports/types'
 
 import { getDataLoader } from '../collections/dataloader'
-import { i18nInit } from '../translations/init'
+import { getLocalI18n } from '../translations/getLocalI18n'
 
 function getRequestContext(
   req: PayloadRequest = { context: null } as PayloadRequest,
@@ -29,13 +29,13 @@ type CreateLocalReq = (
     req?: PayloadRequest
     user?: Document
   },
-  payload: PayloadT,
+  payload: Payload,
 ) => PayloadRequest
 export const createLocalReq: CreateLocalReq = (
   { collection, context, fallbackLocale, locale, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  const i18n = req?.i18n || i18nInit(payload.config?.i18n)
+  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
 
   if (payload.config?.localization) {
     const defaultLocale = payload.config.localization.defaultLocale

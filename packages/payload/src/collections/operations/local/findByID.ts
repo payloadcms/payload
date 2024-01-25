@@ -49,8 +49,6 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     )
   }
 
-  const req = createLocalReq(options, payload)
-
   return findByIDOperation<GeneratedTypes['collections'][T]>({
     id,
     collection,
@@ -59,7 +57,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     disableErrors,
     draft,
     overrideAccess,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
   })
 }

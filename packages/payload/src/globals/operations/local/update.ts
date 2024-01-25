@@ -27,15 +27,13 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
-  const { slug: globalSlug, data, depth, draft, overrideAccess = true, showHiddenFields } = options
+  const { data, depth, draft, overrideAccess = true, showHiddenFields, slug: globalSlug } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
-
-  const req = createLocalReq(options, payload)
 
   return updateOperation<TSlug>({
     slug: globalSlug as string,
@@ -44,7 +42,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     draft,
     globalConfig,
     overrideAccess,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
   })
 }

@@ -57,8 +57,6 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     )
   }
 
-  const req = createLocalReq(options, payload)
-
   return findOperation<GeneratedTypes['collections'][T]>({
     collection,
     currentDepth,
@@ -69,7 +67,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess,
     page,
     pagination,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
     sort,
     where,

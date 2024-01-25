@@ -24,7 +24,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
-  const { id, slug: globalSlug, depth, overrideAccess = true, showHiddenFields } = options
+  const { id, depth, overrideAccess = true, showHiddenFields, slug: globalSlug } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
 
@@ -32,14 +32,12 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  const req = createLocalReq(options, payload)
-
   return restoreVersionOperation({
     id,
     depth,
     globalConfig,
     overrideAccess,
-    req,
+    req: createLocalReq(options, payload),
     showHiddenFields,
   })
 }
