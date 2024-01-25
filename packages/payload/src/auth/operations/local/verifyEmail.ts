@@ -29,7 +29,7 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
 
   return verifyEmailOperation({
     collection,
-    req: await createLocalReq(options, payload),
+    req: createLocalReq(options, payload),
     token,
   })
 }

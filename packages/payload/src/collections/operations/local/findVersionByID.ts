@@ -54,7 +54,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     depth,
     disableErrors,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: createLocalReq(options, payload),
     showHiddenFields,
   })
 }

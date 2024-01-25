@@ -37,7 +37,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     depth,
     globalConfig,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: createLocalReq(options, payload),
     showHiddenFields,
   })
 }

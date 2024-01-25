@@ -43,7 +43,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
     draft,
     globalConfig,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: createLocalReq(options, payload),
     showHiddenFields,
     slug: globalSlug as string,
   })

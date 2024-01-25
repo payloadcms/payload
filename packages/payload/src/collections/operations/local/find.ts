@@ -67,7 +67,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess,
     page,
     pagination,
-    req: await createLocalReq(options, payload),
+    req: createLocalReq(options, payload),
     showHiddenFields,
     sort,
     where,

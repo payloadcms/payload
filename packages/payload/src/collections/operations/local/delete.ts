@@ -76,7 +76,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     collection,
     depth,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: createLocalReq(options, payload),
     showHiddenFields,
     where,
   }

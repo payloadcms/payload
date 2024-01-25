@@ -47,7 +47,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     data,
     depth,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: createLocalReq(options, payload),
     showHiddenFields,
   }
 

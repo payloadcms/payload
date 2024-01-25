@@ -1,9 +1,8 @@
 import type { Payload, RequestContext } from '..'
-import type { File, PayloadRequest } from '../exports/types'
+import type { PayloadRequest } from '../exports/types'
 
 import { getDataLoader } from '../collections/dataloader'
 import { getLocalI18n } from '../translations/getLocalI18n'
-import getFileByPath from '../uploads/getFileByPath'
 
 function getRequestContext(
   req: PayloadRequest = { context: null } as PayloadRequest,
@@ -26,16 +25,14 @@ type CreateLocalReq = (
     collection?: number | string | symbol
     context?: RequestContext
     fallbackLocale?: string
-    file?: File
-    filePath?: string
     locale?: string
     req?: PayloadRequest
     user?: Document
   },
   payload: Payload,
-) => Promise<PayloadRequest>
-export const createLocalReq: CreateLocalReq = async (
-  { collection, context, fallbackLocale, file, filePath, locale, req = {} as PayloadRequest, user },
+) => PayloadRequest
+export const createLocalReq: CreateLocalReq = (
+  { collection, context, fallbackLocale, locale, req = {} as PayloadRequest, user },
   payload,
 ) => {
   const i18n = req?.i18n || getLocalI18n({ config: payload.config })
@@ -54,7 +51,6 @@ export const createLocalReq: CreateLocalReq = async (
   req.payload = payload
   req.i18n = i18n
   req.t = i18n.t
-  req.file = file ?? (await getFileByPath(filePath))
   req.user = user || req?.user || null
   req.collection = collection ? payload?.collections?.[collection] : null
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)

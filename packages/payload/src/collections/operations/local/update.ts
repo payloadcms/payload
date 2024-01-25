@@ -7,6 +7,7 @@ import type { File } from '../../../uploads/types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
+import getFileByPath from '../../../uploads/getFileByPath'
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import { updateOperation } from '../update'
 import { updateByIDOperation } from '../updateByID'
@@ -69,6 +70,8 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     data,
     depth,
     draft,
+    file,
+    filePath,
     overrideAccess = true,
     overwriteExistingFiles = false,
     showHiddenFields,
@@ -83,6 +86,9 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
+  const req = createLocalReq(options, payload)
+  req.file = file ?? (await getFileByPath(filePath))
+
   const args = {
     id,
     autosave,
@@ -93,7 +99,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     overwriteExistingFiles,
     payload,
-    req: await createLocalReq(options, payload),
+    req,
     showHiddenFields,
     where,
   }
