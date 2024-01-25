@@ -1,6 +1,6 @@
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import { User } from 'payload/auth'
-import { DocumentPreferences, RowLabel, Validate } from 'payload/types'
+import { CodeField, DocumentPreferences, JSONField, RowLabel, Tab, Validate } from 'payload/types'
 import { createFieldMap } from '../RenderFields/createFieldMap'
 import { Option } from 'payload/types'
 
@@ -51,6 +51,18 @@ export type FormFieldBase = {
       // For `select` fields
       isClearable?: boolean
       isSortable?: boolean
+    }
+  | {
+      tabs?: Tab[]
+    }
+  | {
+      // For `code` fields
+      editorOptions?: CodeField['admin']['editorOptions']
+      language?: CodeField['admin']['language']
+    }
+  | {
+      // For `json` fields
+      editorOptions?: JSONField['admin']['editorOptions']
     }
 )
 

@@ -170,6 +170,7 @@ export const createFieldMap = (args: {
           maxRows: 'maxRows' in field ? field.maxRows : undefined,
           min: 'min' in field ? field.min : undefined,
           max: 'max' in field ? field.max : undefined,
+          options: 'options' in field ? field.options : undefined,
         }
 
         const Field = (

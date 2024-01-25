@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Option, OptionObject, Validate } from 'payload/types'
@@ -47,11 +48,7 @@ export const Select: React.FC<Props> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const [options, setOptions] = useState(formatOptions(optionsFromProps))
-
-  useEffect(() => {
-    setOptions(formatOptions(optionsFromProps))
-  }, [optionsFromProps])
+  const [options] = useState(formatOptions(optionsFromProps))
 
   const memoizedValidate: Validate = useCallback(
     (value, validationOptions) => {

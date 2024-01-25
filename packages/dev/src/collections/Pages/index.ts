@@ -8,23 +8,23 @@ import { CustomLabel } from './CustomLabel'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
-  // admin: {
-  //   useAsTitle: 'title',
-  //   components: {
-  //     views: {
-  //       Edit: {
-  //         Custom: {
-  //           path: '/custom',
-  //           Component: CustomView,
-  //           Tab: {
-  //             label: 'Custom View',
-  //             href: '/custom',
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // },
+  admin: {
+    useAsTitle: 'title',
+    components: {
+      views: {
+        Edit: {
+          Custom: {
+            path: '/custom',
+            Component: CustomView,
+            Tab: {
+              label: 'Custom View',
+              href: '/custom',
+            },
+          },
+        },
+      },
+    },
+  },
   versions: {
     drafts: true,
   },
@@ -137,27 +137,27 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    // {
-    //   name: 'json',
-    //   label: 'JSON',
-    //   type: 'json',
-    //   required: true,
-    // },
-    // {
-    //   name: 'hidden',
-    //   label: 'Hidden',
-    //   type: 'text',
-    //   required: true,
-    //   admin: {
-    //     hidden: true,
-    //   },
-    // },
-    // {
-    //   name: 'code',
-    //   label: 'Code',
-    //   type: 'code',
-    //   required: true,
-    // },
+    {
+      name: 'json',
+      label: 'JSON',
+      type: 'json',
+      required: true,
+    },
+    {
+      name: 'hidden',
+      label: 'Hidden',
+      type: 'text',
+      required: true,
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'code',
+      label: 'Code',
+      type: 'code',
+      required: true,
+    },
     // {
     //   label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
     //   type: 'collapsible',
@@ -186,36 +186,36 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    // {
-    //   label: 'Tabs',
-    //   type: 'tabs',
-    //   tabs: [
-    //     {
-    //       name: 'tab1',
-    //       label: 'Tab 1 (Named)',
-    //       validate: (value) => true,
-    //       fields: [
-    //         {
-    //           name: 'tab1Text',
-    //           label: 'Tab 1 Text',
-    //           type: 'text',
-    //           required: true,
-    //         },
-    //       ],
-    //     },
-    //     {
-    //       label: 'Tab 2 (Unnamed)',
-    //       fields: [
-    //         {
-    //           name: 'tab2Text',
-    //           label: 'Tab 2 Text',
-    //           type: 'text',
-    //           required: true,
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
+    {
+      label: 'Tabs',
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'tab1',
+          label: 'Tab 1 (Named)',
+          validate: (value) => true,
+          fields: [
+            {
+              name: 'tab1Text',
+              label: 'Tab 1 Text',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+        {
+          label: 'Tab 2 (Unnamed)',
+          fields: [
+            {
+              name: 'tab2Text',
+              label: 'Tab 2 Text',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
     {
       type: 'row',
       fields: [

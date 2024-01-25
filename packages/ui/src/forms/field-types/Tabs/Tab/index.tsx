@@ -1,48 +1,55 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { NamedTab, Tab } from 'payload/types'
-import React from 'react'
+import { Tab, tabHasName } from 'payload/types'
+import React, { useState } from 'react'
 import { ErrorPill } from '../../../../elements/ErrorPill'
 import { WatchChildErrors } from '../../../WatchChildErrors'
-import { useTranslation } from '../../../..'
+import { useFormSubmitted, useTranslation } from '../../../..'
 
 import './index.scss'
 
-type TabProps = {
-  isActive?: boolean
-  setIsActive: () => void
-  pathSegments: string[]
-  path: string
-  label: Tab['label']
-  name: NamedTab['name']
-}
-
 const baseClass = 'tabs-field__tab-button'
 
-export const TabComponent: React.FC<TabProps> = (props) => {
-  const { isActive, setIsActive, pathSegments, name, label } = props
+type TabProps = {
+  isActive?: boolean
+  parentPath: string
+  setIsActive: () => void
+  tab: Tab
+}
 
+export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
   const { i18n } = useTranslation()
+  const [errorCount, setErrorCount] = useState(undefined)
+  const hasName = tabHasName(tab)
+  const submitted = useFormSubmitted()
 
-  const [errorCount, setErrorCount] = React.useState(0)
-
-  const tabHasErrors = errorCount > 0
+  const pathSegments = []
+  if (parentPath) pathSegments.push(parentPath)
+  if (hasName) pathSegments.push(tab.name)
+  const path = pathSegments.join('.')
+  const tabHasErrors = submitted && errorCount > 0
 
   return (
-    <button
-      className={[
-        baseClass,
-        tabHasErrors && `${baseClass}--has-error`,
-        isActive && `${baseClass}--active`,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      onClick={setIsActive}
-      type="button"
-    >
-      <WatchChildErrors pathSegments={pathSegments} setErrorCount={setErrorCount} />
-      {label ? getTranslation(label, i18n) : name}
-      {tabHasErrors && <ErrorPill i18n={i18n} count={errorCount} />}
-    </button>
+    <React.Fragment>
+      <WatchChildErrors
+        fieldSchema={hasName ? undefined : tab.fields}
+        path={path}
+        setErrorCount={setErrorCount}
+      />
+      <button
+        className={[
+          `${baseClass}__tab-button`,
+          tabHasErrors && `${baseClass}__tab-button--has-error`,
+          isActive && `${baseClass}__tab-button--active`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        onClick={setIsActive}
+        type="button"
+      >
+        {tab.label ? getTranslation(tab.label, i18n) : hasName && tab.name}
+        {tabHasErrors && <ErrorPill count={errorCount} i18n={i18n} />}
+      </button>
+    </React.Fragment>
   )
 }

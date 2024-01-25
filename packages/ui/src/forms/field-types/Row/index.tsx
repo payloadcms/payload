@@ -13,13 +13,7 @@ import './index.scss'
 const baseClass = 'row'
 
 const Row: React.FC<Props> = (props) => {
-  const {
-    admin: { className, readOnly },
-    forceRender = false,
-    indexPath,
-    permissions,
-    fieldMap,
-  } = props
+  const { className, readOnly, forceRender = false, indexPath, permissions, fieldMap } = props
 
   return (
     <RowProvider>

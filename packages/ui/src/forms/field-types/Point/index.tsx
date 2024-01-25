@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback } from 'react'
 
 import type { Props } from './types'
@@ -7,6 +8,7 @@ import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import { Validate } from 'payload/types'
 import { useTranslation } from '../../../providers/Translation'
+import { withCondition } from '../../withCondition'
 
 import './index.scss'
 
@@ -66,7 +68,13 @@ const PointField: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={[fieldBaseClass, className, showError && 'error', readOnly && 'read-only']
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
         .filter(Boolean)
         .join(' ')}
       style={{
@@ -116,4 +124,4 @@ const PointField: React.FC<Props> = (props) => {
   )
 }
 
-export default PointField
+export default withCondition(PointField)
