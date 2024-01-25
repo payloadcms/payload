@@ -84,59 +84,59 @@ export const Pages: CollectionConfig = {
         condition: (data) => data.enableConditionalField,
       },
     },
-    // {
-    //   name: 'number',
-    //   label: 'Number',
-    //   type: 'number',
-    //   required: true,
-    // },
-    // {
-    //   name: 'select',
-    //   label: 'Select',
-    //   type: 'select',
-    //   required: true,
-    //   options: [
-    //     {
-    //       label: 'Option 1',
-    //       value: 'option-1',
-    //     },
-    //     {
-    //       label: 'Option 2',
-    //       value: 'option-2',
-    //     },
-    //   ],
-    // },
-    // {
-    //   type: 'textarea',
-    //   name: 'textarea',
-    //   label: 'Textarea',
-    //   required: true,
-    //   admin: {
-    //     rows: 10,
-    //   },
-    // },
-    // {
-    //   type: 'point',
-    //   name: 'point',
-    //   label: 'Point',
-    //   required: true,
-    // },
-    // {
-    //   type: 'radio',
-    //   name: 'radio',
-    //   label: 'Radio',
-    //   required: true,
-    //   options: [
-    //     {
-    //       label: 'Option 1',
-    //       value: 'option-1',
-    //     },
-    //     {
-    //       label: 'Option 2',
-    //       value: 'option-2',
-    //     },
-    //   ],
-    // },
+    {
+      name: 'number',
+      label: 'Number',
+      type: 'number',
+      required: true,
+    },
+    {
+      name: 'select',
+      label: 'Select',
+      type: 'select',
+      required: true,
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option-1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option-2',
+        },
+      ],
+    },
+    {
+      type: 'textarea',
+      name: 'textarea',
+      label: 'Textarea',
+      required: true,
+      admin: {
+        rows: 10,
+      },
+    },
+    {
+      type: 'point',
+      name: 'point',
+      label: 'Point',
+      required: true,
+    },
+    {
+      type: 'radio',
+      name: 'radio',
+      label: 'Radio',
+      required: true,
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option-1',
+        },
+        {
+          label: 'Option 2',
+          value: 'option-2',
+        },
+      ],
+    },
     // {
     //   name: 'json',
     //   label: 'JSON',
@@ -216,26 +216,26 @@ export const Pages: CollectionConfig = {
     //     },
     //   ],
     // },
-    // {
-    //   type: 'row',
-    //   fields: [
-    //     {
-    //       name: 'rowText1',
-    //       label: 'Row Text',
-    //       type: 'text',
-    //       admin: {
-    //         width: '50%',
-    //       },
-    //     },
-    //     {
-    //       name: 'rowText2',
-    //       label: 'Row Text',
-    //       type: 'text',
-    //       admin: {
-    //         width: '50%',
-    //       },
-    //     },
-    //   ],
-    // },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'rowText1',
+          label: 'Row Text',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'rowText2',
+          label: 'Row Text',
+          type: 'text',
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
 }

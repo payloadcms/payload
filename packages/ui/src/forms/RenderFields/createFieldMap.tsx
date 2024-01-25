@@ -152,6 +152,7 @@ export const createFieldMap = (args: {
             parentPath: path,
           })
 
+        // TODO: these types can get cleaned up
         const fieldComponentProps: FormFieldBase = {
           Error,
           Label,
@@ -164,6 +165,11 @@ export const createFieldMap = (args: {
           width: 'width' in field.admin ? field?.admin?.width : undefined,
           // TODO: fix types
           // label: 'label' in field ? field.label : undefined,
+          step: 'step' in field.admin ? field.admin.step : undefined,
+          hasMany: 'hasMany' in field ? field.hasMany : undefined,
+          maxRows: 'maxRows' in field ? field.maxRows : undefined,
+          min: 'min' in field ? field.min : undefined,
+          max: 'max' in field ? field.max : undefined,
         }
 
         const Field = (

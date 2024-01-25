@@ -1,7 +1,8 @@
-import type { Locale, SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
+import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import { User } from 'payload/auth'
-import { DocumentPreferences, GroupField, RowLabel, Validate } from 'payload/types'
+import { DocumentPreferences, RowLabel, Validate } from 'payload/types'
 import { createFieldMap } from '../RenderFields/createFieldMap'
+import { Option } from 'payload/types'
 
 export const fieldBaseClass = 'field-type'
 
@@ -28,7 +29,30 @@ export type FormFieldBase = {
   placeholder?: string
   localized?: boolean
   validate?: Validate
-}
+} & (
+  | {
+      // For `number` fields
+      step?: number
+      hasMany?: boolean
+      maxRows?: number
+      min?: number
+      max?: number
+    }
+  | {
+      // For `radio` fields
+      layout?: 'horizontal' | 'vertical'
+      options?: Option[]
+    }
+  | {
+      // For `textarea` fields
+      rows?: number
+    }
+  | {
+      // For `select` fields
+      isClearable?: boolean
+      isSortable?: boolean
+    }
+)
 
 /**
  * Determines whether a field should be displayed as right-to-left (RTL) based on its configuration, payload's localization configuration and the adming user's currently enabled locale.
