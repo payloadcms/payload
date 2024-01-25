@@ -7,10 +7,7 @@ import type { File } from '../../../uploads/types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
-import { getLocalI18n } from '../../../translations/getLocalI18n'
-import getFileByPath from '../../../uploads/getFileByPath'
-import { setRequestContext } from '../../../utilities/setRequestContext'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import { updateOperation } from '../update'
 import { updateByIDOperation } from '../updateByID'
 
@@ -69,49 +66,22 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     id,
     autosave,
     collection: collectionSlug,
-    context,
     data,
     depth,
     draft,
-    fallbackLocale,
-    file,
-    filePath,
-    locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
-    req: incomingReq,
     showHiddenFields,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload.config.localization
-    ? payload.config.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
       `The collection with slug ${String(collectionSlug)} can't be found. Update Operation.`,
     )
   }
-
-  const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
-
-  const req: PayloadRequest = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    file: file ?? (await getFileByPath(filePath)),
-    i18n,
-    locale: locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    t: i18n.t,
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {
     id,
@@ -123,7 +93,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     overwriteExistingFiles,
     payload,
-    req,
+    req: await createLocalReq(options, payload),
     showHiddenFields,
     where,
   }

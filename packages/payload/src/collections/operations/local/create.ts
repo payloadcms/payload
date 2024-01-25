@@ -1,4 +1,3 @@
-import type { UploadedFile } from 'express-fileupload'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { Payload } from '../../..'
@@ -8,10 +7,7 @@ import type { Document } from '../../../types'
 import type { File } from '../../../uploads/types'
 
 import { APIError } from '../../../errors'
-import { getLocalI18n } from '../../../translations/getLocalI18n'
-import getFileByPath from '../../../uploads/getFileByPath'
-import { setRequestContext } from '../../../utilities/setRequestContext'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import { createOperation } from '../create'
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
@@ -44,47 +40,21 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
     collection: collectionSlug,
-    context,
     data,
     depth,
     disableVerificationEmail,
     draft,
-    fallbackLocale,
-    file,
-    filePath,
-    locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
-    req = {} as PayloadRequest,
     showHiddenFields,
-    user,
   } = options
-  setRequestContext(req, context)
-
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
       `The collection with slug ${String(collectionSlug)} can't be found. Create Operation.`,
     )
   }
-
-  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
-
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale
-  req.payload = payload
-  req.i18n = i18n
-  req.t = i18n.t
-  req.file = file ?? (await getFileByPath(filePath))
-
-  if (typeof user !== 'undefined') req.user = user
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return createOperation<TSlug>({
     collection,
@@ -94,7 +64,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     draft,
     overrideAccess,
     overwriteExistingFiles,
-    req,
+    req: await createLocalReq(options, payload),
     showHiddenFields,
   })
 }

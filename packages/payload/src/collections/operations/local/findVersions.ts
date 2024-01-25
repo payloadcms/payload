@@ -5,9 +5,7 @@ import type { Document, Where } from '../../../types'
 import type { TypeWithVersion } from '../../../versions/types'
 
 import { APIError } from '../../../errors'
-import { getLocalI18n } from '../../../translations/getLocalI18n'
-import { setRequestContext } from '../../../utilities/setRequestContext'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import { findVersionsOperation } from '../findVersions'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -36,24 +34,16 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['collections'][T]>>> {
   const {
     collection: collectionSlug,
-    context,
     depth,
-    fallbackLocale,
     limit,
-    locale = null,
     overrideAccess = true,
     page,
-    req: incomingReq,
     showHiddenFields,
     sort,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -61,29 +51,13 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     )
   }
 
-  const i18n = incomingReq?.i18n || getLocalI18n({ config: payload.config })
-
-  const req: PayloadRequest = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    i18n,
-    locale: locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    t: i18n.t,
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
-
   return findVersionsOperation({
     collection,
     depth,
     limit,
     overrideAccess,
     page,
-    req,
+    req: await createLocalReq(options, payload),
     showHiddenFields,
     sort,
     where,
