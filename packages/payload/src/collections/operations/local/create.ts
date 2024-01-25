@@ -7,6 +7,7 @@ import type { Document } from '../../../types'
 import type { File } from '../../../uploads/types'
 
 import { APIError } from '../../../errors'
+import getFileByPath from '../../../uploads/getFileByPath'
 import { createLocalReq } from '../../../utilities/createLocalReq'
 import { createOperation } from '../create'
 
@@ -44,6 +45,8 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     depth,
     disableVerificationEmail,
     draft,
+    file,
+    filePath,
     overrideAccess = true,
     overwriteExistingFiles = false,
     showHiddenFields,
@@ -56,6 +59,9 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     )
   }
 
+  const req = createLocalReq(options, payload)
+  req.file = file ?? (await getFileByPath(filePath))
+
   return createOperation<TSlug>({
     collection,
     data,
@@ -64,7 +70,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     draft,
     overrideAccess,
     overwriteExistingFiles,
-    req: await createLocalReq(options, payload),
+    req,
     showHiddenFields,
   })
 }
