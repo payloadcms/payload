@@ -79,11 +79,9 @@ export const createPayloadRequest = async ({
     i18n,
     t: i18n.t,
     file,
-
-    // need to add:
-    // ------------
-    // - payloadDataLoader
-    // - payloadUploadSizes
+    transactionID: undefined,
+    payloadDataLoader: undefined,
+    payloadUploadSizes: {},
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)

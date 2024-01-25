@@ -197,12 +197,12 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export type PayloadHandler = ({
+export type PayloadHandler<T = PayloadRequest | Request> = ({
   params,
   req,
 }: {
   params: Record<string, unknown>
-  req: PayloadRequest | Request
+  req: T
 }) => Promise<Response>
 
 /**
@@ -211,12 +211,7 @@ export type PayloadHandler = ({
 export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
-  /**
-   * Middleware that will be called when the path/method matches
-   *
-   * Compatible with Express middleware
-   */
-  handler: PayloadHandler
+  handler: PayloadHandler<PayloadRequest>
   /** HTTP method (or "all") */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
@@ -225,12 +220,34 @@ export type Endpoint = {
    * Compatible with the Express router
    */
   path: string
-  /**
-   * Set to `true` to disable the Payload middleware for this endpoint
-   * @default false
-   */
-  root?: boolean
-}
+} & (
+  | {
+      /**
+       * Middleware that will be called when the path/method matches
+       *
+       * Compatible with Express middleware
+       */
+      handler: PayloadHandler<PayloadRequest>
+      /**
+       * Set to `true` to disable the Payload middleware for this endpoint
+       * @default false
+       */
+      root?: false | undefined
+    }
+  | {
+      /**
+       * Middleware that will be called when the path/method matches
+       *
+       * Compatible with Express middleware
+       */
+      handler: PayloadHandler<Request>
+      /**
+       * Set to `true` to disable the Payload middleware for this endpoint
+       * @default false
+       */
+      root: true
+    }
+)
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
