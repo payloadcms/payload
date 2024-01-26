@@ -1,9 +1,16 @@
 import type { BlockField } from 'payload/types'
 
+import path from 'path'
+
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 
 require('isomorphic-fetch')
+
+// jest.mock('payload-config', () => {
+//   const config = require(path.join(process.cwd(), './config.ts'))
+//   return config
+// })
 
 describe('Config', () => {
   beforeAll(async () => {

@@ -28,10 +28,11 @@ export async function initPayloadE2E(__dirname: string): Promise<InitializedPayl
 
 export async function initPayloadTest(options: Options): Promise<InitializedPayload> {
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
+  const config = (await import(path.resolve(options.__dirname, './config.ts'))).default
 
   const initOptions: InitOptions = {
     local: true,
-    config: require(process.env.PAYLOAD_CONFIG_PATH).default,
+    config,
     // loggerOptions: {
     //   enabled: false,
     // },

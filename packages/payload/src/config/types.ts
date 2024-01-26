@@ -232,14 +232,12 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export type PayloadHandler = ({
+export type PayloadHandler<T = PayloadRequest> = ({
+  params,
   req,
-  routeParams,
 }: {
-  req: PayloadRequest
-  routeParams: {
-    [key: string]: string
-  }
+  params: Record<string, unknown>
+  req: T
 }) => Promise<Response> | Response
 
 /**
@@ -248,12 +246,18 @@ export type PayloadHandler = ({
 export type Endpoint<U = User> = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+
   /**
    * Middleware that will be called when the path/method matches
    *
    * Compatible with Web Request/Response Model
    */
-  handler: PayloadHandler
+  handler: PayloadHandler<
+    Partial<PayloadRequest<U>> & {
+    payload: PayloadRequest['payload']
+    payloadDataLoader: PayloadRequest['payloadDataLoader']
+  } & Request
+  >
   /** HTTP method (or "all") */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
@@ -268,7 +272,7 @@ export type Endpoint<U = User> = {
    * Please add "root" routes under the /api folder in the Payload Project.
    * https://nextjs.org/docs/app/api-reference/file-conventions/route
    */
-  root: never
+  root?: boolean
 }
 
 export type AdminViewConfig = {
