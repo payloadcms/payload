@@ -1,3 +1,20 @@
+## [2.9.0](https://github.com/payloadcms/payload/compare/v2.8.2...v2.9.0) (2024-01-26)
+
+
+### Features
+
+* forceAcceptWarning migration arg added to accept prompts ([#4874](https://github.com/payloadcms/payload/issues/4874)) ([eba53ba](https://github.com/payloadcms/payload/commit/eba53ba60afd7c5d37389377ed06a9b556058d49))
+
+### Bug Fixes
+
+* afterLogin hook write conflicts ([#4904](https://github.com/payloadcms/payload/issues/4904)) ([3eb681e](https://github.com/payloadcms/payload/commit/3eb681e847e9c55eaaa69c22bea4f4e66c7eac36))
+* **db-postgres:** migrate down error ([#4861](https://github.com/payloadcms/payload/issues/4861)) ([dfba522](https://github.com/payloadcms/payload/commit/dfba5222f3abf3f236dc9212a28e1aec7d7214d5))
+* **db-postgres:** query unset relation ([#4862](https://github.com/payloadcms/payload/issues/4862)) ([8ce15c8](https://github.com/payloadcms/payload/commit/8ce15c8b07800397a50dcf790c263ed5b3cfad53))
+* migrate down missing filter for latest batch ([#4860](https://github.com/payloadcms/payload/issues/4860)) ([b99d24f](https://github.com/payloadcms/payload/commit/b99d24fcfa698c493ea01c41621201abe18fabe3))
+* **plugin-cloud-storage:** slow get file performance large collections ([#4927](https://github.com/payloadcms/payload/issues/4927)) ([f73d503](https://github.com/payloadcms/payload/commit/f73d503fecdfa5cefdc26ab9aad60b00563f881e))
+* remove No Options dropdown from hasMany fields ([#4899](https://github.com/payloadcms/payload/issues/4899)) ([e5a7907](https://github.com/payloadcms/payload/commit/e5a7907a72c1371447ac2f71fce213ed22246092))
+* upload input drawer does not show draft versions ([#4903](https://github.com/payloadcms/payload/issues/4903)) ([6930c4e](https://github.com/payloadcms/payload/commit/6930c4e9f2200853121391ad8f8df48ea66c40a4))
+
 ## [2.8.2](https://github.com/payloadcms/payload/compare/v2.8.1...v2.8.2) (2024-01-16)
 
 
