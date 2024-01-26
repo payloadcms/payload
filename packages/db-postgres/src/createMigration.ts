@@ -53,7 +53,7 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
 
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
-  { migrationName, payload },
+  { forceAcceptWarning, migrationName, payload },
 ) {
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
@@ -95,7 +95,7 @@ export const createMigration: CreateMigration = async function createMigration(
   const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
   const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
 
-  if (!sqlStatementsUp.length && !sqlStatementsDown.length) {
+  if (!sqlStatementsUp.length && !sqlStatementsDown.length && !forceAcceptWarning) {
     const { confirm: shouldCreateBlankMigration } = await prompts(
       {
         name: 'confirm',
