@@ -94,7 +94,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'ADD_ROW': {
-      const { blockType, path, rowIndex: rowIndexFromArgs } = action
+      const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState } = action
       const rowIndex =
         typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0
 
@@ -111,9 +111,17 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         },
       )
 
+      if (blockType) {
+        subFieldState.blockType = {
+          initialValue: blockType,
+          valid: true,
+          value: blockType,
+        }
+      }
+
       // add new row to array _field state_
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
-      siblingRows.splice(rowIndex, 0, {})
+      siblingRows.splice(rowIndex, 0, subFieldState)
 
       const newState: FormState = {
         ...remainingFields,

@@ -119,6 +119,7 @@ export type ADD_ROW = {
   blockType?: string
   path: string
   rowIndex?: number
+  subFieldState?: FormState
   type: 'ADD_ROW'
 }
 
