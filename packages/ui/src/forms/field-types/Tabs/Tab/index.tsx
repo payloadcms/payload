@@ -23,10 +23,10 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
   const hasName = 'name' in tab
-  const submitted = useFormSubmitted()
+  const hasSubmitted = useFormSubmitted()
 
   const path = `${parentPath ? `${parentPath}.` : ''}${'name' in tab ? name : ''}`
-  const tabHasErrors = submitted && errorCount > 0
+  const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   return (
     <React.Fragment>
@@ -34,7 +34,7 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
       <button
         className={[
           baseClass,
-          tabHasErrors && `${baseClass}--has-error`,
+          fieldHasErrors && `${baseClass}--has-error`,
           isActive && `${baseClass}--active`,
         ]
           .filter(Boolean)
@@ -43,7 +43,7 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
         type="button"
       >
         {label ? getTranslation(label, i18n) : hasName && name}
-        {tabHasErrors && <ErrorPill count={errorCount} i18n={i18n} />}
+        {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} />}
       </button>
     </React.Fragment>
   )

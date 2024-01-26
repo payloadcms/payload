@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
@@ -13,6 +13,8 @@ import { fieldBaseClass } from '../shared'
 import { DocumentPreferences } from 'payload/types'
 import { useFieldPath } from '../../FieldPathProvider'
 import { WatchChildErrors } from '../../WatchChildErrors'
+import { ErrorPill } from '../../../elements/ErrorPill'
+import { useTranslation } from '../../../providers/Translation'
 
 import './index.scss'
 
@@ -33,6 +35,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const pathFromContext = useFieldPath()
   const path = pathFromProps || pathFromContext
 
+  const { i18n } = useTranslation()
   const initCollapsed = 'initCollapsed' in props ? props.initCollapsed : false
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
@@ -40,6 +43,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const fieldPreferencesKey = `collapsible-${path.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
   const submitted = useFormSubmitted()
+  const fieldHasErrors = errorCount > 0 && submitted
 
   const onToggle = useCallback(
     async (newCollapsedState: boolean) => {
@@ -89,44 +93,44 @@ const CollapsibleField: React.FC<Props> = (props) => {
 
   if (typeof collapsedOnMount !== 'boolean') return null
 
-  const fieldHasErrors = submitted && errorCount > 0
-
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        baseClass,
-        className,
-        fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
-    >
+    <Fragment>
       <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
-      <Collapsible
-        className={`${baseClass}__collapsible`}
-        collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
-        header={
-          <div className={`${baseClass}__row-label-wrap`}>
-            {Label}
-            {errorCount > 0 && Error}
-          </div>
-        }
-        initCollapsed={collapsedOnMount}
-        onToggle={onToggle}
+      <div
+        className={[
+          fieldBaseClass,
+          baseClass,
+          className,
+          fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
       >
-        <RenderFields
-          fieldMap={fieldMap}
-          forceRender
-          indexPath={path}
-          margins="small"
-          permissions={permissions}
-          readOnly={readOnly}
-        />
-      </Collapsible>
-      {Description}
-    </div>
+        <Collapsible
+          className={`${baseClass}__collapsible`}
+          collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+          header={
+            <div className={`${baseClass}__row-label-wrap`}>
+              {Label}
+              {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+            </div>
+          }
+          initCollapsed={collapsedOnMount}
+          onToggle={onToggle}
+        >
+          <RenderFields
+            fieldMap={fieldMap}
+            forceRender
+            indexPath={path}
+            margins="small"
+            permissions={permissions}
+            readOnly={readOnly}
+          />
+        </Collapsible>
+        {Description}
+      </div>
+    </Fragment>
   )
 }
 

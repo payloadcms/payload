@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { Props } from './types'
 import RenderFields from '../../RenderFields'
@@ -11,6 +11,9 @@ import { useTabs } from '../Tabs/provider'
 import { useFormSubmitted } from '../../../forms/Form/context'
 import { fieldBaseClass } from '../shared'
 import { useFieldPath } from '../../FieldPathProvider'
+import { WatchChildErrors } from '../../WatchChildErrors'
+import { ErrorPill } from '../../../elements/ErrorPill'
+import { useTranslation } from '../../../providers/Translation'
 
 import './index.scss'
 
@@ -21,53 +24,57 @@ const Group: React.FC<Props> = (props) => {
 
   const path = useFieldPath()
 
+  const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
   const isWithinCollapsible = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
-  const [errorCount] = React.useState(undefined)
-  const groupHasErrors = hasSubmitted && errorCount > 0
+  const [errorCount, setErrorCount] = React.useState(undefined)
+  const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        baseClass,
-        isTopLevel && `${baseClass}--top-level`,
-        isWithinCollapsible && `${baseClass}--within-collapsible`,
-        isWithinGroup && `${baseClass}--within-group`,
-        isWithinRow && `${baseClass}--within-row`,
-        isWithinTab && `${baseClass}--within-tab`,
-        !hideGutter && isWithinGroup && `${baseClass}--gutter`,
-        groupHasErrors && `${baseClass}--has-error`,
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      id={`field-${path?.replace(/\./g, '__')}`}
-      style={{
-        ...style,
-        width,
-      }}
-    >
-      <GroupProvider>
-        <div className={`${baseClass}__wrap`}>
-          <div className={`${baseClass}__header`}>
-            {(Label || Description) && (
-              <header>
-                {Label}
-                {Description}
-              </header>
-            )}
-            {/* <GroupFieldErrors pathSegments={pathSegments} /> */}
+    <Fragment>
+      <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
+      <div
+        className={[
+          fieldBaseClass,
+          baseClass,
+          isTopLevel && `${baseClass}--top-level`,
+          isWithinCollapsible && `${baseClass}--within-collapsible`,
+          isWithinGroup && `${baseClass}--within-group`,
+          isWithinRow && `${baseClass}--within-row`,
+          isWithinTab && `${baseClass}--within-tab`,
+          !hideGutter && isWithinGroup && `${baseClass}--gutter`,
+          fieldHasErrors && `${baseClass}--has-error`,
+          className,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        id={`field-${path?.replace(/\./g, '__')}`}
+        style={{
+          ...style,
+          width,
+        }}
+      >
+        <GroupProvider>
+          <div className={`${baseClass}__wrap`}>
+            <div className={`${baseClass}__header`}>
+              {(Label || Description) && (
+                <header>
+                  {Label}
+                  {Description}
+                </header>
+              )}
+              {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+            </div>
+            <RenderFields fieldMap={fieldMap} />
           </div>
-          <RenderFields fieldMap={fieldMap} />
-        </div>
-      </GroupProvider>
-    </div>
+        </GroupProvider>
+      </div>
+    </Fragment>
   )
 }
 
