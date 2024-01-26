@@ -1,56 +1,107 @@
-import React from 'react'
+'use client'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types'
 
-import DefaultError from '../../Error'
-import FieldDescription from '../../FieldDescription'
-import DefaultLabel from '../../Label'
-import { JSONInputWrapper } from './Wrapper'
-import { JSONInput } from './Input'
+import { fieldBaseClass } from '../shared'
+import { CodeEditor } from '../../../elements/CodeEditor'
+import { Validate } from 'payload/types'
+import useField from '../../useField'
+import { withCondition } from '../../withCondition'
+
+import './index.scss'
+
+const baseClass = 'json-field'
 
 const JSONField: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      components: { Error, Label } = {},
-      description,
-      editorOptions,
-      readOnly,
-      style,
-      width,
-    } = {},
-    label,
+    className,
+    readOnly,
+    style,
+    width,
     path: pathFromProps,
+    Error,
+    Label,
+    Description,
+    BeforeInput,
+    AfterInput,
+    validate,
     required,
-    i18n,
-    value,
   } = props
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
 
-  const path = pathFromProps || name
+  const [stringValue, setStringValue] = useState<string>()
+  const [jsonError, setJsonError] = useState<string>()
+  const [hasLoadedValue, setHasLoadedValue] = useState(false)
+
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...options, jsonError, required })
+    },
+    [validate, required],
+  )
+
+  const { initialValue, setValue, value, path, showError } = useField<string>({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
+
+  const handleChange = useCallback(
+    (val) => {
+      if (readOnly) return
+      setStringValue(val)
+
+      try {
+        setValue(JSON.parse(val))
+        setJsonError(undefined)
+      } catch (e) {
+        setJsonError(e)
+      }
+    },
+    [readOnly, setValue, setStringValue],
+  )
+
+  useEffect(() => {
+    if (hasLoadedValue) return
+    setStringValue(JSON.stringify(value ? value : initialValue, null, 2))
+    setHasLoadedValue(true)
+  }, [initialValue, value])
 
   return (
-    <JSONInputWrapper
-      className={className}
-      path={path}
-      readOnly={readOnly}
-      width={width}
-      style={style}
+    <div
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
     >
-      <ErrorComp path={path} />
-      <LabelComp htmlFor={`field-${path}`} label={label} required={required} i18n={i18n} />
-      <JSONInput
-        path={path}
-        required={required}
-        readOnly={readOnly}
-        editorOptions={editorOptions}
-      />
-      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
-    </JSONInputWrapper>
+      {Error}
+      {Label}
+      <div>
+        {BeforeInput}
+        <CodeEditor
+          defaultLanguage="json"
+          onChange={handleChange}
+          options={editorOptions}
+          readOnly={readOnly}
+          value={stringValue}
+        />
+        {AfterInput}
+      </div>
+      {Description}
+    </div>
   )
 }
 
-export default JSONField
+export default withCondition(JSONField)

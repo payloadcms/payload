@@ -4,8 +4,11 @@ import type { Row } from '../Form/types'
 export type Options = {
   disableFormData?: boolean
   hasRows?: boolean
-  path: string
   validate?: Validate
+  /**
+   * If you do not provide a path, this hook will look for one using the `useFieldPath` hook.
+   **/
+  path?: string
 }
 
 export type FieldType<T> = {
@@ -18,4 +21,5 @@ export type FieldType<T> = {
   showError: boolean
   valid?: boolean
   value: T
+  path: string
 }

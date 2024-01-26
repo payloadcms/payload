@@ -1,5 +1,10 @@
 import { CollectionConfig } from 'payload/types'
 import { CustomView } from './CustomView'
+import { BeforeInput } from './BeforeInput'
+import { AfterInput } from './AfterInput'
+import { CustomField } from './CustomField'
+import { CustomDescription } from './CustomDescription'
+import { CustomLabel } from './CustomLabel'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -25,10 +30,46 @@ export const Pages: CollectionConfig = {
   },
   fields: [
     {
+      name: 'titleWithCustomComponents',
+      label: 'Title With Custom Components',
+      type: 'text',
+      required: true,
+      admin: {
+        description: CustomDescription,
+        components: {
+          beforeInput: [BeforeInput],
+          afterInput: [AfterInput],
+          Label: CustomLabel,
+        },
+      },
+    },
+    {
       name: 'title',
       label: 'Title',
       type: 'text',
       required: true,
+      admin: {
+        description: 'This is a description',
+      },
+    },
+    {
+      name: 'titleWithCustomField',
+      label: 'Title With Custom Field',
+      type: 'text',
+      admin: {
+        components: {
+          Field: CustomField,
+        },
+      },
+    },
+    {
+      name: 'sidebarTitle',
+      label: 'Sidebar Title',
+      type: 'text',
+      required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'enableConditionalField',
@@ -118,7 +159,9 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
-      label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
+      // TODO: fix this
+      // label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
+      label: 'Hello',
       type: 'collapsible',
       admin: {
         initCollapsed: true,
@@ -145,6 +188,20 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
+    // {
+    //   name: 'array',
+    //   label: 'Array',
+    //   type: 'array',
+    //   required: true,
+    //   fields: [
+    //     {
+    //       name: 'arrayText',
+    //       label: 'Array Text',
+    //       type: 'text',
+    //       required: true,
+    //     },
+    //   ],
+    // },
     {
       label: 'Tabs',
       type: 'tabs',

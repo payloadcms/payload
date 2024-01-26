@@ -1,25 +1,29 @@
-import type { Field, TabAsField } from 'payload/types'
+import type { TabAsField } from 'payload/types'
 
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
+import { tabHasName } from 'payload/types'
+import { createFieldMap } from '../RenderFields/createFieldMap'
 
-export const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] => {
-  const pathNames = fieldSchema.reduce((acc, subField) => {
-    if (fieldHasSubFields(subField) && fieldAffectsData(subField)) {
+export const buildPathSegments = (
+  parentPath: string,
+  fieldMap: ReturnType<typeof createFieldMap>,
+): string[] => {
+  const pathNames = fieldMap.reduce((acc, subField) => {
+    if (subField.subfields && subField.isFieldAffectingData) {
       // group, block, array
       acc.push(parentPath ? `${parentPath}.${subField.name}.` : `${subField.name}.`)
-    } else if (fieldHasSubFields(subField)) {
+    } else if (subField.subfields) {
       // rows, collapsibles, unnamed-tab
-      acc.push(...buildPathSegments(parentPath, subField.fields))
+      acc.push(...buildPathSegments(parentPath, subField.subfields))
     } else if (subField.type === 'tabs') {
       // tabs
-      subField.tabs.forEach((tab: TabAsField) => {
+      subField.tabs.forEach((tab) => {
         let tabPath = parentPath
-        if (tabHasName(tab)) {
+        if ('name' in tab) {
           tabPath = parentPath ? `${parentPath}.${tab.name}` : tab.name
         }
-        acc.push(...buildPathSegments(tabPath, tab.fields))
+        acc.push(...buildPathSegments(tabPath, tab.subfields))
       })
-    } else if (fieldAffectsData(subField)) {
+    } else if (subField.isFieldAffectingData) {
       // text, number, date, etc.
       acc.push(parentPath ? `${parentPath}.${subField.name}` : subField.name)
     }

@@ -1,17 +1,13 @@
+'use client'
+import type { Description } from 'payload/types'
+
 import React from 'react'
 
-import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { Description, DocumentPreferences, Payload, SanitizedConfig } from 'payload/types'
-import type { FieldTypes, Locale } from 'payload/config'
+import type { FieldMap } from '../../utilities/buildComponentMap/types'
 
 import RenderFields from '../../forms/RenderFields'
-import { filterFields } from '../../forms/RenderFields/filterFields'
 import { Gutter } from '../Gutter'
 import './index.scss'
-import { Document, FieldWithPath } from 'payload/types'
-import { FormState } from '../../forms/Form/types'
-import { useOperation } from '../../providers/OperationProvider'
-import { I18n } from '@payloadcms/translations'
 
 const baseClass = 'document-fields'
 
@@ -19,57 +15,14 @@ export const DocumentFields: React.FC<{
   AfterFields?: React.ReactNode
   BeforeFields?: React.ReactNode
   description?: Description
-  fieldTypes: FieldTypes
-  fields: FieldWithPath[]
+  fieldMap: FieldMap
   forceSidebarWrap?: boolean
-  hasSavePermission: boolean
-  docPermissions: CollectionPermission | GlobalPermission
-  docPreferences: DocumentPreferences
-  data: Document
-  formState: FormState
-  user: User
-  i18n: I18n
-  payload: Payload
-  locale?: Locale
-  config: SanitizedConfig
 }> = (props) => {
-  const {
-    AfterFields,
-    BeforeFields,
-    description,
-    fieldTypes,
-    fields,
-    forceSidebarWrap,
-    hasSavePermission,
-    docPermissions,
-    docPreferences,
-    data,
-    formState,
-    user,
-    i18n,
-    payload,
-    locale,
-    config,
-  } = props
+  const { AfterFields, BeforeFields, description, fieldMap, forceSidebarWrap } = props
 
-  const operation = useOperation()
+  const mainFields = fieldMap.filter(({ isSidebar }) => !isSidebar)
 
-  const mainFields = filterFields({
-    fieldSchema: fields,
-    fieldTypes,
-    filter: (field) => !field?.admin?.position || field?.admin?.position !== 'sidebar',
-    permissions: docPermissions.fields,
-    readOnly: !hasSavePermission,
-  })
-
-  const sidebarFields = filterFields({
-    fieldSchema: fields,
-    fieldTypes,
-    filter: (field) => field?.admin?.position === 'sidebar',
-    permissions: docPermissions.fields,
-    readOnly: !hasSavePermission,
-    operation,
-  })
+  const sidebarFields = fieldMap.filter(({ isSidebar }) => isSidebar)
 
   const hasSidebarFields = sidebarFields && sidebarFields.length > 0
 
@@ -93,42 +46,16 @@ export const DocumentFields: React.FC<{
                 </div>
               )}
             </header>
-            {BeforeFields || null}
-            <RenderFields
-              className={`${baseClass}__fields`}
-              fieldTypes={fieldTypes}
-              fields={mainFields}
-              // permissions={permissions.fields}
-              readOnly={!hasSavePermission}
-              data={data}
-              formState={formState}
-              user={user}
-              i18n={i18n}
-              payload={payload}
-              docPreferences={docPreferences}
-              config={config}
-              locale={locale}
-            />
-            {AfterFields || null}
+            {BeforeFields}
+            <RenderFields className={`${baseClass}__fields`} fieldMap={mainFields} />
+            {AfterFields}
           </Gutter>
         </div>
         {hasSidebarFields && (
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-fields`}>
-                <RenderFields
-                  fieldTypes={fieldTypes}
-                  fields={sidebarFields}
-                  // permissions={permissions.fields}
-                  readOnly={!hasSavePermission}
-                  data={data}
-                  formState={formState}
-                  user={user}
-                  i18n={i18n}
-                  payload={payload}
-                  locale={locale}
-                  config={config}
-                />
+                <RenderFields fieldMap={sidebarFields} />
               </div>
             </div>
           </div>

@@ -1,15 +1,13 @@
-import React from 'react'
-
-import { getTranslation } from '@payloadcms/translations'
+'use client'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types'
-import DefaultError from '../../Error'
-import FieldDescription from '../../FieldDescription'
 import { fieldBaseClass } from '../shared'
-import { CheckboxInput } from './Input'
-import DefaultLabel from '../../Label'
-import { CheckboxWrapper } from './Wrapper'
 import { withCondition } from '../../withCondition'
+import { Validate } from 'payload/types'
+import useField from '../../useField'
+import { Check } from '../../../icons/Check'
+import { Line } from '../../../icons/Line'
 
 import './index.scss'
 
@@ -19,38 +17,56 @@ export const inputBaseClass = 'checkbox-input'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Error, Label, afterInput, beforeInput } = {},
-      description,
-      readOnly,
-      style,
-      width,
-    } = {},
-    disableFormData,
-    label,
-    path: pathFromProps,
+    className,
+    readOnly,
+    style,
+    width,
     required,
-    valid = true,
-    errorMessage,
-    value,
-    i18n,
+    validate,
+    BeforeInput,
+    AfterInput,
+    Label,
+    Error,
+    Description,
+    onChange: onChangeFromProps,
+    partialChecked,
+    checked: checkedFromProps,
+    disableFormData,
+    id,
+    path: pathFromProps,
+    name,
   } = props
 
-  const path = pathFromProps || name
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
-  const fieldID = `field-${path.replace(/\./g, '__')}`
+  const { setValue, value, showError, path } = useField({
+    disableFormData,
+    validate: memoizedValidate,
+    path: pathFromProps || name,
+  })
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const onToggle = useCallback(() => {
+    if (!readOnly) {
+      setValue(!value)
+      if (typeof onChangeFromProps === 'function') onChangeFromProps(!value)
+    }
+  }, [onChangeFromProps, readOnly, setValue, value])
+
+  const checked = checkedFromProps || Boolean(value)
+
+  const fieldID = id || `field-${path?.replace(/\./g, '__')}`
 
   return (
     <div
       className={[
         fieldBaseClass,
         baseClass,
-        !valid && 'error',
+        showError && 'error',
         className,
         value && `${baseClass}--checked`,
         readOnly && `${baseClass}--read-only`,
@@ -62,26 +78,42 @@ const Checkbox: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        <ErrorComp alignCaret="left" path={path} />
-      </div>
-      <CheckboxWrapper path={path} readOnly={readOnly} baseClass={inputBaseClass}>
+      <div className={`${baseClass}__error-wrap`}>{Error}</div>
+      <div
+        className={[
+          inputBaseClass,
+          checked && `${inputBaseClass}--checked`,
+          readOnly && `${inputBaseClass}--read-only`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <div className={`${inputBaseClass}__input`}>
-          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
-          <CheckboxInput
+          {BeforeInput}
+          <input
+            aria-label=""
+            defaultChecked={Boolean(checked)}
+            disabled={readOnly}
             id={fieldID}
-            label={getTranslation(label || name, i18n)}
             name={path}
-            readOnly={readOnly}
+            onInput={onToggle}
+            // ref={inputRef}
+            type="checkbox"
             required={required}
-            path={path}
-            iconClassName={`${inputBaseClass}__icon`}
           />
-          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+          <span
+            className={[`${inputBaseClass}__icon`, !value && partialChecked ? 'check' : 'partial']
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {value && <Check />}
+            {!value && partialChecked && <Line />}
+          </span>
+          {AfterInput}
         </div>
-        {label && <LabelComp htmlFor={fieldID} label={label} required={required} i18n={i18n} />}
-      </CheckboxWrapper>
-      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
+        {Label}
+      </div>
+      {Description}
     </div>
   )
 }

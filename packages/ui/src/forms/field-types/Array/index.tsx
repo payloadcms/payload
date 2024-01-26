@@ -14,8 +14,6 @@ import { ErrorPill } from '../../../elements/ErrorPill'
 import { useConfig } from '../../../providers/Config'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { useLocale } from '../../../providers/Locale'
-import Error from '../../Error'
-import FieldDescription from '../../FieldDescription'
 import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
@@ -28,26 +26,23 @@ const baseClass = 'array-field'
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, components, condition, description, readOnly },
-    fieldTypes,
-    fields,
+    className,
+    readOnly,
     forceRender = false,
     indexPath,
     localized,
-    maxRows,
-    minRows,
     path: pathFromProps,
     permissions,
     required,
     validate,
+    Error,
+    Label,
+    Description,
+    fieldMap,
   } = props
 
-  const path = pathFromProps || name
-
-  // eslint-disable-next-line react/destructuring-assignment
-  const label = props?.label ?? props?.labels?.singular
-
-  const CustomRowLabel = components?.RowLabel || undefined
+  const minRows = 'minRows' in props ? props.minRows : 0
+  const maxRows = 'maxRows' in props ? props.maxRows : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm()
@@ -86,20 +81,20 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 
   const {
-    errorMessage,
     rows = [],
     showError,
     valid,
     value,
+    path,
   } = useField<number>({
     hasRows: true,
-    path,
+    path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
   const addRow = useCallback(
     async (rowIndex: number) => {
-      await addFieldRow({ path, rowIndex })
+      await addFieldRow({ path, rowIndex, fieldMap })
       setModified(true)
 
       setTimeout(() => {
@@ -173,17 +168,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && (
-        <div className={`${baseClass}__error-wrap`}>
-          <Error message={errorMessage} showError={showError} />
-        </div>
-      )}
+      {showError && <div className={`${baseClass}__error-wrap`}>{Error}</div>}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
-            <h3 className={`${baseClass}__title`}>{getTranslation(label || name, i18n)}</h3>
+            <h3 className={`${baseClass}__title`}>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} withMessage />
+              <ErrorPill count={fieldErrorCount} withMessage i18n={i18n} />
             )}
           </div>
           {rows.length > 0 && (
@@ -209,14 +200,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          className={`field-description-${path.replace(/\./g, '__')}`}
-          description={description}
-          path={path}
-          value={value}
-        />
+        {Description}
       </header>
-
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
@@ -230,10 +215,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                 <ArrayRow
                   {...draggableSortableItemProps}
                   CustomRowLabel={CustomRowLabel}
+                  fieldMap={fieldMap}
                   addRow={addRow}
                   duplicateRow={duplicateRow}
-                  fieldTypes={fieldTypes}
-                  fields={fields}
                   forceRender={forceRender}
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}

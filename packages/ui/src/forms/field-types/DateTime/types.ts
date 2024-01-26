@@ -1,5 +1,6 @@
-import type { DateField } from 'payload/types'
+import { FormFieldBase } from '../shared'
 
-export type Props = Omit<DateField, 'type'> & {
+export type Props = FormFieldBase & {
   path: string
+  name?: string
 }

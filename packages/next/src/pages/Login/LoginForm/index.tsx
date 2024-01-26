@@ -52,7 +52,7 @@ export const LoginForm: React.FC<{
     >
       <FormLoadingOverlayToggle action="loading" name="login-form" />
       <div className={`${baseClass}__inputWrap`}>
-        <Email admin={{ autoComplete: 'email' }} label={t('general:email')} name="email" required />
+        <Email autoComplete="email" label={t('general:email')} name="email" required />
         <Password autoComplete="off" label={t('general:password')} name="password" required />
       </div>
       <Link href={`${admin}/forgot`}>{t('authentication:forgotPasswordQuestion')}</Link>

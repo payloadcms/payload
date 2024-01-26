@@ -6,7 +6,7 @@ import { Banner } from '../../elements/Banner'
 import { useConfig } from '../../providers/Config'
 import { useLocale } from '../../providers/Locale'
 import { useForm } from '../Form/context'
-import { CheckboxInput } from '../field-types/Checkbox/Input'
+import CheckboxInput from '../field-types/Checkbox'
 
 type NullifyLocaleFieldProps = {
   fieldValue?: [] | null | number

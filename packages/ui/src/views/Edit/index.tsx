@@ -3,7 +3,6 @@ import React, { Fragment } from 'react'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
 import { OperationProvider } from '../../providers/OperationProvider'
-import './index.scss'
 
 // import { getTranslation } from '@payloadcms/translations'
 import { DocumentControls } from '../../elements/DocumentControls'
@@ -13,10 +12,9 @@ import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
 import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
 // import { Upload } from '../Upload'
-import './index.scss'
 import { EditViewProps } from '../types'
-import { fieldTypes } from '../../forms/field-types'
 import { getFormStateFromServer } from './action'
+import { createFieldMap } from '../../forms/RenderFields/createFieldMap'
 
 import './index.scss'
 
@@ -35,9 +33,8 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     docPreferences,
     docPermissions,
     user,
-    i18n,
-    payload,
     locale,
+    i18n,
   } = props
 
   const collectionConfig = 'collectionConfig' in props ? props.collectionConfig : undefined
@@ -102,6 +99,13 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     operation,
     docPreferences,
     user,
+  })
+
+  const fieldMap = createFieldMap({
+    permissions: docPermissions.fields,
+    fieldSchema: fields,
+    operation: isEditing ? 'update' : 'create',
+    readOnly: !hasSavePermission,
   })
 
   return (
@@ -176,18 +180,14 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
                 {/* {upload && <Upload collection={collection} internalState={internalState} />} */}
               </Fragment>
             }
-            fieldTypes={fieldTypes}
-            fields={fields}
             hasSavePermission={hasSavePermission}
             docPermissions={docPermissions}
             docPreferences={docPreferences}
             data={data}
             formState={formState}
             user={user}
-            i18n={i18n}
-            payload={payload}
             locale={locale}
-            config={config}
+            fieldMap={fieldMap}
           />
         </Form>
       </OperationProvider>

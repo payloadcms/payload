@@ -1,25 +1,15 @@
 import type { FieldPermissions, User } from 'payload/auth'
-import type {
-  Document,
-  DocumentPreferences,
-  Field,
-  FieldWithPath,
-  Payload,
-  SanitizedConfig,
-} from 'payload/types'
-import type { ReducedField } from './filterFields'
+import type { Document, DocumentPreferences, Field } from 'payload/types'
 import { FormState } from '../Form/types'
-import { FieldTypes, Locale } from 'payload/config'
-import { I18n } from '@payloadcms/translations'
+import { Locale } from 'payload/config'
+import { createFieldMap } from './createFieldMap'
 
 export type Props = {
   className?: string
-  fieldTypes: FieldTypes
   forceRender?: boolean
   margins?: 'small' | false
   data?: Document
-  formState: FormState
-  user: User
+  fieldMap: ReturnType<typeof createFieldMap>
   docPreferences?: DocumentPreferences
   permissions?:
     | {
@@ -27,20 +17,9 @@ export type Props = {
       }
     | FieldPermissions
   readOnly?: boolean
-  i18n: I18n
-  payload: Payload
   locale?: Locale
-  config: SanitizedConfig
-} & (
-  | {
-      // FormState to be filtered by the component
-      fieldSchema: FieldWithPath[]
-      filter?: (field: Field) => boolean
-      indexPath?: string
-      operation?: 'create' | 'update'
-    }
-  | {
-      // Pre-filtered fields to be simply rendered
-      fields: ReducedField[]
-    }
-)
+} & {
+  filter?: (field: Field) => boolean
+  indexPath?: string
+  operation?: 'create' | 'update'
+}

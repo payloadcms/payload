@@ -1,59 +1,87 @@
-import React from 'react'
+'use client'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types'
+import { CodeEditor } from '../../../elements/CodeEditor'
+import useField from '../../useField'
+import { fieldBaseClass } from '../shared'
+import { withCondition } from '../../withCondition'
 
-import DefaultError from '../../Error'
-import FieldDescription from '../../FieldDescription'
-import DefaultLabel from '../../Label'
-import { CodeInputWrapper } from './Wrapper'
-import { CodeInput } from './Input'
+import './index.scss'
+
+const prismToMonacoLanguageMap = {
+  js: 'javascript',
+  ts: 'typescript',
+}
+
+const baseClass = 'code-field'
 
 const Code: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      components: { Error, Label } = {},
-      description,
-      editorOptions,
-      language,
-      readOnly,
-      style,
-      width,
-    } = {},
-    label,
+    className,
+    readOnly,
+    style,
+    width,
     path: pathFromProps,
     required,
-    i18n,
-    value,
+    Error,
+    Label,
+    Description,
+    BeforeInput,
+    AfterInput,
+    validate,
   } = props
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
+  const language = 'language' in props ? props.language : 'javascript'
 
-  const path = pathFromProps || name
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, required })
+      }
+    },
+    [validate, required],
+  )
+
+  const { setValue, value, path, showError } = useField({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
 
   return (
-    <CodeInputWrapper
-      className={className}
-      path={path}
-      readOnly={readOnly}
-      style={style}
-      width={width}
+    <div
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
     >
-      <ErrorComp path={path} />
-      <LabelComp htmlFor={`field-${path}`} label={label} required={required} i18n={i18n} />
-      <CodeInput
-        path={path}
-        required={required}
-        readOnly={readOnly}
-        name={name}
-        language={language}
-        editorOptions={editorOptions}
-      />
-      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
-    </CodeInputWrapper>
+      {Error}
+      {Label}
+      <div>
+        {BeforeInput}
+        <CodeEditor
+          defaultLanguage={prismToMonacoLanguageMap[language] || language}
+          onChange={readOnly ? () => null : (val) => setValue(val)}
+          options={editorOptions}
+          readOnly={readOnly}
+          value={(value as string) || ''}
+        />
+        {AfterInput}
+      </div>
+      {Description}
+    </div>
   )
 }
 
-export default Code
+export default withCondition(Code)

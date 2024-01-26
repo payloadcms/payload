@@ -1,5 +1,4 @@
 type Args<T = unknown> = {
-  path: string
   value?: T
 }
 
