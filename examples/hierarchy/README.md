@@ -1,10 +1,6 @@
 # Payload Hierarchy Example
 
-A hierarchy for [Payload](https://github.com/payloadcms/payload).
-
-This repo was created by running `npx create-payload-app@latest` and selecting the "blank" template then it was modified.
-
-See the official [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) for details on how to use Payload in a variety of different ways.
+A hierarchy example for [Payload](https://github.com/payloadcms/payload).
 
 ## Quick Start
 
@@ -32,11 +28,13 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - #### Entities
 
-  The `entities` collection can define a parent as any other entity.  It has a virtual field that will also populate children when it is called via the API using a query `children=true`. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work.
+  The `entities` collection can define a parent as any other entity.  It has a virtual field that will also populate children when it is called via the API using a query `children=true`. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work. 
+  
+  The virtual field retrieves __all__ children which includes other entities and people.
 
 - #### People
 
-  The `people` collection is a collection that can define an array of parent entities and also associates an allocation field as an example of attaching data to a parent-child relationship.
+  The `people` collection is a collection that can define an array of parent entities.  It also has an allocation field.  This is for demonstrating attaching data to a parent-child relationship.
 
 ## Development
 
