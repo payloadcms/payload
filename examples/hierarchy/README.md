@@ -28,18 +28,19 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - #### Users
 
-  The `users` collection is auth-enabled and encompass both app-wide and tenant-scoped users based on the value of their `roles` and `tenants` fields. Users with the role `super-admin` can manage your entire application, while users with the _tenant role_ of `admin` have limited access to the platform and can manage only the tenant(s) they are assigned to, see [Tenants](#tenants) for more details.
-
-  For additional help with authentication, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/cms#readme) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+  The `users` collection is a default payload users collection.
 
 - #### Entities
 
-  The `entities` collection can define a parent as any other entity.  It has a virtual field that will also populate children when it is called via the API using a query `children=true`
+  The `entities` collection can define a parent as any other entity.  It has a virtual field that will also populate children when it is called via the API using a query `children=true`. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work.
 
 - #### People
 
   The `people` collection is a collection that can define an array of parent entities and also associates an allocation field as an example of attaching data to a parent-child relationship.
 
+## Development
+
+To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ## Production
 
