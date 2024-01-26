@@ -197,21 +197,32 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export type PayloadHandler<T = PayloadRequest | Request> = ({
+export type PayloadHandler<T = PayloadRequest> = ({
   params,
   req,
 }: {
   params: Record<string, unknown>
   req: T
-}) => Promise<Response>
+}) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
  */
-export type Endpoint = {
+export type Endpoint<U = User> = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
-  handler: PayloadHandler<PayloadRequest>
+
+  /**
+   * Middleware that will be called when the path/method matches
+   *
+   * Compatible with Express middleware
+   */
+  handler: PayloadHandler<
+    Partial<PayloadRequest<U>> & {
+      payload: PayloadRequest['payload']
+      payloadDataLoader: PayloadRequest['payloadDataLoader']
+    } & Request
+  >
   /** HTTP method (or "all") */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
@@ -220,34 +231,12 @@ export type Endpoint = {
    * Compatible with the Express router
    */
   path: string
-} & (
-  | {
-      /**
-       * Middleware that will be called when the path/method matches
-       *
-       * Compatible with Express middleware
-       */
-      handler: PayloadHandler<PayloadRequest>
-      /**
-       * Set to `true` to disable the Payload middleware for this endpoint
-       * @default false
-       */
-      root?: false | undefined
-    }
-  | {
-      /**
-       * Middleware that will be called when the path/method matches
-       *
-       * Compatible with Express middleware
-       */
-      handler: PayloadHandler<Request>
-      /**
-       * Set to `true` to disable the Payload middleware for this endpoint
-       * @default false
-       */
-      root: true
-    }
-)
+  /**
+   * Set to `true` to disable the Payload middleware for this endpoint
+   * @default false
+   */
+  root?: boolean
+}
 
 export type AdminViewConfig = {
   Component: AdminViewComponent

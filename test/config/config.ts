@@ -15,8 +15,8 @@ export default buildConfigWithDefaults({
         {
           path: '/hello',
           method: 'get',
-          handler: (_, res): void => {
-            res.json({ message: 'hi' })
+          handler: () => {
+            return Response.json({ message: 'hi' })
           },
           custom: { examples: [{ type: 'response', value: { message: 'hi' } }] },
         },
@@ -38,9 +38,9 @@ export default buildConfigWithDefaults({
         {
           path: '/greet',
           method: 'get',
-          handler: (req, res): void => {
-            const { name } = req.query
-            res.json({ message: `Hi ${name}!` })
+          handler: ({ req }) => {
+            const sp = new URL(req.url).searchParams
+            return Response.json({ message: `Hi ${sp.get('name')}!` })
           },
           custom: { params: [{ in: 'query', name: 'name', type: 'string' }] },
         },
@@ -60,8 +60,8 @@ export default buildConfigWithDefaults({
       path: '/config',
       method: 'get',
       root: true,
-      handler: (req, res): void => {
-        res.json(req.payload.config)
+      handler: ({ req }) => {
+        return Response.json(req.payload.config)
       },
       custom: { description: 'Get the sanitized payload config' },
     },

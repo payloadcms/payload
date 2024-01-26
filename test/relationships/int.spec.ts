@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto'
 
-import type { PayloadRequest } from '../../packages/payload/src/express/types'
+import type { PayloadRequest } from '../../packages/payload/src/types'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,

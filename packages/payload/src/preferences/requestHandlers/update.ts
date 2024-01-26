@@ -1,11 +1,10 @@
 import httpStatus from 'http-status'
 
 import type { PayloadHandler } from '../../exports/config'
-import type { PayloadRequest } from '../../types'
 
 import update from '../operations/update'
 
-export const updateHandler: PayloadHandler<PayloadRequest> = async ({ params, req }) => {
+export const updateHandler: PayloadHandler = async ({ params, req }) => {
   const payloadRequest = req
   const doc = await update({
     key: params?.key as string,

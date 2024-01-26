@@ -1,6 +1,7 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
+import { withMergedProps } from '@payloadcms/ui/utilities'
+import { withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { AdapterArguments } from './types'
 

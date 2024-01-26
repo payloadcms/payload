@@ -1,7 +1,14 @@
+import path from 'path'
+
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 
 require('isomorphic-fetch')
+
+// jest.mock('payload-config', () => {
+//   const config = require(path.join(process.cwd(), './config.ts'))
+//   return config
+// })
 
 describe('Config', () => {
   beforeAll(async () => {
@@ -29,7 +36,7 @@ describe('Config', () => {
 
     it('allows a custom field in collection endpoints', () => {
       const [collection] = payload.config.collections
-      const [endpoint] = collection.endpoints
+      const [endpoint] = collection.endpoints || []
 
       expect(endpoint.custom).toEqual({
         examples: [{ type: 'response', value: { message: 'hi' } }],
@@ -52,7 +59,7 @@ describe('Config', () => {
 
     it('allows a custom field in global endpoints', () => {
       const [global] = payload.config.globals
-      const [endpoint] = global.endpoints
+      const [endpoint] = global.endpoints || []
 
       expect(endpoint.custom).toEqual({ params: [{ in: 'query', name: 'name', type: 'string' }] })
     })

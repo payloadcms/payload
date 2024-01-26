@@ -120,8 +120,17 @@ const handleCustomEndpoints = ({
     })
 
     if (customEndpoint) {
+      if (customEndpoint.root) {
+        return customEndpoint.handler({
+          req: Object.assign(originalRequest, {
+            payload: payloadRequest.payload,
+            payloadDataLoader: payloadRequest.payloadDataLoader,
+          }),
+          params: handlerParams,
+        })
+      }
       return customEndpoint.handler({
-        req: customEndpoint.root && originalRequest ? originalRequest : payloadRequest,
+        req: payloadRequest,
         params: handlerParams,
       })
     }

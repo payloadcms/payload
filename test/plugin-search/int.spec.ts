@@ -1,5 +1,5 @@
-import wait from '../../packages/payload/dist/utilities/wait'
 import payload from '../../packages/payload/src'
+import wait from '../../packages/payload/src/utilities/wait'
 import { initPayloadTest } from '../helpers/configHelpers'
 
 describe('Search Plugin', () => {
