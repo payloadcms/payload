@@ -1,6 +1,7 @@
 build
 dist
 /media
+/src/collections/uploads
 node_modules
 .DS_Store
 .env
