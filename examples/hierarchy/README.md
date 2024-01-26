@@ -1,6 +1,6 @@
 # Payload Hierarchy Example
 
-A hierarchy example for [Payload](https://github.com/payloadcms/payload).
+This example demonstrates how to achieve a virtual hierarchy between documents in your [Payload](https://github.com/payloadcms/payload) application.
 
 ## Quick Start
 
@@ -16,7 +16,9 @@ That's it! Changes made in `./src` will be reflected in your app.
 
 ## How it works
 
-This is an example parent-child hierarchy between Entities and People.  Entities use of a virtual field to find people and entities it is related to.
+This example achieves parent/child relationships between your documents through the use of virtual fields. When you query a document with the `?children=true` query param, an afterRead hook is used to populate the documents within its own tree.
+
+For more information on how virtual fields, see the [Official Virtual Fields Example](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields).
 
 ### Collections
 
