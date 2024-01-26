@@ -1,13 +1,13 @@
-import React from 'react'
+'use client'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { RadioGroupWrapper } from './Wrapper'
 import { withCondition } from '../../withCondition'
-import FieldDescription from '../../FieldDescription'
-import DefaultError from '../../Error'
-import DefaultLabel from '../../Label'
-import { RadioGroupInput } from './Input'
+import { Radio } from './Radio'
+import { optionIsObject } from 'payload/types'
+import useField from '../../useField'
+import { fieldBaseClass } from '../shared'
 
 import './index.scss'
 
@@ -16,45 +16,86 @@ const baseClass = 'radio-group'
 const RadioGroup: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      components: { Error, Label } = {},
-      description,
-      layout = 'horizontal',
-      readOnly,
-      style,
-      width,
-    } = {},
-    label,
-    options,
+    className,
+    readOnly,
+    style,
+    width,
     path: pathFromProps,
+    Error,
+    Label,
+    Description,
+    validate,
     required,
-    i18n,
-    value,
   } = props
 
-  const path = pathFromProps || name
+  const options = 'options' in props ? props.options : []
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const layout = 'layout' in props ? props.layout : 'horizontal'
+
+  const memoizedValidate = useCallback(
+    (value, validationOptions) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...validationOptions, options, required })
+    },
+    [validate, options, required],
+  )
+
+  const { setValue, value, path, showError } = useField<string>({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
 
   return (
-    <RadioGroupWrapper
-      width={width}
-      className={className}
-      style={style}
-      layout={layout}
-      path={path}
-      readOnly={readOnly}
-      baseClass={baseClass}
+    <div
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        `${baseClass}--layout-${layout}`,
+        showError && 'error',
+        readOnly && `${baseClass}--read-only`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        <ErrorComp path={path} />
-      </div>
-      <LabelComp htmlFor={`field-${path}`} label={label} required={required} i18n={i18n} />
-      <RadioGroupInput path={path} options={options} readOnly={readOnly} baseClass={baseClass} />
-      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
-    </RadioGroupWrapper>
+      <div className={`${baseClass}__error-wrap`}>{Error}</div>
+      {Label}
+      <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
+        {options.map((option) => {
+          let optionValue = ''
+          let optionLabel: string | Record<string, string> = ''
+
+          if (optionIsObject(option)) {
+            optionValue = option.value
+            optionLabel = option.label
+          } else {
+            optionValue = option
+            optionLabel = option
+          }
+
+          const isSelected = String(optionValue) === String(value)
+
+          const id = `field-${path}-${optionValue}`
+
+          return (
+            <li key={`${path} - ${optionValue}`}>
+              <Radio
+                id={id}
+                isSelected={isSelected}
+                onChange={readOnly ? undefined : setValue}
+                option={optionIsObject(option) ? option : { label: option, value: option }}
+                path={path}
+              />
+            </li>
+          )
+        })}
+      </ul>
+      {Description}
+    </div>
   )
 }
 

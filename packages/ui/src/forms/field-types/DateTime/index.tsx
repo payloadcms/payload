@@ -1,38 +1,52 @@
-import React from 'react'
+'use client'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types'
 
-import { DateTimeInput } from './Input'
-import './index.scss'
-import FieldDescription from '../../FieldDescription'
 import { fieldBaseClass } from '../shared'
-import DefaultLabel from '../../Label'
-import DefaultError from '../../Error'
+import DatePickerField from '../../../elements/DatePicker'
+import { getTranslation } from '@payloadcms/translations'
+import { Validate } from 'payload/types'
+import useField from '../../useField'
+import { useTranslation } from '../../../providers/Translation'
+
+import './index.scss'
 
 const baseClass = 'date-time-field'
 
 const DateTime: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      components: { beforeInput, afterInput, Label, Error },
-      date,
-      description,
-      placeholder,
-      readOnly,
-      style,
-      width,
-    } = {},
-    label,
+    className,
+    placeholder,
+    readOnly,
+    style,
+    width,
     path: pathFromProps,
     required,
+    Error,
+    Label,
+    BeforeInput,
+    AfterInput,
+    Description,
+    validate,
   } = props
 
-  const path = pathFromProps || name
+  const datePickerProps = 'date' in props ? props.date : {}
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const { i18n } = useTranslation()
+
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
+
+  const { setValue, showError, value, path } = useField<Date>({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
 
   return (
     <div
@@ -40,7 +54,7 @@ const DateTime: React.FC<Props> = (props) => {
         fieldBaseClass,
         baseClass,
         className,
-        // showError && `${baseClass}--has-error`,
+        showError && `${baseClass}--has-error`,
         readOnly && 'read-only',
       ]
         .filter(Boolean)
@@ -50,26 +64,22 @@ const DateTime: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <div className={`${baseClass}__error-wrap`}>
-        {/* <ErrorComp
-        message={errorMessage}
-        showError={showError}
-        /> */}
-      </div>
-      <LabelComp htmlFor={path} label={label} required={required} />
+      <div className={`${baseClass}__error-wrap`}>{Error}</div>
+      {Label}
       <div className={`${baseClass}__input-wrapper`} id={`field-${path.replace(/\./g, '__')}`}>
-        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
-        <DateTimeInput
-          datePickerProps={date}
-          placeholder={placeholder}
+        {BeforeInput}
+        <DatePickerField
+          {...datePickerProps}
+          onChange={(incomingDate) => {
+            if (!readOnly) setValue(incomingDate?.toISOString() || null)
+          }}
+          placeholder={getTranslation(placeholder, i18n)}
           readOnly={readOnly}
-          path={path}
-          style={style}
-          width={width}
+          value={value}
         />
-        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+        {AfterInput}
       </div>
-      <FieldDescription description={description} path={path} />
+      {Description}
     </div>
   )
 }
