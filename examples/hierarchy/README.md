@@ -6,7 +6,7 @@ This repo was created by running `npx create-payload-app@latest` and selecting t
 
 See the official [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) for details on how to use Payload in a variety of different ways.
 
-## Development
+## Quick Start
 
 To spin up the project locally, follow these steps:
 
@@ -18,15 +18,28 @@ To spin up the project locally, follow these steps:
 
 That's it! Changes made in `./src` will be reflected in your app.
 
-### Docker
+## How it works
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this project locally. To do so, follow these steps:
+This is an example parent-child hierarchy between Entities and People.  Entities use of a virtual field to find people and entities it is related to.
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+### Collections
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend any of this functionality.
+
+- #### Users
+
+  The `users` collection is auth-enabled and encompass both app-wide and tenant-scoped users based on the value of their `roles` and `tenants` fields. Users with the role `super-admin` can manage your entire application, while users with the _tenant role_ of `admin` have limited access to the platform and can manage only the tenant(s) they are assigned to, see [Tenants](#tenants) for more details.
+
+  For additional help with authentication, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth/cms#readme) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+
+- #### Entities
+
+  The `entities` collection can define a parent as any other entity.  It has a virtual field that will also populate children when it is called via the API using a query `children=true`
+
+- #### People
+
+  The `people` collection is a collection that can define an array of parent entities and also associates an allocation field as an example of attaching data to a parent-child relationship.
+
 
 ## Production
 
