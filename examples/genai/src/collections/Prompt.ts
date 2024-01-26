@@ -11,37 +11,24 @@ export const Prompt: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    // WIP: Disabled
-    // {
-    //   name: 'embeddings',
-    //   type: 'relationship',
-    //   relationTo: 'embedding',
-    // access: {
-    //   create: () => false,
-    //   update: () => false,
-    // },
-    // hooks: {
-    //   afterRead: [
-    //     async ({ data, req }) => {
-    //       const { id } = data
-
-    //       if (!req.query.embedding) return
-
-    //       const embedding = await req.payload.find({
-    //         req,
-    //         collection: 'embedding',
-    //         // where: {
-    //         //   prompt: { equals: id },
-    //         // },
-    //         limit: 0,
-    //         depth: 0,
-    //         pagination: false,
-    //       })
-
-    //       return [...embedding.docs]
-    //     },
-    //   ],
-    // },
-    // },
+    {
+      name: 'purpose',
+      type: 'select',
+      required: true,
+      options: [
+        {
+          label: 'chat',
+          value: 'chat',
+        },
+        {
+          label: 'step back',
+          value: 'step-back',
+        },
+        {
+          label: 'custom',
+          value: 'custom',
+        },
+      ],
+    },
   ],
 }
