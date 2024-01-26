@@ -15,7 +15,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { DocumentPreferences, tabHasName } from 'payload/types'
 import { toKebabCase } from 'payload/utilities'
 import { useTranslation } from '../../../providers/Translation'
-import { useFieldPath } from '../../FieldPathProvider'
+import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider'
 
 import './index.scss'
 
@@ -54,7 +54,7 @@ const TabsField: React.FC<Props> = (props) => {
       setActiveTabIndex(initialIndex || 0)
     }
     void getInitialPref()
-  }, [path, indexPath, getPreference, preferencesKey, tabsPrefKey])
+  }, [path, getPreference, preferencesKey, tabsPrefKey])
 
   const handleTabChange = useCallback(
     async (incomingTabIndex: number) => {
@@ -132,23 +132,25 @@ const TabsField: React.FC<Props> = (props) => {
                   .join(' ')}
               >
                 {Description}
-                <RenderFields
-                  fieldMap={fieldMap}
-                  forceRender={forceRender}
-                  indexPath={indexPath}
-                  key={
-                    activeTabConfig.label
-                      ? getTranslation(activeTabConfig.label, i18n)
-                      : activeTabConfig['name']
-                  }
-                  margins="small"
-                  permissions={
-                    tabHasName(activeTabConfig) && permissions?.[activeTabConfig.name]
-                      ? permissions[activeTabConfig.name].fields
-                      : permissions
-                  }
-                  readOnly={readOnly}
-                />
+                <FieldPathProvider path={'name' in activeTabConfig ? activeTabConfig.name : ''}>
+                  <RenderFields
+                    fieldMap={activeTabConfig.subfields}
+                    forceRender={forceRender}
+                    indexPath={indexPath}
+                    key={
+                      activeTabConfig.label
+                        ? getTranslation(activeTabConfig.label, i18n)
+                        : activeTabConfig['name']
+                    }
+                    margins="small"
+                    permissions={
+                      'name' in activeTabConfig && permissions?.[activeTabConfig.name]
+                        ? permissions[activeTabConfig.name].fields
+                        : permissions
+                    }
+                    readOnly={readOnly}
+                  />
+                </FieldPathProvider>
               </div>
             </React.Fragment>
           )}

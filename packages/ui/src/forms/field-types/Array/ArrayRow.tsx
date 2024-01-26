@@ -20,7 +20,7 @@ import './index.scss'
 const baseClass = 'array-field'
 
 type ArrayRowProps = UseDraggableSortableReturn &
-  Pick<Props, 'fieldTypes' | 'fields' | 'indexPath' | 'labels' | 'path' | 'permissions'> & {
+  Pick<Props, 'indexPath' | 'labels' | 'path' | 'permissions'> & {
     CustomRowLabel?: RowLabelType
     addRow: (rowIndex: number) => void
     duplicateRow: (rowIndex: number) => void
@@ -34,13 +34,12 @@ type ArrayRowProps = UseDraggableSortableReturn &
     rowIndex: number
     setCollapse: (rowID: string, collapsed: boolean) => void
   }
+
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   CustomRowLabel,
   addRow,
   attributes,
   duplicateRow,
-  fieldTypes,
-  fields,
   forceRender = false,
   hasMaxRows,
   indexPath,
@@ -57,6 +56,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   setCollapse,
   setNodeRef,
   transform,
+  fieldMap,
 }) => {
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
@@ -115,26 +115,21 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               path={path}
               rowNumber={rowIndex + 1}
             />
-            {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
+            {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage i18n={i18n} />}
           </div>
         }
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        [RenderFields]
-        {/* <RenderFields
+        <RenderFields
           className={`${baseClass}__fields`}
-          fieldSchema={fields.map((field) => ({
-            ...field,
-            path: createNestedFieldPath(path, field),
-          }))}
-          fieldTypes={fieldTypes}
+          fieldMap={fieldMap}
           forceRender={forceRender}
           indexPath={indexPath}
           margins="small"
           permissions={permissions?.fields}
           readOnly={readOnly}
-        /> */}
+        />
       </Collapsible>
     </div>
   )

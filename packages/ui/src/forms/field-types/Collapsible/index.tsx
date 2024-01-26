@@ -12,6 +12,7 @@ import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { DocumentPreferences } from 'payload/types'
 import { useFieldPath } from '../../FieldPathProvider'
+import { WatchChildErrors } from '../../WatchChildErrors'
 
 import './index.scss'
 
@@ -102,7 +103,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
         .join(' ')}
       id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
     >
-      {/* <WatchChildErrors fieldSchema={fields} path={path} setErrorCount={setErrorCount} /> */}
+      <WatchChildErrors fieldMap={fieldMap} path={path} setErrorCount={setErrorCount} />
       <Collapsible
         className={`${baseClass}__collapsible`}
         collapsibleStyle={errorCount > 0 ? 'error' : 'default'}

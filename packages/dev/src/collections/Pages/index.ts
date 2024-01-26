@@ -188,6 +188,20 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
+    // {
+    //   name: 'array',
+    //   label: 'Array',
+    //   type: 'array',
+    //   required: true,
+    //   fields: [
+    //     {
+    //       name: 'arrayText',
+    //       label: 'Array Text',
+    //       type: 'text',
+    //       required: true,
+    //     },
+    //   ],
+    // },
     {
       label: 'Tabs',
       type: 'tabs',

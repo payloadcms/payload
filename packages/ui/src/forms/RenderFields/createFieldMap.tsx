@@ -1,16 +1,16 @@
 import React, { Fragment } from 'react'
 
 import type { FieldPermissions } from 'payload/auth'
-import type { Field, FieldWithPath } from 'payload/types'
+import type { Field, FieldWithPath, TabsField } from 'payload/types'
 import DefaultError from '../Error'
 import DefaultLabel from '../Label'
 import DefaultDescription from '../FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { fieldTypes } from '../field-types'
-import { FieldPathProvider } from '../FieldPathProvider'
 import { FormFieldBase } from '../field-types/shared'
 
 export type ReducedField = {
+  type: keyof typeof fieldTypes
   Field: React.ReactNode
   fieldIsPresentational: boolean
   fieldPermissions: FieldPermissions
@@ -18,6 +18,14 @@ export type ReducedField = {
   name: string
   readOnly: boolean
   isSidebar: boolean
+  subfields?: ReducedField[]
+  tabs?: ReducedTab[]
+}
+
+export type ReducedTab = {
+  name?: string
+  label: TabsField['tabs'][0]['label']
+  subfields?: ReducedField[]
 }
 
 export const createFieldMap = (args: {
@@ -83,6 +91,7 @@ export const createFieldMap = (args: {
             field.admin?.components?.Label) ||
           DefaultLabel
 
+        // TODO: fix this for basic function types, i.e. not React.ComponentType
         const Label = (
           <LabelComponent
             htmlFor="TODO"
@@ -138,7 +147,7 @@ export const createFieldMap = (args: {
             </Fragment>
           )
 
-        // Group, Array, Tabs, and Collapsible fields have nested fields
+        // Group, Array, and Collapsible fields have nested fields
         const nestedFieldMap =
           'fields' in field &&
           field.fields &&
@@ -150,6 +159,28 @@ export const createFieldMap = (args: {
             permissions,
             readOnly: readOnlyOverride,
             parentPath: path,
+          })
+
+        // Tabs
+        const tabs =
+          'tabs' in field &&
+          field.tabs &&
+          Array.isArray(field.tabs) &&
+          field.tabs.map((tab) => {
+            const tabFieldMap = createFieldMap({
+              fieldSchema: tab.fields,
+              filter,
+              operation,
+              permissions,
+              readOnly: readOnlyOverride,
+              parentPath: path,
+            })
+
+            return {
+              name: 'name' in tab ? tab.name : undefined,
+              label: 'label' in tab ? tab.label : undefined,
+              subfields: tabFieldMap,
+            }
           })
 
         // TODO: these types can get cleaned up
@@ -171,22 +202,22 @@ export const createFieldMap = (args: {
           min: 'min' in field ? field.min : undefined,
           max: 'max' in field ? field.max : undefined,
           options: 'options' in field ? field.options : undefined,
+          tabs,
         }
 
-        const Field = (
-          <FieldPathProvider path={path}>
-            <FieldComponent {...fieldComponentProps} />
-          </FieldPathProvider>
-        )
+        const Field = <FieldComponent {...fieldComponentProps} />
 
         const reducedField: ReducedField = {
           name: 'name' in field ? field.name : '',
+          type: field.type,
           Field,
           fieldIsPresentational,
           fieldPermissions,
           isFieldAffectingData,
           readOnly,
           isSidebar: field.admin?.position === 'sidebar',
+          subfields: nestedFieldMap,
+          tabs,
         }
 
         if (FieldComponent) {

@@ -1,7 +1,8 @@
 'use client'
-import React, { Fragment } from 'react'
+import React from 'react'
 import type { Props } from './types'
 import { useTranslation } from '../../providers/Translation'
+import { RenderField } from './RenderField'
 
 import './index.scss'
 
@@ -28,7 +29,9 @@ const RenderFields: React.FC<Props> = (props) => {
           .filter(Boolean)
           .join(' ')}
       >
-        {fieldMap?.map(({ Field }, fieldIndex) => <Fragment key={fieldIndex}>{Field}</Fragment>)}
+        {fieldMap?.map(({ Field, name }, fieldIndex) => (
+          <RenderField key={fieldIndex} name={name} Field={Field} />
+        ))}
       </div>
     )
   }

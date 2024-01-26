@@ -28,7 +28,6 @@ import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
 import { WatchFormErrors } from './WatchFormErrors'
 import { buildFieldSchemaMap } from './buildFieldSchemaMap'
-import buildStateFromSchema from './buildStateFromSchema'
 import {
   FormContext,
   FormFieldsContext,
@@ -463,37 +462,14 @@ const Form: React.FC<Props> = (props) => {
   // The block data is saved in the rows property of the state, which is modified updated here.
   const addFieldRow: Context['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
-      const preferences = await getDocPreferences()
-      const rowSchema = getRowSchemaByPath({
+      dispatchFields({
         blockType: data?.blockType,
         path,
+        rowIndex,
+        type: 'ADD_ROW',
       })
-
-      if (rowSchema) {
-        const subFieldState = await buildStateFromSchema({
-          id,
-          // TODO: fix this
-          // @ts-ignore-next-line
-          config,
-          data,
-          fieldSchema: rowSchema,
-          locale,
-          operation,
-          preferences,
-          t,
-          user,
-        })
-
-        dispatchFields({
-          blockType: data?.blockType,
-          path,
-          rowIndex,
-          subFieldState,
-          type: 'ADD_ROW',
-        })
-      }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
+    [dispatchFields],
   )
 
   const removeFieldRow: Context['removeFieldRow'] = useCallback(
@@ -505,36 +481,14 @@ const Form: React.FC<Props> = (props) => {
 
   const replaceFieldRow: Context['replaceFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
-      const preferences = await getDocPreferences()
-      const rowSchema = getRowSchemaByPath({
+      dispatchFields({
         blockType: data?.blockType,
         path,
+        rowIndex,
+        type: 'REPLACE_ROW',
       })
-
-      if (rowSchema) {
-        const subFieldState = await buildStateFromSchema({
-          id,
-          // TODO: fix this
-          // @ts-ignore-next-line
-          config,
-          data,
-          fieldSchema: rowSchema,
-          locale,
-          operation,
-          preferences,
-          t,
-          user,
-        })
-        dispatchFields({
-          blockType: data?.blockType,
-          path,
-          rowIndex,
-          subFieldState,
-          type: 'REPLACE_ROW',
-        })
-      }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
+    [dispatchFields],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef])

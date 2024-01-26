@@ -1,6 +1,7 @@
 import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import { User } from 'payload/auth'
 import {
+  ArrayField,
   CodeField,
   DateField,
   DocumentPreferences,
@@ -9,7 +10,7 @@ import {
   Tab,
   Validate,
 } from 'payload/types'
-import { createFieldMap } from '../RenderFields/createFieldMap'
+import { ReducedTab, createFieldMap } from '../RenderFields/createFieldMap'
 import { Option } from 'payload/types'
 
 export const fieldBaseClass = 'field-type'
@@ -61,7 +62,7 @@ export type FormFieldBase = {
       isSortable?: boolean
     }
   | {
-      tabs?: Tab[]
+      tabs?: ReducedTab[]
     }
   | {
       // For `code` fields
@@ -79,6 +80,11 @@ export type FormFieldBase = {
   | {
       // For `date` fields
       date?: DateField['admin']['date']
+    }
+  | {
+      // For `array` fields
+      minRows?: ArrayField['minRows']
+      maxRows?: ArrayField['maxRows']
     }
 )
 

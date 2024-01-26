@@ -5,8 +5,6 @@ import type { Props } from './types'
 import RenderFields from '../../RenderFields'
 import { GroupProvider, useGroup } from './provider'
 import { withCondition } from '../../withCondition'
-import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '../../../providers/Translation'
 import { useCollapsible } from '../../../elements/Collapsible/provider'
 import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
@@ -19,11 +17,9 @@ import './index.scss'
 const baseClass = 'group-field'
 
 const Group: React.FC<Props> = (props) => {
-  const { className, style, width, fieldMap, Description, hideGutter, label } = props
+  const { className, style, width, fieldMap, Description, hideGutter, Label } = props
 
   const path = useFieldPath()
-
-  const { i18n } = useTranslation()
 
   const hasSubmitted = useFormSubmitted()
   const isWithinCollapsible = useCollapsible()
@@ -60,9 +56,9 @@ const Group: React.FC<Props> = (props) => {
       <GroupProvider>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__header`}>
-            {(label || Description) && (
+            {(Label || Description) && (
               <header>
-                {/* {label && <h3 className={`${baseClass}__title`}>{getTranslation(label, i18n)}</h3>} */}
+                {Label}
                 {Description}
               </header>
             )}

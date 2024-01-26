@@ -150,7 +150,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             isEditing={isEditing || false}
             pluralLabel={collectionConfig?.labels?.plural}
           />
-          {/* <DocumentControls
+          <DocumentControls
             apiURL={apiURL}
             config={config}
             collectionConfig={collectionConfig}
@@ -161,7 +161,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             isEditing={isEditing}
             permissions={docPermissions}
             i18n={i18n}
-          /> */}
+          />
           <DocumentFields
             BeforeFields={
               <Fragment>
