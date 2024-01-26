@@ -11,5 +11,10 @@ export const KnowledgeGraph: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'resource',
+      type: 'relationship',
+      relationTo: 'resource',
+    },
   ],
 }
