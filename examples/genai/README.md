@@ -4,7 +4,7 @@ A Generative AI template for [Payload](https://github.com/payloadcms/payload) to
 
 See the official [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) for details on how to use Payload in a variety of different ways.
 
-## Development
+## Quick Start
 
 To spin up the project locally, follow these steps:
 
@@ -15,6 +15,8 @@ To spin up the project locally, follow these steps:
 1. Create your first admin user using the form on the page
 
 That's it! Changes made in `./src` will be reflected in your app.
+
+## WIP: How it works
 
 ## Production
 
