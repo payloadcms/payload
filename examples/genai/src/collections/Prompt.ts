@@ -25,6 +25,10 @@ export const Prompt: CollectionConfig = {
           value: 'step-back',
         },
         {
+          label: 'transcription',
+          value: 'transcription',
+        },
+        {
           label: 'custom',
           value: 'custom',
         },
