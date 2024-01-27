@@ -1,4 +1,7 @@
 import path from 'path'
+// TODO: Requires 'webpack' config
+// import fs from 'fs'
+
 import { CollectionConfig } from 'payload/types'
 
 export const Media: CollectionConfig = {
@@ -43,9 +46,14 @@ export const Media: CollectionConfig = {
       hooks: {
         afterRead: [
           async ({ data, req }) => {
-            const { id } = data
+            const { id, url, prompts } = data
 
             if (!req.query.genai) return
+            // TODO: Requires 'fs' module
+            // const imageToBase64 = (path = '') => {
+            //   const imageData = fs.readFileSync(path)
+            //   return imageData.toString('base64')
+            // }
 
             return {
               genai: true,
