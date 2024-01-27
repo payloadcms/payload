@@ -11,6 +11,10 @@ export const Resource: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'uri',
+      type: 'text',
+    },
     // WIP: Encrypt / Decrypt
     {
       name: 'key',
