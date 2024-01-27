@@ -7,14 +7,20 @@ export const Embedding: CollectionConfig = {
   },
   fields: [
     {
-      name: 'prompt',
-      type: 'relationship',
-      relationTo: 'prompt',
-    },
-    {
-      name: 'media',
-      type: 'relationship',
-      relationTo: 'media',
+      name: 'source',
+      type: 'array',
+      fields: [
+        {
+          name: 'prompt',
+          type: 'relationship',
+          relationTo: 'prompt',
+        },
+        {
+          name: 'media',
+          type: 'relationship',
+          relationTo: 'media',
+        },
+      ],
     },
     {
       name: 'transformer',
