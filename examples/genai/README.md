@@ -30,7 +30,9 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - ### Media
 
-  The `media` collection is for uploading documents and associating a `transformer` and `prompts` for GenAI processing. To trigger GenAI processing, using the API endpoint add the query parameter `&genai=true`. This will activate the `genai` virtual field. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work.
+  > To trigger GenAI processing on this field, using the API endpoint add the query parameter `&genai=true`. This will enable the `genai` virtual field. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work.
+
+  The `media` collection is for uploading documents and associating a `transformer` and `prompts` for GenAI processing.
 
 - ### Resource
 
@@ -49,6 +51,8 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
   Databases that can do this are called **vector databases**. If you are new to vector databases, you can explore these examples, [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-vector-search), [Neo4j](https://neo4j.com/), [Milvus](https://milvus.io/), [Elastic](https://www.elastic.co/) and [Pinecone](https://www.pinecone.io/).
 
 - ### Knowledge Graph
+
+  > To trigger GenAI processing on this field, using the API endpoint add the query parameter `&genai=true`. This will enable the `genai` virtual field. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work.
 
   The `knowledge-graph` collection is for identifying a knowledge graph to use for graph computations on documents. Knowledge graphs are best stored and retrieved from databases tuned to operate on graph structured data.
 
