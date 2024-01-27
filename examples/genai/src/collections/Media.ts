@@ -33,7 +33,7 @@ export const Media: CollectionConfig = {
         },
       ],
     },
-    // - This field is populated by setting the query parameter 'genai=true'
+    // - This virtual field is populated by setting the query parameter 'genai=true'
     // - This is a virtual field used to do Retrieval-Augmented Generation (RAG)
     // - GenAI data is not stored on this field
     {
