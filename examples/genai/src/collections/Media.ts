@@ -14,5 +14,21 @@ export const Media: CollectionConfig = {
       name: 'label',
       type: 'text',
     },
+    {
+      name: 'transformer',
+      type: 'relationship',
+      relationTo: 'transformer',
+    },
+    {
+      name: 'prompts',
+      type: 'array',
+      fields: [
+        {
+          name: 'prompt',
+          type: 'relationship',
+          relationTo: 'prompt',
+        },
+      ],
+    },
   ],
 }
