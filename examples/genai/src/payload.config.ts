@@ -18,6 +18,10 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     bundler: webpackBundler(),
+    webpack: (config) => {
+      // TODO: How do I support 'fs' module?
+      return config
+    },
   },
   editor: slateEditor({}),
   collections: [Users, Prompt, Media, Resource, Transformer, Embedding, KnowledgeGraph],
