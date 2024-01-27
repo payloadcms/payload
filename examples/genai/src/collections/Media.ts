@@ -30,5 +30,29 @@ export const Media: CollectionConfig = {
         },
       ],
     },
+    // - This field is populated by setting the query parameter 'genai=true'
+    // - This is a virtual field used to do Retrieval-Augmented Generation (RAG)
+    // - GenAI data is not stored on this field
+    {
+      name: 'genai',
+      type: 'text',
+      access: {
+        create: () => false,
+        update: () => false,
+      },
+      hooks: {
+        afterRead: [
+          async ({ data, req }) => {
+            const { id } = data
+
+            if (!req.query.genai) return
+
+            return {
+              genai: true,
+            }
+          },
+        ],
+      },
+    },
   ],
 }
