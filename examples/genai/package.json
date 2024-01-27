@@ -16,6 +16,7 @@
     "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload"
   },
   "dependencies": {
+    "@langchain/openai": "^0.0.13",
     "@payloadcms/bundler-webpack": "^1.0.0",
     "@payloadcms/db-mongodb": "^1.0.0",
     "@payloadcms/plugin-cloud": "^3.0.0",
@@ -23,6 +24,8 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "langchain": "^0.1.9",
+    "neo4j-driver": "^5.16.0",
     "payload": "^2.0.0"
   },
   "devDependencies": {
