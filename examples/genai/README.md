@@ -26,7 +26,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - ### Prompt
 
-  The `prompt` collection is for associating text with a GenAI purpose.
+  The `prompt` collection is for associating text with a GenAI purpose. The purpose of a prompt in a GenAI Retrieval-Augmented Generation (RAG) system can vary depending on the intended task such as step-back, chat, or a custom task.
 
 - ### Media
 
