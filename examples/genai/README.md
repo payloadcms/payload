@@ -30,7 +30,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - ### Media
 
-  The `media` collection is for uploading documents and associating a `transformer` and `prompts` for GenAI processing.
+  The `media` collection is for uploading documents and associating a `transformer` and `prompts` for GenAI processing. To trigger GenAI processing, using the API endpoint add the query parameter `&genai=true`. This will activate the `genai` virtual field. See [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields) for more details on how virtual fields work.
 
 - ### Resource
 
