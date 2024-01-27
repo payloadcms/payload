@@ -17,5 +17,10 @@ export const Transformer: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'resource',
+      type: 'relationship',
+      relationTo: 'resource',
+    },
   ],
 }
