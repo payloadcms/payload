@@ -12,6 +12,17 @@ export const CypherQuery: CollectionConfig = {
       required: true,
     },
     {
+      name: 'transaction',
+      type: 'select',
+      required: true,
+      options: [
+        {
+          label: 'read',
+          value: 'read',
+        },
+      ],
+    },
+    {
       name: 'purpose',
       type: 'select',
       required: true,

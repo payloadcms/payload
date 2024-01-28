@@ -103,18 +103,20 @@ export const KnowledgeGraph: CollectionConfig = {
             let result
 
             await Promise.all(
-              queries.map(async ({ query, parameters, returnData }) => {
+              queries.map(async ({ query, parameters, returnData, transaction }) => {
                 try {
-                  result = await session.executeRead(async (tx) => {
-                    return await tx.run(query, parameters)
-                  })
-
-                  for (let record of result.records) {
-                    const kgReturnData = {}
-                    Object.keys(returnData).forEach((key) => {
-                      kgReturnData[returnData[key]] = record.get(key)
+                  if ('read' == transaction) {
+                    result = await session.executeRead(async (tx) => {
+                      return await tx.run(query, parameters)
                     })
-                    records.push(kgReturnData)
+
+                    for (let record of result.records) {
+                      const kgReturnData = {}
+                      Object.keys(returnData).forEach((key) => {
+                        kgReturnData[returnData[key]] = record.get(key)
+                      })
+                      records.push(kgReturnData)
+                    }
                   }
                 } catch (err) {
                   console.log(`genai: Neo4j Query error\n${err}\n`)
