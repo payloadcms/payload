@@ -61,7 +61,7 @@ export const Embedding: CollectionConfig = {
 
             const resource = transformerRecord.docs[0].resource
             const service = transformerRecord.docs[0].service
-            console.log(process.env.OPENAI_API_KEY)
+
             const prompts = await Promise.all(
               source.map(async ({ prompt }) => {
                 const record = await req.payload.find({
