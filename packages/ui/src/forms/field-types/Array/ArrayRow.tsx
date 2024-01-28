@@ -4,36 +4,39 @@ import { useTranslation } from '../../../providers/Translation'
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
 import type { Row } from '../../Form/types'
 import type { RowLabel as RowLabelType } from 'payload/types'
-import type { Props } from './types'
 
-import { getTranslation } from '@payloadcms/translations'
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { Collapsible } from '../../../elements/Collapsible'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import { useFormSubmitted } from '../../Form/context'
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
-import { RowLabel } from '../../RowLabel'
 import HiddenInput from '../HiddenInput'
+import { FieldPathProvider } from '../../FieldPathProvider'
+import { buildFieldMap } from '../../RenderFields/buildFieldMap'
+import { FieldPermissions } from 'payload/auth'
+
 import './index.scss'
 
 const baseClass = 'array-field'
 
-type ArrayRowProps = UseDraggableSortableReturn &
-  Pick<Props, 'indexPath' | 'labels' | 'path' | 'permissions'> & {
-    CustomRowLabel?: RowLabelType
-    addRow: (rowIndex: number) => void
-    duplicateRow: (rowIndex: number) => void
-    forceRender?: boolean
-    hasMaxRows?: boolean
-    moveRow: (fromIndex: number, toIndex: number) => void
-    readOnly?: boolean
-    removeRow: (rowIndex: number) => void
-    row: Row
-    rowCount: number
-    rowIndex: number
-    setCollapse: (rowID: string, collapsed: boolean) => void
-  }
+type ArrayRowProps = UseDraggableSortableReturn & {
+  CustomRowLabel?: RowLabelType
+  addRow: (rowIndex: number) => void
+  duplicateRow: (rowIndex: number) => void
+  forceRender?: boolean
+  hasMaxRows?: boolean
+  moveRow: (fromIndex: number, toIndex: number) => void
+  readOnly?: boolean
+  removeRow: (rowIndex: number) => void
+  row: Row
+  rowCount: number
+  rowIndex: number
+  setCollapse: (rowID: string, collapsed: boolean) => void
+  indexPath: string
+  path: string
+  permissions: FieldPermissions
+  fieldMap: ReturnType<typeof buildFieldMap>
+}
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   CustomRowLabel,
@@ -43,7 +46,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   forceRender = false,
   hasMaxRows,
   indexPath,
-  labels,
   listeners,
   moveRow,
   path: parentPath,
@@ -62,10 +64,10 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
-  const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
-    2,
-    '0',
-  )}`
+  // const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
+  //   2,
+  //   '0',
+  // )}`
 
   const childErrorPathsCount = row.childErrorPaths?.size
   const fieldHasErrors = hasSubmitted && childErrorPathsCount > 0
@@ -110,26 +112,28 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }}
         header={
           <div className={`${baseClass}__row-header`}>
-            <RowLabel
+            {/* <RowLabel
               label={CustomRowLabel || fallbackLabel}
               path={path}
               rowNumber={rowIndex + 1}
-            />
+            /> */}
             {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage i18n={i18n} />}
           </div>
         }
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fieldMap={fieldMap}
-          forceRender={forceRender}
-          indexPath={indexPath}
-          margins="small"
-          permissions={permissions?.fields}
-          readOnly={readOnly}
-        />
+        <FieldPathProvider path={path}>
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fieldMap={fieldMap}
+            forceRender={forceRender}
+            indexPath={indexPath}
+            margins="small"
+            permissions={permissions?.fields}
+            readOnly={readOnly}
+          />
+        </FieldPathProvider>
       </Collapsible>
     </div>
   )

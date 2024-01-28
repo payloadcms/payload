@@ -8,6 +8,7 @@ import DefaultDescription from '../FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { fieldTypes } from '../field-types'
 import { FormFieldBase } from '../field-types/shared'
+import { FormState } from '../../forms/Form/types'
 
 export type ReducedField = {
   type: keyof typeof fieldTypes
@@ -28,7 +29,7 @@ export type ReducedTab = {
   subfields?: ReducedField[]
 }
 
-export const createFieldMap = (args: {
+export const buildFieldMap = (args: {
   fieldSchema: FieldWithPath[]
   filter?: (field: Field) => boolean
   operation?: 'create' | 'update'
@@ -147,12 +148,11 @@ export const createFieldMap = (args: {
             </Fragment>
           )
 
-        // Group, Array, and Collapsible fields have nested fields
         const nestedFieldMap =
           'fields' in field &&
           field.fields &&
           Array.isArray(field.fields) &&
-          createFieldMap({
+          buildFieldMap({
             fieldSchema: field.fields,
             filter,
             operation,
@@ -161,13 +161,13 @@ export const createFieldMap = (args: {
             parentPath: path,
           })
 
-        // Tabs
+        // `tabs` fields require a field map of each of its tab's nested fields
         const tabs =
           'tabs' in field &&
           field.tabs &&
           Array.isArray(field.tabs) &&
           field.tabs.map((tab) => {
-            const tabFieldMap = createFieldMap({
+            const tabFieldMap = buildFieldMap({
               fieldSchema: tab.fields,
               filter,
               operation,

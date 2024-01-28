@@ -5,7 +5,6 @@ export type Props = FormFieldBase & {
   forceRender?: boolean
   indexPath: string
   label: false | string
-  path?: string
   permissions: FieldPermissions
   name?: string
 }

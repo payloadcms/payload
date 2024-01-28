@@ -48,6 +48,7 @@ export const Pages: CollectionConfig = {
       label: 'Title',
       type: 'text',
       required: true,
+      defaultValue: 'This is a default value',
       admin: {
         description: 'This is a description',
       },
@@ -89,19 +90,24 @@ export const Pages: CollectionConfig = {
       label: 'Number',
       type: 'number',
       required: true,
+      defaultValue: 4,
+      admin: {
+        description: 'Defaults to 4',
+      },
     },
     {
       name: 'select',
       label: 'Select',
       type: 'select',
       required: true,
+      defaultValue: 'option-2',
       options: [
         {
           label: 'Option 1',
           value: 'option-1',
         },
         {
-          label: 'Option 2',
+          label: 'Option 2 (This is a default value)',
           value: 'option-2',
         },
       ],
@@ -111,6 +117,7 @@ export const Pages: CollectionConfig = {
       name: 'textarea',
       label: 'Textarea',
       required: true,
+      defaultValue: 'This is a default value',
       admin: {
         rows: 10,
       },
@@ -185,23 +192,25 @@ export const Pages: CollectionConfig = {
           label: 'Group Text',
           type: 'text',
           required: true,
+          defaultValue: 'This is a default value',
         },
       ],
     },
-    // {
-    //   name: 'array',
-    //   label: 'Array',
-    //   type: 'array',
-    //   required: true,
-    //   fields: [
-    //     {
-    //       name: 'arrayText',
-    //       label: 'Array Text',
-    //       type: 'text',
-    //       required: true,
-    //     },
-    //   ],
-    // },
+    {
+      name: 'array',
+      label: 'Array',
+      type: 'array',
+      required: true,
+      fields: [
+        {
+          name: 'arrayText',
+          label: 'Array Text',
+          type: 'text',
+          required: true,
+          defaultValue: 'This is a default value',
+        },
+      ],
+    },
     {
       label: 'Tabs',
       type: 'tabs',

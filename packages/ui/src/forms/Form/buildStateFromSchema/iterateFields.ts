@@ -7,7 +7,6 @@ import { fieldIsPresentationalOnly } from 'payload/types'
 import { addFieldStatePromise } from './addFieldStatePromise'
 
 type Args = {
-  config: SanitizedConfig
   data: Data
   fields: FieldSchema[]
   fullData: Data
@@ -26,7 +25,6 @@ type Args = {
 
 export const iterateFields = async ({
   id,
-  config,
   data,
   fields,
   fullData,
@@ -54,7 +52,6 @@ export const iterateFields = async ({
       promises.push(
         addFieldStatePromise({
           id,
-          config,
           data,
           field,
           fullData,
