@@ -1,6 +1,8 @@
 import path from 'path'
 // TODO: Requires 'webpack' config
 // import fs from 'fs'
+import { ChatOpenAI } from '@langchain/openai'
+import { HumanMessage } from '@langchain/core/messages'
 
 import { CollectionConfig } from 'payload/types'
 
@@ -46,17 +48,19 @@ export const Media: CollectionConfig = {
       hooks: {
         afterRead: [
           async ({ data, req }) => {
-            const { id, url, prompts } = data
+            const { label, transformer, prompts } = data
 
             if (!req.query.genai) return
             // TODO: Requires 'fs' module
-            // const imageToBase64 = (path = '') => {
+            // const imageToBase64Url = (path = '') => {
             //   const imageData = fs.readFileSync(path)
-            //   return imageData.toString('base64')
+            //   return `data:image/jpeg;base64,${imageData.toString('base64')}`
             // }
 
+            // TODO: https://js.langchain.com/docs/integrations/chat/openai#multimodal-messages
+
             return {
-              genai: true,
+              generated: true,
             }
           },
         ],
