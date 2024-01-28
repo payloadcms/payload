@@ -7,9 +7,9 @@ export const commitTransaction: CommitTransaction = async function commitTransac
   }
 
   try {
-    this.sessions[id].resolve()
+    await this.sessions[id].resolve()
   } catch (err: unknown) {
-    this.sessions[id].reject()
+    await this.sessions[id].reject()
   }
 
   delete this.sessions[id]

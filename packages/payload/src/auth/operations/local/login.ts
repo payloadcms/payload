@@ -36,8 +36,8 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     context,
     data,
     depth,
-    fallbackLocale,
-    locale,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
+    locale: localeArg = null,
     overrideAccess = true,
     req = {} as PayloadRequest,
     res,
@@ -46,6 +46,12 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   setRequestContext(req, context)
 
   const collection = payload.collections[collectionSlug]
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
+  const locale = localeArg || req?.locale || defaultLocale
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
+    : null
 
   if (!collection) {
     throw new APIError(
@@ -56,8 +62,6 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   req.payloadAPI = req.payloadAPI || 'local'
   req.payload = payload
   req.i18n = i18nInit(payload.config.i18n)
-  req.locale = undefined
-  req.fallbackLocale = undefined
 
   if (!req.t) req.t = req.i18n.t
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
@@ -73,7 +77,10 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   if (locale) args.req.locale = locale
-  if (fallbackLocale) args.req.fallbackLocale = fallbackLocale
+  if (fallbackLocale) {
+    args.req.fallbackLocale =
+      typeof fallbackLocaleArg !== 'undefined' ? fallbackLocaleArg : fallbackLocale || defaultLocale
+  }
 
   return login<TSlug>(args)
 }

@@ -68,6 +68,7 @@ export const upsertRow = async <T extends TypeWithID>({
 
     const localesToInsert: Record<string, unknown>[] = []
     const relationsToInsert: Record<string, unknown>[] = []
+    const textsToInsert: Record<string, unknown>[] = []
     const numbersToInsert: Record<string, unknown>[] = []
     const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
     const selectsToInsert: { [selectTableName: string]: Record<string, unknown>[] } = {}
@@ -86,6 +87,14 @@ export const upsertRow = async <T extends TypeWithID>({
       rowToInsert.relationships.forEach((relation) => {
         relation.parent = insertedRow.id
         relationsToInsert.push(relation)
+      })
+    }
+
+    // If there are texts, add parent to each
+    if (rowToInsert.texts.length > 0) {
+      rowToInsert.texts.forEach((textRow) => {
+        textRow.parent = insertedRow.id
+        textsToInsert.push(textRow)
       })
     }
 
@@ -159,6 +168,29 @@ export const upsertRow = async <T extends TypeWithID>({
 
     if (relationsToInsert.length > 0) {
       await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert)
+    }
+
+    // //////////////////////////////////
+    // INSERT hasMany TEXTS
+    // //////////////////////////////////
+
+    const textsTableName = `${tableName}_texts`
+
+    if (operation === 'update') {
+      await deleteExistingRowsByPath({
+        adapter,
+        db,
+        localeColumnName: 'locale',
+        parentColumnName: 'parent',
+        parentID: insertedRow.id,
+        pathColumnName: 'path',
+        rows: textsToInsert,
+        tableName: textsTableName,
+      })
+    }
+
+    if (textsToInsert.length > 0) {
+      await db.insert(adapter.tables[textsTableName]).values(textsToInsert).returning()
     }
 
     // //////////////////////////////////

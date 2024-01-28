@@ -43,6 +43,8 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
+  customIdCollectionSlug,
+  customIdCollectionId,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -253,6 +255,13 @@ describe('admin', () => {
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
+    test('collection - sidebar fields should respond to permission', async () => {
+      const { id } = await createPost()
+      await page.goto(url.edit(id))
+
+      await expect(page.locator('#field-sidebarField')).toBeDisabled()
+    })
+
     test('global - should not show API tab when disabled in config', async () => {
       await page.goto(url.global(noApiViewGlobalSlug))
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
@@ -261,6 +270,62 @@ describe('admin', () => {
     test('global - should not enable API route when disabled in config', async () => {
       await page.goto(`${url.global(noApiViewGlobalSlug)}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
+    })
+  })
+
+  describe('app-header', () => {
+    test('should show admin level action in admin panel', async () => {
+      await page.goto(url.admin)
+      // Check if the element with the class .admin-button exists
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show admin level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show admin level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
+    })
+
+    test('should show collection list view level action in collection list view', async () => {
+      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+    })
+
+    test('should show collection edit view level action in collection edit view', async () => {
+      const { id } = await createGeo()
+      await page.goto(geoUrl.edit(id))
+      await expect(page.locator('.app-header .collection-edit-button')).toHaveCount(1)
+    })
+
+    test('should show collection api view level action in collection api view', async () => {
+      const { id } = await createGeo()
+      await page.goto(`${geoUrl.edit(id)}/api`)
+      await expect(page.locator('.app-header .collection-api-button')).toHaveCount(1)
+    })
+
+    test('should show global edit view level action in globals edit view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(globalWithPreview.global(globalSlug))
+      await expect(page.locator('.app-header .global-edit-button')).toHaveCount(1)
+    })
+
+    test('should show global api view level action in globals api view', async () => {
+      const globalWithPreview = new AdminUrlUtil(serverURL, globalSlug)
+      await page.goto(`${globalWithPreview.global(globalSlug)}/api`)
+      await expect(page.locator('.app-header .global-api-button')).toHaveCount(1)
+    })
+
+    test('should reset actions array when navigating from view with actions to view without actions', async () => {
+      await page.goto(geoUrl.list)
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
+      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
+      await page.locator(`#nav-posts`).click()
+      await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
     })
   })
 
@@ -462,6 +527,24 @@ describe('admin', () => {
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+  })
+
+  describe('Custom IDs', () => {
+    test('should allow custom ID field nested inside an unnamed tab', async () => {
+      await page.goto(url.collection('customIdTab') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
+    })
+
+    test('should allow custom ID field nested inside a row', async () => {
+      await page.goto(url.collection('customIdRow') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
     })
   })
 

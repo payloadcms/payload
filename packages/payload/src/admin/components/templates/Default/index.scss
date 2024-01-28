@@ -21,6 +21,11 @@
       }
     }
   }
+  [dir='rtl']
+  &__nav-toggler-wrapper {
+    left: unset;
+    right: 0;
+  }
 
   &__nav-toggler-wrapper {
     position: fixed;

@@ -133,9 +133,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const moreThanOneAvailableCollection = enabledCollectionConfigs.length > 1
 
   useEffect(() => {
-    const { admin: { listSearchableFields } = {}, slug } = selectedCollectionConfig
+    const { slug, admin: { listSearchableFields } = {}, versions } = selectedCollectionConfig
     const params: {
       cacheBust?: number
+      draft?: string
       limit?: number
       page?: number
       search?: string
@@ -172,6 +173,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     if (sort) params.sort = sort
     if (cacheBust) params.cacheBust = cacheBust
     if (copyOfWhere) params.where = copyOfWhere
+    if (versions?.drafts) params.draft = 'true'
 
     setParams(params)
   }, [
@@ -215,6 +217,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return null
   }
 
+  const listComponent = selectedCollectionConfig?.admin?.components?.views?.List
+  let ListToRender = null
+
+  if (listComponent && typeof listComponent === 'function') {
+    ListToRender = listComponent
+  } else if (typeof listComponent === 'object' && typeof listComponent.Component === 'function') {
+    ListToRender = listComponent.Component
+  }
+
   return (
     <TableColumnsProvider
       cellProps={[
@@ -235,7 +246,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
-          CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
+          CustomComponent={ListToRender}
           DefaultComponent={DefaultList}
           componentProps={{
             collection: {

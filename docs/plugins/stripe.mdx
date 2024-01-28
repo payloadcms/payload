@@ -10,14 +10,14 @@ keywords: plugins, stripe, payments, ecommerce
 
 With this plugin you can easily integrate [Stripe](https://stripe.com) into Payload. Simply provide your Stripe credentials and this plugin will open up a two-way communication channel between the two platforms. This enables you to easily sync data back and forth, as well as proxy the Stripe REST API through Payload's access control. Use this plugin to completely offload billing to Stripe and retain full control over your application's data.
 
-For example, you might be building an e-commerce or SaaS application, where you have a `products` or a `plans` collection that requires either a one-time payment or a subscription. You can to tie each of these products to Stripe, then easily subscribe to billing-related events such as active purchases or subscription cancellations to perform your application's business logic.
+For example, you might be building an e-commerce or SaaS application, where you have a `products` or a `plans` collection that requires either a one-time payment or a subscription. You can to tie each of these products to Stripe, then easily subscribe to billing-related events to perform your application's business logic, such as active purchases or subscription cancellations.
 
 To build a checkout flow on your front-end you can either use [Stripe Checkout](https://stripe.com/payments/checkout), or you can also build a completely custom checkout experience from scratch using [Stripe Web Elements](https://stripe.com/docs/payments/elements). Then to build fully custom, secure customer dashboards, you can leverage Payload's access control to restrict access to your Stripe resources so your users never have to leave your site to manage their accounts.
 
 The beauty of this plugin is the entirety of your application's content and business logic can be handled in Payload while Stripe handles solely the billing and payment processing. You can build a completely proprietary application that is endlessly customizable and extendable, on APIs and databases that you own. Hosted services like Shopify or BigCommerce might fracture your application's content then charge you for access.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-stripe). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20form-builder&template=bug_report.md&title=plugin-form-builder%3A) with as much detail as possible.
+  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-stripe). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20stripe&template=bug_report.md&title=plugin-stripe%3A) with as much detail as possible.
 </Banner>
 
 ##### Core features
@@ -287,5 +287,5 @@ import {
 
 ## Examples
 
-The [Templates Directory](https://github.com/payloadcms/payload/tree/main/examples) contains an official [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommere) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end. You can also check out [How to Build An E-Commerce Site With Next.js](https://payloadcms.com/blog/how-to-build-an-e-commerce-site-with-nextjs) post for a bit more context around this template.
+The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) contains an official [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end. You can also check out [How to Build An E-Commerce Site With Next.js](https://payloadcms.com/blog/how-to-build-an-e-commerce-site-with-nextjs) post for a bit more context around this template.
 

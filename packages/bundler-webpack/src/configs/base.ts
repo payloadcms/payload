@@ -9,6 +9,7 @@ import webpack from 'webpack'
 
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
+const mockDBAdapterPath = path.resolve(__dirname, '../mocks/db-adapters.js')
 
 const nodeModulesPaths = findNodeModules({ cwd: process.cwd(), relative: false })
 
@@ -82,6 +83,8 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     resolve: {
       alias: {
         '@payloadcms/bundler-webpack': mockModulePath,
+        '@payloadcms/db-mongodb': mockDBAdapterPath,
+        '@payloadcms/db-postgres': mockDBAdapterPath,
         dotenv: mockDotENVPath,
         path: require.resolve('path-browserify'),
         payload$: mockModulePath,

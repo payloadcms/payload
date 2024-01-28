@@ -1,13 +1,19 @@
+import { sql } from 'drizzle-orm'
+import fs from 'fs'
 import { GraphQLClient } from 'graphql-request'
+import path from 'path'
 
+import type { DrizzleDB } from '../../packages/db-postgres/src/types'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../packages/payload/src/express/types'
 
 import payload from '../../packages/payload/src'
+import { migrate } from '../../packages/payload/src/bin/migrate'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction'
 import { initTransaction } from '../../packages/payload/src/utilities/initTransaction'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
+import removeFiles from '../helpers/removeFiles'
 
 describe('database', () => {
   let serverURL
@@ -16,16 +22,12 @@ describe('database', () => {
   const collection = 'posts'
   const title = 'title'
   let user: TypeWithID & Record<string, unknown>
-  let useTransactions = true
 
   beforeAll(async () => {
     const init = await initPayloadTest({ __dirname, init: { local: false } })
     serverURL = init.serverURL
     const url = `${serverURL}/api/graphql`
     client = new GraphQLClient(url)
-    if (payload.db.name === 'mongoose') {
-      useTransactions = false
-    }
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -37,6 +39,101 @@ describe('database', () => {
 
     if (loginResult.token) token = loginResult.token
     user = loginResult.user
+  })
+
+  describe('migrations', () => {
+    beforeAll(async () => {
+      if (process.env.PAYLOAD_DROP_DATABASE === 'true' && 'drizzle' in payload.db) {
+        const drizzle = payload.db.drizzle as DrizzleDB
+        // @ts-expect-error drizzle raw sql typing
+        await drizzle.execute(sql`drop schema public cascade;
+        create schema public;`)
+      }
+    })
+
+    afterAll(() => {
+      removeFiles(path.normalize(payload.db.migrationDir))
+    })
+
+    it('should run migrate:create', async () => {
+      const args = {
+        _: ['migrate:create', 'test'],
+        forceAcceptWarning: true,
+      }
+      await migrate(args)
+
+      // read files names in migrationsDir
+      const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
+      expect(migrationFile).toContain('_test')
+    })
+
+    it('should run migrate', async () => {
+      const args = {
+        _: ['migrate'],
+      }
+      await migrate(args)
+      const { docs } = await payload.find({
+        collection: 'payload-migrations',
+      })
+      const migration = docs[0]
+      expect(migration.name).toContain('_test')
+      expect(migration.batch).toStrictEqual(1)
+    })
+
+    it('should run migrate:status', async () => {
+      let error
+      const args = {
+        _: ['migrate:status'],
+      }
+      try {
+        await migrate(args)
+      } catch (e) {
+        error = e
+      }
+      expect(error).toBeUndefined()
+    })
+
+    it('should run migrate:fresh', async () => {
+      const args = {
+        _: ['migrate:fresh'],
+        forceAcceptWarning: true,
+      }
+      await migrate(args)
+      const { docs } = await payload.find({
+        collection: 'payload-migrations',
+      })
+      const migration = docs[0]
+      expect(migration.name).toContain('_test')
+      expect(migration.batch).toStrictEqual(1)
+    })
+
+    // known issue: https://github.com/payloadcms/payload/issues/4597
+    it.skip('should run migrate:down', async () => {
+      let error
+      const args = {
+        _: ['migrate:down'],
+      }
+      try {
+        await migrate(args)
+      } catch (e) {
+        error = e
+      }
+      expect(error).toBeUndefined()
+    })
+
+    // known issue: https://github.com/payloadcms/payload/issues/4597
+    it.skip('should run migrate:refresh', async () => {
+      let error
+      const args = {
+        _: ['migrate:refresh'],
+      }
+      try {
+        await migrate(args)
+      } catch (e) {
+        error = e
+      }
+      expect(error).toBeUndefined()
+    })
   })
 
   describe('transactions', () => {
@@ -57,15 +154,13 @@ describe('database', () => {
           req,
         })
 
-        if (useTransactions) {
-          await expect(() =>
-            payload.findByID({
-              id: first.id,
-              collection,
-              // omitting req for isolation
-            }),
-          ).rejects.toThrow('The requested resource was not found.')
-        }
+        await expect(() =>
+          payload.findByID({
+            id: first.id,
+            collection,
+            // omitting req for isolation
+          }),
+        ).rejects.toThrow('The requested resource was not found.')
 
         const second = await payload.create({
           collection,
@@ -180,15 +275,13 @@ describe('database', () => {
         // this should not do anything but is needed to be certain about the next assertion
         await commitTransaction(req)
 
-        if (useTransactions) {
-          await expect(() =>
-            payload.findByID({
-              id: first.id,
-              collection,
-              req,
-            }),
-          ).rejects.toThrow('The requested resource was not found.')
-        }
+        await expect(() =>
+          payload.findByID({
+            id: first.id,
+            collection,
+            req,
+          }),
+        ).rejects.toThrow('The requested resource was not found.')
       })
     })
   })

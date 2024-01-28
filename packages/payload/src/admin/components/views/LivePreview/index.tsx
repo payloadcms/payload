@@ -12,6 +12,7 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
@@ -142,6 +143,11 @@ export const LivePreviewView: React.FC<
   const documentInfo = useDocumentInfo()
   const locale = useLocale()
 
+  const { setViewActions } = useActions()
+
+  const collection = documentInfo.collection
+  const global = documentInfo.global
+
   let livePreviewConfig: LivePreviewConfig = config?.admin?.livePreview
 
   if ('collection' in props) {
@@ -178,6 +184,20 @@ export const LivePreviewView: React.FC<
 
     getURL() // eslint-disable-line @typescript-eslint/no-floating-promises
   }, [data, documentInfo, locale, livePreviewConfig])
+
+  useEffect(() => {
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
+    const livePreviewActions =
+      editConfig && 'LivePreview' in editConfig && 'actions' in editConfig.LivePreview
+        ? editConfig.LivePreview.actions
+        : []
+
+    setViewActions(livePreviewActions)
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
 
   const breakpoints: LivePreviewConfig['breakpoints'] = [
     ...(livePreviewConfig?.breakpoints || []),

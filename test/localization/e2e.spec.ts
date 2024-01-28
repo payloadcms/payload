@@ -216,7 +216,8 @@ describe('Localization', () => {
       await page.fill('#field-layout__0__text', 'test')
       await saveDocAndAssert(page)
 
-      const originalDocURL = page.url()
+      const originalID = await page.locator('.id-label').innerText()
+
       // duplicate
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
@@ -224,8 +225,12 @@ describe('Localization', () => {
 
       // verify that the locale did copy
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
+
+      // await the success toast
+      await expect(page.locator('.Toastify')).toContainText('successfully duplicated')
+
       // expect that the document has a new id
-      expect(page.url()).not.toStrictEqual(originalDocURL)
+      await expect(page.locator('.id-label')).not.toContainText(originalID)
     })
   })
 })

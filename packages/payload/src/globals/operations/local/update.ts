@@ -34,7 +34,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     data,
     depth,
     draft,
-    fallbackLocale = null,
+    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     req: incomingReq,
@@ -44,6 +44,13 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const localizationConfig = payload?.config?.localization
+  const defaultLocale = payload?.config?.localization
+    ? payload?.config?.localization?.defaultLocale
+    : null
+  const fallbackLocale = localizationConfig
+    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
+    : null
   const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
@@ -51,7 +58,10 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   }
 
   const req = {
-    fallbackLocale,
+    fallbackLocale:
+      typeof fallbackLocaleArg !== 'undefined'
+        ? fallbackLocaleArg
+        : fallbackLocale || defaultLocale,
     i18n,
     locale,
     payload,
