@@ -15,6 +15,10 @@ export const Transformer: CollectionConfig = {
           label: 'custom',
           value: 'custom',
         },
+        {
+          label: 'OpenAI',
+          value: 'openai',
+        },
       ],
     },
     {
