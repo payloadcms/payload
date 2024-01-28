@@ -1,11 +1,11 @@
 import type { TabAsField } from 'payload/types'
 
 import { tabHasName } from 'payload/types'
-import { createFieldMap } from '../RenderFields/createFieldMap'
+import { buildFieldMap } from '../RenderFields/buildFieldMap'
 
 export const buildPathSegments = (
   parentPath: string,
-  fieldMap: ReturnType<typeof createFieldMap>,
+  fieldMap: ReturnType<typeof buildFieldMap>,
 ): string[] => {
   const pathNames = fieldMap.reduce((acc, subField) => {
     if (subField.subfields && subField.isFieldAffectingData) {

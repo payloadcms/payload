@@ -45,7 +45,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const maxRows = 'maxRows' in props ? props.maxRows : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm()
+  const { dispatchFields, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -93,15 +93,20 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   })
 
   const addRow = useCallback(
-    async (rowIndex: number) => {
-      await addFieldRow({ path, rowIndex, fieldMap })
+    (rowIndex: number) => {
+      dispatchFields({
+        path,
+        rowIndex,
+        type: 'ADD_ROW',
+      })
+
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified],
+    [dispatchFields, path, setModified],
   )
 
   const duplicateRow = useCallback(
@@ -118,10 +123,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      removeFieldRow({ path, rowIndex })
+      dispatchFields({ path, rowIndex, type: 'REMOVE_ROW' })
       setModified(true)
     },
-    [removeFieldRow, path, setModified],
+    [dispatchFields, path, setModified],
   )
 
   const moveRow = useCallback(
@@ -214,14 +219,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
-                  CustomRowLabel={CustomRowLabel}
+                  // CustomRowLabel={CustomRowLabel}
                   fieldMap={fieldMap}
                   addRow={addRow}
                   duplicateRow={duplicateRow}
                   forceRender={forceRender}
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
-                  labels={labels}
                   moveRow={moveRow}
                   path={path}
                   permissions={permissions}

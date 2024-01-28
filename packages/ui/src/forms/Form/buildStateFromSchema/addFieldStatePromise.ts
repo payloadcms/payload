@@ -11,18 +11,13 @@ import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'
 import { iterateFields } from './iterateFields'
 
-export type AddFieldStatePromiseArgs = {
+type AddFieldStatePromiseArgs = {
   /**
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
-  config: SanitizedConfig
   data: Data
   field: NonPresentationalField
-  /**
-   * You can use this to filter down to only `localized` fields that require transalation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
-   */
-  filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
    */
@@ -65,10 +60,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   const {
     id,
     anyParentLocalized = false,
-    config,
     data,
     field,
-    filter,
     forceFullValue = false,
     fullData,
     includeSchema = false,
@@ -112,7 +105,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       validationResult = await validate(data?.[field.name], {
         ...field,
         id,
-        config,
         data: fullData,
         operation,
         siblingData: data,
@@ -261,11 +253,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.promises.push(
                 iterateFields({
                   id,
-                  anyParentLocalized: field.localized || anyParentLocalized,
-                  config,
                   data: row,
+                  anyParentLocalized: field.localized || anyParentLocalized,
                   fields: block.fields,
-                  filter,
                   forceFullValue,
                   fullData,
                   includeSchema,
@@ -322,7 +312,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.rows = rowMetadata
 
         // Add field to state
-        if (!omitParents && (!filter || filter(args))) {
+        if (!omitParents) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -332,11 +322,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'group': {
         await iterateFields({
           id,
-          anyParentLocalized: field.localized || anyParentLocalized,
-          config,
           data: data?.[field.name] || {},
+          anyParentLocalized: field.localized || anyParentLocalized,
           fields: field.fields,
-          filter,
           forceFullValue,
           fullData,
           includeSchema,
@@ -407,9 +395,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           fieldState.initialValue = relationshipValue
         }
 
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
-        }
+        state[`${path}${field.name}`] = fieldState
 
         break
       }
@@ -422,9 +408,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
-        }
+        state[`${path}${field.name}`] = fieldState
 
         break
       }
@@ -433,10 +417,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = valueWithDefault
         fieldState.initialValue = valueWithDefault
 
-        // Add field to state
-        if (!filter || filter(args)) {
-          state[`${path}${field.name}`] = fieldState
-        }
+        state[`${path}${field.name}`] = fieldState
 
         break
       }
@@ -445,9 +426,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
-      anyParentLocalized: field.localized || anyParentLocalized,
-      config,
       data,
+      anyParentLocalized: field.localized || anyParentLocalized,
       fields: field.fields,
       forceFullValue,
       fullData,
@@ -469,7 +449,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       iterateFields({
         id,
         anyParentLocalized: tab.localized || anyParentLocalized,
-        config,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         fields: tab.fields,
         forceFullValue,

@@ -1,12 +1,16 @@
 'use client'
-import type { Description } from 'payload/types'
-
 import React from 'react'
 
-import type { FieldMap } from '../../utilities/buildComponentMap/types'
+import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
+import type { Description, DocumentPreferences } from 'payload/types'
+import type { Locale } from 'payload/config'
 
 import RenderFields from '../../forms/RenderFields'
 import { Gutter } from '../Gutter'
+import { Document } from 'payload/types'
+import { useTranslation } from '../../providers/Translation'
+import { buildFieldMap } from '../../forms/RenderFields/buildFieldMap'
+
 import './index.scss'
 
 const baseClass = 'document-fields'
@@ -15,10 +19,30 @@ export const DocumentFields: React.FC<{
   AfterFields?: React.ReactNode
   BeforeFields?: React.ReactNode
   description?: Description
-  fieldMap: FieldMap
   forceSidebarWrap?: boolean
+  hasSavePermission: boolean
+  docPermissions: CollectionPermission | GlobalPermission
+  docPreferences: DocumentPreferences
+  data: Document
+  user: User
+  locale?: Locale
+  fieldMap?: ReturnType<typeof buildFieldMap>
 }> = (props) => {
-  const { AfterFields, BeforeFields, description, fieldMap, forceSidebarWrap } = props
+  const {
+    AfterFields,
+    BeforeFields,
+    description,
+    forceSidebarWrap,
+    hasSavePermission,
+    docPermissions,
+    docPreferences,
+    data,
+    user,
+    locale,
+    fieldMap,
+  } = props
+
+  const { i18n } = useTranslation()
 
   const mainFields = fieldMap.filter(({ isSidebar }) => !isSidebar)
 
@@ -47,7 +71,15 @@ export const DocumentFields: React.FC<{
               )}
             </header>
             {BeforeFields}
-            <RenderFields className={`${baseClass}__fields`} fieldMap={mainFields} />
+            <RenderFields
+              className={`${baseClass}__fields`}
+              // permissions={permissions.fields}
+              readOnly={!hasSavePermission}
+              data={data}
+              docPreferences={docPreferences}
+              locale={locale}
+              fieldMap={mainFields}
+            />
             {AfterFields}
           </Gutter>
         </div>
@@ -55,7 +87,13 @@ export const DocumentFields: React.FC<{
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-fields`}>
-                <RenderFields fieldMap={sidebarFields} />
+                <RenderFields
+                  // permissions={permissions.fields}
+                  readOnly={!hasSavePermission}
+                  data={data}
+                  locale={locale}
+                  fieldMap={sidebarFields}
+                />
               </div>
             </div>
           </div>

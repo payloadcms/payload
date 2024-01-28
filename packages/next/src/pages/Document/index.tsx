@@ -152,7 +152,6 @@ export const Document = async ({
 
   const formState = await buildStateFromSchema({
     id,
-    config,
     data: data || {},
     fieldSchema: formatFields(fields, isEditing),
     locale: locale.code,

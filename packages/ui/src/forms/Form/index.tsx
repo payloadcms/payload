@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation'
 
 import type { Field } from 'payload/types'
 import type {
-  Context,
   FormState,
   Context as FormContextType,
   GetDataByPath,
@@ -27,7 +26,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
 import { WatchFormErrors } from './WatchFormErrors'
-import { buildFieldSchemaMap } from './buildFieldSchemaMap'
 import buildStateFromSchema from './buildStateFromSchema'
 import {
   FormContext,
@@ -92,10 +90,9 @@ const Form: React.FC<Props> = (props) => {
    */
   const [fields, dispatchFields] = fieldsReducer
 
-  const debouncedFields = useDebounce(fields, 150)
+  const debouncedFormState = useDebounce(fields, 150)
 
   contextRef.current.fields = fields
-  contextRef.current.dispatchFields = dispatchFields
 
   // Build a current set of child errors for all rows in form state
   const buildRowErrors = useCallback(() => {
@@ -394,149 +391,6 @@ const Form: React.FC<Props> = (props) => {
     ],
   )
 
-  const traverseRowConfigs = React.useCallback(
-    ({
-      fieldConfig,
-      path,
-      pathPrefix,
-    }: {
-      fieldConfig: Field[]
-      path: string
-      pathPrefix?: string
-    }) => {
-      const config = fieldConfig
-      const pathSegments = splitPathByArrayFields(path)
-      const configMap = buildFieldSchemaMap(config)
-
-      for (let i = 0; i < pathSegments.length; i += 1) {
-        const pathSegment = pathSegments[i]
-
-        if (isNumber(pathSegment)) {
-          const rowIndex = parseInt(pathSegment, 10)
-          const parentFieldPath = pathSegments.slice(0, i).join('.')
-          const remainingPath = pathSegments.slice(i + 1).join('.')
-          const arrayFieldPath = pathPrefix ? `${pathPrefix}.${parentFieldPath}` : parentFieldPath
-          const parentArrayField = contextRef.current.getField(arrayFieldPath)
-          const rowField = parentArrayField.rows[rowIndex]
-
-          if (rowField.blockType) {
-            const blockConfig = configMap.get(`${parentFieldPath}.${rowField.blockType}`)
-            if (blockConfig) {
-              return traverseRowConfigs({
-                fieldConfig: blockConfig,
-                path: remainingPath,
-                pathPrefix: `${arrayFieldPath}.${rowIndex}`,
-              })
-            }
-
-            throw new Error(`Block config not found for ${rowField.blockType} at path ${path}`)
-          } else {
-            return traverseRowConfigs({
-              fieldConfig: configMap.get(parentFieldPath),
-              path: remainingPath,
-              pathPrefix: `${arrayFieldPath}.${rowIndex}`,
-            })
-          }
-        }
-      }
-
-      return config
-    },
-    [],
-  )
-
-  const getRowSchemaByPath = React.useCallback(
-    ({ blockType, path }: { blockType?: string; path: string }) => {
-      const rowConfig = traverseRowConfigs({
-        fieldConfig: fieldsFromProps,
-        path,
-      })
-      const rowFieldConfigs = buildFieldSchemaMap(rowConfig)
-      const pathSegments = splitPathByArrayFields(path)
-      const fieldKey = pathSegments.at(-1)
-      return rowFieldConfigs.get(blockType ? `${fieldKey}.${blockType}` : fieldKey)
-    },
-    [traverseRowConfigs, fieldsFromProps],
-  )
-
-  // Array/Block row manipulation. This is called when, for example, you add a new block to a blocks field.
-  // The block data is saved in the rows property of the state, which is modified updated here.
-  const addFieldRow: Context['addFieldRow'] = useCallback(
-    async ({ data, path, rowIndex }) => {
-      const preferences = await getDocPreferences()
-      const rowSchema = getRowSchemaByPath({
-        blockType: data?.blockType,
-        path,
-      })
-
-      if (rowSchema) {
-        const subFieldState = await buildStateFromSchema({
-          id,
-          // TODO: fix this
-          // @ts-ignore-next-line
-          config,
-          data,
-          fieldSchema: rowSchema,
-          locale,
-          operation,
-          preferences,
-          t,
-          user,
-        })
-
-        dispatchFields({
-          blockType: data?.blockType,
-          path,
-          rowIndex,
-          subFieldState,
-          type: 'ADD_ROW',
-        })
-      }
-    },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
-  )
-
-  const removeFieldRow: Context['removeFieldRow'] = useCallback(
-    ({ path, rowIndex }) => {
-      dispatchFields({ path, rowIndex, type: 'REMOVE_ROW' })
-    },
-    [dispatchFields],
-  )
-
-  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(
-    async ({ data, path, rowIndex }) => {
-      const preferences = await getDocPreferences()
-      const rowSchema = getRowSchemaByPath({
-        blockType: data?.blockType,
-        path,
-      })
-
-      if (rowSchema) {
-        const subFieldState = await buildStateFromSchema({
-          id,
-          // TODO: fix this
-          // @ts-ignore-next-line
-          config,
-          data,
-          fieldSchema: rowSchema,
-          locale,
-          operation,
-          preferences,
-          t,
-          user,
-        })
-        dispatchFields({
-          blockType: data?.blockType,
-          path,
-          rowIndex,
-          subFieldState,
-          type: 'REPLACE_ROW',
-        })
-      }
-    },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
-  )
-
   const getFields = useCallback(() => contextRef.current.fields, [contextRef])
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef])
   const getData = useCallback(
@@ -627,9 +481,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.reset = reset
   contextRef.current.replaceState = replaceState
   contextRef.current.buildRowErrors = buildRowErrors
-  contextRef.current.addFieldRow = addFieldRow
-  contextRef.current.removeFieldRow = removeFieldRow
-  contextRef.current.replaceFieldRow = replaceFieldRow
+  contextRef.current.dispatchFields = dispatchFields
 
   useEffect(() => {
     if (typeof submittedFromProps === 'boolean') setSubmitted(submittedFromProps)
@@ -660,26 +512,26 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     const executeOnChange = async () => {
       if (Array.isArray(onChange)) {
-        let newFormState
+        let revalidatedFormState
 
         await onChange.reduce(async (priorOnChange, onChangeFn) => {
           await priorOnChange
 
           const result = await onChangeFn({
-            formState: debouncedFields,
+            formState: debouncedFormState,
           })
 
-          newFormState = result
+          revalidatedFormState = result
         }, Promise.resolve())
 
-        if (!isDeepEqual(debouncedFields, newFormState)) {
-          dispatchFields({ state: newFormState, type: 'REPLACE_STATE' })
+        if (!isDeepEqual(debouncedFormState, revalidatedFormState)) {
+          dispatchFields({ state: revalidatedFormState, type: 'REPLACE_STATE' })
         }
       }
     }
 
     executeOnChange()
-  }, [debouncedFields])
+  }, [debouncedFormState])
 
   return (
     <form

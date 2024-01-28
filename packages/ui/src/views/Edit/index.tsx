@@ -14,7 +14,7 @@ import { SetStepNav } from './SetStepNav'
 // import { Upload } from '../Upload'
 import { EditViewProps } from '../types'
 import { getFormStateFromServer } from './action'
-import { createFieldMap } from '../../forms/RenderFields/createFieldMap'
+import { buildFieldMap } from '../../forms/RenderFields/buildFieldMap'
 
 import './index.scss'
 
@@ -27,7 +27,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     config,
     // customHeader,
     data,
-    formState,
+    formState: initialState,
     // isLoading,
     // onSave: onSaveFromProps,
     docPreferences,
@@ -101,7 +101,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     user,
   })
 
-  const fieldMap = createFieldMap({
+  const fieldMap = buildFieldMap({
     permissions: docPermissions.fields,
     fieldSchema: fields,
     operation: isEditing ? 'update' : 'create',
@@ -115,7 +115,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
           // action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
-          initialState={formState}
+          initialState={initialState}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           // onSuccess={onSave}
@@ -184,7 +184,6 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
             docPermissions={docPermissions}
             docPreferences={docPreferences}
             data={data}
-            formState={formState}
             user={user}
             locale={locale}
             fieldMap={fieldMap}

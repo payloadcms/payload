@@ -11,10 +11,6 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
-  /**
-   * config is only needed for validation
-   */
-  config?: SanitizedConfig
   data: Data
   fields: FieldSchema[]
   /**
@@ -67,7 +63,6 @@ type Args = {
 export const iterateFields = async ({
   id,
   anyParentLocalized = false,
-  config,
   data,
   fields,
   forceFullValue = false,
@@ -91,20 +86,16 @@ export const iterateFields = async ({
     const initialData = data
 
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
-      let passesCondition = true
-      if (!skipConditionChecks) {
-        passesCondition = Boolean(
-          (field?.admin?.condition
-            ? field.admin.condition(fullData || {}, initialData || {}, { user })
-            : true) && parentPassesCondition,
-        )
-      }
+      const passesCondition = Boolean(
+        (field?.admin?.condition
+          ? field.admin.condition(fullData || {}, initialData || {}, { user })
+          : true) && parentPassesCondition,
+      )
 
       promises.push(
         addFieldStatePromise({
           id,
           anyParentLocalized,
-          config,
           data,
           field,
           forceFullValue,

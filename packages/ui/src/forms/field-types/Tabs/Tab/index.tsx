@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { ErrorPill } from '../../../../elements/ErrorPill'
 import { WatchChildErrors } from '../../../WatchChildErrors'
 import { useFormSubmitted, useTranslation } from '../../../..'
-import { ReducedTab } from '../../../RenderFields/createFieldMap'
+import { ReducedTab } from '../../../RenderFields/buildFieldMap'
 
 import './index.scss'
 

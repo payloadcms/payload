@@ -7,11 +7,11 @@ import {
   DocumentPreferences,
   JSONField,
   RowLabel,
-  Tab,
   Validate,
 } from 'payload/types'
-import { ReducedTab, createFieldMap } from '../RenderFields/createFieldMap'
+import { ReducedTab, buildFieldMap } from '../RenderFields/buildFieldMap'
 import { Option } from 'payload/types'
+import { FormState } from '../..'
 
 export const fieldBaseClass = 'field-type'
 
@@ -25,7 +25,8 @@ export type FormFieldBase = {
   Label?: React.ReactNode
   Description?: React.ReactNode
   Error?: React.ReactNode
-  fieldMap?: ReturnType<typeof createFieldMap>
+  fieldMap?: ReturnType<typeof buildFieldMap>
+  initialSubfieldState?: FormState
   style?: React.CSSProperties
   width?: string
   className?: string

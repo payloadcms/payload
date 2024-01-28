@@ -94,12 +94,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'ADD_ROW': {
-      const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState } = action
+      const { blockType, path, rowIndex: rowIndexFromArgs } = action
+      const subFieldState: FormState = {}
+
       const rowIndex =
         typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0
 
-      const rowsMetadata = [...(state[path]?.rows || [])]
-      rowsMetadata.splice(
+      const withNewRow = [...(state[path]?.rows || [])]
+
+      withNewRow.splice(
         rowIndex,
         0,
         // new row
@@ -129,7 +132,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          rows: rowsMetadata,
+          rows: withNewRow,
           value: siblingRows.length,
         },
       }
@@ -138,7 +141,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'REPLACE_ROW': {
-      const { blockType, path, rowIndex: rowIndexArg, subFieldState } = action
+      const { blockType, path, rowIndex: rowIndexArg } = action
+      const subFieldState: FormState = {}
+
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
       const rowIndex = Math.max(0, Math.min(rowIndexArg, siblingRows?.length - 1 || 0))
 
