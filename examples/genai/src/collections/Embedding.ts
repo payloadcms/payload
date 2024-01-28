@@ -86,6 +86,8 @@ export const Embedding: CollectionConfig = {
 
             return {
               generated: true,
+              // TODO: vector similarity
+              // similarVector,
               embedding,
             }
           },
