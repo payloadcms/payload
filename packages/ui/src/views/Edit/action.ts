@@ -42,7 +42,6 @@ export const getFormStateFromServer = async (
 
   const result = await buildStateFromSchema({
     id,
-    config: payload.config,
     data,
     fieldSchema: collectionConfig.fields,
     locale: locale.code,

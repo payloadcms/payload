@@ -2,15 +2,14 @@
 import React from 'react'
 
 import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { Description, DocumentPreferences, Payload, SanitizedConfig } from 'payload/types'
+import type { Description, DocumentPreferences } from 'payload/types'
 import type { Locale } from 'payload/config'
 
 import RenderFields from '../../forms/RenderFields'
 import { Gutter } from '../Gutter'
 import { Document } from 'payload/types'
-import { FormState } from '../../forms/Form/types'
 import { useTranslation } from '../../providers/Translation'
-import { createFieldMap } from '../../forms/RenderFields/createFieldMap'
+import { buildFieldMap } from '../../forms/RenderFields/buildFieldMap'
 
 import './index.scss'
 
@@ -25,10 +24,9 @@ export const DocumentFields: React.FC<{
   docPermissions: CollectionPermission | GlobalPermission
   docPreferences: DocumentPreferences
   data: Document
-  formState: FormState
   user: User
   locale?: Locale
-  fieldMap?: ReturnType<typeof createFieldMap>
+  fieldMap?: ReturnType<typeof buildFieldMap>
 }> = (props) => {
   const {
     AfterFields,
@@ -39,7 +37,6 @@ export const DocumentFields: React.FC<{
     docPermissions,
     docPreferences,
     data,
-    formState,
     user,
     locale,
     fieldMap,
