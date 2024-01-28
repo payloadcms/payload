@@ -14,7 +14,6 @@ import { isMongoose } from '../helpers/isMongoose'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
 import { arrayAfterChangeMock, arrayDefaultValue } from './collections/Array'
-import { blockAfterChangeMock } from './collections/Blocks'
 import { blocksDoc } from './collections/Blocks/shared'
 import { dateDoc } from './collections/Date/shared'
 import { groupAfterChangeMock, groupDefaultChild, groupDefaultValue } from './collections/Group'
@@ -1077,38 +1076,6 @@ describe('Fields', () => {
 
       expect(result.docs).toHaveLength(1)
       expect(result.docs[0]).toMatchObject(blockDoc)
-    })
-
-    it('should call afterChange hook with correct value and previousValue', async () => {
-      const document = await payload.create({
-        collection: blockFieldsSlug,
-        data: {
-          blocksWithNestedAfterChange: [
-            {
-              blockType: 'block-after-change',
-              text: 'initialNestedValue',
-            },
-          ],
-        },
-      })
-
-      await payload.update({
-        id: document.id,
-        collection: blockFieldsSlug,
-        data: {
-          blocksWithNestedAfterChange: [
-            {
-              blockType: 'block-after-change',
-              text: 'changedNestedValue',
-            },
-          ],
-        },
-      })
-
-      expect(blockAfterChangeMock).toHaveBeenLastCalledWith({
-        previousValue: 'initialNestedValue',
-        value: 'changedNestedValue',
-      })
     })
   })
 

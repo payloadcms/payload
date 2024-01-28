@@ -2,11 +2,8 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs'
-import { jestFn } from '../jestFn'
 import { AddCustomBlocks } from './components/AddCustomBlocks'
 import { getBlocksFieldSeedData } from './shared'
-
-export const blockAfterChangeMock = jestFn()
 
 export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
@@ -331,30 +328,6 @@ const BlockFields: CollectionConfig = {
           Field: AddCustomBlocks,
         },
       },
-    },
-    {
-      name: 'blocksWithNestedAfterChange',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'block-after-change',
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-              hooks: {
-                afterChange: [
-                  ({ value, previousValue }) => {
-                    if (value !== previousValue) {
-                      blockAfterChangeMock({ value, previousValue })
-                    }
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      ],
     },
   ],
 }

@@ -130,6 +130,7 @@ export const promise = async ({
         const promises = []
         rows.forEach((row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+          const nextSiblingData = siblingData?.[field.name]?.[i] || {}
 
           if (block) {
             promises.push(
@@ -142,10 +143,12 @@ export const promise = async ({
                 global,
                 operation,
                 previousDoc,
-                previousSiblingDoc:
-                  previousSiblingDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
+                previousSiblingDoc: getExistingRowDoc(
+                  nextSiblingData,
+                  previousSiblingDoc?.[field.name],
+                ),
                 req,
-                siblingData: siblingData?.[field.name]?.[i] || {},
+                siblingData: nextSiblingData,
                 siblingDoc: { ...row } || {},
               }),
             )
