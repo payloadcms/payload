@@ -11,6 +11,7 @@ import { Prompt } from './collections/Prompt'
 import { Transformer } from './collections/Transformer'
 import { Embedding } from './collections/Embedding'
 import { Media } from './collections/Media'
+import { CypherQuery } from './collections/CypherQuery'
 import { KnowledgeGraph } from './collections/KnowledgeGraph'
 import { Resource } from './collections/Resource'
 
@@ -24,7 +25,16 @@ export default buildConfig({
     },
   },
   editor: slateEditor({}),
-  collections: [Users, Prompt, Media, Resource, Transformer, Embedding, KnowledgeGraph],
+  collections: [
+    Users,
+    Prompt,
+    Media,
+    Resource,
+    CypherQuery,
+    Transformer,
+    Embedding,
+    KnowledgeGraph,
+  ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
