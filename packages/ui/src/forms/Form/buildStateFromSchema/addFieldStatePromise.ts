@@ -26,11 +26,11 @@ type Args = {
   state: FormState
   t: TFunction
   user: User
+  errorPaths: Set<string>
 }
 
 export const addFieldStatePromise = async ({
   id,
-
   data,
   field,
   fullData,
@@ -42,15 +42,16 @@ export const addFieldStatePromise = async ({
   state,
   t,
   user,
+  errorPaths: parentErrorPaths,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     const validate = operation === 'update' ? field.validate : undefined
-
     const fieldState: FormField = {
       initialValue: undefined,
       passesCondition,
       valid: true,
       value: undefined,
+      errorPaths: new Set(),
     }
 
     const valueWithDefault = await getDefaultValue({
@@ -81,6 +82,7 @@ export const addFieldStatePromise = async ({
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult
       fieldState.valid = false
+      parentErrorPaths.add(`${path}${field.name}`)
     } else {
       fieldState.valid = true
     }
@@ -88,6 +90,7 @@ export const addFieldStatePromise = async ({
     switch (field.type) {
       case 'array': {
         const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : []
+
         const { promises, rowMetadata } = arrayValue.reduce(
           (acc, row, i) => {
             const rowPath = `${path}${field.name}.${i}.`
@@ -113,6 +116,7 @@ export const addFieldStatePromise = async ({
                 state,
                 t,
                 user,
+                errorPaths: fieldState.errorPaths,
               }),
             )
 
@@ -120,7 +124,7 @@ export const addFieldStatePromise = async ({
 
             acc.rowMetadata.push({
               id: row.id,
-              childErrorPaths: new Set(),
+              errorPaths: fieldState.errorPaths,
               collapsed:
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
@@ -201,6 +205,7 @@ export const addFieldStatePromise = async ({
                   state,
                   t,
                   user,
+                  errorPaths: fieldState.errorPaths,
                 }),
               )
 
@@ -209,7 +214,7 @@ export const addFieldStatePromise = async ({
               acc.rowMetadata.push({
                 id: row.id,
                 blockType: row.blockType,
-                childErrorPaths: new Set(),
+                errorPaths: fieldState.errorPaths,
                 collapsed:
                   collapsedRowIDs === undefined
                     ? field.admin.initCollapsed
@@ -262,6 +267,7 @@ export const addFieldStatePromise = async ({
           state,
           t,
           user,
+          errorPaths: parentErrorPaths,
         })
 
         break
@@ -361,6 +367,7 @@ export const addFieldStatePromise = async ({
       state,
       t,
       user,
+      errorPaths: parentErrorPaths,
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) =>
@@ -377,6 +384,7 @@ export const addFieldStatePromise = async ({
         state,
         t,
         user,
+        errorPaths: parentErrorPaths,
       }),
     )
 

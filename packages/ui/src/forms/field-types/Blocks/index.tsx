@@ -16,8 +16,6 @@ import { ErrorPill } from '../../../elements/ErrorPill'
 import { useConfig } from '../../../providers/Config'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { useLocale } from '../../../providers/Locale'
-import Error from '../../Error'
-import FieldDescription from '../../FieldDescription'
 import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
@@ -33,26 +31,27 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     name,
-    admin: { className, description, readOnly },
-    blocks,
-    fieldTypes,
+    className,
+    readOnly,
     forceRender = false,
     indexPath,
-    label,
-    labels: labelsFromProps,
     localized,
-    maxRows,
-    minRows,
+    Description,
+    Error,
+    Label,
     path: pathFromProps,
     permissions,
     required,
     validate,
   } = props
 
-  const path = pathFromProps || name
+  const minRows = 'minRows' in props ? props.minRows : 0
+  const maxRows = 'maxRows' in props ? props.maxRows : undefined
+  const blocks = 'blocks' in props ? props.blocks : undefined
+  const labelsFromProps = 'labels' in props ? props.labels : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm()
+  const { dispatchFields, setModified } = useForm()
   const { code: locale } = useLocale()
   const { localization } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
@@ -85,33 +84,33 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 
   const {
-    errorMessage,
     rows = [],
     showError,
     valid,
     value,
+    path,
   } = useField<number>({
     hasRows: true,
-    path,
+    path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
   const addRow = useCallback(
     async (rowIndex: number, blockType: string) => {
-      await addFieldRow({
-        data: {
-          blockType,
-        },
+      dispatchFields({
+        blockType,
         path,
         rowIndex,
+        type: 'ADD_ROW',
       })
+
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified],
+    [path, setModified],
   )
 
   const duplicateRow = useCallback(
@@ -128,10 +127,15 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      removeFieldRow({ path, rowIndex })
+      dispatchFields({
+        path,
+        rowIndex,
+        type: 'REMOVE_ROW',
+      })
+
       setModified(true)
     },
-    [path, removeFieldRow, setModified],
+    [path, dispatchFields, setModified],
   )
 
   const moveRow = useCallback(
@@ -176,18 +180,13 @@ const BlocksField: React.FC<Props> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && (
-        <div className={`${baseClass}__error-wrap`}>
-          <Error message={errorMessage} showError={showError} />
-        </div>
-      )}
+      {showError && <div className={`${baseClass}__error-wrap`}>{Error}</div>}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
-            <h3>{getTranslation(label || name, i18n)}</h3>
-
+            <h3>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} withMessage />
+              <ErrorPill count={fieldErrorCount} withMessage i18n={i18n} />
             )}
           </div>
           {rows.length > 0 && (
@@ -213,7 +212,7 @@ const BlocksField: React.FC<Props> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription description={description} path={path} value={value} />
+        {Description}
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -232,11 +231,10 @@ const BlocksField: React.FC<Props> = (props) => {
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
-                      addRow={addRow}
-                      blockToRender={blockToRender}
                       blocks={blocks}
+                      addRow={addRow}
+                      block={blockToRender}
                       duplicateRow={duplicateRow}
-                      fieldTypes={fieldTypes}
                       forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}

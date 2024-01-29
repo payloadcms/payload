@@ -62,8 +62,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
-    if (p?.labels) return p.labels
-    if (p?.label) return { plural: undefined, singular: p.label }
+    if ('labels' in p && p?.labels) return p.labels
+    if ('label' in p && p?.label) return { plural: undefined, singular: p.label }
     return { plural: t('fields:rows'), singular: t('fields:row') }
   }
 
@@ -227,6 +227,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
                   moveRow={moveRow}
+                  labels={labels}
                   path={path}
                   permissions={permissions}
                   readOnly={readOnly}

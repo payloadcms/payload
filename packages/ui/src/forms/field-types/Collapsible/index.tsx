@@ -6,7 +6,6 @@ import type { Props } from './types'
 import { Collapsible } from '../../../elements/Collapsible'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { usePreferences } from '../../../providers/Preferences'
-import { useFormSubmitted } from '../../Form/context'
 import RenderFields from '../../RenderFields'
 import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
@@ -42,8 +41,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>()
   const fieldPreferencesKey = `collapsible-${path.replace(/\./g, '__')}`
   const [errorCount, setErrorCount] = useState(0)
-  const submitted = useFormSubmitted()
-  const fieldHasErrors = errorCount > 0 && submitted
+  const fieldHasErrors = errorCount > 0
 
   const onToggle = useCallback(
     async (newCollapsedState: boolean) => {
