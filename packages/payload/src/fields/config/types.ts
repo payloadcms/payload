@@ -1,7 +1,10 @@
 /* eslint-disable no-use-before-define */
 import type { EditorProps } from '@monaco-editor/react'
 import type { TFunction } from 'i18next'
-import type React, { CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
+
+import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
+import type React from 'react'
 
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
 import type { Props as ErrorProps } from '../../admin/components/forms/Error/types'
