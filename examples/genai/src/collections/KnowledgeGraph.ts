@@ -111,11 +111,25 @@ export const KnowledgeGraph: CollectionConfig = {
                     })
 
                     for (let record of result.records) {
-                      const kgReturnData = {}
+                      const kgReadReturnData = {}
                       Object.keys(returnData).forEach((key) => {
-                        kgReturnData[returnData[key]] = record.get(key)
+                        kgReadReturnData[returnData[key]] = record.get(key)
                       })
-                      records.push(kgReturnData)
+                      records.push(kgReadReturnData)
+                    }
+                  }
+
+                  if ('write' == transaction) {
+                    result = await session.executeWrite(async (tx) => {
+                      return await tx.run(query, parameters)
+                    })
+
+                    for (let record of result.records) {
+                      const kgWriteReturnData = {}
+                      Object.keys(returnData).forEach((key) => {
+                        kgWriteReturnData[returnData[key]] = record.get(key)
+                      })
+                      records.push(kgWriteReturnData)
                     }
                   }
                 } catch (err) {
