@@ -1,6 +1,8 @@
 # Payload GenAI
 
-This example demonstrates how to use generative AI in your [Payload](https://github.com/payloadcms/payload) application.
+This is an example of Generative AI (GenAI) in your [Payload](https://github.com/payloadcms/payload) application.
+
+This example uses GenAI tuned collections with [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields). Api use requires a query parameter `genai=true`.
 
 ## Quick Start
 
@@ -42,7 +44,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - ### Cypher Query
 
-  The `cypher-query` collection is for associating query and retrieval information with a `knowledge-graph`.
+  The `cypher-query` collection is for defining a transaction with a `knowledge-graph`.
 
 - ### Transformer
 
