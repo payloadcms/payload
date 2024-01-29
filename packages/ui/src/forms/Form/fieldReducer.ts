@@ -105,7 +105,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newRow: Row = {
         id: new ObjectID().toHexString(),
         blockType: blockType || undefined,
-        childErrorPaths: new Set(),
         collapsed: false,
       }
 
@@ -148,7 +147,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       rowsMetadata[rowIndex] = {
         id: new ObjectID().toHexString(),
         blockType: blockType || undefined,
-        childErrorPaths: new Set(),
         collapsed: false,
       }
 

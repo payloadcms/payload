@@ -78,7 +78,9 @@ const BlocksField: React.FC<Props> = (props) => {
       if (!editingDefaultLocale && value === null) {
         return true
       }
-      return validate(value, { ...options, maxRows, minRows, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, maxRows, minRows, required })
+      }
     },
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
@@ -162,7 +164,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const hasMaxRows = maxRows && rows.length >= maxRows
 
-  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0)
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0)
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
