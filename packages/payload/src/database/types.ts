@@ -78,7 +78,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: () => Promise<void>
+  migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
   /**
    * Run all migration down functions before running up
    */
@@ -138,6 +138,10 @@ export type Destroy = (payload: Payload) => Promise<void>
 
 export type CreateMigration = (args: {
   file?: string
+  /**
+   * Skips the prompt asking to create empty migrations
+   */
+  forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
 }) => Promise<void>

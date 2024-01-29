@@ -13,6 +13,7 @@ import type { BaseDatabaseAdapter } from 'payload/database'
 import type { CustomName } from 'payload/dist/database/types'
 import type { BaseArrayField, BaseBlock, BaseSelectField } from 'payload/dist/fields/config/types'
 import type { BaseGlobalConfig } from 'payload/dist/globals/config/types'
+import type { PayloadRequest } from 'payload/types'
 import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
@@ -78,9 +79,11 @@ export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdap
 
 export type MigrateUpArgs = {
   payload: Payload
+  req?: Partial<PayloadRequest>
 }
 export type MigrateDownArgs = {
   payload: Payload
+  req?: Partial<PayloadRequest>
 }
 
 declare module 'payload' {

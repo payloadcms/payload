@@ -52,5 +52,6 @@ export const incrementLoginAttempts = async ({
     id: doc.id,
     collection: collection.slug,
     data,
+    req,
   })
 }
