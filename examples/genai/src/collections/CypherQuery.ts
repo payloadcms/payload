@@ -44,6 +44,14 @@ export const CypherQuery: CollectionConfig = {
           value: 'step-back',
         },
         {
+          label: 'initialization',
+          value: 'initialization',
+        },
+        {
+          label: 'vector-query',
+          value: 'vector-query',
+        },
+        {
           label: 'custom',
           value: 'custom',
         },
