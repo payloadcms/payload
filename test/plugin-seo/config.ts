@@ -40,6 +40,11 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     seoPlugin({
+      collections: ['users'],
+      fields: [],
+      tabbedUI: true,
+    }),
+    seoPlugin({
       collections: ['pages', 'posts'],
       globals: ['settings'],
       tabbedUI: true,
