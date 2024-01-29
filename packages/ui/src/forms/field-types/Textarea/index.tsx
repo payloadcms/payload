@@ -78,10 +78,10 @@ const Textarea: React.FC<Props> = (props) => {
     >
       {Error}
       {Label}
+      {BeforeInput}
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
           <div className="textarea-clone" data-value={value || placeholder || ''} />
-          {BeforeInput}
           <textarea
             className="textarea-element"
             data-rtl={isRTL}
@@ -93,9 +93,9 @@ const Textarea: React.FC<Props> = (props) => {
             rows={rows}
             value={value || ''}
           />
-          {AfterInput}
         </div>
       </label>
+      {AfterInput}
       {Description}
     </div>
   )

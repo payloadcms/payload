@@ -3,7 +3,7 @@ import { useTranslation } from '../../../providers/Translation'
 
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
 import type { Row } from '../../Form/types'
-import type { RowLabel as RowLabelType } from 'payload/types'
+import type { ArrayField, RowLabel as RowLabelType } from 'payload/types'
 
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { Collapsible } from '../../../elements/Collapsible'
@@ -16,6 +16,7 @@ import { buildFieldMap } from '../../RenderFields/buildFieldMap'
 import { FieldPermissions } from 'payload/auth'
 
 import './index.scss'
+import { getTranslation } from '@payloadcms/translations'
 
 const baseClass = 'array-field'
 
@@ -25,6 +26,7 @@ type ArrayRowProps = UseDraggableSortableReturn & {
   duplicateRow: (rowIndex: number) => void
   forceRender?: boolean
   hasMaxRows?: boolean
+  labels: ArrayField['labels']
   moveRow: (fromIndex: number, toIndex: number) => void
   readOnly?: boolean
   removeRow: (rowIndex: number) => void
@@ -46,6 +48,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   forceRender = false,
   hasMaxRows,
   indexPath,
+  labels,
   listeners,
   moveRow,
   path: parentPath,
@@ -64,13 +67,13 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
-  // const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
-  //   2,
-  //   '0',
-  // )}`
+  const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
+    2,
+    '0',
+  )}`
 
-  const childErrorPathsCount = row.childErrorPaths?.size
-  const fieldHasErrors = hasSubmitted && childErrorPathsCount > 0
+  const errorCount = row.errorPaths?.size
+  const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const classNames = [
     `${baseClass}__row`,
@@ -117,7 +120,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               path={path}
               rowNumber={rowIndex + 1}
             /> */}
-            {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage i18n={i18n} />}
+            {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
           </div>
         }
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}

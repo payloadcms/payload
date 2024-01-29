@@ -1,7 +1,7 @@
 import ObjectID from 'bson-objectid'
 import equal from 'deep-equal'
 
-import type { FieldAction, FormState, FormField } from './types'
+import type { FieldAction, FormState, FormField, Row } from './types'
 
 import { deepCopyObject } from 'payload/utilities'
 import { flattenRows, separateRows } from './rows'
@@ -102,17 +102,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const withNewRow = [...(state[path]?.rows || [])]
 
-      withNewRow.splice(
-        rowIndex,
-        0,
-        // new row
-        {
-          id: new ObjectID().toHexString(),
-          blockType: blockType || undefined,
-          childErrorPaths: new Set(),
-          collapsed: false,
-        },
-      )
+      const newRow: Row = {
+        id: new ObjectID().toHexString(),
+        blockType: blockType || undefined,
+        collapsed: false,
+      }
+
+      withNewRow.splice(rowIndex, 0, newRow)
 
       if (blockType) {
         subFieldState.blockType = {
@@ -151,7 +147,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       rowsMetadata[rowIndex] = {
         id: new ObjectID().toHexString(),
         blockType: blockType || undefined,
-        childErrorPaths: new Set(),
         collapsed: false,
       }
 
