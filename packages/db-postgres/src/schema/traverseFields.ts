@@ -273,6 +273,7 @@ export const traverseFields = ({
             disableUnique,
             fields: [],
             tableName: selectTableName,
+            versions,
           })
 
           relationsToBuild.set(fieldName, selectTableName)
@@ -343,6 +344,7 @@ export const traverseFields = ({
           rootTableIDColType,
           rootTableName,
           tableName: arrayTableName,
+          versions,
         })
 
         if (subHasManyTextField) {
@@ -429,6 +431,7 @@ export const traverseFields = ({
               rootTableIDColType,
               rootTableName,
               tableName: blockTableName,
+              versions,
             })
 
             if (subHasManyTextField) {
