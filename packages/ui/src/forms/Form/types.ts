@@ -7,7 +7,7 @@ import type { Data } from 'payload/types'
 
 export type Row = {
   blockType?: string
-  childErrorPaths?: Set<string>
+  errorPaths?: Set<string>
   collapsed?: boolean
   id: string
 }
@@ -22,6 +22,7 @@ export type FormField = {
   valid: boolean
   value: unknown
   validate?: Validate
+  errorPaths?: Set<string>
 }
 
 export type FormState = {

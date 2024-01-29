@@ -4,7 +4,7 @@ import type { TFunction } from '@payloadcms/translations'
 import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
-import type { NonPresentationalField, Data, SanitizedConfig } from 'payload/types'
+import type { NonPresentationalField, Data } from 'payload/types'
 import type { FormState, FormField } from '../types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
@@ -50,6 +50,7 @@ type AddFieldStatePromiseArgs = {
   state: FormState
   t: TFunction
   user: User
+  errorPaths: Set<string>
 }
 
 /**
@@ -76,16 +77,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     state,
     t,
     user,
+    errorPaths: parentErrorPaths,
   } = args
   if (fieldAffectsData(field)) {
     const validate = operation === 'update' ? field.validate : undefined
-
     const fieldState: FormField = {
       fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
       valid: true,
       value: undefined,
+      errorPaths: new Set(),
     }
 
     const valueWithDefault = await getDefaultValue({
@@ -116,6 +118,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult
       fieldState.valid = false
+      parentErrorPaths.add(`${path}${field.name}`)
     } else {
       fieldState.valid = true
     }
@@ -123,12 +126,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     switch (field.type) {
       case 'array': {
         const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : []
+
         const { promises, rowMetadata } = arrayValue.reduce(
           (acc, row, i) => {
             const rowPath = `${path}${field.name}.${i}.`
             row.id = row?.id || new ObjectID().toHexString()
 
-            if (!omitParents && (!filter || filter(args))) {
+            if (!omitParents) {
               state[`${rowPath}id`] = {
                 initialValue: row.id,
                 valid: true,
@@ -140,7 +144,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               iterateFields({
                 id,
                 anyParentLocalized: field.localized || anyParentLocalized,
-                config,
                 data: row,
                 fields: field.fields,
                 forceFullValue,
@@ -157,6 +160,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 state,
                 t,
                 user,
+                errorPaths: fieldState.errorPaths,
               }),
             )
 
@@ -164,7 +168,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
             acc.rowMetadata.push({
               id: row.id,
-              childErrorPaths: new Set(),
+              errorPaths: fieldState.errorPaths,
               collapsed:
                 collapsedRowIDs === undefined
                   ? field.admin.initCollapsed
@@ -197,7 +201,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.rows = rowMetadata
 
         // Add field to state
-        if (!omitParents && (!filter || filter(args))) {
+        if (!omitParents) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -215,7 +219,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             if (block) {
               row.id = row?.id || new ObjectID().toHexString()
 
-              if (!omitParents && (!filter || filter(args))) {
+              if (!omitParents) {
                 state[`${rowPath}id`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
@@ -270,6 +274,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   state,
                   t,
                   user,
+                  errorPaths: fieldState.errorPaths,
                 }),
               )
 
@@ -278,7 +283,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               acc.rowMetadata.push({
                 id: row.id,
                 blockType: row.blockType,
-                childErrorPaths: new Set(),
+                errorPaths: fieldState.errorPaths,
                 collapsed:
                   collapsedRowIDs === undefined
                     ? field.admin.initCollapsed
@@ -339,6 +344,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           state,
           t,
           user,
+          errorPaths: parentErrorPaths,
         })
 
         break
@@ -417,6 +423,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         fieldState.value = valueWithDefault
         fieldState.initialValue = valueWithDefault
 
+        // Add field to state
         state[`${path}${field.name}`] = fieldState
 
         break
@@ -443,6 +450,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
       t,
       user,
+      errorPaths: parentErrorPaths,
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) =>
@@ -465,6 +473,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         state,
         t,
         user,
+        errorPaths: parentErrorPaths,
       }),
     )
 

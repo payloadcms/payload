@@ -8,7 +8,6 @@ import { withCondition } from '../../withCondition'
 import { useCollapsible } from '../../../elements/Collapsible/provider'
 import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
-import { useFormSubmitted } from '../../../forms/Form/context'
 import { fieldBaseClass } from '../shared'
 import { useFieldPath } from '../../FieldPathProvider'
 import { WatchChildErrors } from '../../WatchChildErrors'
@@ -25,13 +24,12 @@ const Group: React.FC<Props> = (props) => {
   const path = useFieldPath()
 
   const { i18n } = useTranslation()
-  const hasSubmitted = useFormSubmitted()
   const isWithinCollapsible = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
   const [errorCount, setErrorCount] = React.useState(undefined)
-  const fieldHasErrors = errorCount > 0 && hasSubmitted
+  const fieldHasErrors = errorCount > 0
 
   const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 

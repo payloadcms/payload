@@ -34,7 +34,9 @@ export const Email: React.FC<Props> = (props) => {
 
   const memoizedValidate: Validate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function') return validate(value, { ...options, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, required })
+      }
     },
     [validate, required],
   )

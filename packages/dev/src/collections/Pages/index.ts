@@ -145,27 +145,6 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
-      name: 'json',
-      label: 'JSON',
-      type: 'json',
-      required: true,
-    },
-    {
-      name: 'hidden',
-      label: 'Hidden',
-      type: 'text',
-      required: true,
-      admin: {
-        hidden: true,
-      },
-    },
-    {
-      name: 'code',
-      label: 'Code',
-      type: 'code',
-      required: true,
-    },
-    {
       // TODO: fix this
       // label: ({ data }) => `This is ${data?.title || 'Untitled'}`,
       label: 'Hello',
@@ -208,6 +187,51 @@ export const Pages: CollectionConfig = {
           type: 'text',
           required: true,
           defaultValue: 'This is a default value',
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      label: 'Blocks',
+      type: 'blocks',
+      required: true,
+      minRows: 1,
+      maxRows: 2,
+      blocks: [
+        {
+          slug: 'text',
+          labels: {
+            singular: 'Text Block',
+            plural: 'Text Blocks',
+          },
+          fields: [
+            {
+              name: 'text',
+              label: 'Text',
+              type: 'text',
+              required: true,
+              admin: {
+                components: {
+                  beforeInput: [BeforeInput],
+                },
+              },
+            },
+          ],
+        },
+        {
+          slug: 'textarea',
+          labels: {
+            singular: 'Textarea Block',
+            plural: 'Textarea Blocks',
+          },
+          fields: [
+            {
+              name: 'textarea',
+              label: 'Textarea',
+              type: 'textarea',
+              required: true,
+            },
+          ],
         },
       ],
     },
@@ -261,6 +285,27 @@ export const Pages: CollectionConfig = {
           },
         },
       ],
+    },
+    {
+      name: 'json',
+      label: 'JSON',
+      type: 'json',
+      required: true,
+    },
+    {
+      name: 'code',
+      label: 'Code',
+      type: 'code',
+      required: true,
+    },
+    {
+      name: 'hidden',
+      label: 'Hidden',
+      type: 'text',
+      required: true,
+      admin: {
+        hidden: true,
+      },
     },
   ],
 }

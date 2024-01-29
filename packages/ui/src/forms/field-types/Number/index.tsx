@@ -41,7 +41,9 @@ const NumberField: React.FC<Props> = (props) => {
 
   const memoizedValidate = useCallback(
     (value, options) => {
-      if (typeof validate === 'function') return validate(value, { ...options, max, min, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, max, min, required })
+      }
     },
     [validate, min, max, required],
   )

@@ -3,7 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
 import { ErrorPill } from '../../../../elements/ErrorPill'
 import { WatchChildErrors } from '../../../WatchChildErrors'
-import { useFormSubmitted, useTranslation } from '../../../..'
+import { useTranslation } from '../../../..'
 import { ReducedTab } from '../../../RenderFields/buildFieldMap'
 
 import './index.scss'
@@ -23,10 +23,9 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
   const hasName = 'name' in tab
-  const hasSubmitted = useFormSubmitted()
 
   const path = `${parentPath ? `${parentPath}.` : ''}${'name' in tab ? name : ''}`
-  const fieldHasErrors = errorCount > 0 && hasSubmitted
+  const fieldHasErrors = errorCount > 0
 
   return (
     <React.Fragment>

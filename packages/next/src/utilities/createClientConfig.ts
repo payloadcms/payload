@@ -13,6 +13,14 @@ export const sanitizeField = (f) => {
     field.fields = sanitizeFields(field.fields)
   }
 
+  if ('blocks' in field) {
+    field.blocks = field.blocks.map((block) => {
+      const sanitized = { ...block }
+      sanitized.fields = sanitizeFields(sanitized.fields)
+      return sanitized
+    })
+  }
+
   if ('tabs' in field) {
     field.tabs = field.tabs.map((tab) => sanitizeField(tab))
   }

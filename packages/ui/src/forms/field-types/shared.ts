@@ -2,6 +2,7 @@ import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import { User } from 'payload/auth'
 import {
   ArrayField,
+  BlockField,
   CodeField,
   DateField,
   DocumentPreferences,
@@ -9,7 +10,7 @@ import {
   RowLabel,
   Validate,
 } from 'payload/types'
-import { ReducedTab, buildFieldMap } from '../RenderFields/buildFieldMap'
+import { ReducedBlock, ReducedTab, buildFieldMap } from '../RenderFields/buildFieldMap'
 import { Option } from 'payload/types'
 import { FormState } from '../..'
 
@@ -86,6 +87,15 @@ export type FormFieldBase = {
       // For `array` fields
       minRows?: ArrayField['minRows']
       maxRows?: ArrayField['maxRows']
+      labels?: ArrayField['labels']
+    }
+  | {
+      // For `blocks` fields
+      slug?: string
+      minRows?: BlockField['minRows']
+      maxRows?: BlockField['maxRows']
+      labels?: BlockField['labels']
+      blocks?: ReducedBlock[]
     }
 )
 

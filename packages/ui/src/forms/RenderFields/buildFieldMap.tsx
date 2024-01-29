@@ -1,14 +1,13 @@
 import React, { Fragment } from 'react'
 
 import type { FieldPermissions } from 'payload/auth'
-import type { Field, FieldWithPath, TabsField } from 'payload/types'
+import type { BlockField, Field, FieldWithPath, TabsField } from 'payload/types'
 import DefaultError from '../Error'
 import DefaultLabel from '../Label'
 import DefaultDescription from '../FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
 import { fieldTypes } from '../field-types'
 import { FormFieldBase } from '../field-types/shared'
-import { FormState } from '../../forms/Form/types'
 
 export type ReducedField = {
   type: keyof typeof fieldTypes
@@ -19,7 +18,13 @@ export type ReducedField = {
   name: string
   readOnly: boolean
   isSidebar: boolean
+  /**
+   * On `array`, `blocks`, `group`, `collapsible`, and `tabs` fields only
+   */
   subfields?: ReducedField[]
+  /**
+   * On `tabs` fields only
+   */
   tabs?: ReducedTab[]
 }
 
@@ -27,6 +32,14 @@ export type ReducedTab = {
   name?: string
   label: TabsField['tabs'][0]['label']
   subfields?: ReducedField[]
+}
+
+export type ReducedBlock = {
+  slug: string
+  subfields: ReducedField[]
+  labels: BlockField['labels']
+  imageAltText?: string
+  imageURL?: string
 }
 
 export const buildFieldMap = (args: {
@@ -176,11 +189,39 @@ export const buildFieldMap = (args: {
               parentPath: path,
             })
 
-            return {
+            const reducedTab: ReducedTab = {
               name: 'name' in tab ? tab.name : undefined,
-              label: 'label' in tab ? tab.label : undefined,
+              label: tab.label,
               subfields: tabFieldMap,
             }
+
+            return reducedTab
+          })
+
+        // `blocks` fields require a field map of each of its block's nested fields
+        const blocks =
+          'blocks' in field &&
+          field.blocks &&
+          Array.isArray(field.blocks) &&
+          field.blocks.map((block) => {
+            const blockFieldMap = buildFieldMap({
+              fieldSchema: block.fields,
+              filter,
+              operation,
+              permissions,
+              readOnly: readOnlyOverride,
+              parentPath: path,
+            })
+
+            const reducedBlock: ReducedBlock = {
+              slug: block.slug,
+              subfields: blockFieldMap,
+              labels: block.labels,
+              imageAltText: block.imageAltText,
+              imageURL: block.imageURL,
+            }
+
+            return reducedBlock
           })
 
         // TODO: these types can get cleaned up
@@ -203,6 +244,7 @@ export const buildFieldMap = (args: {
           max: 'max' in field ? field.max : undefined,
           options: 'options' in field ? field.options : undefined,
           tabs,
+          blocks,
         }
 
         const Field = <FieldComponent {...fieldComponentProps} />

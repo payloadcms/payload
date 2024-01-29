@@ -40,6 +40,7 @@ const buildStateFromSchema = async (args: Args): Promise<FormState> => {
       state,
       t,
       user,
+      errorPaths: new Set(),
     })
 
     return state

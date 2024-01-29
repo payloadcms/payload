@@ -13,11 +13,10 @@ import type {
   Context as FormContextType,
   GetDataByPath,
   Props,
-  Row,
   SubmitOptions,
 } from './types'
 
-import { splitPathByArrayFields, setsAreEqual, wait, isNumber } from 'payload/utilities'
+import { wait } from 'payload/utilities'
 import { requests } from '../../utilities/api'
 import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAuth } from '../../providers/Auth'
@@ -25,7 +24,6 @@ import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
-import { WatchFormErrors } from './WatchFormErrors'
 import buildStateFromSchema from './buildStateFromSchema'
 import {
   FormContext,
@@ -93,62 +91,6 @@ const Form: React.FC<Props> = (props) => {
   const debouncedFormState = useDebounce(fields, 150)
 
   contextRef.current.fields = fields
-
-  // Build a current set of child errors for all rows in form state
-  const buildRowErrors = useCallback(() => {
-    const existingFieldRows: { [path: string]: Row[] } = {}
-    const newFieldRows: { [path: string]: Row[] } = {}
-
-    Object.entries(fields).forEach(([path, field]) => {
-      const pathSegments = splitPathByArrayFields(path)
-
-      for (let i = 0; i < pathSegments.length; i += 1) {
-        const fieldPath = pathSegments.slice(0, i + 1).join('.')
-        const formField = fields?.[fieldPath]
-
-        // Is this an array or blocks field?
-        if (Array.isArray(formField?.rows)) {
-          // Keep a reference to the existing row state
-          existingFieldRows[fieldPath] = formField.rows
-
-          // A new row state will be used to compare
-          // against the old state later,
-          // to see if we need to dispatch an update
-          if (!newFieldRows[fieldPath]) {
-            newFieldRows[fieldPath] = formField.rows.map((existingRow) => ({
-              ...existingRow,
-              childErrorPaths: new Set(),
-            }))
-          }
-
-          const rowIndex = pathSegments[i + 1]
-          const childFieldPath = pathSegments.slice(i + 1).join('.')
-
-          if (field.valid === false && childFieldPath) {
-            newFieldRows[fieldPath][rowIndex].childErrorPaths.add(`${fieldPath}.${childFieldPath}`)
-          }
-        }
-      }
-    })
-
-    // Now loop over all fields with rows -
-    // if anything changed, dispatch an update for the field
-    // with the new row state
-    Object.entries(newFieldRows).forEach(([path, newRows]) => {
-      const stateMatches = newRows.every((newRow, i) => {
-        const existingRowErrorPaths = existingFieldRows[path][i]?.childErrorPaths
-        return setsAreEqual(newRow.childErrorPaths, existingRowErrorPaths)
-      })
-
-      if (!stateMatches) {
-        dispatchFields({
-          path,
-          rows: newRows,
-          type: 'UPDATE',
-        })
-      }
-    })
-  }, [fields, dispatchFields])
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -229,7 +171,6 @@ const Form: React.FC<Props> = (props) => {
       if (waitForAutocomplete) await wait(100)
 
       const isValid = skipValidation ? true : await contextRef.current.validateForm()
-      contextRef.current.buildRowErrors()
 
       if (!skipValidation) setSubmitted(true)
 
@@ -480,7 +421,6 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.formRef = formRef
   contextRef.current.reset = reset
   contextRef.current.replaceState = replaceState
-  contextRef.current.buildRowErrors = buildRowErrors
   contextRef.current.dispatchFields = dispatchFields
 
   useEffect(() => {
@@ -553,7 +493,6 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
-                  <WatchFormErrors buildRowErrors={buildRowErrors} />
                   {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>

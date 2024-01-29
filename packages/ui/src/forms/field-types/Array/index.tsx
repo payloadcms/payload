@@ -62,9 +62,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
-    if (p?.labels) return p.labels
-    if (p?.label) return { plural: undefined, singular: p.label }
-    return { plural: t('fields:rows'), singular: t('fields:row') }
+    if ('labels' in p && p?.labels) return p.labels
+    if ('label' in p && p?.label) return { plural: undefined, singular: p.label }
+    return { plural: t('general:rows'), singular: t('general:row') }
   }
 
   const labels = getLabels(props)
@@ -75,7 +75,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       if (!editingDefaultLocale && value === null) {
         return true
       }
-      return validate(value, { ...options, maxRows, minRows, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, maxRows, minRows, required })
+      }
     },
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
@@ -154,7 +156,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount =
-    rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1)
+    rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0) + (valid ? 0 : 1)
 
   const fieldHasErrors = submitted && fieldErrorCount > 0
 
@@ -227,6 +229,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
                   moveRow={moveRow}
+                  labels={labels}
                   path={path}
                   permissions={permissions}
                   readOnly={readOnly}
