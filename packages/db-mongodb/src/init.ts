@@ -19,13 +19,14 @@ import buildCollectionSchema from './models/buildCollectionSchema'
 import { buildGlobalModel } from './models/buildGlobalModel'
 import buildSchema from './models/buildSchema'
 import getBuildQueryPlugin from './queries/buildQuery'
+import { getDBName } from './utilities/getDBName'
 
 export const init: Init = async function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schema = buildCollectionSchema(collection, this.payload.config)
 
     if (collection.versions) {
-      const versionModelName = getVersionsModelName(collection)
+      const versionModelName = getDBName({ config: collection, versions: true })
 
       const versionCollectionFields = buildVersionCollectionFields(collection)
 
@@ -54,12 +55,11 @@ export const init: Init = async function init(this: MongooseAdapter) {
         versionSchema,
         this.autoPluralization === true ? undefined : versionModelName,
       ) as CollectionModel
-      // this.payload.versions[collection.slug] = model;
       this.versions[collection.slug] = model
     }
 
     const model = mongoose.model(
-      collection.slug,
+      getDBName({ config: collection }),
       schema,
       this.autoPluralization === true ? undefined : collection.slug,
     ) as CollectionModel
@@ -77,7 +77,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {
-      const versionModelName = getVersionsModelName(global)
+      const versionModelName = getDBName({ config: global, versions: true })
 
       const versionGlobalFields = buildVersionGlobalFields(global)
 

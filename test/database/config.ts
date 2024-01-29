@@ -85,7 +85,7 @@ export default buildConfigWithDefaults({
         {
           name: 'select',
           type: 'select',
-          dbName: 'customSelect',
+          dbName: ({ tableName }) => `${tableName}_customSelect`,
           enumName: 'selectEnum',
           hasMany: true,
           options: ['a', 'b', 'c'],
@@ -134,6 +134,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: true,
     },
   ],
   globals: [
@@ -147,6 +148,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: true,
     },
   ],
   localization: {

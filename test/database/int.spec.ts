@@ -15,6 +15,7 @@ import { initTransaction } from '../../packages/payload/src/utilities/initTransa
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import removeFiles from '../helpers/removeFiles'
+import { MongooseAdapter } from '../../packages/db-mongodb/src'
 
 describe('database', () => {
   let serverURL
@@ -23,16 +24,12 @@ describe('database', () => {
   const collection = 'posts'
   const title = 'title'
   let user: TypeWithID & Record<string, unknown>
-  let checkSchema = true
 
   beforeAll(async () => {
     const init = await initPayloadTest({ __dirname, init: { local: false } })
     serverURL = init.serverURL
     const url = `${serverURL}/api/graphql`
     client = new GraphQLClient(url)
-    if (payload.db.name === 'mongoose') {
-      checkSchema = false
-    }
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -142,11 +139,20 @@ describe('database', () => {
   })
 
   describe('schema', () => {
-    it('should use custom tableNames', () => {
-      const db: PostgresAdapter = payload.db
-      expect(db).toBeDefined()
+    it('should use custom dbNames', () => {
+      expect(payload.db).toBeDefined()
 
-      if (checkSchema) {
+      if (payload.db.name === 'mongoose') {
+        // @ts-expect-error
+        const db: MongooseAdapter = payload.db
+
+        expect(db.collections['custom-schema'].modelName).toStrictEqual('customs')
+        expect(db.versions['custom-schema'].modelName).toStrictEqual('_customs_versions')
+        expect(db.versions.global.modelName).toStrictEqual('_customGlobal_versions')
+      } else {
+        // @ts-expect-error
+        const db: PostgresAdapter = payload.db
+        // const db: PostgresAdapter = payload.db
         // collection
         expect(db.tables['customs']).toBeDefined()
 
@@ -158,6 +164,7 @@ describe('database', () => {
 
         // global
         expect(db.tables.customGlobal).toBeDefined()
+        expect(db.tables._customGlobal_v).toBeDefined()
 
         // select
         expect(db.tables.customs_customSelect).toBeDefined()

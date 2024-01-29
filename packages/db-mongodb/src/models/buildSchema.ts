@@ -28,7 +28,7 @@ import type {
   TextareaField,
   UploadField,
 } from 'payload/types'
-import type { FieldAffectingData, NonPresentationalField, Tab, UnnamedTab } from 'payload/types'
+import type { FieldAffectingData, NonPresentationalField, Tab } from 'payload/types'
 
 import { Schema } from 'mongoose'
 import {
