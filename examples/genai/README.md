@@ -6,6 +6,8 @@ This example uses GenAI tuned collections with [Virtual Fields](https://github.c
 
 This example uses Graph Databases. You can try a graph database instance for free with [Neo4j Aura](https://console.neo4j.io/).
 
+This example uses transformer services through [OpenAI](https://openai.com/blog/openai-api), you will need your own API key.
+
 ## Quick Start
 
 To spin up the project locally, follow these steps:
