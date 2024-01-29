@@ -53,6 +53,7 @@ type Args = {
   rootRelationsToBuild?: Map<string, string>
   rootTableIDColType: string
   rootTableName: string
+  versions: boolean
 }
 
 type Result = {
@@ -86,6 +87,7 @@ export const traverseFields = ({
   rootRelationsToBuild,
   rootTableIDColType,
   rootTableName,
+  versions,
 }: Args): Result => {
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
@@ -219,6 +221,7 @@ export const traverseFields = ({
           config: field,
           parentTableName: newTableName,
           prefix: `enum_${newTableName}_`,
+          target: 'enumName',
         })
 
         adapter.enums[enumName] = pgEnum(
@@ -382,9 +385,10 @@ export const traverseFields = ({
 
         field.blocks.forEach((block) => {
           const blockTableName = getTableName({
-            config: field,
+            config: block,
             parentTableName: rootTableName,
             prefix: `${rootTableName}_blocks_`,
+            versions,
           })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
@@ -507,6 +511,7 @@ export const traverseFields = ({
             rootRelationsToBuild,
             rootTableIDColType,
             rootTableName,
+            versions,
           })
 
           if (groupHasLocalizedField) hasLocalizedField = true
@@ -549,6 +554,7 @@ export const traverseFields = ({
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
+          versions,
         })
 
         if (groupHasLocalizedField) hasLocalizedField = true
@@ -592,6 +598,7 @@ export const traverseFields = ({
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
+          versions,
         })
 
         if (tabHasLocalizedField) hasLocalizedField = true
@@ -635,6 +642,7 @@ export const traverseFields = ({
           rootRelationsToBuild,
           rootTableIDColType,
           rootTableName,
+          versions,
         })
 
         if (rowHasLocalizedField) hasLocalizedField = true

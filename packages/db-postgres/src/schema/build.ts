@@ -39,6 +39,7 @@ type Args = {
   rootTableName?: string
   tableName: string
   timestamps?: boolean
+  versions: boolean
 }
 
 type Result = {
@@ -63,6 +64,7 @@ export const buildTable = ({
   rootTableName: incomingRootTableName,
   tableName,
   timestamps,
+  versions,
 }: Args): Result => {
   const rootTableName = incomingRootTableName || tableName
   const columns: Record<string, PgColumnBuilder> = baseColumns
@@ -124,6 +126,7 @@ export const buildTable = ({
     rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
     rootTableIDColType: rootTableIDColType || idColType,
     rootTableName,
+    versions,
   }))
 
   if (timestamps) {

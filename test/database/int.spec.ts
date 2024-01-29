@@ -152,9 +152,12 @@ describe('database', () => {
       } else {
         // @ts-expect-error
         const db: PostgresAdapter = payload.db
-        // const db: PostgresAdapter = payload.db
+
         // collection
-        expect(db.tables['customs']).toBeDefined()
+        expect(db.tables.customs).toBeDefined()
+
+        // collection versions
+        expect(db.tables._customs_v).toBeDefined()
 
         // collection relationships
         expect(db.tables.customs_rels).toBeDefined()
@@ -170,20 +173,20 @@ describe('database', () => {
         expect(db.tables.customs_customSelect).toBeDefined()
 
         // array
-        expect(db.tables.customs_customArrays).toBeDefined()
+        expect(db.tables.customArrays).toBeDefined()
 
         // array localized
-        expect(db.tables.customs_customArrays_locales).toBeDefined()
+        expect(db.tables.customArrays_locales).toBeDefined()
 
         // blocks
-        expect(db.tables.customs_blocks_customBlocks).toBeDefined()
+        expect(db.tables.customBlocks).toBeDefined()
 
         // localized blocks
-        expect(db.tables.customs_blocks_customBlocks_locales).toBeDefined()
+        expect(db.tables.customBlocks_locales).toBeDefined()
 
         // enum names
-        expect(db.enums.enum_customs_selectEnum).toBeDefined()
-        expect(db.enums.enum_customs_radioEnum).toBeDefined()
+        expect(db.enums.selectEnum).toBeDefined()
+        expect(db.enums.radioEnum).toBeDefined()
       }
     })
   })

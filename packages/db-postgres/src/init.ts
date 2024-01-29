@@ -32,6 +32,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
       fields: collection.fields,
       tableName,
       timestamps: collection.timestamps,
+      versions: false,
     })
 
     if (collection.versions) {
@@ -50,6 +51,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,
+        versions: true,
       })
     }
   })
@@ -67,6 +69,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
       fields: global.fields,
       tableName,
       timestamps: false,
+      versions: false,
     })
 
     if (global.versions) {
@@ -83,6 +86,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,
+        versions: true,
       })
     }
   })
