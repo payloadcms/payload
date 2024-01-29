@@ -3,9 +3,13 @@ import { CollectionConfig } from 'payload/types'
 export const CypherQuery: CollectionConfig = {
   slug: 'cypher-query',
   admin: {
-    useAsTitle: 'purpose',
+    useAsTitle: 'description',
   },
   fields: [
+    {
+      name: 'description',
+      type: 'textarea',
+    },
     {
       name: 'query',
       type: 'textarea',
@@ -19,6 +23,10 @@ export const CypherQuery: CollectionConfig = {
         {
           label: 'read',
           value: 'read',
+        },
+        {
+          label: 'write',
+          value: 'write',
         },
       ],
     },
