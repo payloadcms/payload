@@ -4,6 +4,8 @@ This is an example of Generative AI (GenAI) in your [Payload](https://github.com
 
 This example uses GenAI tuned collections with [Virtual Fields](https://github.com/payloadcms/payload/tree/main/examples/virtual-fields). Api use requires a query parameter `genai=true`.
 
+This example uses Graph Databases. You can try a graph database instance for free with [Neo4j Aura](https://console.neo4j.io/).
+
 ## Quick Start
 
 To spin up the project locally, follow these steps:
