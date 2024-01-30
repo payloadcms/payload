@@ -5,6 +5,7 @@ import type { Data, Field as FieldSchema } from 'payload/types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 
 import type { FormState } from '../../Form/types'
+import type { AddFieldStatePromiseArgs } from './addFieldStatePromise'
 
 import { addFieldStatePromise } from './addFieldStatePromise'
 
@@ -28,7 +29,7 @@ type Args = {
   includeSchema?: boolean
 
   /**
-   * operation is only needed for checking field conditions
+   * locale is only needed for checking field conditions
    */
   locale: string
   /**
@@ -87,14 +88,15 @@ export const iterateFields = async ({
   const promises = []
 
   fields.forEach((field) => {
-    const initialData = data
-
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
-      const passesCondition = Boolean(
-        (field?.admin?.condition
-          ? Boolean(field.admin.condition(fullData || {}, initialData || {}, { user }))
-          : true) && parentPassesCondition,
-      )
+      let passesCondition = true
+      if (!skipConditionChecks) {
+        passesCondition = Boolean(
+          (field?.admin?.condition
+            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user }))
+            : true) && parentPassesCondition,
+        )
+      }
 
       promises.push(
         addFieldStatePromise({

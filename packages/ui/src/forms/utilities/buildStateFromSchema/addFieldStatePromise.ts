@@ -11,7 +11,7 @@ import type { FormField, FormState } from '../../Form/types'
 
 import { iterateFields } from './iterateFields'
 
-type AddFieldStatePromiseArgs = {
+export type AddFieldStatePromiseArgs = {
   /**
    * if all parents are localized, then the field is localized
    */
@@ -82,6 +82,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     const validate = operation === 'update' ? field.validate : undefined
     const fieldState: FormField = {
       errorPaths: new Set(),
+      fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
       valid: true,
