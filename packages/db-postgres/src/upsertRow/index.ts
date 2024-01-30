@@ -286,7 +286,7 @@ export const upsertRow = async <T extends TypeWithID>({
               message: req.t('error:valueMustBeUnique'),
             },
           ],
-          req?.t ?? i18nInit(req.payload.config.i18n).t,
+          req.t,
         )
       : error
   }

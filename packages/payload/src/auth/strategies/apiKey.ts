@@ -38,8 +38,6 @@ export const APIKeyAuthentication =
           collection: collectionConfig.slug,
           depth: collectionConfig.auth.depth,
           overrideAccess: true,
-          // TODO(JAMES)(REVIEW): had to remove with new pattern
-          // req,
           where,
         })
 
