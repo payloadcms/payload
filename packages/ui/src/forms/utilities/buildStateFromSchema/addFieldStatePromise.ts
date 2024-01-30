@@ -11,43 +11,85 @@ import type { FormField, FormState } from '../../Form/types'
 
 import { iterateFields } from './iterateFields'
 
-type Args = {
+export type AddFieldStatePromiseArgs = {
+  /**
+   * if all parents are localized, then the field is localized
+   */
+  anyParentLocalized?: boolean
   data: Data
   errorPaths: Set<string>
   field: NonPresentationalField
+  /**
+   * You can use this to filter down to only `localized` fields that require transalation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
+   */
+  filter?: (args: AddFieldStatePromiseArgs) => boolean
+  /**
+   * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
+   */
+  forceFullValue?: boolean
   fullData: Data
   id: number | string
+  /**
+   * Whether the field schema should be included in the state
+   */
+  includeSchema?: boolean
   locale: string
+  /**
+   * Whether to omit parent fields in the state. @default false
+   */
+  omitParents?: boolean
   operation: 'create' | 'update'
   passesCondition: boolean
   path: string
   preferences: {
     [key: string]: unknown
   }
+  /**
+   * Whether to skip checking the field's condition. @default false
+   */
+  skipConditionChecks?: boolean
+  /**
+   * Whether to skip validating the field. @default false
+   */
+  skipValidation?: boolean
   state: FormState
   t: TFunction
   user: User
 }
 
-export const addFieldStatePromise = async ({
-  id,
-  data,
-  errorPaths: parentErrorPaths,
-  field,
-  fullData,
-  locale,
-  operation,
-  passesCondition,
-  path,
-  preferences,
-  state,
-  t,
-  user,
-}: Args): Promise<void> => {
+/**
+ * Flattens the fields schema and fields data.
+ * The output is the field path (e.g. array.0.name) mapped to a FormField object.
+ */
+export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Promise<void> => {
+  const {
+    id,
+    anyParentLocalized = false,
+    data,
+    errorPaths: parentErrorPaths,
+    field,
+    filter,
+    forceFullValue = false,
+    fullData,
+    includeSchema = false,
+    locale,
+    omitParents = false,
+    operation,
+    passesCondition,
+    path,
+    preferences,
+    skipConditionChecks = false,
+    skipValidation = false,
+    state,
+    t,
+    user,
+  } = args
+
   if (fieldAffectsData(field)) {
     const validate = operation === 'update' ? field.validate : undefined
     const fieldState: FormField = {
       errorPaths: new Set(),
+      fieldSchema: includeSchema ? field : undefined,
       initialValue: undefined,
       passesCondition,
       valid: true,
@@ -65,9 +107,9 @@ export const addFieldStatePromise = async ({
       data[field.name] = valueWithDefault
     }
 
-    let validationResult: boolean | string = true
+    let validationResult: string | true = true
 
-    if (typeof validate === 'function') {
+    if (typeof validate === 'function' && !skipValidation) {
       validationResult = await validate(data?.[field.name], {
         ...field,
         id,
@@ -98,24 +140,36 @@ export const addFieldStatePromise = async ({
             const rowPath = `${path}${field.name}.${i}.`
             row.id = row?.id || new ObjectId().toHexString()
 
-            state[`${rowPath}id`] = {
-              initialValue: row.id,
-              valid: true,
-              value: row.id,
+            if (!omitParents && (!filter || filter(args))) {
+              state[`${rowPath}id`] = {
+                fieldSchema: includeSchema
+                  ? field.fields.find((field) => 'name' in field && field.name === 'id')
+                  : undefined,
+                initialValue: row.id,
+                valid: true,
+                value: row.id,
+              }
             }
 
             acc.promises.push(
               iterateFields({
                 id,
+                anyParentLocalized: field.localized || anyParentLocalized,
                 data: row,
                 errorPaths: fieldState.errorPaths,
                 fields: field.fields,
+                filter,
+                forceFullValue,
                 fullData,
+                includeSchema,
                 locale,
+                omitParents,
                 operation,
                 parentPassesCondition: passesCondition,
                 path: rowPath,
                 preferences,
+                skipConditionChecks,
+                skipValidation,
                 state,
                 t,
                 user,
@@ -148,8 +202,8 @@ export const addFieldStatePromise = async ({
           fieldState.value = null
           fieldState.initialValue = null
         } else {
-          fieldState.value = arrayValue.length
-          fieldState.initialValue = arrayValue.length
+          fieldState.value = forceFullValue ? arrayValue : arrayValue.length
+          fieldState.initialValue = forceFullValue ? arrayValue : arrayValue.length
 
           if (arrayValue.length > 0) {
             fieldState.disableFormData = true
@@ -159,7 +213,9 @@ export const addFieldStatePromise = async ({
         fieldState.rows = rowMetadata
 
         // Add field to state
-        state[`${path}${field.name}`] = fieldState
+        if (!omitParents && (!filter || filter(args))) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -175,36 +231,60 @@ export const addFieldStatePromise = async ({
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
 
-              state[`${rowPath}id`] = {
-                initialValue: row.id,
-                valid: true,
-                value: row.id,
-              }
+              if (!omitParents && (!filter || filter(args))) {
+                state[`${rowPath}id`] = {
+                  fieldSchema: includeSchema
+                    ? block.fields.find(
+                        (blockField) => 'name' in blockField && blockField.name === 'id',
+                      )
+                    : undefined,
+                  initialValue: row.id,
+                  valid: true,
+                  value: row.id,
+                }
 
-              state[`${rowPath}blockType`] = {
-                initialValue: row.blockType,
-                valid: true,
-                value: row.blockType,
-              }
+                state[`${rowPath}blockType`] = {
+                  fieldSchema: includeSchema
+                    ? block.fields.find(
+                        (blockField) => 'name' in blockField && blockField.name === 'blockType',
+                      )
+                    : undefined,
+                  initialValue: row.blockType,
+                  valid: true,
+                  value: row.blockType,
+                }
 
-              state[`${rowPath}blockName`] = {
-                initialValue: row.blockName,
-                valid: true,
-                value: row.blockName,
+                state[`${rowPath}blockName`] = {
+                  fieldSchema: includeSchema
+                    ? block.fields.find(
+                        (blockField) => 'name' in blockField && blockField.name === 'blockName',
+                      )
+                    : undefined,
+                  initialValue: row.blockName,
+                  valid: true,
+                  value: row.blockName,
+                }
               }
 
               acc.promises.push(
                 iterateFields({
                   id,
+                  anyParentLocalized: field.localized || anyParentLocalized,
                   data: row,
                   errorPaths: fieldState.errorPaths,
                   fields: block.fields,
+                  filter,
+                  forceFullValue,
                   fullData,
+                  includeSchema,
                   locale,
+                  omitParents,
                   operation,
                   parentPassesCondition: passesCondition,
                   path: rowPath,
                   preferences,
+                  skipConditionChecks,
+                  skipValidation,
                   state,
                   t,
                   user,
@@ -239,8 +319,8 @@ export const addFieldStatePromise = async ({
           fieldState.value = null
           fieldState.initialValue = null
         } else {
-          fieldState.value = blocksValue.length
-          fieldState.initialValue = blocksValue.length
+          fieldState.value = forceFullValue ? blocksValue : blocksValue.length
+          fieldState.initialValue = forceFullValue ? blocksValue : blocksValue.length
 
           if (blocksValue.length > 0) {
             fieldState.disableFormData = true
@@ -250,7 +330,9 @@ export const addFieldStatePromise = async ({
         fieldState.rows = rowMetadata
 
         // Add field to state
-        state[`${path}${field.name}`] = fieldState
+        if (!omitParents && (!filter || filter(args))) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -258,15 +340,22 @@ export const addFieldStatePromise = async ({
       case 'group': {
         await iterateFields({
           id,
+          anyParentLocalized: field.localized || anyParentLocalized,
           data: data?.[field.name] || {},
           errorPaths: parentErrorPaths,
           fields: field.fields,
+          filter,
+          forceFullValue,
           fullData,
+          includeSchema,
           locale,
+          omitParents,
           operation,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
           preferences,
+          skipConditionChecks,
+          skipValidation,
           state,
           t,
           user,
@@ -326,7 +415,9 @@ export const addFieldStatePromise = async ({
           fieldState.initialValue = relationshipValue
         }
 
-        state[`${path}${field.name}`] = fieldState
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -339,7 +430,9 @@ export const addFieldStatePromise = async ({
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
-        state[`${path}${field.name}`] = fieldState
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -349,7 +442,9 @@ export const addFieldStatePromise = async ({
         fieldState.initialValue = valueWithDefault
 
         // Add field to state
-        state[`${path}${field.name}`] = fieldState
+        if (!filter || filter(args)) {
+          state[`${path}${field.name}`] = fieldState
+        }
 
         break
       }
@@ -358,15 +453,22 @@ export const addFieldStatePromise = async ({
     // Handle field types that do not use names (row, etc)
     await iterateFields({
       id,
+      anyParentLocalized: field.localized || anyParentLocalized,
       data,
       errorPaths: parentErrorPaths,
       fields: field.fields,
+      filter,
+      forceFullValue,
       fullData,
+      includeSchema,
       locale,
+      omitParents,
       operation,
       parentPassesCondition: passesCondition,
       path,
       preferences,
+      skipConditionChecks,
+      skipValidation,
       state,
       t,
       user,
@@ -375,15 +477,22 @@ export const addFieldStatePromise = async ({
     const promises = field.tabs.map((tab) =>
       iterateFields({
         id,
+        anyParentLocalized: tab.localized || anyParentLocalized,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         errorPaths: parentErrorPaths,
         fields: tab.fields,
+        filter,
+        forceFullValue,
         fullData,
+        includeSchema,
         locale,
+        omitParents,
         operation,
         parentPassesCondition: passesCondition,
         path: tabHasName(tab) ? `${path}${tab.name}.` : path,
         preferences,
+        skipConditionChecks,
+        skipValidation,
         state,
         t,
         user,
