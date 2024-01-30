@@ -12,7 +12,7 @@ import { fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../../
 import getValueWithDefault from '../../../../../fields/getDefaultValue'
 import { iterateFields } from './iterateFields'
 
-type Args = {
+export type AddFieldStatePromiseArgs = {
   /**
    * if all parents are localized, then the field is localized
    */
@@ -21,24 +21,24 @@ type Args = {
   data: Data
   field: NonPresentationalField
   /**
+   * You can use this to filter down to only `localized` fields that require transalation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
+   */
+  filter?: (args: AddFieldStatePromiseArgs) => boolean
+  /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
    */
   forceFullValue?: boolean
   fullData: Data
   id: number | string
   /**
-   * Whether to include parent fields in the state
-   */
-  includeParents?: boolean
-  /**
    * Whether the field schema should be included in the state
    */
   includeSchema?: boolean
-  /**
-   * Whether to include unlocalized fields in the state
-   */
-  includeUnlocalizedFields?: boolean
   locale: string
+  /**
+   * Whether to omit parent fields in the state. @default false
+   */
+  omitParents?: boolean
   operation: 'create' | 'update'
   passesCondition: boolean
   path: string
@@ -46,13 +46,13 @@ type Args = {
     [key: string]: unknown
   }
   /**
-   * Whether to check the field's condition
+   * Whether to skip checking the field's condition. @default false
    */
-  shouldCheckConditions?: boolean
+  skipConditionChecks?: boolean
   /**
-   * Whether to validate the field
+   * Whether to skip validating the field. @default false
    */
-  shouldValidate?: boolean
+  skipValidation?: boolean
   state: Fields
   t: TFunction
   user: User
@@ -62,28 +62,29 @@ type Args = {
  * Flattens the fields schema and fields data.
  * The output is the field path (e.g. array.0.name) mapped to a FormField object.
  */
-export const addFieldStatePromise = async ({
-  id,
-  anyParentLocalized = false,
-  config,
-  data,
-  field,
-  forceFullValue = false,
-  fullData,
-  includeParents = true,
-  includeSchema = false,
-  includeUnlocalizedFields = true,
-  locale,
-  operation,
-  passesCondition,
-  path,
-  preferences,
-  shouldCheckConditions = true,
-  shouldValidate = true,
-  state,
-  t,
-  user,
-}: Args): Promise<void> => {
+export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Promise<void> => {
+  const {
+    id,
+    anyParentLocalized = false,
+    config,
+    data,
+    field,
+    filter,
+    forceFullValue = false,
+    fullData,
+    includeSchema = false,
+    locale,
+    omitParents = false,
+    operation,
+    passesCondition,
+    path,
+    preferences,
+    skipConditionChecks = false,
+    skipValidation = false,
+    state,
+    t,
+    user,
+  } = args
   if (fieldAffectsData(field)) {
     const fieldState: FormField = {
       condition: field.admin?.condition,
@@ -108,7 +109,7 @@ export const addFieldStatePromise = async ({
 
     let validationResult: string | true = true
 
-    if (typeof fieldState.validate === 'function' && shouldValidate) {
+    if (typeof fieldState.validate === 'function' && !skipValidation) {
       validationResult = await fieldState.validate(data?.[field.name], {
         ...field,
         id,
@@ -136,10 +137,7 @@ export const addFieldStatePromise = async ({
             const rowPath = `${path}${field.name}.${i}.`
             row.id = row?.id || new ObjectID().toHexString()
 
-            if (
-              includeParents &&
-              (includeUnlocalizedFields || anyParentLocalized || field.localized)
-            ) {
+            if (!omitParents && (!filter || filter(args))) {
               state[`${rowPath}id`] = {
                 fieldSchema: includeSchema
                   ? field.fields.find((field) => 'name' in field && field.name === 'id')
@@ -157,18 +155,18 @@ export const addFieldStatePromise = async ({
                 config,
                 data: row,
                 fields: field.fields,
+                filter,
                 forceFullValue,
                 fullData,
-                includeParents,
                 includeSchema,
-                includeUnlocalizedFields,
                 locale,
+                omitParents,
                 operation,
                 parentPassesCondition: passesCondition,
                 path: rowPath,
                 preferences,
-                shouldCheckConditions,
-                shouldValidate,
+                skipConditionChecks,
+                skipValidation,
                 state,
                 t,
                 user,
@@ -212,7 +210,7 @@ export const addFieldStatePromise = async ({
         fieldState.rows = rowMetadata
 
         // Add field to state
-        if (includeParents && (includeUnlocalizedFields || anyParentLocalized || field.localized)) {
+        if (!omitParents && (!filter || filter(args))) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -230,10 +228,7 @@ export const addFieldStatePromise = async ({
             if (block) {
               row.id = row?.id || new ObjectID().toHexString()
 
-              if (
-                includeParents &&
-                (includeUnlocalizedFields || anyParentLocalized || field.localized)
-              ) {
+              if (!omitParents && (!filter || filter(args))) {
                 state[`${rowPath}id`] = {
                   fieldSchema: includeSchema
                     ? block.fields.find(
@@ -275,18 +270,18 @@ export const addFieldStatePromise = async ({
                   config,
                   data: row,
                   fields: block.fields,
+                  filter,
                   forceFullValue,
                   fullData,
-                  includeParents,
                   includeSchema,
-                  includeUnlocalizedFields,
                   locale,
+                  omitParents,
                   operation,
                   parentPassesCondition: passesCondition,
                   path: rowPath,
                   preferences,
-                  shouldCheckConditions,
-                  shouldValidate,
+                  skipConditionChecks,
+                  skipValidation,
                   state,
                   t,
                   user,
@@ -332,7 +327,7 @@ export const addFieldStatePromise = async ({
         fieldState.rows = rowMetadata
 
         // Add field to state
-        if (includeParents && (includeUnlocalizedFields || anyParentLocalized || field.localized)) {
+        if (!omitParents && (!filter || filter(args))) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -346,18 +341,18 @@ export const addFieldStatePromise = async ({
           config,
           data: data?.[field.name] || {},
           fields: field.fields,
+          filter,
           forceFullValue,
           fullData,
-          includeParents,
           includeSchema,
-          includeUnlocalizedFields,
           locale,
+          omitParents,
           operation,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
           preferences,
-          shouldCheckConditions,
-          shouldValidate,
+          skipConditionChecks,
+          skipValidation,
           state,
           t,
           user,
@@ -417,7 +412,7 @@ export const addFieldStatePromise = async ({
           fieldState.initialValue = relationshipValue
         }
 
-        if (includeUnlocalizedFields || anyParentLocalized || field.localized) {
+        if (!filter || filter(args)) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -432,7 +427,7 @@ export const addFieldStatePromise = async ({
         fieldState.value = relationshipValue
         fieldState.initialValue = relationshipValue
 
-        if (includeUnlocalizedFields || anyParentLocalized || field.localized) {
+        if (!filter || filter(args)) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -444,7 +439,7 @@ export const addFieldStatePromise = async ({
         fieldState.initialValue = valueWithDefault
 
         // Add field to state
-        if (includeUnlocalizedFields || anyParentLocalized || field.localized) {
+        if (!filter || filter(args)) {
           state[`${path}${field.name}`] = fieldState
         }
 
@@ -459,18 +454,18 @@ export const addFieldStatePromise = async ({
       config,
       data,
       fields: field.fields,
+      filter,
       forceFullValue,
       fullData,
-      includeParents,
       includeSchema,
-      includeUnlocalizedFields,
       locale,
+      omitParents,
       operation,
       parentPassesCondition: passesCondition,
       path,
       preferences,
-      shouldCheckConditions,
-      shouldValidate,
+      skipConditionChecks,
+      skipValidation,
       state,
       t,
       user,
@@ -483,18 +478,18 @@ export const addFieldStatePromise = async ({
         config,
         data: tabHasName(tab) ? data?.[tab.name] : data,
         fields: tab.fields,
+        filter,
         forceFullValue,
         fullData,
-        includeParents,
         includeSchema,
-        includeUnlocalizedFields,
         locale,
+        omitParents,
         operation,
         parentPassesCondition: passesCondition,
         path: tabHasName(tab) ? `${path}${tab.name}.` : path,
         preferences,
-        shouldCheckConditions,
-        shouldValidate,
+        skipConditionChecks,
+        skipValidation,
         state,
         t,
         user,

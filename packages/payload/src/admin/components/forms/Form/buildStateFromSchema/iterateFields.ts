@@ -4,6 +4,7 @@ import type { User } from '../../../../../auth'
 import type { SanitizedConfig } from '../../../../../config/types'
 import type { Field as FieldSchema } from '../../../../../fields/config/types'
 import type { Data, Fields } from '../types'
+import type { AddFieldStatePromiseArgs } from './addFieldStatePromise'
 
 import { fieldIsPresentationalOnly } from '../../../../../fields/config/types'
 import { addFieldStatePromise } from './addFieldStatePromise'
@@ -19,6 +20,7 @@ type Args = {
   config?: SanitizedConfig
   data: Data
   fields: FieldSchema[]
+  filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
    * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
    */
@@ -26,21 +28,18 @@ type Args = {
   fullData: Data
   id?: number | string
   /**
-   * Whether to include parent fields in the state. @default true
-   */
-  includeParents?: boolean
-  /**
    * Whether the field schema should be included in the state. @default false
    */
   includeSchema?: boolean
-  /**
-   * Whether to include unlocalized fields in the state. @default true
-   */
-  includeUnlocalizedFields?: boolean
+
   /**
    * operation is only needed for checking field conditions
    */
   locale: string
+  /**
+   * Whether to omit parent fields in the state. @default false
+   */
+  omitParents?: boolean
   /**
    * operation is only needed for validation
    */
@@ -54,13 +53,13 @@ type Args = {
     [key: string]: unknown
   }
   /**
-   * Whether to check the field's condition. @default true
+   * Whether to skip checking the field's condition. @default false
    */
-  shouldCheckConditions?: boolean
+  skipConditionChecks?: boolean
   /**
-   * Whether to validate the field. @default true
+   * Whether to skip validating the field. @default false
    */
-  shouldValidate?: boolean
+  skipValidation?: boolean
   state?: Fields
   t: TFunction
   user: User
@@ -75,18 +74,18 @@ export const iterateFields = async ({
   config,
   data,
   fields,
+  filter,
   forceFullValue = false,
   fullData,
-  includeParents = true,
   includeSchema = false,
-  includeUnlocalizedFields = true,
   locale,
+  omitParents = false,
   operation,
   parentPassesCondition = true,
   path = '',
   preferences,
-  shouldCheckConditions = true,
-  shouldValidate = true,
+  skipConditionChecks = false,
+  skipValidation = false,
   state = {},
   t,
   user,
@@ -95,7 +94,7 @@ export const iterateFields = async ({
   fields.forEach((field) => {
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
       let passesCondition = true
-      if (shouldCheckConditions) {
+      if (!skipConditionChecks) {
         passesCondition = Boolean(
           (field?.admin?.condition
             ? Boolean(field.admin.condition(fullData || {}, data || {}, { user }))
@@ -110,18 +109,18 @@ export const iterateFields = async ({
           config,
           data,
           field,
+          filter,
           forceFullValue,
           fullData,
-          includeParents,
           includeSchema,
-          includeUnlocalizedFields,
           locale,
+          omitParents,
           operation,
           passesCondition,
           path,
           preferences,
-          shouldCheckConditions,
-          shouldValidate,
+          skipConditionChecks,
+          skipValidation,
           state,
           t,
           user,
