@@ -1387,6 +1387,9 @@ importers:
       i18next:
         specifier: 22.5.1
         version: 22.5.1
+      json-schema:
+        specifier: ^0.4.0
+        version: 0.4.0
       lexical:
         specifier: 0.12.6
         version: 0.12.6
@@ -1412,6 +1415,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config-payload
+      '@types/json-schema':
+        specifier: 7.0.12
+        version: 7.0.12
       '@types/node':
         specifier: 20.6.2
         version: 20.6.2
@@ -12969,6 +12975,10 @@ packages:
 
   /json-schema-typed@7.0.3:
     resolution: {integrity: sha512-7DE8mpG+/fVw+dTpjbxnx47TaMnDfOI1jwft9g1VybltZCduyRQPJPvc+zzKY9WPHxhPWczyFuYa6I8Mw4iU5A==}
+    dev: false
+
+  /json-schema@0.4.0:
+    resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
     dev: false
 
   /json-stable-stringify-without-jsonify@1.0.1:

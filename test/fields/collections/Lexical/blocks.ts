@@ -73,6 +73,7 @@ export const TextBlock: Block = {
 }
 
 export const RadioButtonsBlock: Block = {
+  interfaceName: 'LexicalBlocksRadioButtonsBlock',
   fields: [
     {
       name: 'radioButtons',
