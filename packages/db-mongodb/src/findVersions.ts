@@ -79,6 +79,7 @@ export const findVersions: FindVersions = async function findVersions(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
+          ...options,
           hint: { _id: 1 },
         }),
       )

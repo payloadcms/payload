@@ -50,6 +50,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       drizzle: undefined,
       enums: {},
       fieldConstraints: {},
+      logger: args.logger,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,

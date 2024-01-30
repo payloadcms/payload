@@ -1,6 +1,7 @@
+import type { BlockField } from 'payload/types'
+
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { BlockField } from "payload/dist/fields/config/types";
 
 require('isomorphic-fetch')
 
@@ -39,7 +40,7 @@ describe('Config', () => {
 
     it('allows a custom field in collection fields', () => {
       const [collection] = payload.config.collections
-      const [field,] = collection.fields
+      const [field] = collection.fields
 
       expect(field.custom).toEqual({ description: 'The title of this page' })
     })
@@ -48,7 +49,9 @@ describe('Config', () => {
       const [collection] = payload.config.collections
       const [, blocksField] = collection.fields
 
-      expect((blocksField as BlockField).blocks[0].custom).toEqual({ description: 'The blockOne of this page' })
+      expect((blocksField as BlockField).blocks[0].custom).toEqual({
+        description: 'The blockOne of this page',
+      })
     })
   })
 

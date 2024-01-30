@@ -30,6 +30,7 @@ const seo =
             },
             label: 'Overview',
           },
+          // @ts-expect-error
           {
             name: 'title',
             type: 'text',
@@ -39,6 +40,7 @@ const seo =
               },
             },
             localized: true,
+            ...(pluginConfig?.fieldOverrides?.title ?? {}),
           },
           {
             name: 'description',
@@ -49,6 +51,7 @@ const seo =
               },
             },
             localized: true,
+            ...(pluginConfig?.fieldOverrides?.description ?? {}),
           },
           ...(pluginConfig?.uploadsCollection
             ? [
@@ -66,6 +69,7 @@ const seo =
                   label: 'Meta Image',
                   localized: true,
                   relationTo: pluginConfig?.uploadsCollection,
+                  ...(pluginConfig?.fieldOverrides?.image ?? {}),
                 } as Field,
               ]
             : []),
@@ -81,6 +85,7 @@ const seo =
             label: 'Preview',
           },
         ],
+        interfaceName: pluginConfig.interfaceName,
         label: 'SEO',
       },
     ]

@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
 
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, like, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { APIError } from 'payload/errors'
 import { fieldAffectsData, tabHasName } from 'payload/types'
@@ -317,20 +317,14 @@ export const getTableColumnFromPath = ({
 
         // Join in the relationships table
         joinAliases.push({
-          condition: eq(
-            (aliasTable || adapter.tables[rootTableName]).id,
-            aliasRelationshipTable.parent,
+          condition: and(
+            eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+            like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
           ),
           table: aliasRelationshipTable,
         })
 
         selectFields[`${relationTableName}.path`] = aliasRelationshipTable.path
-
-        constraints.push({
-          columnName: 'path',
-          table: aliasRelationshipTable,
-          value: `${constraintPath}${field.name}`,
-        })
 
         let newAliasTable
 
@@ -428,7 +422,7 @@ export const getTableColumnFromPath = ({
             columnName: `${columnPrefix}${field.name}`,
             constraints,
             field,
-            pathSegments: pathSegments,
+            pathSegments,
             table: targetTable,
           }
         }

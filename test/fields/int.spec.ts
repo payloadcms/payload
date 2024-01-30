@@ -112,7 +112,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
@@ -413,7 +413,7 @@ describe('Fields', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
   })
@@ -643,6 +643,14 @@ describe('Fields', () => {
         collection,
       })
 
+      expect(result.items[0]).toMatchObject({
+        subArray: [
+          {
+            text: subArrayText,
+          },
+        ],
+        text: 'test',
+      })
       expect(result.items[0].subArray[0].text).toStrictEqual(subArrayText)
     })
 
@@ -706,6 +714,15 @@ describe('Fields', () => {
     it('should create with defaultValue', async () => {
       expect(document.group.defaultParent).toStrictEqual(groupDefaultValue)
       expect(document.group.defaultChild).toStrictEqual(groupDefaultChild)
+    })
+
+    it('should not have duplicate keys', async () => {
+      expect(document.arrayOfGroups[0]).toMatchObject({
+        id: expect.any(String),
+        groupItem: {
+          text: 'Hello world',
+        },
+      })
     })
   })
 

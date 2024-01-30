@@ -207,6 +207,16 @@ export async function parseParams({
                   break
                 }
 
+                if (operator === 'equals' && queryValue === null) {
+                  constraints.push(isNull(rawColumn || table[columnName]))
+                  break
+                }
+
+                if (operator === 'not_equals' && queryValue === null) {
+                  constraints.push(isNotNull(rawColumn || table[columnName]))
+                  break
+                }
+
                 constraints.push(
                   operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
                 )

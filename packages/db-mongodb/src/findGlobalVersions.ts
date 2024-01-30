@@ -82,6 +82,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
+          ...options,
           hint: { _id: 1 },
         }),
       )
