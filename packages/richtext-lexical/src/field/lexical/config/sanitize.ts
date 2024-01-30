@@ -12,6 +12,9 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
     floatingSelectToolbar: {
       sections: [],
     },
+    generatedTypes: {
+      modifyOutputSchemas: [],
+    },
     hooks: {
       afterReadPromises: [],
       load: [],
@@ -29,6 +32,9 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
   }
 
   features.forEach((feature) => {
+    if (feature?.generatedTypes?.modifyOutputSchema) {
+      sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
+    }
     if (feature.hooks) {
       if (feature.hooks.afterReadPromise) {
         sanitized.hooks.afterReadPromises = sanitized.hooks.afterReadPromises.concat(

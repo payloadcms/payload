@@ -10,6 +10,7 @@ export { combineMerge } from '../utilities/combineMerge'
 export {
   configToJSONSchema,
   entityToJSONSchema,
+  fieldsToJSONSchema,
   withNullableJSONSchemaType,
 } from '../utilities/configToJSONSchema'
 
