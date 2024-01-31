@@ -16,7 +16,7 @@ const useTitle = (args: {
 
   let title: string = ''
 
-  const field = useFormFields(([formFields]) => formFields[useAsTitle])
+  const field = useFormFields(([fields]) => (fields && fields?.[useAsTitle]) || null)
 
   if (useAsTitle) {
     title = formatDocTitle({

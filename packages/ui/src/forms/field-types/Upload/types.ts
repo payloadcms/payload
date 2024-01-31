@@ -1,7 +1,9 @@
-import type { FieldTypes } from 'payload/config'
-import type { UploadField } from 'payload/types'
+import { UploadField } from 'payload/types'
+import { FormFieldBase } from '../shared'
 
-export type Props = Omit<UploadField, 'type'> & {
-  fieldTypes: FieldTypes
+export type Props = FormFieldBase & {
   path?: string
+  name?: string
+  filterOptions?: UploadField['filterOptions']
+  relationTo?: UploadField['relationTo']
 }

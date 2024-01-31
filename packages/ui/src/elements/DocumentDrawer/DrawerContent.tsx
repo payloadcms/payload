@@ -1,5 +1,4 @@
-// TODO: fix this file
-// @ts-nocheck
+'use client'
 import { useModal } from '@faceless-ui/modal'
 import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -12,7 +11,6 @@ import type { DocumentDrawerProps } from './types'
 import { baseClass } from '.'
 import { getTranslation } from '@payloadcms/translations'
 import usePayloadAPI from '../../hooks/usePayloadAPI'
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
 import { fieldTypes } from '../../forms/field-types'
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
 import { X } from '../../icons/X'
@@ -23,10 +21,12 @@ import { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentI
 import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useLocale } from '../../providers/Locale'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
-// import DefaultEdit from '../../views/collections/Edit/Default'
 import { formatFields } from '../../utilities/formatFields'
 import { Button } from '../Button'
 import IDLabel from '../IDLabel'
+import type { EditViewProps } from '../../views/types'
+import { useFieldMaps } from '../../providers/FieldMapsProvider'
+import { DefaultEditView } from '../../views/Edit'
 
 const Content: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
@@ -41,8 +41,11 @@ const Content: React.FC<DocumentDrawerProps> = ({
     serverURL,
   } = config
 
+  const fieldMaps = useFieldMaps()
+  const fieldMap = fieldMaps[collectionSlug]
+
   const { closeModal, modalState, toggleModal } = useModal()
-  const { code: locale } = useLocale()
+  const locale = useLocale()
   const { user } = useAuth()
   const [internalState, setInternalState] = useState<FormState>()
   const { i18n, t } = useTranslation()
@@ -55,23 +58,23 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const { admin: { components: { views: { Edit } = {} } = {} } = {}, fields: fieldsFromConfig } =
     collectionConfig
 
-  const { id, docPermissions, getDocPreferences } = useDocumentInfo()
+  const { id, docPermissions } = useDocumentInfo()
 
   // The component definition could come from multiple places in the config
   // we need to cascade into the proper component from the top-down
   // 1. "components.Edit"
   // 2. "components.Edit.Default"
   // 3. "components.Edit.Default.Component"
-  const CustomEditView =
-    typeof Edit === 'function'
-      ? Edit
-      : typeof Edit === 'object' && typeof Edit.Default === 'function'
-      ? Edit.Default
-      : typeof Edit?.Default === 'object' &&
-        'Component' in Edit.Default &&
-        typeof Edit.Default.Component === 'function'
-      ? Edit.Default.Component
-      : undefined
+  // const CustomEditView =
+  //   typeof Edit === 'function'
+  //     ? Edit
+  //     : typeof Edit === 'object' && typeof Edit.Default === 'function'
+  //     ? Edit.Default
+  //     : typeof Edit?.Default === 'object' &&
+  //       'Component' in Edit.Default &&
+  //       typeof Edit.Default.Component === 'function'
+  //     ? Edit.Default.Component
+  //     : undefined
 
   const [fields, setFields] = useState(() => formatFields(fieldsFromConfig, true))
 
@@ -85,31 +88,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
   useEffect(() => {
     setFields(formatFields(fields, true))
   }, [collectionSlug, collectionConfig])
-
-  useEffect(() => {
-    if (isLoadingDocument || hasInitializedState.current) {
-      return
-    }
-
-    const awaitInitialState = async () => {
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        id,
-        config,
-        data,
-        fieldSchema: fields,
-        locale,
-        operation: id ? 'update' : 'create',
-        preferences,
-        t,
-        user,
-      })
-      setInternalState(state)
-    }
-
-    awaitInitialState()
-    hasInitializedState.current = true
-  }, [data, fields, id, user, locale, isLoadingDocument, t, getDocPreferences, config])
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
@@ -138,51 +116,55 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   const isLoading = !internalState || !docPermissions || isLoadingDocument
 
+  const componentProps: EditViewProps = {
+    id,
+    action,
+    apiURL,
+    // customHeader: (
+    //   <div className={`${baseClass}__header`}>
+    //     <div className={`${baseClass}__header-content`}>
+    //       <h2 className={`${baseClass}__header-text`}>
+    //         {!customHeader
+    //           ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
+    //               label: getTranslation(collectionConfig.labels.singular, i18n),
+    //             })
+    //           : customHeader}
+    //       </h2>
+    //       <Button
+    //         aria-label={t('general:close')}
+    //         buttonStyle="none"
+    //         className={`${baseClass}__header-close`}
+    //         onClick={() => toggleModal(drawerSlug)}
+    //       >
+    //         <X />
+    //       </Button>
+    //     </div>
+    //     {id && <IDLabel id={id.toString()} />}
+    //   </div>
+    // ),
+    data,
+    disableActions: true,
+    disableLeaveWithoutSaving: true,
+    hasSavePermission,
+    isEditing,
+    // isLoading,
+    // me: true,
+    // onSave,
+    // permissions: docPermissions,
+    collectionSlug: collectionConfig.slug,
+    docPermissions: docPermissions as CollectionPermission,
+    docPreferences: null,
+    user,
+    fieldMap,
+    updatedAt: data?.updatedAt,
+    locale,
+  }
+
   return (
     <RenderCustomComponent
-      CustomComponent={CustomEditView}
-      // DefaultComponent={DefaultEdit}
-      DefaultComponent={null}
-      componentProps={{
-        id,
-        action,
-        apiURL,
-        collection: collectionConfig,
-        customHeader: (
-          <div className={`${baseClass}__header`}>
-            <div className={`${baseClass}__header-content`}>
-              <h2 className={`${baseClass}__header-text`}>
-                {!customHeader
-                  ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
-                      label: getTranslation(collectionConfig.labels.singular, i18n),
-                    })
-                  : customHeader}
-              </h2>
-              <Button
-                aria-label={t('general:close')}
-                buttonStyle="none"
-                className={`${baseClass}__header-close`}
-                onClick={() => toggleModal(drawerSlug)}
-              >
-                <X />
-              </Button>
-            </div>
-            {id && <IDLabel id={id.toString()} />}
-          </div>
-        ),
-        data,
-        disableActions: true,
-        disableLeaveWithoutSaving: true,
-        disableRoutes: true,
-        fieldTypes,
-        hasSavePermission,
-        internalState,
-        isEditing,
-        isLoading,
-        me: true,
-        onSave,
-        permissions: docPermissions,
-      }}
+      // CustomComponent={CustomEditView}
+      DefaultComponent={DefaultEditView}
+      componentProps={componentProps}
     />
   )
 }
@@ -211,7 +193,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   )
 
   return (
-    <DocumentInfoProvider collection={collectionConfig} id={id}>
+    <DocumentInfoProvider collectionSlug={collectionSlug} id={id}>
       <Content {...props} onSave={onSave} />
     </DocumentInfoProvider>
   )

@@ -5,11 +5,11 @@ import useThrottledEffect from '../../hooks/useThrottledEffect'
 import { useAllFormFields, useFormSubmitted } from '../Form/context'
 import { getFieldStateFromPaths } from './getFieldStateFromPaths'
 import { buildPathSegments } from './buildPathSegments'
-import { buildFieldMap } from '../RenderFields/buildFieldMap'
+import { FieldMap } from '../RenderFields/buildFieldMaps/types'
 
 type TrackSubSchemaErrorCountProps = {
   path: string
-  fieldMap?: ReturnType<typeof buildFieldMap>
+  fieldMap?: FieldMap
   setErrorCount: (count: number) => void
 }
 

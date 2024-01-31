@@ -1,3 +1,4 @@
+'use client'
 import React, { Fragment } from 'react'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
@@ -14,17 +15,18 @@ import { SetStepNav } from './SetStepNav'
 // import { Upload } from '../Upload'
 import { EditViewProps } from '../types'
 import { getFormStateFromServer } from './action'
-import { buildFieldMap } from '../../forms/RenderFields/buildFieldMap'
+import { Upload } from './Upload'
+import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 
 import './index.scss'
 
 const baseClass = 'collection-edit'
 
-export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
+export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const {
     action,
     apiURL,
-    config,
     // customHeader,
     data,
     formState: initialState,
@@ -34,13 +36,22 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     docPermissions,
     user,
     locale,
-    i18n,
+    fieldMap,
   } = props
 
-  const collectionConfig = 'collectionConfig' in props ? props.collectionConfig : undefined
-  const globalConfig = 'globalConfig' in props ? props.globalConfig : undefined
-  const fields = collectionConfig?.fields || globalConfig?.fields || []
+  const { i18n } = useTranslation()
+
+  const config = useConfig()
+
+  const collectionConfig =
+    'collectionSlug' in props &&
+    config.collections.find((collection) => collection.slug === props.collectionSlug)
+
+  const globalConfig =
+    'globalSlug' in props && config.globals.find((global) => global.slug === props.globalSlug)
+
   const auth = collectionConfig ? collectionConfig.auth : undefined
+  const upload = collectionConfig ? collectionConfig.upload : undefined
   const id = 'id' in props ? props.id : undefined
   const hasSavePermission = 'hasSavePermission' in props ? props.hasSavePermission : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined
@@ -101,12 +112,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     user,
   })
 
-  const fieldMap = buildFieldMap({
-    permissions: docPermissions.fields,
-    fieldSchema: fields,
-    operation: isEditing ? 'update' : 'create',
-    readOnly: !hasSavePermission,
-  })
+  console.log('collectionConfig', collectionConfig)
 
   return (
     <main className={classes}>
@@ -144,7 +150,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
       /> */}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetStepNav
-            collectionSlug={collectionConfig?.slug}
+            collectionSlug={collectionConfig?.slug || globalConfig?.slug}
             useAsTitle={collectionConfig?.admin?.useAsTitle}
             id={id}
             isEditing={isEditing || false}
@@ -152,15 +158,13 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
           />
           <DocumentControls
             apiURL={apiURL}
-            config={config}
-            collectionConfig={collectionConfig}
+            slug={collectionConfig?.slug}
             data={data}
             disableActions={disableActions}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
             permissions={docPermissions}
-            i18n={i18n}
           />
           <DocumentFields
             BeforeFields={
@@ -177,7 +181,7 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
                     verify={auth.verify}
                   />
                 )}
-                {/* {upload && <Upload collection={collection} internalState={internalState} />} */}
+                {upload && <Upload uploadConfig={upload} />}
               </Fragment>
             }
             hasSavePermission={hasSavePermission}

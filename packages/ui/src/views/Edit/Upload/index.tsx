@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from '../../../providers/Translation'
 
@@ -50,8 +51,9 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
+  const { internalState, onChange, updatedAt, uploadConfig } = props
+
   const submitted = useFormSubmitted()
-  const { collection, internalState, onChange, updatedAt } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation()
@@ -114,10 +116,10 @@ export const Upload: React.FC<Props> = (props) => {
     'delete' in docPermissions &&
     docPermissions?.delete?.permission
 
-  const hasImageSizes = collection?.upload?.imageSizes?.length > 0
-  const hasResizeOptions = Boolean(collection?.upload?.resizeOptions)
+  const hasImageSizes = uploadConfig?.imageSizes?.length > 0
+  const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
 
-  const { collection: { upload: { crop: showCrop = true, focalPoint = true } } = {} } = props
+  const { crop: showCrop = true, focalPoint = true } = uploadConfig
 
   const showFocalPoint = focalPoint && (hasImageSizes || hasResizeOptions)
 
@@ -130,7 +132,7 @@ export const Upload: React.FC<Props> = (props) => {
       {doc.filename && !replacingFile && (
         <FileDetails
           canEdit={showCrop || showFocalPoint}
-          collection={collection}
+          uploadConfig={uploadConfig}
           doc={doc}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
@@ -143,7 +145,7 @@ export const Upload: React.FC<Props> = (props) => {
           {!value && (
             <Dropzone
               className={`${baseClass}__dropzone`}
-              mimeTypes={collection?.upload?.mimeTypes}
+              mimeTypes={uploadConfig?.mimeTypes}
               onChange={handleFileSelection}
             />
           )}
@@ -201,7 +203,7 @@ export const Upload: React.FC<Props> = (props) => {
           slug={sizePreviewSlug}
           title={t('upload:sizesFor', { label: doc?.filename })}
         >
-          <PreviewSizes collection={collection} doc={doc} />
+          <PreviewSizes uploadConfig={uploadConfig} doc={doc} />
         </Drawer>
       )}
     </div>

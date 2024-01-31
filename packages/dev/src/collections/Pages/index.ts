@@ -176,6 +176,12 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'upload',
+      label: 'Upload',
+      type: 'upload',
+      relationTo: 'media',
+    },
+    {
       name: 'array',
       label: 'Array',
       type: 'array',

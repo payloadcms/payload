@@ -1,46 +1,14 @@
 import React, { Fragment } from 'react'
 
 import type { FieldPermissions } from 'payload/auth'
-import type { BlockField, Field, FieldWithPath, TabsField } from 'payload/types'
-import DefaultError from '../Error'
-import DefaultLabel from '../Label'
-import DefaultDescription from '../FieldDescription'
+import type { Field, FieldWithPath } from 'payload/types'
+import DefaultError from '../../Error'
+import DefaultLabel from '../../Label'
+import DefaultDescription from '../../FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { fieldTypes } from '../field-types'
-import { FormFieldBase } from '../field-types/shared'
-
-export type ReducedField = {
-  type: keyof typeof fieldTypes
-  Field: React.ReactNode
-  fieldIsPresentational: boolean
-  fieldPermissions: FieldPermissions
-  isFieldAffectingData: boolean
-  name: string
-  readOnly: boolean
-  isSidebar: boolean
-  /**
-   * On `array`, `blocks`, `group`, `collapsible`, and `tabs` fields only
-   */
-  subfields?: ReducedField[]
-  /**
-   * On `tabs` fields only
-   */
-  tabs?: ReducedTab[]
-}
-
-export type ReducedTab = {
-  name?: string
-  label: TabsField['tabs'][0]['label']
-  subfields?: ReducedField[]
-}
-
-export type ReducedBlock = {
-  slug: string
-  subfields: ReducedField[]
-  labels: BlockField['labels']
-  imageAltText?: string
-  imageURL?: string
-}
+import { fieldTypes } from '../../field-types'
+import { FormFieldBase } from '../../field-types/shared'
+import { FieldMap, ReducedBlock, ReducedField, ReducedTab } from './types'
 
 export const buildFieldMap = (args: {
   fieldSchema: FieldWithPath[]
@@ -53,7 +21,7 @@ export const buildFieldMap = (args: {
     | FieldPermissions
   readOnly?: boolean
   parentPath?: string
-}): ReducedField[] => {
+}): FieldMap => {
   const {
     fieldSchema,
     filter,
@@ -63,7 +31,7 @@ export const buildFieldMap = (args: {
     parentPath,
   } = args
 
-  return fieldSchema.reduce((acc, field): ReducedField[] => {
+  return fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let FieldComponent = field.admin?.components?.Field || fieldTypes[field.type]
 
@@ -245,6 +213,7 @@ export const buildFieldMap = (args: {
           options: 'options' in field ? field.options : undefined,
           tabs,
           blocks,
+          relationTo: 'relationTo' in field ? field.relationTo : undefined,
         }
 
         const Field = <FieldComponent {...fieldComponentProps} />

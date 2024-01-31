@@ -1,11 +1,8 @@
+'use client'
 import React, { Fragment } from 'react'
 
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
-import type {
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import { formatDate } from '../../utilities/formatDate'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
@@ -20,7 +17,8 @@ import { Publish } from '../Publish'
 import { Save } from '../Save'
 import { SaveDraft } from '../SaveDraft'
 import Status from '../Status'
-import type { I18n } from '@payloadcms/translations'
+import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 
 import './index.scss'
 
@@ -30,37 +28,40 @@ export const DocumentControls: React.FC<{
   apiURL: string
   data?: any
   disableActions?: boolean
-  globalConfig?: SanitizedGlobalConfig
   hasSavePermission?: boolean
-  id?: string
+  id?: number | string
   isAccountView?: boolean
   isEditing?: boolean
   permissions: CollectionPermission | GlobalPermission | null
-  config: SanitizedConfig
-  collectionConfig?: SanitizedCollectionConfig
-  i18n: I18n
+  slug: SanitizedCollectionConfig['slug'] | SanitizedGlobalConfig['slug']
 }> = (props) => {
   const {
     id,
-    config,
-    collectionConfig,
     data,
     disableActions,
-    globalConfig,
     hasSavePermission,
     isAccountView,
     isEditing,
     permissions,
-    i18n,
+    slug,
   } = props
+
+  const { i18n } = useTranslation()
+
+  const config = useConfig()
+
+  const collectionConfig = config.collections.find((coll) => coll.slug === slug)
 
   const {
     admin: { dateFormat },
     routes: { admin: adminRoute },
   } = config
 
-  const hasCreatePermission = 'create' in permissions && permissions.create?.permission
-  const hasDeletePermission = 'delete' in permissions && permissions.delete?.permission
+  const hasCreatePermission =
+    permissions && 'create' in permissions && permissions.create?.permission
+
+  const hasDeletePermission =
+    permissions && 'delete' in permissions && permissions.delete?.permission
 
   const showDotMenu = Boolean(
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
@@ -214,7 +215,7 @@ export const DocumentControls: React.FC<{
                     {!collectionConfig?.admin?.disableDuplicate && isEditing && (
                       <DuplicateDocument
                         singularLabel={collectionConfig?.labels?.singular}
-                        id={id}
+                        id={id.toString()}
                         slug={collectionConfig?.slug}
                       />
                     )}
@@ -226,7 +227,7 @@ export const DocumentControls: React.FC<{
                     collectionSlug={collectionConfig?.slug}
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                     singularLabel={collectionConfig?.labels?.singular}
-                    id={id}
+                    id={id.toString()}
                   />
                 )}
               </PopupList.ButtonGroup>

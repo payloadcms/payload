@@ -90,7 +90,8 @@ const Auth: React.FC<Props> = (props) => {
       {!disableLocalStrategy && (
         <React.Fragment>
           <Email
-            admin={{ autoComplete: 'email', readOnly }}
+            autoComplete="email"
+            readOnly={readOnly}
             label={t('general:email')}
             name="email"
             required
@@ -147,8 +148,7 @@ const Auth: React.FC<Props> = (props) => {
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
-            i18n={i18n}
-            admin={{ readOnly }}
+            readOnly={readOnly}
             label={t('authentication:enableAPIKey')}
             name="enableAPIKey"
           />
@@ -156,12 +156,7 @@ const Auth: React.FC<Props> = (props) => {
         </div>
       )}
       {verify && (
-        <Checkbox
-          i18n={i18n}
-          admin={{ readOnly }}
-          label={t('authentication:verified')}
-          name="_verified"
-        />
+        <Checkbox readOnly={readOnly} label={t('authentication:verified')} name="_verified" />
       )}
     </div>
   )
