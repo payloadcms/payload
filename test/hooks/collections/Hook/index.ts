@@ -11,6 +11,13 @@ const Hooks: CollectionConfig = {
     update: () => true,
   },
   hooks: {
+    beforeOperation: [
+      ({ req }) => {
+        if (!req.transactionID) {
+          throw new Error('transactionID is missing in beforeOperation hook')
+        }
+      },
+    ],
     beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
     beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
     afterChange: [
