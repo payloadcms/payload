@@ -6,6 +6,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     doc,
     operation,
     req: { payload },
+    req,
     // @ts-expect-error
     searchConfig,
   } = args
@@ -60,6 +61,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
             ...dataToSave,
             priority: defaultPriority,
           },
+          req,
         })
       }
     }
@@ -70,6 +72,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         const searchDocQuery = await payload.find({
           collection: 'search',
           depth: 0,
+          req,
           where: {
             'doc.value': {
               equals: id,
@@ -94,6 +97,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
                 payload.delete({
                   id: duplicativeDocID,
                   collection: 'search',
+                  req,
                 }),
               ), // eslint-disable-line function-paren-newline
             )
@@ -116,6 +120,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
                   ...dataToSave,
                   priority: foundDoc.priority || defaultPriority,
                 },
+                req,
               })
             } catch (err: unknown) {
               payload.logger.error(`Error updating search document.`)
@@ -128,6 +133,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
               payload.delete({
                 id: searchDocID,
                 collection: 'search',
+                req,
               })
             } catch (err: unknown) {
               payload.logger.error(`Error deleting search document: ${err}`)
@@ -142,6 +148,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
                 ...dataToSave,
                 priority: defaultPriority,
               },
+              req,
             })
           } catch (err: unknown) {
             payload.logger.error(`Error creating search document: ${err}`)

@@ -13,10 +13,11 @@ const Search =
 
     if (collections) {
       const searchConfig: SearchConfig = {
-        ...incomingSearchConfig,
-        deleteDrafts: true,
-        syncDrafts: false,
         // write any config defaults here
+        deleteDrafts: true,
+        maxDepth: 0,
+        syncDrafts: false,
+        ...incomingSearchConfig,
       }
 
       // add afterChange and afterDelete hooks to every search-enabled collection
