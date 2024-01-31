@@ -28,6 +28,15 @@ export class AutoLinkNode extends LinkNode {
   }
 
   static importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
+    if (
+      serializedNode.version === 1 &&
+      typeof serializedNode.fields?.doc?.value === 'object' &&
+      serializedNode.fields?.doc?.value?.id
+    ) {
+      serializedNode.fields.doc.value = serializedNode.fields.doc.value.id
+      serializedNode.version = 2
+    }
+
     const node = $createAutoLinkNode({ fields: serializedNode.fields })
 
     node.setFormat(serializedNode.format)
@@ -40,7 +49,7 @@ export class AutoLinkNode extends LinkNode {
     return {
       ...super.exportJSON(),
       type: 'autolink',
-      version: 1,
+      version: 2,
     }
   }
 

@@ -32,6 +32,10 @@ export default buildConfig({
 
 NOTE: If your Payload config already has an email with transport, this will take precedence over Payload Cloud's email service.
 
+### From Domain
+
+After configuring, ensure that the `from` email address is from a domain you have access to. Payload Cloud will automatically give you permissions to use your deployed domain with the value available in `process.env.PAYLOAD_CLOUD_DEFAULT_DOMAIN`. If you have custom domains, your custom domains will also be whitelisted. Attempting to send from a domain you do not have access to will not succeed.
+
 ### Optional configuration
 
 If you wish to opt-out of any Payload cloud features, the plugin also accepts options to do so.
@@ -64,29 +68,19 @@ payloadCloud({
 
 ### Accessing File Storage from Local Environment
 
-This plugin works off of a specific set of environment variables in order to access your file resources. Here is this list with some prefilled.
+This plugin works off of a specific set of environment variables in order to access your file resources. The following values must be set in your local environment in order to access your file resources:
 
 ```txt
-PORT=3000
-MONGODB_URI=
 PAYLOAD_CLOUD=true
 PAYLOAD_CLOUD_ENVIRONMENT=prod
-PAYLOAD_CLOUD_BUCKET=
-PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID=
 PAYLOAD_CLOUD_COGNITO_USER_POOL_CLIENT_ID=
 PAYLOAD_CLOUD_COGNITO_USER_POOL_ID=
+PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID=
 PAYLOAD_CLOUD_PROJECT_ID=
-PAYLOAD_CLOUD_COGNITO_PASSWORD=
+PAYLOAD_CLOUD_BUCKET=
 PAYLOAD_CLOUD_BUCKET_REGION=
-
-PAYLOAD_SECRET=
+PAYLOAD_CLOUD_COGNITO_PASSWORD=
 ```
-
-- `MONGODB_URI` is on the the Database tab.
-- `PAYLOAD_CLOUD_PROJECT_ID` is from Settings -> Billing.
-- `PAYLOAD_SECRET` is from Settings -> Environment Variables
-
-The remaining values can be seen on your project's File Storage tab. You'll have to match up the values appropriately. We plan on adding the ability to easily copy these values in the near future.
 
 ## Future enhancements
 

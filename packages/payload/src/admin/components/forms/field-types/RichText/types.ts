@@ -32,9 +32,14 @@ type RichTextAdapterBase<
   i18nServer?: Resource
   outputSchema?: ({
     field,
+    interfaceNameDefinitions,
     isRequired,
   }: {
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    /**
+     * Allows you to define new top-level interfaces that can be re-used in the output schema.
+     */
+    interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
   }) => JSONSchema4
   populationPromise?: (data: {

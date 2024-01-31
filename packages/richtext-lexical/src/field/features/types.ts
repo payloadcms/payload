@@ -1,5 +1,6 @@
 import type { Transformer } from '@lexical/markdown'
 import type { Resource } from 'i18next'
+import type { JSONSchema4 } from 'json-schema'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
 import type { LexicalNodeReplacement } from 'lexical'
@@ -65,6 +66,25 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
 export type Feature = {
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
+  }
+  generatedTypes?: {
+    modifyOutputSchema: ({
+      currentSchema,
+      field,
+      interfaceNameDefinitions,
+      isRequired,
+    }: {
+      /**
+       * Current schema which will be modified by this function.
+       */
+      currentSchema: JSONSchema4
+      field: RichTextField<SerializedEditorState, AdapterProps>
+      /**
+       * Allows you to define new top-level interfaces that can be re-used in the output schema.
+       */
+      interfaceNameDefinitions: Map<string, JSONSchema4>
+      isRequired: boolean
+    }) => JSONSchema4
   }
   hooks?: {
     afterReadPromise?: ({
@@ -202,6 +222,27 @@ export type SanitizedFeatures = Required<
   enabledFeatures: string[]
   floatingSelectToolbar: {
     sections: FloatingToolbarSection[]
+  }
+  generatedTypes: {
+    modifyOutputSchemas: Array<
+      ({
+        currentSchema,
+        field,
+        interfaceNameDefinitions,
+        isRequired,
+      }: {
+        /**
+         * Current schema which will be modified by this function.
+         */
+        currentSchema: JSONSchema4
+        field: RichTextField<SerializedEditorState, AdapterProps>
+        /**
+         * Allows you to define new top-level interfaces that can be re-used in the output schema.
+         */
+        interfaceNameDefinitions: Map<string, JSONSchema4>
+        isRequired: boolean
+      }) => JSONSchema4
+    >
   }
   hooks: {
     afterReadPromises: Array<

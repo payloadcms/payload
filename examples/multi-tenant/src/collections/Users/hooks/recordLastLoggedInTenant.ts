@@ -11,6 +11,7 @@ export const recordLastLoggedInTenant: AfterLoginHook = async ({ req, user }) =>
       },
       depth: 0,
       limit: 1,
+      req,
     })
 
     if (relatedOrg.docs.length > 0) {
@@ -20,6 +21,7 @@ export const recordLastLoggedInTenant: AfterLoginHook = async ({ req, user }) =>
         data: {
           lastLoggedInTenant: relatedOrg.docs[0].id,
         },
+        req,
       })
     }
   } catch (err: unknown) {

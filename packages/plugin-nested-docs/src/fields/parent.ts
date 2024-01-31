@@ -9,23 +9,15 @@ export const createParentField = (
   >,
 ): SingleRelationshipField => ({
   name: 'parent',
-  relationTo,
-  type: 'relationship',
-  maxDepth: 1,
-  filterOptions: ({ id }) => {
-    if (id) {
-      return {
-        id: { not_equals: id },
-        'breadcrumbs.doc': { not_in: [id] },
-      }
-    }
-
-    return null
-  },
   admin: {
     position: 'sidebar',
     ...(overrides?.admin || {}),
   },
+  // filterOptions are assigned dynamically based on the pluginConfig
+  // filterOptions: parentFilterOptions(),
+  maxDepth: 1,
+  relationTo,
+  type: 'relationship',
   ...(overrides || {}),
 })
 

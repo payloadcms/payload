@@ -2,6 +2,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import AutosavePosts from './collections/Autosave'
+import CustomIDs from './collections/CustomIDs'
 import DisablePublish from './collections/DisablePublish'
 import DraftPosts from './collections/Drafts'
 import Posts from './collections/Posts'
@@ -24,7 +25,7 @@ export default buildConfigWithDefaults({
       },
     }),
   },
-  collections: [DisablePublish, Posts, AutosavePosts, DraftPosts, VersionPosts],
+  collections: [DisablePublish, Posts, AutosavePosts, DraftPosts, VersionPosts, CustomIDs],
   globals: [AutosaveGlobal, DraftGlobal, DisablePublishGlobal],
   indexSortableFields: true,
   localization: {

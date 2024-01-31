@@ -27,6 +27,27 @@ export default buildConfigWithDefaults({
           type: 'text',
           custom: { description: 'The title of this page' },
         },
+        {
+          name: 'myBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'blockOne',
+              fields: [
+                {
+                  name: 'blockOneField',
+                  type: 'text',
+                },
+                {
+                  name: 'blockTwoField',
+                  type: 'text',
+                },
+              ],
+              custom: { description: 'The blockOne of this page' },
+            },
+          ],
+          custom: { description: 'The blocks of this page' },
+        },
       ],
       custom: { externalLink: 'https://foo.bar' },
     },

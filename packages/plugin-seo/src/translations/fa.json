@@ -1,0 +1,22 @@
+{
+  "$schema": "./translation-schema.json",
+  "plugin-seo": {
+    "autoGenerate": "تولید خودکار",
+    "imageAutoGenerationTip": "این قابلیت، تصویر فعلی بارگذاری شده در مجموعه محتوای شما را بازیابی می‌کند",
+    "bestPractices": "آموزش بیشتر",
+    "lengthTipTitle": "این باید بین {{minLength}} و {{maxLength}} کلمه باشد. برای کمک در نوشتن عناوین متا با کیفیت، مراجعه کنید به ",
+    "lengthTipDescription": "این باید بین {{minLength}} و {{maxLength}} کلمه باشد. برای کمک در نوشتن توضیحات متا با کیفیت، مراجعه کنید به ",
+    "good": "خوب",
+    "tooLong": "خیلی طولانی",
+    "tooShort": "خیلی کوتاه",
+    "almostThere": "چیزیی باقی نمونده",
+    "characterCount": "{{current}}/{{minLength}}-{{maxLength}} کلمه، ",
+    "charactersToGo": "{{characters}} باقی مانده",
+    "charactersLeftOver": "{{characters}} باقی مانده",
+    "charactersTooMany": "{{characters}} بیش از حد",
+    "noImage": "بدون تصویر",
+    "checksPassing": "{{current}}/{{max}} بررسی‌ها با موفقیت انجام شده است",
+    "preview": "پیش‌نمایش",
+    "previewDescription": "فهرست نتایج ممکن است بر اساس محتوا و متناسب با کلمه کلیدی جستجو شده باشند"
+  }
+}

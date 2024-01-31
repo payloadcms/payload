@@ -29,7 +29,7 @@ describe('uploads', () => {
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadE2E(__dirname)
-    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
@@ -149,6 +149,33 @@ describe('uploads', () => {
     await expect(iconMeta).toContainText('16x16')
   })
 
+  test('should show draft uploads in the relation list', async () => {
+    await page.goto(relationURL.list)
+
+    // from the list edit the first document
+    await page.locator('.row-1 a').click()
+
+    // edit the versioned image
+    await page.locator('.field-versionedImage .icon--edit').click()
+
+    // fill the title with 'draft'
+    await page.locator('#field-title').fill('draft')
+
+    // save draft
+    await page.locator('#action-save-draft').click()
+
+    // close the drawer
+    await page.locator('.doc-drawer__header-close').click()
+
+    // remove the selected versioned image
+    await page.locator('.field-versionedImage .icon--x').click()
+
+    // choose from existing
+    await page.locator('.list-drawer__toggler').click()
+
+    await expect(page.locator('.cell-title')).toContainText('draft')
+  })
+
   test('should restrict mimetype based on filterOptions', async () => {
     await page.goto(audioURL.edit(audioDoc.id))
     await wait(200)
@@ -214,21 +241,21 @@ describe('uploads', () => {
   describe('image manipulation', () => {
     test('should crop image correctly', async () => {
       const positions = {
-        'top-left': {
-          focalX: 25,
-          focalY: 25,
-          dragX: 0,
-          dragY: 0,
-        },
         'bottom-right': {
-          focalX: 75,
-          focalY: 75,
           dragX: 800,
           dragY: 800,
+          focalX: 75,
+          focalY: 75,
+        },
+        'top-left': {
+          dragX: 0,
+          dragY: 0,
+          focalX: 25,
+          focalY: 25,
         },
       }
       const createFocalCrop = async (page: Page, position: 'bottom-right' | 'top-left') => {
-        const { focalX, focalY, dragX, dragY } = positions[position]
+        const { dragX, dragY, focalX, focalY } = positions[position]
         await page.goto(mediaURL.create)
 
         // select and upload file
