@@ -62,15 +62,13 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
 }
 
 const PreviewSizes: React.FC<{
-  collection: SanitizedCollectionConfig
+  uploadConfig: SanitizedCollectionConfig['upload']
   doc: Data & {
     sizes?: FileSizes
   }
   imageCacheTag?: string
-}> = ({ collection, doc, imageCacheTag }) => {
-  const {
-    upload: { imageSizes, staticURL },
-  } = collection
+}> = ({ uploadConfig, doc, imageCacheTag }) => {
+  const { imageSizes, staticURL } = uploadConfig
   const { sizes } = doc
 
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes))

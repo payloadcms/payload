@@ -11,7 +11,6 @@ import type { DocumentDrawerProps } from './types'
 import { baseClass } from '.'
 import { getTranslation } from '@payloadcms/translations'
 import usePayloadAPI from '../../hooks/usePayloadAPI'
-import { fieldTypes } from '../../forms/field-types'
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
 import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
@@ -27,6 +26,7 @@ import IDLabel from '../IDLabel'
 import type { EditViewProps } from '../../views/types'
 import { useFieldMaps } from '../../providers/FieldMapsProvider'
 import { DefaultEditView } from '../../views/Edit'
+import { Gutter } from '../Gutter'
 
 const Content: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
@@ -120,28 +120,28 @@ const Content: React.FC<DocumentDrawerProps> = ({
     id,
     action,
     apiURL,
-    // customHeader: (
-    //   <div className={`${baseClass}__header`}>
-    //     <div className={`${baseClass}__header-content`}>
-    //       <h2 className={`${baseClass}__header-text`}>
-    //         {!customHeader
-    //           ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
-    //               label: getTranslation(collectionConfig.labels.singular, i18n),
-    //             })
-    //           : customHeader}
-    //       </h2>
-    //       <Button
-    //         aria-label={t('general:close')}
-    //         buttonStyle="none"
-    //         className={`${baseClass}__header-close`}
-    //         onClick={() => toggleModal(drawerSlug)}
-    //       >
-    //         <X />
-    //       </Button>
-    //     </div>
-    //     {id && <IDLabel id={id.toString()} />}
-    //   </div>
-    // ),
+    CustomHeader: (
+      <Gutter className={`${baseClass}__header`}>
+        <div className={`${baseClass}__header-content`}>
+          <h2 className={`${baseClass}__header-text`}>
+            {!customHeader
+              ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
+                  label: getTranslation(collectionConfig.labels.singular, i18n),
+                })
+              : customHeader}
+          </h2>
+          <Button
+            aria-label={t('general:close')}
+            buttonStyle="none"
+            className={`${baseClass}__header-close`}
+            onClick={() => toggleModal(drawerSlug)}
+          >
+            <X />
+          </Button>
+        </div>
+        {id && <IDLabel id={id.toString()} />}
+      </Gutter>
+    ),
     data,
     disableActions: true,
     disableLeaveWithoutSaving: true,
@@ -150,7 +150,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
     // isLoading,
     // me: true,
     // onSave,
-    // permissions: docPermissions,
     collectionSlug: collectionConfig.slug,
     docPermissions: docPermissions as CollectionPermission,
     docPreferences: null,

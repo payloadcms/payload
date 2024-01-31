@@ -184,14 +184,11 @@ export const Document = async ({
     hasSavePermission,
     formState,
     isEditing,
-    permissions,
     docPermissions,
     docPreferences,
     updatedAt: data?.updatedAt?.toString(),
     user,
     locale,
-    params,
-    searchParams,
     fieldMap,
   }
 

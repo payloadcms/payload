@@ -51,13 +51,13 @@ export const UploadActions = ({ canEdit, showSizePreviews }) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const { internalState, onChange, updatedAt, uploadConfig } = props
+  const { onChange, updatedAt, uploadConfig, collectionSlug, initialState } = props
 
   const submitted = useFormSubmitted()
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation()
-  const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true))
+  const [doc, setDoc] = useState(reduceFieldsToValues(initialState || {}, true))
   const { docPermissions } = useDocumentInfo()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -89,9 +89,9 @@ export const Upload: React.FC<Props> = (props) => {
   }, [setValue])
 
   useEffect(() => {
-    setDoc(reduceFieldsToValues(internalState || {}, true))
+    setDoc(reduceFieldsToValues(initialState || {}, true))
     setReplacingFile(false)
-  }, [internalState])
+  }, [initialState])
 
   useEffect(() => {
     if (value instanceof File) {
@@ -133,6 +133,7 @@ export const Upload: React.FC<Props> = (props) => {
         <FileDetails
           canEdit={showCrop || showFocalPoint}
           uploadConfig={uploadConfig}
+          collectionSlug={collectionSlug}
           doc={doc}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}

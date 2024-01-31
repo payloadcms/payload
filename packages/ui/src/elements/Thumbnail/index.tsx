@@ -12,7 +12,7 @@ const baseClass = 'thumbnail'
 const Thumbnail: React.FC<Props> = (props) => {
   const {
     className = '',
-    collection,
+    uploadConfig,
     doc: { filename } = {},
     doc,
     fileSrc,
@@ -20,7 +20,7 @@ const Thumbnail: React.FC<Props> = (props) => {
     size,
   } = props
 
-  const thumbnailSRC = collection && doc ? useThumbnail(collection, doc) : fileSrc
+  const thumbnailSRC = uploadConfig && doc ? useThumbnail(uploadConfig, doc) : fileSrc
   const [src, setSrc] = useState(thumbnailSRC)
 
   const classes = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
@@ -29,7 +29,7 @@ const Thumbnail: React.FC<Props> = (props) => {
     if (thumbnailSRC) {
       setSrc(`${thumbnailSRC}${imageCacheTag ? `?${imageCacheTag}` : ''}`)
     }
-  }, [doc, collection, thumbnailSRC, fileSrc, imageCacheTag])
+  }, [thumbnailSRC, imageCacheTag])
 
   return (
     <div className={classes}>

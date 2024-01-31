@@ -27,7 +27,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const {
     action,
     apiURL,
-    // customHeader,
+    CustomHeader,
     data,
     formState: initialState,
     // isLoading,
@@ -112,8 +112,6 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     user,
   })
 
-  console.log('collectionConfig', collectionConfig)
-
   return (
     <main className={classes}>
       <OperationProvider operation={operation}>
@@ -148,6 +146,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
           i18n,
         )}`}
       /> */}
+          {CustomHeader}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetStepNav
             collectionSlug={collectionConfig?.slug || globalConfig?.slug}
@@ -181,7 +180,13 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
                     verify={auth.verify}
                   />
                 )}
-                {upload && <Upload uploadConfig={upload} />}
+                {upload && (
+                  <Upload
+                    uploadConfig={upload}
+                    collectionSlug={collectionConfig.slug}
+                    initialState={initialState}
+                  />
+                )}
               </Fragment>
             }
             hasSavePermission={hasSavePermission}

@@ -37,12 +37,6 @@ export type EditViewProps = (
   user: User | null | undefined
   locale: Locale
   formState?: FormState
-  permissions: Permissions
-  params?: {
-    segments?: string[]
-    collection?: string
-    global?: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
   fieldMap: FieldMap
+  CustomHeader?: React.ReactNode
 }
