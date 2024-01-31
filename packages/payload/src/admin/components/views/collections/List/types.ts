@@ -6,10 +6,10 @@ import type { Props as ListControlsProps } from '../../../elements/ListControls/
 import type { Props as PaginatorProps } from '../../../elements/Paginator/types'
 import type { Props as PerPageProps } from '../../../elements/PerPage'
 
-export type Props = {
+export type Props<T = any> = {
   collection: SanitizedCollectionConfig
   customHeader?: React.ReactNode
-  data: PaginatedDocs<any>
+  data: PaginatedDocs<T>
   handleDelete?: () => void
   handlePageChange?: PaginatorProps['onChange']
   handlePerPageChange?: PerPageProps['handleChange']
