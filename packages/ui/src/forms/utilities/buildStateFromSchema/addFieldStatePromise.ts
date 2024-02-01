@@ -5,7 +5,7 @@ import ObjectID from 'bson-objectid'
 
 import type { User } from 'payload/auth'
 import type { NonPresentationalField, Data, SanitizedConfig } from 'payload/types'
-import type { FormState, FormField } from '../types'
+import type { FormState, FormField } from '../../Form/types'
 
 import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/types'
 import { getDefaultValue } from 'payload/utilities'

@@ -1,7 +1,7 @@
 import type { FieldPermissions, User } from 'payload/auth'
 import type { Document, DocumentPreferences, Field } from 'payload/types'
 import { Locale } from 'payload/config'
-import { FieldMap, FieldMaps } from './buildFieldMaps/types'
+import { FieldMap, FieldMaps } from '../utilities/buildFieldMaps/types'
 
 export type Props = {
   className?: string

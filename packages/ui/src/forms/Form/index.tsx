@@ -24,7 +24,6 @@ import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
-import buildStateFromSchema from './buildStateFromSchema'
 import {
   FormContext,
   FormFieldsContext,
@@ -376,22 +375,22 @@ const Form: React.FC<Props> = (props) => {
   const reset = useCallback(
     async (fieldSchema: Field[], data: unknown) => {
       const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        id,
-        // TODO: fix this
-        // @ts-ignore-next-line
-        config,
-        data,
-        fieldSchema,
-        locale,
-        operation,
-        preferences,
-        t,
-        user,
-      })
+      // const state = await buildStateFromSchema({
+      //   id,
+      //   // TODO: fix this
+      //   // @ts-ignore-next-line
+      //   config,
+      //   data,
+      //   fieldSchema,
+      //   locale,
+      //   operation,
+      //   preferences,
+      //   t,
+      //   user,
+      // })
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      dispatchFields({ state, type: 'REPLACE_STATE' })
+      // dispatchFields({ state, type: 'REPLACE_STATE' })
     },
     [id, user, operation, locale, t, dispatchFields, getDocPreferences, config],
   )

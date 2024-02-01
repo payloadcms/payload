@@ -1,53 +1,51 @@
-'use client'
 import React from 'react'
 import { useTranslation } from '../../../providers/Translation'
 
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
 import type { Row } from '../../Form/types'
+import type { ArrayField, RowLabel as RowLabelType } from 'payload/types'
 
-import { getTranslation } from '@payloadcms/translations'
+import { ArrayAction } from '../../../elements/ArrayAction'
 import { Collapsible } from '../../../elements/Collapsible'
 import { ErrorPill } from '../../../elements/ErrorPill'
-import Pill from '../../../elements/Pill'
 import { useFormSubmitted } from '../../Form/context'
 import RenderFields from '../../RenderFields'
 import HiddenInput from '../HiddenInput'
-import { RowActions } from './RowActions'
-import SectionTitle from './SectionTitle'
 import { FieldPathProvider } from '../../FieldPathProvider'
-import { Labels } from 'payload/types'
 import { FieldPermissions } from 'payload/auth'
-import { ReducedBlock } from '../../RenderFields/buildFieldMaps/types'
+import { getTranslation } from '@payloadcms/translations'
+import { FieldMap } from '../../utilities/buildFieldMaps/types'
 
-const baseClass = 'blocks-field'
+import './index.scss'
 
-type BlockFieldProps = UseDraggableSortableReturn & {
-  addRow: (rowIndex: number, blockType: string) => void
-  blocks: ReducedBlock[]
-  block: ReducedBlock
+const baseClass = 'array-field'
+
+type ArrayRowProps = UseDraggableSortableReturn & {
+  CustomRowLabel?: RowLabelType
+  addRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   forceRender?: boolean
   hasMaxRows?: boolean
+  labels: ArrayField['labels']
   moveRow: (fromIndex: number, toIndex: number) => void
-  readOnly: boolean
+  readOnly?: boolean
   removeRow: (rowIndex: number) => void
   row: Row
   rowCount: number
   rowIndex: number
-  setCollapse: (id: string, collapsed: boolean) => void
+  setCollapse: (rowID: string, collapsed: boolean) => void
   indexPath: string
   path: string
-  labels: Labels
   permissions: FieldPermissions
+  fieldMap: FieldMap
 }
 
-export const BlockRow: React.FC<BlockFieldProps> = ({
+export const ArrayRow: React.FC<ArrayRowProps> = ({
+  CustomRowLabel,
   addRow,
   attributes,
-  blocks,
-  block,
   duplicateRow,
-  forceRender,
+  forceRender = false,
   hasMaxRows,
   indexPath,
   labels,
@@ -63,10 +61,16 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   setCollapse,
   setNodeRef,
   transform,
+  fieldMap,
 }) => {
   const path = `${parentPath}.${rowIndex}`
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
+
+  const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
+    2,
+    '0',
+  )}`
 
   const errorCount = row.errorPaths?.size
   const fieldHasErrors = errorCount > 0 && hasSubmitted
@@ -81,7 +85,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   return (
     <div
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
-      key={`${parentPath}-row-${rowIndex}`}
+      key={`${parentPath}-row-${row.id}`}
       ref={setNodeRef}
       style={{
         transform,
@@ -90,18 +94,14 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
       <Collapsible
         actions={
           !readOnly ? (
-            <RowActions
+            <ArrayAction
               addRow={addRow}
-              blockType={row.blockType}
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
-              labels={labels}
+              index={rowIndex}
               moveRow={moveRow}
               removeRow={removeRow}
               rowCount={rowCount}
-              rowIndex={rowIndex}
-              blocks={blocks}
-              fieldMap={block.subfields}
             />
           ) : undefined
         }
@@ -114,32 +114,26 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           listeners,
         }}
         header={
-          <div className={`${baseClass}__block-header`}>
-            <span className={`${baseClass}__block-number`}>
-              {String(rowIndex + 1).padStart(2, '0')}
-            </span>
-            <Pill
-              className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-              pillStyle="white"
-            >
-              {getTranslation(block.labels.singular, i18n)}
-            </Pill>
-            <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+          <div className={`${baseClass}__row-header`}>
+            {/* <RowLabel
+              label={CustomRowLabel || fallbackLabel}
+              path={path}
+              rowNumber={rowIndex + 1}
+            /> */}
             {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
           </div>
         }
-        key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
         <FieldPathProvider path={path}>
           <RenderFields
             className={`${baseClass}__fields`}
-            fieldMap={block.subfields}
+            fieldMap={fieldMap}
             forceRender={forceRender}
             indexPath={indexPath}
             margins="small"
-            permissions={permissions?.blocks?.[row.blockType]?.fields}
+            permissions={permissions?.fields}
             readOnly={readOnly}
           />
         </FieldPathProvider>

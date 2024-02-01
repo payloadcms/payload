@@ -6,8 +6,8 @@ import DefaultError from '../../Error'
 import DefaultLabel from '../../Label'
 import DefaultDescription from '../../FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { fieldTypes } from '../../field-types'
-import { FormFieldBase } from '../../field-types/shared'
+import { fieldTypes } from '../../fields'
+import { FormFieldBase } from '../../fields/shared'
 import { FieldMap, ReducedBlock, ReducedField, ReducedTab } from './types'
 
 export const buildFieldMap = (args: {

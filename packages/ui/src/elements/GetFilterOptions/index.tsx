@@ -2,12 +2,12 @@ import equal from 'deep-equal'
 import { useEffect } from 'react'
 
 import type { FilterOptions } from 'payload/types'
-import type { FilterOptionsResult } from '../../forms/field-types/Relationship/types'
+import type { FilterOptionsResult } from '../../forms/fields/Relationship/types'
 
 import { useAllFormFields } from '../../forms/Form/context'
 import getSiblingData from '../../forms/Form/getSiblingData'
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues'
-import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery'
+import { getFilterOptionsQuery } from '../../forms/fields/getFilterOptionsQuery'
 import { useAuth } from '../../providers/Auth'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 

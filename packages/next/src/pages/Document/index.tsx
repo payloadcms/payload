@@ -24,7 +24,7 @@ import { TFunction } from '@payloadcms/translations'
 import { AdminViewComponent } from 'payload/config'
 import { getViewsFromConfig } from './getViewsFromConfig'
 import type { DocumentPermissions } from 'payload/types'
-import { buildFieldMap } from '../../../../ui/src/forms/RenderFields/buildFieldMaps/buildFieldMap'
+import { buildFieldMap } from '../../../../ui/src/forms/utilities/buildFieldMaps/buildFieldMap'
 
 export const Document = async ({
   params,
