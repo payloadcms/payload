@@ -1,42 +1,44 @@
-import React from 'react'
+'use client'
+import React, { useCallback } from 'react'
 import type { Props } from './types'
-import { isFieldRTL } from '../shared'
-import TextareaInput from './Input'
-import DefaultError from '../../Error'
-import DefaultLabel from '../../Label'
-import FieldDescription from '../../FieldDescription'
-import { TextareaInputWrapper } from './Wrapper'
+import { fieldBaseClass, isFieldRTL } from '../shared'
 import { withCondition } from '../../withCondition'
+import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '../../../providers/Translation'
+import useField from '../../useField'
+import { Validate } from 'payload/types'
+import { useConfig } from '../../../providers/Config'
 
 import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      components: { Error, Label, afterInput, beforeInput } = {},
-      description,
-      placeholder,
-      readOnly,
-      rows,
-      rtl,
-      style,
-      width,
-    } = {},
-    label,
+    className,
+    placeholder,
+    readOnly,
+    rtl,
+    style,
+    width,
     localized,
     maxLength,
     minLength,
     path: pathFromProps,
     required,
-    value,
     locale,
-    config: { localization },
-    i18n,
+    Error,
+    Label,
+    BeforeInput,
+    AfterInput,
+    validate,
+    Description,
   } = props
 
-  const path = pathFromProps || name
+  const rows = 'rows' in props ? props.rows : undefined
+
+  const { i18n } = useTranslation()
+
+  const { localization } = useConfig()
 
   const isRTL = isFieldRTL({
     fieldLocalized: localized,
@@ -45,44 +47,57 @@ const Textarea: React.FC<Props> = (props) => {
     localizationConfig: localization || undefined,
   })
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...options, maxLength, minLength, required })
+    },
+    [validate, required],
+  )
+
+  const { setValue, value, path, showError } = useField<string>({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
 
   return (
-    <TextareaInputWrapper
-      className={className}
-      readOnly={readOnly}
-      style={style}
-      width={width}
-      path={path}
+    <div
+      className={[
+        fieldBaseClass,
+        'textarea',
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
     >
-      <ErrorComp path={path} />
-      <LabelComp
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-        i18n={i18n}
-      />
+      {Error}
+      {Label}
+      {BeforeInput}
       <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
           <div className="textarea-clone" data-value={value || placeholder || ''} />
-          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
-          <TextareaInput
-            name={name}
-            path={path}
-            placeholder={placeholder}
-            readOnly={readOnly}
-            required={required}
+          <textarea
+            className="textarea-element"
+            data-rtl={isRTL}
+            disabled={readOnly}
+            id={`field-${path.replace(/\./g, '__')}`}
+            name={path}
+            onChange={setValue}
+            placeholder={getTranslation(placeholder, i18n)}
             rows={rows}
-            rtl={isRTL}
-            maxLength={maxLength}
-            minLength={minLength}
+            value={value || ''}
           />
-          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         </div>
       </label>
-      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
-    </TextareaInputWrapper>
+      {AfterInput}
+      {Description}
+    </div>
   )
 }
 

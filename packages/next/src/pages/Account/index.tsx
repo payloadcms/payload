@@ -75,7 +75,6 @@ export const Account = async ({
 
     const formState = await buildStateFromSchema({
       id: user?.id,
-      config,
       data: data || {},
       fieldSchema,
       locale: locale.code,

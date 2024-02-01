@@ -2,10 +2,10 @@ import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
 import type { EditViewProps } from '../../views/types'
+import type { Props as DrawerProps } from '../Drawer/types'
 
-export type DocumentDrawerProps = {
+export type DocumentDrawerProps = Pick<DrawerProps, 'Header'> & {
   collectionSlug: string
-  customHeader?: React.ReactNode
   drawerSlug?: string
   id?: string
   onSave?: EditViewProps['onSave']

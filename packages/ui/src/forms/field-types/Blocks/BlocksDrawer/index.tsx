@@ -3,7 +3,6 @@ import { useModal } from '@faceless-ui/modal'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from '../../../../providers/Translation'
 
-import type { Block } from 'payload/types'
 import type { Props } from './types'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -12,11 +11,13 @@ import { Drawer } from '../../../../elements/Drawer'
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard'
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage'
 import BlockSearch from './BlockSearch'
+import { ReducedBlock } from '../../../RenderFields/buildFieldMaps/types'
+
 import './index.scss'
 
 const baseClass = 'blocks-drawer'
 
-const getBlockLabel = (block: Block, i18n: I18n) => {
+const getBlockLabel = (block: ReducedBlock, i18n: I18n) => {
   if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
   if (typeof block.labels.singular === 'object') {
     return getTranslation(block.labels.singular, i18n).toLowerCase()
@@ -41,7 +42,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   useEffect(() => {
     const searchTermToUse = searchTerm.toLowerCase()
 
-    const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
+    const matchingBlocks = blocks?.reduce((matchedBlocks, block) => {
       const blockLabel = getBlockLabel(block, i18n)
       if (blockLabel.includes(searchTermToUse)) matchedBlocks.push(block)
       return matchedBlocks
@@ -65,7 +66,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
               <li className={`${baseClass}__block`} key={index}>
                 <ThumbnailCard
                   alignLabel="center"
-                  label={getTranslation(blockLabels.singular, i18n)}
+                  label={getTranslation(blockLabels?.singular, i18n)}
                   onClick={() => {
                     addRow(addRowIndex, slug)
                     closeModal(drawerSlug)

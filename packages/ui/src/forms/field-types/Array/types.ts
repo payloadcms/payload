@@ -1,12 +1,10 @@
-import type { FieldTypes } from 'payload/config'
 import type { FieldPermissions } from 'payload/auth'
-import type { ArrayField } from 'payload/types'
+import { FormFieldBase } from '../shared'
 
-export type Props = Omit<ArrayField, 'type'> & {
-  fieldTypes: FieldTypes
+export type Props = FormFieldBase & {
   forceRender?: boolean
   indexPath: string
   label: false | string
-  path?: string
   permissions: FieldPermissions
+  name?: string
 }

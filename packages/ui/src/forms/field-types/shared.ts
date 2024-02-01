@@ -1,24 +1,113 @@
-import type { Locale, SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config'
-import { FormState } from '../Form/types'
+import type { Locale, SanitizedLocalizationConfig } from 'payload/config'
 import { User } from 'payload/auth'
-import { I18n } from '@payloadcms/translations'
-import { Payload } from 'payload'
-import { DocumentPreferences } from 'payload/types'
+import {
+  ArrayField,
+  BlockField,
+  CodeField,
+  DateField,
+  DocumentPreferences,
+  JSONField,
+  RelationshipField,
+  RowLabel,
+  UploadField,
+  Validate,
+} from 'payload/types'
+import { Option } from 'payload/types'
+import { FormState } from '../..'
+import type { FieldMap, ReducedBlock, ReducedTab } from '../RenderFields/buildFieldMaps/types'
 
 export const fieldBaseClass = 'field-type'
 
 export type FormFieldBase = {
-  formState?: FormState
   path?: string
-  valid?: boolean
-  errorMessage?: string
   user?: User
-  i18n?: I18n
-  payload?: Payload
   docPreferences?: DocumentPreferences
   locale?: Locale
-  config?: SanitizedConfig
-}
+  BeforeInput?: React.ReactNode
+  AfterInput?: React.ReactNode
+  Label?: React.ReactNode
+  Description?: React.ReactNode
+  Error?: React.ReactNode
+  fieldMap?: FieldMap
+  initialSubfieldState?: FormState
+  style?: React.CSSProperties
+  width?: string
+  className?: string
+  label?: RowLabel
+  readOnly?: boolean
+  rtl?: boolean
+  maxLength?: number
+  minLength?: number
+  required?: boolean
+  placeholder?: string
+  localized?: boolean
+  validate?: Validate
+} & (
+  | {
+      // For `number` fields
+      step?: number
+      hasMany?: boolean
+      maxRows?: number
+      min?: number
+      max?: number
+    }
+  | {
+      // For `radio` fields
+      layout?: 'horizontal' | 'vertical'
+      options?: Option[]
+    }
+  | {
+      // For `textarea` fields
+      rows?: number
+    }
+  | {
+      // For `select` fields
+      isClearable?: boolean
+      isSortable?: boolean
+    }
+  | {
+      tabs?: ReducedTab[]
+    }
+  | {
+      // For `code` fields
+      editorOptions?: CodeField['admin']['editorOptions']
+      language?: CodeField['admin']['language']
+    }
+  | {
+      // For `json` fields
+      editorOptions?: JSONField['admin']['editorOptions']
+    }
+  | {
+      // For `collapsible` fields
+      initCollapsed?: boolean
+    }
+  | {
+      // For `date` fields
+      date?: DateField['admin']['date']
+    }
+  | {
+      // For `array` fields
+      minRows?: ArrayField['minRows']
+      maxRows?: ArrayField['maxRows']
+      labels?: ArrayField['labels']
+    }
+  | {
+      // For `blocks` fields
+      slug?: string
+      minRows?: BlockField['minRows']
+      maxRows?: BlockField['maxRows']
+      labels?: BlockField['labels']
+      blocks?: ReducedBlock[]
+    }
+  | {
+      // For `upload` fields
+      relationTo?: UploadField['relationTo']
+    }
+  | {
+      // For `relationship` fields
+      relationTo?: RelationshipField['relationTo']
+    }
+)
 
 /**
  * Determines whether a field should be displayed as right-to-left (RTL) based on its configuration, payload's localization configuration and the adming user's currently enabled locale.
@@ -41,6 +130,7 @@ export function isFieldRTL({
     localizationConfig &&
     localizationConfig.locales &&
     localizationConfig.locales.length > 1
+
   const isCurrentLocaleDefaultLocale = locale?.code === localizationConfig?.defaultLocale
 
   return (

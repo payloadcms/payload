@@ -14,8 +14,6 @@ import { ErrorPill } from '../../../elements/ErrorPill'
 import { useConfig } from '../../../providers/Config'
 import { useDocumentInfo } from '../../../providers/DocumentInfo'
 import { useLocale } from '../../../providers/Locale'
-import Error from '../../Error'
-import FieldDescription from '../../FieldDescription'
 import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
@@ -28,29 +26,26 @@ const baseClass = 'array-field'
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, components, condition, description, readOnly },
-    fieldTypes,
-    fields,
+    className,
+    readOnly,
     forceRender = false,
     indexPath,
     localized,
-    maxRows,
-    minRows,
     path: pathFromProps,
     permissions,
     required,
     validate,
+    Error,
+    Label,
+    Description,
+    fieldMap,
   } = props
 
-  const path = pathFromProps || name
-
-  // eslint-disable-next-line react/destructuring-assignment
-  const label = props?.label ?? props?.labels?.singular
-
-  const CustomRowLabel = components?.RowLabel || undefined
+  const minRows = 'minRows' in props ? props.minRows : 0
+  const maxRows = 'maxRows' in props ? props.maxRows : undefined
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm()
+  const { dispatchFields, setModified } = useForm()
   const submitted = useFormSubmitted()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -67,9 +62,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
-    if (p?.labels) return p.labels
-    if (p?.label) return { plural: undefined, singular: p.label }
-    return { plural: t('fields:rows'), singular: t('fields:row') }
+    if ('labels' in p && p?.labels) return p.labels
+    if ('label' in p && p?.label) return { plural: undefined, singular: p.label }
+    return { plural: t('general:rows'), singular: t('general:row') }
   }
 
   const labels = getLabels(props)
@@ -80,33 +75,40 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       if (!editingDefaultLocale && value === null) {
         return true
       }
-      return validate(value, { ...options, maxRows, minRows, required })
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, maxRows, minRows, required })
+      }
     },
     [maxRows, minRows, required, validate, editingDefaultLocale],
   )
 
   const {
-    errorMessage,
     rows = [],
     showError,
     valid,
     value,
+    path,
   } = useField<number>({
     hasRows: true,
-    path,
+    path: pathFromProps || name,
     validate: memoizedValidate,
   })
 
   const addRow = useCallback(
-    async (rowIndex: number) => {
-      await addFieldRow({ path, rowIndex })
+    (rowIndex: number) => {
+      dispatchFields({
+        path,
+        rowIndex,
+        type: 'ADD_ROW',
+      })
+
       setModified(true)
 
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, setModified],
+    [dispatchFields, path, setModified],
   )
 
   const duplicateRow = useCallback(
@@ -123,10 +125,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const removeRow = useCallback(
     (rowIndex: number) => {
-      removeFieldRow({ path, rowIndex })
+      dispatchFields({ path, rowIndex, type: 'REMOVE_ROW' })
       setModified(true)
     },
-    [removeFieldRow, path, setModified],
+    [dispatchFields, path, setModified],
   )
 
   const moveRow = useCallback(
@@ -154,7 +156,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount =
-    rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1)
+    rows.reduce((total, row) => total + (row?.errorPaths?.size || 0), 0) + (valid ? 0 : 1)
 
   const fieldHasErrors = submitted && fieldErrorCount > 0
 
@@ -173,17 +175,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
     >
-      {showError && (
-        <div className={`${baseClass}__error-wrap`}>
-          <Error message={errorMessage} showError={showError} />
-        </div>
-      )}
+      {showError && <div className={`${baseClass}__error-wrap`}>{Error}</div>}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
-            <h3 className={`${baseClass}__title`}>{getTranslation(label || name, i18n)}</h3>
+            <h3 className={`${baseClass}__title`}>{Label}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} withMessage />
+              <ErrorPill count={fieldErrorCount} withMessage i18n={i18n} />
             )}
           </div>
           {rows.length > 0 && (
@@ -209,14 +207,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription
-          className={`field-description-${path.replace(/\./g, '__')}`}
-          description={description}
-          path={path}
-          value={value}
-        />
+        {Description}
       </header>
-
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
@@ -229,16 +221,15 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
-                  CustomRowLabel={CustomRowLabel}
+                  // CustomRowLabel={CustomRowLabel}
+                  fieldMap={fieldMap}
                   addRow={addRow}
                   duplicateRow={duplicateRow}
-                  fieldTypes={fieldTypes}
-                  fields={fields}
                   forceRender={forceRender}
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
-                  labels={labels}
                   moveRow={moveRow}
+                  labels={labels}
                   path={path}
                   permissions={permissions}
                   readOnly={readOnly}

@@ -1,41 +1,65 @@
-import React from 'react'
+'use client'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types'
-import Error from '../../Error'
-import Label from '../../Label'
-import { PasswordInput } from './Input'
-import { PasswordInputWrapper } from './Wrapper'
 import { withCondition } from '../../withCondition'
+import { fieldBaseClass } from '../shared'
+import { Validate } from 'payload/types'
+import useField from '../../useField'
 
 import './index.scss'
 
 export const Password: React.FC<Props> = (props) => {
   const {
-    name,
     autoComplete,
     className,
     disabled,
-    label,
-    path: pathFromProps,
     required,
     style,
     width,
-    i18n,
+    validate,
+    path: pathFromProps,
+    name,
+    Error,
+    Label,
   } = props
 
-  const path = pathFromProps || name
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function') {
+        return validate(value, { ...options, required })
+      }
+    },
+    [validate, required],
+  )
+
+  const { formProcessing, setValue, showError, value, path } = useField({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
 
   return (
-    <PasswordInputWrapper className={className} style={style} width={width} path={path}>
-      <Error path={path} />
-      <Label
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-        i18n={i18n}
+    <div
+      className={[fieldBaseClass, 'password', className, showError && 'error']
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
+    >
+      {Error}
+      {Label}
+      <input
+        autoComplete={autoComplete}
+        disabled={formProcessing || disabled}
+        id={`field-${path.replace(/\./g, '__')}`}
+        name={path}
+        onChange={setValue}
+        type="password"
+        value={(value as string) || ''}
       />
-      <PasswordInput name={name} autoComplete={autoComplete} disabled={disabled} path={path} />
-    </PasswordInputWrapper>
+    </div>
   )
 }
 

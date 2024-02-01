@@ -1,7 +1,7 @@
 import ObjectID from 'bson-objectid'
 import equal from 'deep-equal'
 
-import type { FieldAction, FormState, FormField } from './types'
+import type { FieldAction, FormState, FormField, Row } from './types'
 
 import { deepCopyObject } from 'payload/utilities'
 import { flattenRows, separateRows } from './rows'
@@ -94,22 +94,21 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'ADD_ROW': {
-      const { blockType, path, rowIndex: rowIndexFromArgs, subFieldState } = action
+      const { blockType, path, rowIndex: rowIndexFromArgs } = action
+      const subFieldState: FormState = {}
+
       const rowIndex =
         typeof rowIndexFromArgs === 'number' ? rowIndexFromArgs : state[path]?.rows?.length || 0
 
-      const rowsMetadata = [...(state[path]?.rows || [])]
-      rowsMetadata.splice(
-        rowIndex,
-        0,
-        // new row
-        {
-          id: new ObjectID().toHexString(),
-          blockType: blockType || undefined,
-          childErrorPaths: new Set(),
-          collapsed: false,
-        },
-      )
+      const withNewRow = [...(state[path]?.rows || [])]
+
+      const newRow: Row = {
+        id: new ObjectID().toHexString(),
+        blockType: blockType || undefined,
+        collapsed: false,
+      }
+
+      withNewRow.splice(rowIndex, 0, newRow)
 
       if (blockType) {
         subFieldState.blockType = {
@@ -129,7 +128,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          rows: rowsMetadata,
+          rows: withNewRow,
           value: siblingRows.length,
         },
       }
@@ -138,7 +137,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'REPLACE_ROW': {
-      const { blockType, path, rowIndex: rowIndexArg, subFieldState } = action
+      const { blockType, path, rowIndex: rowIndexArg } = action
+      const subFieldState: FormState = {}
+
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
       const rowIndex = Math.max(0, Math.min(rowIndexArg, siblingRows?.length - 1 || 0))
 
@@ -146,7 +147,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       rowsMetadata[rowIndex] = {
         id: new ObjectID().toHexString(),
         blockType: blockType || undefined,
-        childErrorPaths: new Set(),
         collapsed: false,
       }
 

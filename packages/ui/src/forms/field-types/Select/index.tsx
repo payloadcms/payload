@@ -1,13 +1,14 @@
-import React from 'react'
+'use client'
+import React, { useCallback, useEffect, useState } from 'react'
 
-import type { Option, OptionObject } from 'payload/types'
+import type { Option, OptionObject, Validate } from 'payload/types'
 import type { Props } from './types'
-import DefaultError from '../../Error'
-import DefaultLabel from '../../Label'
-import FieldDescription from '../../FieldDescription'
-import SelectInput from './Input'
-import { SelectFieldWrapper } from './Wrapper'
 import { withCondition } from '../../withCondition'
+import { getTranslation } from '@payloadcms/translations'
+import { fieldBaseClass } from '../shared'
+import useField from '../../useField'
+import ReactSelect from '../../../elements/ReactSelect'
+import { useTranslation } from '../../../providers/Translation'
 
 import './index.scss'
 
@@ -26,55 +27,120 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 export const Select: React.FC<Props> = (props) => {
   const {
     name,
-    admin: {
-      className,
-      description,
-      isClearable,
-      isSortable = true,
-      readOnly,
-      style,
-      width,
-      components: { Error, Label } = {},
-    } = {},
-    hasMany,
-    label,
-    options,
+    className,
+    readOnly,
+    style,
+    width,
     path: pathFromProps,
     required,
-    i18n,
-    value,
+    Description,
+    Error,
+    Label,
+    BeforeInput,
+    AfterInput,
+    validate,
   } = props
 
-  const path = pathFromProps || name
+  const optionsFromProps = 'options' in props ? props.options : []
+  const hasMany = 'hasMany' in props ? props.hasMany : false
+  const isClearable = 'isClearable' in props ? props.isClearable : true
+  const isSortable = 'isSortable' in props ? props.isSortable : true
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const { i18n } = useTranslation()
+
+  const [options] = useState(formatOptions(optionsFromProps))
+
+  const memoizedValidate: Validate = useCallback(
+    (value, validationOptions) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...validationOptions, hasMany, options, required })
+    },
+    [validate, required],
+  )
+
+  const { setValue, value, showError, path } = useField({
+    path: pathFromProps || name,
+    validate: memoizedValidate,
+  })
+
+  let valueToRender
+
+  if (hasMany && Array.isArray(value)) {
+    valueToRender = value.map((val) => {
+      const matchingOption = options.find((option) => option.value === val)
+      return {
+        label: matchingOption ? getTranslation(matchingOption.label, i18n) : val,
+        value: matchingOption?.value ?? val,
+      }
+    })
+  } else if (value) {
+    const matchingOption = options.find((option) => option.value === value)
+    valueToRender = {
+      label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
+      value: matchingOption?.value ?? value,
+    }
+  }
+
+  const onChange = useCallback(
+    (selectedOption) => {
+      if (!readOnly) {
+        let newValue
+        if (!selectedOption) {
+          newValue = null
+        } else if (hasMany) {
+          if (Array.isArray(selectedOption)) {
+            newValue = selectedOption.map((option) => option.value)
+          } else {
+            newValue = []
+          }
+        } else {
+          newValue = selectedOption.value
+        }
+
+        setValue(newValue)
+      }
+    },
+    [readOnly, hasMany, setValue],
+  )
 
   return (
-    <SelectFieldWrapper
-      className={className}
-      style={style}
-      width={width}
-      path={path}
-      readOnly={readOnly}
+    <div
+      className={[
+        fieldBaseClass,
+        'select',
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
+      style={{
+        ...style,
+        width,
+      }}
     >
-      <ErrorComp path={path} />
-      <LabelComp
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-        i18n={i18n}
-      />
-      <SelectInput
-        readOnly={readOnly}
-        isClearable={isClearable}
-        hasMany={hasMany}
-        isSortable={isSortable}
-        options={formatOptions(options)}
-        path={path}
-      />
-      <FieldDescription description={description} path={path} value={value} i18n={i18n} />
-    </SelectFieldWrapper>
+      {Error}
+      {Label}
+      <div>
+        {BeforeInput}
+        <ReactSelect
+          disabled={readOnly}
+          isClearable={isClearable}
+          isMulti={hasMany}
+          isSortable={isSortable}
+          onChange={onChange}
+          options={options.map((option) => ({
+            ...option,
+            label: getTranslation(option.label, i18n),
+          }))}
+          showError={showError}
+          value={valueToRender as OptionObject}
+        />
+        {AfterInput}
+      </div>
+      {Description}
+    </div>
   )
 }
 

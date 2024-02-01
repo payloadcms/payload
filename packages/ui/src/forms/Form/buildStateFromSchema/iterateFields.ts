@@ -1,13 +1,12 @@
 import type { TFunction } from '@payloadcms/translations'
 
 import type { User } from 'payload/auth'
-import type { Field as FieldSchema, SanitizedConfig, Data } from 'payload/types'
+import type { Field as FieldSchema, Data } from 'payload/types'
 import type { FormState } from '../types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { addFieldStatePromise } from './addFieldStatePromise'
 
 type Args = {
-  config: SanitizedConfig
   data: Data
   fields: FieldSchema[]
   fullData: Data
@@ -22,11 +21,11 @@ type Args = {
   state: FormState
   t: TFunction
   user: User
+  errorPaths: Set<string>
 }
 
 export const iterateFields = async ({
   id,
-  config,
   data,
   fields,
   fullData,
@@ -38,6 +37,7 @@ export const iterateFields = async ({
   state,
   t,
   user,
+  errorPaths,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -54,7 +54,6 @@ export const iterateFields = async ({
       promises.push(
         addFieldStatePromise({
           id,
-          config,
           data,
           field,
           fullData,
@@ -66,9 +65,11 @@ export const iterateFields = async ({
           state,
           t,
           user,
+          errorPaths,
         }),
       )
     }
   })
+
   await Promise.all(promises)
 }

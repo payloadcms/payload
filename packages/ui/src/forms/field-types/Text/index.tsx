@@ -1,78 +1,99 @@
-import React from 'react'
+'use client'
+import React, { useCallback } from 'react'
 
 import type { Props } from './types'
-import { TextInput } from './Input'
-import FieldDescription from '../../FieldDescription'
-import DefaultError from '../../Error'
-import DefaultLabel from '../../Label'
-import { TextInputWrapper } from './Wrapper'
 import { withCondition } from '../../withCondition'
+import { fieldBaseClass, isFieldRTL } from '../shared'
+import useField from '../../useField'
+import { useTranslation } from '../../../providers/Translation'
+import { useConfig, useLocale } from '../../..'
+import { Validate } from 'payload/types'
+import { getTranslation } from '@payloadcms/translations'
+
+import './index.scss'
 
 const Text: React.FC<Props> = (props) => {
   const {
-    name,
-    admin: {
-      className,
-      components: { Error, Label, afterInput, beforeInput } = {},
-      description,
-      placeholder,
-      readOnly,
-      rtl,
-      style,
-      width,
-    } = {},
-    label,
+    className,
     localized,
     maxLength,
     minLength,
-    path: pathFromProps,
     required,
-    value,
-    i18n,
+    Error,
+    Label,
+    Description,
+    BeforeInput,
+    AfterInput,
+    validate,
+    inputRef,
+    readOnly,
+    width,
+    style,
+    onKeyDown,
+    placeholder,
+    rtl,
+    name,
+    path: pathFromProps,
   } = props
 
-  const path = pathFromProps || name
+  const { i18n } = useTranslation()
 
-  const ErrorComp = Error || DefaultError
-  const LabelComp = Label || DefaultLabel
+  const locale = useLocale()
+
+  const { localization: localizationConfig } = useConfig()
+
+  const memoizedValidate: Validate = useCallback(
+    (value, options) => {
+      if (typeof validate === 'function')
+        return validate(value, { ...options, maxLength, minLength, required })
+    },
+    [validate, minLength, maxLength, required],
+  )
+
+  const { setValue, value, path, showError } = useField({
+    validate: memoizedValidate,
+    path: pathFromProps || name,
+  })
+
+  const renderRTL = isFieldRTL({
+    fieldLocalized: localized,
+    fieldRTL: rtl,
+    locale,
+    localizationConfig: localizationConfig || undefined,
+  })
 
   return (
-    <TextInputWrapper
-      className={className}
-      style={style}
-      width={width}
-      path={path}
-      readOnly={readOnly}
+    <div
+      className={[fieldBaseClass, 'text', className, showError && 'error', readOnly && 'read-only']
+        .filter(Boolean)
+        .join(' ')}
+      style={{
+        ...style,
+        width,
+      }}
     >
-      <ErrorComp path={path} />
-      <LabelComp
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-        i18n={i18n}
-      />
+      {Error}
+      {Label}
       <div>
-        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
-        <TextInput
-          path={path}
-          name={name}
-          localized={localized}
-          rtl={rtl}
-          placeholder={placeholder}
-          readOnly={readOnly}
-          maxLength={maxLength}
-          minLength={minLength}
+        {BeforeInput}
+        <input
+          data-rtl={renderRTL}
+          disabled={readOnly}
+          id={`field-${path?.replace(/\./g, '__')}`}
+          name={path}
+          onChange={(e) => {
+            setValue(e.target.value)
+          }}
+          onKeyDown={onKeyDown}
+          placeholder={getTranslation(placeholder, i18n)}
+          ref={inputRef}
+          type="text"
+          value={(value as string) || ''}
         />
-        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+        {AfterInput}
       </div>
-      <FieldDescription
-        className={`field-description-${path.replace(/\./g, '__')}`}
-        description={description}
-        path={path}
-        value={value}
-        i18n={i18n}
-      />
-    </TextInputWrapper>
+      {Description}
+    </div>
   )
 }
 

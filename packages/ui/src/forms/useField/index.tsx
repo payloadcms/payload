@@ -10,6 +10,7 @@ import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useOperation } from '../../providers/OperationProvider'
 import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context'
+import { useFieldPath } from '../FieldPathProvider'
 
 /**
  * Get and set the value of a form field.
@@ -17,17 +18,23 @@ import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
 const useField = <T,>(options: Options): FieldType<T> => {
-  const { disableFormData = false, hasRows, path, validate } = options
+  const { disableFormData = false, hasRows, validate } = options
+
+  const pathFromContext = useFieldPath()
+
+  const path = options.path || pathFromContext
 
   const submitted = useFormSubmitted()
   const processing = useFormProcessing()
   const { user } = useAuth()
   const { id } = useDocumentInfo()
   const operation = useOperation()
+
   const { field, dispatchField } = useFormFields(([fields, dispatch]) => ({
-    field: fields[path],
+    field: (fields && fields?.[path]) || null,
     dispatchField: dispatch,
   }))
+
   const { t } = useTranslation()
   const config = useConfig()
 
@@ -79,6 +86,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       showError,
       valid: field?.valid,
       value,
+      path,
     }),
     [
       field?.errorMessage,
@@ -90,6 +98,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       submitted,
       value,
       initialValue,
+      path,
     ],
   )
 

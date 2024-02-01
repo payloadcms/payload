@@ -24,6 +24,7 @@ import { TFunction } from '@payloadcms/translations'
 import { AdminViewComponent } from 'payload/config'
 import { getViewsFromConfig } from './getViewsFromConfig'
 import type { DocumentPermissions } from 'payload/types'
+import { buildFieldMap } from '../../../../ui/src/forms/RenderFields/buildFieldMaps/buildFieldMap'
 
 export const Document = async ({
   params,
@@ -152,7 +153,6 @@ export const Document = async ({
 
   const formState = await buildStateFromSchema({
     id,
-    config,
     data: data || {},
     fieldSchema: formatFields(fields, isEditing),
     locale: locale.code,
@@ -160,6 +160,10 @@ export const Document = async ({
     preferences: docPreferences,
     t: i18n.t,
     user,
+  })
+
+  const fieldMap = buildFieldMap({
+    fieldSchema: collectionConfig?.fields || globalConfig?.fields,
   })
 
   const formQueryParams: QueryParamTypes = {
@@ -174,25 +178,18 @@ export const Document = async ({
     action: `${action}?${queryString.stringify(formQueryParams)}`,
     apiURL,
     canAccessAdmin: permissions?.canAccessAdmin,
-    config,
-    collectionConfig,
-    globalConfig,
+    collectionSlug,
+    globalSlug,
     data,
-    fieldTypes,
     hasSavePermission,
     formState,
     isEditing,
-    permissions,
     docPermissions,
     docPreferences,
     updatedAt: data?.updatedAt?.toString(),
     user,
-    onSave: () => {},
-    payload,
     locale,
-    params,
-    searchParams,
-    i18n,
+    fieldMap,
   }
 
   return (

@@ -1,9 +1,9 @@
-import React, { Fragment } from 'react'
+'use client'
+import React, { Fragment, useCallback } from 'react'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
 import { OperationProvider } from '../../providers/OperationProvider'
-import './index.scss'
 
 // import { getTranslation } from '@payloadcms/translations'
 import { DocumentControls } from '../../elements/DocumentControls'
@@ -13,37 +13,50 @@ import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
 import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
 // import { Upload } from '../Upload'
-import './index.scss'
 import { EditViewProps } from '../types'
-import { fieldTypes } from '../../forms/field-types'
 import { getFormStateFromServer } from './action'
+import { Upload } from './Upload'
+import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
 
 import './index.scss'
 
 const baseClass = 'collection-edit'
 
-export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
+export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const {
     action,
     apiURL,
-    config,
-    // customHeader,
+    BeforeDocument,
     data,
-    formState,
+    formState: initialState,
     // isLoading,
-    // onSave: onSaveFromProps,
+    onSave: onSaveFromProps,
     docPreferences,
     docPermissions,
     user,
-    i18n,
-    payload,
     locale,
+    fieldMap,
   } = props
 
-  const collectionConfig = 'collectionConfig' in props ? props.collectionConfig : undefined
-  const globalConfig = 'globalConfig' in props ? props.globalConfig : undefined
-  const fields = collectionConfig?.fields || globalConfig?.fields || []
+  const { i18n } = useTranslation()
+
+  const {
+    serverURL,
+    routes: { api: apiRoute },
+    collections,
+    globals,
+  } = useConfig()
+
+  const collectionConfig =
+    'collectionSlug' in props &&
+    collections.find((collection) => collection.slug === props.collectionSlug)
+
+  const globalConfig =
+    'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
+
   const auth = collectionConfig ? collectionConfig.auth : undefined
+  const upload = collectionConfig ? collectionConfig.upload : undefined
   const id = 'id' in props ? props.id : undefined
   const hasSavePermission = 'hasSavePermission' in props ? props.hasSavePermission : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined
@@ -56,26 +69,35 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
-  // const onSave = useCallback(
-  //   async (json) => {
-  //     reportUpdate({
-  //       id,
-  //       entitySlug: collectionConfig.slug,
-  //       updatedAt: json?.result?.updatedAt || new Date().toISOString(),
-  //     })
-  //     if (auth && id === user.id) {
-  //       await refreshCookieAsync()
-  //     }
+  const onSave = useCallback(
+    async (json) => {
+      // reportUpdate({
+      //   id,
+      //   entitySlug: collectionConfig.slug,
+      //   updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      // })
 
-  //     if (typeof onSaveFromProps === 'function') {
-  //       onSaveFromProps({
-  //         ...json,
-  //         operation: id ? 'update' : 'create',
-  //       })
-  //     }
-  //   },
-  //   [id, onSaveFromProps, auth, user, refreshCookieAsync, collectionConfig, reportUpdate],
-  // )
+      // if (auth && id === user.id) {
+      //   await refreshCookieAsync()
+      // }
+
+      if (typeof onSaveFromProps === 'function') {
+        onSaveFromProps({
+          ...json,
+          operation: id ? 'update' : 'create',
+        })
+      }
+    },
+    [
+      id,
+      onSaveFromProps,
+      auth,
+      user,
+      // refreshCookieAsync,
+      collectionConfig,
+      //  reportUpdate
+    ],
+  )
 
   const operation = isEditing ? 'update' : 'create'
 
@@ -108,13 +130,13 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
     <main className={classes}>
       <OperationProvider operation={operation}>
         <Form
-          // action={action}
+          action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
-          initialState={formState}
+          initialState={initialState}
           method={id ? 'PATCH' : 'POST'}
-          onChange={[onChange]}
-          // onSuccess={onSave}
+          // onChange={[onChange]}
+          onSuccess={onSave}
         >
           <FormLoadingOverlayToggle
             action={operation}
@@ -138,9 +160,11 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
           i18n,
         )}`}
       /> */}
+          {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetStepNav
             collectionSlug={collectionConfig?.slug}
+            globalSlug={globalConfig?.slug}
             useAsTitle={collectionConfig?.admin?.useAsTitle}
             id={id}
             isEditing={isEditing || false}
@@ -148,15 +172,13 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
           />
           <DocumentControls
             apiURL={apiURL}
-            config={config}
-            collectionConfig={collectionConfig}
+            slug={collectionConfig?.slug}
             data={data}
             disableActions={disableActions}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
             permissions={docPermissions}
-            i18n={i18n}
           />
           <DocumentFields
             BeforeFields={
@@ -173,21 +195,22 @@ export const DefaultEditView: React.FC<EditViewProps> = async (props) => {
                     verify={auth.verify}
                   />
                 )}
-                {/* {upload && <Upload collection={collection} internalState={internalState} />} */}
+                {upload && (
+                  <Upload
+                    uploadConfig={upload}
+                    collectionSlug={collectionConfig.slug}
+                    initialState={initialState}
+                  />
+                )}
               </Fragment>
             }
-            fieldTypes={fieldTypes}
-            fields={fields}
             hasSavePermission={hasSavePermission}
             docPermissions={docPermissions}
             docPreferences={docPreferences}
             data={data}
-            formState={formState}
             user={user}
-            i18n={i18n}
-            payload={payload}
             locale={locale}
-            config={config}
+            fieldMap={fieldMap}
           />
         </Form>
       </OperationProvider>

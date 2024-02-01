@@ -1,46 +1,52 @@
+'use client'
 import React from 'react'
 import { useTranslation } from '../../../providers/Translation'
 
-import type { Block } from 'payload/types'
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types'
 import type { Row } from '../../Form/types'
-import type { Props } from './types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Collapsible } from '../../../elements/Collapsible'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import Pill from '../../../elements/Pill'
 import { useFormSubmitted } from '../../Form/context'
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
 import RenderFields from '../../RenderFields'
 import HiddenInput from '../HiddenInput'
 import { RowActions } from './RowActions'
 import SectionTitle from './SectionTitle'
+import { FieldPathProvider } from '../../FieldPathProvider'
+import { Labels } from 'payload/types'
+import { FieldPermissions } from 'payload/auth'
+import { ReducedBlock } from '../../RenderFields/buildFieldMaps/types'
 
 const baseClass = 'blocks-field'
 
-type BlockFieldProps = UseDraggableSortableReturn &
-  Pick<Props, 'blocks' | 'fieldTypes' | 'indexPath' | 'labels' | 'path' | 'permissions'> & {
-    addRow: (rowIndex: number, blockType: string) => void
-    blockToRender: Block
-    duplicateRow: (rowIndex: number) => void
-    forceRender?: boolean
-    hasMaxRows?: boolean
-    moveRow: (fromIndex: number, toIndex: number) => void
-    readOnly: boolean
-    removeRow: (rowIndex: number) => void
-    row: Row
-    rowCount: number
-    rowIndex: number
-    setCollapse: (id: string, collapsed: boolean) => void
-  }
+type BlockFieldProps = UseDraggableSortableReturn & {
+  addRow: (rowIndex: number, blockType: string) => void
+  blocks: ReducedBlock[]
+  block: ReducedBlock
+  duplicateRow: (rowIndex: number) => void
+  forceRender?: boolean
+  hasMaxRows?: boolean
+  moveRow: (fromIndex: number, toIndex: number) => void
+  readOnly: boolean
+  removeRow: (rowIndex: number) => void
+  row: Row
+  rowCount: number
+  rowIndex: number
+  setCollapse: (id: string, collapsed: boolean) => void
+  indexPath: string
+  path: string
+  labels: Labels
+  permissions: FieldPermissions
+}
+
 export const BlockRow: React.FC<BlockFieldProps> = ({
   addRow,
   attributes,
-  blockToRender,
   blocks,
+  block,
   duplicateRow,
-  fieldTypes,
   forceRender,
   hasMaxRows,
   indexPath,
@@ -62,8 +68,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
-  const childErrorPathsCount = row.childErrorPaths?.size
-  const fieldHasErrors = hasSubmitted && childErrorPathsCount > 0
+  const errorCount = row.errorPaths?.size
+  const fieldHasErrors = errorCount > 0 && hasSubmitted
 
   const classNames = [
     `${baseClass}__row`,
@@ -87,7 +93,6 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             <RowActions
               addRow={addRow}
               blockType={row.blockType}
-              blocks={blocks}
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
               labels={labels}
@@ -95,6 +100,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}
+              blocks={blocks}
+              fieldMap={block.subfields}
             />
           ) : undefined
         }
@@ -115,30 +122,27 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
               pillStyle="white"
             >
-              {getTranslation(blockToRender.labels.singular, i18n)}
+              {getTranslation(block.labels.singular, i18n)}
             </Pill>
             <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
-            {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
+            {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
           </div>
         }
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
-        [RenderFields]
-        {/* <RenderFields
-          className={`${baseClass}__fields`}
-          fieldSchema={blockToRender.fields.map((field) => ({
-            ...field,
-            path: createNestedFieldPath(path, field),
-          }))}
-          fieldTypes={fieldTypes}
-          forceRender={forceRender}
-          indexPath={indexPath}
-          margins="small"
-          permissions={permissions?.blocks?.[row.blockType]?.fields}
-          readOnly={readOnly}
-        /> */}
+        <FieldPathProvider path={path}>
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fieldMap={block.subfields}
+            forceRender={forceRender}
+            indexPath={indexPath}
+            margins="small"
+            permissions={permissions?.blocks?.[row.blockType]?.fields}
+            readOnly={readOnly}
+          />
+        </FieldPathProvider>
       </Collapsible>
     </div>
   )

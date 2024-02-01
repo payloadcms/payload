@@ -1,16 +1,18 @@
+'use client'
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import type { Block, Labels } from 'payload/types'
+import type { Labels } from 'payload/types'
 
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug'
 import { BlocksDrawer } from './BlocksDrawer'
+import { FieldMap, ReducedBlock } from '../../RenderFields/buildFieldMaps/types'
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void
   blockType: string
-  blocks: Block[]
+  fieldMap: FieldMap
   duplicateRow: (rowIndex: number, blockType: string) => void
   hasMaxRows?: boolean
   labels: Labels
@@ -18,11 +20,11 @@ export const RowActions: React.FC<{
   removeRow: (rowIndex: number) => void
   rowCount: number
   rowIndex: number
+  blocks: ReducedBlock[]
 }> = (props) => {
   const {
     addRow,
     blockType,
-    blocks,
     duplicateRow,
     hasMaxRows,
     labels,
@@ -30,6 +32,7 @@ export const RowActions: React.FC<{
     removeRow,
     rowCount,
     rowIndex,
+    blocks,
   } = props
 
   const { closeModal, openModal } = useModal()

@@ -90,7 +90,6 @@ export const CreateFirstUser: React.FC<{
   ] as Field[]
 
   const formState = await buildStateFromSchema({
-    config,
     fieldSchema: fields,
     locale: locale.code,
     operation: 'create',

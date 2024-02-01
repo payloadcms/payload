@@ -120,7 +120,7 @@ const EditMany: React.FC<Props> = (props) => {
       >
         {t('general:edit')}
       </DrawerToggler>
-      <Drawer header={null} slug={drawerSlug}>
+      <Drawer Header={null} slug={drawerSlug}>
         <OperationContext.Provider value="update">
           <Form className={`${baseClass}__form`} onSuccess={onSuccess}>
             <div className={`${baseClass}__main`}>
