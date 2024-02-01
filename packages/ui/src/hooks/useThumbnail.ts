@@ -7,12 +7,10 @@ const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i')
 const base64Pattern = new RegExp(/^data:image\/[a-z]+;base64,/)
 
 const useThumbnail = (
-  collection: SanitizedCollectionConfig,
+  uploadConfig: SanitizedCollectionConfig['upload'],
   doc: Record<string, unknown>,
 ): false | string => {
-  const {
-    upload: { adminThumbnail, staticURL },
-  } = collection
+  const { adminThumbnail, staticURL } = uploadConfig
 
   const { filename, mimeType, sizes, url } = doc
 

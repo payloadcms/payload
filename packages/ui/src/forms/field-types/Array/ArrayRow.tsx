@@ -12,11 +12,11 @@ import { useFormSubmitted } from '../../Form/context'
 import RenderFields from '../../RenderFields'
 import HiddenInput from '../HiddenInput'
 import { FieldPathProvider } from '../../FieldPathProvider'
-import { buildFieldMap } from '../../RenderFields/buildFieldMap'
 import { FieldPermissions } from 'payload/auth'
+import { getTranslation } from '@payloadcms/translations'
+import { FieldMap } from '../../RenderFields/buildFieldMaps/types'
 
 import './index.scss'
-import { getTranslation } from '@payloadcms/translations'
 
 const baseClass = 'array-field'
 
@@ -37,7 +37,7 @@ type ArrayRowProps = UseDraggableSortableReturn & {
   indexPath: string
   path: string
   permissions: FieldPermissions
-  fieldMap: ReturnType<typeof buildFieldMap>
+  fieldMap: FieldMap
 }
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({

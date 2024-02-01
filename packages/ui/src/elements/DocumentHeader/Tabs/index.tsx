@@ -4,9 +4,9 @@ import { DocumentTab } from './Tab'
 import { getCustomViews } from './getCustomViews'
 import { getViewConfig } from './getViewConfig'
 import { tabs as defaultViews } from './tabs'
+import { DocumentTabProps } from 'payload/types'
 
 import './index.scss'
-import { DocumentTabProps } from 'payload/types'
 
 const baseClass = 'doc-tabs'
 

@@ -4,10 +4,11 @@ import { translations } from '@payloadcms/translations/client'
 import { RootProvider } from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 import { createClientConfig } from '../../utilities/createClientConfig'
-
-import '@payloadcms/ui/scss/app.scss'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 import { deepMerge } from 'payload/utilities'
+import { buildFieldMaps } from '../../../../ui/src/forms/RenderFields/buildFieldMaps'
+
+import '@payloadcms/ui/scss/app.scss'
 
 export const metadata = {
   title: 'Next.js',
@@ -23,7 +24,8 @@ export const RootLayout = async ({
   children: React.ReactNode
   config: Promise<SanitizedConfig>
 }) => {
-  const clientConfig = await createClientConfig(configPromise)
+  const config = await configPromise
+  const clientConfig = await createClientConfig(config)
 
   const lang =
     getRequestLanguage({
@@ -40,6 +42,8 @@ export const RootLayout = async ({
     value: language,
   }))
 
+  const fieldMaps = buildFieldMaps({ config })
+
   return (
     <html lang={lang} dir={dir}>
       <body>
@@ -49,6 +53,7 @@ export const RootLayout = async ({
           lang={lang}
           fallbackLang={clientConfig.i18n.fallbackLanguage}
           languageOptions={languageOptions}
+          fieldMaps={fieldMaps}
         >
           {children}
         </RootProvider>

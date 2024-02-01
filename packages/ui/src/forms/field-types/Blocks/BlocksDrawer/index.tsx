@@ -11,7 +11,7 @@ import { Drawer } from '../../../../elements/Drawer'
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard'
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage'
 import BlockSearch from './BlockSearch'
-import { ReducedBlock } from '../../../RenderFields/buildFieldMap'
+import { ReducedBlock } from '../../../RenderFields/buildFieldMaps/types'
 
 import './index.scss'
 

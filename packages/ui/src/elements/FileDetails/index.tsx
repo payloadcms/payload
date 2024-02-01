@@ -12,19 +12,17 @@ import './index.scss'
 const baseClass = 'file-details'
 
 const FileDetails: React.FC<Props> = (props) => {
-  const { canEdit, collection, doc, handleRemove, hasImageSizes, imageCacheTag } = props
+  const { canEdit, collectionSlug, uploadConfig, doc, handleRemove, hasImageSizes, imageCacheTag } =
+    props
 
-  const {
-    slug: collectionSlug,
-    upload: { staticURL },
-  } = collection
+  const { staticURL } = uploadConfig
 
   const { id, filename, filesize, height, mimeType, url, width } = doc
 
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail collection={collection} doc={doc} imageCacheTag={imageCacheTag} />
+        <Thumbnail uploadConfig={uploadConfig} doc={doc} imageCacheTag={imageCacheTag} />
         <div className={`${baseClass}__main-detail`}>
           <Meta
             collection={collectionSlug}

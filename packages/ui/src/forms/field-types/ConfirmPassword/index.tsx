@@ -53,7 +53,6 @@ const ConfirmPassword: React.FC<Props> = (props) => {
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
         required
-        i18n={i18n}
       />
       <input
         autoComplete="off"

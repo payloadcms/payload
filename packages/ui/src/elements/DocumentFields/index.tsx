@@ -8,8 +8,7 @@ import type { Locale } from 'payload/config'
 import RenderFields from '../../forms/RenderFields'
 import { Gutter } from '../Gutter'
 import { Document } from 'payload/types'
-import { useTranslation } from '../../providers/Translation'
-import { buildFieldMap } from '../../forms/RenderFields/buildFieldMap'
+import { FieldMap } from '../../forms/RenderFields/buildFieldMaps/types'
 
 import './index.scss'
 
@@ -26,7 +25,7 @@ export const DocumentFields: React.FC<{
   data: Document
   user: User
   locale?: Locale
-  fieldMap?: ReturnType<typeof buildFieldMap>
+  fieldMap: FieldMap
 }> = (props) => {
   const {
     AfterFields,
@@ -41,8 +40,6 @@ export const DocumentFields: React.FC<{
     locale,
     fieldMap,
   } = props
-
-  const { i18n } = useTranslation()
 
   const mainFields = fieldMap.filter(({ isSidebar }) => !isSidebar)
 

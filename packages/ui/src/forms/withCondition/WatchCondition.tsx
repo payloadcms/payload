@@ -14,7 +14,7 @@ export const WatchCondition: React.FC<{
 
   const path = typeof pathFromProps === 'string' ? pathFromProps : name
 
-  const field = useFormFields(([fields]) => fields[path])
+  const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
 
   const { passesCondition } = field || {}
 

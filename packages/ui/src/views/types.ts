@@ -10,42 +10,34 @@ import type {
 import type { I18n } from '@payloadcms/translations'
 import type { FormState } from '../forms/Form/types'
 import type { FieldTypes, Locale } from 'payload/config'
+import { FieldMap } from '../forms/RenderFields/buildFieldMaps/types'
 
 export type EditViewProps = (
   | {
-      collectionConfig: SanitizedCollectionConfig
+      collectionSlug?: string
       disableActions?: boolean
       disableLeaveWithoutSaving?: boolean
       hasSavePermission?: boolean
-      id: string
+      id: number | string
       isEditing?: boolean
       docPermissions: CollectionPermission | null
     }
   | {
-      globalConfig: SanitizedGlobalConfig
+      globalSlug?: string
       docPermissions: GlobalPermission | null
     }
 ) & {
-  config: SanitizedConfig
   action?: string
   apiURL: string
   canAccessAdmin?: boolean
   data: Document
   docPreferences: DocumentPreferences
   // isLoading: boolean
-  onSave: (json: any) => void
+  onSave?: (json: any) => void
   updatedAt: string
   user: User | null | undefined
-  fieldTypes: FieldTypes
-  payload: Payload
   locale: Locale
   formState?: FormState
-  permissions: Permissions
-  params?: {
-    segments?: string[]
-    collection?: string
-    global?: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
-  i18n: I18n
+  fieldMap: FieldMap
+  BeforeDocument?: React.ReactNode
 }
