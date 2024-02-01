@@ -24,7 +24,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
     useFacet: undefined,
   }
 
-  if (process.env.NODE_ENV === 'test') {
+  if ([process.env.APP_ENV, process.env.NODE_ENV].includes('test')) {
     if (process.env.PAYLOAD_TEST_MONGO_URL) {
       urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL
     } else {

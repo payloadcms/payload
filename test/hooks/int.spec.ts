@@ -4,7 +4,6 @@ import payload from '../../packages/payload/src'
 import { AuthenticationError } from '../../packages/payload/src/errors'
 import { devUser, regularUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
 import { afterOperationSlug } from './collections/AfterOperation'
 import { chainingHooksSlug } from './collections/ChainingHooks'
 import { contextHooksSlug } from './collections/ContextHooks'
@@ -17,17 +16,14 @@ import {
 import { relationsSlug } from './collections/Relations'
 import { transformSlug } from './collections/Transform'
 import { hooksUsersSlug } from './collections/Users'
-import configPromise, { HooksConfig } from './config'
+import { HooksConfig } from './config'
 import { dataHooksGlobalSlug } from './globals/Data'
 
-let client: RESTClient
 let apiUrl
 
 describe('Hooks', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    const config = await configPromise
-    client = new RESTClient(config, { serverURL, defaultSlug: transformSlug })
     apiUrl = `${serverURL}/api`
   })
 

@@ -1,13 +1,15 @@
 import swcRegister from '@swc/register'
-import express from 'express'
 import getPort from 'get-port'
+import { createServer } from 'http'
+import next from 'next'
 import path from 'path'
 import shelljs from 'shelljs'
+import { parse } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
 
 type Options = {
   __dirname: string
@@ -40,10 +42,6 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_ENV = 'test'
 
-  if (!initOptions?.local) {
-    initOptions.express = express()
-  }
-
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore - bad @swc/register types
   swcRegister({
@@ -59,12 +57,40 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
     },
   })
 
-  await payload.init(initOptions)
+  const payload = await getPayload(initOptions)
 
   const port = await getPort()
-  if (initOptions.express) {
-    initOptions.express.listen(port)
+  const serverURL = `http://localhost:${port}`
+
+  if (!initOptions?.local) {
+    // when using middleware `hostname` and `port` must be provided below
+    const app = next({
+      dev: true,
+      hostname: 'localhost',
+      port,
+      dir: path.resolve(__dirname, '../REST_API'),
+    })
+    const handle = app.getRequestHandler()
+    await app.prepare()
+    createServer(async (req, res) => {
+      try {
+        const parsedUrl = parse(req.url, true)
+
+        await handle(req, res, parsedUrl)
+      } catch (err) {
+        console.error('Error occurred handling', req.url, err)
+        res.statusCode = 500
+        res.end('internal server error')
+      }
+    })
+      .once('error', (err) => {
+        console.error(err)
+        process.exit(1)
+      })
+      .listen(port, () => {
+        console.log(`> Ready on ${serverURL}`)
+      })
   }
 
-  return { serverURL: `http://localhost:${port}`, payload }
+  return { serverURL, payload }
 }
