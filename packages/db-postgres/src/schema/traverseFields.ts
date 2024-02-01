@@ -32,9 +32,9 @@ import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdent
 
 type Args = {
   adapter: PostgresAdapter
-  buildTexts: boolean
   buildNumbers: boolean
   buildRelationships: boolean
+  buildTexts: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
   disableNotNull: boolean
@@ -56,18 +56,18 @@ type Args = {
 
 type Result = {
   hasLocalizedField: boolean
-  hasLocalizedManyTextField: boolean
   hasLocalizedManyNumberField: boolean
+  hasLocalizedManyTextField: boolean
   hasLocalizedRelationshipField: boolean
-  hasManyTextField: 'index' | boolean
   hasManyNumberField: 'index' | boolean
+  hasManyTextField: 'index' | boolean
 }
 
 export const traverseFields = ({
   adapter,
-  buildTexts,
   buildNumbers,
   buildRelationships,
+  buildTexts,
   columnPrefix,
   columns,
   disableNotNull,
@@ -122,7 +122,7 @@ export const traverseFields = ({
       if (
         (field.unique || field.index) &&
         !['array', 'blocks', 'group', 'point', 'relationship', 'upload'].includes(field.type) &&
-        !(field.type === 'number' && field.hasMany === true)
+        !('hasMany' in field && field.hasMany === true)
       ) {
         const unique = disableUnique !== true && field.unique
         if (unique) {
@@ -132,9 +132,10 @@ export const traverseFields = ({
           }
           adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
         }
-        targetIndexes[`${field.name}Idx`] = createIndex({
+        targetIndexes[`${newTableName}_${field.name}Idx`] = createIndex({
           name: fieldName,
           columnName,
+          tableName: newTableName,
           unique,
         })
       }
@@ -314,8 +315,8 @@ export const traverseFields = ({
         }
 
         const {
-          hasManyTextField: subHasManyTextField,
           hasManyNumberField: subHasManyNumberField,
+          hasManyTextField: subHasManyTextField,
           relationsToBuild: subRelationsToBuild,
         } = buildTable({
           adapter,
@@ -395,8 +396,8 @@ export const traverseFields = ({
             }
 
             const {
-              hasManyTextField: subHasManyTextField,
               hasManyNumberField: subHasManyNumberField,
+              hasManyTextField: subHasManyTextField,
               relationsToBuild: subRelationsToBuild,
             } = buildTable({
               adapter,
@@ -465,16 +466,16 @@ export const traverseFields = ({
         if (!('name' in field)) {
           const {
             hasLocalizedField: groupHasLocalizedField,
-            hasLocalizedManyTextField: groupHasLocalizedManyTextField,
             hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
+            hasLocalizedManyTextField: groupHasLocalizedManyTextField,
             hasLocalizedRelationshipField: groupHasLocalizedRelationshipField,
-            hasManyTextField: groupHasManyTextField,
             hasManyNumberField: groupHasManyNumberField,
+            hasManyTextField: groupHasManyTextField,
           } = traverseFields({
             adapter,
-            buildTexts,
             buildNumbers,
             buildRelationships,
+            buildTexts,
             columnPrefix,
             columns,
             disableNotNull,
@@ -507,16 +508,16 @@ export const traverseFields = ({
 
         const {
           hasLocalizedField: groupHasLocalizedField,
-          hasLocalizedManyTextField: groupHasLocalizedManyTextField,
           hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: groupHasLocalizedManyTextField,
           hasLocalizedRelationshipField: groupHasLocalizedRelationshipField,
-          hasManyTextField: groupHasManyTextField,
           hasManyNumberField: groupHasManyNumberField,
+          hasManyTextField: groupHasManyTextField,
         } = traverseFields({
           adapter,
-          buildTexts,
           buildNumbers,
           buildRelationships,
+          buildTexts,
           columnPrefix: `${columnName}_`,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -550,16 +551,16 @@ export const traverseFields = ({
 
         const {
           hasLocalizedField: tabHasLocalizedField,
-          hasLocalizedManyTextField: tabHasLocalizedManyTextField,
           hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: tabHasLocalizedManyTextField,
           hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
-          hasManyTextField: tabHasManyTextField,
           hasManyNumberField: tabHasManyNumberField,
+          hasManyTextField: tabHasManyTextField,
         } = traverseFields({
           adapter,
-          buildTexts,
           buildNumbers,
           buildRelationships,
+          buildTexts,
           columnPrefix,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -593,16 +594,16 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
         const {
           hasLocalizedField: rowHasLocalizedField,
-          hasLocalizedManyTextField: rowHasLocalizedManyTextField,
           hasLocalizedManyNumberField: rowHasLocalizedManyNumberField,
+          hasLocalizedManyTextField: rowHasLocalizedManyTextField,
           hasLocalizedRelationshipField: rowHasLocalizedRelationshipField,
-          hasManyTextField: rowHasManyTextField,
           hasManyNumberField: rowHasManyNumberField,
+          hasManyTextField: rowHasManyTextField,
         } = traverseFields({
           adapter,
-          buildTexts,
           buildNumbers,
           buildRelationships,
+          buildTexts,
           columnPrefix,
           columns,
           disableNotNull: disableNotNullFromHere,
@@ -663,10 +664,10 @@ export const traverseFields = ({
 
   return {
     hasLocalizedField,
-    hasLocalizedManyTextField,
     hasLocalizedManyNumberField,
+    hasLocalizedManyTextField,
     hasLocalizedRelationshipField,
-    hasManyTextField,
     hasManyNumberField,
+    hasManyTextField,
   }
 }
