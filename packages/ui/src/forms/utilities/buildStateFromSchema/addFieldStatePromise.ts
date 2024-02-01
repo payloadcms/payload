@@ -84,7 +84,7 @@ export const addFieldStatePromise = async ({
       fieldState.valid = false
       // TODO: this is unpredictable, need to figure out why
       // It will sometimes lead to inconsistencies across re-renders
-      // parentErrorPaths.add(`${path}${field.name}`)
+      parentErrorPaths.add(`${path}${field.name}`)
     } else {
       fieldState.valid = true
     }

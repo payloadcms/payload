@@ -7,7 +7,7 @@ const reduceFieldsToValues = (fields: FormState, unflatten?: boolean): Data => {
   const data = {}
 
   Object.keys(fields).forEach((key) => {
-    if (!fields[key].disableFormData) {
+    if (fields && key in fields && !fields[key]?.disableFormData) {
       data[key] = fields[key].value
     }
   })

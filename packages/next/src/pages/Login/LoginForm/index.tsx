@@ -3,6 +3,7 @@ import {
   Email,
   Form,
   FormLoadingOverlayToggle,
+  FormState,
   FormSubmit,
   Password,
   useConfig,
@@ -25,27 +26,29 @@ export const LoginForm: React.FC<{
     routes: { admin, api },
   } = config
 
+  const { t } = useTranslation()
+
   const prefillForm = autoLogin && autoLogin.prefillOnly
 
-  const { t } = useTranslation()
+  const initialState: FormState = {
+    email: {
+      initialValue: prefillForm ? autoLogin.email : undefined,
+      value: prefillForm ? autoLogin.email : undefined,
+      valid: true,
+    },
+    password: {
+      initialValue: prefillForm ? autoLogin.password : undefined,
+      value: prefillForm ? autoLogin.password : undefined,
+      valid: true,
+    },
+  }
 
   return (
     <Form
       action={`${api}/${userSlug}/login`}
       className={`${baseClass}__form`}
       disableSuccessStatus
-      initialState={{
-        email: {
-          initialValue: prefillForm ? autoLogin.email : undefined,
-          value: prefillForm ? autoLogin.email : undefined,
-          valid: true,
-        },
-        password: {
-          initialValue: prefillForm ? autoLogin.password : undefined,
-          value: prefillForm ? autoLogin.password : undefined,
-          valid: true,
-        },
-      }}
+      initialState={initialState}
       redirect={`${admin}${searchParams?.redirect || ''}`}
       waitForAutocomplete
       method="POST"
