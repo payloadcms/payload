@@ -92,22 +92,8 @@ jobs:
       POSTGRES_DB: payloadtests
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
       - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+        uses: ./.github/actions/restore-build-cache
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
@@ -145,22 +131,8 @@ jobs:
         part: [1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
       - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+        uses: ./.github/actions/restore-build-cache
 
       - name: E2E Tests
         uses: nick-fields/retry@v2
@@ -182,22 +154,8 @@ jobs:
     needs: core-build
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
       - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+        uses: ./.github/actions/restore-build-cache
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -222,22 +180,8 @@ jobs:
           - live-preview-react
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
       - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+        uses: ./.github/actions/restore-build-cache
 
       - name: Build ${{ matrix.pkg }}
         run: pnpm turbo run build --filter=${{ matrix.pkg }}
@@ -259,22 +203,8 @@ jobs:
           - plugin-seo
 
     steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
       - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+        uses: ./.github/actions/restore-build-cache
 
       - name: Build ${{ matrix.pkg }}
         run: pnpm turbo run build --filter=${{ matrix.pkg }}
