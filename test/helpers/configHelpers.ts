@@ -1,12 +1,15 @@
+import swcRegister from '@swc/register'
 import getPort from 'get-port'
+import { createServer } from 'http'
+import next from 'next'
 import path from 'path'
 import shelljs from 'shelljs'
+import { parse } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
 import { getPayload } from '../../packages/payload/src'
-import { bootAdminPanel } from './bootAdminPanel'
 
 type Options = {
   __dirname: string
@@ -33,14 +36,26 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   const initOptions: InitOptions = {
     local: true,
     config,
-    // loggerOptions: {
-    //   enabled: false,
-    // },
     ...(options.init || {}),
   }
 
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_ENV = 'test'
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - bad @swc/register types
+  swcRegister({
+    sourceMaps: 'inline',
+    jsc: {
+      parser: {
+        syntax: 'typescript',
+        tsx: true,
+      },
+    },
+    module: {
+      type: 'commonjs',
+    },
+  })
 
   const payload = await getPayload(initOptions)
 
@@ -48,10 +63,33 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   const serverURL = `http://localhost:${port}`
 
   if (!initOptions?.local) {
-    process.env.APP_ENV = 'test'
-    process.env.__NEXT_TEST_MODE = 'jest'
-    await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../../') })
-    jest.resetModules()
+    // when using middleware `hostname` and `port` must be provided below
+    const app = next({
+      dev: true,
+      hostname: 'localhost',
+      port,
+      dir: path.resolve(__dirname, '../REST_API'),
+    })
+    const handle = app.getRequestHandler()
+    await app.prepare()
+    createServer(async (req, res) => {
+      try {
+        const parsedUrl = parse(req.url, true)
+
+        await handle(req, res, parsedUrl)
+      } catch (err) {
+        console.error('Error occurred handling', req.url, err)
+        res.statusCode = 500
+        res.end('internal server error')
+      }
+    })
+      .once('error', (err) => {
+        console.error(err)
+        process.exit(1)
+      })
+      .listen(port, () => {
+        console.log(`> Ready on ${serverURL}`)
+      })
   }
 
   return { serverURL, payload }
