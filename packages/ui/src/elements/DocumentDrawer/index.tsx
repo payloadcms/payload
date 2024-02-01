@@ -10,6 +10,7 @@ import { useRelatedCollections } from '../../forms/field-types/Relationship/AddN
 import { useEditDepth } from '../../providers/EditDepth'
 import { Drawer, DrawerToggler } from '../Drawer'
 import { DocumentDrawerContent } from './DrawerContent'
+
 import './index.scss'
 
 export const baseClass = 'doc-drawer'
@@ -57,7 +58,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer className={baseClass} gutter={false} header={false} slug={drawerSlug}>
+    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
       <DocumentDrawerContent {...props} />
     </Drawer>
   )

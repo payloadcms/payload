@@ -4,7 +4,7 @@ export type Props = {
   children: React.ReactNode
   className?: string
   gutter?: boolean
-  header?: React.ReactNode
+  Header?: React.ReactNode
   hoverTitle?: boolean
   slug: string
   title?: string

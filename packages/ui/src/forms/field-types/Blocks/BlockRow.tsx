@@ -14,10 +14,10 @@ import RenderFields from '../../RenderFields'
 import HiddenInput from '../HiddenInput'
 import { RowActions } from './RowActions'
 import SectionTitle from './SectionTitle'
-import { ReducedBlock } from '../../RenderFields/buildFieldMap'
 import { FieldPathProvider } from '../../FieldPathProvider'
 import { Labels } from 'payload/types'
 import { FieldPermissions } from 'payload/auth'
+import { ReducedBlock } from '../../RenderFields/buildFieldMaps/types'
 
 const baseClass = 'blocks-field'
 

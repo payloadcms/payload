@@ -2,17 +2,17 @@
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
-import type { Labels, RowField } from 'payload/types'
+import type { Labels } from 'payload/types'
 
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug'
 import { BlocksDrawer } from './BlocksDrawer'
-import { ReducedBlock, buildFieldMap } from '../../RenderFields/buildFieldMap'
+import { FieldMap, ReducedBlock } from '../../RenderFields/buildFieldMaps/types'
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void
   blockType: string
-  fieldMap: ReturnType<typeof buildFieldMap>
+  fieldMap: FieldMap
   duplicateRow: (rowIndex: number, blockType: string) => void
   hasMaxRows?: boolean
   labels: Labels

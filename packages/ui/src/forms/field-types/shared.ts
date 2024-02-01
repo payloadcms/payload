@@ -7,12 +7,14 @@ import {
   DateField,
   DocumentPreferences,
   JSONField,
+  RelationshipField,
   RowLabel,
+  UploadField,
   Validate,
 } from 'payload/types'
-import { ReducedBlock, ReducedTab, buildFieldMap } from '../RenderFields/buildFieldMap'
 import { Option } from 'payload/types'
 import { FormState } from '../..'
+import type { FieldMap, ReducedBlock, ReducedTab } from '../RenderFields/buildFieldMaps/types'
 
 export const fieldBaseClass = 'field-type'
 
@@ -26,7 +28,7 @@ export type FormFieldBase = {
   Label?: React.ReactNode
   Description?: React.ReactNode
   Error?: React.ReactNode
-  fieldMap?: ReturnType<typeof buildFieldMap>
+  fieldMap?: FieldMap
   initialSubfieldState?: FormState
   style?: React.CSSProperties
   width?: string
@@ -96,6 +98,14 @@ export type FormFieldBase = {
       maxRows?: BlockField['maxRows']
       labels?: BlockField['labels']
       blocks?: ReducedBlock[]
+    }
+  | {
+      // For `upload` fields
+      relationTo?: UploadField['relationTo']
+    }
+  | {
+      // For `relationship` fields
+      relationTo?: RelationshipField['relationTo']
     }
 )
 

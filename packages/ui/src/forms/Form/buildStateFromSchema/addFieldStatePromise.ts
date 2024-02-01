@@ -82,7 +82,9 @@ export const addFieldStatePromise = async ({
     if (typeof validationResult === 'string') {
       fieldState.errorMessage = validationResult
       fieldState.valid = false
-      parentErrorPaths.add(`${path}${field.name}`)
+      // TODO: this is unpredictable, need to figure out why
+      // It will sometimes lead to inconsistencies across re-renders
+      // parentErrorPaths.add(`${path}${field.name}`)
     } else {
       fieldState.valid = true
     }

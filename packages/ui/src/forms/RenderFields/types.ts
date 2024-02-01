@@ -1,15 +1,14 @@
 import type { FieldPermissions, User } from 'payload/auth'
 import type { Document, DocumentPreferences, Field } from 'payload/types'
-import { FormState } from '../Form/types'
 import { Locale } from 'payload/config'
-import { buildFieldMap } from './buildFieldMap'
+import { FieldMap, FieldMaps } from './buildFieldMaps/types'
 
 export type Props = {
   className?: string
   forceRender?: boolean
   margins?: 'small' | false
   data?: Document
-  fieldMap: ReturnType<typeof buildFieldMap>
+  fieldMap: FieldMap
   docPreferences?: DocumentPreferences
   permissions?:
     | {
