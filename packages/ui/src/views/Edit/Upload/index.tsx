@@ -186,7 +186,7 @@ export const Upload: React.FC<Props> = (props) => {
       )}
 
       {(value || doc.filename) && (
-        <Drawer header={null} slug={editDrawerSlug}>
+        <Drawer Header={null} slug={editDrawerSlug}>
           <EditUpload
             doc={doc || undefined}
             fileName={value?.name || doc?.filename}

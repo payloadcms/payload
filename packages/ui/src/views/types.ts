@@ -33,10 +33,11 @@ export type EditViewProps = (
   data: Document
   docPreferences: DocumentPreferences
   // isLoading: boolean
+  onSave?: (json: any) => void
   updatedAt: string
   user: User | null | undefined
   locale: Locale
   formState?: FormState
   fieldMap: FieldMap
-  CustomHeader?: React.ReactNode
+  BeforeDocument?: React.ReactNode
 }

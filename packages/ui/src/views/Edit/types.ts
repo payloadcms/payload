@@ -8,7 +8,7 @@ export type IndexProps = {
 }
 
 export type DefaultEditViewProps = EditViewProps & {
-  customHeader?: React.ReactNode
+  BeforeDocument?: React.ReactNode
   disableRoutes?: boolean
   fieldTypes: FieldTypes
 }

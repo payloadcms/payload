@@ -1,13 +1,14 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from '../../providers/Translation'
+import { useTranslation } from 'react-i18next'
 
 import type { Props, TogglerProps } from './types'
 
-import { X } from '../../icons/X'
-import { EditDepthContext, useEditDepth } from '../../providers/EditDepth'
 import { Gutter } from '../Gutter'
+import { EditDepthContext, useEditDepth } from '../../providers/EditDepth'
+import { X } from '../../icons/X'
+
 import './index.scss'
 
 const baseClass = 'drawer'
@@ -45,12 +46,12 @@ export const Drawer: React.FC<Props> = ({
   children,
   className,
   gutter = true,
-  header,
+  Header,
   hoverTitle,
   slug,
   title,
 }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('general')
   const { closeModal, modalState } = useModal()
   const drawerDepth = useEditDepth()
   const [isOpen, setIsOpen] = useState(false)
@@ -66,7 +67,6 @@ export const Drawer: React.FC<Props> = ({
 
   if (isOpen) {
     // IMPORTANT: do not render the drawer until it is explicitly open, this is to avoid large html trees especially when nesting drawers
-
     return (
       <Modal
         className={[
@@ -84,7 +84,7 @@ export const Drawer: React.FC<Props> = ({
       >
         {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
         <button
-          aria-label={t('general:close')}
+          aria-label={t('close')}
           className={`${baseClass}__close`}
           id={`close-drawer__${slug}`}
           onClick={() => closeModal(slug)}
@@ -94,14 +94,17 @@ export const Drawer: React.FC<Props> = ({
           <div className={`${baseClass}__blur-bg-content`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
             <EditDepthContext.Provider value={drawerDepth + 1}>
-              {header && header}
-              {header === undefined && (
+              {Header}
+              {Header === undefined && (
                 <div className={`${baseClass}__header`}>
                   <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
                     {title}
                   </h2>
+                  {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
+                    i.e. changing to a `div` element will fix the animation issue but will break accessibility
+                  */}
                   <button
-                    aria-label={t('general:close')}
+                    aria-label={t('close')}
                     className={`${baseClass}__header__close`}
                     id={`close-drawer__${slug}`}
                     onClick={() => closeModal(slug)}

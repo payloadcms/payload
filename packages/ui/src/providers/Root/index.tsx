@@ -86,7 +86,7 @@ export const RootProvider: React.FC<Props> = ({
           </TranslationProvider>
         </FieldMapsProvider>
       </ConfigProvider>
-      {/* <ToastContainer icon={false} position="bottom-center" transition={Slide} /> */}
+      <ToastContainer icon={false} position="bottom-center" transition={Slide} />
     </Fragment>
   )
 }

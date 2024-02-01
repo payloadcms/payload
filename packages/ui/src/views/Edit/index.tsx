@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment } from 'react'
+import React, { Fragment, useCallback } from 'react'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
@@ -27,11 +27,11 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const {
     action,
     apiURL,
-    CustomHeader,
+    BeforeDocument,
     data,
     formState: initialState,
     // isLoading,
-    // onSave: onSaveFromProps,
+    onSave: onSaveFromProps,
     docPreferences,
     docPermissions,
     user,
@@ -41,14 +41,19 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const config = useConfig()
+  const {
+    serverURL,
+    routes: { api: apiRoute },
+    collections,
+    globals,
+  } = useConfig()
 
   const collectionConfig =
     'collectionSlug' in props &&
-    config.collections.find((collection) => collection.slug === props.collectionSlug)
+    collections.find((collection) => collection.slug === props.collectionSlug)
 
   const globalConfig =
-    'globalSlug' in props && config.globals.find((global) => global.slug === props.globalSlug)
+    'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
 
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined
@@ -64,26 +69,35 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
-  // const onSave = useCallback(
-  //   async (json) => {
-  //     reportUpdate({
-  //       id,
-  //       entitySlug: collectionConfig.slug,
-  //       updatedAt: json?.result?.updatedAt || new Date().toISOString(),
-  //     })
-  //     if (auth && id === user.id) {
-  //       await refreshCookieAsync()
-  //     }
+  const onSave = useCallback(
+    async (json) => {
+      // reportUpdate({
+      //   id,
+      //   entitySlug: collectionConfig.slug,
+      //   updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      // })
 
-  //     if (typeof onSaveFromProps === 'function') {
-  //       onSaveFromProps({
-  //         ...json,
-  //         operation: id ? 'update' : 'create',
-  //       })
-  //     }
-  //   },
-  //   [id, onSaveFromProps, auth, user, refreshCookieAsync, collectionConfig, reportUpdate],
-  // )
+      // if (auth && id === user.id) {
+      //   await refreshCookieAsync()
+      // }
+
+      if (typeof onSaveFromProps === 'function') {
+        onSaveFromProps({
+          ...json,
+          operation: id ? 'update' : 'create',
+        })
+      }
+    },
+    [
+      id,
+      onSaveFromProps,
+      auth,
+      user,
+      // refreshCookieAsync,
+      collectionConfig,
+      //  reportUpdate
+    ],
+  )
 
   const operation = isEditing ? 'update' : 'create'
 
@@ -116,13 +130,13 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     <main className={classes}>
       <OperationProvider operation={operation}>
         <Form
-          // action={action}
+          action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
           initialState={initialState}
           method={id ? 'PATCH' : 'POST'}
-          onChange={[onChange]}
-          // onSuccess={onSave}
+          // onChange={[onChange]}
+          onSuccess={onSave}
         >
           <FormLoadingOverlayToggle
             action={operation}
@@ -146,10 +160,11 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
           i18n,
         )}`}
       /> */}
-          {CustomHeader}
+          {BeforeDocument}
           {preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           <SetStepNav
-            collectionSlug={collectionConfig?.slug || globalConfig?.slug}
+            collectionSlug={collectionConfig?.slug}
+            globalSlug={globalConfig?.slug}
             useAsTitle={collectionConfig?.admin?.useAsTitle}
             id={id}
             isEditing={isEditing || false}

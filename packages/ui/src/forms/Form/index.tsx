@@ -252,7 +252,6 @@ const Form: React.FC<Props> = (props) => {
           }
         } else {
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
-
           if (json.message) {
             toast.error(json.message)
 
@@ -304,7 +303,7 @@ const Form: React.FC<Props> = (props) => {
             return
           }
 
-          const message = errorMessages[res.status] || t('error:unknown')
+          const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
 
           toast.error(message)
         }

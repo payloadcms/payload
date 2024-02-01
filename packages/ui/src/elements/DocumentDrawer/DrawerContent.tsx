@@ -21,19 +21,13 @@ import { useFormQueryParams } from '../../providers/FormQueryParams'
 import { useLocale } from '../../providers/Locale'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { formatFields } from '../../utilities/formatFields'
-import { Button } from '../Button'
 import IDLabel from '../IDLabel'
 import type { EditViewProps } from '../../views/types'
 import { useFieldMaps } from '../../providers/FieldMapsProvider'
 import { DefaultEditView } from '../../views/Edit'
 import { Gutter } from '../Gutter'
 
-const Content: React.FC<DocumentDrawerProps> = ({
-  collectionSlug,
-  customHeader,
-  drawerSlug,
-  onSave,
-}) => {
+const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawerSlug, onSave }) => {
   const config = useConfig()
 
   const {
@@ -80,6 +74,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   // no need to an additional requests when creating new documents
   const initialID = useRef(id)
+
   const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
     initialID.current ? `${serverURL}${api}/${collectionSlug}/${initialID.current}` : null,
     { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
@@ -120,24 +115,25 @@ const Content: React.FC<DocumentDrawerProps> = ({
     id,
     action,
     apiURL,
-    CustomHeader: (
+    BeforeDocument: (
       <Gutter className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-content`}>
           <h2 className={`${baseClass}__header-text`}>
-            {!customHeader
-              ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
-                  label: getTranslation(collectionConfig.labels.singular, i18n),
-                })
-              : customHeader}
+            {Header ||
+              t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
+                label: getTranslation(collectionConfig.labels.singular, i18n),
+              })}
           </h2>
-          <Button
+          {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
+            i.e. changing to a `div` element will fix the animation issue but will break accessibility
+          */}
+          <button
             aria-label={t('general:close')}
-            buttonStyle="none"
             className={`${baseClass}__header-close`}
             onClick={() => toggleModal(drawerSlug)}
           >
             <X />
-          </Button>
+          </button>
         </div>
         {id && <IDLabel id={id.toString()} />}
       </Gutter>
@@ -149,7 +145,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
     isEditing,
     // isLoading,
     // me: true,
-    // onSave,
+    onSave,
     collectionSlug: collectionConfig.slug,
     docPermissions: docPermissions as CollectionPermission,
     docPreferences: null,
@@ -157,6 +153,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
     fieldMap,
     updatedAt: data?.updatedAt,
     locale,
+    formState: {},
   }
 
   return (

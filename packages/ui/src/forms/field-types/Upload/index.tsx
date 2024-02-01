@@ -31,7 +31,7 @@ const Upload: React.FC<Props> = (props) => {
     Error,
     Label,
     filterOptions,
-    path,
+    path: pathFromProps,
     relationTo,
     required,
     validate,
@@ -54,8 +54,8 @@ const Upload: React.FC<Props> = (props) => {
     [validate, required],
   )
 
-  const { setValue, showError, value } = useField({
-    path,
+  const { setValue, showError, value, path } = useField({
+    path: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -159,7 +159,8 @@ const Upload: React.FC<Props> = (props) => {
           <React.Fragment>
             {file && !missingFile && (
               <FileDetails
-                collection={collection}
+                uploadConfig={collection.upload}
+                collectionSlug={relationTo}
                 doc={file}
                 handleRemove={
                   readOnly
@@ -199,4 +200,5 @@ const Upload: React.FC<Props> = (props) => {
 
   return null
 }
+
 export default Upload
