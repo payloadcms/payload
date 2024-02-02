@@ -1,15 +1,13 @@
 import swcRegister from '@swc/register'
 import getPort from 'get-port'
-import { createServer } from 'http'
-import next from 'next'
 import path from 'path'
 import shelljs from 'shelljs'
-import { parse } from 'url'
 
 import type { Payload } from '../../packages/payload/src'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
 import { getPayload } from '../../packages/payload/src'
+import { bootAdminPanel } from './bootAdminPanel'
 
 type Options = {
   __dirname: string
@@ -31,11 +29,10 @@ export async function initPayloadE2E(__dirname: string): Promise<InitializedPayl
 
 export async function initPayloadTest(options: Options): Promise<InitializedPayload> {
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
-  const config = (await import(process.env.PAYLOAD_CONFIG_PATH)).default
 
   const initOptions: InitOptions = {
     local: true,
-    config,
+    config: require(process.env.PAYLOAD_CONFIG_PATH),
     ...(options.init || {}),
   }
 
@@ -63,33 +60,7 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   const serverURL = `http://localhost:${port}`
 
   if (!initOptions?.local) {
-    // when using middleware `hostname` and `port` must be provided below
-    const app = next({
-      dev: true,
-      hostname: 'localhost',
-      port,
-      dir: path.resolve(__dirname, '../REST_API'),
-    })
-    const handle = app.getRequestHandler()
-    await app.prepare()
-    createServer(async (req, res) => {
-      try {
-        const parsedUrl = parse(req.url, true)
-
-        await handle(req, res, parsedUrl)
-      } catch (err) {
-        console.error('Error occurred handling', req.url, err)
-        res.statusCode = 500
-        res.end('internal server error')
-      }
-    })
-      .once('error', (err) => {
-        console.error(err)
-        process.exit(1)
-      })
-      .listen(port, () => {
-        console.log(`> Ready on ${serverURL}`)
-      })
+    await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../REST_API') })
   }
 
   return { serverURL, payload }

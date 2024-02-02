@@ -4,9 +4,14 @@ const nextConfig = {
     outputFileTracingExcludes: {
       '**/*': ['drizzle-kit', 'drizzle-kit/utils'],
     },
-    serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
+    serverComponentsExternalPackages: [
+      'drizzle-kit',
+      'drizzle-kit/utils',
+      'pino',
+      'pino-pretty',
+      'mongodb-memory-server',
+    ],
   },
-  reactStrictMode: false,
   // transpilePackages: ['@payloadcms/db-mongodb', 'mongoose'],
   webpack: (config) => {
     return {
