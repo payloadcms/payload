@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import CheckboxInput from '../../../forms/field-types/Checkbox'
+import CheckboxInput from '../../../forms/fields/Checkbox'
 import { useSelection } from '../SelectionProvider'
 import './index.scss'
 

@@ -9,7 +9,6 @@ import { initPage } from '../../utilities/initPage'
 import {
   EditDepthProvider,
   RenderCustomComponent,
-  fieldTypes,
   buildStateFromSchema,
   formatFields,
   FormQueryParamsProvider,
@@ -20,11 +19,9 @@ import {
 import type { EditViewProps } from '@payloadcms/ui'
 import queryString from 'qs'
 import { notFound } from 'next/navigation'
-import { TFunction } from '@payloadcms/translations'
 import { AdminViewComponent } from 'payload/config'
 import { getViewsFromConfig } from './getViewsFromConfig'
 import type { DocumentPermissions } from 'payload/types'
-import { buildFieldMap } from '../../../../ui/src/forms/RenderFields/buildFieldMaps/buildFieldMap'
 
 export const Document = async ({
   params,
@@ -43,6 +40,7 @@ export const Document = async ({
   const globalSlug = params.global
   const isCreating = params.segments?.length === 1 && params.segments?.[0] === 'create'
   const id = (collectionSlug && !isCreating && params.segments[0]) || undefined
+
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
   const { config, payload, permissions, user, collectionConfig, globalConfig, locale, i18n } =
@@ -162,10 +160,6 @@ export const Document = async ({
     user,
   })
 
-  const fieldMap = buildFieldMap({
-    fieldSchema: collectionConfig?.fields || globalConfig?.fields,
-  })
-
   const formQueryParams: QueryParamTypes = {
     depth: 0,
     'fallback-locale': 'null',
@@ -189,7 +183,6 @@ export const Document = async ({
     updatedAt: data?.updatedAt?.toString(),
     user,
     locale,
-    fieldMap,
   }
 
   return (

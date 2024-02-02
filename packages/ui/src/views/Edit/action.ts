@@ -3,7 +3,7 @@
 import { getPayload } from 'payload'
 import { FormState } from '../../forms/Form/types'
 import configPromise from 'payload-config'
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import buildStateFromSchema from '../../forms/utilities/buildStateFromSchema'
 import { reduceFieldsToValues } from '../..'
 import { DocumentPreferences } from 'payload/types'
 import { Locale } from 'payload/config'

@@ -13,7 +13,7 @@ export const getDataAndFile: GetDataAndFile = async ({ request, collection, conf
   let data: Record<string, any> = undefined
   let file: CustomPayloadRequest['file'] = undefined
 
-  if (['POST', 'PUT'].includes(request.method.toUpperCase()) && request.body) {
+  if (['PATCH', 'POST', 'PUT'].includes(request.method.toUpperCase()) && request.body) {
     const [contentType] = request.headers.get('Content-Type').split(';')
 
     if (contentType === 'application/json') {

@@ -5,7 +5,7 @@ import {
   SanitizedGlobalConfig,
   TabsField,
 } from 'payload/types'
-import { fieldTypes } from '../../field-types'
+import { fieldTypes } from '../../fields'
 
 export type ReducedTab = {
   name?: string

@@ -2,7 +2,7 @@ import type { TFunction } from '@payloadcms/translations'
 
 import type { User } from 'payload/auth'
 import type { Field as FieldSchema, Data } from 'payload/types'
-import type { FormState } from '../types'
+import type { FormState } from '../../Form/types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { addFieldStatePromise } from './addFieldStatePromise'
 

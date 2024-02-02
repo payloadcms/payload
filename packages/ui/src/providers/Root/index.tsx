@@ -18,7 +18,7 @@ import type { LanguageOptions, LanguageTranslations } from '../Translation'
 import { Slide, ToastContainer } from 'react-toastify'
 import { DocumentEventsProvider } from '../DocumentEvents'
 import { CustomProvider } from '../CustomProvider'
-import { FieldMaps } from '../../forms/RenderFields/buildFieldMaps/types'
+import { FieldMaps } from '../../forms/utilities/buildFieldMaps/types'
 import { FieldMapsProvider } from '../FieldMapsProvider'
 
 type Props = {

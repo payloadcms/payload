@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useContext } from 'react'
 
-import { FieldMaps } from '../../forms/RenderFields/buildFieldMaps/types'
+import { FieldMaps } from '../../forms/utilities/buildFieldMaps/types'
 
 const FieldMapsContext = createContext<FieldMaps>({} as FieldMaps)
 

@@ -6,7 +6,7 @@ import { useTranslation } from '../../providers/Translation'
 import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
+import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections'
 import { useEditDepth } from '../../providers/EditDepth'
 import { Drawer, DrawerToggler } from '../Drawer'
 import { DocumentDrawerContent } from './DrawerContent'

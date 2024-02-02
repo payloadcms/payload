@@ -65,10 +65,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         state[action.path] || ({} as FormField),
       )
 
-      return {
+      const newState = {
         ...state,
         [action.path]: newField,
       }
+
+      return newState
     }
 
     case 'REMOVE_ROW': {

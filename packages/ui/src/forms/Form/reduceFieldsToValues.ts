@@ -15,16 +15,16 @@ const reduceFieldsToValues = (
   unflatten?: boolean,
   ignoreDisableFormData?: boolean,
 ): Data => {
-  const data = {}
+  let data = {}
 
   Object.keys(fields).forEach((key) => {
-    if (ignoreDisableFormData === true || !fields[key].disableFormData) {
-      data[key] = fields[key].value
+    if (ignoreDisableFormData === true || !fields[key]?.disableFormData) {
+      data[key] = fields[key]?.value
     }
   })
 
   if (unflatten) {
-    return flatleyUnflatten(data, { safe: true })
+    data = flatleyUnflatten(data, { safe: true })
   }
 
   return data

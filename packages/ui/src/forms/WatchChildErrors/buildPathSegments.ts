@@ -1,4 +1,4 @@
-import { FieldMap } from '../RenderFields/buildFieldMaps/types'
+import { FieldMap } from '../utilities/buildFieldMaps/types'
 
 export const buildPathSegments = (parentPath: string, fieldMap: FieldMap): string[] => {
   const pathNames = fieldMap.reduce((acc, subField) => {

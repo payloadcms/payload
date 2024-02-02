@@ -6,8 +6,8 @@ import DefaultError from '../../Error'
 import DefaultLabel from '../../Label'
 import DefaultDescription from '../../FieldDescription'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
-import { fieldTypes } from '../../field-types'
-import { FormFieldBase } from '../../field-types/shared'
+import { fieldTypes } from '../../fields'
+import { FormFieldBase } from '../../fields/shared'
 import { FieldMap, ReducedBlock, ReducedField, ReducedTab } from './types'
 
 export const buildFieldMap = (args: {
@@ -93,7 +93,8 @@ export const buildFieldMap = (args: {
         const Error = <ErrorComponent />
 
         const DescriptionComponent =
-          ('description' in field.admin &&
+          (field.admin &&
+            'description' in field.admin &&
             field.admin.description &&
             typeof field.admin.description === 'function' &&
             (field.admin.description as React.FC<any>)) ||
@@ -102,7 +103,9 @@ export const buildFieldMap = (args: {
         const Description = (
           <DescriptionComponent
             description={
-              'description' in field.admin && typeof field.admin?.description === 'string'
+              field.admin &&
+              'description' in field.admin &&
+              typeof field.admin?.description === 'string'
                 ? field.admin.description
                 : undefined
             }
