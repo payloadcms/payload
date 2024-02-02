@@ -5,9 +5,9 @@ export const hooksSlug = 'hooks'
 const Hooks: CollectionConfig = {
   slug: hooksSlug,
   access: {
-    read: () => true,
     create: () => true,
     delete: () => true,
+    read: () => true,
     update: () => true,
   },
   hooks: {
@@ -50,7 +50,15 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
       hooks: {
         beforeChange: [
-          ({ data }) => {
+          ({ data, operation, previousSiblingDoc, previousValue }) => {
+            if (operation === 'update') {
+              if (typeof previousValue === 'undefined') {
+                throw new Error('previousValue is missing in beforeChange hook')
+              }
+              if (!previousSiblingDoc) {
+                throw new Error('previousSiblingDoc is missing in beforeChange hook')
+              }
+            }
             data.fieldBeforeChange = true
             validateHookOrder('fieldBeforeChange', data)
             return true
@@ -113,7 +121,7 @@ const Hooks: CollectionConfig = {
   ],
 }
 
-const createHookOrder = [
+const writeHooksOrder = [
   'fieldBeforeValidate',
   'collectionBeforeValidate',
   'collectionBeforeChange',
@@ -126,10 +134,11 @@ const createHookOrder = [
 
 const validateHookOrder = (check: string, data) => {
   let hasMatched
-  createHookOrder.forEach((hook) => {
-    if (check === 'collectionBeforeRead' && !data.id) {
-      data[check] = true
-    } else if (hook === check) {
+  if (check === 'collectionBeforeRead') {
+    data.collectionBeforeRead = true
+  }
+  writeHooksOrder.forEach((hook) => {
+    if (hook === check) {
       data[check] = true
       hasMatched = true
     } else if ((!hasMatched && !data[hook]) || (hasMatched && data[hook])) {

@@ -38,8 +38,9 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   originalDoc?: T
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: T
-  /** The sibling data from the previous document in `afterChange` hook. */
+  /** The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook. */
   previousSiblingDoc?: T
+  /** The previous value of the field, before changes, only in `beforeChange` and `afterChange` hooks. */
   previousValue?: P
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
