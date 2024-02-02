@@ -11,7 +11,7 @@ export const bootAdminPanel = async ({ port = 3000, appDir }: args) => {
   const app = next({
     dev: true,
     hostname: 'localhost',
-    port: port || 3000,
+    port,
     dir: appDir,
   })
 
