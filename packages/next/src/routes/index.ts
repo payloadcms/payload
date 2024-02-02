@@ -34,6 +34,7 @@ import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
 import { PayloadRequest } from 'payload/types'
 import { Endpoint } from 'payload/config'
+import { renderPlaygroundPage } from 'graphql-playground-html'
 
 const endpoints = {
   root: {
@@ -128,12 +129,18 @@ const handleCustomEndpoints = ({
   return null
 }
 
+const trimLeadingSlash = (str: string) => {
+  if (str.startsWith('/')) {
+    return str.slice(1)
+  }
+  return str
+}
+
 export const GET = async (
   request: Request,
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
-
   try {
     const req = await createPayloadRequest({
       request,
@@ -200,6 +207,29 @@ export const GET = async (
           return endpoints.global.GET?.[`doc-${slug3}-by-id`]({ req, id: slug4, globalConfig })
         default:
           return new Response('Route Not Found', { status: 404 })
+      }
+    }
+    // graphql-playground
+    else if (slug.join('/') === trimLeadingSlash(req.payload.config.routes.graphQLPlayground)) {
+      if (
+        (!req.payload.config.graphQL.disable &&
+          !req.payload.config.graphQL.disablePlaygroundInProduction &&
+          process.env.NODE_ENV === 'production') ||
+        process.env.NODE_ENV !== 'production'
+      ) {
+        return new Response(
+          renderPlaygroundPage({
+            endpoint: `${req.payload.config.routes.api}${req.payload.config.routes.graphQL}`,
+          }),
+          {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/html',
+            },
+          },
+        )
+      } else {
+        return new Response('Route Not Found', { status: 404 })
       }
     } else {
       // root routes
