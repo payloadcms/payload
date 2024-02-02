@@ -418,7 +418,7 @@ describe('Fields', () => {
     })
   })
 
-  if (isMongoose(payload) || !['postgres'].includes(process.env.PAYLOAD_DATABASE)) {
+  if (isMongoose(payload)) {
     describe('indexes', () => {
       let indexes
       const definitions: Record<string, IndexDirection> = {}
