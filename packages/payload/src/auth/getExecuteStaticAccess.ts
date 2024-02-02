@@ -1,7 +1,5 @@
 import type { NextFunction, Response } from 'express'
 
-import { URL } from 'url'
-
 import type { SanitizedCollectionConfig } from '../collections/config/types'
 import type { PayloadRequest } from '../types'
 import type { Where } from '../types'
@@ -17,7 +15,7 @@ const getExecuteStaticAccess =
     }
 
     try {
-      const { pathname } = new URL(req.url)
+      const { pathname } = req
       if (pathname) {
         const accessResult = await executeAccess({ req }, config.access.read)
 

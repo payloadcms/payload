@@ -1,13 +1,13 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 import type { Props, TogglerProps } from './types'
 
 import { Gutter } from '../Gutter'
 import { EditDepthContext, useEditDepth } from '../../providers/EditDepth'
 import { X } from '../../icons/X'
+import { useTranslation } from '../..'
 
 import './index.scss'
 
@@ -51,7 +51,7 @@ export const Drawer: React.FC<Props> = ({
   slug,
   title,
 }) => {
-  const { t } = useTranslation('general')
+  const { t } = useTranslation()
   const { closeModal, modalState } = useModal()
   const drawerDepth = useEditDepth()
   const [isOpen, setIsOpen] = useState(false)
@@ -84,7 +84,7 @@ export const Drawer: React.FC<Props> = ({
       >
         {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
         <button
-          aria-label={t('close')}
+          aria-label={t('general:close')}
           className={`${baseClass}__close`}
           id={`close-drawer__${slug}`}
           onClick={() => closeModal(slug)}
@@ -104,7 +104,7 @@ export const Drawer: React.FC<Props> = ({
                     i.e. changing to a `div` element will fix the animation issue but will break accessibility
                   */}
                   <button
-                    aria-label={t('close')}
+                    aria-label={t('general:close')}
                     className={`${baseClass}__header__close`}
                     id={`close-drawer__${slug}`}
                     onClick={() => closeModal(slug)}

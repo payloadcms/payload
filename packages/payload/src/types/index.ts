@@ -48,6 +48,13 @@ export type CustomPayloadRequest<U = any> = {
    * Only available for localized collections
    */
   locale?: string
+  /**
+   * The URL path of the request
+   */
+  pathname: null | string
+  /**
+   * The payload object
+   */
   payload: typeof payload
   /**
    * The context in which the request is being made
@@ -57,6 +64,10 @@ export type CustomPayloadRequest<U = any> = {
   payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
+  /**
+   * The search parameters from the request URL
+   */
+  searchParams: URLSearchParams
   /** Translate function - duplicate of i18n.t */
   t: TFunction
   /**

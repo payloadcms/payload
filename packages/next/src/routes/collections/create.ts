@@ -6,7 +6,7 @@ import { isNumber } from 'payload/utilities'
 import { createOperation } from 'payload/operations'
 
 export const create = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
   const depth = searchParams.get('depth')

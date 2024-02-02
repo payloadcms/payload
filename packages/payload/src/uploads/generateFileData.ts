@@ -6,7 +6,6 @@ import mkdirp from 'mkdirp'
 import path from 'path'
 import sanitize from 'sanitize-filename'
 import sharp from 'sharp'
-import { URL } from 'url'
 
 import type { Collection } from '../collections/config/types'
 import type { SanitizedConfig } from '../config/types'
@@ -54,7 +53,7 @@ export const generateFileData = async <T>({
 
   let file = req.file
 
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const uploadEdits = searchParams.get('uploadEdits') || {}
 
   const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =

@@ -5,7 +5,7 @@ import { isNumber } from 'payload/utilities'
 import { generatePayloadCookie } from '../../utilities/cookies'
 
 export const login = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await loginOperation({

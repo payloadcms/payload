@@ -5,7 +5,7 @@ import { generatePayloadCookie } from '../../utilities/cookies'
 import { PayloadRequest } from 'payload/types'
 
 export const resetPassword = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await resetPasswordOperation({
