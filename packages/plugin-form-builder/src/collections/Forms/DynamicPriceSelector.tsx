@@ -1,7 +1,7 @@
 'use client'
 
 import type { Data } from 'payload/dist/admin/components/forms/Form/types'
-import type { Props as TextFieldType } from 'payload/dist/admin/components/forms/fields/Text/types'
+import type { Props as TextFieldType } from 'payload/dist/admin/components/forms/field-types/Text/types'
 
 import { Text, useWatchForm } from 'payload/components/forms'
 import { useLocale } from 'payload/components/utilities'

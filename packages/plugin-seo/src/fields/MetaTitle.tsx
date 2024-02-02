@@ -1,7 +1,7 @@
 'use client'
 
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import TextInput from 'payload/dist/admin/components/forms/fields/Text/Input'
+// import TextInput from 'payload/dist/admin/components/forms/field-types/Text/Input'
 import type {
   FieldType as FieldType,
   Options,
