@@ -11,7 +11,7 @@ import type { DocumentDrawerProps } from './types'
 import { baseClass } from '.'
 import { getTranslation } from '@payloadcms/translations'
 import usePayloadAPI from '../../hooks/usePayloadAPI'
-import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
+import { useRelatedCollections } from '../../forms/fields/Relationship/AddNew/useRelatedCollections'
 import { X } from '../../icons/X'
 import { useAuth } from '../../providers/Auth'
 import { useConfig } from '../../providers/Config'
@@ -23,7 +23,6 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent'
 import { formatFields } from '../../utilities/formatFields'
 import IDLabel from '../IDLabel'
 import type { EditViewProps } from '../../views/types'
-import { useFieldMaps } from '../../providers/FieldMapsProvider'
 import { DefaultEditView } from '../../views/Edit'
 import { Gutter } from '../Gutter'
 
@@ -34,9 +33,6 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
     routes: { api },
     serverURL,
   } = config
-
-  const fieldMaps = useFieldMaps()
-  const fieldMap = fieldMaps[collectionSlug]
 
   const { closeModal, modalState, toggleModal } = useModal()
   const locale = useLocale()
@@ -150,10 +146,9 @@ const Content: React.FC<DocumentDrawerProps> = ({ collectionSlug, Header, drawer
     docPermissions: docPermissions as CollectionPermission,
     docPreferences: null,
     user,
-    fieldMap,
     updatedAt: data?.updatedAt,
     locale,
-    formState: {},
+    initializeFormState: true,
   }
 
   return (

@@ -6,8 +6,8 @@ import type { CodeField, CellComponentProps, CellProps } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent'
-import cellComponents from './field-types'
-import CodeCell from './field-types/Code'
+import cellComponents from './fields'
+import CodeCell from './fields/Code'
 
 const DefaultCell: React.FC<CellProps> = (props) => {
   const {

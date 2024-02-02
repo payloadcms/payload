@@ -30,11 +30,9 @@ const RenderFields: React.FC<Props> = (props) => {
           .filter(Boolean)
           .join(' ')}
       >
-        <FieldPathProvider path="">
-          {fieldMap?.map(({ Field, name }, fieldIndex) => (
-            <RenderField key={fieldIndex} name={name} Field={Field} />
-          ))}
-        </FieldPathProvider>
+        {fieldMap?.map(({ Field, name }, fieldIndex) => (
+          <RenderField key={fieldIndex} name={name} Field={Field} />
+        ))}
       </div>
     )
   }

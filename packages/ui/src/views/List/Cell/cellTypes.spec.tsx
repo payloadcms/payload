@@ -3,11 +3,11 @@ import React from 'react'
 
 import type { BlockField, DateField, SelectField } from 'payload/types'
 
-import BlocksCell from './field-types/Blocks'
-import Checkbox from './field-types/Checkbox'
-import DateCell from './field-types/Date'
-import Select from './field-types/Select'
-import Textarea from './field-types/Textarea'
+import BlocksCell from './fields/Blocks'
+import Checkbox from './fields/Checkbox'
+import DateCell from './fields/Date'
+import Select from './fields/Select'
+import Textarea from './fields/Textarea'
 
 jest.mock('../../../../utilities/Config', () => ({
   useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),

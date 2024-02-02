@@ -6,7 +6,7 @@ export type Options = {
   hasRows?: boolean
   validate?: Validate
   /**
-   * If you do not provide a path, this hook will look for one using the `useFieldPath` hook.
+   * If you do not provide a `path` or a `name`, this hook will look for one using the `useFieldPath` hook.
    **/
   path?: string
 }
