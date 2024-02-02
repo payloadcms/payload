@@ -10,6 +10,27 @@ const Hooks: CollectionConfig = {
     read: () => true,
     update: () => true,
   },
+  hooks: {
+    beforeOperation: [
+      ({ req }) => {
+        if (!req.transactionID) {
+          throw new Error('transactionID is missing in beforeOperation hook')
+        }
+      },
+    ],
+    beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
+    beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
+    afterChange: [
+      ({ doc, previousDoc }) => {
+        if (!previousDoc) {
+          throw new Error('previousDoc is missing in afterChange hook')
+        }
+        return validateHookOrder('collectionAfterChange', doc)
+      },
+    ],
+    beforeRead: [({ doc }) => validateHookOrder('collectionBeforeRead', doc)],
+    afterRead: [({ doc }) => validateHookOrder('collectionAfterRead', doc)],
+  },
   fields: [
     {
       name: 'fieldBeforeValidate',
@@ -98,20 +119,6 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
     },
   ],
-  hooks: {
-    afterChange: [
-      ({ doc, previousDoc }) => {
-        if (!previousDoc) {
-          throw new Error('previousDoc is missing in afterChange hook')
-        }
-        return validateHookOrder('collectionAfterChange', doc)
-      },
-    ],
-    afterRead: [({ doc }) => validateHookOrder('collectionAfterRead', doc)],
-    beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
-    beforeRead: [({ doc }) => validateHookOrder('collectionBeforeRead', doc)],
-    beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
-  },
 }
 
 const writeHooksOrder = [

@@ -29,37 +29,38 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
 
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection?.config,
-        context: args.req.context,
-        operation: 'forgotPassword',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    collection: { config: collectionConfig },
-    data,
-    disableEmail,
-    expiration,
-    req: {
-      payload: { config, emailOptions, sendEmail: email },
-      payload,
-      t,
-    },
-    req,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection?.config,
+          context: args.req.context,
+          operation: 'forgotPassword',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      collection: { config: collectionConfig },
+      data,
+      disableEmail,
+      expiration,
+      req: {
+        payload: { config, emailOptions, sendEmail: email },
+        payload,
+        t,
+      },
+      req,
+    } = args
 
     // /////////////////////////////////////
     // Forget password
@@ -159,7 +160,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
 
     return token
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }
