@@ -24,7 +24,6 @@ import { useConfig } from '../../providers/Config'
 import { useDocumentInfo } from '../../providers/DocumentInfo'
 import { useLocale } from '../../providers/Locale'
 import { useOperation } from '../../providers/OperationProvider'
-import buildStateFromSchema from './buildStateFromSchema'
 import {
   FormContext,
   FormFieldsContext,
@@ -40,6 +39,7 @@ import getSiblingDataFunc from './getSiblingData'
 import initContextState from './initContextState'
 import reduceFieldsToValues from './reduceFieldsToValues'
 import useDebounce from '../../hooks/useDebounce'
+import { FieldPathProvider } from '../FieldPathProvider'
 
 const baseClass = 'form'
 
@@ -62,6 +62,7 @@ const Form: React.FC<Props> = (props) => {
     submitted: submittedFromProps,
     waitForAutocomplete,
     onChange,
+    beforeSubmit,
   } = props
 
   const method = 'method' in props ? props.method : undefined
@@ -95,7 +96,9 @@ const Form: React.FC<Props> = (props) => {
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
     let isValid = true
-    const data = contextRef.current.getData()
+
+    const dataFromContext = contextRef.current.getData()
+    let data = dataFromContext
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
@@ -143,7 +146,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid
-  }, [contextRef, id, user, operation, t, dispatchFields, config])
+  }, [id, user, operation, t, dispatchFields, config, beforeSubmit])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -167,12 +170,33 @@ const Form: React.FC<Props> = (props) => {
       }
 
       setProcessing(true)
+      setSubmitted(true)
 
       if (waitForAutocomplete) await wait(100)
 
-      const isValid = skipValidation ? true : await contextRef.current.validateForm()
+      // Execute server side validations
+      if (Array.isArray(beforeSubmit)) {
+        let revalidatedFormState: FormState
 
-      if (!skipValidation) setSubmitted(true)
+        await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
+          await priorOnChange
+
+          const result = await beforeSubmitFn({
+            formState: debouncedFormState,
+          })
+
+          revalidatedFormState = result
+        }, Promise.resolve())
+
+        const isValid = Object.entries(revalidatedFormState).every(([, field]) => field.valid)
+
+        if (!isValid) {
+          setProcessing(false)
+          return dispatchFields({ state: revalidatedFormState, type: 'REPLACE_STATE' })
+        }
+      }
+
+      const isValid = skipValidation ? true : await contextRef.current.validateForm()
 
       // If not valid, prevent submission
       if (!isValid) {
@@ -331,67 +355,65 @@ const Form: React.FC<Props> = (props) => {
     ],
   )
 
-  const getFields = useCallback(() => contextRef.current.fields, [contextRef])
-  const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef])
-  const getData = useCallback(
-    () => reduceFieldsToValues(contextRef.current.fields, true),
-    [contextRef],
-  )
+  const getFields = useCallback(() => contextRef.current.fields, [])
+
+  const getField = useCallback((path: string) => contextRef.current.fields[path], [])
+
+  const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [])
+
   const getSiblingData = useCallback(
     (path: string) => getSiblingDataFunc(contextRef.current.fields, path),
-    [contextRef],
+    [],
   )
   const getDataByPath = useCallback<GetDataByPath>(
     (path: string) => getDataByPathFunc(contextRef.current.fields, path),
-    [contextRef],
+    [],
   )
 
-  const createFormData = useCallback(
-    (overrides: any = {}) => {
-      const data = reduceFieldsToValues(contextRef.current.fields, true)
+  const createFormData = useCallback((overrides: any = {}) => {
+    const data = reduceFieldsToValues(contextRef.current.fields, true)
 
-      const file = data?.file
+    const file = data?.file
 
-      if (file) {
-        delete data.file
-      }
+    if (file) {
+      delete data.file
+    }
 
-      const dataWithOverrides = {
-        ...data,
-        ...overrides,
-      }
+    const dataWithOverrides = {
+      ...data,
+      ...overrides,
+    }
 
-      const dataToSerialize = {
-        _payload: JSON.stringify(dataWithOverrides),
-        file,
-      }
+    const dataToSerialize = {
+      _payload: JSON.stringify(dataWithOverrides),
+      file,
+    }
 
-      // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
-      const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false })
-      return formData
-    },
-    [contextRef],
-  )
+    // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
+    const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false })
+
+    return formData
+  }, [])
 
   const reset = useCallback(
     async (fieldSchema: Field[], data: unknown) => {
       const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        id,
-        // TODO: fix this
-        // @ts-ignore-next-line
-        config,
-        data,
-        fieldSchema,
-        locale,
-        operation,
-        preferences,
-        t,
-        user,
-      })
+      // const state = await buildStateFromSchema({
+      //   id,
+      //   // TODO: fix this
+      //   // @ts-ignore-next-line
+      //   config,
+      //   data,
+      //   fieldSchema,
+      //   locale,
+      //   operation,
+      //   preferences,
+      //   t,
+      //   user,
+      // })
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      dispatchFields({ state, type: 'REPLACE_STATE' })
+      // dispatchFields({ state, type: 'REPLACE_STATE' })
     },
     [id, user, operation, locale, t, dispatchFields, getDocPreferences, config],
   )
@@ -492,7 +514,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
-                  {children}
+                  <FieldPathProvider path="">{children}</FieldPathProvider>
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>
             </ProcessingContext.Provider>

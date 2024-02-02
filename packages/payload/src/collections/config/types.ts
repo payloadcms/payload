@@ -435,7 +435,7 @@ export interface SanitizedCollectionConfig
     'auth' | 'endpoints' | 'fields' | 'upload' | 'versions'
   > {
   auth: Auth
-  endpoints: Omit<Endpoint, 'root'>[] | false
+  endpoints: Endpoint[] | false
   fields: Field[]
   upload: Upload
   versions: SanitizedCollectionVersions

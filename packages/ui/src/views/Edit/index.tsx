@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
@@ -12,12 +12,12 @@ import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving'
 // import Meta from '../../../../utilities/Meta'
 import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
-// import { Upload } from '../Upload'
 import { EditViewProps } from '../types'
 import { getFormStateFromServer } from './action'
 import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
 import { useTranslation } from '../../providers/Translation'
+import { useFieldMaps } from '../../providers/FieldMapsProvider'
 
 import './index.scss'
 
@@ -29,24 +29,19 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     apiURL,
     BeforeDocument,
     data,
-    formState: initialState,
+    formState: initialStateFromProps,
+    initializeFormState,
     // isLoading,
     onSave: onSaveFromProps,
     docPreferences,
     docPermissions,
     user,
     locale,
-    fieldMap,
   } = props
 
+  const { collections, globals } = useConfig()
   const { i18n } = useTranslation()
-
-  const {
-    serverURL,
-    routes: { api: apiRoute },
-    collections,
-    globals,
-  } = useConfig()
+  const fieldMaps = useFieldMaps()
 
   const collectionConfig =
     'collectionSlug' in props &&
@@ -55,11 +50,31 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const globalConfig =
     'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
 
+  const slug = collectionConfig?.slug || globalConfig?.slug
+  const id = 'id' in props ? props.id : undefined
+  const isEditing = 'isEditing' in props ? props.isEditing : undefined
+  const operation = isEditing ? 'update' : 'create'
+  const fieldMap = fieldMaps[slug]
+
+  const [initialState] = useState(() => {
+    if (initializeFormState) {
+      const initializedState = getFormStateFromServer.bind(null, {
+        collectionSlug: collectionConfig?.slug,
+        id: id || undefined,
+        locale,
+        language: i18n.language,
+        operation,
+        docPreferences,
+        user,
+      })({ formState: {} })
+
+      return initializedState
+    } else return initialStateFromProps
+  })
+
   const auth = collectionConfig ? collectionConfig.auth : undefined
   const upload = collectionConfig ? collectionConfig.upload : undefined
-  const id = 'id' in props ? props.id : undefined
   const hasSavePermission = 'hasSavePermission' in props ? props.hasSavePermission : undefined
-  const isEditing = 'isEditing' in props ? props.isEditing : undefined
   const disableActions = 'disableActions' in props ? props.disableActions : undefined
 
   const preventLeaveWithoutSaving =
@@ -99,8 +114,6 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     ],
   )
 
-  const operation = isEditing ? 'update' : 'create'
-
   // useEffect(() => {
   //   const path = location.pathname
 
@@ -116,7 +129,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   //   setViewActions(defaultActions)
   // }, [id, location.pathname, collectionConfig?.admin?.components?.views?.Edit, setViewActions])
 
-  const onChange = getFormStateFromServer.bind(null, {
+  const rebuildFormState = getFormStateFromServer.bind(null, {
     collectionSlug: collectionConfig?.slug,
     id: id || undefined,
     locale,
@@ -135,7 +148,8 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
           disabled={!hasSavePermission}
           initialState={initialState}
           method={id ? 'PATCH' : 'POST'}
-          // onChange={[onChange]}
+          beforeSubmit={[rebuildFormState]}
+          onChange={[rebuildFormState]}
           onSuccess={onSave}
         >
           <FormLoadingOverlayToggle

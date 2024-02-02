@@ -55,6 +55,8 @@ export const createLocalReq: CreateLocalReq = (
   req.user = user || req?.user || null
   req.collection = collection ? payload.collections?.[collection] : null
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)
+  req.searchParams = req?.searchParams || new URLSearchParams()
+  req.pathname = req?.pathname || null
 
   return req
 }

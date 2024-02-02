@@ -9,7 +9,7 @@ import GenerateConfirmation from '../../../elements/GenerateConfirmation'
 import { useFormFields } from '../../../forms/Form/context'
 import Label from '../../../forms/Label'
 import useField from '../../../forms/useField'
-import { fieldBaseClass } from '../../../forms/field-types/shared'
+import { fieldBaseClass } from '../../../forms/fields/shared'
 
 const path = 'apiKey'
 const baseClass = 'api-key'

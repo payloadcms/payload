@@ -2,7 +2,7 @@ import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
 import type { SanitizedCollectionConfig } from 'payload/types'
-import type { FilterOptionsResult } from '../../forms/field-types/Relationship/types'
+import type { FilterOptionsResult } from '../../forms/fields/Relationship/types'
 
 export type ListDrawerProps = {
   collectionSlugs: string[]

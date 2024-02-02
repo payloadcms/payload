@@ -82,6 +82,8 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
+    searchParams,
+    pathname,
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)

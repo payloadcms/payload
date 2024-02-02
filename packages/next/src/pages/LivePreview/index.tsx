@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig } from '../../../../collections/config/t
 import type { LivePreviewConfig } from '../../../../exports/config'
 import type { Field } from '../../../../fields/config/types'
 import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
-import type { FieldTypes } from '../../forms/field-types'
+import type { FieldTypes } from '../../forms/fields'
 import type { EditViewProps } from '../types'
 
 import { DocumentControls } from '../../elements/DocumentControls'

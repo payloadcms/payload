@@ -12,7 +12,7 @@ export const update = async ({
   req: PayloadRequest
   globalConfig: SanitizedGlobalConfig
 }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
   const draft = searchParams.get('draft') === 'true'
   const autosave = searchParams.get('autosave') === 'true'

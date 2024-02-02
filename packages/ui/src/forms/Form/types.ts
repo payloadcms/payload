@@ -60,7 +60,8 @@ export type Props = (
   submitted?: boolean
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
-  onChange?: ((args: { formState: FormState }) => Promise<FormState | void>)[]
+  onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
+  beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
 }
 
 export type SubmitOptions = {

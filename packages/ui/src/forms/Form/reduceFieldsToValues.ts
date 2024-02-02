@@ -4,16 +4,16 @@ import type { FormState } from './types'
 import { Data } from 'payload/types'
 
 const reduceFieldsToValues = (fields: FormState, unflatten?: boolean): Data => {
-  const data = {}
+  let data = {}
 
   Object.keys(fields).forEach((key) => {
-    if (!fields[key].disableFormData) {
-      data[key] = fields[key].value
+    if (!fields[key]?.disableFormData) {
+      data[key] = fields[key]?.value
     }
   })
 
   if (unflatten) {
-    return flatleyUnflatten(data, { safe: true })
+    data = flatleyUnflatten(data, { safe: true })
   }
 
   return data

@@ -290,11 +290,10 @@ const Relationship: React.FC<Props> = (props) => {
       await priorRelation
 
       const idsToLoad = ids.filter((id) => {
-        return !options.find(
-          (optionGroup) =>
-            optionGroup?.options?.find(
-              (option) => option.value === id && option.relationTo === relation,
-            ),
+        return !options.find((optionGroup) =>
+          optionGroup?.options?.find(
+            (option) => option.value === id && option.relationTo === relation,
+          ),
         )
       })
 

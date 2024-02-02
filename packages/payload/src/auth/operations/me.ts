@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken'
-import { URL } from 'url'
 
 import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../types'
@@ -28,8 +27,8 @@ export const meOperation = async ({
   }
 
   if (req.user) {
-    const parsedURL = new URL(req.url)
-    const isGraphQL = parsedURL.pathname === `/api${req.payload.config.routes.graphQL}`
+    const { pathname } = req
+    const isGraphQL = pathname === `/api${req.payload.config.routes.graphQL}`
 
     const user = (await req.payload.findByID({
       id: req.user.id,

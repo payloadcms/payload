@@ -10,7 +10,7 @@ import type {
 import type { I18n } from '@payloadcms/translations'
 import type { FormState } from '../forms/Form/types'
 import type { FieldTypes, Locale } from 'payload/config'
-import { FieldMap } from '../forms/RenderFields/buildFieldMaps/types'
+import { FieldMap } from '../forms/utilities/buildFieldMaps/types'
 
 export type EditViewProps = (
   | {
@@ -38,6 +38,6 @@ export type EditViewProps = (
   user: User | null | undefined
   locale: Locale
   formState?: FormState
-  fieldMap: FieldMap
+  initializeFormState?: boolean
   BeforeDocument?: React.ReactNode
 }

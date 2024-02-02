@@ -9,7 +9,7 @@ import { useCollapsible } from '../../../elements/Collapsible/provider'
 import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
 import { fieldBaseClass } from '../shared'
-import { useFieldPath } from '../../FieldPathProvider'
+import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider'
 import { WatchChildErrors } from '../../WatchChildErrors'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import { useTranslation } from '../../../providers/Translation'
@@ -57,20 +57,22 @@ const Group: React.FC<Props> = (props) => {
           width,
         }}
       >
-        <GroupProvider>
-          <div className={`${baseClass}__wrap`}>
-            <div className={`${baseClass}__header`}>
-              {(Label || Description) && (
-                <header>
-                  {Label}
-                  {Description}
-                </header>
-              )}
-              {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+        <FieldPathProvider path={path}>
+          <GroupProvider>
+            <div className={`${baseClass}__wrap`}>
+              <div className={`${baseClass}__header`}>
+                {(Label || Description) && (
+                  <header>
+                    {Label}
+                    {Description}
+                  </header>
+                )}
+                {fieldHasErrors && <ErrorPill count={errorCount} withMessage i18n={i18n} />}
+              </div>
+              <RenderFields fieldMap={fieldMap} />
             </div>
-            <RenderFields fieldMap={fieldMap} />
-          </div>
-        </GroupProvider>
+          </GroupProvider>
+        </FieldPathProvider>
       </div>
     </Fragment>
   )

@@ -197,12 +197,14 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export type PayloadHandler<T = PayloadRequest> = ({
-  params,
+export type PayloadHandler = ({
   req,
+  routeParams,
 }: {
-  params: Record<string, unknown>
-  req: T
+  req: PayloadRequest
+  routeParams: {
+    [key: string]: string
+  }
 }) => Promise<Response> | Response
 
 /**
@@ -211,18 +213,12 @@ export type PayloadHandler<T = PayloadRequest> = ({
 export type Endpoint<U = User> = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
-
   /**
    * Middleware that will be called when the path/method matches
    *
-   * Compatible with Express middleware
+   * Compatible with Web Request/Response Model
    */
-  handler: PayloadHandler<
-    Partial<PayloadRequest<U>> & {
-      payload: PayloadRequest['payload']
-      payloadDataLoader: PayloadRequest['payloadDataLoader']
-    } & Request
-  >
+  handler: PayloadHandler
   /** HTTP method (or "all") */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
@@ -232,10 +228,12 @@ export type Endpoint<U = User> = {
    */
   path: string
   /**
-   * Set to `true` to disable the Payload middleware for this endpoint
-   * @default false
+   * @deprecated in 3.0
+   *
+   * Please add "root" routes under the /api folder in the Payload Project.
+   * https://nextjs.org/docs/app/api-reference/file-conventions/route
    */
-  root?: boolean
+  root: never
 }
 
 export type AdminViewConfig = {

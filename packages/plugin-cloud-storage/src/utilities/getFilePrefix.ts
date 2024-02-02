@@ -8,7 +8,7 @@ export async function getFilePrefix({
   req: PayloadRequest
 }): Promise<string> {
   const imageSizes = (collection?.upload as IncomingUploadType)?.imageSizes || []
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const filename = searchParams.get('filename')
 
   const files = await req.payload.find({
