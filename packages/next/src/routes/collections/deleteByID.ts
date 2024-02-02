@@ -11,7 +11,7 @@ export const deleteByID = async ({
   req: PayloadRequest
   id: string
 }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
   const doc = await deleteByIDOperation({
     id,

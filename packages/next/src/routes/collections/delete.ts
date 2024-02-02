@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { deleteOperation } from 'payload/operations'
 
 export const deleteDoc = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
   const where = searchParams.get('where')
 

@@ -12,7 +12,7 @@ export const findOne = async ({
   req: PayloadRequest
   globalConfig: SanitizedGlobalConfig
 }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await findOneOperation({

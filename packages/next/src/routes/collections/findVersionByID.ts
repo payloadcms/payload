@@ -11,7 +11,7 @@ export const findVersionByID = async ({
   req: PayloadRequest
   id: string
 }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await findVersionByIDOperation({

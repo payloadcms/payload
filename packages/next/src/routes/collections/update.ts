@@ -7,7 +7,7 @@ import { updateOperation } from 'payload/operations'
 import { getTranslation } from '@payloadcms/translations'
 
 export const update = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const depth = searchParams.get('depth')
   const where = searchParams.get('where')
 

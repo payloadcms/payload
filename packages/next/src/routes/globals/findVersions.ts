@@ -12,7 +12,7 @@ export const findVersions = async ({
   req: PayloadRequest
   globalConfig: SanitizedGlobalConfig
 }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const page = searchParams.get('page')
   const limit = searchParams.get('limit')
   const depth = searchParams.get('depth')

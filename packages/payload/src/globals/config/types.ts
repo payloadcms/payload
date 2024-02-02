@@ -199,7 +199,7 @@ export type GlobalConfig = {
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'versions'> {
-  endpoints: Omit<Endpoint, 'root'>[] | false
+  endpoints: Endpoint[] | false
   fields: Field[]
   versions: SanitizedGlobalVersions
 }

@@ -11,7 +11,7 @@ export const findVersions = async ({
   req: PayloadRequest
   id: string
 }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
   const page = searchParams.get('page')
   const depth = searchParams.get('depth')
   const limit = searchParams.get('limit')

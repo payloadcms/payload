@@ -197,13 +197,15 @@ export type Access<T = any, U = any> = (
 ) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
-export type PayloadHandler<T = PayloadRequest | Request> = ({
-  params,
+export type PayloadHandler = ({
   req,
+  routeParams,
 }: {
-  params: Record<string, unknown>
-  req: T
-}) => Promise<Response>
+  req: PayloadRequest
+  routeParams: {
+    [key: string]: string
+  }
+}) => Promise<Response> | Response
 
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
@@ -211,7 +213,12 @@ export type PayloadHandler<T = PayloadRequest | Request> = ({
 export type Endpoint = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
-  handler: PayloadHandler<PayloadRequest>
+  /**
+   * Middleware that will be called when the path/method matches
+   *
+   * Compatible with Web Request/Response Model
+   */
+  handler: PayloadHandler
   /** HTTP method (or "all") */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
@@ -220,34 +227,14 @@ export type Endpoint = {
    * Compatible with the Express router
    */
   path: string
-} & (
-  | {
-      /**
-       * Middleware that will be called when the path/method matches
-       *
-       * Compatible with Express middleware
-       */
-      handler: PayloadHandler<PayloadRequest>
-      /**
-       * Set to `true` to disable the Payload middleware for this endpoint
-       * @default false
-       */
-      root?: false | undefined
-    }
-  | {
-      /**
-       * Middleware that will be called when the path/method matches
-       *
-       * Compatible with Express middleware
-       */
-      handler: PayloadHandler<Request>
-      /**
-       * Set to `true` to disable the Payload middleware for this endpoint
-       * @default false
-       */
-      root: true
-    }
-)
+  /**
+   * @deprecated in 3.0
+   *
+   * Please add "root" routes under the /api folder in the Payload Project.
+   * https://nextjs.org/docs/app/api-reference/file-conventions/route
+   */
+  root: never
+}
 
 export type AdminViewConfig = {
   Component: AdminViewComponent

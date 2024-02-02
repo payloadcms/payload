@@ -6,7 +6,7 @@ import { isNumber } from 'payload/utilities'
 import { findOperation } from 'payload/operations'
 
 export const find = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
-  const { searchParams } = new URL(req.url)
+  const { searchParams } = req
 
   const depth = searchParams.get('depth')
   const limit = searchParams.get('limit')
