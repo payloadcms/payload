@@ -45,6 +45,7 @@ import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequ
 import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
 import withNullableType from './withNullableType'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 
 const idFieldTypes = {
   number: GraphQLInt,
@@ -55,7 +56,9 @@ export const getCollectionIDType = (
   payload: Payload,
   collection: SanitizedCollectionConfig,
 ): GraphQLScalarType => {
-  const idField = collection.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+  const idField = flattenFields(collection.fields).find(
+    (field) => fieldAffectsData(field) && field.name === 'id',
+  )
 
   if (!idField) {
     return idFieldTypes[payload.db.defaultIDType]
@@ -268,7 +271,13 @@ function buildMutationInputType(
     },
     text: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+      [field.name]: {
+        type: withNullableType(
+          field,
+          field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
+          forceNullable,
+        ),
+      },
     }),
     textarea: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextareaField) => ({
       ...inputObjectTypeConfig,

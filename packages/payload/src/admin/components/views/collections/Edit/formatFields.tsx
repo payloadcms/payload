@@ -5,7 +5,7 @@ import { fieldAffectsData } from '../../../../../fields/config/types'
 
 const formatFields = (collection: SanitizedCollectionConfig, isEditing?: boolean): Field[] =>
   isEditing
-    ? collection.fields.filter((field) => (fieldAffectsData(field) && field.name !== 'id') || true)
+    ? collection.fields.filter((field) => !fieldAffectsData(field) || field.name !== 'id')
     : collection.fields
 
 export default formatFields

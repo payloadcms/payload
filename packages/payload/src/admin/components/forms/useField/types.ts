@@ -15,7 +15,7 @@ export type FieldType<T> = {
   formSubmitted: boolean
   initialValue?: T
   rows?: Row[]
-  setValue: (val: unknown, modifyForm?: boolean) => void
+  setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
   valid?: boolean
   value: T

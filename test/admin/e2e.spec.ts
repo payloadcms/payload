@@ -43,6 +43,8 @@ import {
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   postsCollectionSlug,
+  customIdCollectionSlug,
+  customIdCollectionId,
 } from './slugs'
 
 const { beforeAll, beforeEach, describe } = test
@@ -251,6 +253,13 @@ describe('admin', () => {
       expect(collectionItems.docs.length).toBe(1)
       await page.goto(`${url.collection(noApiViewGlobalSlug)}/${collectionItems.docs[0].id}/api`)
       await expect(page.locator('.not-found')).toHaveCount(1)
+    })
+
+    test('collection - sidebar fields should respond to permission', async () => {
+      const { id } = await createPost()
+      await page.goto(url.edit(id))
+
+      await expect(page.locator('#field-sidebarField')).toBeDisabled()
     })
 
     test('global - should not show API tab when disabled in config', async () => {
@@ -518,6 +527,24 @@ describe('admin', () => {
       await saveDocAndAssert(page)
 
       await expect(page.locator('#field-title')).toHaveValue(title)
+    })
+  })
+
+  describe('Custom IDs', () => {
+    test('should allow custom ID field nested inside an unnamed tab', async () => {
+      await page.goto(url.collection('customIdTab') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
+    })
+
+    test('should allow custom ID field nested inside a row', async () => {
+      await page.goto(url.collection('customIdRow') + '/' + customIdCollectionId)
+
+      const idField = await page.locator('#field-id')
+
+      await expect(idField).toHaveValue(customIdCollectionId)
     })
   })
 

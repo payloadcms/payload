@@ -58,7 +58,7 @@ export const promise = async ({
   skipValidation,
 }: Args): Promise<void> => {
   const passesCondition = field.admin?.condition
-    ? field.admin.condition(data, siblingData, { user: req.user })
+    ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
 
@@ -88,6 +88,8 @@ export const promise = async ({
           global,
           operation,
           originalDoc: doc,
+          previousSiblingDoc: siblingDoc,
+          previousValue: siblingDoc[field.name],
           req,
           siblingData,
           value: siblingData[field.name],

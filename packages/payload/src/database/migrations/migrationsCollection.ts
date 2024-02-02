@@ -1,9 +1,11 @@
 import type { CollectionConfig } from '../../collections/config/types'
 
 export const migrationsCollection: CollectionConfig = {
+  slug: 'payload-migrations',
   admin: {
     hidden: true,
   },
+  endpoints: false,
   fields: [
     {
       name: 'name',
@@ -14,22 +16,6 @@ export const migrationsCollection: CollectionConfig = {
       type: 'number',
       // NOTE: This value is -1 if it is a "dev push"
     },
-    // TODO: do we need to persist the indexes separate from the schema?
-    // {
-    //   name: 'indexes',
-    //   type: 'array',
-    //   fields: [
-    //     {
-    //       name: 'index',
-    //       type: 'text',
-    //     },
-    //     {
-    //       name: 'value',
-    //       type: 'json',
-    //     },
-    //   ],
-    // },
   ],
   graphQL: false,
-  slug: 'payload-migrations',
 }

@@ -85,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: [mongoose, postgres]
+        database: [mongoose, postgres, supabase]
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -118,13 +118,33 @@ jobs:
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
         if: matrix.database == 'postgres'
 
-      - run: sleep 30
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+        if: matrix.database == 'supabase'
+
+      - name: Initialize Supabase
+        run: |
+          supabase init
+          supabase start
+        if: matrix.database == 'supabase'
+
+      - name: Wait for PostgreSQL
+        run: sleep 30
+        if: matrix.database == 'postgres'
+
       - name: Configure PostgreSQL
         run: |
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
+
+      - name: Configure Supabase
+        run: |
+          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
+        if: matrix.database == 'supabase'
 
       - name: Component Tests
         run: pnpm test:components
@@ -256,6 +276,7 @@ jobs:
           - plugin-nested-docs
           - plugin-search
           - plugin-sentry
+          - plugin-seo
 
     steps:
       - name: Use Node.js 18
@@ -306,9 +327,10 @@ jobs:
         with:
           mongodb-version: 6.0
 
-      - name: Build Website
+      - name: Build Template
         run: |
           cd templates/${{ matrix.template }}
           cp .env.example .env
           yarn install
           yarn build
+          yarn generate:types

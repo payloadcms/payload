@@ -1,13 +1,12 @@
 'use client'
 
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import TextareaInput from 'payload/dist/admin/components/forms/field-types/Textarea/Input'
 import type { FieldType, Options } from 'payload/dist/admin/components/forms/useField/types'
 import type { TextareaField } from 'payload/types'
 
 import { TextareaInput, useAllFormFields, useField } from 'payload/components/forms'
 import { useDocumentInfo, useLocale } from 'payload/components/utilities'
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import type { PluginConfig } from '../types'
 
@@ -23,7 +22,9 @@ type MetaDescriptionProps = TextareaField & {
 }
 
 export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
-  const { name, label, path, pluginConfig } = props
+  const { name, label, path, pluginConfig, required } = props
+
+  const { t } = useTranslation('plugin-seo')
 
   const locale = useLocale()
   const [fields] = useAllFormFields()
@@ -35,7 +36,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
     path,
   } as Options)
 
-  const { setValue, showError, value } = field
+  const { setValue, showError, value, errorMessage } = field
 
   const regenerateDescription = useCallback(async () => {
     const { generateDescription } = pluginConfig
@@ -66,6 +67,18 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
       >
         <div>
           {label && typeof label === 'string' && label}
+
+          {required && (
+            <span
+              style={{
+                marginLeft: '5px',
+                color: 'var(--theme-error-500)',
+              }}
+            >
+              *
+            </span>
+          )}
+
           {typeof pluginConfig.generateDescription === 'function' && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
@@ -82,7 +95,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
                 }}
                 type="button"
               >
-                Auto-generate
+                {t('autoGenerate')}
               </button>
             </React.Fragment>
           )}
@@ -92,13 +105,13 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
             color: '#9A9A9A',
           }}
         >
-          {`This should be between ${minLength} and ${maxLength} characters. For help in writing quality meta descriptions, see `}
+          {t('lengthTipDescription', { maxLength, minLength })}
           <a
             href="https://developers.google.com/search/docs/advanced/appearance/snippet#meta-descriptions"
             rel="noopener noreferrer"
             target="_blank"
           >
-            best practices
+            {t('bestPractices')}
           </a>
         </div>
       </div>
@@ -116,6 +129,8 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           style={{
             marginBottom: 0,
           }}
+          required={required}
+          errorMessage={errorMessage}
           value={value}
         />
       </div>
@@ -126,7 +141,7 @@ export const MetaDescription: React.FC<MetaDescriptionProps> = (props) => {
           width: '100%',
         }}
       >
-        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value as string} />
+        <LengthIndicator maxLength={maxLength} minLength={minLength} text={value} />
       </div>
     </div>
   )
