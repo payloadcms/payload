@@ -5,24 +5,10 @@ export const hooksSlug = 'hooks'
 const Hooks: CollectionConfig = {
   slug: hooksSlug,
   access: {
-    read: () => true,
     create: () => true,
     delete: () => true,
+    read: () => true,
     update: () => true,
-  },
-  hooks: {
-    beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
-    beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
-    afterChange: [
-      ({ doc, previousDoc }) => {
-        if (!previousDoc) {
-          throw new Error('previousDoc is missing in afterChange hook')
-        }
-        return validateHookOrder('collectionAfterChange', doc)
-      },
-    ],
-    beforeRead: [({ doc }) => validateHookOrder('collectionBeforeRead', doc)],
-    afterRead: [({ doc }) => validateHookOrder('collectionAfterRead', doc)],
   },
   fields: [
     {
@@ -43,7 +29,15 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
       hooks: {
         beforeChange: [
-          ({ data }) => {
+          ({ data, operation, previousSiblingDoc, previousValue }) => {
+            if (operation === 'update') {
+              if (typeof previousValue === 'undefined') {
+                throw new Error('previousValue is missing in beforeChange hook')
+              }
+              if (!previousSiblingDoc) {
+                throw new Error('previousSiblingDoc is missing in beforeChange hook')
+              }
+            }
             data.fieldBeforeChange = true
             validateHookOrder('fieldBeforeChange', data)
             return true
@@ -104,9 +98,23 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
     },
   ],
+  hooks: {
+    afterChange: [
+      ({ doc, previousDoc }) => {
+        if (!previousDoc) {
+          throw new Error('previousDoc is missing in afterChange hook')
+        }
+        return validateHookOrder('collectionAfterChange', doc)
+      },
+    ],
+    afterRead: [({ doc }) => validateHookOrder('collectionAfterRead', doc)],
+    beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
+    beforeRead: [({ doc }) => validateHookOrder('collectionBeforeRead', doc)],
+    beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
+  },
 }
 
-const createHookOrder = [
+const writeHooksOrder = [
   'fieldBeforeValidate',
   'collectionBeforeValidate',
   'collectionBeforeChange',
@@ -119,10 +127,11 @@ const createHookOrder = [
 
 const validateHookOrder = (check: string, data) => {
   let hasMatched
-  createHookOrder.forEach((hook) => {
-    if (check === 'collectionBeforeRead' && !data.id) {
-      data[check] = true
-    } else if (hook === check) {
+  if (check === 'collectionBeforeRead') {
+    data.collectionBeforeRead = true
+  }
+  writeHooksOrder.forEach((hook) => {
+    if (hook === check) {
       data[check] = true
       hasMatched = true
     } else if ((!hasMatched && !data[hook]) || (hasMatched && data[hook])) {
