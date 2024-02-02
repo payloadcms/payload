@@ -219,6 +219,9 @@ export const GET = async (
       ) {
         return new Response(
           renderPlaygroundPage({
+            settings: {
+              'request.credentials': 'include',
+            },
             endpoint: `${req.payload.config.routes.api}${req.payload.config.routes.graphQL}`,
           }),
           {
