@@ -60,7 +60,9 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   const serverURL = `http://localhost:${port}`
 
   if (!initOptions?.local) {
-    await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../REST_API') })
+    process.env.APP_ENV = 'test'
+    process.env.__NEXT_TEST_MODE = 'jest'
+    await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../../packages/dev') })
   }
 
   return { serverURL, payload }
