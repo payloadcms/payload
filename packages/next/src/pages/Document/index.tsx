@@ -40,6 +40,7 @@ export const Document = async ({
   const globalSlug = params.global
   const isCreating = params.segments?.length === 1 && params.segments?.[0] === 'create'
   const id = (collectionSlug && !isCreating && params.segments[0]) || undefined
+
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
   const { config, payload, permissions, user, collectionConfig, globalConfig, locale, i18n } =

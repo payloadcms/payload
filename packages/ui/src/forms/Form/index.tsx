@@ -62,6 +62,7 @@ const Form: React.FC<Props> = (props) => {
     submitted: submittedFromProps,
     waitForAutocomplete,
     onChange,
+    beforeSubmit,
   } = props
 
   const method = 'method' in props ? props.method : undefined
@@ -95,7 +96,9 @@ const Form: React.FC<Props> = (props) => {
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
     let isValid = true
-    const data = contextRef.current.getData()
+
+    const dataFromContext = contextRef.current.getData()
+    let data = dataFromContext
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
@@ -143,7 +146,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid
-  }, [id, user, operation, t, dispatchFields, config])
+  }, [id, user, operation, t, dispatchFields, config, beforeSubmit])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -167,12 +170,33 @@ const Form: React.FC<Props> = (props) => {
       }
 
       setProcessing(true)
+      setSubmitted(true)
 
       if (waitForAutocomplete) await wait(100)
 
-      const isValid = skipValidation ? true : await contextRef.current.validateForm()
+      // Execute server side validations
+      if (Array.isArray(beforeSubmit)) {
+        let revalidatedFormState: FormState
 
-      if (!skipValidation) setSubmitted(true)
+        await beforeSubmit.reduce(async (priorOnChange, beforeSubmitFn) => {
+          await priorOnChange
+
+          const result = await beforeSubmitFn({
+            formState: debouncedFormState,
+          })
+
+          revalidatedFormState = result
+        }, Promise.resolve())
+
+        const isValid = Object.entries(revalidatedFormState).every(([, field]) => field.valid)
+
+        if (!isValid) {
+          setProcessing(false)
+          return dispatchFields({ state: revalidatedFormState, type: 'REPLACE_STATE' })
+        }
+      }
+
+      const isValid = skipValidation ? true : await contextRef.current.validateForm()
 
       // If not valid, prevent submission
       if (!isValid) {
@@ -367,6 +391,7 @@ const Form: React.FC<Props> = (props) => {
 
     // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
     const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false })
+
     return formData
   }, [])
 

@@ -129,7 +129,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   //   setViewActions(defaultActions)
   // }, [id, location.pathname, collectionConfig?.admin?.components?.views?.Edit, setViewActions])
 
-  const onChange = getFormStateFromServer.bind(null, {
+  const rebuildFormState = getFormStateFromServer.bind(null, {
     collectionSlug: collectionConfig?.slug,
     id: id || undefined,
     locale,
@@ -143,13 +143,14 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     <main className={classes}>
       <OperationProvider operation={operation}>
         <Form
-          // action={action}
+          action={action}
           className={`${baseClass}__form`}
           disabled={!hasSavePermission}
           initialState={initialState}
           method={id ? 'PATCH' : 'POST'}
-          onChange={[onChange]}
-          // onSuccess={onSave}
+          beforeSubmit={[rebuildFormState]}
+          onChange={[rebuildFormState]}
+          onSuccess={onSave}
         >
           <FormLoadingOverlayToggle
             action={operation}

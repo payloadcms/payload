@@ -93,7 +93,8 @@ export const buildFieldMap = (args: {
         const Error = <ErrorComponent />
 
         const DescriptionComponent =
-          ('description' in field.admin &&
+          (field.admin &&
+            'description' in field.admin &&
             field.admin.description &&
             typeof field.admin.description === 'function' &&
             (field.admin.description as React.FC<any>)) ||
@@ -102,7 +103,9 @@ export const buildFieldMap = (args: {
         const Description = (
           <DescriptionComponent
             description={
-              'description' in field.admin && typeof field.admin?.description === 'string'
+              field.admin &&
+              'description' in field.admin &&
+              typeof field.admin?.description === 'string'
                 ? field.admin.description
                 : undefined
             }
