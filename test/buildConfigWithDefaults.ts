@@ -55,7 +55,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const config: Config = {
     db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
     secret: 'TEST_SECRET',
-    editor: slateEditor({}),
+    editor: undefined,
     rateLimit: {
       max: 9999999999,
       window: 15 * 60 * 1000, // 15min default,

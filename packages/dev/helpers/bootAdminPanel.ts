@@ -1,12 +1,8 @@
-import { createServer } from 'http'
-import next from 'next'
-import { parse } from 'url'
+const { createServer } = require('http')
+const next = require('next')
+const { parse } = require('url')
 
-type args = {
-  appDir: string
-  port?: number
-}
-export const bootAdminPanel = async ({ port = 3000, appDir }: args) => {
+const bootAdminPanel = async ({ port = 3000, appDir }) => {
   const serverURL = `http://localhost:${port}`
   const app = next({
     dev: true,
@@ -21,7 +17,6 @@ export const bootAdminPanel = async ({ port = 3000, appDir }: args) => {
   createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true)
-      console.log('Requested path: ', parsedUrl.path)
       await handle(req, res, parsedUrl)
     } catch (err) {
       console.error('Error occurred handling', req.url, err)
@@ -37,3 +32,5 @@ export const bootAdminPanel = async ({ port = 3000, appDir }: args) => {
       console.log(`> Ready on ${serverURL}`)
     })
 }
+
+module.exports = { bootAdminPanel }
