@@ -35,6 +35,13 @@ const databaseAdapters = {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   }),
+  supabase: postgresAdapter({
+    migrationDir,
+    pool: {
+      connectionString:
+        process.env.POSTGRES_URL || 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+    },
+  }),
 }
 
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
