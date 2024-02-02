@@ -99,7 +99,7 @@ const seo =
 
           if (isEnabled) {
             if (pluginConfig?.tabbedUI) {
-              //
+              // prevent issues with auth enabled collections having an email field that shouldn't be moved to the SEO tab
               const emailField =
                 (collection.auth ||
                   !(typeof collection.auth === 'object' && collection.auth.disableLocalStrategy)) &&
