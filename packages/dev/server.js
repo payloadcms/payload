@@ -1,4 +1,4 @@
-const { bootAdminPanel } = require('./helpers/bootAdminPanel.ts')
+const { bootAdminPanel } = require('../../test/helpers/bootAdminPanel.ts')
 
 bootAdminPanel({
   appDir: __dirname,
