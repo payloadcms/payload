@@ -6,10 +6,11 @@ import type { GenericColumn } from '../types'
 type CreateIndexArgs = {
   columnName: string
   name: string | string[]
+  tableName: string
   unique?: boolean
 }
 
-export const createIndex = ({ name, columnName, unique }: CreateIndexArgs) => {
+export const createIndex = ({ name, columnName, tableName, unique }: CreateIndexArgs) => {
   return (table: { [x: string]: GenericColumn }) => {
     let columns
     if (Array.isArray(name)) {
@@ -20,7 +21,8 @@ export const createIndex = ({ name, columnName, unique }: CreateIndexArgs) => {
     } else {
       columns = [table[name]]
     }
-    if (unique) return uniqueIndex(`${columnName}_idx`).on(columns[0], ...columns.slice(1))
-    return index(`${columnName}_idx`).on(columns[0], ...columns.slice(1))
+    if (unique)
+      return uniqueIndex(`${tableName}_${columnName}_idx`).on(columns[0], ...columns.slice(1))
+    return index(`${tableName}_${columnName}_idx`).on(columns[0], ...columns.slice(1))
   }
 }

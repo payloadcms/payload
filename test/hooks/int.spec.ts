@@ -55,29 +55,65 @@ describe('Hooks', () => {
 
   describe('hook execution', () => {
     let doc
-    it('should execute hooks in correct order on create', async () => {
+    const data = {
+      collectionAfterChange: false,
+      collectionAfterRead: false,
+      collectionBeforeChange: false,
+      collectionBeforeRead: false,
+      collectionBeforeValidate: false,
+      fieldAfterChange: false,
+      fieldAfterRead: false,
+      fieldBeforeChange: false,
+      fieldBeforeValidate: false,
+    }
+    beforeEach(async () => {
       doc = await payload.create({
         collection: hooksSlug,
-        data: {
-          collectionAfterChange: false,
-          collectionAfterRead: false,
-          collectionBeforeChange: false,
-          collectionBeforeRead: false,
-          collectionBeforeValidate: false,
-          fieldAfterChange: false,
-          fieldAfterRead: false,
-          fieldBeforeChange: false,
-          fieldBeforeValidate: false,
-        },
+        data,
+      })
+    })
+
+    it('should execute hooks in correct order on create', async () => {
+      expect(doc.collectionAfterChange).toBeTruthy()
+      expect(doc.collectionAfterRead).toBeTruthy()
+      expect(doc.collectionBeforeChange).toBeTruthy()
+      // beforeRead is not run on create operation
+      expect(doc.collectionBeforeRead).toBeFalsy()
+      expect(doc.collectionBeforeValidate).toBeTruthy()
+      expect(doc.fieldAfterChange).toBeTruthy()
+      expect(doc.fieldAfterRead).toBeTruthy()
+      expect(doc.fieldBeforeChange).toBeTruthy()
+      expect(doc.fieldBeforeValidate).toBeTruthy()
+    })
+
+    it('should execute hooks in correct order on update', async () => {
+      doc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        data,
       })
 
-      expect(doc.fieldBeforeValidate).toEqual(true)
-      expect(doc.collectionBeforeValidate).toEqual(true)
-      expect(doc.fieldBeforeChange).toEqual(true)
-      expect(doc.collectionBeforeChange).toEqual(true)
-      expect(doc.fieldAfterChange).toEqual(true)
-      expect(doc.collectionAfterChange).toEqual(true)
-      expect(doc.fieldAfterRead).toEqual(true)
+      expect(doc.collectionAfterChange).toBeTruthy()
+      expect(doc.collectionAfterRead).toBeTruthy()
+      expect(doc.collectionBeforeChange).toBeTruthy()
+      // beforeRead is not run on update operation
+      expect(doc.collectionBeforeRead).toBeFalsy()
+      expect(doc.collectionBeforeValidate).toBeTruthy()
+      expect(doc.fieldAfterChange).toBeTruthy()
+      expect(doc.fieldAfterRead).toBeTruthy()
+      expect(doc.fieldBeforeChange).toBeTruthy()
+      expect(doc.fieldBeforeValidate).toBeTruthy()
+    })
+
+    it('should execute hooks in correct order on find', async () => {
+      doc = await payload.findByID({
+        id: doc.id,
+        collection: hooksSlug,
+      })
+
+      expect(doc.collectionAfterRead).toBeTruthy()
+      expect(doc.collectionBeforeRead).toBeTruthy()
+      expect(doc.fieldAfterRead).toBeTruthy()
     })
 
     it('should save data generated with afterRead hooks in nested field structures', async () => {
