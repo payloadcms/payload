@@ -1,3 +1,4 @@
+import type { UploadedFile } from 'express-fileupload'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../../'
@@ -8,10 +9,8 @@ import type { File } from '../../../uploads/types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
 import getFileByPath from '../../../uploads/getFileByPath'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import update from '../update'
 import updateByID from '../updateByID'
 
@@ -70,30 +69,18 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     id,
     autosave,
     collection: collectionSlug,
-    context,
     data,
     depth,
     draft,
-    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
     file,
     filePath,
-    locale: localeArg = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
-    req: incomingReq,
     showHiddenFields,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const i18n = i18nInit(payload.config.i18n)
-  const localizationConfig = payload?.config?.localization
-  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
-  const locale = localeArg || incomingReq?.locale || defaultLocale
-  const fallbackLocale = localizationConfig
-    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -101,25 +88,8 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const req = {
-    fallbackLocale:
-      typeof fallbackLocaleArg !== 'undefined'
-        ? fallbackLocaleArg
-        : fallbackLocale || defaultLocale,
-    files: {
-      file: file ?? (await getFileByPath(filePath)),
-    },
-    i18n,
-    locale: locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = createLocalReq(options, payload)
+  req.files.file = (file ?? (await getFileByPath(filePath))) as UploadedFile
 
   const args = {
     id,
