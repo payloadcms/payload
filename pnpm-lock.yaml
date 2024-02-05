@@ -494,9 +494,24 @@ importers:
       deep-equal:
         specifier: 2.2.2
         version: 2.2.2
+      graphql:
+        specifier: 16.8.1
+        version: 16.8.1
+      graphql-http:
+        specifier: 1.21.0
+        version: 1.21.0(graphql@16.8.1)
       graphql-playground-html:
         specifier: ^1.6.30
         version: 1.6.30
+      graphql-query-complexity:
+        specifier: 0.12.0
+        version: 0.12.0(graphql@16.8.1)
+      graphql-scalars:
+        specifier: 1.22.2
+        version: 1.22.2(graphql@16.8.1)
+      graphql-type-json:
+        specifier: 0.3.2
+        version: 0.3.2(graphql@16.8.1)
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -509,6 +524,9 @@ importers:
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.1
+      pluralize:
+        specifier: 8.0.0
+        version: 8.0.0
       react-diff-viewer-continued:
         specifier: 3.2.6
         version: 3.2.6(react-dom@18.2.0)(react@18.2.0)
@@ -525,6 +543,9 @@ importers:
       sass:
         specifier: ^1.69.5
         version: 1.69.5
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.2.2)
 
   packages/payload:
     dependencies:
@@ -15587,7 +15608,6 @@ packages:
       typescript: '>=3.7.0'
     dependencies:
       typescript: 5.2.2
-    dev: false
 
   /ts-jest@29.1.1(@babel/core@7.22.20)(jest@29.7.0)(typescript@5.2.2):
     resolution: {integrity: sha512-D6xjnnbP17cC85nliwGiL+tpoKN0StpgE0TeOjXQTU6MVCfsB4v7aW05CgQ/1OywGb0x/oy9hHFnN+sczTiRaA==}
