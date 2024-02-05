@@ -32,7 +32,7 @@ export const createMigration: CreateMigration = async function createMigration({
 
   // Check for predefined migration.
   // Either passed in via --file or prefixed with @payloadcms/db-mongodb/
-  if (file || migrationName.startsWith('@payloadcms/db-mongodb/')) {
+  if (file || migrationName?.startsWith('@payloadcms/db-mongodb/')) {
     if (!file) file = migrationName
 
     const predefinedMigrationName = file.replace('@payloadcms/db-mongodb/', '')
@@ -59,8 +59,8 @@ export const createMigration: CreateMigration = async function createMigration({
 
   const timestamp = `${formattedDate}_${formattedTime}`
 
-  const formattedName = migrationName.replace(/\W/g, '_')
-  const fileName = `${timestamp}_${formattedName}.ts`
+  const formattedName = migrationName?.replace(/\W/g, '_')
+  const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
   const filePath = `${dir}/${fileName}`
   fs.writeFileSync(filePath, migrationFileContent)
   payload.logger.info({ msg: `Migration created at ${filePath}` })
