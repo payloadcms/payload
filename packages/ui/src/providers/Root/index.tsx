@@ -18,8 +18,8 @@ import type { LanguageOptions, LanguageTranslations } from '../Translation'
 import { Slide, ToastContainer } from 'react-toastify'
 import { DocumentEventsProvider } from '../DocumentEvents'
 import { CustomProvider } from '../CustomProvider'
-import { FieldMaps } from '../../forms/utilities/buildFieldMaps/types'
-import { FieldMapsProvider } from '../FieldMapsProvider'
+import { ComponentMap } from '../../forms/utilities/buildComponentMap/types'
+import { ComponentMapProvider } from '../ComponentMapProvider'
 
 type Props = {
   config: ClientConfig
@@ -28,7 +28,7 @@ type Props = {
   lang: string
   fallbackLang: ClientConfig['i18n']['fallbackLanguage']
   languageOptions: LanguageOptions
-  fieldMaps: FieldMaps
+  componentMap: ComponentMap
 }
 
 export const RootProvider: React.FC<Props> = ({
@@ -38,12 +38,12 @@ export const RootProvider: React.FC<Props> = ({
   lang,
   fallbackLang,
   languageOptions,
-  fieldMaps,
+  componentMap,
 }) => {
   return (
     <Fragment>
       <ConfigProvider config={config}>
-        <FieldMapsProvider fieldMaps={fieldMaps}>
+        <ComponentMapProvider componentMap={componentMap}>
           <TranslationProvider
             lang={lang}
             translations={translations}
@@ -84,7 +84,7 @@ export const RootProvider: React.FC<Props> = ({
               </ScrollInfoProvider>
             </WindowInfoProvider>
           </TranslationProvider>
-        </FieldMapsProvider>
+        </ComponentMapProvider>
       </ConfigProvider>
       <ToastContainer icon={false} position="bottom-center" transition={Slide} />
     </Fragment>

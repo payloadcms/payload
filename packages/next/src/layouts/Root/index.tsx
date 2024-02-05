@@ -6,7 +6,7 @@ import { SanitizedConfig } from 'payload/types'
 import { createClientConfig } from '../../utilities/createClientConfig'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 import { deepMerge } from 'payload/utilities'
-import { buildFieldMaps } from '../../../../ui/src/forms/utilities/buildFieldMaps'
+import { buildComponentMap } from '../../../../ui/src/forms/utilities/buildComponentMap'
 
 import '@payloadcms/ui/scss/app.scss'
 
@@ -42,7 +42,7 @@ export const RootLayout = async ({
     value: language,
   }))
 
-  const fieldMaps = buildFieldMaps({ config })
+  const componentMap = buildComponentMap({ config })
 
   return (
     <html lang={lang} dir={dir}>
@@ -53,7 +53,7 @@ export const RootLayout = async ({
           lang={lang}
           fallbackLang={clientConfig.i18n.fallbackLanguage}
           languageOptions={languageOptions}
-          fieldMaps={fieldMaps}
+          componentMap={componentMap}
         >
           {children}
         </RootProvider>

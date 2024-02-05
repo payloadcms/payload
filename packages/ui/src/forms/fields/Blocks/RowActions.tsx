@@ -7,7 +7,7 @@ import type { Labels } from 'payload/types'
 import { ArrayAction } from '../../../elements/ArrayAction'
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug'
 import { BlocksDrawer } from './BlocksDrawer'
-import { FieldMap, ReducedBlock } from '../../utilities/buildFieldMaps/types'
+import { FieldMap, ReducedBlock } from '../../utilities/buildComponentMap/types'
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void

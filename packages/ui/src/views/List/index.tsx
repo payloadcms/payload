@@ -1,8 +1,7 @@
+'use client'
 import React, { Fragment } from 'react'
 
 import type { DefaultListViewProps } from './types'
-
-import './index.scss'
 import { SelectionProvider } from './SelectionProvider'
 import { Gutter } from '../../elements/Gutter'
 import { getTranslation } from '@payloadcms/translations'
@@ -24,25 +23,22 @@ import { SetStepNav } from '../../elements/StepNav/SetStepNav'
 import buildColumns from '../../elements/TableColumns/buildColumns'
 import getInitialColumnState from '../../elements/TableColumns/getInitialColumns'
 import formatFields from './formatFields'
+import { useConfig } from '../../providers/Config'
+import { useTranslation } from '../../providers/Translation'
+
+import './index.scss'
+import { useComponentMap } from '../../providers/ComponentMapProvider'
 
 const baseClass = 'collection-list'
 
 export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
   const {
-    config,
-    collectionConfig,
-    collectionConfig: {
-      admin: {
-        components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
-        defaultColumns,
-        listSearchableFields,
-        useAsTitle,
-      } = {},
-      fields,
-      labels: { plural: pluralLabel, singular: singularLabel } = {},
-      slug: collectionSlug,
-    },
-    customHeader,
+    // collectionConfig: {
+    //   admin: { defaultColumns, listSearchableFields, useAsTitle } = {},
+    //   fields,
+    //   labels: { plural: pluralLabel, singular: singularLabel } = {},
+    // },
+    Header,
     data,
     handlePageChange,
     handlePerPageChange,
@@ -55,8 +51,21 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
     newDocumentURL,
     resetParams,
     titleField,
-    i18n,
+    collectionSlug,
   } = props
+
+  const config = useConfig()
+
+  const componentMap = useComponentMap()
+
+  const { BeforeList, AfterList, BeforeListTable, AfterListTable } =
+    componentMap?.[collectionSlug] || {}
+
+  const collectionConfig = config.collections.find(
+    (collection) => collection.slug === collectionSlug,
+  )
+
+  const { i18n } = useTranslation()
 
   const textFieldsToBeSearched = getTextFieldsToBeSearched(listSearchableFields, fields)
 
@@ -95,14 +104,12 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
           },
         ]}
       />
-      {Array.isArray(BeforeList) &&
-        BeforeList.map((Component, i) => <Component key={i} {...props} />)}
+      {BeforeList}
       {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
-            {customHeader && customHeader}
-            {!customHeader && (
+            {Header || (
               <Fragment>
                 <h1>{getTranslation(pluralLabel, i18n)}</h1>
                 {hasCreatePermission && (
@@ -137,8 +144,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
             // resetParams={resetParams}
             titleField={titleField}
           />
-          {Array.isArray(BeforeListTable) &&
-            BeforeListTable.map((Component, i) => <Component key={i} {...props} />)}
+          {BeforeListTable}
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
@@ -160,8 +166,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
               )}
             </div>
           )}
-          {Array.isArray(AfterListTable) &&
-            AfterListTable.map((Component, i) => <Component key={i} {...props} />)}
+          {AfterListTable}
           {data.docs && data.docs.length > 0 && (
             <div className={`${baseClass}__page-controls`}>
               <Pagination
@@ -211,8 +216,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
           )}
         </Gutter>
       </SelectionProvider>
-      {Array.isArray(AfterList) &&
-        AfterList.map((Component, i) => <Component key={i} {...props} />)}
+      {AfterList}
     </div>
   )
 }

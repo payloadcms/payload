@@ -43,6 +43,14 @@ export type ReducedField = {
 
 export type FieldMap = ReducedField[]
 
-export type FieldMaps = {
-  [key: SanitizedCollectionConfig['slug'] | SanitizedGlobalConfig['slug']]: FieldMap
+export type ComponentMap = {
+  [key: SanitizedCollectionConfig['slug'] | SanitizedGlobalConfig['slug']]: {
+    BeforeList: React.ReactNode
+    AfterList: React.ReactNode
+    BeforeListTable: React.ReactNode
+    AfterListTable: React.ReactNode
+    BeforeFields: React.ReactNode
+    AfterFields: React.ReactNode
+    fields: FieldMap
+  }
 }

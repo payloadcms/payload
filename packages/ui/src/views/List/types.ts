@@ -1,15 +1,12 @@
-import type { SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
 import type { PaginatedDocs } from 'payload/database'
 import type { FieldAffectingData, Where } from 'payload/types'
-import type { I18n } from '@payloadcms/translations'
 import type { Props as ListControlsProps } from '../../elements/ListControls/types'
 import type { Props as PaginatorProps } from '../../elements/Pagination/types'
 import type { Props as PerPageProps } from '../../elements/PerPage'
 
 export type DefaultListViewProps = {
-  config: SanitizedConfig
-  collectionConfig: SanitizedCollectionConfig
-  customHeader?: React.ReactNode
+  Header?: React.ReactNode
   data: PaginatedDocs<any>
   handleDelete?: () => void
   handlePageChange?: PaginatorProps['onChange']
@@ -22,18 +19,18 @@ export type DefaultListViewProps = {
   modifySearchParams?: boolean
   newDocumentURL: string
   onCreateNewClick?: () => void
-  resetParams: (overrides?: {
+  resetParams?: (overrides?: {
     page?: number
     search?: string
     sort?: string
     where?: Where
   }) => void
-  setLimit: (limit: number) => void
-  setListControls: (controls: unknown) => void
-  setSort: (sort: string) => void
+  setLimit?: (limit: number) => void
+  setListControls?: (controls: unknown) => void
+  setSort?: (sort: string) => void
   titleField?: FieldAffectingData
-  toggleColumn: (column: string) => void
-  i18n: I18n
+  toggleColumn?: (column: string) => void
+  collectionSlug: SanitizedCollectionConfig['slug']
 }
 
 export type ListIndexProps = {

@@ -17,7 +17,7 @@ import { getFormStateFromServer } from './action'
 import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
 import { useTranslation } from '../../providers/Translation'
-import { useFieldMaps } from '../../providers/FieldMapsProvider'
+import { useComponentMap } from '../../providers/ComponentMapProvider'
 
 import './index.scss'
 
@@ -41,7 +41,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
 
   const { collections, globals } = useConfig()
   const { i18n } = useTranslation()
-  const fieldMaps = useFieldMaps()
+  const componentMap = useComponentMap()
 
   const collectionConfig =
     'collectionSlug' in props &&
@@ -51,10 +51,12 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
 
   const slug = collectionConfig?.slug || globalConfig?.slug
+
+  const { fields: fieldMap } = componentMap?.[slug] || {}
+
   const id = 'id' in props ? props.id : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined
   const operation = isEditing ? 'update' : 'create'
-  const fieldMap = fieldMaps[slug]
 
   const [initialState] = useState(() => {
     if (initializeFormState) {
