@@ -31,12 +31,21 @@
     "./routes": {
       "import": "./src/routes/index.ts",
       "require": "./src/routes/index.ts"
+    },
+    "./graphql": {
+      "import": "./src/graphql/routes/handler.ts",
+      "require": "./src/graphql/routes/handler.ts"
+    },
+    "./graphql-playground": {
+      "import": "./src/graphql/routes/playground.ts",
+      "require": "./src/graphql/routes/playground.ts"
     }
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*",
-    "sass": "^1.69.5"
+    "sass": "^1.69.5",
+    "ts-essentials": "7.0.3"
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
@@ -45,8 +54,14 @@
     "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0",
     "deep-equal": "2.2.2",
+    "graphql": "16.8.1",
+    "graphql-http": "1.21.0",
     "graphql-playground-html": "^1.6.30",
+    "graphql-query-complexity": "0.12.0",
+    "graphql-scalars": "1.22.2",
+    "graphql-type-json": "0.3.2",
     "path-to-regexp": "^6.2.1",
+    "pluralize": "8.0.0",
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "8.2.0"
   },
@@ -84,6 +99,16 @@
         "import": "./dist/routes/index.js",
         "require": "./dist/routes/index.js",
         "types": "./dist/routes/index.d.ts"
+      },
+      "./graphql": {
+        "import": "./dist/graphql/routes/handler.js",
+        "require": "./dist/graphql/routes/handler.js",
+        "types": "./dist/graphql/routes/handler.ts"
+      },
+      "./graphql-playground": {
+        "import": "./dist/graphql/routes/playground.js",
+        "require": "./dist/graphql/routes/playground.js",
+        "types": "./dist/graphql/routes/playground.ts"
       }
     },
     "registry": "https://registry.npmjs.org/"

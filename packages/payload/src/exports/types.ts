@@ -7,6 +7,7 @@ export type { DocumentPermissions } from '../auth'
 export type {
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
+  AfterErrorHook as CollectionAfterErrorHook,
   AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   AfterLoginHook as CollectionAfterLoginHook,
   AfterOperationHook as CollectionAfterOperationHook,

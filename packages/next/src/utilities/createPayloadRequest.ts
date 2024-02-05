@@ -12,6 +12,7 @@ import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
 import { getDataAndFile } from './getDataAndFile'
+import { registerGraphQLSchema } from '../graphql/registerSchema'
 
 type Args = {
   request: Request
@@ -28,6 +29,9 @@ export const createPayloadRequest = async ({
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
   const payload = await getPayload({ config: configPromise })
+  if (!payload.config.graphQL.disable) {
+    registerGraphQLSchema(payload)
+  }
   const { collections, config } = payload
 
   let collection: Collection = undefined
