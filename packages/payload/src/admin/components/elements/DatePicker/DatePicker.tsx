@@ -1,6 +1,6 @@
 import * as Locales from 'date-fns/locale'
 import React from 'react'
-import DatePicker, { registerLocale } from 'react-datepicker'
+import DatePicker, { registerLocale, ReactDatePickerProps } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useTranslation } from 'react-i18next'
 
@@ -61,7 +61,7 @@ const DateTime: React.FC<Props> = (props) => {
     if (typeof onChangeFromProps === 'function') onChangeFromProps(newDate)
   }
 
-  const dateTimePickerProps = {
+  const dateTimePickerProps: ReactDatePickerProps<undefined> = {
     customInputRef: 'ref',
     dateFormat,
     disabled: readOnly,
@@ -75,6 +75,7 @@ const DateTime: React.FC<Props> = (props) => {
     selected: value && new Date(value),
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
+    popperPlacement: 'bottom-start',
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
@@ -104,12 +105,6 @@ const DateTime: React.FC<Props> = (props) => {
           {...dateTimePickerProps}
           dropdownMode="select"
           locale={locale}
-          popperModifiers={[
-            {
-              name: 'preventOverflow',
-              enabled: true,
-            },
-          ]}
           showMonthDropdown
           showYearDropdown
         />

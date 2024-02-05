@@ -198,6 +198,10 @@ $cal-icon-width: 18px;
     }
 
     &__month-text {
+      padding: base(0.3);
+      margin: base(0.15);
+      font-size: base(0.55);
+
       &:hover {
         background: var(--theme-elevation-100);
       }
