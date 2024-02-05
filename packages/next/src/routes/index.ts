@@ -319,6 +319,8 @@ export const POST = async (
         default:
           return new Response('Route Not Found', { status: 404 })
       }
+    } else if (req.payloadAPI === 'GraphQL') {
+      // graphql handler
     } else {
       // root routes
       const customEndpointResponse = await handleCustomEndpoints({
