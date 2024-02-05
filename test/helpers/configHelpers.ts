@@ -32,7 +32,7 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
 
   const initOptions: InitOptions = {
     local: true,
-    config: require(process.env.PAYLOAD_CONFIG_PATH),
+    config: require(process.env.PAYLOAD_CONFIG_PATH).default,
     ...(options.init || {}),
   }
 
