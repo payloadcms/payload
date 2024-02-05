@@ -75,6 +75,7 @@ const DateTime: React.FC<Props> = (props) => {
     selected: value && new Date(value),
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
+    popperPlacement: 'bottom-start',
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
@@ -104,12 +105,6 @@ const DateTime: React.FC<Props> = (props) => {
           {...dateTimePickerProps}
           dropdownMode="select"
           locale={locale}
-          popperModifiers={[
-            {
-              name: 'preventOverflow',
-              enabled: true,
-            },
-          ]}
           showMonthDropdown
           showYearDropdown
         />
