@@ -1,5 +1,7 @@
+import type { Ref } from 'vue'
+
 import { ready, subscribe, unsubscribe } from '@payloadcms/live-preview'
-import { type Ref, ref, watchEffect } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 /**
  * Vue composable to implement Payload CMS Live Preview.
@@ -13,7 +15,7 @@ export const useLivePreview = <T>(props: {
   serverURL: string
 }): { data: Ref<T>; isLoading: Ref<boolean> } => {
   const { apiRoute, depth, initialData, serverURL } = props
-  const data = ref(initialData) as Ref<T> // Workaround for weird Ref<T> behavior
+  const data = ref(initialData) as Ref<T>
   const isLoading = ref(true)
   const hasSentReadyMessage = ref(false)
 
@@ -22,7 +24,7 @@ export const useLivePreview = <T>(props: {
     isLoading.value = false
   }
 
-  watchEffect((onCleanup) => {
+  onMounted(() => {
     const subscription = subscribe({
       apiRoute,
       callback: onChange,
@@ -36,7 +38,7 @@ export const useLivePreview = <T>(props: {
       ready({ serverURL })
     }
 
-    onCleanup(() => {
+    onUnmounted(() => {
       unsubscribe(subscription)
     })
   })
