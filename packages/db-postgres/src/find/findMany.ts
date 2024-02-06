@@ -158,7 +158,7 @@ export const findMany = async function find({
       query: db
         .select({
           count: sql<number>`count
-              (*)`,
+              (DISTINCT ${adapter.tables[tableName].id})`,
         })
         .from(table)
         .where(where),
