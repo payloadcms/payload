@@ -49,7 +49,7 @@ const RichText: React.FC<FieldProps> = (props) => {
     validate: memoizedValidate,
   })
 
-  const { errorMessage, setValue, showError, value } = fieldType
+  const { errorMessage, initialValue, setValue, showError, value } = fieldType
 
   const classes = [
     baseClass,
@@ -77,6 +77,7 @@ const RichText: React.FC<FieldProps> = (props) => {
           <LexicalProvider
             editorConfig={editorConfig}
             fieldProps={props}
+            key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More Info in PR description
             onChange={(editorState) => {
               let serializedEditorState = editorState.toJSON()
 
