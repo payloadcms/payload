@@ -110,6 +110,11 @@ const DraftPosts: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'relation',
+      type: 'relationship',
+      relationTo: draftCollectionSlug,
+    },
   ],
   versions: {
     drafts: true,
