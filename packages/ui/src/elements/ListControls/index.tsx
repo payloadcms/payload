@@ -11,7 +11,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { Chevron } from '../../icons/Chevron'
 import { useSearchParams } from '../../providers/SearchParams'
 import { Button } from '../Button'
-import ColumnSelector from '../ColumnSelector'
+// import ColumnSelector from '../ColumnSelector'
 import DeleteMany from '../DeleteMany'
 import EditMany from '../EditMany'
 import Pill from '../Pill'
@@ -127,7 +127,7 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'columns' ? 'auto' : 0}
           id={`${baseClass}-columns`}
         >
-          <ColumnSelector collectionSlug={collectionSlug} />
+          {/* <ColumnSelector collectionSlug={collectionSlug} /> */}
         </AnimateHeight>
       )}
       <AnimateHeight

@@ -28,7 +28,7 @@ const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] =>
     return [...remaining, field.name]
   }, [])
 
-const getInitialColumnState = (
+export const getInitialColumns = (
   fields: Field[],
   useAsTitle: string,
   defaultColumns: string[],
@@ -50,5 +50,3 @@ const getInitialColumnState = (
 
   return initialColumns
 }
-
-export default getInitialColumnState

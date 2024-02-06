@@ -8,7 +8,7 @@ import type { Locale } from 'payload/config'
 import RenderFields from '../../forms/RenderFields'
 import { Gutter } from '../Gutter'
 import { Document } from 'payload/types'
-import { FieldMap } from '../../forms/utilities/buildComponentMap/types'
+import { FieldMap } from '../../utilities/buildComponentMap/types'
 
 import './index.scss'
 

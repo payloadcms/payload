@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from '../../../../../providers/Translation'
 
-import type { CellComponentProps, RelationshipField } from 'payload/types'
+import type { CellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useIntersect } from '../../../../../hooks/useIntersect'
@@ -15,7 +15,7 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props) => {
+export const RelationshipCell: React.FC<CellComponentProps<any>> = (props) => {
   const { data: cellData, field } = props
   const config = useConfig()
   const { collections, routes } = config
@@ -84,5 +84,3 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
     </div>
   )
 }
-
-export default RelationshipCell

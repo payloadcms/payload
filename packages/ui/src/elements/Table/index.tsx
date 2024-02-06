@@ -1,13 +1,20 @@
+'use client'
 import React from 'react'
 
 import type { Props } from './types'
+
+import { useTableColumns } from '../TableColumns'
+import { TableCellProvider } from './TableCellProvider'
 
 import './index.scss'
 
 const baseClass = 'table'
 
-export const Table: React.FC<Props> = ({ columns, data }) => {
-  const activeColumns = columns?.filter((col) => col.active)
+export const Table: React.FC<Props> = ({ columns: columnsFromProps, data, customCellContext }) => {
+  const { columns: columnsFromContext } = useTableColumns()
+
+  const columns = columnsFromProps || columnsFromContext
+  const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
     return <div>No columns selected</div>
@@ -30,13 +37,20 @@ export const Table: React.FC<Props> = ({ columns, data }) => {
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
                 {columns.map((col, colIndex) => {
-                  const { active } = col
+                  const { active } = col || {}
 
                   if (!active) return null
 
                   return (
                     <td className={`cell-${col.accessor}`} key={colIndex}>
-                      {col.components.renderCell(row, row[col.accessor])}
+                      <TableCellProvider
+                        rowData={row}
+                        cellData={row[col.accessor]}
+                        customCellContext={customCellContext}
+                        columnIndex={colIndex}
+                      >
+                        {col.components.Cell}
+                      </TableCellProvider>
                     </td>
                   )
                 })}

@@ -18,6 +18,7 @@ import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
 import { useTranslation } from '../../providers/Translation'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
+import { FieldMap } from '../../utilities/buildComponentMap/types'
 
 import './index.scss'
 
@@ -41,7 +42,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
 
   const { collections, globals } = useConfig()
   const { i18n } = useTranslation()
-  const componentMap = useComponentMap()
+  const { componentMap } = useComponentMap()
 
   const collectionConfig =
     'collectionSlug' in props &&
@@ -52,7 +53,11 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
 
   const slug = collectionConfig?.slug || globalConfig?.slug
 
-  const { fields: fieldMap } = componentMap?.[slug] || {}
+  let fieldMap: FieldMap
+
+  if (collectionConfig) fieldMap = componentMap?.collections?.[slug]?.fieldMap
+
+  if (globalConfig) fieldMap = componentMap?.globals?.[slug]?.fieldMap
 
   const id = 'id' in props ? props.id : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined

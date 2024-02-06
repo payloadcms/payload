@@ -6,7 +6,7 @@ import { SanitizedConfig } from 'payload/types'
 import { createClientConfig } from '../../utilities/createClientConfig'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 import { deepMerge } from 'payload/utilities'
-import { buildComponentMap } from '../../../../ui/src/forms/utilities/buildComponentMap'
+import { buildComponentMap } from '@payloadcms/ui'
 
 import '@payloadcms/ui/scss/app.scss'
 

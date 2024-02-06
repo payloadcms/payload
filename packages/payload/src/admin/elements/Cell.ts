@@ -1,29 +1,15 @@
-import type { I18n } from '@payloadcms/translations'
-
-import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { SanitizedConfig } from '../../config/types'
-import type { FieldAffectingData, UIField } from '../../fields/config/types'
+import type { Field, FieldBase } from '../../fields/config/types'
 
 export type CellProps = {
-  cellData: unknown
   className?: string
-  colIndex: number
-  collectionConfig: SanitizedCollectionConfig
-  config: SanitizedConfig
-  field: FieldAffectingData | UIField
-  i18n: I18n
+  fieldType?: Field['type']
+  isFieldAffectingData?: boolean
+  label?: string
   link?: boolean
+  name: FieldBase['name']
   onClick?: (Props) => void
-  rowData: {
-    [path: string]: unknown
-  }
 }
 
-export type CellComponentProps<Field = FieldAffectingData | UIField, Data = unknown> = Pick<
-  CellProps,
-  'collectionConfig' | 'config' | 'rowData'
-> & {
+export type CellComponentProps<Data = unknown> = {
   data: Data
-  field: Field
-  i18n: I18n
 }

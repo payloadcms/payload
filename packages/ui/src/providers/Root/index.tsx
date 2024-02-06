@@ -18,7 +18,7 @@ import type { LanguageOptions, LanguageTranslations } from '../Translation'
 import { Slide, ToastContainer } from 'react-toastify'
 import { DocumentEventsProvider } from '../DocumentEvents'
 import { CustomProvider } from '../CustomProvider'
-import { ComponentMap } from '../../forms/utilities/buildComponentMap/types'
+import { ComponentMap } from '../../utilities/buildComponentMap/types'
 import { ComponentMapProvider } from '../ComponentMapProvider'
 
 type Props = {

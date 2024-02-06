@@ -6,38 +6,22 @@ import { SelectionProvider } from './SelectionProvider'
 import { Gutter } from '../../elements/Gutter'
 import { getTranslation } from '@payloadcms/translations'
 import Pill from '../../elements/Pill'
-import { ListControls } from '../../elements/ListControls'
 import { StaggeredShimmers } from '../../elements/ShimmerEffect'
 import { RelationshipProvider } from './RelationshipProvider'
-import Table from '../../elements/Table'
 import { Button } from '../../elements/Button'
 import { PerPage } from '../../elements/PerPage'
 import { Pagination } from '../../elements/Pagination'
-import ListSelection from '../../elements/ListSelection'
-import EditMany from '../../elements/EditMany'
-import PublishMany from '../../elements/PublishMany'
-import UnpublishMany from '../../elements/UnpublishMany'
-import DeleteMany from '../../elements/DeleteMany'
-import { getTextFieldsToBeSearched } from '../../elements/ListControls/getTextFieldsToBeSearched'
-import { SetStepNav } from '../../elements/StepNav/SetStepNav'
-import buildColumns from '../../elements/TableColumns/buildColumns'
-import getInitialColumnState from '../../elements/TableColumns/getInitialColumns'
-import formatFields from './formatFields'
 import { useConfig } from '../../providers/Config'
 import { useTranslation } from '../../providers/Translation'
+import { useComponentMap } from '../../providers/ComponentMapProvider'
+import { Table } from '../../elements/Table'
 
 import './index.scss'
-import { useComponentMap } from '../../providers/ComponentMapProvider'
 
 const baseClass = 'collection-list'
 
 export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
   const {
-    // collectionConfig: {
-    //   admin: { defaultColumns, listSearchableFields, useAsTitle } = {},
-    //   fields,
-    //   labels: { plural: pluralLabel, singular: singularLabel } = {},
-    // },
     Header,
     data,
     handlePageChange,
@@ -56,18 +40,19 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
 
   const config = useConfig()
 
-  const componentMap = useComponentMap()
+  const { componentMap } = useComponentMap()
 
-  const { BeforeList, AfterList, BeforeListTable, AfterListTable } =
-    componentMap?.[collectionSlug] || {}
+  const collectionComponentMap = componentMap?.collections?.[collectionSlug]
+
+  const { BeforeList, AfterList, BeforeListTable, AfterListTable } = collectionComponentMap || {}
 
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
   )
 
-  const { i18n } = useTranslation()
+  const { labels } = collectionConfig
 
-  const textFieldsToBeSearched = getTextFieldsToBeSearched(listSearchableFields, fields)
+  const { i18n } = useTranslation()
 
   let docs = data.docs || []
 
@@ -80,30 +65,8 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
     })
   }
 
-  const formattedFields = formatFields(collectionConfig)
-
-  const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
-
-  const columns = buildColumns({
-    cellProps: [],
-    config,
-    collectionConfig,
-    i18n,
-    columns: initialColumns.map((column) => ({
-      accessor: column,
-      active: true,
-    })),
-  })
-
   return (
     <div className={baseClass}>
-      <SetStepNav
-        nav={[
-          {
-            label: pluralLabel,
-          },
-        ]}
-      />
       {BeforeList}
       {/* <Meta title={getTranslation(collection.labels.plural, i18n)} /> */}
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
@@ -111,11 +74,11 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
           <header className={`${baseClass}__header`}>
             {Header || (
               <Fragment>
-                <h1>{getTranslation(pluralLabel, i18n)}</h1>
+                <h1>{getTranslation(labels?.plural, i18n)}</h1>
                 {hasCreatePermission && (
                   <Pill
                     aria-label={i18n.t('general:createNewLabel', {
-                      label: getTranslation(singularLabel, i18n),
+                      label: getTranslation(labels?.singular, i18n),
                     })}
                     to={newDocumentURL}
                   >
@@ -133,8 +96,8 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
               </Fragment>
             )}
           </header>
-          <ListControls
-            collectionPluralLabel={pluralLabel}
+          {/* <ListControls
+            collectionPluralLabel={labels?.plural}
             collectionSlug={collectionSlug}
             textFieldsToBeSearched={textFieldsToBeSearched}
             // handleSearchChange={handleSearchChange}
@@ -143,7 +106,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
             // modifySearchQuery={modifySearchParams}
             // resetParams={resetParams}
             titleField={titleField}
-          />
+          /> */}
           {BeforeListTable}
           {!data.docs && (
             <StaggeredShimmers
@@ -153,15 +116,23 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
           )}
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
-              <Table data={docs} columns={columns} />
+              <Table
+                data={docs}
+                customCellContext={{
+                  collectionSlug,
+                  isUploadCollection: Boolean(collectionConfig.upload),
+                }}
+              />
             </RelationshipProvider>
           )}
           {data.docs && data.docs.length === 0 && (
             <div className={`${baseClass}__no-results`}>
-              <p>{i18n.t('general:noResults', { label: getTranslation(pluralLabel, i18n) })}</p>
+              <p>{i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
                 <Button el="link" to={newDocumentURL}>
-                  {i18n.t('general:createNewLabel', { label: getTranslation(singularLabel, i18n) })}
+                  {i18n.t('general:createNewLabel', {
+                    label: getTranslation(labels?.singular, i18n),
+                  })}
                 </Button>
               )}
             </div>

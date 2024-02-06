@@ -17,7 +17,7 @@ import SectionTitle from './SectionTitle'
 import { FieldPathProvider } from '../../FieldPathProvider'
 import { Labels } from 'payload/types'
 import { FieldPermissions } from 'payload/auth'
-import { ReducedBlock } from '../../utilities/buildComponentMap/types'
+import { ReducedBlock } from '../../../utilities/buildComponentMap/types'
 
 const baseClass = 'blocks-field'
 

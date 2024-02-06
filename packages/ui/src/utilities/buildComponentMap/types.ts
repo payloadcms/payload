@@ -5,25 +5,27 @@ import {
   SanitizedGlobalConfig,
   TabsField,
 } from 'payload/types'
-import { fieldTypes } from '../../fields'
+import { fieldTypes } from '../../forms/fields'
 
-export type ReducedTab = {
+export type MappedTab = {
   name?: string
   label: TabsField['tabs'][0]['label']
-  subfields?: ReducedField[]
+  subfields?: FieldMap
 }
 
 export type ReducedBlock = {
   slug: string
-  subfields: ReducedField[]
+  subfields: FieldMap
   labels: BlockField['labels']
   imageAltText?: string
   imageURL?: string
 }
 
-export type ReducedField = {
+export type MappedField = {
   type: keyof typeof fieldTypes
   Field: React.ReactNode
+  Cell: React.ReactNode
+  Heading: React.ReactNode
   fieldIsPresentational: boolean
   fieldPermissions: FieldPermissions
   isFieldAffectingData: boolean
@@ -33,24 +35,34 @@ export type ReducedField = {
   /**
    * On `array`, `blocks`, `group`, `collapsible`, and `tabs` fields only
    */
-  subfields?: ReducedField[]
+  subfields?: FieldMap
   /**
    * On `tabs` fields only
    */
-  tabs?: ReducedTab[]
+  tabs?: MappedTab[]
   fieldMap?: FieldMap
 }
 
-export type FieldMap = ReducedField[]
+export type FieldMap = MappedField[]
+
+export type CollectionComponentMap = {
+  BeforeList: React.ReactNode
+  AfterList: React.ReactNode
+  BeforeListTable: React.ReactNode
+  AfterListTable: React.ReactNode
+  fieldMap: FieldMap
+  initialColumns: string[]
+}
+
+export type GlobalComponentMap = {
+  fieldMap: FieldMap
+}
 
 export type ComponentMap = {
-  [key: SanitizedCollectionConfig['slug'] | SanitizedGlobalConfig['slug']]: {
-    BeforeList: React.ReactNode
-    AfterList: React.ReactNode
-    BeforeListTable: React.ReactNode
-    AfterListTable: React.ReactNode
-    BeforeFields: React.ReactNode
-    AfterFields: React.ReactNode
-    fields: FieldMap
+  collections: {
+    [slug: SanitizedCollectionConfig['slug']]: CollectionComponentMap
+  }
+  globals: {
+    [slug: SanitizedGlobalConfig['slug']]: GlobalComponentMap
   }
 }

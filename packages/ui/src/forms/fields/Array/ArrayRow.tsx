@@ -14,7 +14,7 @@ import HiddenInput from '../HiddenInput'
 import { FieldPathProvider } from '../../FieldPathProvider'
 import { FieldPermissions } from 'payload/auth'
 import { getTranslation } from '@payloadcms/translations'
-import { FieldMap } from '../../utilities/buildComponentMap/types'
+import { FieldMap } from '../../../utilities/buildComponentMap/types'
 
 import './index.scss'
 

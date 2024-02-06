@@ -1,13 +1,5 @@
 'use client'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
 
 import type { SanitizedCollectionConfig, Field } from 'payload/types'
 import type { CellProps } from 'payload/types'
@@ -17,11 +9,9 @@ import type { Action } from './columnReducer'
 
 import { usePreferences } from '../../providers/Preferences'
 import { useTranslation } from '../../providers/Translation'
-import formatFields from '../../views/List/formatFields'
-import buildColumns from './buildColumns'
 import { columnReducer } from './columnReducer'
-import getInitialColumnState from './getInitialColumns'
 import { useConfig } from '../../providers/Config'
+import { useComponentMap } from '../../providers/ComponentMapProvider'
 
 export interface ITableColumns {
   columns: Column[]
@@ -41,163 +31,173 @@ export const TableColumnsProvider: React.FC<{
   collectionSlug: string
 }> = ({ cellProps, children, collectionSlug }) => {
   const config = useConfig()
+
+  const { componentMap, getMappedFieldByPath } = useComponentMap()
+
+  const { initialColumns } = componentMap.collections[collectionSlug]
+
   const collectionConfig = config.collections.find(
     (collectionConfig) => collectionConfig.slug === collectionSlug,
   )
+
   const {
     admin: { useAsTitle, defaultColumns },
   } = collectionConfig
+
   const preferenceKey = `${collectionSlug}-list`
   const prevCollection = useRef<SanitizedCollectionConfig['slug']>()
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
   const { i18n } = useTranslation()
-  const [formattedFields] = useState<Field[]>(() => formatFields(collectionConfig))
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
-    const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
+    return initialColumns.map((columnPath) => {
+      const field = getMappedFieldByPath({ path: columnPath, collectionSlug })
+      console.log(field, columnPath)
+      if (field) {
+        const column: Column = {
+          accessor: columnPath,
+          active: true,
+          // label: field.label,
+          name: field.name,
+          components: {
+            Cell: field.Cell,
+            Heading: field.Heading,
+          },
+        }
 
-    return buildColumns({
-      cellProps,
-      // TODO: fix this
-      // @ts-ignore-next-line
-      config,
-      i18n,
-      collectionConfig,
-      columns: initialColumns.map((column) => ({
-        accessor: column,
-        active: true,
-      })),
+        return column
+      }
     })
   })
 
-  // /////////////////////////////////////
-  // Sync preferences on collectionConfig change
-  // /////////////////////////////////////
+  // // /////////////////////////////////////
+  // // Sync preferences on collectionConfig change
+  // // /////////////////////////////////////
 
-  useEffect(() => {
-    const sync = async () => {
-      const collectionHasChanged = prevCollection.current !== collectionConfig.slug
+  // useEffect(() => {
+  //   const sync = async () => {
+  //     const collectionHasChanged = prevCollection.current !== collectionConfig.slug
 
-      if (collectionHasChanged) {
-        hasInitialized.current = false
+  //     if (collectionHasChanged) {
+  //       hasInitialized.current = false
 
-        const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
-        prevCollection.current = collectionConfig.slug
-        const initialColumns = getInitialColumnState(formattedFields, useAsTitle, defaultColumns)
-        const newCols = currentPreferences?.columns || initialColumns
+  //       const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
+  //       prevCollection.current = collectionConfig.slug
+  //       const initialColumns = getInitialColumnState(columns, useAsTitle, defaultColumns)
+  //       const newCols = currentPreferences?.columns || initialColumns
 
-        dispatchTableColumns({
-          payload: {
-            cellProps,
-            i18n,
-            collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
-            columns: newCols.map((column) => {
-              // 'string' is for backwards compatibility
-              // the preference used to be stored as an array of strings
-              if (typeof column === 'string') {
-                return {
-                  accessor: column,
-                  active: true,
-                }
-              }
-              return column
-            }),
-          },
-          type: 'set',
-        })
+  //       dispatchTableColumns({
+  //         payload: {
+  //           cellProps,
+  //           i18n,
+  //           collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
+  //           columns: newCols.map((column) => {
+  //             // 'string' is for backwards compatibility
+  //             // the preference used to be stored as an array of strings
+  //             if (typeof column === 'string') {
+  //               return {
+  //                 accessor: column,
+  //                 active: true,
+  //               }
+  //             }
+  //             return column
+  //           }),
+  //         },
+  //         type: 'set',
+  //       })
 
-        hasInitialized.current = true
-      }
-    }
+  //       hasInitialized.current = true
+  //     }
+  //   }
 
-    sync()
-  }, [
-    preferenceKey,
-    setPreference,
-    tableColumns,
-    getPreference,
-    useAsTitle,
-    defaultColumns,
-    collectionConfig,
-    cellProps,
-    formattedFields,
-  ])
+  //   sync()
+  // }, [
+  //   preferenceKey,
+  //   setPreference,
+  //   tableColumns,
+  //   getPreference,
+  //   useAsTitle,
+  //   defaultColumns,
+  //   collectionConfig,
+  //   cellProps,
+  //   columns,
+  // ])
 
-  // /////////////////////////////////////
-  // Set preferences on column change
-  // /////////////////////////////////////
+  // // /////////////////////////////////////
+  // // Set preferences on column change
+  // // /////////////////////////////////////
 
-  useEffect(() => {
-    if (!hasInitialized.current) return
-    const columns = tableColumns.map((c) => ({
-      accessor: c.accessor,
-      active: c.active,
-    }))
+  // useEffect(() => {
+  //   if (!hasInitialized.current) return
+  //   const columns = tableColumns.map((c) => ({
+  //     accessor: c.accessor,
+  //     active: c.active,
+  //   }))
 
-    void setPreference(preferenceKey, { columns }, true)
-  }, [tableColumns, preferenceKey, setPreference, getPreference])
+  //   void setPreference(preferenceKey, { columns }, true)
+  // }, [tableColumns, preferenceKey, setPreference, getPreference])
 
-  const setActiveColumns = useCallback(
-    (columns: string[]) => {
-      dispatchTableColumns({
-        payload: {
-          // onSelect,
-          i18n,
-          cellProps,
-          collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
-          columns: columns.map((column) => ({
-            accessor: column,
-            active: true,
-          })),
-        },
-        type: 'set',
-      })
-    },
-    [collectionConfig, cellProps],
-  )
+  // const setActiveColumns = useCallback(
+  //   (columns: string[]) => {
+  //     dispatchTableColumns({
+  //       payload: {
+  //         // onSelect,
+  //         i18n,
+  //         cellProps,
+  //         collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
+  //         columns: columns.map((column) => ({
+  //           accessor: column,
+  //           active: true,
+  //         })),
+  //       },
+  //       type: 'set',
+  //     })
+  //   },
+  //   [collectionConfig, cellProps],
+  // )
 
-  const moveColumn = useCallback(
-    (args: { fromIndex: number; toIndex: number }) => {
-      const { fromIndex, toIndex } = args
+  // const moveColumn = useCallback(
+  //   (args: { fromIndex: number; toIndex: number }) => {
+  //     const { fromIndex, toIndex } = args
 
-      dispatchTableColumns({
-        payload: {
-          cellProps,
-          i18n,
-          collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
-          fromIndex,
-          toIndex,
-        },
-        type: 'move',
-      })
-    },
-    [collectionConfig, cellProps],
-  )
+  //     dispatchTableColumns({
+  //       payload: {
+  //         cellProps,
+  //         i18n,
+  //         collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
+  //         fromIndex,
+  //         toIndex,
+  //       },
+  //       type: 'move',
+  //     })
+  //   },
+  //   [collectionConfig, cellProps],
+  // )
 
-  const toggleColumn = useCallback(
-    (column: string) => {
-      dispatchTableColumns({
-        payload: {
-          cellProps,
-          i18n,
-          collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
-          column,
-        },
-        type: 'toggle',
-      })
-    },
-    [collectionConfig, cellProps],
-  )
+  // const toggleColumn = useCallback(
+  //   (column: string) => {
+  //     dispatchTableColumns({
+  //       payload: {
+  //         cellProps,
+  //         i18n,
+  //         collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
+  //         column,
+  //       },
+  //       type: 'toggle',
+  //     })
+  //   },
+  //   [collectionConfig, cellProps],
+  // )
 
   return (
     <TableColumnContext.Provider
       value={{
         columns: tableColumns,
         dispatchTableColumns,
-        moveColumn,
-        setActiveColumns,
-        toggleColumn,
+        // moveColumn,
+        // setActiveColumns,
+        // toggleColumn,
       }}
     >
       {children}

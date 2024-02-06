@@ -1,29 +1,32 @@
 import React from 'react'
 
 import type { SanitizedCollectionConfig, SanitizedConfig, CellProps } from 'payload/types'
-import { I18n } from '@payloadcms/translations'
 
-import type { Column } from '../Table/types'
 import { fieldIsPresentationalOnly } from 'payload/types'
 import { flattenTopLevelFields } from 'payload/utilities'
-import Cell from '../../views/List/Cell'
-import SelectAll from '../../views/List/SelectAll'
-import SelectRow from '../../views/List/SelectRow'
-import SortColumn from '../SortColumn'
+import { DefaultCell } from '../../../views/List/Cell'
+import SelectAll from '../../../views/List/SelectAll'
+import SelectRow from '../../../views/List/SelectRow'
+import SortColumn from '../../../elements/SortColumn'
+import { Column } from '../../../elements/Table/types'
+import { RenderCustomComponent } from '../../../elements/RenderCustomComponent'
+import { getDisplayableFields } from './getDisplayableFields'
 
-const buildColumns = ({
+export const mapColumns = ({
   cellProps,
   config,
-  i18n,
   collectionConfig,
-  columns,
 }: {
   cellProps: Partial<CellProps>[]
   config: SanitizedConfig
-  i18n: I18n
   collectionConfig: SanitizedCollectionConfig
-  columns: Pick<Column, 'accessor' | 'active'>[]
 }): Column[] => {
+  const columnsToDisplay = getDisplayableFields(collectionConfig)
+  const columns = columnsToDisplay.map((field) => ({
+    accessor: field.name,
+    active: true,
+  }))
+
   // sort the fields to the order of activeColumns
   const sortedFields = flattenTopLevelFields(collectionConfig.fields, true).sort((a, b) => {
     const aIndex = columns.findIndex((column) => column.accessor === a.name)
@@ -39,14 +42,25 @@ const buildColumns = ({
   )
 
   let colIndex = -1
-  const cols: Column[] = sortedFields.map((field) => {
+
+  const cols = sortedFields.map((field) => {
     const isActive = columns.find((column) => column.accessor === field.name)?.active || false
     const isFirstActive = firstActiveColumn?.name === field.name
+
     if (isActive) {
       colIndex += 1
     }
-    const props = cellProps?.[colIndex] || {}
-    return {
+
+    // const props = cellProps?.[colIndex] || {}
+
+    const cellProps: CellProps = {
+      colIndex,
+      field,
+      link: isFirstActive,
+      adminRoute: config.routes.admin,
+    }
+
+    const mappedColumn: Column = {
       name: field.name,
       accessor: field.name,
       active: isActive,
@@ -62,25 +76,18 @@ const buildColumns = ({
             name={field.name}
           />
         ),
-        renderCell: (rowData, cellData) => {
-          return (
-            <Cell
-              cellData={cellData}
-              colIndex={colIndex}
-              config={config}
-              collectionConfig={collectionConfig}
-              field={field}
-              key={JSON.stringify(cellData)}
-              link={isFirstActive}
-              rowData={rowData}
-              i18n={i18n}
-              {...props}
-            />
-          )
-        },
+        Cell: (
+          <RenderCustomComponent
+            DefaultComponent={DefaultCell}
+            CustomComponent={field.admin?.components?.Cell}
+            componentProps={cellProps}
+          />
+        ),
       },
       label: field.label,
     }
+
+    return mappedColumn
   })
 
   if (cellProps?.[0]?.link !== false) {
@@ -90,7 +97,7 @@ const buildColumns = ({
       active: true,
       components: {
         Heading: <SelectAll />,
-        renderCell: (rowData) => <SelectRow id={rowData.id} />,
+        Cell: <SelectRow />,
       },
       label: null,
     })
@@ -98,5 +105,3 @@ const buildColumns = ({
 
   return cols
 }
-
-export default buildColumns

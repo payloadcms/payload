@@ -5,6 +5,7 @@ import {
   DefaultList,
   HydrateClientUser,
   DefaultListViewProps,
+  TableColumnsProvider,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
@@ -61,11 +62,13 @@ export const CollectionList = async ({
     return (
       <Fragment>
         <HydrateClientUser user={user} permissions={permissions} />
-        <RenderCustomComponent
-          CustomComponent={ListToRender}
-          DefaultComponent={DefaultList}
-          componentProps={componentProps}
-        />
+        <TableColumnsProvider collectionSlug={collectionSlug}>
+          <RenderCustomComponent
+            CustomComponent={ListToRender}
+            DefaultComponent={DefaultList}
+            componentProps={componentProps}
+          />
+        </TableColumnsProvider>
       </Fragment>
     )
   }

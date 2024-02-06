@@ -1,12 +1,18 @@
+'use client'
 import React from 'react'
 
 import Thumbnail from '../../../../../elements/Thumbnail'
-import './index.scss'
 import { CellComponentProps } from 'payload/types'
+
+import './index.scss'
 
 const baseClass = 'file'
 
-const File: React.FC<CellComponentProps<any, any>> = ({ collectionConfig, data, rowData }) => {
+export const FileCell: React.FC<CellComponentProps<any>> = ({
+  collectionConfig,
+  data,
+  rowData,
+}) => {
   return (
     <div className={baseClass}>
       <Thumbnail
@@ -22,5 +28,3 @@ const File: React.FC<CellComponentProps<any, any>> = ({ collectionConfig, data, 
     </div>
   )
 }
-
-export default File

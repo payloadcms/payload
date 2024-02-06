@@ -31,6 +31,7 @@ export type DefaultListViewProps = {
   titleField?: FieldAffectingData
   toggleColumn?: (column: string) => void
   collectionSlug: SanitizedCollectionConfig['slug']
+  useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
 }
 
 export type ListIndexProps = {

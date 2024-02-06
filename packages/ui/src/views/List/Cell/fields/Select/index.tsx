@@ -1,11 +1,15 @@
+'use client'
 import React from 'react'
 
-import type { CellComponentProps, OptionObject, SelectField } from 'payload/types'
+import type { CellComponentProps, OptionObject } from 'payload/types'
 
 import { optionsAreObjects } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '../../../../../providers/Translation'
 
-const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, field, i18n }) => {
+export const SelectCell: React.FC<CellComponentProps<any>> = ({ data, field }) => {
+  const { i18n } = useTranslation()
+
   const findLabel = (items: string[]) =>
     items
       .map((i) => {
@@ -29,5 +33,3 @@ const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, fiel
 
   return <span>{content}</span>
 }
-
-export default SelectCell

@@ -2,8 +2,6 @@ import { I18n } from '@payloadcms/translations'
 import type { SanitizedCollectionConfig, CellProps } from 'payload/types'
 import type { Column } from '../Table/types'
 
-import buildColumns from './buildColumns'
-
 type TOGGLE = {
   payload: {
     cellProps: Partial<CellProps>[]

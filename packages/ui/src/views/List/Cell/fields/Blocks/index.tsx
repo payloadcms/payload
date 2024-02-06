@@ -1,10 +1,14 @@
+'use client'
 import React from 'react'
 
-import type { BlockField, CellComponentProps } from 'payload/types'
+import type { CellComponentProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '../../../../../providers/Translation'
 
-const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field, i18n }) => {
+export const BlocksCell: React.FC<CellComponentProps<any>> = ({ data, field }) => {
+  const { i18n } = useTranslation()
+
   const selectedBlocks = data ? data.map(({ blockType }) => blockType) : []
   const blockLabels = field.blocks.map((s) => ({
     label: getTranslation(s.labels.singular, i18n),
@@ -22,6 +26,7 @@ const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field
       .join(', ')
 
   const itemsToShow = 5
+
   if (selectedBlocks.length > itemsToShow) {
     const more = selectedBlocks.length - itemsToShow
     label = `${selectedBlocks.length} ${getTranslation(field.labels.plural, i18n)} - ${i18n.t(
@@ -37,4 +42,3 @@ const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field
 
   return <span>{label}</span>
 }
-export default BlocksCell

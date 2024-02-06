@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import Link from 'next/link' // TODO: abstract this out to support all routers
 
@@ -5,28 +6,22 @@ import type { CodeField, CellComponentProps, CellProps } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent'
 import cellComponents from './fields'
-import CodeCell from './fields/Code'
+import { CodeCell } from './fields/Code'
+import { useTranslation } from '../../../providers/Translation'
+import { useConfig } from '../../../providers/Config'
+import { useTableCell } from '../../../elements/Table/TableCellProvider'
 
-const DefaultCell: React.FC<CellProps> = (props) => {
-  const {
-    cellData,
-    className,
-    config,
-    collectionConfig: { slug },
-    collectionConfig,
-    field,
-    link = true,
-    onClick,
-    rowData: { id } = {},
-    rowData,
-    i18n,
-  } = props
+export const DefaultCell: React.FC<CellProps> = (props) => {
+  const { className, onClick, name, link: linkFromProps, fieldType, isFieldAffectingData } = props
+
+  const { i18n } = useTranslation()
 
   const {
-    routes: { admin },
-  } = config
+    routes: { admin: adminRoute },
+  } = useConfig()
+
+  const { cellData, rowData, customCellContext, columnIndex } = useTableCell()
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -39,9 +34,11 @@ const DefaultCell: React.FC<CellProps> = (props) => {
     className,
   }
 
-  if (link) {
+  if (linkFromProps || (linkFromProps === undefined && columnIndex === 0)) {
     WrapElement = Link
-    wrapElementProps.href = `${admin}/collections/${slug}/${id}`
+    wrapElementProps.href = customCellContext?.collectionSlug
+      ? `${adminRoute}/collections/${customCellContext?.collectionSlug}/${rowData.id}`
+      : ''
   }
 
   if (typeof onClick === 'function') {
@@ -52,31 +49,24 @@ const DefaultCell: React.FC<CellProps> = (props) => {
     }
   }
 
-  if (field.name === 'id') {
+  if (name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell
-          config={config}
-          collectionConfig={collectionConfig}
-          data={`ID: ${cellData}`}
-          field={field as CodeField}
-          nowrap
-          rowData={rowData}
-          i18n={i18n}
-        />
+        <CodeCell data={`ID: ${cellData}`} nowrap />
       </WrapElement>
     )
   }
 
-  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[field.type]
+  console.log('fieldType', fieldType, cellData)
+  let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[fieldType]
 
   if (!CellComponent) {
-    if (collectionConfig.upload && fieldAffectsData(field) && field.name === 'filename') {
+    if (customCellContext.isUploadCollection && isFieldAffectingData && name === 'filename') {
       CellComponent = cellComponents.File
     } else {
       return (
         <WrapElement {...wrapElementProps}>
-          {(cellData === '' || typeof cellData === 'undefined') &&
+          {/* {(cellData === '' || typeof cellData === 'undefined') &&
             'label' in field &&
             typeof field.label === 'string' &&
             i18n.t('general:noLabel', {
@@ -84,7 +74,7 @@ const DefaultCell: React.FC<CellProps> = (props) => {
                 typeof field.label === 'function' ? 'data' : field.label || 'data',
                 i18n,
               ),
-            })}
+            })} */}
           {typeof cellData === 'string' && cellData}
           {typeof cellData === 'number' && cellData}
           {typeof cellData === 'object' && JSON.stringify(cellData)}
@@ -95,53 +85,7 @@ const DefaultCell: React.FC<CellProps> = (props) => {
 
   return (
     <WrapElement {...wrapElementProps}>
-      <CellComponent
-        config={config}
-        collectionConfig={collectionConfig}
-        data={cellData}
-        field={field}
-        rowData={rowData}
-        i18n={i18n}
-      />
+      <CellComponent data={cellData} />
     </WrapElement>
   )
 }
-
-const Cell: React.FC<CellProps> = (props) => {
-  const {
-    cellData,
-    className,
-    colIndex,
-    config,
-    collectionConfig,
-    field: { admin: { components: { Cell: CustomCell } = {} } = {} },
-    field,
-    link,
-    onClick,
-    rowData,
-    i18n,
-  } = props
-
-  const componentProps: CellProps = {
-    cellData,
-    className,
-    colIndex,
-    config,
-    collectionConfig,
-    field,
-    link,
-    onClick,
-    rowData,
-    i18n,
-  }
-
-  return (
-    <RenderCustomComponent
-      CustomComponent={CustomCell}
-      DefaultComponent={DefaultCell}
-      componentProps={componentProps}
-    />
-  )
-}
-
-export default Cell

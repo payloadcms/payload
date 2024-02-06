@@ -1,27 +1,27 @@
-import array from './Array'
-import blocks from './Blocks'
-import checkbox from './Checkbox'
-import code from './Code'
-import date from './Date'
-import File from './File'
-import json from './JSON'
-import relationship from './Relationship'
-import richText from './Richtext'
-import select from './Select'
-import textarea from './Textarea'
+import { ArrayCell } from './Array'
+import { BlocksCell } from './Blocks'
+import { CheckboxCell } from './Checkbox'
+import { CodeCell } from './Code'
+import { DateCell } from './Date'
+import { FileCell } from './File'
+import { JSONCell } from './JSON'
+import { RelationshipCell } from './Relationship'
+import { RichTextCell } from './Richtext'
+import { SelectCell } from './Select'
+import { TextareaCell } from './Textarea'
 
 export default {
-  File,
-  array,
-  blocks,
-  checkbox,
-  code,
-  date,
-  json,
-  radio: select,
-  relationship,
-  richText,
-  select,
-  textarea,
-  upload: relationship,
+  File: FileCell,
+  array: ArrayCell,
+  blocks: BlocksCell,
+  checkbox: CheckboxCell,
+  code: CodeCell,
+  date: DateCell,
+  json: JSONCell,
+  radio: SelectCell,
+  relationship: RelationshipCell,
+  richText: RichTextCell,
+  select: SelectCell,
+  textarea: TextareaCell,
+  upload: RelationshipCell,
 }
