@@ -3,6 +3,7 @@ import type { Collection } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
 import { extractJWT } from '../../../utilities/jwt'
+import { generatePayloadCookie } from '../../../utilities/cookies'
 
 function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -22,7 +23,12 @@ function refreshResolver(collection: Collection) {
     }
 
     const result = await refreshOperation(options)
-
+    const cookie = generatePayloadCookie({
+      token: result.refreshedToken,
+      payload: context.req.payload,
+      collectionConfig: context.req.collection.config,
+    })
+    context.headers.set('Set-Cookie', cookie)
     return result
   }
 

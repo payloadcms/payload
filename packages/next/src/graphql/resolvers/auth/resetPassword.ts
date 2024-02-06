@@ -2,6 +2,7 @@ import { resetPasswordOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { generatePayloadCookie } from '../../../utilities/cookies'
 
 function resetPasswordResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -17,7 +18,12 @@ function resetPasswordResolver(collection: Collection) {
     }
 
     const result = await resetPasswordOperation(options)
-
+    const cookie = generatePayloadCookie({
+      token: result.token,
+      payload: context.req.payload,
+      collectionConfig: context.req.collection.config,
+    })
+    context.headers.set('Set-Cookie', cookie)
     return result
   }
 

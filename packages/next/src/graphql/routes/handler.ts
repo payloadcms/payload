@@ -1,10 +1,10 @@
 import config from 'payload-config'
 import { GraphQLError } from 'graphql'
+import { createSchema, createYoga } from 'graphql-yoga'
 import httpStatus from 'http-status'
 import type { Payload, CollectionAfterErrorHook } from 'payload/types'
 import type { GraphQLFormattedError } from 'graphql'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest'
-import { createHandler } from 'graphql-http/lib/use/fetch'
 
 const handleError = async (
   payload: Payload,
@@ -43,40 +43,40 @@ const handleError = async (
 }
 
 export const POST = async (request: Request) => {
+  const originalRequest = request.clone()
   const req = await createPayloadRequest({
     request,
     config,
   })
-  const { payload } = req
-  const headers = new Headers()
+  const copyOfSchema = req.payload.schema
 
-  const afterErrorHook =
-    typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
-
-  return createHandler({
-    context: { req, headers },
-    onOperation: async (request, args, result) => {
-      const response =
-        typeof payload.extensions === 'function'
-          ? await payload.extensions({
-              args,
-              req: request,
-              result,
-            })
-          : result
-      if (response.errors) {
-        const errors = (await Promise.all(
-          result.errors.map((error) => {
-            return handleError(payload, error, payload.config.debug, afterErrorHook)
-          }),
-        )) as GraphQLError[]
-        // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
-        return { ...response, errors }
+  const schema = createSchema({
+    typeDefs: /* GraphQL */ `
+      type Query {
+        greetings: String
       }
-      return response
+    `,
+    resolvers: {
+      Query: {
+        greetings: () => 'This is the `greetings` field of the root `Query` type',
+      },
     },
-    schema: payload.schema,
-    validationRules: (request, args, defaultRules) =>
-      defaultRules.concat(payload.validationRules(args)),
+  })
+  const apiResponse = await createYoga({
+    schema: copyOfSchema,
+
+    // While using Next.js file convention for routing, we need to configure Yoga to use the correct endpoint
+    graphqlEndpoint: '/api/graphql',
+
+    // Yoga needs to know how to create a valid Next response
+    fetchAPI: { Response },
+  })(originalRequest)
+  console.log('schema', Object.keys(schema))
+  console.log('payload schema', typeof req.payload.schema)
+
+  return new Response(apiResponse.body, {
+    headers: {
+      ...apiResponse.headers,
+    },
   })
 }
