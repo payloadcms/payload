@@ -18,7 +18,7 @@ import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 /* eslint-disable no-use-before-define */
 import { GraphQLJSON } from 'graphql-type-json'
 
-import type { RichTextAdapter } from '../../admin/types'
+import type { RichTextAdapter } from 'payload/types'
 import type {
   ArrayField,
   BlockField,
@@ -41,11 +41,11 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-} from '../../fields/config/types'
-import type { Payload } from '../../types'
+} from 'payload/types'
+import type { Payload } from 'payload'
 
-import { tabHasName } from '../../fields/config/types'
-import { toWords } from '../../utilities/formatLabels'
+import { tabHasName } from 'payload/types'
+import { toWords } from 'payload/utilities'
 import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
 import formatOptions from '../utilities/formatOptions'
