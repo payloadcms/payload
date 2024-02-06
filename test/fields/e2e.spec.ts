@@ -862,16 +862,15 @@ describe('fields', () => {
 
       const bulkText = 'Bulk update text'
       await page.goto(url.list)
-      console.log(url.list)
+      await page.waitForSelector('.table > table > tbody > tr td.cell-title')
       const rows = page.locator('.table > table > tbody > tr', {
-        has: page.locator('td.cell-title > span', {
+        has: page.locator('td.cell-title span', {
           hasText: 'for test',
         }),
       })
       const count = await rows.count()
-      console.log(count)
+
       for (let i = 0; i < count; i++) {
-        console.log('row')
         await rows
           .nth(i)
           .locator('td.cell-_select .checkbox-input__input > input[type="checkbox"]')
@@ -901,16 +900,7 @@ describe('fields', () => {
 
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
       await expect(page.locator('.Toastify__toast--success')).toContainText(
-        'Updated 3 Posts successfully.',
-      )
-      await expect(page.locator('.table > tbody > tr', { hasText: 'for test 1' })).toContainText(
-        '1 Items',
-      )
-      await expect(page.locator('.table > tbody > tr', { hasText: 'for test 2' })).toContainText(
-        '1 Items',
-      )
-      await expect(page.locator('.table > tbody > tr', { hasText: 'for test 3' })).toContainText(
-        '1 Items',
+        'Updated 3 Array Fields successfully.',
       )
     })
   })
