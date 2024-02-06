@@ -5,9 +5,7 @@ import type { Document, Where } from '../../../types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import deleteOperation from '../delete'
 import deleteByID from '../deleteByID'
 
@@ -59,24 +57,13 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   const {
     id,
     collection: collectionSlug,
-    context,
     depth,
-    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
-    locale: localeArg = null,
     overrideAccess = true,
-    req: incomingReq = {} as PayloadRequest,
     showHiddenFields,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const localizationConfig = payload?.config?.localization
-  const defaultLocale = localizationConfig ? localizationConfig.defaultLocale : null
-  const locale = localeArg || incomingReq?.locale || defaultLocale
-  const fallbackLocale = localizationConfig
-    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -84,22 +71,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const req = {
-    fallbackLocale:
-      typeof fallbackLocaleArg !== 'undefined'
-        ? fallbackLocaleArg
-        : fallbackLocale || defaultLocale,
-    i18n: i18nInit(payload.config.i18n),
-    locale: locale,
-    payload,
-    payloadAPI: 'local',
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = createLocalReq(options, payload)
 
   const args = {
     id,

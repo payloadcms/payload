@@ -45,37 +45,38 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection?.config,
-        context: args.req.context,
-        operation: 'login',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    collection: { config: collectionConfig },
-    data,
-    depth,
-    overrideAccess,
-    req,
-    req: {
-      payload,
-      payload: { config, secret },
-    },
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection?.config,
+          context: args.req.context,
+          operation: 'login',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      collection: { config: collectionConfig },
+      data,
+      depth,
+      overrideAccess,
+      req,
+      req: {
+        payload,
+        payload: { config, secret },
+      },
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Login
@@ -262,7 +263,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

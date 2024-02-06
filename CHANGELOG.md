@@ -1,3 +1,27 @@
+## [2.10.0](https://github.com/payloadcms/payload/compare/v2.9.0...v2.10.0) (2024-02-06)
+
+
+### Features
+
+* add more options to addFieldStatePromise so that it can be used for field flattening ([#4799](https://github.com/payloadcms/payload/issues/4799)) ([8725d41](https://github.com/payloadcms/payload/commit/8725d411645bb0270376e235669f46be2227ecc0))
+* extend transactions to cover after and beforeOperation hooks ([#4960](https://github.com/payloadcms/payload/issues/4960)) ([1e8a6b7](https://github.com/payloadcms/payload/commit/1e8a6b7899f7b1e6451cc4d777602208478b483c))
+* previousValue and previousSiblingDoc args added to beforeChange field hooks ([#4958](https://github.com/payloadcms/payload/issues/4958)) ([5d934ba](https://github.com/payloadcms/payload/commit/5d934ba02d07d98f781ce983228858ee5ce5c226))
+* re-use existing logger instance passed to payload.init ([#3124](https://github.com/payloadcms/payload/issues/3124)) ([471d211](https://github.com/payloadcms/payload/commit/471d2113a790dc0d54b2f8ed84e6899310efd600))
+* **richtext-lexical:** Blocks: generate type definitions for blocks fields ([#4529](https://github.com/payloadcms/payload/issues/4529)) ([90d7ee3](https://github.com/payloadcms/payload/commit/90d7ee3e6535d51290fc734b284ff3811dbda1f8))
+* use deletion success message from server if provided ([#4966](https://github.com/payloadcms/payload/issues/4966)) ([e3c8105](https://github.com/payloadcms/payload/commit/e3c8105cc2ed6fdf8007d97cd7b5556fc71ed724))
+
+
+### Bug Fixes
+
+* **db-postgres:** filtering relationships with drafts enabled ([#4998](https://github.com/payloadcms/payload/issues/4998)) ([c3a3942](https://github.com/payloadcms/payload/commit/c3a39429697e9d335e9be199e7caafb82eb26219))
+* **db-postgres:** handle schema changes with supabase ([#4968](https://github.com/payloadcms/payload/issues/4968)) ([5d3659d](https://github.com/payloadcms/payload/commit/5d3659d48ad8bbf5d96fbcd80434d2287cab97e0))
+* **db-postgres:** indexes not created for non unique field names ([#4967](https://github.com/payloadcms/payload/issues/4967)) ([64f705c](https://github.com/payloadcms/payload/commit/64f705c3c94148972f67e8175e718015760d6430))
+* **db-postgres:** indexes not creating for relationships, arrays, hasmany and blocks ([#4976](https://github.com/payloadcms/payload/issues/4976)) ([47106d5](https://github.com/payloadcms/payload/commit/47106d5a1af2ebd073fbbc6e474174c3d3835e5c))
+* **db-postgres:** localized field sort count ([#4997](https://github.com/payloadcms/payload/issues/4997)) ([f3876c2](https://github.com/payloadcms/payload/commit/f3876c2a39efe19a1864213306725aadcc14f130))
+* ensures docPermissions fallback to collection permissions on create ([#4969](https://github.com/payloadcms/payload/issues/4969)) ([afa2b94](https://github.com/payloadcms/payload/commit/afa2b942e0aad90c55744ae13e0ffe1cefa4585d))
+* **migrations:** safely create migration file when no name passed ([#4995](https://github.com/payloadcms/payload/issues/4995)) ([0740d50](https://github.com/payloadcms/payload/commit/0740d5095ee1aef13e4e37f6b174d529f0f2d993))
+* **plugin-seo:** tabbedUI with email field causes duplicate field ([#4944](https://github.com/payloadcms/payload/issues/4944)) ([db22cbd](https://github.com/payloadcms/payload/commit/db22cbdf21a39ed0604ab96c57ca4242eac82ce7))
+
 ## [2.9.0](https://github.com/payloadcms/payload/compare/v2.8.2...v2.9.0) (2024-01-26)
 
 

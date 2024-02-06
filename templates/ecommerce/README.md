@@ -299,6 +299,14 @@ To seed the database with a few products and pages you can run `yarn seed`. This
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 
+
+### Conflicting routes
+
+>In a monorepo when routes are bootstrapped to the same host, they can conflict with Payload's own routes if they have the same name. In our template we've named the Nextjs API routes to `next` to avoid this conflict.
+>
+>This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.  
+>Alternatively you can also rename Payload's own routes via the [configuration](https://payloadcms.com/docs/configuration/overview).
+
 ## Production
 
 To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:

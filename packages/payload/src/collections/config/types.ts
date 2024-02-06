@@ -49,6 +49,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  req: PayloadRequest
 }) => any
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
