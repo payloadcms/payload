@@ -226,6 +226,40 @@ describe('Versions', () => {
         )
       })
 
+      // https://github.com/payloadcms/payload/issues/4827
+      it('should query drafts with relation', async () => {
+        const draftPost = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Some Title',
+            description: 'Description',
+          },
+        })
+
+        await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'With Relation',
+            description: 'Description',
+            relation: draftPost.id,
+          },
+        })
+
+        const query = {
+          collection: draftCollectionSlug,
+          where: {
+            relation: {
+              equals: draftPost.id,
+            },
+          },
+        }
+        const all = await payload.find(query)
+        const drafts = await payload.find({ ...query, draft: true })
+
+        expect(all.docs).toHaveLength(1)
+        expect(drafts.docs).toHaveLength(1)
+      })
+
       it('should `findVersions` with sort', async () => {
         const draftsAscending = await payload.findVersions({
           collection: draftCollectionSlug,
@@ -289,7 +323,7 @@ describe('Versions', () => {
           draft: true,
         })
 
-        // @ts-ignore
+        // @ts-expect-error
         let updatedPost = await payload.update({
           id: versionedPost.id,
           collection: draftCollectionSlug,
@@ -305,7 +339,7 @@ describe('Versions', () => {
           },
           draft: true,
         })
-        // @ts-ignore
+        // @ts-expect-error
         updatedPost = await payload.update({
           id: versionedPost.id,
           collection: draftCollectionSlug,
