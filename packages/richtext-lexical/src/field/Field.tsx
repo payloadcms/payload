@@ -77,7 +77,7 @@ const RichText: React.FC<FieldProps> = (props) => {
           <LexicalProvider
             editorConfig={editorConfig}
             fieldProps={props}
-            key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More Info in PR description
+            key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={(editorState) => {
               let serializedEditorState = editorState.toJSON()
 
