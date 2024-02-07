@@ -7,6 +7,7 @@ import {
   TabsField,
 } from 'payload/types'
 import { fieldTypes } from '../../forms/fields'
+import { Column } from '../../elements/Table/types'
 
 export type MappedTab = {
   name?: string
@@ -53,7 +54,7 @@ export type CollectionComponentMap = {
   BeforeListTable: React.ReactNode
   AfterListTable: React.ReactNode
   fieldMap: FieldMap
-  initialColumns: string[]
+  initialColumns: Pick<Column, 'accessor' | 'active'>[]
 }
 
 export type GlobalComponentMap = {

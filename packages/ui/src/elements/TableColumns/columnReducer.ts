@@ -1,5 +1,3 @@
-import { I18n } from '@payloadcms/translations'
-import type { SanitizedCollectionConfig, CellProps } from 'payload/types'
 import type { Column } from '../Table/types'
 
 type TOGGLE = {
@@ -11,10 +9,7 @@ type TOGGLE = {
 
 type SET = {
   payload: {
-    cellProps: Partial<CellProps>[]
-    collection: SanitizedCollectionConfig
-    columns: Pick<Column, 'accessor' | 'active'>[]
-    i18n: I18n
+    columns: Column[]
   }
   type: 'set'
 }
@@ -35,7 +30,7 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       const { column } = action.payload
 
       const withToggledColumn = state.map((col) => {
-        if (col.name === column) {
+        if (col?.name === column) {
           return {
             ...col,
             active: !col.active,
@@ -55,16 +50,8 @@ export const columnReducer = (state: Column[], action: Action): Column[] => {
       return withMovedColumn
     }
     case 'set': {
-      const { cellProps, collection, columns } = action.payload
-
-      return buildColumns({
-        cellProps,
-        // TODO: fix this
-        // @ts-ignore-next-line
-        collection,
-        i18n,
-        columns,
-      })
+      const { columns } = action.payload
+      return columns
     }
     default:
       return state

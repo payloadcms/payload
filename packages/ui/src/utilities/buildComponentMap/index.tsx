@@ -3,7 +3,6 @@ import type { FieldPermissions } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/types'
 import { mapFields } from './mapFields'
 import { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
-import { mapColumns } from './mapColumns'
 import { getInitialColumns } from './getInitialColumns'
 
 export const buildComponentMap = (args: {
