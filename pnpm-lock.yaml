@@ -543,15 +543,6 @@ importers:
       graphql-playground-html:
         specifier: 1.6.30
         version: 1.6.30
-      graphql-query-complexity:
-        specifier: 0.12.0
-        version: 0.12.0(graphql@16.8.1)
-      graphql-scalars:
-        specifier: 1.22.2
-        version: 1.22.2(graphql@16.8.1)
-      graphql-type-json:
-        specifier: 0.3.2
-        version: 0.3.2(graphql@16.8.1)
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -564,9 +555,6 @@ importers:
       path-to-regexp:
         specifier: ^6.2.1
         version: 6.2.1
-      pluralize:
-        specifier: 8.0.0
-        version: 8.0.0
       react-diff-viewer-continued:
         specifier: 3.2.6
         version: 3.2.6(react-dom@18.2.0)(react@18.2.0)
@@ -583,9 +571,6 @@ importers:
       sass:
         specifier: ^1.70.0
         version: 1.70.0
-      ts-essentials:
-        specifier: 7.0.3
-        version: 7.0.3(typescript@5.2.2)
 
   packages/payload:
     dependencies:

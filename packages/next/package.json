@@ -44,25 +44,20 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*",
-    "sass": "^1.70.0",
-    "ts-essentials": "7.0.3"
+    "sass": "^1.70.0"
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
+    "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:^",
     "@payloadcms/ui": "workspace:*",
-    "@payloadcms/graphql": "workspace:*",
     "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0",
     "deep-equal": "2.2.2",
     "graphql": "16.8.1",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
-    "graphql-query-complexity": "0.12.0",
-    "graphql-scalars": "1.22.2",
-    "graphql-type-json": "0.3.2",
     "path-to-regexp": "^6.2.1",
-    "pluralize": "8.0.0",
     "react-diff-viewer-continued": "3.2.6",
     "react-toastify": "8.2.0"
   },
