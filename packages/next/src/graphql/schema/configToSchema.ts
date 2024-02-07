@@ -161,8 +161,6 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
     }),
   ]
 
-  console.log('schema', Object.keys(graphqlResult.Query.fields))
-
   return {
     schema,
     validationRules,
