@@ -53,7 +53,7 @@ export const TableColumnsProvider: React.FC<{
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
     return initialColumns.map((columnPath) => {
       const field = getMappedFieldByPath({ path: columnPath, collectionSlug })
-      console.log(field, columnPath)
+
       if (field) {
         const column: Column = {
           accessor: columnPath,

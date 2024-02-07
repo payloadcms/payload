@@ -8,8 +8,8 @@ export interface CodeCellProps extends CellComponentProps<string> {
   nowrap?: boolean
 }
 
-export const CodeCell: React.FC<CodeCellProps> = ({ data, nowrap }) => {
-  const textToShow = data.length > 100 ? `${data.substring(0, 100)}\u2026` : data
+export const CodeCell: React.FC<CodeCellProps> = ({ cellData, nowrap }) => {
+  const textToShow = cellData.length > 100 ? `${cellData.substring(0, 100)}\u2026` : cellData
 
   const noWrapStyle: React.CSSProperties = nowrap ? { whiteSpace: 'nowrap' } : {}
 

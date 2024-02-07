@@ -1,6 +1,6 @@
 import type React from 'react'
 
-import type { FieldBase, SanitizedCollectionConfig } from 'payload/types'
+import type { FieldBase } from 'payload/types'
 
 export type Column = {
   accessor: string

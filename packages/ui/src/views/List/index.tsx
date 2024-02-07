@@ -120,7 +120,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
                 data={docs}
                 customCellContext={{
                   collectionSlug,
-                  isUploadCollection: Boolean(collectionConfig.upload),
+                  uploadConfig: collectionConfig.upload,
                 }}
               />
             </RelationshipProvider>

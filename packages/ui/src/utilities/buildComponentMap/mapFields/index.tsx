@@ -14,7 +14,6 @@ import DefaultLabel from '../../../forms/Label'
 import DefaultError from '../../../forms/Error'
 import DefaultDescription from '../../../forms/FieldDescription'
 import { HiddenInput } from '../../..'
-import { CodeCell } from '../../../views/List/Cell/fields/Code'
 
 export const mapFields = (args: {
   fieldSchema: FieldWithPath[]
@@ -233,6 +232,19 @@ export const mapFields = (args: {
           fieldType: field.type,
           isFieldAffectingData,
           name: 'name' in field ? field.name : undefined,
+          label:
+            'label' in field && field.label && typeof field.label !== 'function'
+              ? field.label
+              : undefined,
+          labels: 'labels' in field ? field.labels : undefined,
+          dateDisplayFormat: 'date' in field.admin ? field.admin.date.displayFormat : undefined,
+          blocks:
+            'blocks' in field &&
+            field.blocks.map((b) => ({
+              labels: b.labels,
+              slug: b.slug,
+            })),
+          options: 'options' in field ? field.options : undefined,
         }
 
         const reducedField: MappedField = {
@@ -253,8 +265,13 @@ export const mapFields = (args: {
                 fieldIsPresentationalOnly(field) ||
                 undefined
               }
-              // label={field.label || field.name}
-              label={'name' in field ? field.name : undefined}
+              label={
+                'label' in field && field.label && typeof field.label !== 'function'
+                  ? field.label
+                  : 'name' in field
+                  ? field.name
+                  : undefined
+              }
               name={'name' in field ? field.name : undefined}
             />
           ),
@@ -284,7 +301,7 @@ export const mapFields = (args: {
       type: 'text',
       Field: <HiddenInput name="id" />,
       Cell: <DefaultCell name="id" />,
-      Heading: <div>Heading</div>,
+      Heading: <SortColumn label="ID" name="id" />,
       fieldIsPresentational: false,
       fieldPermissions: {},
       isFieldAffectingData: true,

@@ -2,9 +2,8 @@
 import React from 'react'
 import Link from 'next/link' // TODO: abstract this out to support all routers
 
-import type { CodeField, CellComponentProps, CellProps } from 'payload/types'
+import type { CellComponentProps, CellProps } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
 import cellComponents from './fields'
 import { CodeCell } from './fields/Code'
@@ -13,7 +12,15 @@ import { useConfig } from '../../../providers/Config'
 import { useTableCell } from '../../../elements/Table/TableCellProvider'
 
 export const DefaultCell: React.FC<CellProps> = (props) => {
-  const { className, onClick, name, link: linkFromProps, fieldType, isFieldAffectingData } = props
+  const {
+    className,
+    onClick,
+    name,
+    link: linkFromProps,
+    fieldType,
+    isFieldAffectingData,
+    label,
+  } = props
 
   const { i18n } = useTranslation()
 
@@ -52,29 +59,24 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
   if (name === 'id') {
     return (
       <WrapElement {...wrapElementProps}>
-        <CodeCell data={`ID: ${cellData}`} nowrap />
+        <CodeCell cellData={`ID: ${cellData}`} nowrap />
       </WrapElement>
     )
   }
 
-  console.log('fieldType', fieldType, cellData)
   let CellComponent: React.FC<CellComponentProps> = cellData && cellComponents[fieldType]
 
   if (!CellComponent) {
-    if (customCellContext.isUploadCollection && isFieldAffectingData && name === 'filename') {
+    if (customCellContext.uploadConfig && isFieldAffectingData && name === 'filename') {
       CellComponent = cellComponents.File
     } else {
       return (
         <WrapElement {...wrapElementProps}>
-          {/* {(cellData === '' || typeof cellData === 'undefined') &&
-            'label' in field &&
-            typeof field.label === 'string' &&
+          {(cellData === '' || typeof cellData === 'undefined') &&
+            label &&
             i18n.t('general:noLabel', {
-              label: getTranslation(
-                typeof field.label === 'function' ? 'data' : field.label || 'data',
-                i18n,
-              ),
-            })} */}
+              label: getTranslation(label || 'data', i18n),
+            })}
           {typeof cellData === 'string' && cellData}
           {typeof cellData === 'number' && cellData}
           {typeof cellData === 'object' && JSON.stringify(cellData)}
@@ -85,7 +87,7 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
 
   return (
     <WrapElement {...wrapElementProps}>
-      <CellComponent data={cellData} />
+      <CellComponent cellData={cellData} rowData={rowData} customCellContext={customCellContext} />
     </WrapElement>
   )
 }

@@ -1,12 +1,15 @@
 'use client'
+import { CellComponentProps, SanitizedCollectionConfig } from 'payload/types'
 import React from 'react'
 
-const TableCellContext = React.createContext<{
+export type ITableCellContext = {
   rowData: any
   cellData: any
-  customCellContext: any
+  customCellContext: CellComponentProps['customCellContext']
   columnIndex?: number
-}>({} as any)
+}
+
+const TableCellContext = React.createContext<ITableCellContext>({} as ITableCellContext)
 
 export const TableCellProvider: React.FC<{
   cellData: any

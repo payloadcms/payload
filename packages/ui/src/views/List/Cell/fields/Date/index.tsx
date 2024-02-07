@@ -1,19 +1,24 @@
 'use client'
 import React from 'react'
 
-import type { CellComponentProps } from 'payload/types'
+import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { formatDate } from '../../../../../utilities/formatDate'
 import { useTranslation } from '../../../../../providers/Translation'
+import { useConfig } from '../../../../../providers/Config'
 
-export const DateCell: React.FC<CellComponentProps<any>> = ({ config, data, field }) => {
+export interface DateCellProps extends CellComponentProps<string> {
+  dateDisplayFormat?: CellProps['dateDisplayFormat']
+}
+
+export const DateCell: React.FC<DateCellProps> = ({ cellData, dateDisplayFormat }) => {
   const {
     admin: { dateFormat: dateFormatFromConfig },
-  } = config
+  } = useConfig()
 
   const { i18n } = useTranslation()
 
-  const dateFormat = field?.admin?.date?.displayFormat || dateFormatFromConfig
+  const dateFormat = dateDisplayFormat || dateFormatFromConfig
 
-  return <span>{data && formatDate(data, dateFormat, i18n.language)}</span>
+  return <span>{cellData && formatDate(cellData, dateFormat, i18n.language)}</span>
 }
