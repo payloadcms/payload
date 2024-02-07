@@ -1,25 +1,25 @@
 /* eslint-disable no-param-reassign */
 import * as GraphQL from 'graphql'
-import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { OperationArgs } from 'graphql-http'
 
-import queryComplexity, {
+import {
   fieldExtensionsEstimator,
   simpleEstimator,
+  createComplexityRule,
 } from 'graphql-query-complexity'
 
 import type { GraphQLInfo } from 'payload/config'
 import type { SanitizedConfig } from 'payload/types'
-import accessResolver from '../resolvers/auth/access'
-import initCollections from '../initCollections'
-import initGlobals from '../initGlobals'
-import buildFallbackLocaleInputType from './buildFallbackLocaleInputType'
-import buildLocaleInputType from './buildLocaleInputType'
-import buildPoliciesType from './buildPoliciesType'
-import { wrapCustomFields } from '../utilities/wrapCustomResolver'
+import accessResolver from './resolvers/auth/access'
+import initCollections from './schema/initCollections'
+import initGlobals from './schema/initGlobals'
+import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType'
+import buildLocaleInputType from './schema/buildLocaleInputType'
+import buildPoliciesType from './schema/buildPoliciesType'
+import { wrapCustomFields } from './utilities/wrapCustomResolver'
 
 export async function configToSchema(config: SanitizedConfig): Promise<{
-  schema: GraphQLSchema
+  schema: GraphQL.GraphQLSchema
   validationRules: (args: OperationArgs<any>) => GraphQL.ValidationRule[]
 }> {
   const collections = config.collections.reduce((acc, collection) => {
@@ -97,24 +97,24 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
     }
   }
 
-  const query = new GraphQLObjectType(graphqlResult.Query)
-  const mutation = new GraphQLObjectType(graphqlResult.Mutation)
+  const query = new GraphQL.GraphQLObjectType(graphqlResult.Query)
+  const mutation = new GraphQL.GraphQLObjectType(graphqlResult.Mutation)
 
   const schemaToCreate = {
     mutation,
     query,
   }
 
-  const schema = new GraphQLSchema(schemaToCreate)
+  const schema = new GraphQL.GraphQLSchema(schemaToCreate)
 
-  const validationRules = ({ variableValues }) => [
-    queryComplexity({
+  const validationRules = (args) => [
+    createComplexityRule({
       estimators: [
         fieldExtensionsEstimator(),
         simpleEstimator({ defaultComplexity: 1 }), // Fallback if complexity not set
       ],
       maximumComplexity: config.graphQL.maxComplexity,
-      variables: variableValues,
+      variables: args.variableValues,
       // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
     }),
   ]

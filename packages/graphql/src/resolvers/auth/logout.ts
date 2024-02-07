@@ -1,8 +1,8 @@
 import { logoutOperation } from 'payload/operations'
+import { generateExpiredPayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
 import { isolateObjectProperty } from 'payload/utilities'
-import { generateExpiredPayloadCookie } from '../../../utilities/cookies'
 import { Context } from '../types'
 
 function logoutResolver(collection: Collection): any {

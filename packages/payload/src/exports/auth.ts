@@ -1,5 +1,7 @@
+export * from '../auth'
 export { getAccessResults } from '../auth/getAccessResults'
 export { getAuthenticatedUser } from '../auth/getAuthenticatedUser'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,

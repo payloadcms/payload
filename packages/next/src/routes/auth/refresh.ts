@@ -1,7 +1,7 @@
-import { extractJWT } from '../../utilities/jwt'
+import { extractJWT } from 'payload/auth'
 import { refreshOperation } from 'payload/operations'
 import httpStatus from 'http-status'
-import { generatePayloadCookie } from '../../utilities/cookies'
+import { generatePayloadCookie } from 'payload/auth'
 import { CollectionRouteHandler } from '../types'
 
 export const refresh: CollectionRouteHandler = async ({ req, collection }) => {

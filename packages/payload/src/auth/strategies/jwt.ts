@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 
 import type { AuthStrategyFunction, User } from '..'
 
-import { extractJWT } from '../getExtractJWT'
+import { extractJWT } from '../extractJWT'
 
 type JWTToken = {
   collection: string

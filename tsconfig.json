@@ -34,6 +34,7 @@
     // if your tsconfig is something different
     { "path": "./packages/db-mongodb" },
     { "path": "./packages/db-postgres" },
+    { "path": "./packages/graphql" },
     { "path": "./packages/live-preview" },
     { "path": "./packages/live-preview-react" },
     { "path": "./packages/next" },

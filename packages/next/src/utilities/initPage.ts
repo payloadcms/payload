@@ -9,7 +9,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 import { redirect } from 'next/navigation'
-import { parseCookies } from './cookies'
+import { parseCookies } from 'payload/auth'
 import { getNextI18n } from './getNextI18n'
 import { getRequestLanguage } from './getRequestLanguage'
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'

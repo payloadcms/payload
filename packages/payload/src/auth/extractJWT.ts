@@ -3,7 +3,7 @@ import type { AuthStrategyFunctionArgs } from '.'
 import { parseCookies } from '../utilities/parseCookies'
 
 export const extractJWT = (
-  args: Pick<AuthStrategyFunctionArgs, 'headers' | 'payload'>,
+  args: Pick<AuthStrategyFunctionArgs, 'cookies' | 'headers' | 'payload'>,
 ): null | string => {
   const { headers, payload } = args
 
