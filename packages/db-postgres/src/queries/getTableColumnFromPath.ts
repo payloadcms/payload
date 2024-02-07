@@ -44,6 +44,10 @@ type Args = {
   rootTableName?: string
   selectFields: Record<string, GenericColumn>
   tableName: string
+  /**
+   * If creating a new table name for arrays and blocks, this suffix should be appended to the table name
+   */
+  tableNameSuffix?: string
 }
 /**
  * Transforms path to table and column name
@@ -65,6 +69,7 @@ export const getTableColumnFromPath = ({
   rootTableName: incomingRootTableName,
   selectFields,
   tableName,
+  tableNameSuffix = '',
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
@@ -125,6 +130,7 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix,
         })
       }
       case 'tab': {
@@ -144,6 +150,7 @@ export const getTableColumnFromPath = ({
             rootTableName,
             selectFields,
             tableName: newTableName,
+            tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
           })
         }
         return getTableColumnFromPath({
@@ -161,6 +168,7 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix,
         })
       }
 
@@ -195,11 +203,12 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
         })
       }
 
       case 'array': {
-        newTableName = `${tableName}_${toSnakeCase(field.name)}`
+        newTableName = `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
