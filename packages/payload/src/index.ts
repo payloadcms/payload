@@ -1,5 +1,5 @@
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
-import type { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler'
+import type { OperationArgs, Request as graphQLRequest } from 'graphql-http'
 import type { SendMailOptions } from 'nodemailer'
 import type pino from 'pino'
 
@@ -338,7 +338,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       }
     })
 
-    this.db = this.config.db({ payload: this })
+    this.db = this.config.db.init({ payload: this })
     this.db.payload = this
 
     if (this.db?.init) {

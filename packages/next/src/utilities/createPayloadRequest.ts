@@ -72,7 +72,6 @@ export const createPayloadRequest = async ({
     payload,
     user: null,
     context: {},
-    collection,
     payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
     data,
     locale: requestLocale,

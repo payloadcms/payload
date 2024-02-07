@@ -1,9 +1,9 @@
-import type { PayloadRequest } from 'payload/types'
 import { initOperation } from 'payload/operations'
+import { CollectionRouteHandler } from '../types'
 
-export const init = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const init: CollectionRouteHandler = async ({ req, collection }) => {
   const initialized = await initOperation({
-    collection: req.collection.config.slug,
+    collection: collection.config.slug,
     req,
   })
 
