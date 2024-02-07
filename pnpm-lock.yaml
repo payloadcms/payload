@@ -449,6 +449,40 @@ importers:
         specifier: 1.15.0
         version: 1.15.0(eslint@8.48.0)
 
+  packages/graphql:
+    dependencies:
+      graphql:
+        specifier: ^16.8.1
+        version: 16.8.1
+      graphql-http:
+        specifier: ^1.22.0
+        version: 1.22.0(graphql@16.8.1)
+      graphql-playground-html:
+        specifier: 1.6.30
+        version: 1.6.30
+      graphql-query-complexity:
+        specifier: 0.12.0
+        version: 0.12.0(graphql@16.8.1)
+      graphql-scalars:
+        specifier: 1.22.2
+        version: 1.22.2(graphql@16.8.1)
+      graphql-type-json:
+        specifier: 0.3.2
+        version: 0.3.2(graphql@16.8.1)
+      pluralize:
+        specifier: 8.0.0
+        version: 8.0.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.2.2)
+
   packages/live-preview:
     devDependencies:
       '@payloadcms/eslint-config':
@@ -482,6 +516,9 @@ importers:
       '@faceless-ui/modal':
         specifier: 2.0.1
         version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
+      '@payloadcms/graphql':
+        specifier: workspace:*
+        version: link:../graphql
       '@payloadcms/translations':
         specifier: workspace:^
         version: link:../translations
@@ -576,6 +613,9 @@ importers:
       find-up:
         specifier: 4.1.0
         version: 4.1.0
+      get-tsconfig:
+        specifier: ^4.7.2
+        version: 4.7.2
       http-status:
         specifier: 1.6.2
         version: 1.6.2

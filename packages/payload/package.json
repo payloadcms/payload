@@ -54,6 +54,7 @@
     "deepmerge": "4.3.1",
     "file-type": "16.5.4",
     "find-up": "4.1.0",
+    "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
     "is-plain-object": "5.0.0",
     "json-schema-to-typescript": "11.0.3",

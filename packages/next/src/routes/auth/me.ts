@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { meOperation } from 'payload/operations'
-import { extractJWT } from '../../utilities/jwt'
+import { extractJWT } from 'payload/auth'
 import { CollectionRouteHandler } from '../types'
 
 export const me: CollectionRouteHandler = async ({ req, collection }) => {

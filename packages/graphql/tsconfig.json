@@ -6,12 +6,6 @@
     "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "paths": {
-      "payload-config": ["./src/config.ts"],
-      "@payloadcms/graphql": ["../graphql/dist/index.ts"],
-      "@payloadcms/ui": ["../ui/src/exports/index.ts"],
-      "@payloadcms/translations/*": ["../translations/dist/*"]
-    },
     "allowImportingTsExtensions": true
   },
   "exclude": [
@@ -26,20 +20,6 @@
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx"
   ],
-  "include": [
-    "src/translations/*.json",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts",
-    "src/**/*.json",
-    "../ui/src/createClientConfig.ts",
-    "../dev/src/app/(payload)/admin/login/action.ts",
-    "../payload/src/auth/cookies.ts"
-  ],
-  "references": [
-    { "path": "../payload" },
-    { "path": "../ui" },
-    { "path": "../translations" },
-    { "path": "../graphql" }
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "references": [{ "path": "../payload" }]
 }

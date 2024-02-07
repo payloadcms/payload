@@ -1,39 +1,35 @@
-import { refreshOperation } from 'payload/operations'
+import { loginOperation } from 'payload/operations'
+import { generatePayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
-import { extractJWT } from '../../../utilities/jwt'
-import { generatePayloadCookie } from '../../../utilities/cookies'
 import { Context } from '../types'
 
-function refreshResolver(collection: Collection) {
+function loginResolver(collection: Collection) {
   async function resolver(_, args, context: Context) {
-    let token
-
-    token = extractJWT(context.req)
-
-    if (args.token) {
-      token = args.token
-    }
-
     const options = {
       collection,
+      data: {
+        email: args.email,
+        password: args.password,
+      },
       depth: 0,
       req: isolateTransactionID(context.req),
-      token,
     }
 
-    const result = await refreshOperation(options)
+    const result = await loginOperation(options)
     const cookie = generatePayloadCookie({
-      token: result.refreshedToken,
+      token: result.token,
       payload: context.req.payload,
       collectionConfig: collection.config,
     })
+
     context.headers['Set-Cookie'] = cookie
+
     return result
   }
 
   return resolver
 }
 
-export default refreshResolver
+export default loginResolver

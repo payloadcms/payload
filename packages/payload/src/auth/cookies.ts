@@ -1,5 +1,5 @@
-import type { Payload, SanitizedCollectionConfig } from 'payload/types'
-
+import type { Payload } from '..'
+import type { SanitizedCollectionConfig } from './../collections/config/types'
 type CookieOptions = {
   domain?: string
   expires?: Date

@@ -51,6 +51,7 @@
     "@faceless-ui/modal": "2.0.1",
     "@payloadcms/translations": "workspace:^",
     "@payloadcms/ui": "workspace:*",
+    "@payloadcms/graphql": "workspace:*",
     "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0",
     "deep-equal": "2.2.2",

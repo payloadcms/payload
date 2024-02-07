@@ -7,12 +7,11 @@ import type {
 import { getAuthenticatedUser } from 'payload/auth'
 import { getPayload } from 'payload'
 import { URL } from 'url'
-import { parseCookies } from './cookies'
+import { parseCookies } from 'payload/auth'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
 import { getNextI18n } from './getNextI18n'
 import { getDataAndFile } from './getDataAndFile'
-import { registerGraphQLSchema } from '../graphql/registerSchema'
 
 type Args = {
   request: Request

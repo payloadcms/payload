@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 
 import { resetPasswordOperation } from 'payload/operations'
-import { generatePayloadCookie } from '../../utilities/cookies'
+import { generatePayloadCookie } from 'payload/auth'
 import { CollectionRouteHandler } from '../types'
 
 export const resetPassword: CollectionRouteHandler = async ({ req, collection }) => {

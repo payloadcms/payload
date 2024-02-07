@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { registerFirstUserOperation } from 'payload/operations'
-import { generatePayloadCookie } from '../../utilities/cookies'
+import { generatePayloadCookie } from 'payload/auth'
 import { CollectionRouteHandler } from '../types'
 
 export const registerFirstUser: CollectionRouteHandler = async ({ req, collection }) => {

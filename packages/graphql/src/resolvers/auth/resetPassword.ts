@@ -1,8 +1,8 @@
 import { resetPasswordOperation } from 'payload/operations'
+import { generatePayloadCookie } from 'payload/auth'
 import type { Collection } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
-import { generatePayloadCookie } from '../../../utilities/cookies'
 import { Context } from '../types'
 
 function resetPasswordResolver(collection: Collection) {

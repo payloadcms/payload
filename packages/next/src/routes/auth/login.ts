@@ -1,7 +1,7 @@
 import httpStatus from 'http-status'
 import { loginOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
-import { generatePayloadCookie } from '../../utilities/cookies'
+import { generatePayloadCookie } from 'payload/auth'
 import { CollectionRouteHandler } from '../types'
 
 export const login: CollectionRouteHandler = async ({ req, collection }) => {

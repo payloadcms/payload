@@ -1,9 +1,9 @@
 import { updateOperationGlobal } from 'payload/operations'
 import type { DeepPartial } from 'ts-essentials'
+import type { GeneratedTypes } from 'payload'
 import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
-import type { GeneratedTypes } from 'payload'
 import { Context } from '../types'
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (

@@ -1,6 +1,6 @@
 import httpStatus from 'http-status'
 import { logoutOperation } from 'payload/operations'
-import { generateExpiredPayloadCookie } from '../../utilities/cookies'
+import { generateExpiredPayloadCookie } from 'payload/auth'
 import { CollectionRouteHandler } from '../types'
 
 export const logout: CollectionRouteHandler = async ({ req, collection }) => {
