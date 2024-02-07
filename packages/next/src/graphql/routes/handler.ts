@@ -42,21 +42,50 @@ const handleError = async (
   return response
 }
 
+let cached = global._payload_graphql
+
+if (!cached) {
+  // eslint-disable-next-line no-multi-assign
+  cached = global._payload_graphql = { graphql: null, promise: null }
+}
+
+export const getGraphql = async () => {
+  if (cached.graphql) {
+    return cached.graphql
+  }
+
+  if (!cached.promise) {
+    cached.promise = new Promise(async (resolve) => {
+      const resolvedConfig = await config
+      const schema = await configToSchema(resolvedConfig)
+      resolve(schema)
+    })
+  }
+
+  try {
+    cached.graphql = await cached.promise
+  } catch (e) {
+    cached.promise = null
+    throw e
+  }
+
+  return cached.graphql
+}
+
 export const POST = async (request: Request) => {
   const originalRequest = request.clone()
   const req = await createPayloadRequest({
     request,
     config,
   })
-  const resolvedConfig = await config
-  const mySchema = await configToSchema(resolvedConfig)
+  const { schema, validationRules } = await getGraphql()
 
   const { payload } = req
-  const headers = new Headers()
 
   const afterErrorHook =
     typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
 
+  const headers = {}
   const apiResponse = await createHandler({
     context: { req, headers },
     onOperation: async (request, args, result) => {
@@ -79,16 +108,12 @@ export const POST = async (request: Request) => {
       }
       return response
     },
-    schema: mySchema.schema,
-    validationRules: (request, args, defaultRules) =>
-      defaultRules.concat(mySchema.validationRules(args)),
+    schema: schema,
+    validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
   })(originalRequest)
 
   return new Response(apiResponse.body, {
     status: apiResponse.status,
-    headers: {
-      ...apiResponse.headers,
-      ...headers,
-    },
+    headers: new Headers(headers),
   })
 }

@@ -3,9 +3,10 @@ import type { Collection } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
 import { generatePayloadCookie } from '../../../utilities/cookies'
+import { Context } from '../types'
 
 function resetPasswordResolver(collection: Collection) {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     if (args.locale) context.req.locale = args.locale
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
@@ -21,9 +22,9 @@ function resetPasswordResolver(collection: Collection) {
     const cookie = generatePayloadCookie({
       token: result.token,
       payload: context.req.payload,
-      collectionConfig: context.req.collection.config,
+      collectionConfig: collection.config,
     })
-    context.headers.set('Set-Cookie', cookie)
+    context.headers['Set-Cookie'] = cookie
     return result
   }
 

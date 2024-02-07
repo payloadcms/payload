@@ -1,13 +1,15 @@
 /* eslint-disable no-param-reassign */
 import * as GraphQL from 'graphql'
-import { GraphQLObjectType, GraphQLSchema, GraphQLEnumType, GraphQLNonNull } from 'graphql'
-import type { GraphQLScalarType, ValidationRule } from 'graphql'
+import { GraphQLObjectType, GraphQLSchema } from 'graphql'
+import { OperationArgs } from 'graphql-http'
 
 import queryComplexity, {
   fieldExtensionsEstimator,
   simpleEstimator,
 } from 'graphql-query-complexity'
 
+import type { GraphQLInfo } from 'payload/config'
+import type { SanitizedConfig } from 'payload/types'
 import accessResolver from '../resolvers/auth/access'
 import initCollections from '../initCollections'
 import initGlobals from '../initGlobals'
@@ -15,58 +17,10 @@ import buildFallbackLocaleInputType from './buildFallbackLocaleInputType'
 import buildLocaleInputType from './buildLocaleInputType'
 import buildPoliciesType from './buildPoliciesType'
 import { wrapCustomFields } from '../utilities/wrapCustomResolver'
-import { Collection, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
-import { OperationArgs } from 'graphql-http'
-
-/*
- * Actually Need:
- * - config
- * - db
- * - collections
- * - types
- * - Query
- * - Mutation
- */
-
-export type Result = {
-  types: {
-    arrayTypes: Record<string, GraphQL.GraphQLType>
-    blockInputTypes: Record<string, GraphQL.GraphQLInputObjectType>
-    blockTypes: Record<string, GraphQL.GraphQLObjectType>
-    groupTypes: Record<string, GraphQL.GraphQLObjectType>
-    tabTypes: Record<string, GraphQL.GraphQLObjectType>
-    localeInputType?: GraphQLEnumType | GraphQLScalarType
-    fallbackLocaleInputType?: GraphQLEnumType | GraphQLScalarType
-  }
-  Query: {
-    name: string
-    fields: Record<string, any>
-  }
-  Mutation: {
-    name: string
-    fields: Record<string, any>
-  }
-  collections: {
-    [slug: number | string | symbol]: Collection
-  }
-  globals: {
-    config: SanitizedGlobalConfig[]
-    graphQL?:
-      | {
-          [slug: string]: {
-            mutationInputType: GraphQLNonNull<any>
-            type: GraphQLObjectType
-            versionType?: GraphQLObjectType
-          }
-        }
-      | false
-  }
-  defaultIDType: 'text' | 'number'
-}
 
 export async function configToSchema(config: SanitizedConfig): Promise<{
   schema: GraphQLSchema
-  validationRules: (args: OperationArgs<any>) => ValidationRule[]
+  validationRules: (args: OperationArgs<any>) => GraphQL.ValidationRule[]
 }> {
   const collections = config.collections.reduce((acc, collection) => {
     acc[collection.slug] = {
@@ -80,7 +34,7 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
     config: config.globals,
   }
 
-  let graphqlResult: Result = {
+  let graphqlResult: GraphQLInfo = {
     types: {
       arrayTypes: {},
       blockInputTypes: {},
@@ -98,8 +52,6 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
     },
     collections,
     globals,
-    // TODO: This needs to be determined by the db adapter
-    defaultIDType: 'text',
   }
 
   if (config.localization) {
@@ -118,7 +70,10 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
   }
 
   if (typeof config.graphQL.queries === 'function') {
-    const customQueries = config.graphQL.queries(GraphQL, config)
+    const customQueries = config.graphQL.queries(GraphQL, {
+      ...graphqlResult,
+      config,
+    })
     graphqlResult.Query = {
       ...graphqlResult.Query,
       fields: {
@@ -129,7 +84,10 @@ export async function configToSchema(config: SanitizedConfig): Promise<{
   }
 
   if (typeof config.graphQL.mutations === 'function') {
-    const customMutations = config.graphQL.mutations(GraphQL, config)
+    const customMutations = config.graphQL.mutations(GraphQL, {
+      ...graphqlResult,
+      config,
+    })
     graphqlResult.Mutation = {
       ...graphqlResult.Mutation,
       fields: {

@@ -1,10 +1,11 @@
 import type { Payload } from 'payload'
+import type { DatabaseAdapterObj } from 'payload/database'
 
 import fs from 'fs'
 import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
-import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
+import type { Args, PostgresAdapter } from './types'
 
 import { connect } from './connect'
 import { create } from './create'
@@ -39,7 +40,7 @@ import { updateVersion } from './updateVersion'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types'
 
-export function postgresAdapter(args: Args): PostgresAdapterResult {
+export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
 
@@ -95,7 +96,10 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     })
   }
 
-  return adapter
+  return {
+    defaultIDType: 'number',
+    init: adapter,
+  }
 }
 
 /**

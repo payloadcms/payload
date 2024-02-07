@@ -18,8 +18,10 @@ import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 /* eslint-disable no-use-before-define */
 import { GraphQLJSON } from 'graphql-type-json'
 
-import type { RichTextAdapter, SanitizedConfig } from 'payload/types'
+import type { GraphQLInfo } from 'payload/config'
 import type {
+  RichTextAdapter,
+  SanitizedConfig,
   ArrayField,
   BlockField,
   CheckboxField,
@@ -51,7 +53,7 @@ import formatOptions from '../utilities/formatOptions'
 import buildWhereInputType from './buildWhereInputType'
 import isFieldNullable from './isFieldNullable'
 import withNullableType from './withNullableType'
-import { Result } from './configToSchema'
+import { Context } from '../resolvers/types'
 
 type LocaleInputType = {
   fallbackLocale: {
@@ -75,7 +77,7 @@ type Args = {
   forceNullable?: boolean
   name: string
   parentName: string
-  graphqlResult: Result
+  graphqlResult: GraphQLInfo
   config: SanitizedConfig
 }
 
@@ -339,7 +341,7 @@ function buildObjectType({
       const relationship = {
         args: relationshipArgs,
         extensions: { complexity: 10 },
-        async resolve(parent, args, context) {
+        async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
@@ -457,7 +459,7 @@ function buildObjectType({
             type: GraphQLInt,
           },
         },
-        async resolve(parent, args, context) {
+        async resolve(parent, args, context: Context) {
           let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
           const editor: RichTextAdapter = field?.editor
@@ -586,7 +588,7 @@ function buildObjectType({
       const upload = {
         args: uploadArgs,
         extensions: { complexity: 20 },
-        async resolve(parent, args, context) {
+        async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale

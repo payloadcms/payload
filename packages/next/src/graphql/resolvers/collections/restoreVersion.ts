@@ -3,6 +3,7 @@ import type { PayloadRequest } from 'payload/types'
 import type { Collection } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { Context } from '../types'
 
 export type Resolver = (
   _: unknown,
@@ -15,7 +16,7 @@ export type Resolver = (
 ) => Promise<Document>
 
 export default function restoreVersionResolver(collection: Collection): Resolver {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     const options = {
       id: args.id,
       collection,

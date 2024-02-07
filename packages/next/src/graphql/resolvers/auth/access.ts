@@ -3,6 +3,7 @@ import type { SanitizedConfig } from 'payload/types'
 
 import formatName from '../../utilities/formatName'
 import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { Context } from '../types'
 
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results }
@@ -17,7 +18,7 @@ const formatConfigNames = (results, configs) => {
 }
 
 function accessResolver(config: SanitizedConfig) {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     const options = {
       req: isolateTransactionID(context.req),
     }
@@ -26,8 +27,8 @@ function accessResolver(config: SanitizedConfig) {
 
     return {
       ...accessResults,
-      ...formatConfigNames(accessResults.collections, context.req.payload.config.collections),
-      ...formatConfigNames(accessResults.globals, context.req.payload.config.globals),
+      ...formatConfigNames(accessResults.collections, config.collections),
+      ...formatConfigNames(accessResults.globals, config.globals),
     }
   }
 

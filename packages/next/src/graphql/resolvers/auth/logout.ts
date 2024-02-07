@@ -3,9 +3,10 @@ import type { Collection } from 'payload/types'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
 import { generateExpiredPayloadCookie } from '../../../utilities/cookies'
+import { Context } from '../types'
 
 function logoutResolver(collection: Collection): any {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     const options = {
       collection,
       req: isolateTransactionID(context.req),
@@ -13,10 +14,10 @@ function logoutResolver(collection: Collection): any {
 
     const result = await logoutOperation(options)
     const expiredCookie = generateExpiredPayloadCookie({
-      collectionConfig: context.req.collection.config,
+      collectionConfig: collection.config,
       payload: context.req.payload,
     })
-    context.headers.set('Set-Cookie', expiredCookie)
+    context.headers['Set-Cookie'] = expiredCookie
     return result
   }
 
