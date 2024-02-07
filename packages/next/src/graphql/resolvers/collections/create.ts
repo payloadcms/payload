@@ -4,7 +4,8 @@ import type { GeneratedTypes } from 'payload'
 import type { PayloadRequest } from 'payload/types'
 import type { Collection } from 'payload/types'
 
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
@@ -24,7 +25,7 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
 export default function createResolver<TSlug extends keyof GeneratedTypes['collections']>(
   collection: Collection,
 ): Resolver<TSlug> {
-  return async function resolver(_, args, context) {
+  return async function resolver(_, args, context: Context) {
     if (args.locale) {
       context.req.locale = args.locale
     }

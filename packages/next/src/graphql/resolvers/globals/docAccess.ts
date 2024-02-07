@@ -3,6 +3,7 @@ import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 import type { CollectionPermission, GlobalPermission } from 'payload/auth'
 
 import isolateTransactionID from '../../utilities/isolateTransactionID'
+import { Context } from '../types'
 
 export type Resolver = (
   _: unknown,
@@ -12,7 +13,7 @@ export type Resolver = (
 ) => Promise<CollectionPermission | GlobalPermission>
 
 export function docAccessResolver(global: SanitizedGlobalConfig): Resolver {
-  async function resolver(_, context) {
+  async function resolver(_, context: Context) {
     return docAccessOperationGlobal({
       globalConfig: global,
       req: isolateTransactionID(context.req),

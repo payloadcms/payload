@@ -1,7 +1,7 @@
 import type { TransactionOptions } from 'mongodb'
 import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
 import type { Payload } from 'payload'
-import type { BaseDatabaseAdapter } from 'payload/database'
+import type { BaseDatabaseAdapter, DatabaseAdapterObj } from 'payload/database'
 
 import fs from 'fs'
 import mongoose from 'mongoose'
@@ -68,8 +68,6 @@ export type MongooseAdapter = BaseDatabaseAdapter &
     }
   }
 
-type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
-
 declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<BaseDatabaseAdapter, 'sessions'>,
@@ -95,7 +93,7 @@ export function mongooseAdapter({
   migrationDir: migrationDirArg,
   transactionOptions = {},
   url,
-}: Args): MongooseAdapterResult {
+}: Args): DatabaseAdapterObj<MongooseAdapter> {
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(migrationDirArg)
     mongoose.set('strictQuery', false)
@@ -148,7 +146,10 @@ export function mongooseAdapter({
     })
   }
 
-  return adapter
+  return {
+    defaultIDType: 'text',
+    init: adapter,
+  }
 }
 
 /**

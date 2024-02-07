@@ -3,7 +3,8 @@ import type { PayloadRequest } from 'payload/types'
 import type { TypeWithVersion } from 'payload/versions'
 import type { Collection, TypeWithID } from 'payload/types'
 
-import isolateObjectProperty from '../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
@@ -19,7 +20,7 @@ export type Resolver<T extends TypeWithID = any> = (
 ) => Promise<TypeWithVersion<T>>
 
 export default function findVersionByIDResolver(collection: Collection): Resolver {
-  return async function resolver(_, args, context) {
+  return async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
@@ -33,7 +34,7 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
       collection,
       depth: 0,
       draft: args.draft,
-      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
+      req: isolateObjectProperty(req, 'transactionID'),
     }
 
     const result = await findVersionByIDOperation(options)

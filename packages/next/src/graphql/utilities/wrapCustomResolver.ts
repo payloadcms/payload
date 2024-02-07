@@ -3,7 +3,7 @@ import type { GraphQLFieldConfig, GraphQLFieldResolver } from 'graphql/type/defi
 
 import type { PayloadRequest } from 'payload/types'
 
-import isolateObjectProperty from '../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
 
 type PayloadContext = { req: PayloadRequest }
 

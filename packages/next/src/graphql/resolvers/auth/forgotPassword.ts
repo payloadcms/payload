@@ -1,10 +1,11 @@
 import { forgotPasswordOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 function forgotPasswordResolver(collection: Collection): any {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     const options = {
       collection,
       data: {
@@ -12,7 +13,7 @@ function forgotPasswordResolver(collection: Collection): any {
       },
       disableEmail: args.disableEmail,
       expiration: args.expiration,
-      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     await forgotPasswordOperation(options)

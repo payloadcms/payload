@@ -27,6 +27,7 @@ export { default as getUniqueListBy } from '../utilities/getUniqueListBy'
 export { isNumber } from '../utilities/isNumber'
 
 export { isValidID } from '../utilities/isValidID'
+export { default as isolateObjectProperty } from '../utilities/isolateObjectProperty'
 export { setsAreEqual } from '../utilities/setsAreEqual'
 export { splitPathByArrayFields } from '../utilities/splitPathByArrayFields'
 export { default as toKebabCase } from '../utilities/toKebabCase'

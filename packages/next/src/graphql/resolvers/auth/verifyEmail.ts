@@ -1,10 +1,11 @@
 import { verifyEmailOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 function verifyEmailResolver(collection: Collection) {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     if (args.locale) context.req.locale = args.locale
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 

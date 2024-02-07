@@ -3,7 +3,8 @@ import type { PayloadRequest, Where } from 'payload/types'
 import type { PaginatedDocs } from 'payload/database'
 import type { Collection } from 'payload/types'
 
-import isolateObjectProperty from '../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 export type Resolver = (
   _: unknown,
@@ -21,7 +22,7 @@ export type Resolver = (
 ) => Promise<PaginatedDocs<any>>
 
 export default function findVersionsResolver(collection: Collection): Resolver {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
@@ -35,7 +36,7 @@ export default function findVersionsResolver(collection: Collection): Resolver {
       depth: 0,
       limit: args.limit,
       page: args.page,
-      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
+      req: isolateObjectProperty(req, 'transactionID'),
       sort: args.sort,
       where: args.where,
     }

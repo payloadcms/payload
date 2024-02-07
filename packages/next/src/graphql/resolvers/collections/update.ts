@@ -3,7 +3,8 @@ import type { GeneratedTypes } from 'payload'
 import type { PayloadRequest } from 'payload/types'
 import type { Collection } from 'payload/types'
 
-import isolateObjectProperty from '../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
@@ -22,7 +23,7 @@ export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
 export default function updateResolver<TSlug extends keyof GeneratedTypes['collections']>(
   collection: Collection,
 ): Resolver<TSlug> {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     let { req } = context
     const locale = req.locale
     const fallbackLocale = req.fallbackLocale
@@ -38,7 +39,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
+      req: isolateObjectProperty(req, 'transactionID'),
     }
 
     const result = await updateByIDOperation<TSlug>(options)

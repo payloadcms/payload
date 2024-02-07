@@ -2,8 +2,9 @@ import { updateOperationGlobal } from 'payload/operations'
 import type { DeepPartial } from 'ts-essentials'
 import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
-import isolateObjectProperty from '../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
 import type { GeneratedTypes } from 'payload'
+import { Context } from '../types'
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   _: unknown,
@@ -21,7 +22,7 @@ type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
 export default function updateResolver<TSlug extends keyof GeneratedTypes['globals']>(
   globalConfig: SanitizedGlobalConfig,
 ): Resolver<TSlug> {
-  return async function resolver(_, args, context) {
+  return async function resolver(_, args, context: Context) {
     if (args.locale) context.req.locale = args.locale
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
@@ -33,7 +34,7 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
       depth: 0,
       draft: args.draft,
       globalConfig,
-      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     const result = await updateOperationGlobal<TSlug>(options)

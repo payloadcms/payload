@@ -1,7 +1,8 @@
 import { findVersionsOperationGlobal } from 'payload/operations'
 import type { Document, PayloadRequest, SanitizedGlobalConfig, Where } from 'payload/types'
 
-import isolateObjectProperty from '../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 export type Resolver = (
   _: unknown,
@@ -19,13 +20,13 @@ export type Resolver = (
 ) => Promise<Document>
 
 export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig): Resolver {
-  return async function resolver(_, args, context) {
+  return async function resolver(_, args, context: Context) {
     const options = {
       depth: 0,
       globalConfig,
       limit: args.limit,
       page: args.page,
-      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
+      req: isolateObjectProperty(context.req, 'transactionID'),
       sort: args.sort,
       where: args.where,
     }

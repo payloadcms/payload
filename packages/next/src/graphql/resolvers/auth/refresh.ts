@@ -2,11 +2,12 @@ import { refreshOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
 import { extractJWT } from '../../../utilities/jwt'
-import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
 import { generatePayloadCookie } from '../../../utilities/cookies'
+import { Context } from '../types'
 
 function refreshResolver(collection: Collection) {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     let token
 
     token = extractJWT(context.req)
@@ -26,9 +27,9 @@ function refreshResolver(collection: Collection) {
     const cookie = generatePayloadCookie({
       token: result.refreshedToken,
       payload: context.req.payload,
-      collectionConfig: context.req.collection.config,
+      collectionConfig: collection.config,
     })
-    context.headers.set('Set-Cookie', cookie)
+    context.headers['Set-Cookie'] = cookie
     return result
   }
 

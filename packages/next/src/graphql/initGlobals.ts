@@ -4,9 +4,10 @@ import { singular } from 'pluralize'
 import { toWords } from 'payload/utilities'
 import { buildVersionGlobalFields } from 'payload/versions'
 
+import type { GraphQLInfo } from 'payload/config'
 import type { Field, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 
-import buildMutationInputType from './schema/buildMutationInputType'
+import { buildMutationInputType } from './schema/buildMutationInputType'
 import buildObjectType from './schema/buildObjectType'
 import buildPaginatedListType from './schema/buildPaginatedListType'
 import { buildPolicyType } from './schema/buildPoliciesType'
@@ -18,11 +19,10 @@ import findVersionByIDResolver from './resolvers/globals/findVersionByID'
 import findVersionsResolver from './resolvers/globals/findVersions'
 import restoreVersionResolver from './resolvers/globals/restoreVersion'
 import updateResolver from './resolvers/globals/update'
-import { Result } from './schema/configToSchema'
 
 type InitGlobalsGraphQLArgs = {
   config: SanitizedConfig
-  graphqlResult: Result
+  graphqlResult: GraphQLInfo
 }
 function initGlobalsGraphQL({ config, graphqlResult }: InitGlobalsGraphQLArgs): void {
   Object.keys(graphqlResult.globals.config).forEach((slug) => {
@@ -39,13 +39,13 @@ function initGlobalsGraphQL({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
 
     if (!graphqlResult.globals.graphQL) graphqlResult.globals.graphQL = {}
 
-    const updateMutationInputType = buildMutationInputType(
-      formattedName,
+    const updateMutationInputType = buildMutationInputType({
+      name: formattedName,
       fields,
-      formattedName,
-      false,
+      parentName: formattedName,
       graphqlResult,
-    )
+      config,
+    })
     graphqlResult.globals.graphQL[slug] = {
       mutationInputType: updateMutationInputType
         ? new GraphQLNonNull(updateMutationInputType)
@@ -101,13 +101,13 @@ function initGlobalsGraphQL({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
     }
 
     if (global.versions) {
-      const idType = graphqlResult.defaultIDType === 'number' ? GraphQLInt : GraphQLString
+      const idType = config.db.defaultIDType === 'number' ? GraphQLInt : GraphQLString
 
       const versionGlobalFields: Field[] = [
         ...buildVersionGlobalFields(global),
         {
           name: 'id',
-          type: graphqlResult.defaultIDType as 'text',
+          type: config.db.defaultIDType as 'text',
         },
         {
           name: 'createdAt',

@@ -10,6 +10,7 @@ import {
 import { flattenTopLevelFields, formatNames, toWords } from 'payload/utilities'
 import { fieldAffectsData } from 'payload/types'
 import { buildVersionCollectionFields } from 'payload/versions'
+import type { GraphQLInfo } from 'payload/config'
 import type { Field, Collection, SanitizedCollectionConfig, SanitizedConfig } from 'payload/types'
 
 import type { ObjectTypeConfig } from './schema/buildObjectType'
@@ -22,7 +23,7 @@ import refresh from './resolvers/auth/refresh'
 import resetPassword from './resolvers/auth/resetPassword'
 import unlock from './resolvers/auth/unlock'
 import verifyEmail from './resolvers/auth/verifyEmail'
-import buildMutationInputType, { getCollectionIDType } from './schema/buildMutationInputType'
+import { buildMutationInputType, getCollectionIDType } from './schema/buildMutationInputType'
 import buildObjectType from './schema/buildObjectType'
 import buildPaginatedListType from './schema/buildPaginatedListType'
 import { buildPolicyType } from './schema/buildPoliciesType'
@@ -37,11 +38,10 @@ import findVersionByIDResolver from './resolvers/collections/findVersionByID'
 import findVersionsResolver from './resolvers/collections/findVersions'
 import restoreVersionResolver from './resolvers/collections/restoreVersion'
 import updateResolver from './resolvers/collections/update'
-import { Result } from './schema/configToSchema'
 
 type InitCollectionsGraphQLArgs = {
   config: SanitizedConfig
-  graphqlResult: Result
+  graphqlResult: GraphQLInfo
 }
 function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQLArgs): void {
   Object.keys(graphqlResult.collections).forEach((slug) => {
@@ -81,7 +81,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       flattenTopLevelFields(fields).findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
       -1
 
-    const idType = getCollectionIDType(graphqlResult.defaultIDType, collectionConfig)
+    const idType = getCollectionIDType(config.db.defaultIDType, collectionConfig)
 
     const baseFields: ObjectTypeConfig = {}
 
@@ -91,7 +91,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       baseFields.id = { type: idType }
       whereInputFields.push({
         name: 'id',
-        type: graphqlResult.defaultIDType as 'text',
+        type: config.db.defaultIDType as 'text',
       })
     }
 
@@ -124,24 +124,25 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       })
     }
 
-    const createMutationInputType = buildMutationInputType(
-      singularName,
+    const createMutationInputType = buildMutationInputType({
+      name: singularName,
       fields,
-      singularName,
-      false,
+      parentName: singularName,
       graphqlResult,
-    )
+      config,
+    })
     if (createMutationInputType) {
       collection.graphQL.mutationInputType = new GraphQLNonNull(createMutationInputType)
     }
 
-    const updateMutationInputType = buildMutationInputType(
-      `${singularName}Update`,
-      fields.filter((field) => !(fieldAffectsData(field) && field.name === 'id')),
-      `${singularName}Update`,
-      true,
+    const updateMutationInputType = buildMutationInputType({
+      name: `${singularName}Update`,
+      fields: fields.filter((field) => !(fieldAffectsData(field) && field.name === 'id')),
+      parentName: `${singularName}Update`,
+      forceNullable: true,
       graphqlResult,
-    )
+      config,
+    })
     if (updateMutationInputType) {
       collection.graphQL.updateMutationInputType = new GraphQLNonNull(updateMutationInputType)
     }
@@ -183,7 +184,7 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
       args: {
         id: { type: new GraphQLNonNull(idType) },
       },
-      resolve: docAccessResolver(),
+      resolve: docAccessResolver(collection),
       type: buildPolicyType({
         entity: collectionConfig,
         scope: 'docAccess',
@@ -235,12 +236,12 @@ function initCollectionsGraphQL({ config, graphqlResult }: InitCollectionsGraphQ
     }
 
     if (collectionConfig.versions) {
-      const versionIDType = graphqlResult.defaultIDType === 'text' ? GraphQLString : GraphQLInt
+      const versionIDType = config.db.defaultIDType === 'text' ? GraphQLString : GraphQLInt
       const versionCollectionFields: Field[] = [
         ...buildVersionCollectionFields(collectionConfig),
         {
           name: 'id',
-          type: graphqlResult.defaultIDType as 'text',
+          type: config.db.defaultIDType as 'text',
         },
         {
           name: 'createdAt',

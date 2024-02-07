@@ -1,10 +1,11 @@
 import { unlockOperation } from 'payload/operations'
 import type { Collection } from 'payload/types'
 
-import isolateObjectProperty from 'payload/dist/utilities/isolateObjectProperty.ts'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 function unlockResolver(collection: Collection) {
-  async function resolver(_, args, context) {
+  async function resolver(_, args, context: Context) {
     const options = {
       collection,
       data: { email: args.email },

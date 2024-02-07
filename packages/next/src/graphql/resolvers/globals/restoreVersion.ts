@@ -1,7 +1,8 @@
 import { restoreVersionOperationGlobal } from 'payload/operations'
 import type { Document, PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
-import isolateObjectProperty from '../../utilities/isolateObjectProperty'
+import { isolateObjectProperty } from 'payload/utilities'
+import { Context } from '../types'
 
 type Resolver = (
   _: unknown,
@@ -13,12 +14,12 @@ type Resolver = (
   },
 ) => Promise<Document>
 export default function restoreVersionResolver(globalConfig: SanitizedGlobalConfig): Resolver {
-  return async function resolver(_, args, context) {
+  return async function resolver(_, args, context: Context) {
     const options = {
       id: args.id,
       depth: 0,
       globalConfig,
-      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
+      req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
     const result = await restoreVersionOperationGlobal(options)
