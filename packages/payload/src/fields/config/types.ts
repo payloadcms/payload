@@ -584,6 +584,7 @@ export type Block = {
 }
 
 export type BlockField = FieldBase & {
+  accessRowActions?: Condition
   admin?: Admin & {
     initCollapsed?: boolean | false
   }

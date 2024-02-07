@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
@@ -22,6 +22,7 @@ import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { WatchCondition } from '../../withCondition/WatchCondition'
 import { fieldBaseClass } from '../shared'
 import { BlockRow } from './BlockRow'
 import { BlocksDrawer } from './BlocksDrawer'
@@ -34,6 +35,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     name,
+    accessRowActions,
     admin: { className, condition, description, readOnly },
     blocks,
     fieldTypes,
@@ -166,6 +168,8 @@ const BlocksField: React.FC<Props> = (props) => {
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
 
+  const [rowActionsAvailable, setRowActionsAvailable] = useState(true)
+
   return (
     <div
       className={[
@@ -249,6 +253,7 @@ const BlocksField: React.FC<Props> = (props) => {
                       readOnly={readOnly}
                       removeRow={removeRow}
                       row={row}
+                      rowActionsAvailable={rowActionsAvailable}
                       rowCount={rows.length}
                       rowIndex={i}
                       setCollapse={setCollapse}
@@ -284,7 +289,7 @@ const BlocksField: React.FC<Props> = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!readOnly && !hasMaxRows && (
+      {!readOnly && !hasMaxRows && rowActionsAvailable && (
         <Fragment>
           <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
             <Button
@@ -306,6 +311,12 @@ const BlocksField: React.FC<Props> = (props) => {
           />
         </Fragment>
       )}
+      <WatchCondition
+        condition={accessRowActions}
+        name={name}
+        path={path}
+        setShowField={setRowActionsAvailable}
+      />
     </div>
   )
 }

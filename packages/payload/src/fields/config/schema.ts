@@ -396,6 +396,7 @@ export const relationship = baseField.keys({
 
 export const blocks = baseField.keys({
   name: joi.string().required(),
+  accessRowActions: joi.func(),
   blocks: joi
     .array()
     .items(

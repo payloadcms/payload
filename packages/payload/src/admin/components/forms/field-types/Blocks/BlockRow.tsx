@@ -30,6 +30,7 @@ type BlockFieldProps = UseDraggableSortableReturn &
     readOnly: boolean
     removeRow: (rowIndex: number) => void
     row: Row
+    rowActionsAvailable: boolean
     rowCount: number
     rowIndex: number
     setCollapse: (id: string, collapsed: boolean) => void
@@ -52,6 +53,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   readOnly,
   removeRow,
   row,
+  rowActionsAvailable,
   rowCount,
   rowIndex,
   setCollapse,
@@ -83,7 +85,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
     >
       <Collapsible
         actions={
-          !readOnly ? (
+          !readOnly && rowActionsAvailable ? (
             <RowActions
               addRow={addRow}
               blockType={row.blockType}
@@ -101,11 +103,15 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         className={classNames}
         collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          rowActionsAvailable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
           <div className={`${baseClass}__block-header`}>
             <span className={`${baseClass}__block-number`}>
