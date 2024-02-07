@@ -22,8 +22,9 @@ import { DefaultList } from '../../views/List'
 import { useDocumentDrawer } from '../DocumentDrawer'
 import Pill from '../Pill'
 import ReactSelect from '../ReactSelect'
-// import { TableColumnsProvider } from '../TableColumns'
+import { TableColumnsProvider } from '../TableColumns'
 import ViewDescription from '../ViewDescription'
+import { DefaultListViewProps } from '../../views/List/types'
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -223,101 +224,98 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     ListToRender = listComponent.Component
   }
 
-  return null
+  const componentProps: DefaultListViewProps = {
+    collectionSlug: selectedCollectionConfig.slug,
+    Header: (
+      <header className={`${baseClass}__header`}>
+        <div className={`${baseClass}__header-wrap`}>
+          <div className={`${baseClass}__header-content`}>
+            <h2 className={`${baseClass}__header-text`}>
+              {!customHeader
+                ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n)
+                : customHeader}
+            </h2>
+            {hasCreatePermission && (
+              <DocumentDrawerToggler className={`${baseClass}__create-new-button`}>
+                <Pill>{t('general:createNew')}</Pill>
+              </DocumentDrawerToggler>
+            )}
+          </div>
+          <button
+            className={`${baseClass}__header-close`}
+            onClick={() => {
+              closeModal(drawerSlug)
+            }}
+            type="button"
+          >
+            <X />
+          </button>
+        </div>
+        {selectedCollectionConfig?.admin?.description && (
+          <div className={`${baseClass}__sub-header`}>
+            <ViewDescription description={selectedCollectionConfig.admin.description} />
+          </div>
+        )}
+        {moreThanOneAvailableCollection && (
+          <div className={`${baseClass}__select-collection-wrap`}>
+            <Label label={t('upload:selectCollectionToBrowse')} />
+            <ReactSelect
+              className={`${baseClass}__select-collection`}
+              onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
+              options={enabledCollectionConfigs.map((coll) => ({
+                label: getTranslation(coll.labels.singular, i18n),
+                value: coll.slug,
+              }))}
+              value={selectedOption}
+            />
+          </div>
+        )}
+      </header>
+    ),
+    data,
+    handlePageChange: setPage,
+    handlePerPageChange: setLimit,
+    handleSearchChange: setSearch,
+    handleSortChange: setSort,
+    handleWhereChange: setWhere,
+    hasCreatePermission,
+    limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
+    modifySearchParams: false,
+    newDocumentURL: null,
+    setLimit,
+    setSort,
+    titleField,
+  }
 
-  // return (
-  //   <TableColumnsProvider
-  //     cellProps={[
-  //       {
-  //         className: `${baseClass}__first-cell`,
-  //         link: false,
-  //         onClick: ({ collection: rowColl, rowData }) => {
-  //           if (typeof onSelect === 'function') {
-  //             onSelect({
-  //               collectionConfig: rowColl,
-  //               docID: rowData.id,
-  //             })
-  //           }
-  //         },
-  //       },
-  //     ]}
-  //     collectionSlug={selectedCollectionConfig.slug}
-  //   >
-  //     <DocumentInfoProvider
-  //       collectionSlug={selectedCollectionConfig.slug}
-  //       versionsConfig={selectedCollectionConfig?.versions}
-  //     >
-  //       <RenderCustomComponent
-  //         CustomComponent={ListToRender}
-  //         DefaultComponent={DefaultList}
-  //         componentProps={{
-  //           collection: {
-  //             ...selectedCollectionConfig,
-  //             // fields,
-  //           },
-  //           customHeader: (
-  //             <header className={`${baseClass}__header`}>
-  //               <div className={`${baseClass}__header-wrap`}>
-  //                 <div className={`${baseClass}__header-content`}>
-  //                   <h2 className={`${baseClass}__header-text`}>
-  //                     {!customHeader
-  //                       ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n)
-  //                       : customHeader}
-  //                   </h2>
-  //                   {hasCreatePermission && (
-  //                     <DocumentDrawerToggler className={`${baseClass}__create-new-button`}>
-  //                       <Pill>{t('general:createNew')}</Pill>
-  //                     </DocumentDrawerToggler>
-  //                   )}
-  //                 </div>
-  //                 <button
-  //                   className={`${baseClass}__header-close`}
-  //                   onClick={() => {
-  //                     closeModal(drawerSlug)
-  //                   }}
-  //                   type="button"
-  //                 >
-  //                   <X />
-  //                 </button>
-  //               </div>
-  //               {selectedCollectionConfig?.admin?.description && (
-  //                 <div className={`${baseClass}__sub-header`}>
-  //                   <ViewDescription description={selectedCollectionConfig.admin.description} />
-  //                 </div>
-  //               )}
-  //               {moreThanOneAvailableCollection && (
-  //                 <div className={`${baseClass}__select-collection-wrap`}>
-  //                   <Label label={t('upload:selectCollectionToBrowse')} />
-  //                   <ReactSelect
-  //                     className={`${baseClass}__select-collection`}
-  //                     onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
-  //                     options={enabledCollectionConfigs.map((coll) => ({
-  //                       label: getTranslation(coll.labels.singular, i18n),
-  //                       value: coll.slug,
-  //                     }))}
-  //                     value={selectedOption}
-  //                   />
-  //                 </div>
-  //               )}
-  //             </header>
-  //           ),
-  //           data,
-  //           handlePageChange: setPage,
-  //           handlePerPageChange: setLimit,
-  //           handleSearchChange: setSearch,
-  //           handleSortChange: setSort,
-  //           handleWhereChange: setWhere,
-  //           hasCreatePermission,
-  //           limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
-  //           modifySearchParams: false,
-  //           newDocumentURL: null,
-  //           setLimit,
-  //           setSort,
-  //           titleField,
-  //         }}
-  //       />
-  //     </DocumentInfoProvider>
-  //     <DocumentDrawer onSave={onCreateNew} />
-  //   </TableColumnsProvider>
-  // )
+  return (
+    <TableColumnsProvider
+      cellProps={[
+        {
+          className: `${baseClass}__first-cell`,
+          link: false,
+          onClick: ({ collection: rowColl, rowData }) => {
+            if (typeof onSelect === 'function') {
+              onSelect({
+                collectionConfig: rowColl,
+                docID: rowData.id,
+              })
+            }
+          },
+        },
+      ]}
+      collectionSlug={selectedCollectionConfig.slug}
+    >
+      <DocumentInfoProvider
+        collectionSlug={selectedCollectionConfig.slug}
+        versionsConfig={selectedCollectionConfig?.versions}
+      >
+        <RenderCustomComponent
+          CustomComponent={ListToRender}
+          DefaultComponent={DefaultList}
+          componentProps={componentProps}
+        />
+      </DocumentInfoProvider>
+      <DocumentDrawer onSave={onCreateNew} />
+    </TableColumnsProvider>
+  )
 }

@@ -97,23 +97,23 @@ export const Pages: CollectionConfig = {
         description: 'Defaults to 4',
       },
     },
-    // {
-    //   name: 'select',
-    //   label: 'Select',
-    //   type: 'select',
-    //   required: true,
-    //   defaultValue: 'option-2',
-    //   options: [
-    //     {
-    //       label: 'Option 1',
-    //       value: 'option-1',
-    //     },
-    //     {
-    //       label: 'Option 2 (This is a default value)',
-    //       value: 'option-2',
-    //     },
-    //   ],
-    // },
+    {
+      name: 'select',
+      label: 'Select',
+      type: 'select',
+      required: true,
+      defaultValue: 'option-2',
+      options: [
+        {
+          label: 'Option 1',
+          value: 'option-1',
+        },
+        {
+          label: 'Option 2 (This is a default value)',
+          value: 'option-2',
+        },
+      ],
+    },
     {
       type: 'textarea',
       name: 'textarea',
@@ -177,72 +177,72 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    // {
-    //   name: 'upload',
-    //   label: 'Upload',
-    //   type: 'upload',
-    //   relationTo: 'media',
-    // },
-    // {
-    //   name: 'array',
-    //   label: 'Array',
-    //   type: 'array',
-    //   required: true,
-    //   fields: [
-    //     {
-    //       name: 'arrayText',
-    //       label: 'Array Text',
-    //       type: 'text',
-    //       required: true,
-    //       defaultValue: 'This is a default value',
-    //     },
-    //   ],
-    // },
-    // {
-    //   name: 'blocks',
-    //   label: 'Blocks',
-    //   type: 'blocks',
-    //   required: true,
-    //   minRows: 1,
-    //   maxRows: 2,
-    //   blocks: [
-    //     {
-    //       slug: 'text',
-    //       labels: {
-    //         singular: 'Text Block',
-    //         plural: 'Text Blocks',
-    //       },
-    //       fields: [
-    //         {
-    //           name: 'text',
-    //           label: 'Text',
-    //           type: 'text',
-    //           required: true,
-    //           admin: {
-    //             components: {
-    //               beforeInput: [BeforeInput],
-    //             },
-    //           },
-    //         },
-    //       ],
-    //     },
-    //     {
-    //       slug: 'textarea',
-    //       labels: {
-    //         singular: 'Textarea Block',
-    //         plural: 'Textarea Blocks',
-    //       },
-    //       fields: [
-    //         {
-    //           name: 'textarea',
-    //           label: 'Textarea',
-    //           type: 'textarea',
-    //           required: true,
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
+    {
+      name: 'upload',
+      label: 'Upload',
+      type: 'upload',
+      relationTo: 'media',
+    },
+    {
+      name: 'array',
+      label: 'Array',
+      type: 'array',
+      required: true,
+      fields: [
+        {
+          name: 'arrayText',
+          label: 'Array Text',
+          type: 'text',
+          required: true,
+          defaultValue: 'This is a default value',
+        },
+      ],
+    },
+    {
+      name: 'blocks',
+      label: 'Blocks',
+      type: 'blocks',
+      required: true,
+      minRows: 1,
+      maxRows: 2,
+      blocks: [
+        {
+          slug: 'text',
+          labels: {
+            singular: 'Text Block',
+            plural: 'Text Blocks',
+          },
+          fields: [
+            {
+              name: 'text',
+              label: 'Text',
+              type: 'text',
+              required: true,
+              admin: {
+                components: {
+                  beforeInput: [BeforeInput],
+                },
+              },
+            },
+          ],
+        },
+        {
+          slug: 'textarea',
+          labels: {
+            singular: 'Textarea Block',
+            plural: 'Textarea Blocks',
+          },
+          fields: [
+            {
+              name: 'textarea',
+              label: 'Textarea',
+              type: 'textarea',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
     {
       label: 'Tabs',
       type: 'tabs',
@@ -294,12 +294,12 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    // {
-    //   name: 'json',
-    //   label: 'JSON',
-    //   type: 'json',
-    //   required: true,
-    // },
+    {
+      name: 'json',
+      label: 'JSON',
+      type: 'json',
+      required: true,
+    },
     {
       name: 'code',
       label: 'Code',
