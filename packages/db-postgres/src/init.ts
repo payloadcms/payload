@@ -9,7 +9,7 @@ import type { PostgresAdapter } from './types'
 
 import { buildTable } from './schema/build'
 import { getConfigIDType } from './schema/getConfigIDType'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
@@ -20,7 +20,10 @@ export const init: Init = async function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const tableName = getTableName({ config: collection })
+    const tableName = getTableName({
+      adapter: this,
+      config: collection,
+    })
 
     buildTable({
       adapter: this,
@@ -36,7 +39,11 @@ export const init: Init = async function init(this: PostgresAdapter) {
     })
 
     if (collection.versions) {
-      const versionsTableName = `_${tableName}_v`
+      const versionsTableName = getTableName({
+        adapter: this,
+        config: collection,
+        versions: true,
+      })
       const versionFields = buildVersionCollectionFields(collection)
 
       const versionsParentIDColType = getConfigIDType(collection.fields)
@@ -57,7 +64,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
   })
 
   this.payload.config.globals.forEach((global) => {
-    const tableName = getTableName({ config: global })
+    const tableName = getTableName({ adapter: this, config: global })
 
     buildTable({
       adapter: this,
@@ -73,7 +80,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
     })
 
     if (global.versions) {
-      const versionsTableName = getTableName({ config: global, versions: true })
+      const versionsTableName = getTableName({ adapter: this, config: global, versions: true })
       const versionFields = buildVersionGlobalFields(global)
 
       buildTable({

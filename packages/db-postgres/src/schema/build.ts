@@ -18,8 +18,8 @@ import { fieldAffectsData } from 'payload/types'
 
 import type { GenericColumns, GenericTable, PostgresAdapter } from '../types'
 
-import { getTableName } from '../utilities/getTableName'
 import { getConfigIDType } from './getConfigIDType'
+import { getTableName } from './getTableName'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { traverseFields } from './traverseFields'
 
@@ -161,7 +161,7 @@ export const buildTable = ({
   adapter.tables[tableName] = table
 
   if (hasLocalizedField) {
-    const localeTableName = `${tableName}_locales`
+    const localeTableName = `${tableName}${adapter.localesSuffix}`
     localesColumns.id = serial('id').primaryKey()
     localesColumns._locale = adapter.enums.enum__locales('_locale').notNull()
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id')
@@ -304,6 +304,7 @@ export const buildTable = ({
       relationships.forEach((relationTo) => {
         const relationshipConfig = adapter.payload.collections[relationTo].config
         const formattedRelationTo = getTableName({
+          adapter,
           config: relationshipConfig,
         })
         let colType = 'integer'
@@ -318,7 +319,7 @@ export const buildTable = ({
         ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
       })
 
-      const relationshipsTableName = `${tableName}_rels`
+      const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
         const result: Record<string, unknown> = {
@@ -347,6 +348,7 @@ export const buildTable = ({
 
         relationships.forEach((relationTo) => {
           const relatedTableName = getTableName({
+            adapter,
             config: adapter.payload.collections[relationTo].config,
           })
           const idColumnName = `${relationTo}ID`

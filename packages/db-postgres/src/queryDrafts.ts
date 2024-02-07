@@ -4,7 +4,7 @@ import { type QueryDrafts, combineQueries } from 'payload/database'
 import { buildVersionCollectionFields } from 'payload/versions'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts({
   collection,
@@ -17,7 +17,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   where,
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName({ config: collectionConfig, versions: true })
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+    versions: true,
+  })
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)

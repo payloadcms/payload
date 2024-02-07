@@ -6,7 +6,7 @@ import { fieldAffectsData, tabHasName } from 'payload/types'
 import type { PostgresAdapter } from '../types'
 import type { Result } from './buildFindManyArgs'
 
-import { getTableName } from '../utilities/getTableName'
+import { getTableName } from '../schema/getTableName'
 
 type TraverseFieldArgs = {
   _locales: Record<string, unknown>
@@ -80,11 +80,13 @@ export const traverseFields = ({
           }
 
           const arrayTableName = getTableName({
+            adapter,
             config: field,
             parentTableName: currentTableName,
           })
 
           const arrayTableNameWithLocales = getTableName({
+            adapter,
             config: field,
             locales: true,
             parentTableName: currentTableName,
@@ -139,6 +141,7 @@ export const traverseFields = ({
               }
 
               const tableName = getTableName({
+                adapter,
                 config: block,
                 parentTableName: topLevelTableName,
                 prefix: `${topLevelTableName}_blocks_`,
@@ -147,6 +150,7 @@ export const traverseFields = ({
               if (
                 adapter.tables[
                   getTableName({
+                    adapter,
                     config: block,
                     locales: true,
                   })

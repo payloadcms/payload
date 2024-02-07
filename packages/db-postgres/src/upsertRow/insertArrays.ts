@@ -66,8 +66,11 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
     }
 
     // Insert locale rows
-    if (adapter.tables[`${tableName}_locales`] && row.locales.length > 0) {
-      await db.insert(adapter.tables[`${tableName}_locales`]).values(row.locales).returning()
+    if (adapter.tables[`${tableName}${adapter.localesSuffix}`] && row.locales.length > 0) {
+      await db
+        .insert(adapter.tables[`${tableName}${adapter.localesSuffix}`])
+        .values(row.locales)
+        .returning()
     }
 
     // If there are sub arrays, call this function recursively

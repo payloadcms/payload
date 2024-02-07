@@ -138,7 +138,7 @@ export const upsertRow = async <T extends TypeWithID>({
     // //////////////////////////////////
 
     if (localesToInsert.length > 0) {
-      const localeTable = adapter.tables[`${tableName}_locales`]
+      const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
 
       if (operation === 'update') {
         await db.delete(localeTable).where(eq(localeTable._parentID, insertedRow.id))
@@ -151,7 +151,7 @@ export const upsertRow = async <T extends TypeWithID>({
     // INSERT RELATIONSHIPS
     // //////////////////////////////////
 
-    const relationshipsTableName = `${tableName}_rels`
+    const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
 
     if (operation === 'update') {
       await deleteExistingRowsByPath({
@@ -224,15 +224,22 @@ export const upsertRow = async <T extends TypeWithID>({
 
     if (operation === 'update') {
       for (const blockName of rowToInsert.blocksToDelete) {
-        const blockTableName = `${tableName}_blocks_${blockName}`
+        if (!adapter.blockTableNames[`${tableName}.${blockName}`]) {
+          console.log('jhit')
+        }
+        const blockTableName = adapter.blockTableNames[`${tableName}_${blockName}`]
         const blockTable = adapter.tables[blockTableName]
         await db.delete(blockTable).where(eq(blockTable._parentID, insertedRow.id))
       }
     }
 
     for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
+      if (!adapter.blockTableNames[`${tableName}.${blockName}`]) {
+        console.log('jhit')
+      }
+      const blockTableName = adapter.blockTableNames[`${tableName}.${blockName}`]
       insertedBlockRows[blockName] = await db
-        .insert(adapter.tables[`${tableName}_blocks_${blockName}`])
+        .insert(adapter.tables[blockTableName])
         .values(blockRows.map(({ row }) => row))
         .returning()
 
@@ -259,7 +266,7 @@ export const upsertRow = async <T extends TypeWithID>({
 
       if (blockLocaleRowsToInsert.length > 0) {
         await db
-          .insert(adapter.tables[`${tableName}_blocks_${blockName}_locales`])
+          .insert(adapter.tables[`${blockTableName}${adapter.localesSuffix}`])
           .values(blockLocaleRowsToInsert)
           .returning()
       }

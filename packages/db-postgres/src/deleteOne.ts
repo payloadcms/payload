@@ -5,8 +5,8 @@ import type { PostgresAdapter } from './types'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs'
 import buildQuery from './queries/buildQuery'
+import { getTableName } from './schema/getTableName'
 import { transform } from './transform/read'
-import { getTableName } from './utilities/getTableName'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
@@ -14,7 +14,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName({ config: collectionConfig })
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+  })
 
   const { where } = await buildQuery({
     adapter: this,

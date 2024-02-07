@@ -7,8 +7,8 @@ import { buildVersionGlobalFields } from 'payload/versions'
 
 import type { PostgresAdapter } from './types'
 
+import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
-import { getTableName } from './utilities/getTableName'
 
 export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -17,6 +17,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
   const tableName = getTableName({
+    adapter: this,
     config: global,
     versions: true,
   })

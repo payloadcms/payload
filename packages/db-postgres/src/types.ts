@@ -19,10 +19,13 @@ import type { Pool, PoolConfig } from 'pg'
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
+  localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
   pool: PoolConfig
   push?: boolean
+  relationshipsSuffix?: string
+  versionsSuffix?: string
 }
 
 export type GenericColumn = PgColumn<
@@ -52,6 +55,10 @@ export type DrizzleTransaction = PgTransaction<
 >
 
 export type PostgresAdapter = BaseDatabaseAdapter & {
+  /**
+   * Used internally to map the block name to the table name
+   */
+  blockTableNames: Record<string, string>
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
   /**
@@ -59,11 +66,13 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  localesSuffix?: string
   logger: DrizzleConfig['logger']
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
   relations: Record<string, GenericRelation>
+  relationshipsSuffix?: string
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>
   sessions: {
     [id: string]: {
@@ -73,6 +82,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
     }
   }
   tables: Record<string, GenericTable>
+  versionsSuffix?: string
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
@@ -93,9 +103,11 @@ declare module 'payload' {
     drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
     fieldConstraints: Record<string, Record<string, string>>
+    localeSuffix?: string
     pool: Pool
     push: boolean
     relations: Record<string, GenericRelation>
+    relationshipsSuffix?: string
     schema: Record<string, GenericEnum | GenericRelation | GenericTable>
     sessions: {
       [id: string]: {
@@ -105,6 +117,7 @@ declare module 'payload' {
       }
     }
     tables: Record<string, GenericTable>
+    versionsSuffix?: string
   }
 }
 

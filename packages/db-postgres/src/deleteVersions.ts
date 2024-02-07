@@ -7,7 +7,7 @@ import { buildVersionCollectionFields } from 'payload/versions'
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: PostgresAdapter,
@@ -17,6 +17,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const tableName = getTableName({
+    adapter: this,
     config: collectionConfig,
     versions: true,
   })

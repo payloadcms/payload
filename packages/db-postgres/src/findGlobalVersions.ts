@@ -6,7 +6,7 @@ import { buildVersionGlobalFields } from 'payload/versions'
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: PostgresAdapter,
@@ -28,6 +28,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   const sort = typeof sortArg === 'string' ? sortArg : '-createdAt'
 
   const tableName = getTableName({
+    adapter: this,
     config: globalConfig,
     versions: true,
   })

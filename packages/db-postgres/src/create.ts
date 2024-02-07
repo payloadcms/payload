@@ -2,8 +2,8 @@ import type { Create } from 'payload/database'
 
 import type { PostgresAdapter } from './types'
 
+import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
-import { getTableName } from './utilities/getTableName'
 
 export const create: Create = async function create(
   this: PostgresAdapter,
@@ -20,6 +20,7 @@ export const create: Create = async function create(
     operation: 'create',
     req,
     tableName: getTableName({
+      adapter: this,
       config: collection,
     }),
   })

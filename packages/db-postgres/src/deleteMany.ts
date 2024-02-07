@@ -6,7 +6,7 @@ import { inArray } from 'drizzle-orm'
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: PostgresAdapter,
@@ -14,7 +14,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
 ) {
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName({ config: collectionConfig })
+  const tableName = getTableName({ adapter: this, config: collectionConfig })
 
   const result = await findMany({
     adapter: this,

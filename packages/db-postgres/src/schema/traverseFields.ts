@@ -23,10 +23,10 @@ import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, PostgresAdapter } from '../types'
 
-import { getTableName } from '../utilities/getTableName'
 import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
 import { createIndex } from './createIndex'
+import { getTableName } from './getTableName'
 import { idToUUID } from './idToUUID'
 import { parentIDColumnMap } from './parentIDColumnMap'
 import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical'
@@ -219,10 +219,12 @@ export const traverseFields = ({
       case 'radio':
       case 'select': {
         const enumName = getTableName({
+          adapter,
           config: field,
           parentTableName: newTableName,
           prefix: `enum_${newTableName}_`,
           target: 'enumName',
+          versions,
         })
 
         adapter.enums[enumName] = pgEnum(
@@ -238,8 +240,11 @@ export const traverseFields = ({
 
         if (field.type === 'select' && field.hasMany) {
           const selectTableName = getTableName({
+            adapter,
             config: field,
             parentTableName: newTableName,
+            prefix: `${newTableName}_`,
+            versions,
           })
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
@@ -307,8 +312,10 @@ export const traverseFields = ({
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
         const arrayTableName = getTableName({
+          adapter,
           config: field,
           parentTableName: newTableName,
+          prefix: `${newTableName}_`,
         })
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
@@ -370,7 +377,7 @@ export const traverseFields = ({
           }
 
           if (hasLocalesTable(field.fields)) {
-            result._locales = many(adapter.tables[`${arrayTableName}_locales`])
+            result._locales = many(adapter.tables[`${arrayTableName}${adapter.localesSuffix}`])
           }
 
           subRelationsToBuild.forEach((val, key) => {
@@ -390,10 +397,10 @@ export const traverseFields = ({
 
         field.blocks.forEach((block) => {
           const blockTableName = getTableName({
+            adapter,
             config: block,
             parentTableName: rootTableName,
             prefix: `${rootTableName}_blocks_`,
-            versions,
           })
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
@@ -459,7 +466,9 @@ export const traverseFields = ({
                 }
 
                 if (hasLocalesTable(block.fields)) {
-                  result._locales = many(adapter.tables[`${blockTableName}_locales`])
+                  result._locales = many(
+                    adapter.tables[`${blockTableName}${adapter.localesSuffix}`],
+                  )
                 }
 
                 subRelationsToBuild.forEach((val, key) => {
@@ -479,7 +488,7 @@ export const traverseFields = ({
               table: adapter.tables[blockTableName],
             })
           }
-
+          adapter.blockTableNames[`${rootTableName}.${toSnakeCase(block.slug)}`] = blockTableName
           rootRelationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
         })
 

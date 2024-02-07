@@ -2,18 +2,28 @@ import type { CustomName } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
+import type { PostgresAdapter } from '../types'
+
 type Args = {
+  adapter: PostgresAdapter
+  /** The collection, global or field config **/
   config: {
     dbName?: CustomName
     enumName?: CustomName
     name?: string
     slug?: string
   }
+  /** Localized tables need to be given the locales suffix */
   locales?: boolean
+  /** For nested tables passed for the user custom dbName functions to handle their own iterations */
   parentTableName?: string
+  /** For sub tables (array for example) this needs to include the parentTableName */
   prefix?: string
+  /** Adds the relationships suffix */
   relationships?: boolean
+  /** For tables based on fields that could have both enumName and dbName (ie: select with hasMany), default: 'dbName' */
   target?: 'dbName' | 'enumName'
+  /** Adds the versions suffix, should only be used on the base collection to duplicate suffixing */
   versions?: boolean
 }
 
@@ -22,6 +32,7 @@ type Args = {
  * Returns the table or enum name for a given entity
  */
 export const getTableName = ({
+  adapter,
   config: { name, slug },
   config,
   locales = false,
@@ -44,9 +55,9 @@ export const getTableName = ({
     result = `${prefix}${toSnakeCase(name ?? slug)}`
   }
 
-  if (locales) result = `${result}_locales`
-  if (versions) result = `_${result}_v`
-  if (relationships) result = `${result}_rels`
+  if (locales) result = `${result}${adapter.localesSuffix}`
+  if (versions) result = `_${result}${adapter.versionsSuffix}`
+  if (relationships) result = `${result}${adapter.relationshipsSuffix}`
 
   return result
 }

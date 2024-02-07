@@ -367,7 +367,8 @@ export type BaseCollectionConfig = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
   /**
-   * Custom database name
+   * Used to override the default naming of the database table or collection with your using a function or string
+   * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
    */
   dbName?: CustomName
   /**

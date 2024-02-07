@@ -4,7 +4,7 @@ import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const find: Find = async function find(
   this: PostgresAdapter,
@@ -21,7 +21,10 @@ export const find: Find = async function find(
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
-  const tableName = getTableName({ config: collectionConfig })
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+  })
 
   return findMany({
     adapter: this,

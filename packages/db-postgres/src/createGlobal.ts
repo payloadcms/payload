@@ -3,8 +3,8 @@ import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import type { PostgresAdapter } from './types'
 
+import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
-import { getTableName } from './utilities/getTableName'
 
 export async function createGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -21,6 +21,7 @@ export async function createGlobal<T extends TypeWithID>(
     operation: 'create',
     req,
     tableName: getTableName({
+      adapter: this,
       config: globalConfig,
     }),
   })

@@ -6,7 +6,7 @@ import { buildVersionCollectionFields } from 'payload/versions'
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const findVersions: FindVersions = async function findVersions(
   this: PostgresAdapter,
@@ -25,7 +25,11 @@ export const findVersions: FindVersions = async function findVersions(
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
 
-  const tableName = getTableName({ config: collectionConfig, versions: true })
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+    versions: true,
+  })
   const fields = buildVersionCollectionFields(collectionConfig)
 
   return findMany({

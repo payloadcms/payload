@@ -3,14 +3,17 @@ import type { FindGlobal } from 'payload/database'
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: PostgresAdapter,
   { slug, locale, req, where },
 ) {
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-  const tableName = getTableName({ config: globalConfig })
+  const tableName = getTableName({
+    adapter: this,
+    config: globalConfig,
+  })
 
   const {
     docs: [doc],

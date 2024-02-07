@@ -13,7 +13,7 @@ import { v4 as uuid } from 'uuid'
 import type { GenericColumn, GenericTable, PostgresAdapter } from '../types'
 import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
-import { getTableName } from '../utilities/getTableName'
+import { getTableName } from '../schema/getTableName'
 
 type Constraint = {
   columnName: string
@@ -168,11 +168,13 @@ export const getTableColumnFromPath = ({
 
       case 'group': {
         if (locale && field.localized && adapter.payload.config.localization) {
-          newTableName = `${getTableName({
+          newTableName = getTableName({
+            adapter,
             config: field,
+            locales: true,
             parentTableName: tableName,
             prefix: `${tableName}_`,
-          })}_locales`
+          })
 
           joins[tableName] = eq(
             adapter.tables[tableName].id,
@@ -205,7 +207,12 @@ export const getTableColumnFromPath = ({
       }
 
       case 'array': {
-        newTableName = getTableName({ config: field, prefix: `${tableName}_` })
+        newTableName = getTableName({
+          adapter,
+          config: field,
+          parentTableName: tableName,
+          prefix: `${tableName}_`,
+        })
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
@@ -246,7 +253,9 @@ export const getTableColumnFromPath = ({
         let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
           newTableName = getTableName({
+            adapter,
             config: block,
+            parentTableName: tableName,
             prefix: `${tableName}_blocks_`,
           })
           constraintPath = `${constraintPath}${field.name}.%.`
@@ -316,7 +325,7 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         let relationshipFields
-        const relationTableName = `${rootTableName}_rels`
+        const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
         const newCollectionPath = pathSegments.slice(1).join('.')
         const aliasRelationshipTableName = uuid()
         const aliasRelationshipTable = alias(
@@ -340,6 +349,7 @@ export const getTableColumnFromPath = ({
         if (typeof field.relationTo === 'string') {
           const relationshipConfig = adapter.payload.collections[field.relationTo].config
           newTableName = getTableName({
+            adapter,
             config: relationshipConfig,
           })
           // parent to relationship join table
@@ -364,6 +374,7 @@ export const getTableColumnFromPath = ({
           const tableColumnsNames = field.relationTo.map(
             (relationTo) =>
               `"${aliasRelationshipTableName}"."${getTableName({
+                adapter,
                 config: adapter.payload.collections[relationTo].config,
               })}_id"`,
           )
@@ -411,7 +422,7 @@ export const getTableColumnFromPath = ({
           if (field.localized && adapter.payload.config.localization) {
             // If localized, we go to localized table and set aliasTable to undefined
             // so it is not picked up below to be used as targetTable
-            newTableName = `${tableName}_locales`
+            newTableName = `${tableName}${adapter.localesSuffix}`
 
             const parentTable = aliasTable || adapter.tables[tableName]
 

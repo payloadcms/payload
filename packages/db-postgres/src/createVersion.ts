@@ -6,8 +6,8 @@ import { buildVersionCollectionFields } from 'payload/versions'
 
 import type { PostgresAdapter } from './types'
 
+import { getTableName } from './schema/getTableName'
 import { upsertRow } from './upsertRow'
-import { getTableName } from './utilities/getTableName'
 
 export async function createVersion<T extends TypeWithID>(
   this: PostgresAdapter,
@@ -22,6 +22,7 @@ export async function createVersion<T extends TypeWithID>(
   const db = this.sessions[req.transactionID]?.db || this.drizzle
   const collection = this.payload.collections[collectionSlug].config
   const tableName = getTableName({
+    adapter: this,
     config: collection,
     versions: true,
   })
@@ -45,6 +46,7 @@ export async function createVersion<T extends TypeWithID>(
   const relationshipsTable =
     this.tables[
       getTableName({
+        adapter: this,
         config: collection,
         relationships: true,
         versions: true,

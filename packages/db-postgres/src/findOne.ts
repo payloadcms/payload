@@ -4,14 +4,17 @@ import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payl
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
-import { getTableName } from './utilities/getTableName'
+import { getTableName } from './schema/getTableName'
 
 export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,
   { collection, locale, req = {} as PayloadRequest, where }: FindOneArgs,
 ): Promise<T> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-  const tableName = getTableName({ config: collectionConfig })
+  const tableName = getTableName({
+    adapter: this,
+    config: collectionConfig,
+  })
 
   const { docs } = await findMany({
     adapter: this,
