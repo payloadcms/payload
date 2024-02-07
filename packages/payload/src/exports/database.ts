@@ -12,6 +12,7 @@ export type {
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
+  DatabaseAdapterResult as DatabaseAdapterObj,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,

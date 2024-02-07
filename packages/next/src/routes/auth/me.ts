@@ -1,13 +1,13 @@
 import httpStatus from 'http-status'
-import type { PayloadRequest } from 'payload/types'
 import { meOperation } from 'payload/operations'
 import { extractJWT } from '../../utilities/jwt'
+import { CollectionRouteHandler } from '../types'
 
-export const me = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const me: CollectionRouteHandler = async ({ req, collection }) => {
   const currentToken = extractJWT(req)
 
   const result = await meOperation({
-    collection: req.collection,
+    collection,
     req,
     currentToken,
   })

@@ -1,17 +1,12 @@
 import httpStatus from 'http-status'
 
-import type { PayloadRequest, SanitizedGlobalConfig, Where } from 'payload/types'
+import type { Where } from 'payload/types'
 
 import { findVersionsOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
+import { GlobalRouteHandler } from '../types'
 
-export const findVersions = async ({
-  req,
-  globalConfig,
-}: {
-  req: PayloadRequest
-  globalConfig: SanitizedGlobalConfig
-}): Promise<Response> => {
+export const findVersions: GlobalRouteHandler = async ({ req, globalConfig }) => {
   const { searchParams } = req
   const page = searchParams.get('page')
   const limit = searchParams.get('limit')

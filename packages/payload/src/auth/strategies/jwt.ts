@@ -24,8 +24,6 @@ export const JWTAuthentication: AuthStrategyFunction = async ({
       id: decodedPayload.id,
       collection: decodedPayload.collection,
       depth: isGraphQL ? 0 : collection.config.auth.depth,
-      // TODO(JAMES)(REVIEW): had to remove with new pattern
-      // req,
     })
 
     if (user && (!collection.config.auth.verify || user._verified)) {

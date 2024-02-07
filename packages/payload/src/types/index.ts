@@ -3,8 +3,7 @@ import type DataLoader from 'dataloader'
 
 import type payload from '../'
 import type { User } from '../auth/types'
-import type { Collection, TypeWithID, TypeWithTimestamps } from '../collections/config/types'
-import type { FindOneArgs } from '../database/types'
+import type { TypeWithID, TypeWithTimestamps } from '../collections/config/types'
 import type { validOperators } from './constants'
 export type { Payload as Payload } from '../'
 
@@ -22,11 +21,6 @@ export type UploadEdits = {
 }
 
 export type CustomPayloadRequest<U = any> = {
-  /**
-   * The collection being interacted with
-   * Only available for collection routes
-   */
-  collection?: Collection
   context: RequestContext
   /** Data from the request body */
   data?: Record<string, unknown>

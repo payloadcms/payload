@@ -142,19 +142,20 @@ export const GET = async (
         collection: slug1,
       },
     })
+    const collection = req.payload?.collections?.[slug1]
 
-    if (req?.collection) {
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        endpoints: req.collection.config?.endpoints || [],
+        endpoints: collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
 
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.GET.find({ req })
+          return endpoints.collection.GET.find({ req, collection })
         case 2:
           if (slug2 in endpoints.collection.GET) {
             // /:collection/init
@@ -163,7 +164,7 @@ export const GET = async (
             return endpoints.collection.GET?.[slug2]({ req })
           }
           // /:collection/:id
-          return endpoints.collection.GET.findByID({ req, id: slug2 })
+          return endpoints.collection.GET.findByID({ req, id: slug2, collection })
         case 3:
           // /:collection/access/:id
           // /:collection/versions/:id
@@ -210,7 +211,7 @@ export const GET = async (
       if (customEndpointResponse) return customEndpointResponse
 
       if (slug.length === 1 && slug1 === 'access') {
-        return endpoints.root.GET.access({ req })
+        return endpoints.root.GET.access({ req, collection })
       }
 
       return new Response('Route Not Found', { status: 404 })
@@ -228,19 +229,20 @@ export const POST = async (
 
   try {
     const req = await createPayloadRequest({ request, config, params: { collection: slug1 } })
+    const collection = req.payload?.collections?.[slug1]
 
-    if (req?.collection) {
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        endpoints: req.collection.config?.endpoints || [],
+        endpoints: collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
 
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.POST.create({ req })
+          return endpoints.collection.POST.create({ req, collection })
         case 2:
           if (slug2 in endpoints.collection.POST) {
             // /:collection/login
@@ -313,22 +315,23 @@ export const DELETE = async (
         collection: slug1,
       },
     })
+    const collection = req.payload?.collections?.[slug1]
 
-    if (req?.collection) {
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        endpoints: req.collection.config?.endpoints || [],
+        endpoints: collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
 
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.DELETE.delete({ req })
+          return endpoints.collection.DELETE.delete({ req, collection })
         case 2:
           // /:collection/:id
-          return endpoints.collection.DELETE.deleteByID({ req, id: slug2 })
+          return endpoints.collection.DELETE.deleteByID({ req, id: slug2, collection })
         default:
           return new Response('Route Not Found', { status: 404 })
       }
@@ -359,22 +362,23 @@ export const PATCH = async (
         collection: slug1,
       },
     })
+    const collection = req.payload?.collections?.[slug1]
 
-    if (req?.collection) {
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
-        endpoints: req.collection.config?.endpoints || [],
+        endpoints: collection.config?.endpoints || [],
       })
       if (customEndpointResponse) return customEndpointResponse
 
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.PATCH.update({ req })
+          return endpoints.collection.PATCH.update({ req, collection })
         case 2:
           // /:collection/:id
-          return endpoints.collection.PATCH.updateByID({ req, id: slug2 })
+          return endpoints.collection.PATCH.updateByID({ req, id: slug2, collection })
         default:
           return new Response('Route Not Found', { status: 404 })
       }
