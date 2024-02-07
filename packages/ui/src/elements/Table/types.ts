@@ -1,6 +1,6 @@
 import type React from 'react'
 
-import type { FieldBase } from 'payload/types'
+import type { CellProps, FieldBase } from 'payload/types'
 
 export type Column = {
   accessor: string
@@ -11,6 +11,7 @@ export type Column = {
   }
   label: FieldBase['label']
   name: FieldBase['name']
+  cellProps?: Partial<CellProps>
 }
 
 export type Props = {

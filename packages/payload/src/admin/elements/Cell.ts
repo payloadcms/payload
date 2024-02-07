@@ -22,7 +22,11 @@ export type CellProps = {
   labels?: Labels
   link?: boolean
   name: FieldBase['name']
-  onClick?: (Props) => void
+  onClick?: (args: {
+    cellData: unknown
+    collectionSlug: SanitizedCollectionConfig['slug']
+    rowData: Record<string, unknown>
+  }) => void
   options?: SelectField['options']
   relationTo?: RelationshipField['relationTo']
 }

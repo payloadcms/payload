@@ -13,13 +13,12 @@ import { useTableCell } from '../../../elements/Table/TableCellProvider'
 
 export const DefaultCell: React.FC<CellProps> = (props) => {
   const {
-    className,
-    onClick,
+    className: classNameFromProps,
     name,
-    link: linkFromProps,
     fieldType,
     isFieldAffectingData,
     label,
+    onClick: onClickFromProps,
   } = props
 
   const { i18n } = useTranslation()
@@ -28,7 +27,15 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
     routes: { admin: adminRoute },
   } = useConfig()
 
-  const { cellData, rowData, customCellContext, columnIndex } = useTableCell()
+  const cellContext = useTableCell()
+
+  const { cellData, rowData, customCellContext, columnIndex, cellProps } = cellContext || {}
+
+  const { link, onClick: onClickFromContext, className: classNameFromContext } = cellProps || {}
+
+  const className = classNameFromProps || classNameFromContext
+
+  const onClick = onClickFromProps || onClickFromContext
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -41,7 +48,9 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
     className,
   }
 
-  if (linkFromProps || (linkFromProps === undefined && columnIndex === 0)) {
+  const isLink = link !== undefined ? link : columnIndex === 0
+
+  if (isLink) {
     WrapElement = Link
     wrapElementProps.href = customCellContext?.collectionSlug
       ? `${adminRoute}/collections/${customCellContext?.collectionSlug}/${rowData.id}`
@@ -52,7 +61,11 @@ export const DefaultCell: React.FC<CellProps> = (props) => {
     WrapElement = 'button'
     wrapElementProps.type = 'button'
     wrapElementProps.onClick = () => {
-      onClick(props)
+      onClick({
+        cellData,
+        rowData,
+        collectionSlug: customCellContext?.collectionSlug,
+      })
     }
   }
 

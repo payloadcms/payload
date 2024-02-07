@@ -51,7 +51,7 @@ export const TableColumnsProvider: React.FC<{
   const { i18n } = useTranslation()
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
-    return initialColumns.map((columnPath) => {
+    return initialColumns.map((columnPath, index) => {
       const field = getMappedFieldByPath({ path: columnPath, collectionSlug })
 
       if (field) {
@@ -64,6 +64,7 @@ export const TableColumnsProvider: React.FC<{
             Cell: field.Cell,
             Heading: field.Heading,
           },
+          cellProps: cellProps?.[index],
         }
 
         return column

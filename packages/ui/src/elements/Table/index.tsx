@@ -14,6 +14,7 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, data, custom
   const { columns: columnsFromContext } = useTableColumns()
 
   const columns = columnsFromProps || columnsFromContext
+
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -47,6 +48,7 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, data, custom
                         rowData={row}
                         cellData={row[col.accessor]}
                         customCellContext={customCellContext}
+                        cellProps={col?.cellProps}
                         columnIndex={colIndex}
                       >
                         {col.components.Cell}

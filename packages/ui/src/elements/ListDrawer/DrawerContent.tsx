@@ -200,7 +200,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     ({ doc }) => {
       if (typeof onSelect === 'function') {
         onSelect({
-          collectionConfig: selectedCollectionConfig,
+          collectionSlug: selectedCollectionConfig.slug,
           docID: doc.id,
         })
       }
@@ -293,11 +293,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         {
           className: `${baseClass}__first-cell`,
           link: false,
-          onClick: ({ collection: rowColl, rowData }) => {
+          onClick: ({ collectionSlug: rowColl, rowData }) => {
             if (typeof onSelect === 'function') {
               onSelect({
-                collectionConfig: rowColl,
-                docID: rowData.id,
+                collectionSlug: rowColl,
+                docID: rowData.id as string,
               })
             }
           },
