@@ -273,6 +273,74 @@ describe('Relationships', () => {
         expect(query.totalDocs).toEqual(2)
       })
 
+      // https://github.com/payloadcms/payload/issues/4240
+      it('should allow querying by relationship id field', async () => {
+        /**
+         * This test shows something which breaks on postgres but not on mongodb.
+         */
+        const someDirector = await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Harry Potter',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Lord of the Rings is boring',
+            director: someDirector.id,
+          },
+        })
+
+        // This causes the following error:
+        // "Your "id" field references a column "directors"."id", but the table "directors" is not part of the query! Did you forget to join it?"
+        // This only happens on postgres, not on mongodb
+        const query = await payload.find({
+          collection: 'movies',
+          depth: 5,
+          limit: 1,
+          where: {
+            or: [
+              {
+                name: {
+                  equals: 'Pulp Fiction',
+                },
+              },
+              {
+                'director.id': {
+                  equals: someDirector.id,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(query.totalDocs).toEqual(3)
+        expect(query.docs).toHaveLength(1) // Due to limit: 1
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { doc } = await client.findByID<Post>({ id: post.id })
@@ -288,7 +356,7 @@ describe('Relationships', () => {
           await expect(async () =>
             createPost({
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore Sending bad data to test error handling
+              // @ts-expect-error Sending bad data to test error handling
               customIdRelation: 1234,
             }),
           ).rejects.toThrow('The following field is invalid: customIdRelation')
@@ -298,7 +366,7 @@ describe('Relationships', () => {
           await expect(async () =>
             createPost({
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore Sending bad data to test error handling
+              // @ts-expect-error Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),
           ).rejects.toThrow('The following field is invalid: customIdNumberRelation')
