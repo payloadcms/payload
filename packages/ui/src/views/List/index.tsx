@@ -17,6 +17,7 @@ import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { Table } from '../../elements/Table'
 
 import './index.scss'
+import { ListControls } from '../../elements/ListControls'
 
 const baseClass = 'collection-list'
 
@@ -96,17 +97,17 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
               </Fragment>
             )}
           </header>
-          {/* <ListControls
+          <ListControls
             collectionPluralLabel={labels?.plural}
             collectionSlug={collectionSlug}
-            textFieldsToBeSearched={textFieldsToBeSearched}
+            // textFieldsToBeSearched={textFieldsToBeSearched}
             // handleSearchChange={handleSearchChange}
             // handleSortChange={handleSortChange}
             // handleWhereChange={handleWhereChange}
             // modifySearchQuery={modifySearchParams}
             // resetParams={resetParams}
             titleField={titleField}
-          /> */}
+          />
           {BeforeListTable}
           {!data.docs && (
             <StaggeredShimmers

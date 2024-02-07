@@ -58,7 +58,7 @@ export const TableColumnsProvider: React.FC<{
         const column: Column = {
           accessor: columnPath,
           active: true,
-          // label: field.label,
+          label: field.label,
           name: field.name,
           components: {
             Cell: field.Cell,

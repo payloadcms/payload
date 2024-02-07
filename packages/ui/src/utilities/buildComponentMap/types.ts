@@ -1,6 +1,7 @@
 import { FieldPermissions } from 'payload/auth'
 import {
   BlockField,
+  FieldBase,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TabsField,
@@ -32,6 +33,7 @@ export type MappedField = {
   name: string
   readOnly: boolean
   isSidebar: boolean
+  label: FieldBase['label']
   /**
    * On `array`, `blocks`, `group`, `collapsible`, and `tabs` fields only
    */

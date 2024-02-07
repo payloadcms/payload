@@ -11,7 +11,6 @@ import { getTranslation } from '@payloadcms/translations'
 import { Chevron } from '../../icons/Chevron'
 import { useSearchParams } from '../../providers/SearchParams'
 import { Button } from '../Button'
-// import ColumnSelector from '../ColumnSelector'
 import DeleteMany from '../DeleteMany'
 import EditMany from '../EditMany'
 import Pill from '../Pill'
@@ -21,6 +20,8 @@ import SortComplex from '../SortComplex'
 import UnpublishMany from '../UnpublishMany'
 import WhereBuilder from '../WhereBuilder'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery'
+import ColumnSelector from '../ColumnSelector'
+
 import './index.scss'
 
 const baseClass = 'list-controls'
@@ -127,7 +128,7 @@ export const ListControls: React.FC<Props> = (props) => {
           height={visibleDrawer === 'columns' ? 'auto' : 0}
           id={`${baseClass}-columns`}
         >
-          {/* <ColumnSelector collectionSlug={collectionSlug} /> */}
+          <ColumnSelector collectionSlug={collectionSlug} />
         </AnimateHeight>
       )}
       <AnimateHeight

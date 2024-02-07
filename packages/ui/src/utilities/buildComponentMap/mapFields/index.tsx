@@ -36,7 +36,7 @@ export const mapFields = (args: {
     parentPath,
   } = args
 
-  const result = fieldSchema.reduce((acc, field): FieldMap => {
+  const result: FieldMap = fieldSchema.reduce((acc, field): FieldMap => {
     const fieldIsPresentational = fieldIsPresentationalOnly(field)
     let FieldComponent = field.admin?.components?.Field || fieldTypes[field.type]
 
@@ -249,6 +249,7 @@ export const mapFields = (args: {
 
         const reducedField: MappedField = {
           name: 'name' in field ? field.name : '',
+          label: 'label' in field && typeof field.label !== 'function' ? field.label : undefined,
           type: field.type,
           Field,
           Cell: (
@@ -299,6 +300,7 @@ export const mapFields = (args: {
     result.push({
       name: 'id',
       type: 'text',
+      label: 'ID',
       Field: <HiddenInput name="id" />,
       Cell: <DefaultCell name="id" />,
       Heading: <SortColumn label="ID" name="id" />,
