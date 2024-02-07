@@ -64,13 +64,16 @@ describe('uploads', () => {
     audioDoc = findAudio.docs[0] as unknown as Media
   })
 
-  test('should see upload filename in relation list', async () => {
+  test('should see upload filename and thumbnail in relation list', async () => {
     await page.goto(relationURL.list)
 
     await wait(110)
     const field = page.locator('.cell-image')
 
     await expect(field).toContainText('image.png')
+
+    const thumbnail = page.locator('.cell-image img')
+    await expect(thumbnail).toBeVisible()
   })
 
   test('should show upload filename in upload collection list', async () => {
