@@ -349,7 +349,7 @@ export const getTableColumnFromPath = ({
             table: newAliasTable,
           })
 
-          if (newCollectionPath === '') {
+          if (newCollectionPath === '' || newCollectionPath === 'id') {
             return {
               columnName: `${field.relationTo}ID`,
               constraints,
