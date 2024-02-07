@@ -1,11 +1,11 @@
 import httpStatus from 'http-status'
 
 import { unlockOperation } from 'payload/operations'
-import { PayloadRequest } from 'payload/types'
+import { CollectionRouteHandler } from '../types'
 
-export const unlock = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const unlock: CollectionRouteHandler = async ({ req, collection }) => {
   await unlockOperation({
-    collection: req.collection,
+    collection,
     data: { email: req.data.email as string },
     req,
   })

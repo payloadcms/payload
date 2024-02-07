@@ -1,10 +1,10 @@
 import { forgotPasswordOperation } from 'payload/operations'
-import { PayloadRequest } from 'payload/types'
 import httpStatus from 'http-status'
+import { CollectionRouteHandler } from '../types'
 
-export const forgotPassword = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const forgotPassword: CollectionRouteHandler = async ({ req, collection }) => {
   await forgotPasswordOperation({
-    collection: req.collection,
+    collection,
     data: {
       email: req.data.email as string,
     },

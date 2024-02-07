@@ -22,7 +22,6 @@ function getRequestContext(
 
 type CreateLocalReq = (
   options: {
-    collection?: number | string | symbol
     context?: RequestContext
     fallbackLocale?: string
     locale?: string
@@ -32,7 +31,7 @@ type CreateLocalReq = (
   payload: Payload,
 ) => PayloadRequest
 export const createLocalReq: CreateLocalReq = (
-  { collection, context, fallbackLocale, locale, req = {} as PayloadRequest, user },
+  { context, fallbackLocale, locale, req = {} as PayloadRequest, user },
   payload,
 ) => {
   const i18n = req?.i18n || getLocalI18n({ config: payload.config })
@@ -56,7 +55,6 @@ export const createLocalReq: CreateLocalReq = (
   req.i18n = i18n
   req.t = i18n.t
   req.user = user || req?.user || null
-  req.collection = collection ? payload.collections?.[collection] : null
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)
   req.searchParams = req?.searchParams || new URLSearchParams()
   req.pathname = req?.pathname || null

@@ -1,11 +1,11 @@
 import httpStatus from 'http-status'
 import { registerFirstUserOperation } from 'payload/operations'
-import { PayloadRequest } from 'payload/types'
 import { generatePayloadCookie } from '../../utilities/cookies'
+import { CollectionRouteHandler } from '../types'
 
-export const registerFirstUser = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const registerFirstUser: CollectionRouteHandler = async ({ req, collection }) => {
   const result = await registerFirstUserOperation({
-    collection: req.collection,
+    collection,
     data: {
       email: typeof req.data?.email === 'string' ? req.data.email : '',
       password: typeof req.data?.password === 'string' ? req.data.password : '',
@@ -16,7 +16,7 @@ export const registerFirstUser = async ({ req }: { req: PayloadRequest }): Promi
   const cookie = generatePayloadCookie({
     token: result.token,
     payload: req.payload,
-    collectionConfig: req.collection.config,
+    collectionConfig: collection.config,
   })
 
   return Response.json(

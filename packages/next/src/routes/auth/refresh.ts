@@ -1,10 +1,10 @@
 import { extractJWT } from '../../utilities/jwt'
 import { refreshOperation } from 'payload/operations'
-import { PayloadRequest } from 'payload/types'
 import httpStatus from 'http-status'
 import { generatePayloadCookie } from '../../utilities/cookies'
+import { CollectionRouteHandler } from '../types'
 
-export const refresh = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const refresh: CollectionRouteHandler = async ({ req, collection }) => {
   const token = typeof req.data?.token === 'string' ? req.data.token : extractJWT(req)
 
   if (!token) {
@@ -22,13 +22,13 @@ export const refresh = async ({ req }: { req: PayloadRequest }): Promise<Respons
   const result = await refreshOperation({
     token,
     req,
-    collection: req.collection,
+    collection,
   })
 
   const cookie = generatePayloadCookie({
     token: result.refreshedToken,
     payload: req.payload,
-    collectionConfig: req.collection.config,
+    collectionConfig: collection.config,
   })
 
   return Response.json(

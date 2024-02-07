@@ -1,22 +1,16 @@
 import httpStatus from 'http-status'
 
-import { PayloadRequest } from 'payload/types'
 import { findByIDOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
+import { CollectionRouteHandler } from '../types'
 
-export const findByID = async ({
-  req,
-  id,
-}: {
-  req: PayloadRequest
-  id: string
-}): Promise<Response> => {
+export const findByID: CollectionRouteHandler<{ id: string }> = async ({ req, collection, id }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await findByIDOperation({
     id,
-    collection: req.collection,
+    collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     req,

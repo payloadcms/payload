@@ -1,11 +1,10 @@
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from 'payload/types'
-
 import { isNumber } from 'payload/utilities'
 import { createOperation } from 'payload/operations'
+import { CollectionRouteHandler } from '../types'
 
-export const create = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const create: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
   const autosave = searchParams.get('autosave') === 'true'
   const draft = searchParams.get('draft') === 'true'
@@ -13,7 +12,7 @@ export const create = async ({ req }: { req: PayloadRequest }): Promise<Response
 
   const doc = await createOperation({
     autosave,
-    collection: req.collection,
+    collection,
     data: req.data,
     depth: isNumber(depth) ? depth : undefined,
     draft,
@@ -24,7 +23,7 @@ export const create = async ({ req }: { req: PayloadRequest }): Promise<Response
     {
       doc,
       message: req.t('general:successfullyCreated', {
-        label: req.collection.config.labels.singular,
+        label: collection.config.labels.singular,
       }),
     },
     {

@@ -1,22 +1,20 @@
 import httpStatus from 'http-status'
 
-import { PayloadRequest } from 'payload/types'
 import { findVersionByIDOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
+import { CollectionRouteHandler } from '../types'
 
-export const findVersionByID = async ({
+export const findVersionByID: CollectionRouteHandler<{ id: string }> = async ({
   req,
+  collection,
   id,
-}: {
-  req: PayloadRequest
-  id: string
-}): Promise<Response> => {
+}) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await findVersionByIDOperation({
     id,
-    collection: req.collection,
+    collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     req,
   })

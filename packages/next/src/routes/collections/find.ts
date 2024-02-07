@@ -1,11 +1,10 @@
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from 'payload/types'
-
 import { isNumber } from 'payload/utilities'
 import { findOperation } from 'payload/operations'
+import { CollectionRouteHandler } from '../types'
 
-export const find = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const find: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
 
   const depth = searchParams.get('depth')
@@ -14,7 +13,7 @@ export const find = async ({ req }: { req: PayloadRequest }): Promise<Response> 
   const where = searchParams.get('where')
 
   const result = await findOperation({
-    collection: req.collection,
+    collection,
     depth: isNumber(depth) ? Number(depth) : undefined,
     draft: searchParams.get('draft') === 'true',
     limit: isNumber(limit) ? Number(limit) : undefined,

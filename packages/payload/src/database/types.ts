@@ -403,3 +403,8 @@ export type PaginatedDocs<T = any> = {
   totalDocs: number
   totalPages: number
 }
+
+export type DatabaseAdapterResult<T = BaseDatabaseAdapter> = {
+  defaultIDType: 'number' | 'text'
+  init: (args: { payload: Payload }) => T
+}
