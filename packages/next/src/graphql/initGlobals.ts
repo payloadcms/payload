@@ -4,8 +4,7 @@ import { singular } from 'pluralize'
 import { toWords } from 'payload/utilities'
 import { buildVersionGlobalFields } from 'payload/versions'
 
-import type { Payload } from 'payload'
-import type { Field, SanitizedGlobalConfig } from 'payload/types'
+import type { Field, SanitizedConfig, SanitizedGlobalConfig } from 'payload/types'
 
 import buildMutationInputType from './schema/buildMutationInputType'
 import buildObjectType from './schema/buildObjectType'
@@ -19,10 +18,15 @@ import findVersionByIDResolver from './resolvers/globals/findVersionByID'
 import findVersionsResolver from './resolvers/globals/findVersions'
 import restoreVersionResolver from './resolvers/globals/restoreVersion'
 import updateResolver from './resolvers/globals/update'
+import { Result } from './schema/configToSchema'
 
-function initGlobalsGraphQL(payload: Payload): void {
-  Object.keys(payload.globals.config).forEach((slug) => {
-    const global: SanitizedGlobalConfig = payload.globals.config[slug]
+type InitGlobalsGraphQLArgs = {
+  config: SanitizedConfig
+  graphqlResult: Result
+}
+function initGlobalsGraphQL({ config, graphqlResult }: InitGlobalsGraphQLArgs): void {
+  Object.keys(graphqlResult.globals.config).forEach((slug) => {
+    const global: SanitizedGlobalConfig = graphqlResult.globals.config[slug]
     const { fields, graphQL, versions } = global
 
     if (graphQL === false) {
@@ -33,15 +37,16 @@ function initGlobalsGraphQL(payload: Payload): void {
 
     const forceNullableObjectType = Boolean(versions?.drafts)
 
-    if (!payload.globals.graphQL) payload.globals.graphQL = {}
+    if (!graphqlResult.globals.graphQL) graphqlResult.globals.graphQL = {}
 
     const updateMutationInputType = buildMutationInputType(
-      payload,
       formattedName,
       fields,
       formattedName,
+      false,
+      graphqlResult,
     )
-    payload.globals.graphQL[slug] = {
+    graphqlResult.globals.graphQL[slug] = {
       mutationInputType: updateMutationInputType
         ? new GraphQLNonNull(updateMutationInputType)
         : null,
@@ -50,41 +55,42 @@ function initGlobalsGraphQL(payload: Payload): void {
         fields,
         forceNullable: forceNullableObjectType,
         parentName: formattedName,
-        payload,
+        graphqlResult,
+        config,
       }),
     }
 
-    payload.Query.fields[formattedName] = {
+    graphqlResult.Query.fields[formattedName] = {
       args: {
         draft: { type: GraphQLBoolean },
-        ...(payload.config.localization
+        ...(config.localization
           ? {
-              fallbackLocale: { type: payload.types.fallbackLocaleInputType },
-              locale: { type: payload.types.localeInputType },
+              fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
+              locale: { type: graphqlResult.types.localeInputType },
             }
           : {}),
       },
       resolve: findOneResolver(global),
-      type: payload.globals.graphQL[slug].type,
+      type: graphqlResult.globals.graphQL[slug].type,
     }
 
-    payload.Mutation.fields[`update${formattedName}`] = {
+    graphqlResult.Mutation.fields[`update${formattedName}`] = {
       args: {
         ...(updateMutationInputType
-          ? { data: { type: payload.globals.graphQL[slug].mutationInputType } }
+          ? { data: { type: graphqlResult.globals.graphQL[slug].mutationInputType } }
           : {}),
         draft: { type: GraphQLBoolean },
-        ...(payload.config.localization
+        ...(config.localization
           ? {
-              locale: { type: payload.types.localeInputType },
+              locale: { type: graphqlResult.types.localeInputType },
             }
           : {}),
       },
       resolve: updateResolver(global),
-      type: payload.globals.graphQL[slug].type,
+      type: graphqlResult.globals.graphQL[slug].type,
     }
 
-    payload.Query.fields[`docAccess${formattedName}`] = {
+    graphqlResult.Query.fields[`docAccess${formattedName}`] = {
       resolve: docAccessResolver(global),
       type: buildPolicyType({
         entity: global,
@@ -95,13 +101,13 @@ function initGlobalsGraphQL(payload: Payload): void {
     }
 
     if (global.versions) {
-      const idType = payload.db.defaultIDType === 'number' ? GraphQLInt : GraphQLString
+      const idType = graphqlResult.defaultIDType === 'number' ? GraphQLInt : GraphQLString
 
       const versionGlobalFields: Field[] = [
         ...buildVersionGlobalFields(global),
         {
           name: 'id',
-          type: payload.db.defaultIDType as 'text',
+          type: graphqlResult.defaultIDType as 'text',
         },
         {
           name: 'createdAt',
@@ -115,41 +121,41 @@ function initGlobalsGraphQL(payload: Payload): void {
         },
       ]
 
-      payload.globals.graphQL[slug].versionType = buildObjectType({
+      graphqlResult.globals.graphQL[slug].versionType = buildObjectType({
         name: `${formattedName}Version`,
         fields: versionGlobalFields,
         forceNullable: forceNullableObjectType,
         parentName: `${formattedName}Version`,
-        payload,
+        graphqlResult,
+        config,
       })
 
-      payload.Query.fields[`version${formatName(formattedName)}`] = {
+      graphqlResult.Query.fields[`version${formatName(formattedName)}`] = {
         args: {
           id: { type: idType },
-          ...(payload.config.localization
+          ...(config.localization
             ? {
-                fallbackLocale: { type: payload.types.fallbackLocaleInputType },
-                locale: { type: payload.types.localeInputType },
+                fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
+                locale: { type: graphqlResult.types.localeInputType },
               }
             : {}),
         },
         resolve: findVersionByIDResolver(global),
-        type: payload.globals.graphQL[slug].versionType,
+        type: graphqlResult.globals.graphQL[slug].versionType,
       }
-      payload.Query.fields[`versions${formattedName}`] = {
+      graphqlResult.Query.fields[`versions${formattedName}`] = {
         args: {
           where: {
             type: buildWhereInputType({
               name: `versions${formattedName}`,
               fields: versionGlobalFields,
               parentName: `versions${formattedName}`,
-              payload,
             }),
           },
-          ...(payload.config.localization
+          ...(config.localization
             ? {
-                fallbackLocale: { type: payload.types.fallbackLocaleInputType },
-                locale: { type: payload.types.localeInputType },
+                fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
+                locale: { type: graphqlResult.types.localeInputType },
               }
             : {}),
           limit: { type: GraphQLInt },
@@ -159,15 +165,15 @@ function initGlobalsGraphQL(payload: Payload): void {
         resolve: findVersionsResolver(global),
         type: buildPaginatedListType(
           `versions${formatName(formattedName)}`,
-          payload.globals.graphQL[slug].versionType,
+          graphqlResult.globals.graphQL[slug].versionType,
         ),
       }
-      payload.Mutation.fields[`restoreVersion${formatName(formattedName)}`] = {
+      graphqlResult.Mutation.fields[`restoreVersion${formatName(formattedName)}`] = {
         args: {
           id: { type: idType },
         },
         resolve: restoreVersionResolver(global),
-        type: payload.globals.graphQL[slug].type,
+        type: graphqlResult.globals.graphQL[slug].type,
       }
     }
   })

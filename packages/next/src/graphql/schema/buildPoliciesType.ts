@@ -6,7 +6,7 @@ import type {
   Field,
   GlobalConfig,
   SanitizedGlobalConfig,
-  Payload,
+  SanitizedConfig,
 } from 'payload/types'
 
 import { toWords } from 'payload/utilities'
@@ -198,14 +198,14 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   })
 }
 
-export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
+export default function buildPoliciesType(config: SanitizedConfig): GraphQLObjectType {
   const fields = {
     canAccessAdmin: {
       type: new GraphQLNonNull(GraphQLBoolean),
     },
   }
 
-  Object.values(payload.config.collections).forEach((collection: SanitizedCollectionConfig) => {
+  Object.values(config.collections).forEach((collection: SanitizedCollectionConfig) => {
     if (collection.graphQL === false) {
       return
     }
@@ -220,7 +220,7 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
     }
   })
 
-  Object.values(payload.config.globals).forEach((global: SanitizedGlobalConfig) => {
+  Object.values(config.globals).forEach((global: SanitizedGlobalConfig) => {
     if (global.graphQL === false) {
       return
     }

@@ -1,10 +1,11 @@
 import config from 'payload-config'
 import { GraphQLError } from 'graphql'
-import { createSchema, createYoga } from 'graphql-yoga'
 import httpStatus from 'http-status'
 import type { Payload, CollectionAfterErrorHook } from 'payload/types'
 import type { GraphQLFormattedError } from 'graphql'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest'
+import { createHandler } from 'graphql-http/lib/use/fetch'
+import { configToSchema } from '../schema/configToSchema'
 
 const handleError = async (
   payload: Payload,
@@ -14,7 +15,6 @@ const handleError = async (
 ): Promise<GraphQLFormattedError> => {
   const status = err.originalError.status || httpStatus.INTERNAL_SERVER_ERROR
   let errorMessage = err.message
-
   payload.logger.error(err.stack)
 
   // Internal server errors can contain anything, including potentially sensitive data.
@@ -48,35 +48,47 @@ export const POST = async (request: Request) => {
     request,
     config,
   })
-  const copyOfSchema = req.payload.schema
+  const resolvedConfig = await config
+  const mySchema = await configToSchema(resolvedConfig)
 
-  const schema = createSchema({
-    typeDefs: /* GraphQL */ `
-      type Query {
-        greetings: String
+  const { payload } = req
+  const headers = new Headers()
+
+  const afterErrorHook =
+    typeof payload.config.hooks.afterError === 'function' ? payload.config.hooks.afterError : null
+
+  const apiResponse = await createHandler({
+    context: { req, headers },
+    onOperation: async (request, args, result) => {
+      const response =
+        typeof payload.extensions === 'function'
+          ? await payload.extensions({
+              args,
+              req: request,
+              result,
+            })
+          : result
+      if (response.errors) {
+        const errors = (await Promise.all(
+          result.errors.map((error) => {
+            return handleError(payload, error, payload.config.debug, afterErrorHook)
+          }),
+        )) as GraphQLError[]
+        // errors type should be FormattedGraphQLError[] but onOperation has a return type of ExecutionResult instead of FormattedExecutionResult
+        return { ...response, errors }
       }
-    `,
-    resolvers: {
-      Query: {
-        greetings: () => 'This is the `greetings` field of the root `Query` type',
-      },
+      return response
     },
-  })
-  const apiResponse = await createYoga({
-    schema: copyOfSchema,
-
-    // While using Next.js file convention for routing, we need to configure Yoga to use the correct endpoint
-    graphqlEndpoint: '/api/graphql',
-
-    // Yoga needs to know how to create a valid Next response
-    fetchAPI: { Response },
+    schema: mySchema.schema,
+    validationRules: (request, args, defaultRules) =>
+      defaultRules.concat(mySchema.validationRules(args)),
   })(originalRequest)
-  console.log('schema', Object.keys(schema))
-  console.log('payload schema', typeof req.payload.schema)
 
   return new Response(apiResponse.body, {
+    status: apiResponse.status,
     headers: {
       ...apiResponse.headers,
+      ...headers,
     },
   })
 }

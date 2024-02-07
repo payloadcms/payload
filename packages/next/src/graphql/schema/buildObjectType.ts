@@ -18,7 +18,7 @@ import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 /* eslint-disable no-use-before-define */
 import { GraphQLJSON } from 'graphql-type-json'
 
-import type { RichTextAdapter } from 'payload/types'
+import type { RichTextAdapter, SanitizedConfig } from 'payload/types'
 import type {
   ArrayField,
   BlockField,
@@ -42,7 +42,6 @@ import type {
   TextareaField,
   UploadField,
 } from 'payload/types'
-import type { Payload } from 'payload'
 
 import { tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
@@ -52,6 +51,7 @@ import formatOptions from '../utilities/formatOptions'
 import buildWhereInputType from './buildWhereInputType'
 import isFieldNullable from './isFieldNullable'
 import withNullableType from './withNullableType'
+import { Result } from './configToSchema'
 
 type LocaleInputType = {
   fallbackLocale: {
@@ -75,7 +75,8 @@ type Args = {
   forceNullable?: boolean
   name: string
   parentName: string
-  payload: Payload
+  graphqlResult: Result
+  config: SanitizedConfig
 }
 
 function buildObjectType({
@@ -84,32 +85,36 @@ function buildObjectType({
   fields,
   forceNullable,
   parentName,
-  payload,
+  graphqlResult,
+  config,
 }: Args): GraphQLObjectType {
   const fieldToSchemaMap = {
     array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
       const interfaceName =
         field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
-      if (!payload.types.arrayTypes[interfaceName]) {
+      if (!graphqlResult.types.arrayTypes[interfaceName]) {
         const objectType = buildObjectType({
           name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
           parentName: interfaceName,
-          payload,
+          graphqlResult,
+          config,
         })
 
         if (Object.keys(objectType.getFields()).length) {
-          payload.types.arrayTypes[interfaceName] = objectType
+          graphqlResult.types.arrayTypes[interfaceName] = objectType
         }
       }
 
-      if (!payload.types.arrayTypes[interfaceName]) {
+      if (!graphqlResult.types.arrayTypes[interfaceName]) {
         return objectTypeConfig
       }
 
-      const arrayType = new GraphQLList(new GraphQLNonNull(payload.types.arrayTypes[interfaceName]))
+      const arrayType = new GraphQLList(
+        new GraphQLNonNull(graphqlResult.types.arrayTypes[interfaceName]),
+      )
 
       return {
         ...objectTypeConfig,
@@ -118,7 +123,7 @@ function buildObjectType({
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
       const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, block) => {
-        if (!payload.types.blockTypes[block.slug]) {
+        if (!graphqlResult.types.blockTypes[block.slug]) {
           const interfaceName =
             block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true)
 
@@ -133,16 +138,17 @@ function buildObjectType({
             ],
             forceNullable,
             parentName: interfaceName,
-            payload,
+            graphqlResult,
+            config,
           })
 
           if (Object.keys(objectType.getFields()).length) {
-            payload.types.blockTypes[block.slug] = objectType
+            graphqlResult.types.blockTypes[block.slug] = objectType
           }
         }
 
-        if (payload.types.blockTypes[block.slug]) {
-          acc.push(payload.types.blockTypes[block.slug])
+        if (graphqlResult.types.blockTypes[block.slug]) {
+          acc.push(graphqlResult.types.blockTypes[block.slug])
         }
 
         return acc
@@ -158,7 +164,7 @@ function buildObjectType({
         new GraphQLNonNull(
           new GraphQLUnionType({
             name: fullName,
-            resolveType: (data) => payload.types.blockTypes[data.blockType].name,
+            resolveType: (data) => graphqlResult.types.blockTypes[data.blockType].name,
             types: blockTypes,
           }),
         ),
@@ -195,27 +201,28 @@ function buildObjectType({
       const interfaceName =
         field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
-      if (!payload.types.groupTypes[interfaceName]) {
+      if (!graphqlResult.types.groupTypes[interfaceName]) {
         const objectType = buildObjectType({
           name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
           parentName: interfaceName,
-          payload,
+          graphqlResult,
+          config,
         })
 
         if (Object.keys(objectType.getFields()).length) {
-          payload.types.groupTypes[interfaceName] = objectType
+          graphqlResult.types.groupTypes[interfaceName] = objectType
         }
       }
 
-      if (!payload.types.groupTypes[interfaceName]) {
+      if (!graphqlResult.types.groupTypes[interfaceName]) {
         return objectTypeConfig
       }
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type: payload.types.groupTypes[interfaceName] },
+        [field.name]: { type: graphqlResult.types.groupTypes[interfaceName] },
       }
     },
     json: (objectTypeConfig: ObjectTypeConfig, field: JSONField) => ({
@@ -281,7 +288,7 @@ function buildObjectType({
           ),
         })
 
-        const types = relationTo.map((relation) => payload.collections[relation].graphQL.type)
+        const types = relationTo.map((relation) => graphqlResult.collections[relation].graphQL.type)
 
         type = new GraphQLObjectType({
           name: `${relationshipName}_Relationship`,
@@ -293,7 +300,7 @@ function buildObjectType({
               type: new GraphQLUnionType({
                 name: relationshipName,
                 async resolveType(data, { req }) {
-                  return payload.collections[data.collection].graphQL.type.name
+                  return graphqlResult.collections[data.collection].graphQL.type.name
                 },
                 types,
               }),
@@ -301,7 +308,7 @@ function buildObjectType({
           },
         })
       } else {
-        ;({ type } = payload.collections[relationTo].graphQL)
+        ;({ type } = graphqlResult.collections[relationTo].graphQL)
       }
 
       // If the relationshipType is undefined at this point,
@@ -319,13 +326,13 @@ function buildObjectType({
         where?: unknown
       } = {}
 
-      if (payload.config.localization) {
+      if (config.localization) {
         relationshipArgs.locale = {
-          type: payload.types.localeInputType,
+          type: graphqlResult.types.localeInputType,
         }
 
         relationshipArgs.fallbackLocale = {
-          type: payload.types.fallbackLocaleInputType,
+          type: graphqlResult.types.fallbackLocaleInputType,
         }
       }
 
@@ -451,7 +458,7 @@ function buildObjectType({
           },
         },
         async resolve(parent, args, context) {
-          let depth = payload.config.defaultDepth
+          let depth = config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
           const editor: RichTextAdapter = field?.editor
 
@@ -508,13 +515,14 @@ function buildObjectType({
           const interfaceName =
             tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true))
 
-          if (!payload.types.tabTypes[interfaceName]) {
+          if (!graphqlResult.types.tabTypes[interfaceName]) {
             const objectType = buildObjectType({
               name: interfaceName,
               fields: tab.fields,
               forceNullable,
               parentName: interfaceName,
-              payload,
+              graphqlResult,
+              config,
             })
 
             if (Object.keys(objectType.getFields()).length) {
@@ -557,19 +565,19 @@ function buildObjectType({
 
       const type = withNullableType(
         field,
-        payload.collections[relationTo].graphQL.type || newlyCreatedBlockType,
+        graphqlResult.collections[relationTo].graphQL.type || newlyCreatedBlockType,
         forceNullable,
       )
 
       const uploadArgs = {} as LocaleInputType
 
-      if (payload.config.localization) {
+      if (config.localization) {
         uploadArgs.locale = {
-          type: payload.types.localeInputType,
+          type: graphqlResult.types.localeInputType,
         }
 
         uploadArgs.fallbackLocale = {
-          type: payload.types.fallbackLocaleInputType,
+          type: graphqlResult.types.fallbackLocaleInputType,
         }
       }
 
@@ -607,14 +615,13 @@ function buildObjectType({
         type,
       }
 
-      const whereFields = payload.collections[relationTo].config.fields
+      const whereFields = graphqlResult.collections[relationTo].config.fields
 
       upload.args.where = {
         type: buildWhereInputType({
           name: uploadName,
           fields: whereFields,
           parentName: uploadName,
-          payload,
         }),
       }
 

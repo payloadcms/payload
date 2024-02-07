@@ -498,10 +498,10 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       graphql-http:
-        specifier: 1.21.0
-        version: 1.21.0(graphql@16.8.1)
+        specifier: ^1.22.0
+        version: 1.22.0(graphql@16.8.1)
       graphql-playground-html:
-        specifier: ^1.6.30
+        specifier: 1.6.30
         version: 1.6.30
       graphql-query-complexity:
         specifier: 0.12.0
@@ -541,8 +541,8 @@ importers:
         specifier: workspace:*
         version: link:../payload
       sass:
-        specifier: ^1.69.5
-        version: 1.69.5
+        specifier: ^1.70.0
+        version: 1.70.0
       ts-essentials:
         specifier: 7.0.3
         version: 7.0.3(typescript@5.2.2)
@@ -573,21 +573,6 @@ importers:
       find-up:
         specifier: 4.1.0
         version: 4.1.0
-      graphql:
-        specifier: 16.8.1
-        version: 16.8.1
-      graphql-http:
-        specifier: 1.21.0
-        version: 1.21.0(graphql@16.8.1)
-      graphql-query-complexity:
-        specifier: 0.12.0
-        version: 0.12.0(graphql@16.8.1)
-      graphql-scalars:
-        specifier: 1.22.2
-        version: 1.22.2(graphql@16.8.1)
-      graphql-type-json:
-        specifier: 0.3.2
-        version: 0.3.2(graphql@16.8.1)
       http-status:
         specifier: 1.6.2
         version: 1.6.2
@@ -10046,8 +10031,8 @@ packages:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
     dev: false
 
-  /graphql-http@1.21.0(graphql@16.8.1):
-    resolution: {integrity: sha512-yrItPfHj5WeT4n7iusbVin+vGSQjXFAX6U/GnYytdCJRXVad1TWGtYFDZ2ROjCKpXQzIwvfbiWCEwfuXgR3B6A==}
+  /graphql-http@1.22.0(graphql@16.8.1):
+    resolution: {integrity: sha512-9RBUlGJWBFqz9LwfpmAbjJL/8j/HCNkZwPBU5+Bfmwez+1Ay43DocMNQYpIWsWqH0Ftv6PTNAh2aRnnMCBJgLw==}
     engines: {node: '>=12'}
     peerDependencies:
       graphql: '>=0.11 <=16'
@@ -14541,6 +14526,16 @@ packages:
       chokidar: 3.5.3
       immutable: 4.3.4
       source-map-js: 1.0.2
+
+  /sass@1.70.0:
+    resolution: {integrity: sha512-uUxNQ3zAHeAx5nRFskBnrWzDUJrrvpCPD5FNAoRvTi0WwremlheES3tg+56PaVtCs5QDRX5CBLxxKMDJMEa1WQ==}
+    engines: {node: '>=14.0.0'}
+    hasBin: true
+    dependencies:
+      chokidar: 3.5.3
+      immutable: 4.3.4
+      source-map-js: 1.0.2
+    dev: true
 
   /sax@1.2.4:
     resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
