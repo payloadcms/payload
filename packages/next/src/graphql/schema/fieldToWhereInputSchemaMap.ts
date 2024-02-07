@@ -1,7 +1,6 @@
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
 import GraphQLJSON from 'graphql-type-json'
 
-import type { Payload } from 'payload/types'
 import type {
   ArrayField,
   CheckboxField,
@@ -32,16 +31,14 @@ import { withOperators } from './withOperators'
 type Args = {
   nestedFieldName?: string
   parentName: string
-  payload: Payload
 }
 
-const fieldToSchemaMap = ({ nestedFieldName, parentName, payload }: Args): any => ({
+const fieldToSchemaMap = ({ nestedFieldName, parentName }: Args): any => ({
   array: (field: ArrayField) =>
     recursivelyBuildNestedPaths({
       field,
       nestedFieldName2: nestedFieldName,
       parentName,
-      payload,
     }),
   checkbox: (field: CheckboxField) => ({
     type: withOperators(field, parentName),
@@ -54,7 +51,6 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName, payload }: Args): any =
       field,
       nestedFieldName2: nestedFieldName,
       parentName,
-      payload,
     }),
   date: (field: DateField) => ({
     type: withOperators(field, parentName),
@@ -67,7 +63,6 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName, payload }: Args): any =
       field,
       nestedFieldName2: nestedFieldName,
       parentName,
-      payload,
     }),
   json: (field: JSONField) => ({
     type: withOperators(field, parentName),
@@ -119,7 +114,6 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName, payload }: Args): any =
       field,
       nestedFieldName2: nestedFieldName,
       parentName,
-      payload,
     }),
   select: (field: SelectField) => ({
     type: withOperators(field, parentName),
@@ -129,7 +123,6 @@ const fieldToSchemaMap = ({ nestedFieldName, parentName, payload }: Args): any =
       field,
       nestedFieldName2: nestedFieldName,
       parentName,
-      payload,
     }),
   text: (field: TextField) => ({
     type: withOperators(field, parentName),

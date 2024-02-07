@@ -1,5 +1,5 @@
 import { accessOperation } from 'payload/operations'
-import type { Payload } from 'payload/types'
+import type { SanitizedConfig } from 'payload/types'
 
 import formatName from '../../../graphql/utilities/formatName'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
@@ -16,7 +16,7 @@ const formatConfigNames = (results, configs) => {
   return formattedResults
 }
 
-function accessResolver(payload: Payload) {
+function accessResolver(config: SanitizedConfig) {
   async function resolver(_, args, context) {
     const options = {
       req: isolateObjectProperty<any>(context.req, 'transactionID'),
@@ -26,8 +26,8 @@ function accessResolver(payload: Payload) {
 
     return {
       ...accessResults,
-      ...formatConfigNames(accessResults.collections, payload.config.collections),
-      ...formatConfigNames(accessResults.globals, payload.config.globals),
+      ...formatConfigNames(accessResults.collections, context.req.payload.config.collections),
+      ...formatConfigNames(accessResults.globals, context.req.payload.config.globals),
     }
   }
 

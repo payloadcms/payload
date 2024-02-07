@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import { GraphQLInputObjectType, GraphQLList } from 'graphql'
 
-import type { Payload, Field, FieldAffectingData } from 'payload/types'
+import type { Field, FieldAffectingData } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsPresentationalOnly } from 'payload/types'
 import formatName from '../utilities/formatName'
@@ -14,7 +14,6 @@ type Args = {
   fields: Field[]
   name: string
   parentName: string
-  payload: Payload
 }
 
 /** This does as the function name suggests. It builds a where GraphQL input type
@@ -31,12 +30,7 @@ type Args = {
  *    directly searchable. Instead, we need to build a chained pathname
  *    using dot notation so MongoDB can properly search nested paths.
  */
-const buildWhereInputType = ({
-  name,
-  fields,
-  parentName,
-  payload,
-}: Args): GraphQLInputObjectType => {
+const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
@@ -48,7 +42,6 @@ const buildWhereInputType = ({
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
       const getFieldSchema = fieldToSchemaMap({
         parentName,
-        payload,
       })[field.type]
 
       if (getFieldSchema) {

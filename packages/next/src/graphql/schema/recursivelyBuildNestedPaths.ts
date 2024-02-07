@@ -1,4 +1,3 @@
-import type { Payload } from 'payload/types'
 import type { FieldWithSubFields, TabsField } from 'payload/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types'
@@ -8,10 +7,9 @@ type Args = {
   field: FieldWithSubFields | TabsField
   nestedFieldName2: string
   parentName: string
-  payload: Payload
 }
 
-const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentName, payload }: Args) => {
+const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentName }: Args) => {
   const fieldName = fieldAffectsData(field) ? field.name : undefined
   const nestedFieldName = fieldName || nestedFieldName2
 
@@ -27,7 +25,6 @@ const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentName, payl
           },
           nestedFieldName2: nestedFieldName,
           parentName,
-          payload,
         }),
       )
       return tabSchema
@@ -43,7 +40,6 @@ const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentName, payl
             field: nestedField,
             nestedFieldName2: nestedFieldName,
             parentName,
-            payload,
           }),
         ]
       }
@@ -54,7 +50,6 @@ const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentName, payl
       const getFieldSchema = fieldToSchemaMap({
         nestedFieldName,
         parentName,
-        payload,
       })[nestedField.type]
 
       if (getFieldSchema) {

@@ -36,7 +36,6 @@ import type {
   TextField,
   TextareaField,
   UploadField,
-  Payload,
 } from 'payload/types'
 import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/types'
 import { toWords } from 'payload/utilities'
@@ -45,7 +44,8 @@ import { groupOrTabHasRequiredSubfield } from '../utilities/groupOrTabHasRequire
 import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
 import withNullableType from './withNullableType'
-import flattenFields from '../../utilities/flattenTopLevelFields'
+import { Result } from './configToSchema'
+import { flattenTopLevelFields } from 'payload/utilities'
 
 const idFieldTypes = {
   number: GraphQLInt,
@@ -53,15 +53,15 @@ const idFieldTypes = {
 }
 
 export const getCollectionIDType = (
-  payload: Payload,
+  type: keyof typeof idFieldTypes,
   collection: SanitizedCollectionConfig,
 ): GraphQLScalarType => {
-  const idField = flattenFields(collection.fields).find(
+  const idField = flattenTopLevelFields(collection.fields).find(
     (field) => fieldAffectsData(field) && field.name === 'id',
   )
 
   if (!idField) {
-    return idFieldTypes[payload.db.defaultIDType]
+    return idFieldTypes[type]
   }
 
   return idFieldTypes[idField.type]
@@ -72,20 +72,21 @@ export type InputObjectTypeConfig = {
 }
 
 function buildMutationInputType(
-  payload: Payload,
   name: string,
   fields: Field[],
   parentName: string,
   forceNullable = false,
+  graphqlResult: Result,
 ): GraphQLInputObjectType | null {
   const fieldToSchemaMap = {
     array: (inputObjectTypeConfig: InputObjectTypeConfig, field: ArrayField) => {
       const fullName = combineParentName(parentName, toWords(field.name, true))
       let type: GraphQLList<GraphQLType> | GraphQLType = buildMutationInputType(
-        payload,
         fullName,
         field.fields,
         fullName,
+        false,
+        graphqlResult,
       )
 
       if (!type) return inputObjectTypeConfig
@@ -125,7 +126,13 @@ function buildMutationInputType(
     group: (inputObjectTypeConfig: InputObjectTypeConfig, field: GroupField) => {
       const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
       const fullName = combineParentName(parentName, toWords(field.name, true))
-      let type: GraphQLType = buildMutationInputType(payload, fullName, field.fields, fullName)
+      let type: GraphQLType = buildMutationInputType(
+        fullName,
+        field.fields,
+        fullName,
+        false,
+        graphqlResult,
+      )
 
       if (!type) return inputObjectTypeConfig
 
@@ -194,7 +201,10 @@ function buildMutationInputType(
           },
         })
       } else {
-        type = getCollectionIDType(payload, payload.collections[relationTo].config)
+        type = getCollectionIDType(
+          graphqlResult.defaultIDType,
+          graphqlResult.collections[relationTo].config,
+        )
       }
 
       return {
@@ -248,7 +258,13 @@ function buildMutationInputType(
         if (tabHasName(tab)) {
           const fullName = combineParentName(parentName, toWords(tab.name, true))
           const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)
-          let type: GraphQLType = buildMutationInputType(payload, fullName, tab.fields, fullName)
+          let type: GraphQLType = buildMutationInputType(
+            fullName,
+            tab.fields,
+            fullName,
+            false,
+            graphqlResult,
+          )
 
           if (!type) return acc
 

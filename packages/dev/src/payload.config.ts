@@ -23,13 +23,13 @@ export default buildConfig({
   globals: [Settings],
   editor: lexicalEditor({}),
   onInit: async (payload) => {
-    // await payload.create({
-    //   collection: 'users',
-    //   data: {
-    //     email: 'dev@payloadcms.com',
-    //     password: 'test',
-    //   },
-    // })
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: 'dev@payloadcms.com',
+        password: 'test',
+      },
+    })
     // const page = await payload.create({
     //   collection: 'pages',
     //   data: {
