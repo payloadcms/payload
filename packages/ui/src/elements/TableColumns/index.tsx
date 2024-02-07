@@ -158,47 +158,41 @@ export const TableColumnsProvider: React.FC<{
   //   [collectionConfig, cellProps],
   // )
 
-  // const moveColumn = useCallback(
-  //   (args: { fromIndex: number; toIndex: number }) => {
-  //     const { fromIndex, toIndex } = args
+  const moveColumn = useCallback(
+    (args: { fromIndex: number; toIndex: number }) => {
+      const { fromIndex, toIndex } = args
 
-  //     dispatchTableColumns({
-  //       payload: {
-  //         cellProps,
-  //         i18n,
-  //         collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
-  //         fromIndex,
-  //         toIndex,
-  //       },
-  //       type: 'move',
-  //     })
-  //   },
-  //   [collectionConfig, cellProps],
-  // )
+      dispatchTableColumns({
+        payload: {
+          fromIndex,
+          toIndex,
+        },
+        type: 'move',
+      })
+    },
+    [dispatchTableColumns],
+  )
 
-  // const toggleColumn = useCallback(
-  //   (column: string) => {
-  //     dispatchTableColumns({
-  //       payload: {
-  //         cellProps,
-  //         i18n,
-  //         collection: { ...collectionConfig, fields: formatFields(collectionConfig) },
-  //         column,
-  //       },
-  //       type: 'toggle',
-  //     })
-  //   },
-  //   [collectionConfig, cellProps],
-  // )
+  const toggleColumn = useCallback(
+    (column: string) => {
+      dispatchTableColumns({
+        payload: {
+          column,
+        },
+        type: 'toggle',
+      })
+    },
+    [collectionConfig, cellProps],
+  )
 
   return (
     <TableColumnContext.Provider
       value={{
         columns: tableColumns,
         dispatchTableColumns,
-        // moveColumn,
+        moveColumn,
         // setActiveColumns,
-        // toggleColumn,
+        toggleColumn,
       }}
     >
       {children}
