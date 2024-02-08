@@ -1,13 +1,11 @@
+'use client'
 import React from 'react'
-
-import type { CellComponentProps, CheckboxField } from 'payload/types'
+import { CellComponentProps } from 'payload/types'
 
 import './index.scss'
 
-// Handles boolean values
-const Checkbox: React.FC<CellComponentProps<CheckboxField>> = ({ data }) => (
+export const CheckboxCell: React.FC<CellComponentProps<boolean>> = ({ cellData }) => (
   <code className="bool-cell">
-    <span>{JSON.stringify(data)}</span>
+    <span>{JSON.stringify(cellData)}</span>
   </code>
 )
-export default Checkbox

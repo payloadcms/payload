@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from '../../../../../providers/Translation'
 
-import type { CellComponentProps, RelationshipField } from 'payload/types'
+import type { CellComponentProps, CellProps } from 'payload/types'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useIntersect } from '../../../../../hooks/useIntersect'
@@ -15,8 +15,16 @@ type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props) => {
-  const { data: cellData, field } = props
+export interface RelationshipCellProps extends CellComponentProps<any> {
+  relationTo: CellProps['relationTo']
+  label: CellProps['label']
+}
+
+export const RelationshipCell: React.FC<RelationshipCellProps> = ({
+  cellData,
+  relationTo,
+  label,
+}) => {
   const config = useConfig()
   const { collections, routes } = config
   const [intersectionRef, entry] = useIntersect()
@@ -40,11 +48,10 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
           }
           if (
             (typeof cell === 'number' || typeof cell === 'string') &&
-            'relationTo' in field &&
-            typeof field.relationTo === 'string'
+            typeof relationTo === 'string'
           ) {
             formattedValues.push({
-              relationTo: field.relationTo,
+              relationTo: relationTo,
               value: cell,
             })
           }
@@ -53,7 +60,15 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
       setHasRequested(true)
       setValues(formattedValues)
     }
-  }, [cellData, field, collections, isAboveViewport, routes.api, hasRequested, getRelationships])
+  }, [
+    cellData,
+    relationTo,
+    collections,
+    isAboveViewport,
+    routes.api,
+    hasRequested,
+    getRelationships,
+  ])
 
   return (
     <div className={baseClass} ref={intersectionRef}>
@@ -79,10 +94,7 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
       {Array.isArray(cellData) &&
         cellData.length > totalToShow &&
         t('fields:itemsAndMore', { count: cellData.length - totalToShow, items: '' })}
-      {values.length === 0 &&
-        t('general:noLabel', { label: getTranslation(field?.label || '', i18n) })}
+      {values.length === 0 && t('general:noLabel', { label: getTranslation(label || '', i18n) })}
     </div>
   )
 }
-
-export default RelationshipCell

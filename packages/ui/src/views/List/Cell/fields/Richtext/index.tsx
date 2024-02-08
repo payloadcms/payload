@@ -1,8 +1,9 @@
+'use client'
 import React, { useMemo } from 'react'
 
 import type { RichTextField, RichTextAdapter, CellComponentProps } from 'payload/types'
 
-const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
+export const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   // eslint-disable-next-line react/destructuring-assignment
   const editor: RichTextAdapter = props.field.editor
 
@@ -30,5 +31,3 @@ const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
 
   return <editor.CellComponent {...props} />
 }
-
-export default RichTextCell

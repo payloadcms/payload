@@ -5,11 +5,13 @@ import { AfterInput } from './AfterInput'
 import { CustomField } from './CustomField'
 import { CustomDescription } from './CustomDescription'
 import { CustomLabel } from './CustomLabel'
+import { CustomCell } from './CustomCell'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
-    useAsTitle: 'title',
+    // useAsTitle: 'title',
+    // defaultColumns: ['title'],
     components: {
       views: {
         Edit: {
@@ -303,6 +305,11 @@ export const Pages: CollectionConfig = {
       label: 'Code',
       type: 'code',
       required: true,
+      admin: {
+        components: {
+          Cell: CustomCell,
+        },
+      },
     },
     {
       name: 'hidden',

@@ -9,7 +9,7 @@ export type ListDrawerProps = {
   customHeader?: React.ReactNode
   drawerSlug?: string
   filterOptions?: FilterOptionsResult
-  onSelect?: (args: { collectionConfig: SanitizedCollectionConfig; docID: string }) => void
+  onSelect?: (args: { collectionSlug: SanitizedCollectionConfig['slug']; docID: string }) => void
   selectedCollection?: string
 }
 
