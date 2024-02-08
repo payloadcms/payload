@@ -1,6 +1,9 @@
 import config from 'payload-config'
-import { createPayloadRequest } from '../utilities/createPayloadRequest'
+import type { PayloadRequest } from 'payload/types'
+import type { Endpoint } from 'payload/config'
 import { match } from 'path-to-regexp'
+
+import { createPayloadRequest } from '../utilities/createPayloadRequest'
 
 import { me } from './auth/me'
 import { init } from './auth/init'
@@ -32,8 +35,6 @@ import { docAccess as docAccessGlobal } from './globals/docAccess'
 import { findVersions as findVersionsGlobal } from './globals/findVersions'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
-import { PayloadRequest } from 'payload/types'
-import { Endpoint } from 'payload/config'
 
 const endpoints = {
   root: {
