@@ -1,29 +1,41 @@
-import type { I18n } from '@payloadcms/translations'
-
 import type { SanitizedCollectionConfig } from '../../collections/config/types'
-import type { SanitizedConfig } from '../../config/types'
-import type { FieldAffectingData, UIField } from '../../fields/config/types'
+import type {
+  BlockField,
+  DateField,
+  Field,
+  FieldBase,
+  Labels,
+  RelationshipField,
+  SelectField,
+} from '../../fields/config/types'
 
 export type CellProps = {
-  cellData: unknown
+  blocks?: {
+    labels: BlockField['labels']
+    slug: string
+  }[]
   className?: string
-  colIndex: number
-  collectionConfig: SanitizedCollectionConfig
-  config: SanitizedConfig
-  field: FieldAffectingData | UIField
-  i18n: I18n
+  dateDisplayFormat?: DateField['admin']['date']['displayFormat']
+  fieldType?: Field['type']
+  isFieldAffectingData?: boolean
+  label?: Record<string, string> | string
+  labels?: Labels
   link?: boolean
-  onClick?: (Props) => void
-  rowData: {
-    [path: string]: unknown
-  }
+  name: FieldBase['name']
+  onClick?: (args: {
+    cellData: unknown
+    collectionSlug: SanitizedCollectionConfig['slug']
+    rowData: Record<string, unknown>
+  }) => void
+  options?: SelectField['options']
+  relationTo?: RelationshipField['relationTo']
 }
 
-export type CellComponentProps<Field = FieldAffectingData | UIField, Data = unknown> = Pick<
-  CellProps,
-  'collectionConfig' | 'config' | 'rowData'
-> & {
-  data: Data
-  field: Field
-  i18n: I18n
+export type CellComponentProps<Data = unknown> = {
+  cellData: Data
+  customCellContext?: {
+    collectionSlug?: SanitizedCollectionConfig['slug']
+    uploadConfig?: SanitizedCollectionConfig['upload']
+  }
+  rowData?: Record<string, unknown>
 }
