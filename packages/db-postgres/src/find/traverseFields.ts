@@ -83,6 +83,7 @@ export const traverseFields = ({
             adapter,
             config: field,
             parentTableName: currentTableName,
+            prefix: `${currentTableName}_`,
           })
 
           const arrayTableNameWithLocales = getTableName({
@@ -90,6 +91,7 @@ export const traverseFields = ({
             config: field,
             locales: true,
             parentTableName: currentTableName,
+            prefix: `${currentTableName}_`,
           })
 
           if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
