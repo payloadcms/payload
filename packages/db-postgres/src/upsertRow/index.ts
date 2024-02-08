@@ -224,19 +224,13 @@ export const upsertRow = async <T extends TypeWithID>({
 
     if (operation === 'update') {
       for (const blockName of rowToInsert.blocksToDelete) {
-        if (!adapter.blockTableNames[`${tableName}.${blockName}`]) {
-          console.log('jhit')
-        }
-        const blockTableName = adapter.blockTableNames[`${tableName}_${blockName}`]
+        const blockTableName = adapter.blockTableNames[`${tableName}.${blockName}`]
         const blockTable = adapter.tables[blockTableName]
         await db.delete(blockTable).where(eq(blockTable._parentID, insertedRow.id))
       }
     }
 
     for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
-      if (!adapter.blockTableNames[`${tableName}.${blockName}`]) {
-        console.log('jhit')
-      }
       const blockTableName = adapter.blockTableNames[`${tableName}.${blockName}`]
       insertedBlockRows[blockName] = await db
         .insert(adapter.tables[blockTableName])
