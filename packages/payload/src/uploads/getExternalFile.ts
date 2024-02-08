@@ -11,7 +11,7 @@ export const getExternalFile = async ({ req, data }: Args): Promise<File> => {
   const { url, filename } = data
 
   if (typeof url === 'string') {
-    const fileURL = `${baseUrl}${url}`
+    const fileURL = url.startsWith("http") ? url :`${baseUrl}${url}`;
     const { default: fetch } = (await import('node-fetch')) as any
 
     const res = await fetch(fileURL, {
