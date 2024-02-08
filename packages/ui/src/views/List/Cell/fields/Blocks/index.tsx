@@ -16,12 +16,12 @@ export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, blocks, labels
 
   const selectedBlocks = cellData ? cellData.map(({ blockType }) => blockType) : []
 
-  const translatedBlockLabels = blocks.map((b) => ({
+  const translatedBlockLabels = blocks?.map((b) => ({
     label: getTranslation(b.labels.singular, i18n),
     slug: b.slug,
   }))
 
-  let label = `0 ${getTranslation(labels.plural, i18n)}`
+  let label = `0 ${getTranslation(labels?.plural, i18n)}`
 
   const formatBlockList = (blocks) =>
     blocks
@@ -35,13 +35,13 @@ export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, blocks, labels
 
   if (selectedBlocks.length > itemsToShow) {
     const more = selectedBlocks.length - itemsToShow
-    label = `${selectedBlocks.length} ${getTranslation(labels.plural, i18n)} - ${i18n.t(
+    label = `${selectedBlocks.length} ${getTranslation(labels?.plural, i18n)} - ${i18n.t(
       'fields:itemsAndMore',
       { count: more, items: formatBlockList(selectedBlocks.slice(0, itemsToShow)) },
     )}`
   } else if (selectedBlocks.length > 0) {
     label = `${selectedBlocks.length} ${getTranslation(
-      selectedBlocks.length === 1 ? labels.singular : labels.plural,
+      selectedBlocks.length === 1 ? labels?.singular : labels?.plural,
       i18n,
     )} - ${formatBlockList(selectedBlocks)}`
   }
