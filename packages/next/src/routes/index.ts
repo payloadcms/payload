@@ -154,7 +154,7 @@ export const GET = async (
           // /:collection/init
           // /:collection/me
           // /:collection/versions
-          response = endpoints.collection.GET?.[slug2]({ req, collection })
+          response = endpoints.collection.GET[slug2]({ req, collection })
         } else {
           response = endpoints.collection.GET.findByID({ req, id: slug2, collection })
         }
