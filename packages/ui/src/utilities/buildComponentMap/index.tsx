@@ -3,7 +3,6 @@ import type { FieldPermissions } from 'payload/auth'
 import type { SanitizedConfig } from 'payload/types'
 import { mapFields } from './mapFields'
 import { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
-import { getInitialColumns } from './getInitialColumns'
 
 export const buildComponentMap = (args: {
   config: SanitizedConfig
@@ -56,15 +55,12 @@ export const buildComponentMap = (args: {
       readOnly: readOnlyOverride,
     })
 
-    const initialColumns = getInitialColumns(fields, useAsTitle, defaultColumns)
-
     const componentMap: CollectionComponentMap = {
       BeforeList,
       AfterList,
       BeforeListTable,
       AfterListTable,
       fieldMap: mappedFields,
-      initialColumns,
     }
 
     return {

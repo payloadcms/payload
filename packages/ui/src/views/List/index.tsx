@@ -15,9 +15,9 @@ import { useConfig } from '../../providers/Config'
 import { useTranslation } from '../../providers/Translation'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { Table } from '../../elements/Table'
+import { ListControls } from '../../elements/ListControls'
 
 import './index.scss'
-import { ListControls } from '../../elements/ListControls'
 
 const baseClass = 'collection-list'
 

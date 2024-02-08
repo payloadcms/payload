@@ -9,6 +9,7 @@ import {
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
+import { ListPreferences } from '../../../../ui/src/views/List/types'
 
 export const CollectionList = async ({
   collectionSlug,
@@ -24,6 +25,23 @@ export const CollectionList = async ({
     redirectUnauthenticatedUser: true,
     collectionSlug,
   })
+
+  let listPreferences: ListPreferences
+
+  try {
+    listPreferences = (await payload
+      .find({
+        collection: 'payload-preferences',
+        where: {
+          key: {
+            equals: `${collectionSlug}-list`,
+          },
+        },
+        limit: 1,
+        depth: 0,
+      })
+      ?.then((res) => res?.docs?.[0]?.value)) as unknown as ListPreferences
+  } catch (error) {}
 
   const {
     routes: { admin },
@@ -62,7 +80,7 @@ export const CollectionList = async ({
     return (
       <Fragment>
         <HydrateClientUser user={user} permissions={permissions} />
-        <TableColumnsProvider collectionSlug={collectionSlug}>
+        <TableColumnsProvider collectionSlug={collectionSlug} listPreferences={listPreferences}>
           <RenderCustomComponent
             CustomComponent={ListToRender}
             DefaultComponent={DefaultList}
