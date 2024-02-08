@@ -149,11 +149,15 @@ export const GET = async (
       if (slug.length === 1) {
         // /:collection
         response = endpoints.collection.GET.find({ req, collection })
-      } else if (slug.length === 2 && slug2 in endpoints.collection.GET) {
-        // /:collection/init
-        // /:collection/me
-        // /:collection/versions
-        response = endpoints.collection.GET?.[slug2]({ req, collection })
+      } else if (slug.length === 2) {
+        if (slug2 in endpoints.collection.GET) {
+          // /:collection/init
+          // /:collection/me
+          // /:collection/versions
+          response = endpoints.collection.GET?.[slug2]({ req, collection })
+        } else {
+          response = endpoints.collection.GET.findByID({ req, id: slug2, collection })
+        }
       } else if (slug.length === 3 && `doc-${slug2}-by-id` in endpoints.collection.GET) {
         // /:collection/access/:id
         // /:collection/versions/:id
