@@ -86,7 +86,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const req = createLocalReq(options, payload)
+  const req = await createLocalReq(options, payload)
   req.file = file ?? (await getFileByPath(filePath))
 
   const args = {

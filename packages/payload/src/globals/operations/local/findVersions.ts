@@ -52,7 +52,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     limit,
     overrideAccess,
     page,
-    req: createLocalReq(options, payload),
+    req: await createLocalReq(options, payload),
     showHiddenFields,
     sort,
     where,

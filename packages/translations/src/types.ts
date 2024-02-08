@@ -42,3 +42,9 @@ export type InitTFunction = (args: {
   language?: string
   translations?: Translations
 }) => TFunction
+
+export type InitI18n = (args: {
+  config: I18nOptions
+  language?: string
+  translationsContext: 'client' | 'api'
+}) => Promise<I18n>
