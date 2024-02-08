@@ -18,12 +18,13 @@ import { DocumentInfoProvider } from '../../providers/DocumentInfo'
 import { usePreferences } from '../../providers/Preferences'
 import { RenderCustomComponent } from '../RenderCustomComponent'
 import { DefaultList } from '../../views/List'
-import formatFields from '../../views/List/formatFields'
+// import formatFields from '../../views/List/formatFields'
 import { useDocumentDrawer } from '../DocumentDrawer'
 import Pill from '../Pill'
 import ReactSelect from '../ReactSelect'
 import { TableColumnsProvider } from '../TableColumns'
 import ViewDescription from '../ViewDescription'
+import { DefaultListViewProps } from '../../views/List/types'
 
 const hoistQueryParamsToAnd = (where: Where, queryParams: Where) => {
   if ('and' in where) {
@@ -86,12 +87,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       : undefined,
   )
 
-  const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
+  // const [fields, setFields] = useState<Field[]>(() => formatFields(selectedCollectionConfig))
 
   const titleField = useUseTitleField(selectedCollectionConfig)
 
   useEffect(() => {
-    setFields(formatFields(selectedCollectionConfig))
+    // setFields(formatFields(selectedCollectionConfig))
   }, [selectedCollectionConfig])
 
   // allow external control of selected collection, same as the initial state logic above
@@ -199,7 +200,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     ({ doc }) => {
       if (typeof onSelect === 'function') {
         onSelect({
-          collectionConfig: selectedCollectionConfig,
+          collectionSlug: selectedCollectionConfig.slug,
           docID: doc.id,
         })
       }
@@ -223,17 +224,80 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     ListToRender = listComponent.Component
   }
 
+  const componentProps: DefaultListViewProps = {
+    collectionSlug: selectedCollectionConfig.slug,
+    Header: (
+      <header className={`${baseClass}__header`}>
+        <div className={`${baseClass}__header-wrap`}>
+          <div className={`${baseClass}__header-content`}>
+            <h2 className={`${baseClass}__header-text`}>
+              {!customHeader
+                ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n)
+                : customHeader}
+            </h2>
+            {hasCreatePermission && (
+              <DocumentDrawerToggler className={`${baseClass}__create-new-button`}>
+                <Pill>{t('general:createNew')}</Pill>
+              </DocumentDrawerToggler>
+            )}
+          </div>
+          <button
+            className={`${baseClass}__header-close`}
+            onClick={() => {
+              closeModal(drawerSlug)
+            }}
+            type="button"
+          >
+            <X />
+          </button>
+        </div>
+        {selectedCollectionConfig?.admin?.description && (
+          <div className={`${baseClass}__sub-header`}>
+            <ViewDescription description={selectedCollectionConfig.admin.description} />
+          </div>
+        )}
+        {moreThanOneAvailableCollection && (
+          <div className={`${baseClass}__select-collection-wrap`}>
+            <Label label={t('upload:selectCollectionToBrowse')} />
+            <ReactSelect
+              className={`${baseClass}__select-collection`}
+              onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
+              options={enabledCollectionConfigs.map((coll) => ({
+                label: getTranslation(coll.labels.singular, i18n),
+                value: coll.slug,
+              }))}
+              value={selectedOption}
+            />
+          </div>
+        )}
+      </header>
+    ),
+    data,
+    handlePageChange: setPage,
+    handlePerPageChange: setLimit,
+    handleSearchChange: setSearch,
+    handleSortChange: setSort,
+    handleWhereChange: setWhere,
+    hasCreatePermission,
+    limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
+    modifySearchParams: false,
+    newDocumentURL: null,
+    setLimit,
+    setSort,
+    titleField,
+  }
+
   return (
     <TableColumnsProvider
       cellProps={[
         {
           className: `${baseClass}__first-cell`,
           link: false,
-          onClick: ({ collection: rowColl, rowData }) => {
+          onClick: ({ collectionSlug: rowColl, rowData }) => {
             if (typeof onSelect === 'function') {
               onSelect({
-                collectionConfig: rowColl,
-                docID: rowData.id,
+                collectionSlug: rowColl,
+                docID: rowData.id as string,
               })
             }
           },
@@ -248,71 +312,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         <RenderCustomComponent
           CustomComponent={ListToRender}
           DefaultComponent={DefaultList}
-          componentProps={{
-            collection: {
-              ...selectedCollectionConfig,
-              fields,
-            },
-            customHeader: (
-              <header className={`${baseClass}__header`}>
-                <div className={`${baseClass}__header-wrap`}>
-                  <div className={`${baseClass}__header-content`}>
-                    <h2 className={`${baseClass}__header-text`}>
-                      {!customHeader
-                        ? getTranslation(selectedCollectionConfig?.labels?.plural, i18n)
-                        : customHeader}
-                    </h2>
-                    {hasCreatePermission && (
-                      <DocumentDrawerToggler className={`${baseClass}__create-new-button`}>
-                        <Pill>{t('general:createNew')}</Pill>
-                      </DocumentDrawerToggler>
-                    )}
-                  </div>
-                  <button
-                    className={`${baseClass}__header-close`}
-                    onClick={() => {
-                      closeModal(drawerSlug)
-                    }}
-                    type="button"
-                  >
-                    <X />
-                  </button>
-                </div>
-                {selectedCollectionConfig?.admin?.description && (
-                  <div className={`${baseClass}__sub-header`}>
-                    <ViewDescription description={selectedCollectionConfig.admin.description} />
-                  </div>
-                )}
-                {moreThanOneAvailableCollection && (
-                  <div className={`${baseClass}__select-collection-wrap`}>
-                    <Label label={t('upload:selectCollectionToBrowse')} />
-                    <ReactSelect
-                      className={`${baseClass}__select-collection`}
-                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
-                      options={enabledCollectionConfigs.map((coll) => ({
-                        label: getTranslation(coll.labels.singular, i18n),
-                        value: coll.slug,
-                      }))}
-                      value={selectedOption}
-                    />
-                  </div>
-                )}
-              </header>
-            ),
-            data,
-            handlePageChange: setPage,
-            handlePerPageChange: setLimit,
-            handleSearchChange: setSearch,
-            handleSortChange: setSort,
-            handleWhereChange: setWhere,
-            hasCreatePermission,
-            limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
-            modifySearchParams: false,
-            newDocumentURL: null,
-            setLimit,
-            setSort,
-            titleField,
-          }}
+          componentProps={componentProps}
         />
       </DocumentInfoProvider>
       <DocumentDrawer onSave={onCreateNew} />

@@ -14,7 +14,7 @@ import {
 } from 'payload/types'
 import { Option } from 'payload/types'
 import { FormState } from '../..'
-import type { FieldMap, ReducedBlock, ReducedTab } from '../utilities/buildFieldMaps/types'
+import type { FieldMap, ReducedBlock, ReducedTab } from '../../utilities/buildComponentMap/types'
 
 export const fieldBaseClass = 'field-type'
 

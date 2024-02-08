@@ -5,6 +5,7 @@ import {
   DefaultList,
   HydrateClientUser,
   DefaultListViewProps,
+  TableColumnsProvider,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
@@ -18,7 +19,7 @@ export const CollectionList = async ({
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
-  const { config, payload, permissions, user, collectionConfig, i18n } = await initPage({
+  const { config, payload, permissions, user, collectionConfig } = await initPage({
     configPromise,
     redirectUnauthenticatedUser: true,
     collectionSlug,
@@ -51,29 +52,23 @@ export const CollectionList = async ({
     })
 
     const componentProps: DefaultListViewProps = {
-      config,
-      collectionConfig,
       data,
       hasCreatePermission: permissions?.collections?.[collectionSlug]?.create?.permission,
       limit,
       newDocumentURL: `${admin}/collections/${collectionSlug}/create`,
-      // titleField,
-      toggleColumn: () => {},
-      resetParams: () => {},
-      setLimit: () => {},
-      setListControls: () => {},
-      setSort: () => {},
-      i18n,
+      collectionSlug,
     }
 
     return (
       <Fragment>
         <HydrateClientUser user={user} permissions={permissions} />
-        <RenderCustomComponent
-          CustomComponent={ListToRender}
-          DefaultComponent={DefaultList}
-          componentProps={componentProps}
-        />
+        <TableColumnsProvider collectionSlug={collectionSlug}>
+          <RenderCustomComponent
+            CustomComponent={ListToRender}
+            DefaultComponent={DefaultList}
+            componentProps={componentProps}
+          />
+        </TableColumnsProvider>
       </Fragment>
     )
   }
