@@ -480,7 +480,7 @@ export const traverseFields = ({
             )
 
             adapter.relations[`relations_${blockTableName}`] = blockTableRelations
-          } else if (process.env.NODE_ENV !== 'production') {
+          } else if (process.env.NODE_ENV !== 'production' && !versions) {
             validateExistingBlockIsIdentical({
               block,
               localized: field.localized,
