@@ -21,10 +21,13 @@ export { findVersionsOperation } from '../collections/operations/findVersions'
 export { restoreVersionOperation } from '../collections/operations/restoreVersion'
 export { updateOperation } from '../collections/operations/update'
 export { updateByIDOperation } from '../collections/operations/updateByID'
-
 export { docAccessOperation as docAccessOperationGlobal } from '../globals/operations/docAccess'
+
 export { findOneOperation } from '../globals/operations/findOne'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from '../globals/operations/findVersionByID'
 export { findVersionsOperation as findVersionsOperationGlobal } from '../globals/operations/findVersions'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from '../globals/operations/restoreVersion'
 export { updateOperation as updateOperationGlobal } from '../globals/operations/update'
+
+export { default as findPreferenceByIDOperation } from '../preferences/operations/findOne'
+export { default as updatePreferenceByIDOperation } from '../preferences/operations/update'

@@ -60,7 +60,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
           let value = null
           if (request.status === 200) {
             const preference = await request.json()
-            value = preference.value
+            value = preference?.value
           }
           preferencesRef.current[key] = value
           resolve(value)
@@ -85,21 +85,17 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
       let newValue = value
       const currentPreference = await getPreference(key)
+
       // handle value objects where multiple values can be set under one key
       if (
         typeof value === 'object' &&
-        typeof currentPreference === 'object' &&
-        typeof newValue === 'object'
+        typeof newValue === 'object' &&
+        typeof currentPreference === 'object'
       ) {
         // merge the value with any existing preference for the key
         newValue = { ...(currentPreference || {}), ...value }
         if (isDeepEqual(newValue, currentPreference)) {
           return
-        }
-        // add the requested changes to a pendingUpdate batch for the key
-        pendingUpdate.current[key] = {
-          ...pendingUpdate.current[key],
-          ...(newValue as Record<string, unknown>),
         }
       } else {
         if (newValue === currentPreference) {

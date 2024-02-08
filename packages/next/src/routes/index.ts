@@ -34,6 +34,8 @@ import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
 import { PayloadRequest } from 'payload/types'
 import { Endpoint } from 'payload/config'
+import { findPreferenceByID } from './collections/findPreferenceByID'
+import { updatePreferenceByID } from './collections/updatePreferenceByID'
 
 const endpoints = {
   root: {
@@ -48,6 +50,7 @@ const endpoints = {
       versions: findVersions,
       find,
       findByID,
+      findPreferenceByID,
       'doc-access-by-id': docAccess,
       'doc-versions-by-id': findVersionByID,
     },
@@ -57,6 +60,7 @@ const endpoints = {
       logout,
       unlock,
       access: docAccess,
+      updatePreferenceByID,
       'first-register': registerFirstUser,
       'forgot-password': forgotPassword,
       'reset-password': resetPassword,
@@ -133,6 +137,7 @@ export const GET = async (
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
+
   try {
     const req = await createPayloadRequest({
       request,
@@ -147,16 +152,20 @@ export const GET = async (
 
     if (collection) {
       if (slug.length === 1) {
-        // /:collection
         response = endpoints.collection.GET.find({ req, collection })
       } else if (slug.length === 2) {
-        if (slug2 in endpoints.collection.GET) {
-          // /:collection/init
-          // /:collection/me
-          // /:collection/versions
-          response = endpoints.collection.GET[slug2]({ req, collection })
+        if (slug1 === 'payload-preferences') {
+          // /payload-preferences/:key
+          response = endpoints.collection.GET.findPreferenceByID({ req, collection, id: slug2 })
         } else {
-          response = endpoints.collection.GET.findByID({ req, id: slug2, collection })
+          if (slug2 in endpoints.collection.GET) {
+            // /:collection/init
+            // /:collection/me
+            // /:collection/versions
+            response = endpoints.collection.GET[slug2]({ req, collection })
+          } else {
+            response = endpoints.collection.GET.findByID({ req, id: slug2, collection })
+          }
         }
       } else if (slug.length === 3 && `doc-${slug2}-by-id` in endpoints.collection.GET) {
         // /:collection/access/:id
@@ -221,16 +230,21 @@ export const POST = async (
       if (slug.length === 1) {
         // /:collection
         response = endpoints.collection.POST.create({ req, collection })
-      } else if (slug.length === 2 && slug2 in endpoints.collection.POST) {
-        // /:collection/login
-        // /:collection/logout
-        // /:collection/unlock
-        // /:collection/access
-        // /:collection/first-register
-        // /:collection/forgot-password
-        // /:collection/reset-password
-        // /:collection/refresh-token
-        response = await endpoints.collection.POST[slug2]({ req, collection })
+      } else if (slug.length === 2) {
+        if (slug1 === 'payload-preferences') {
+          // /payload-preferences/:key
+          response = endpoints.collection.POST.updatePreferenceByID({ req, collection, id: slug2 })
+        } else if (slug2 in endpoints.collection.POST) {
+          // /:collection/login
+          // /:collection/logout
+          // /:collection/unlock
+          // /:collection/access
+          // /:collection/first-register
+          // /:collection/forgot-password
+          // /:collection/reset-password
+          // /:collection/refresh-token
+          response = await endpoints.collection.POST[slug2]({ req, collection })
+        }
       } else if (slug.length === 3 && `doc-${slug2}-by-id` in endpoints.collection.POST) {
         // /:collection/access/:id
         // /:collection/versions/:id
