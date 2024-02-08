@@ -1,8 +1,8 @@
 import httpStatus from 'http-status'
 import { accessOperation } from 'payload/operations'
-import { CollectionRouteHandler } from '../types'
+import { BaseRouteHandler } from '../types'
 
-export const access: CollectionRouteHandler = async ({ req }) => {
+export const access: BaseRouteHandler = async ({ req }) => {
   const results = await accessOperation({
     req,
   })
