@@ -1,6 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-import memoize from 'micro-memoize'
-
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Collection, TypeWithID } from '../config/types'
@@ -32,7 +30,6 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
   try {
     const shouldCommit = await initTransaction(args.req)
-    const { transactionID } = args.req
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -90,25 +87,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    if (!req.findByID) {
-      req.findByID = { [transactionID]: {} }
-    } else if (!req.findByID[transactionID]) {
-      req.findByID[transactionID] = {}
-    }
-
-    if (!req.findByID[transactionID][collectionConfig.slug]) {
-      const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query)
-
-      req.findByID[transactionID][collectionConfig.slug] = memoize(nonMemoizedFindByID, {
-        isPromise: true,
-        maxSize: 100,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore This is straight from their docs, bad typings
-        transformKey: JSON.stringify,
-      })
-    }
-
-    let result = (await req.findByID[transactionID][collectionConfig.slug](findOneArgs)) as T
+    let result: T = await req.payload.db.findOne(findOneArgs)
 
     if (!result) {
       if (!disableErrors) {
@@ -117,9 +96,6 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       return null
     }
-
-    // Clone the result - it may have come back memoized
-    result = JSON.parse(JSON.stringify(result))
 
     // /////////////////////////////////////
     // Replace document with draft if available
