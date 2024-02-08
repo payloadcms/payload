@@ -38,7 +38,7 @@ async function localResetPassword<T extends keyof GeneratedTypes['collections']>
     collection,
     data,
     overrideAccess,
-    req: createLocalReq(options, payload),
+    req: await createLocalReq(options, payload),
   })
 }
 

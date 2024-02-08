@@ -10,6 +10,11 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "exports": {
+    ".": {
+      "import": "./src/exports/index.ts",
+      "require": "./src/exports/index.ts",
+      "types": "./src/exports/index.ts"
+    },
     "./api": {
       "import": "./src/all/index.ts",
       "require": "./src/all/index.ts",
@@ -19,11 +24,6 @@
       "import": "./src/all/index.ts",
       "require": "./src/all/index.ts",
       "types": "./src/all/index.ts"
-    },
-    ".": {
-      "import": "./src/exports/index.ts",
-      "require": "./src/exports/index.ts",
-      "types": "./src/exports/index.ts"
     }
   },
   "devDependencies": {
@@ -33,13 +33,17 @@
   },
   "publishConfig": {
     "exports": {
+      ".": {
+        "import": "./dist/exports/index.js",
+        "require": "./dist/exports/index.js"
+      },
       "./api": {
-        "import": "./dist/api/index.ts",
-        "require": "./dist/api/index.ts"
+        "import": "./dist/api/index.js",
+        "require": "./dist/api/index.js"
       },
       "./client": {
-        "import": "./dist/client/index.ts",
-        "require": "./dist/client/index.ts"
+        "import": "./dist/client/index.js",
+        "require": "./dist/client/index.js"
       }
     },
     "main": "./dist/exports/index.js",

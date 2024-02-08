@@ -1,4 +1,4 @@
-import { I18n, Translations, InitTFunction } from '../types'
+import { Translations, InitTFunction, InitI18n, I18n } from '../types'
 import { deepMerge } from './deepMerge'
 
 /**
@@ -191,7 +191,7 @@ export function matchLanguage(header: string): string | undefined {
   return undefined
 }
 
-export const initTFunction: InitTFunction = (args) => (key, vars) => {
+const initTFunction: InitTFunction = (args) => (key, vars) => {
   const { config, language, translations } = args
 
   const mergedLanguages = deepMerge(config?.translations ?? {}, translations)
@@ -204,18 +204,58 @@ export const initTFunction: InitTFunction = (args) => (key, vars) => {
   })
 }
 
-export const initI18n = ({
-  config,
-  language = 'en',
-  translations,
-}: Parameters<InitTFunction>[0]): I18n => {
-  return {
-    fallbackLanguage: config.fallbackLanguage,
-    language: language || config.fallbackLanguage,
-    t: initTFunction({
-      config,
-      language: language || config.fallbackLanguage,
-      translations,
-    }),
+function memoize<T>(fn: Function, keys: string[]): T {
+  const cacheMap = new Map()
+
+  return <T>async function (args) {
+    const cacheKey = keys.reduce((acc, key) => acc + args[key], '')
+
+    if (!cacheMap.has(cacheKey)) {
+      const result = await fn(args)
+      cacheMap.set(cacheKey, result)
+    }
+
+    return cacheMap.get(cacheKey)!
   }
 }
+
+type GetTranslationsByKey = ({ context }: { context: 'client' | 'api' }) => Promise<Translations>
+const getTranslationsByKey: GetTranslationsByKey = memoize(
+  <GetTranslationsByKey>(async ({ context }): Promise<Translations> => {
+    const cachedTranslations = new Map<string, Translations>()
+    if (cachedTranslations.has(context)) {
+      return cachedTranslations.get(context)
+    }
+
+    let translations = {}
+    if (context === 'api') {
+      translations = await import('@payloadcms/translations/api')
+      cachedTranslations.set(context, translations)
+    } else if (context === 'client') {
+      translations = await import('@payloadcms/translations/client')
+      cachedTranslations.set(context, translations)
+    }
+
+    return translations
+  }),
+  ['context'] satisfies Array<keyof Parameters<GetTranslationsByKey>[0]>,
+)
+
+export const initI18n: InitI18n = memoize(
+  <InitI18n>(async ({ config, language = 'en', translationsContext }) => {
+    const translations = await getTranslationsByKey({ context: translationsContext })
+
+    const i18n = {
+      fallbackLanguage: config.fallbackLanguage,
+      language: language || config.fallbackLanguage,
+      t: initTFunction({
+        config,
+        language: language || config.fallbackLanguage,
+        translations,
+      }),
+    }
+
+    return i18n
+  }),
+  ['language', 'translationsContext'] satisfies Array<keyof Parameters<InitI18n>[0]>,
+)

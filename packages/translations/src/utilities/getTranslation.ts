@@ -1,9 +1,9 @@
 import type { JSX } from 'react'
-import type { initI18n } from './init'
+import { I18n } from '../types'
 
 export const getTranslation = (
   label: JSX.Element | Record<string, string> | string,
-  i18n: Pick<ReturnType<typeof initI18n>, 'fallbackLanguage' | 'language'>,
+  i18n: Pick<I18n, 'fallbackLanguage' | 'language'>,
 ): string => {
   if (typeof label === 'object') {
     if (label[i18n.language]) {

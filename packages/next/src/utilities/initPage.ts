@@ -10,9 +10,10 @@ import type {
 } from 'payload/types'
 import { redirect } from 'next/navigation'
 import { parseCookies } from 'payload/auth'
-import { getNextI18n } from './getNextI18n'
 import { getRequestLanguage } from './getRequestLanguage'
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
+import { I18n } from '@payloadcms/translations/types'
+import { initI18n } from '@payloadcms/translations'
 
 export const initPage = async ({
   configPromise,
@@ -31,7 +32,7 @@ export const initPage = async ({
   permissions: Awaited<ReturnType<typeof auth>>['permissions']
   user: Awaited<ReturnType<typeof auth>>['user']
   config: SanitizedConfig
-  i18n: ReturnType<typeof getNextI18n>
+  i18n: I18n
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   locale: ReturnType<typeof findLocaleFromCode>
@@ -59,7 +60,11 @@ export const initPage = async ({
     config: configPromise,
   })
 
-  const i18n = getNextI18n({ config, language })
+  const i18n = await initI18n({
+    config: config.i18n,
+    language,
+    translationsContext: 'client',
+  })
   let collectionConfig: SanitizedCollectionConfig
   let globalConfig: SanitizedGlobalConfig
 

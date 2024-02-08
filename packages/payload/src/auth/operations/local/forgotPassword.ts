@@ -38,7 +38,7 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     data,
     disableEmail,
     expiration,
-    req: createLocalReq(options, payload),
+    req: await createLocalReq(options, payload),
   })
 }
 
