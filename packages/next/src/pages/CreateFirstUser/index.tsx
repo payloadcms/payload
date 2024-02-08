@@ -24,7 +24,7 @@ export const generateMetadata = async ({
 }: {
   config: Promise<SanitizedConfig>
 }): Promise<Metadata> => {
-  const t = getNextT({
+  const t = await getNextT({
     config: await config,
   })
 

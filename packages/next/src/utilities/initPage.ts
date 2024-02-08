@@ -13,7 +13,7 @@ import { parseCookies } from 'payload/auth'
 import { getRequestLanguage } from './getRequestLanguage'
 import { findLocaleFromCode } from '../../../ui/src/utilities/findLocaleFromCode'
 import { I18n } from '@payloadcms/translations/types'
-import { initI18n } from '@payloadcms/translations/exports'
+import { initI18n } from '@payloadcms/translations'
 
 export const initPage = async ({
   configPromise,
