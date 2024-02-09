@@ -1,10 +1,16 @@
 import config from 'payload-config'
 import httpStatus from 'http-status'
-import type { GlobalConfig, PayloadRequest } from 'payload/types'
+import type { Collection, GlobalConfig, PayloadRequest } from 'payload/types'
 import type { Endpoint } from 'payload/config'
 import { match } from 'path-to-regexp'
 
 import { createPayloadRequest } from '../utilities/createPayloadRequest'
+import {
+  CollectionRouteHandler,
+  CollectionRouteHandlerWithID,
+  GlobalRouteHandler,
+  GlobalRouteHandlerWithID,
+} from './types'
 
 import { me } from './auth/me'
 import { init } from './auth/init'
@@ -36,6 +42,7 @@ import { docAccess as docAccessGlobal } from './globals/docAccess'
 import { findVersions as findVersionsGlobal } from './globals/findVersions'
 import { restoreVersion as restoreVersionGlobal } from './globals/restoreVersion'
 import { findVersionByID as findVersionByIdGlobal } from './globals/findVersionByID'
+import { RouteError } from './RouteError'
 
 const endpoints = {
   root: {
@@ -138,32 +145,25 @@ const RouteNotFoundResponse = (slug: string[]) =>
     { status: httpStatus.NOT_FOUND },
   )
 
-const RouteError = (error: Error, slug: string[]) =>
-  Response.json(
-    {
-      error: error.message,
-      message: `Route Error: "${slug.join('/')}"`,
-    },
-    { status: httpStatus.INTERNAL_SERVER_ERROR },
-  )
-
 export const GET = async (
   request: Request,
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
+  let req: PayloadRequest
+  let collection: Collection
 
   try {
-    const req = await createPayloadRequest({
+    req = await createPayloadRequest({
       request,
       config,
       params: {
         collection: slug1,
       },
     })
+    collection = req.payload.collections?.[slug1]
 
-    if (req.payload?.collections?.[slug1]) {
-      const collection = req.payload.collections[slug1]
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
@@ -180,7 +180,7 @@ export const GET = async (
             // /:collection/init
             // /:collection/me
             // /:collection/versions
-            return endpoints.collection.GET[slug2]({ req, collection })
+            return (endpoints.collection.GET[slug2] as CollectionRouteHandler)({ req, collection })
           }
           // /:collection/:id
           return endpoints.collection.GET.findByID({ req, id: slug2, collection })
@@ -188,7 +188,9 @@ export const GET = async (
           if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
             // /:collection/access/:id
             // /:collection/versions/:id
-            return endpoints.collection.GET[`doc-${slug2}-by-id`]({ req, id: slug3, collection })
+            return (endpoints.collection.GET[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID)(
+              { req, id: slug3, collection },
+            )
           }
           break
       }
@@ -209,13 +211,20 @@ export const GET = async (
           if (`doc-${slug3}` in endpoints.global.GET) {
             // /globals/:slug/access
             // /globals/:slug/versions
-            return endpoints.global.GET?.[`doc-${slug3}`]({ req, globalConfig })
+            return (endpoints.global.GET?.[`doc-${slug3}`] as GlobalRouteHandler)({
+              req,
+              globalConfig,
+            })
           }
           break
         case 4:
           if (`doc-${slug3}-by-id` in endpoints.global.GET) {
             // /globals/:slug/versions/:id
-            return endpoints.global.GET?.[`doc-${slug3}-by-id`]({ req, id: slug4, globalConfig })
+            return (endpoints.global.GET?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID)({
+              req,
+              id: slug4,
+              globalConfig,
+            })
           }
           break
       }
@@ -232,7 +241,11 @@ export const GET = async (
 
     return RouteNotFoundResponse(slug)
   } catch (error) {
-    return RouteError(error, slug)
+    return RouteError({
+      req,
+      collection,
+      err: error,
+    })
   }
 }
 
@@ -241,16 +254,18 @@ export const POST = async (
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
+  let req: PayloadRequest
+  let collection: Collection
 
   try {
-    const req = await createPayloadRequest({
+    req = await createPayloadRequest({
       request,
       config,
       params: { collection: slug1 },
     })
+    collection = req.payload.collections?.[slug1]
 
-    if (req.payload?.collections?.[slug1]) {
-      const collection = req.payload.collections[slug1]
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
@@ -272,7 +287,10 @@ export const POST = async (
             // /:collection/forgot-password
             // /:collection/reset-password
             // /:collection/refresh-token
-            return endpoints.collection.POST?.[slug2]({ req, collection })
+            return (endpoints.collection.POST?.[slug2] as CollectionRouteHandler)({
+              req,
+              collection,
+            })
           }
           break
         case 3:
@@ -280,7 +298,9 @@ export const POST = async (
             // /:collection/access/:id
             // /:collection/versions/:id
             // /:collection/verify/:token ("doc-verify-by-id" uses id as token internally)
-            return endpoints.collection.POST[`doc-${slug2}-by-id`]({ req, id: slug3, collection })
+            return (
+              endpoints.collection.POST[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
+            )({ req, id: slug3, collection })
           }
           break
       }
@@ -294,13 +314,20 @@ export const POST = async (
         case 3:
           if (`doc-${slug3}` in endpoints.global.POST) {
             // /globals/:slug/access
-            return endpoints.global.POST?.[`doc-${slug3}`]({ req, globalConfig })
+            return (endpoints.global.POST?.[`doc-${slug3}`] as GlobalRouteHandler)({
+              req,
+              globalConfig,
+            })
           }
           break
         case 4:
           if (`doc-${slug3}-by-id` in endpoints.global.POST) {
             // /globals/:slug/versions/:id
-            return endpoints.global.POST?.[`doc-${slug3}-by-id`]({ req, id: slug4, globalConfig })
+            return (endpoints.global.POST?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID)({
+              req,
+              id: slug4,
+              globalConfig,
+            })
           }
           break
         default:
@@ -317,7 +344,11 @@ export const POST = async (
 
     return RouteNotFoundResponse(slug)
   } catch (error) {
-    return RouteError(error, slug)
+    return RouteError({
+      req,
+      collection,
+      err: error,
+    })
   }
 }
 
@@ -326,19 +357,20 @@ export const DELETE = async (
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2] = slug
+  let req: PayloadRequest
+  let collection: Collection
 
   try {
-    const req = await createPayloadRequest({
+    req = await createPayloadRequest({
       request,
       config,
       params: {
         collection: slug1,
       },
     })
+    collection = req.payload.collections?.[slug1]
 
-    if (req.payload?.collections?.[slug1]) {
-      const collection = req.payload?.collections[slug1]
-
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
@@ -365,7 +397,11 @@ export const DELETE = async (
 
     return RouteNotFoundResponse(slug)
   } catch (error) {
-    return RouteError(error, slug)
+    return RouteError({
+      req,
+      collection,
+      err: error,
+    })
   }
 }
 
@@ -374,19 +410,20 @@ export const PATCH = async (
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2] = slug
+  let req: PayloadRequest
+  let collection: Collection
 
   try {
-    const req = await createPayloadRequest({
+    req = await createPayloadRequest({
       request,
       config,
       params: {
         collection: slug1,
       },
     })
+    collection = req.payload.collections?.[slug1]
 
-    if (req.payload?.collections?.[slug1]) {
-      const collection = req.payload.collections[slug1]
-
+    if (collection) {
       const customEndpointResponse = await handleCustomEndpoints({
         entitySlug: slug1,
         payloadRequest: req,
@@ -413,6 +450,10 @@ export const PATCH = async (
 
     return RouteNotFoundResponse(slug)
   } catch (error) {
-    return RouteError(error, slug)
+    return RouteError({
+      req,
+      collection,
+      err: error,
+    })
   }
 }

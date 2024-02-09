@@ -2,13 +2,9 @@ import httpStatus from 'http-status'
 
 import { isNumber } from 'payload/utilities'
 import { deleteByIDOperation } from 'payload/operations'
-import { CollectionRouteHandler } from '../types'
+import { CollectionRouteHandlerWithID } from '../types'
 
-export const deleteByID: CollectionRouteHandler<{ id: string }> = async ({
-  req,
-  collection,
-  id,
-}) => {
+export const deleteByID: CollectionRouteHandlerWithID = async ({ req, collection, id }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
   const doc = await deleteByIDOperation({
