@@ -235,7 +235,7 @@ export const GET = async (
 
     return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
   } catch (error) {
-    attemptCustomEndpointBeforeError({
+    return attemptCustomEndpointBeforeError({
       req,
       entitySlug,
       entityConfig,
@@ -316,7 +316,7 @@ export const POST = async (
 
     return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
   } catch (error) {
-    attemptCustomEndpointBeforeError({
+    return attemptCustomEndpointBeforeError({
       req,
       entitySlug,
       entityConfig,
@@ -372,7 +372,7 @@ export const DELETE = async (
 
     return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
   } catch (error) {
-    attemptCustomEndpointBeforeError({
+    return attemptCustomEndpointBeforeError({
       req,
       entitySlug,
       entityConfig,
@@ -428,7 +428,7 @@ export const PATCH = async (
 
     return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
   } catch (error) {
-    attemptCustomEndpointBeforeError({
+    return attemptCustomEndpointBeforeError({
       req,
       entitySlug,
       entityConfig,
