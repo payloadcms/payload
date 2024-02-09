@@ -8,7 +8,7 @@ type Args = {
   req: PayloadRequest
 }
 export const getExternalFile = async ({ data, req }: Args): Promise<File> => {
-  const baseUrl = req.get('origin') || `${req.protocol}://${req.get('host')}`
+  const baseUrl = req.origin || `${req.protocol}://${req.host}`
   const { filename, url } = data
 
   if (typeof url === 'string') {

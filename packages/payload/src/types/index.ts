@@ -43,10 +43,6 @@ export type CustomPayloadRequest<U = any> = {
    */
   locale?: string
   /**
-   * The URL path of the request
-   */
-  pathname: null | string
-  /**
    * The payload object
    */
   payload: typeof payload
@@ -58,10 +54,6 @@ export type CustomPayloadRequest<U = any> = {
   payloadDataLoader?: DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
-  /**
-   * The search parameters from the request URL
-   */
-  searchParams: URLSearchParams
   /** Translate function - duplicate of i18n.t */
   t: TFunction
   /**
@@ -74,7 +66,7 @@ export type CustomPayloadRequest<U = any> = {
   transactionIDPromise?: Promise<void>
   /** The signed in user */
   user: (U & User) | null
-}
+} & Partial<URL>
 export type PayloadRequest<U = any> = Partial<Request> &
   Required<Pick<Request, 'headers'>> &
   CustomPayloadRequest<U>

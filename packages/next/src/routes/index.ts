@@ -1,5 +1,6 @@
 import config from 'payload-config'
-import type { Collection, CollectionConfig, GlobalConfig, PayloadRequest } from 'payload/types'
+import httpStatus from 'http-status'
+import type { GlobalConfig, PayloadRequest } from 'payload/types'
 import type { Endpoint } from 'payload/config'
 import { match } from 'path-to-regexp'
 
@@ -129,31 +130,22 @@ const handleCustomEndpoints = ({
   return null
 }
 
-const attemptCustomEndpointBeforeError = async ({
-  req,
-  entitySlug,
-  entityConfig,
-  initialError,
-}: {
-  req: PayloadRequest
-  entitySlug: string
-  entityConfig: CollectionConfig | GlobalConfig
-  initialError: { message: string; status?: number }
-}) => {
-  try {
-    const customRouteResponse = await handleCustomEndpoints({
-      payloadRequest: req,
-      entitySlug,
-      endpoints: entityConfig ? entityConfig?.endpoints : req.payload.config.endpoints,
-    })
-    return (
-      customRouteResponse ||
-      new Response(initialError.message, { status: initialError?.status || 500 })
-    )
-  } catch (e) {
-    return new Response(e.message, { status: e?.status || 500 })
-  }
-}
+const RouteNotFoundResponse = (slug: string[]) =>
+  Response.json(
+    {
+      message: `Route Not Found: "${slug.join('/')}"`,
+    },
+    { status: httpStatus.NOT_FOUND },
+  )
+
+const RouteError = (error: Error, slug: string[]) =>
+  Response.json(
+    {
+      error: error.message,
+      message: `Route Error: "${slug.join('/')}"`,
+    },
+    { status: httpStatus.INTERNAL_SERVER_ERROR },
+  )
 
 export const GET = async (
   request: Request,
@@ -161,86 +153,86 @@ export const GET = async (
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
 
-  let req: PayloadRequest
-  let entitySlug: string
-  let entityConfig: CollectionConfig | GlobalConfig = null
-
   try {
-    req = await createPayloadRequest({
+    const req = await createPayloadRequest({
       request,
       config,
       params: {
         collection: slug1,
       },
     })
-    const collection: Collection = req.payload?.collections?.[slug1]
 
-    let response: Response | Promise<Response> = null
+    if (req.payload?.collections?.[slug1]) {
+      const collection = req.payload.collections[slug1]
+      const customEndpointResponse = await handleCustomEndpoints({
+        entitySlug: slug1,
+        payloadRequest: req,
+        endpoints: collection.config?.endpoints || [],
+      })
+      if (customEndpointResponse) return customEndpointResponse
 
-    if (collection) {
-      entitySlug = slug1
-      entityConfig = collection.config
-      if (slug.length === 1) {
-        // /:collection
-        response = await endpoints.collection.GET.find({ req, collection })
-      } else if (slug.length === 2) {
-        if (slug2 in endpoints.collection.GET) {
-          // /:collection/init
-          // /:collection/me
-          // /:collection/versions
-          response = await endpoints.collection.GET[slug2]({ req, collection })
-        } else {
-          response = await endpoints.collection.GET.findByID({ req, id: slug2, collection })
-        }
-      } else if (slug.length === 3 && `doc-${slug2}-by-id` in endpoints.collection.GET) {
-        // /:collection/access/:id
-        // /:collection/versions/:id
-        response = await endpoints.collection.GET[`doc-${slug2}-by-id`]({
-          req,
-          id: slug3,
-          collection,
-        })
+      switch (slug.length) {
+        case 1:
+          // /:collection
+          return endpoints.collection.GET.find({ req, collection })
+        case 2:
+          if (slug2 in endpoints.collection.GET) {
+            // /:collection/init
+            // /:collection/me
+            // /:collection/versions
+            return endpoints.collection.GET[slug2]({ req, collection })
+          }
+          // /:collection/:id
+          return endpoints.collection.GET.findByID({ req, id: slug2, collection })
+        case 3:
+          if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
+            // /:collection/access/:id
+            // /:collection/versions/:id
+            return endpoints.collection.GET[`doc-${slug2}-by-id`]({ req, id: slug3, collection })
+          }
+          break
       }
     } else if (slug1 === 'globals') {
-      entitySlug = `globals/${slug2}`
       const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
-      entityConfig = globalConfig
+      const customEndpointResponse = await handleCustomEndpoints({
+        entitySlug: `${slug1}/${slug2}`,
+        payloadRequest: req,
+        endpoints: globalConfig?.endpoints || [],
+      })
+      if (customEndpointResponse) return customEndpointResponse
 
-      if (slug.length === 2) {
-        // /globals/:slug
-        response = await endpoints.global.GET.findOne({ req, globalConfig })
-      } else if (slug.length === 3 && `doc-${slug3}` in endpoints.global.GET) {
-        // /globals/:slug/access
-        // /globals/:slug/versions
-        response = await endpoints.global.GET[`doc-${slug3}`]({ req, globalConfig })
-      } else if (slug.length === 4 && `doc-${slug3}-by-id` in endpoints.global.GET) {
-        // /globals/:slug/versions/:id
-        response = await endpoints.global.GET[`doc-${slug3}-by-id`]({
-          req,
-          id: slug4,
-          globalConfig,
-        })
+      switch (slug.length) {
+        case 2:
+          // /globals/:slug
+          return endpoints.global.GET.findOne({ req, globalConfig })
+        case 3:
+          if (`doc-${slug3}` in endpoints.global.GET) {
+            // /globals/:slug/access
+            // /globals/:slug/versions
+            return endpoints.global.GET?.[`doc-${slug3}`]({ req, globalConfig })
+          }
+          break
+        case 4:
+          if (`doc-${slug3}-by-id` in endpoints.global.GET) {
+            // /globals/:slug/versions/:id
+            return endpoints.global.GET?.[`doc-${slug3}-by-id`]({ req, id: slug4, globalConfig })
+          }
+          break
       }
     } else if (slug.length === 1 && slug1 === 'access') {
-      response = await endpoints.root.GET.access({ req })
+      return endpoints.root.GET.access({ req })
     }
 
-    if (!response) {
-      response = await handleCustomEndpoints({
-        entitySlug,
-        payloadRequest: req,
-        endpoints: entityConfig ? entityConfig?.endpoints : req.payload.config.endpoints,
-      })
-    }
-
-    return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
-  } catch (error) {
-    return attemptCustomEndpointBeforeError({
-      req,
-      entitySlug,
-      entityConfig,
-      initialError: error,
+    // root routes
+    const customEndpointResponse = await handleCustomEndpoints({
+      payloadRequest: req,
+      endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
+
+    return RouteNotFoundResponse(slug)
+  } catch (error) {
+    return RouteError(error, slug)
   }
 }
 
@@ -249,84 +241,83 @@ export const POST = async (
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
-  let req: PayloadRequest
-  let entitySlug: string
-  let entityConfig: CollectionConfig | GlobalConfig = null
 
   try {
-    req = await createPayloadRequest({
+    const req = await createPayloadRequest({
       request,
       config,
       params: { collection: slug1 },
     })
 
-    const collection: Collection = req.payload?.collections?.[slug1]
-
-    let response: Response | Promise<Response> = null
-
-    if (collection) {
-      entitySlug = slug1
-      entityConfig = collection.config
-      if (slug.length === 1) {
-        // /:collection
-        response = await endpoints.collection.POST.create({ req, collection })
-      } else if (slug.length === 2 && slug2 in endpoints.collection.POST) {
-        // /:collection/login
-        // /:collection/logout
-        // /:collection/unlock
-        // /:collection/access
-        // /:collection/first-register
-        // /:collection/forgot-password
-        // /:collection/reset-password
-        // /:collection/refresh-token
-        response = await endpoints.collection.POST[slug2]({ req, collection })
-      } else if (slug.length === 3 && `doc-${slug2}-by-id` in endpoints.collection.POST) {
-        // /:collection/access/:id
-        // /:collection/versions/:id
-        // /:collection/verify/:token ("doc-verify-by-id" uses id as token internally)
-        response = await endpoints.collection.POST[`doc-${slug2}-by-id`]({
-          req,
-          collection,
-          id: slug3,
-        })
-      }
-    } else if (slug1 === 'globals') {
-      entitySlug = `globals/${slug2}`
-      const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
-      entityConfig = globalConfig
-
-      if (slug.length === 2) {
-        // /globals/:slug
-        response = await endpoints.global.POST.update({ req, globalConfig })
-      } else if (slug.length === 3 && `doc-${slug3}` in endpoints.global.POST) {
-        // /globals/:slug/access
-        response = await endpoints.global.POST[`doc-${slug3}`]({ req, globalConfig })
-      } else if (slug.length === 4 && `doc-${slug3}-by-id` in endpoints.global.POST) {
-        // /globals/:slug/versions/:id
-        response = await endpoints.global.POST[`doc-${slug3}-by-id`]({
-          req,
-          id: slug4,
-          globalConfig,
-        })
-      }
-    }
-
-    if (!response) {
-      response = await handleCustomEndpoints({
-        entitySlug,
+    if (req.payload?.collections?.[slug1]) {
+      const collection = req.payload.collections[slug1]
+      const customEndpointResponse = await handleCustomEndpoints({
+        entitySlug: slug1,
         payloadRequest: req,
-        endpoints: entityConfig ? entityConfig?.endpoints : req.payload.config.endpoints,
+        endpoints: collection.config?.endpoints || [],
       })
+      if (customEndpointResponse) return customEndpointResponse
+
+      switch (slug.length) {
+        case 1:
+          // /:collection
+          return endpoints.collection.POST.create({ req, collection })
+        case 2:
+          if (slug2 in endpoints.collection.POST) {
+            // /:collection/login
+            // /:collection/logout
+            // /:collection/unlock
+            // /:collection/access
+            // /:collection/first-register
+            // /:collection/forgot-password
+            // /:collection/reset-password
+            // /:collection/refresh-token
+            return endpoints.collection.POST?.[slug2]({ req, collection })
+          }
+          break
+        case 3:
+          if (`doc-${slug2}-by-id` in endpoints.collection.POST) {
+            // /:collection/access/:id
+            // /:collection/versions/:id
+            // /:collection/verify/:token ("doc-verify-by-id" uses id as token internally)
+            return endpoints.collection.POST[`doc-${slug2}-by-id`]({ req, id: slug3, collection })
+          }
+          break
+      }
+    } else if (slug1 === 'globals' && slug2) {
+      const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
+
+      switch (slug.length) {
+        case 2:
+          // /globals/:slug
+          return endpoints.global.POST.update({ req, globalConfig })
+        case 3:
+          if (`doc-${slug3}` in endpoints.global.POST) {
+            // /globals/:slug/access
+            return endpoints.global.POST?.[`doc-${slug3}`]({ req, globalConfig })
+          }
+          break
+        case 4:
+          if (`doc-${slug3}-by-id` in endpoints.global.POST) {
+            // /globals/:slug/versions/:id
+            return endpoints.global.POST?.[`doc-${slug3}-by-id`]({ req, id: slug4, globalConfig })
+          }
+          break
+        default:
+          return new Response('Route Not Found', { status: 404 })
+      }
     }
 
-    return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
-  } catch (error) {
-    return attemptCustomEndpointBeforeError({
-      req,
-      entitySlug,
-      entityConfig,
-      initialError: error,
+    // root routes
+    const customEndpointResponse = await handleCustomEndpoints({
+      payloadRequest: req,
+      endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
+
+    return RouteNotFoundResponse(slug)
+  } catch (error) {
+    return RouteError(error, slug)
   }
 }
 
@@ -335,54 +326,46 @@ export const DELETE = async (
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2] = slug
-  let req: PayloadRequest
-  let entitySlug: string
-  let entityConfig: CollectionConfig | GlobalConfig = null
 
   try {
-    req = await createPayloadRequest({
+    const req = await createPayloadRequest({
       request,
       config,
       params: {
         collection: slug1,
       },
     })
-    const collection = req.payload?.collections?.[slug1]
 
-    let response: Response | Promise<Response> = null
+    if (req.payload?.collections?.[slug1]) {
+      const collection = req.payload?.collections[slug1]
 
-    if (collection) {
-      entitySlug = slug1
-      entityConfig = collection.config
-      if (slug.length === 1) {
-        // /:collection
-        response = await endpoints.collection.DELETE.delete({ req, collection })
-      } else if (slug.length === 2) {
-        // /:collection/:id
-        response = await endpoints.collection.DELETE.deleteByID({ req, id: slug2, collection })
-      }
-    } else if (slug1 === 'globals') {
-      entitySlug = `globals/${slug2}`
-      const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
-      entityConfig = globalConfig
-    }
-
-    if (!response) {
-      response = await handleCustomEndpoints({
-        entitySlug,
+      const customEndpointResponse = await handleCustomEndpoints({
+        entitySlug: slug1,
         payloadRequest: req,
-        endpoints: entityConfig ? entityConfig?.endpoints : req.payload.config.endpoints,
+        endpoints: collection.config?.endpoints || [],
       })
+      if (customEndpointResponse) return customEndpointResponse
+
+      switch (slug.length) {
+        case 1:
+          // /:collection
+          return endpoints.collection.DELETE.delete({ req, collection })
+        case 2:
+          // /:collection/:id
+          return endpoints.collection.DELETE.deleteByID({ req, id: slug2, collection })
+      }
     }
 
-    return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
-  } catch (error) {
-    return attemptCustomEndpointBeforeError({
-      req,
-      entitySlug,
-      entityConfig,
-      initialError: error,
+    // root routes
+    const customEndpointResponse = await handleCustomEndpoints({
+      payloadRequest: req,
+      endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
+
+    return RouteNotFoundResponse(slug)
+  } catch (error) {
+    return RouteError(error, slug)
   }
 }
 
@@ -391,53 +374,45 @@ export const PATCH = async (
   { params: { slug } }: { params: { slug: string[] } },
 ) => {
   const [slug1, slug2] = slug
-  let req: PayloadRequest
-  let entitySlug: string
-  let entityConfig: CollectionConfig | GlobalConfig = null
 
   try {
-    req = await createPayloadRequest({
+    const req = await createPayloadRequest({
       request,
       config,
       params: {
         collection: slug1,
       },
     })
-    const collection = req.payload?.collections?.[slug1]
 
-    let response: Response | Promise<Response> = null
+    if (req.payload?.collections?.[slug1]) {
+      const collection = req.payload.collections[slug1]
 
-    if (collection) {
-      entitySlug = slug1
-      entityConfig = collection.config
-      if (slug.length === 1) {
-        // /:collection
-        response = await endpoints.collection.PATCH.update({ req, collection })
-      } else if (slug.length === 2) {
-        // /:collection/:id
-        response = await endpoints.collection.PATCH.updateByID({ req, id: slug2, collection })
-      }
-    } else if (slug1 === 'globals') {
-      entitySlug = `globals/${slug2}`
-      const globalConfig = req.payload.config.globals.find((global) => global.slug === slug2)
-      entityConfig = globalConfig
-    }
-
-    if (!response) {
-      response = await handleCustomEndpoints({
-        entitySlug,
+      const customEndpointResponse = await handleCustomEndpoints({
+        entitySlug: slug1,
         payloadRequest: req,
-        endpoints: entityConfig ? entityConfig?.endpoints : req.payload.config.endpoints,
+        endpoints: collection.config?.endpoints || [],
       })
+      if (customEndpointResponse) return customEndpointResponse
+
+      switch (slug.length) {
+        case 1:
+          // /:collection
+          return endpoints.collection.PATCH.update({ req, collection })
+        case 2:
+          // /:collection/:id
+          return endpoints.collection.PATCH.updateByID({ req, id: slug2, collection })
+      }
     }
 
-    return response || new Response(`Route Not Found: "${slug.join('/')}"`, { status: 404 })
-  } catch (error) {
-    return attemptCustomEndpointBeforeError({
-      req,
-      entitySlug,
-      entityConfig,
-      initialError: error,
+    // root routes
+    const customEndpointResponse = await handleCustomEndpoints({
+      payloadRequest: req,
+      endpoints: req.payload.config.endpoints,
     })
+    if (customEndpointResponse) return customEndpointResponse
+
+    return RouteNotFoundResponse(slug)
+  } catch (error) {
+    return RouteError(error, slug)
   }
 }

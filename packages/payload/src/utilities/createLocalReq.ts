@@ -20,6 +20,42 @@ function getRequestContext(
   }
 }
 
+const attachFakeURLProperties = (req: PayloadRequest) => {
+  /**
+   * *NOTE*
+   * If no URL is provided, the local API was called directly outside
+   * the context of a request. Therefore we create a fake URL object.
+   * `ts-ignore` is used below for properties that are 'read-only'
+   * since they do not exist yet we can safely ignore the error.
+   */
+  try {
+    const urlProperties = new URL(req.payload.config?.serverURL)
+    req.host = urlProperties.host
+    req.protocol = urlProperties.protocol
+    req.pathname = urlProperties.pathname
+    // @ts-ignore
+    req.searchParams = urlProperties.searchParams
+    // @ts-ignore
+    req.origin = urlProperties.origin
+    // @ts-ignore
+    req.url = urlProperties.href
+    return
+  } catch (error) {
+    /** do nothing */
+  }
+
+  req.host = 'localhost'
+  req.protocol = 'https:'
+  req.pathname = '/'
+  // @ts-ignore
+  req.searchParams = new URLSearchParams()
+  // @ts-ignore
+  req.origin = 'http://localhost'
+  // @ts-ignore
+  req.url = 'http://localhost'
+  return
+}
+
 type CreateLocalReq = (
   options: {
     context?: RequestContext
@@ -56,8 +92,8 @@ export const createLocalReq: CreateLocalReq = async (
   req.t = i18n.t
   req.user = user || req?.user || null
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)
-  req.searchParams = req?.searchParams || new URLSearchParams()
-  req.pathname = req?.pathname || null
+
+  if (!req?.url) attachFakeURLProperties(req)
 
   return req
 }
