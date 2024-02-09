@@ -59,5 +59,10 @@ export const getTableName = ({
   if (versions) result = `_${result}${adapter.versionsSuffix}`
   if (relationships) result = `${result}${adapter.relationshipsSuffix}`
 
+  if (result.length > adapter.maxIdentifierLength) {
+    throw new Error(
+      `Exceeded max identifier length for table or enum name of ${adapter.maxIdentifierLength} characters. Invalid ${target}: ${result}`,
+    )
+  }
   return result
 }

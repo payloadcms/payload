@@ -54,6 +54,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       idType,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      maxIdentifierLength: args.maxIdentifierLength || 63,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,
