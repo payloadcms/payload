@@ -19,7 +19,6 @@ export type Args = {
   localesSuffix?: string
   idType?: 'serial' | 'uuid'
   logger?: DrizzleConfig['logger']
-  maxIdentifierLength?: number
   migrationDir?: string
   pool: PoolConfig
   push?: boolean
@@ -68,7 +67,6 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   idType: Args['idType']
   localesSuffix?: string
   logger: DrizzleConfig['logger']
-  maxIdentifierLength: number
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -107,7 +105,6 @@ declare module 'payload' {
     enums: Record<string, GenericEnum>
     fieldConstraints: Record<string, Record<string, string>>
     localeSuffix?: string
-    maxIdentifierLength: number
     pool: Pool
     push: boolean
     relations: Record<string, GenericRelation>
