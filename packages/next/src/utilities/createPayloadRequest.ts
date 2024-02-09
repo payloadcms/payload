@@ -18,7 +18,6 @@ type Args = {
   config: Promise<SanitizedConfig>
   params?: {
     collection: string
-    id?: string
   }
 }
 
@@ -82,7 +81,6 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    params,
     searchParams,
     pathname,
   }
