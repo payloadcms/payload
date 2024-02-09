@@ -9,7 +9,7 @@ export const updatePreferenceByID: CollectionRouteHandler<{ id: string }> = asyn
       key: id,
       req,
       user: req.user,
-      value: req.data,
+      value: req.data?.value || req.data,
     })
 
     let message = req.t('general:updatedSuccessfully')
