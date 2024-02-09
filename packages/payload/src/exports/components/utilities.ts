@@ -1,4 +1,4 @@
-export { useCollapsibleIsOpen } from '../../admin/components/elements/Collapsible/provider'
+export { useCollapsible } from '../../admin/components/elements/Collapsible/provider'
 export { default as buildStateFromSchema } from '../../admin/components/forms/Form/buildStateFromSchema'
 export { useAuth } from '../../admin/components/utilities/Auth'
 export { useConfig } from '../../admin/components/utilities/Config'
