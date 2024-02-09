@@ -35,7 +35,8 @@ export const createPayloadRequest = async ({
     collection = collections[params.collection]
   }
 
-  const { searchParams, pathname } = new URL(request.url)
+  const urlProperties = new URL(request.url)
+  const { searchParams, pathname } = urlProperties
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
   const { data, file } = await getDataAndFile({
@@ -81,8 +82,7 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    searchParams,
-    pathname,
+    ...urlProperties,
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)

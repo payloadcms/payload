@@ -46,6 +46,7 @@
     "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
   },
   "dependencies": {
+    "@payloadcms/graphql": "workspace:^",
     "@payloadcms/translations": "workspace:^",
     "bson-objectid": "2.0.4",
     "conf": "10.2.0",
@@ -57,6 +58,7 @@
     "get-tsconfig": "^4.7.2",
     "http-status": "1.6.2",
     "is-plain-object": "5.0.0",
+    "joi": "^17.12.1",
     "json-schema-to-typescript": "11.0.3",
     "jsonwebtoken": "9.0.1",
     "minimist": "1.2.8",

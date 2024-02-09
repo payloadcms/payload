@@ -29,12 +29,13 @@ export const TableColumnsProvider: React.FC<{
   cellProps?: Partial<CellProps>[]
   children: React.ReactNode
   collectionSlug: string
-}> = ({ cellProps, children, collectionSlug }) => {
+  listPreferences: ListPreferences
+}> = ({ cellProps, children, collectionSlug, listPreferences }) => {
   const config = useConfig()
 
-  const { componentMap, getMappedFieldByPath } = useComponentMap()
+  const { componentMap } = useComponentMap()
 
-  const { initialColumns } = componentMap.collections[collectionSlug]
+  const { fieldMap } = componentMap.collections[collectionSlug]
 
   const collectionConfig = config.collections.find(
     (collectionConfig) => collectionConfig.slug === collectionSlug,
@@ -45,60 +46,69 @@ export const TableColumnsProvider: React.FC<{
   } = collectionConfig
 
   const preferenceKey = `${collectionSlug}-list`
-  const prevCollection = useRef<SanitizedCollectionConfig['slug']>()
+  const prevCollection = useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const hasInitialized = useRef(false)
   const { getPreference, setPreference } = usePreferences()
 
   const [tableColumns, dispatchTableColumns] = useReducer(columnReducer, {}, () => {
     return buildColumns({
-      columns: initialColumns,
-      getMappedFieldByPath,
-      collectionSlug,
+      useAsTitle,
+      defaultColumns,
+      columnPreferences: listPreferences?.columns,
+      fieldMap,
       cellProps,
     })
   })
 
-  // // /////////////////////////////////////
-  // // Sync preferences on collectionConfig change
-  // // /////////////////////////////////////
+  // /////////////////////////////////////
+  // Get preferences on collection change
+  // /////////////////////////////////////
 
   useEffect(() => {
     const sync = async () => {
       const collectionHasChanged = prevCollection.current !== collectionSlug
 
       if (collectionHasChanged) {
-        hasInitialized.current = false
-
         const currentPreferences = await getPreference<ListPreferences>(preferenceKey)
         prevCollection.current = collectionSlug
 
-        const newCols = currentPreferences?.columns || initialColumns
-
-        dispatchTableColumns({
-          payload: {
-            columns: buildColumns({
-              columns: newCols,
-              getMappedFieldByPath,
-              collectionSlug,
-              cellProps,
-            }),
-          },
-          type: 'set',
-        })
-
-        hasInitialized.current = true
+        if (currentPreferences.columns) {
+          dispatchTableColumns({
+            payload: {
+              columns: buildColumns({
+                useAsTitle,
+                columnPreferences: currentPreferences?.columns,
+                defaultColumns,
+                fieldMap,
+                cellProps,
+              }),
+            },
+            type: 'set',
+          })
+        }
       }
     }
 
     sync()
-  }, [preferenceKey, getPreference, collectionSlug, initialColumns, cellProps])
+  }, [
+    preferenceKey,
+    getPreference,
+    collectionSlug,
+    fieldMap,
+    cellProps,
+    defaultColumns,
+    useAsTitle,
+  ])
 
-  // // /////////////////////////////////////
-  // // Set preferences on column change
-  // // /////////////////////////////////////
+  // /////////////////////////////////////
+  // Set preferences on column change
+  // /////////////////////////////////////
 
   useEffect(() => {
-    if (!hasInitialized.current) return
+    if (!hasInitialized.current) {
+      hasInitialized.current = true
+      return
+    }
 
     const columns = tableColumns.map((c) => ({
       accessor: c?.accessor,
