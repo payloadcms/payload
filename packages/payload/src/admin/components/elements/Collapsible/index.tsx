@@ -24,7 +24,7 @@ export const Collapsible: React.FC<Props> = ({
 }) => {
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed))
   const [hoveringToggle, setHoveringToggle] = useState(false)
-  const { withinCollapsible } = useCollapsible()
+  const isNested = useCollapsible()
   const { t } = useTranslation('fields')
 
   const collapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal
@@ -36,7 +36,7 @@ export const Collapsible: React.FC<Props> = ({
         className,
         dragHandleProps && `${baseClass}--has-drag-handle`,
         collapsed && `${baseClass}--collapsed`,
-        withinCollapsible && `${baseClass}--nested`,
+        isNested && `${baseClass}--nested`,
         hoveringToggle && `${baseClass}--hovered`,
         `${baseClass}--style-${collapsibleStyle}`,
       ]

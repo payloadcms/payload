@@ -83,7 +83,7 @@ const TabsField: React.FC<Props> = (props) => {
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
 
-  const { withinCollapsible } = useCollapsible()
+  const isWithinCollapsible = useCollapsible()
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
   const tabsPrefKey = `tabs-${indexPath}`
 
@@ -138,7 +138,7 @@ const TabsField: React.FC<Props> = (props) => {
         fieldBaseClass,
         className,
         baseClass,
-        withinCollapsible && `${baseClass}--within-collapsible`,
+        isWithinCollapsible && `${baseClass}--within-collapsible`,
       ]
         .filter(Boolean)
         .join(' ')}
