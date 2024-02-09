@@ -100,8 +100,8 @@ describe('Fields', () => {
       const { id } = await payload.create({
         collection: 'text-fields',
         data: {
-          text,
           localizedHasMany,
+          text,
         },
         locale: 'en',
       })
@@ -977,6 +977,70 @@ describe('Fields', () => {
       expect(result.docs).toHaveLength(1)
       expect(result.docs[0]).toMatchObject(blockDoc)
     })
+
+    it('should query by blockType', async () => {
+      const text = 'blockType query test'
+
+      const hit = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'content',
+              text,
+            },
+          ],
+        },
+      })
+      const miss = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'number',
+              number: 5,
+            },
+          ],
+          duplicate: [
+            {
+              blockType: 'content',
+              text,
+            },
+          ],
+        },
+      })
+
+      const { docs: equalsDocs } = await payload.find({
+        collection: blockFieldsSlug,
+        where: {
+          and: [
+            {
+              'blocks.blockType': { equals: 'content' },
+            },
+            {
+              'blocks.text': { equals: text },
+            },
+          ],
+        },
+      })
+
+      const { docs: inDocs } = await payload.find({
+        collection: blockFieldsSlug,
+        where: {
+          'blocks.blockType': { in: ['content'] },
+        },
+      })
+
+      const equalsHitResult = equalsDocs.find(({ id }) => id === hit.id)
+      const inHitResult = inDocs.find(({ id }) => id === hit.id)
+      const equalsMissResult = equalsDocs.find(({ id }) => id === miss.id)
+      const inMissResult = inDocs.find(({ id }) => id === miss.id)
+
+      expect(equalsHitResult.id).toStrictEqual(hit.id)
+      expect(inHitResult.id).toStrictEqual(hit.id)
+      expect(equalsMissResult).toBeUndefined()
+      expect(inMissResult).toBeUndefined()
+    })
   })
 
   describe('json', () => {
@@ -1145,6 +1209,63 @@ describe('Fields', () => {
         expect(existTrueIDs).toContain(hasJSON.id)
         expect(existFalseIDs).not.toContain(hasJSON.id)
       })
+
+      it('exists should not return null values', async () => {
+        const { id } = await payload.create({
+          collection: 'select-fields',
+          data: {
+            select: 'one',
+          },
+        })
+
+        const existsResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: true },
+          },
+        })
+
+        expect(existsResult.docs).toHaveLength(1)
+
+        const existsFalseResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: false },
+          },
+        })
+
+        expect(existsFalseResult.docs).toHaveLength(0)
+
+        await payload.update({
+          id,
+          collection: 'select-fields',
+          data: {
+            select: null,
+          },
+        })
+
+        const existsTrueResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: true },
+          },
+        })
+
+        expect(existsTrueResult.docs).toHaveLength(0)
+
+        const result = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: false },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+      })
     })
   })
 
@@ -1200,8 +1321,8 @@ describe('Fields', () => {
       expect(nodes).toBeDefined()
       const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
       expect(child).toMatchObject({
-        linkType: 'internal',
         type: 'link',
+        linkType: 'internal',
       })
       expect(child.doc.relationTo).toEqual('array-fields')
 
@@ -1247,6 +1368,65 @@ describe('Fields', () => {
       })
 
       expect(query.docs).toBeDefined()
+    })
+  })
+
+  describe('clearable fields - exists', () => {
+    it('exists should not return null values', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          select: 'one',
+        },
+      })
+
+      const existsResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: true },
+        },
+      })
+
+      expect(existsResult.docs).toHaveLength(1)
+
+      const existsFalseResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: false },
+        },
+      })
+
+      expect(existsFalseResult.docs).toHaveLength(0)
+
+      await payload.update({
+        id,
+        collection: 'select-fields',
+        data: {
+          select: null,
+        },
+      })
+
+      const existsTrueResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: true },
+        },
+      })
+
+      expect(existsTrueResult.docs).toHaveLength(0)
+
+      const result = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: false },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
     })
   })
 })

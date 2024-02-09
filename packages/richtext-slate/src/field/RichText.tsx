@@ -326,7 +326,7 @@ const RichText: React.FC<FieldProps> = (props) => {
         <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
         <Slate
           editor={editor}
-          key={JSON.stringify({ initialValue, path })}
+          key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
           onChange={handleChange}
           value={valueToRender as any[]}
         >
