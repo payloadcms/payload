@@ -1,3 +1,15 @@
+## [2.10.1](https://github.com/payloadcms/payload/compare/v2.10.0...v2.10.1) (2024-02-09)
+
+
+### Bug Fixes
+
+* clearable cells handle null values ([#5038](https://github.com/payloadcms/payload/issues/5038)) ([f6d7da7](https://github.com/payloadcms/payload/commit/f6d7da751039df25066b51bb91d6453e1a4efd82))
+* **db-mongodb:** handle null values with exists ([#5037](https://github.com/payloadcms/payload/issues/5037)) ([cdc4cb9](https://github.com/payloadcms/payload/commit/cdc4cb971b9180ba2ed09741f5af1a3c18292828))
+* **db-postgres:** handle nested docs with drafts ([#5012](https://github.com/payloadcms/payload/issues/5012)) ([da184d4](https://github.com/payloadcms/payload/commit/da184d40ece74bffb224002eb5df8f6987d65043))
+* ensures docs with the same id are shown in relationship field select ([#4859](https://github.com/payloadcms/payload/issues/4859)) ([e1813fb](https://github.com/payloadcms/payload/commit/e1813fb884e0dc84203fcbab87527a99a4d3a5d7))
+* query relationships by explicit id field ([#5022](https://github.com/payloadcms/payload/issues/5022)) ([a0a58e7](https://github.com/payloadcms/payload/commit/a0a58e7fd20dff54d210c968f4d5defd67441bdd))
+* **richtext-lexical:** make editor reactive to initialValue changes ([#5010](https://github.com/payloadcms/payload/issues/5010)) ([2315781](https://github.com/payloadcms/payload/commit/2315781f1891ddde4b4c5f2f0cfa1c17af85b7a9))
+
 ## [2.10.0](https://github.com/payloadcms/payload/compare/v2.9.0...v2.10.0) (2024-02-06)
 
 
