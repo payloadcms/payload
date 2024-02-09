@@ -8,9 +8,9 @@ import { getAuthenticatedUser } from 'payload/auth'
 import { getPayload } from 'payload'
 import { URL } from 'url'
 import { parseCookies } from 'payload/auth'
+import { initI18n } from '@payloadcms/translations'
 import { getRequestLanguage } from './getRequestLanguage'
 import { getRequestLocales } from './getRequestLocales'
-import { getNextI18n } from './getNextI18n'
 import { getDataAndFile } from './getDataAndFile'
 
 type Args = {
@@ -61,10 +61,10 @@ export const createPayloadRequest = async ({
     cookies,
   })
 
-  const i18n = getNextI18n({
-    config,
+  const i18n = await initI18n({
+    config: config.i18n,
     language,
-    translationContext: 'api',
+    translationsContext: 'api',
   })
 
   const customRequest: CustomPayloadRequest = {
