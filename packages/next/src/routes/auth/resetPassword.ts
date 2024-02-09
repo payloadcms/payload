@@ -1,15 +1,15 @@
 import httpStatus from 'http-status'
 
 import { resetPasswordOperation } from 'payload/operations'
-import { generatePayloadCookie } from '../../utilities/cookies'
-import { PayloadRequest } from 'payload/types'
+import { generatePayloadCookie } from 'payload/auth'
+import { CollectionRouteHandler } from '../types'
 
-export const resetPassword = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const resetPassword: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await resetPasswordOperation({
-    collection: req.collection,
+    collection,
     data: {
       password: typeof req.data?.password === 'string' ? req.data.password : '',
       token: typeof req.data?.token === 'string' ? req.data.token : '',
@@ -21,7 +21,7 @@ export const resetPassword = async ({ req }: { req: PayloadRequest }): Promise<R
   const cookie = generatePayloadCookie({
     token: result.token,
     payload: req.payload,
-    collectionConfig: req.collection.config,
+    collectionConfig: collection.config,
   })
 
   return Response.json(

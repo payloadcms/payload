@@ -8,8 +8,7 @@ import { reduceFieldsToValues } from '../..'
 import { DocumentPreferences } from 'payload/types'
 import { Locale } from 'payload/config'
 import { User } from 'payload/auth'
-import { initTFunction } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/api'
+import { initI18n } from '@payloadcms/translations'
 
 export const getFormStateFromServer = async (
   args: {
@@ -37,8 +36,11 @@ export const getFormStateFromServer = async (
 
   const data = reduceFieldsToValues(formState, true)
 
-  // TODO: memoize the creation of this function based on language
-  const t = initTFunction({ config: payload.config.i18n, language, translations })
+  const { t } = await initI18n({
+    translationsContext: 'client',
+    language: language,
+    config: payload.config.i18n,
+  })
 
   const result = await buildStateFromSchema({
     id,

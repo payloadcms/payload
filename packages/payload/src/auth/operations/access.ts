@@ -12,27 +12,13 @@ type Arguments = {
 }
 
 export const accessOperation = async (args: Arguments): Promise<Permissions> => {
-  const {
-    req,
-    req: { payload, user },
-  } = args
+  const { req } = args
 
   adminInitTelemetry(req)
 
   try {
     const shouldCommit = await initTransaction(req)
-    const results = getAccessResults({
-      req: {
-        context: req.context,
-        data: req.data,
-        headers: req.headers,
-        i18n: req.i18n,
-        payload,
-        payloadAPI: req.payloadAPI,
-        t: req.t,
-        user,
-      },
-    })
+    const results = getAccessResults({ req })
     if (shouldCommit) await commitTransaction(req)
     return results
   } catch (e: unknown) {

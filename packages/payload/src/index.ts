@@ -52,7 +52,6 @@ import buildEmail from './email/build'
 import { defaults as emailDefaults } from './email/defaults'
 import sendEmail from './email/sendEmail'
 import localGlobalOperations from './globals/operations/local'
-import registerGraphQLSchema from './graphql/registerSchema'
 import Logger from './utilities/logger'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit'
 
@@ -335,11 +334,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
     this.config.collections.forEach((collection) => {
       this.collections[collection.slug] = {
-        config: collection,
+        collectionConfig: collection,
       }
     })
 
-    this.db = this.config.db({ payload: this })
+    this.db = this.config.db.init({ payload: this })
     this.db.payload = this
 
     if (this.db?.init) {
@@ -363,10 +362,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.emailOptions = emailOptions ?? emailDefaults
     this.email = buildEmail(this.emailOptions, this.logger)
     this.sendEmail = sendEmail.bind(this)
-
-    if (!this.config.graphQL.disable) {
-      registerGraphQLSchema(this)
-    }
 
     serverInitTelemetry(this)
 

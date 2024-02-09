@@ -1,15 +1,15 @@
 import httpStatus from 'http-status'
 import { loginOperation } from 'payload/operations'
-import { PayloadRequest } from 'payload/types'
 import { isNumber } from 'payload/utilities'
-import { generatePayloadCookie } from '../../utilities/cookies'
+import { generatePayloadCookie } from 'payload/auth'
+import { CollectionRouteHandler } from '../types'
 
-export const login = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const login: CollectionRouteHandler = async ({ req, collection }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
   const result = await loginOperation({
-    collection: req.collection,
+    collection,
     data: {
       email: typeof req.data?.email === 'string' ? req.data.email : '',
       password: typeof req.data?.password === 'string' ? req.data.password : '',
@@ -21,7 +21,7 @@ export const login = async ({ req }: { req: PayloadRequest }): Promise<Response>
   const cookie = generatePayloadCookie({
     token: result.token,
     payload: req.payload,
-    collectionConfig: req.collection.config,
+    collectionConfig: collection.config,
   })
 
   return Response.json(

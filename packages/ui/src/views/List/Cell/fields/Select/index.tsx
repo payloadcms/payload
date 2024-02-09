@@ -1,33 +1,38 @@
+'use client'
 import React from 'react'
 
-import type { CellComponentProps, OptionObject, SelectField } from 'payload/types'
+import type { CellComponentProps, CellProps, OptionObject } from 'payload/types'
 
 import { optionsAreObjects } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '../../../../../providers/Translation'
 
-const SelectCell: React.FC<CellComponentProps<SelectField, any>> = ({ data, field, i18n }) => {
+export interface SelectCellProps extends CellComponentProps<any> {
+  options: CellProps['options']
+}
+
+export const SelectCell: React.FC<SelectCellProps> = ({ cellData, options }) => {
+  const { i18n } = useTranslation()
+
   const findLabel = (items: string[]) =>
     items
       .map((i) => {
-        const found = (field.options as OptionObject[]).filter(
-          (f: OptionObject) => f.value === i,
-        )?.[0]?.label
+        const found = (options as OptionObject[]).filter((f: OptionObject) => f.value === i)?.[0]
+          ?.label
         return getTranslation(found, i18n)
       })
       .join(', ')
 
   let content = ''
-  if (optionsAreObjects(field.options)) {
-    content = Array.isArray(data)
-      ? findLabel(data) // hasMany
-      : findLabel([data])
+  if (optionsAreObjects(options)) {
+    content = Array.isArray(cellData)
+      ? findLabel(cellData) // hasMany
+      : findLabel([cellData])
   } else {
-    content = Array.isArray(data)
-      ? data.join(', ') // hasMany
-      : data
+    content = Array.isArray(cellData)
+      ? cellData.join(', ') // hasMany
+      : cellData
   }
 
   return <span>{content}</span>
 }
-
-export default SelectCell

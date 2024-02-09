@@ -6,3 +6,4 @@ export { getLatestCollectionVersion } from '../versions/getLatestCollectionVersi
 export { getLatestGlobalVersion } from '../versions/getLatestGlobalVersion'
 export { getVersionsModelName } from '../versions/getVersionsModelName'
 export { saveVersion } from '../versions/saveVersion'
+export type { TypeWithVersion } from '../versions/types'

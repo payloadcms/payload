@@ -1,0 +1,51 @@
+{
+  "name": "@payloadcms/graphql",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.d.ts",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*",
+    "ts-essentials": "7.0.3"
+  },
+  "dependencies": {
+    "graphql": "16.8.1",
+    "graphql-http": "^1.22.0",
+    "graphql-playground-html": "1.6.30",
+    "graphql-query-complexity": "0.12.0",
+    "graphql-scalars": "1.22.2",
+    "graphql-type-json": "0.3.2",
+    "pluralize": "8.0.0"
+  },
+  "peerDependencies": {
+    "payload": "^2.0.0"
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index/*.js",
+        "require": "./dist/index/*.js",
+        "types": "./dist/index/*.d.ts"
+      }
+    },
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist"
+  ]
+}

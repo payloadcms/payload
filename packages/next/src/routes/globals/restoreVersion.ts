@@ -1,19 +1,14 @@
 import httpStatus from 'http-status'
 
-import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
-
 import { restoreVersionOperationGlobal } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
+import { GlobalRouteHandler } from '../types'
 
-export const restoreVersion = async ({
+export const restoreVersion: GlobalRouteHandler<{ id: string }> = async ({
   req,
   globalConfig,
   id,
-}: {
-  req: PayloadRequest
-  globalConfig: SanitizedGlobalConfig
-  id: string
-}): Promise<Response> => {
+}) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 

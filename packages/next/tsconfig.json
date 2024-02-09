@@ -8,6 +8,7 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "paths": {
       "payload-config": ["./src/config.ts"],
+      "@payloadcms/graphql": ["../graphql/dist/index.ts"],
       "@payloadcms/ui": ["../ui/src/exports/index.ts"],
       "@payloadcms/translations/*": ["../translations/dist/*"]
     },
@@ -32,7 +33,13 @@
     "src/**/*.d.ts",
     "src/**/*.json",
     "../ui/src/createClientConfig.ts",
-    "../dev/src/app/(payload)/admin/login/action.ts"
+    "../dev/src/app/(payload)/admin/login/action.ts",
+    "../payload/src/auth/cookies.ts"
   ],
-  "references": [{ "path": "../payload" }, { "path": "../ui" }, { "path": "../translations" }]
+  "references": [
+    { "path": "../payload" },
+    { "path": "../ui" },
+    { "path": "../translations" },
+    { "path": "../graphql" }
+  ]
 }

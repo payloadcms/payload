@@ -1,19 +1,17 @@
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from 'payload/types'
-
 import { docAccessOperation } from 'payload/operations'
+import { CollectionRouteHandler } from '../types'
 
-export const docAccess = async ({
+export const docAccess: CollectionRouteHandler<{ id: string }> = async ({
   req,
   id,
-}: {
-  req: PayloadRequest
-  id: string
-}): Promise<Response> => {
+  collection,
+}) => {
   const result = await docAccessOperation({
     id,
     req,
+    collection,
   })
 
   return Response.json(result, {

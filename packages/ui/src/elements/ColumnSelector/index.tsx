@@ -30,7 +30,7 @@ const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   return (
     <DraggableSortable
       className={baseClass}
-      ids={columns.map((col) => col.accessor)}
+      ids={columns.map((col) => col?.accessor)}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         moveColumn({
           fromIndex: moveFromIndex,
@@ -39,6 +39,8 @@ const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       }}
     >
       {columns.map((col, i) => {
+        if (!col) return null
+
         const { name, accessor, active, label } = col
 
         if (col.accessor === '_select') return null

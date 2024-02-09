@@ -1,6 +1,6 @@
 export { fieldTypes } from '../forms/fields'
 export { default as buildStateFromSchema } from '../forms/utilities/buildStateFromSchema'
-export { buildFieldMaps } from '../forms/utilities/buildFieldMaps'
+export { buildComponentMap } from '../utilities/buildComponentMap'
 export { default as Form } from '../forms/Form'
 export { default as FormSubmit } from '../forms/Submit'
 export { default as ConfirmPassword } from '../forms/fields/ConfirmPassword'

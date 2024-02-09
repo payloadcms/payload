@@ -1,17 +1,16 @@
 import { initI18n } from '@payloadcms/translations'
-import { translations } from '@payloadcms/translations/api'
 
 import type { SanitizedConfig } from '../exports/types'
 
-export const getLocalI18n = ({
+export const getLocalI18n = async ({
   config,
   language = 'en',
 }: {
   config: SanitizedConfig
   language?: string
-}): ReturnType<typeof initI18n> =>
+}) =>
   initI18n({
     config: config.i18n,
     language,
-    translations,
+    translationsContext: 'api',
   })

@@ -48,6 +48,11 @@ export type DrizzleTransaction = PgTransaction<
 export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
   enums: Record<string, GenericEnum>
+  /**
+   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
+   * Used for returning properly formed errors from unique fields
+   */
+  fieldConstraints: Record<string, Record<string, string>>
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -61,14 +66,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
     }
   }
   tables: Record<string, GenericTable>
-  /**
-   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
-   * Used for returning properly formed errors from unique fields
-   */
-  fieldConstraints: Record<string, Record<string, string>>
 }
-
-export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
 export type MigrateUpArgs = { payload: Payload }
 export type MigrateDownArgs = { payload: Payload }
@@ -79,6 +77,7 @@ declare module 'payload' {
       BaseDatabaseAdapter {
     drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
+    fieldConstraints: Record<string, Record<string, string>>
     pool: Pool
     push: boolean
     relations: Record<string, GenericRelation>
@@ -91,6 +90,5 @@ declare module 'payload' {
       }
     }
     tables: Record<string, GenericTable>
-    fieldConstraints: Record<string, Record<string, string>>
   }
 }

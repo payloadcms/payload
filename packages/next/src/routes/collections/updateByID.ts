@@ -1,17 +1,14 @@
 import httpStatus from 'http-status'
 
-import type { PayloadRequest } from 'payload/types'
-
 import { isNumber } from 'payload/utilities'
 import { updateByIDOperation } from 'payload/operations'
+import { CollectionRouteHandler } from '../types'
 
-export const updateByID = async ({
+export const updateByID: CollectionRouteHandler<{ id: string }> = async ({
   req,
+  collection,
   id,
-}: {
-  req: PayloadRequest
-  id: string
-}): Promise<Response> => {
+}) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
   const autosave = searchParams.get('autosave') === 'true'
@@ -21,7 +18,7 @@ export const updateByID = async ({
     const doc = await updateByIDOperation({
       id,
       autosave,
-      collection: req.collection,
+      collection,
       data: req.data,
       depth: isNumber(depth) ? Number(depth) : undefined,
       draft,

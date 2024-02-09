@@ -6,7 +6,7 @@ import { tempFileHandler, memHandler } from './handlers'
 import { processNested } from './processNested'
 import { isFunc, debugLog, buildFields, parseFileName } from './utilities'
 import { NextFileUploadOptions, NextFileUploadResponse } from '.'
-import APIError from 'payload/dist/errors/APIError'
+import { APIError } from 'payload/errors'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
 

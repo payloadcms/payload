@@ -22,7 +22,6 @@ function getRequestContext(
 
 type CreateLocalReq = (
   options: {
-    collection?: number | string | symbol
     context?: RequestContext
     fallbackLocale?: string
     locale?: string
@@ -30,12 +29,12 @@ type CreateLocalReq = (
     user?: Document
   },
   payload: Payload,
-) => PayloadRequest
-export const createLocalReq: CreateLocalReq = (
-  { collection, context, fallbackLocale, locale, req = {} as PayloadRequest, user },
+) => Promise<PayloadRequest>
+export const createLocalReq: CreateLocalReq = async (
+  { context, fallbackLocale, locale, req = {} as PayloadRequest, user },
   payload,
 ) => {
-  const i18n = req?.i18n || getLocalI18n({ config: payload.config })
+  const i18n = req?.i18n || (await getLocalI18n({ config: payload.config }))
 
   if (payload.config?.localization) {
     const defaultLocale = payload.config.localization.defaultLocale
@@ -43,8 +42,11 @@ export const createLocalReq: CreateLocalReq = (
     const fallbackLocaleFromConfig = payload.config.localization.locales.find(
       ({ code }) => req.locale === code,
     )?.fallbackLocale
-    req.fallbackLocale =
-      fallbackLocale || req?.fallbackLocale || fallbackLocaleFromConfig || defaultLocale
+    if (typeof fallbackLocale !== 'undefined') {
+      req.fallbackLocale = fallbackLocale
+    } else if (typeof req?.fallbackLocale === 'undefined') {
+      req.fallbackLocale = fallbackLocaleFromConfig || defaultLocale
+    }
   }
 
   req.context = getRequestContext(req, context)
@@ -53,7 +55,6 @@ export const createLocalReq: CreateLocalReq = (
   req.i18n = i18n
   req.t = i18n.t
   req.user = user || req?.user || null
-  req.collection = collection ? payload.collections?.[collection] : null
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req)
   req.searchParams = req?.searchParams || new URLSearchParams()
   req.pathname = req?.pathname || null

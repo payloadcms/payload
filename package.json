@@ -115,5 +115,10 @@
   },
   "dependencies": {
     "@sentry/react": "^7.77.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "graphql": "^16.8.1"
+    }
   }
 }

@@ -57,7 +57,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     disableErrors,
     draft,
     overrideAccess,
-    req: createLocalReq(options, payload),
+    req: await createLocalReq(options, payload),
     showHiddenFields,
   })
 }

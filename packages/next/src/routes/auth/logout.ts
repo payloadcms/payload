@@ -1,11 +1,11 @@
 import httpStatus from 'http-status'
 import { logoutOperation } from 'payload/operations'
-import { PayloadRequest } from 'payload/types'
-import { generateExpiredPayloadCookie } from '../../utilities/cookies'
+import { generateExpiredPayloadCookie } from 'payload/auth'
+import { CollectionRouteHandler } from '../types'
 
-export const logout = async ({ req }: { req: PayloadRequest }): Promise<Response> => {
+export const logout: CollectionRouteHandler = async ({ req, collection }) => {
   const result = logoutOperation({
-    collection: req.collection,
+    collection,
     req,
   })
 
@@ -21,7 +21,7 @@ export const logout = async ({ req }: { req: PayloadRequest }): Promise<Response
   }
 
   const expiredCookie = generateExpiredPayloadCookie({
-    collectionConfig: req.collection.config,
+    collectionConfig: collection.config,
     payload: req.payload,
   })
 

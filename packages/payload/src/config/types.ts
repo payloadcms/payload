@@ -15,12 +15,13 @@ import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
   AfterErrorHook,
+  Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
 } from '../collections/config/types'
-import type { BaseDatabaseAdapter } from '../database/types'
+import type { DatabaseAdapterResult } from '../database/types'
 import type { ClientConfigField } from '../fields/config/types'
-import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
+import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types'
 import type { PayloadRequest } from '../types'
 import type { Where } from '../types'
 
@@ -104,9 +105,34 @@ export function hasTransportOptions(
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined
 }
 
+export type GraphQLInfo = {
+  Mutation: {
+    fields: Record<string, any>
+    name: string
+  }
+  Query: {
+    fields: Record<string, any>
+    name: string
+  }
+  collections: {
+    [slug: number | string | symbol]: Collection
+  }
+  globals: Globals
+  types: {
+    arrayTypes: Record<string, GraphQL.GraphQLType>
+    blockInputTypes: Record<string, GraphQL.GraphQLInputObjectType>
+    blockTypes: Record<string, GraphQL.GraphQLObjectType>
+    fallbackLocaleInputType?: GraphQL.GraphQLEnumType | GraphQL.GraphQLScalarType
+    groupTypes: Record<string, GraphQL.GraphQLObjectType>
+    localeInputType?: GraphQL.GraphQLEnumType | GraphQL.GraphQLScalarType
+    tabTypes: Record<string, GraphQL.GraphQLObjectType>
+  }
+}
 export type GraphQLExtension = (
   graphQL: typeof GraphQL,
-  payload: Payload,
+  context: {
+    config: SanitizedConfig
+  } & GraphQLInfo,
 ) => Record<string, unknown>
 
 export type InitOptions = {
@@ -526,7 +552,7 @@ export type Config = {
   custom?: Record<string, any>
 
   /** Pass in a database adapter for use on this project. */
-  db: (args: { payload: Payload }) => BaseDatabaseAdapter
+  db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
   debug?: boolean
   /**
@@ -584,7 +610,7 @@ export type Config = {
    *
    * You can add your own GraphQL queries and mutations to Payload, making use of all the types that Payload has defined for you.
    *
-   * @see https://payloadcms.com/docs/access-control/overview
+   * @see https://payloadcms.com/docs/graphql/overview
    */
   graphQL?: {
     disable?: boolean
@@ -593,13 +619,13 @@ export type Config = {
     /**
      * Function that returns an object containing keys to custom GraphQL mutations
      *
-     * @see https://payloadcms.com/docs/access-control/overview
+     * @see https://payloadcms.com/docs/graphql/extending
      */
     mutations?: GraphQLExtension
     /**
      * Function that returns an object containing keys to custom GraphQL queries
      *
-     * @see https://payloadcms.com/docs/access-control/overview
+     * @see https://payloadcms.com/docs/graphql/extending
      */
     queries?: GraphQLExtension
     schemaOutputFile?: string
