@@ -1,13 +1,7 @@
 import React, { createContext, useContext } from 'react'
 
-type ContextType = {
-  collapsed: boolean
-  withinCollapsible: boolean
-}
-const Context = createContext({
-  collapsed: false,
-  withinCollapsible: true,
-})
+const Context = createContext(false)
+const IsOpenContext = createContext(false)
 
 export const CollapsibleProvider: React.FC<{
   children?: React.ReactNode
@@ -15,17 +9,11 @@ export const CollapsibleProvider: React.FC<{
   withinCollapsible?: boolean
 }> = ({ children, collapsed, withinCollapsible = true }) => {
   return (
-    <Context.Provider
-      value={{
-        collapsed: Boolean(collapsed),
-        withinCollapsible,
-      }}
-    >
-      {children}
+    <Context.Provider value={withinCollapsible}>
+      <IsOpenContext.Provider value={Boolean(collapsed)}>{children}</IsOpenContext.Provider>
     </Context.Provider>
   )
 }
 
-export const useCollapsible = (): ContextType => useContext(Context)
-
-export default Context
+export const useCollapsible = (): boolean => useContext(Context)
+export const useCollapsibleIsOpen = (): boolean => useContext(IsOpenContext)
