@@ -277,7 +277,12 @@ export const getTableColumnFromPath = ({
           const blockTypes = Array.isArray(value) ? value : [value]
           blockTypes.forEach((blockType) => {
             const block = field.blocks.find((block) => block.slug === blockType)
-            newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
+            newTableName = getTableName({
+              adapter,
+              config: block,
+              parentTableName: tableName,
+              prefix: `${tableName}_blocks_`,
+            })
             joins[newTableName] = eq(
               adapter.tables[tableName].id,
               adapter.tables[newTableName]._parentID,
