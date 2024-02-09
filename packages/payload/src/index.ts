@@ -334,7 +334,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
     this.config.collections.forEach((collection) => {
       this.collections[collection.slug] = {
-        collectionConfig: collection,
+        config: collection,
       }
     })
 

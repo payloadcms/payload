@@ -1,9 +1,15 @@
+import payload from '..'
 import loadConfig from '../config/load'
 
 export const build = async (): Promise<void> => {
-  const config = await loadConfig() // Will throw its own error if it fails
+  await payload.init({
+    config: loadConfig(),
+    disableDBConnect: true,
+    disableOnInit: true,
+    local: true,
+  })
 
-  await config.admin.bundler.build(config)
+  await payload.config.admin.bundler.build(payload.config)
 }
 
 // when build.js is launched directly
