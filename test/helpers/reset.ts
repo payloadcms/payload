@@ -20,7 +20,7 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
       return
     }
     const queries = Object.values(schema).map((table: any) => {
-      return sql.raw(`DELETE FROM ${table.dbName}`)
+      return sql.raw(`DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName}`)
     })
 
     await db.drizzle.transaction(async (trx) => {

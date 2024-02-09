@@ -51,11 +51,13 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       enums: {},
       fieldConstraints: {},
       logger: args.logger,
+      pgSchema: undefined,
       pool: undefined,
       poolOptions: args.pool,
       push: args.push,
       relations: {},
       schema: {},
+      schemaName: args.schemaName,
       sessions: {},
       tables: {},
 

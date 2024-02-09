@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { SQL } from 'drizzle-orm'
+import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
 
 import { and, eq, like, sql } from 'drizzle-orm'
@@ -15,7 +16,7 @@ import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 type Constraint = {
   columnName: string
-  table: GenericTable
+  table: GenericTable | PgTableWithColumns<any>
   value: unknown
 }
 
@@ -26,12 +27,12 @@ type TableColumn = {
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
-  table: GenericTable
+  table: GenericTable | PgTableWithColumns<any>
 }
 
 type Args = {
   adapter: PostgresAdapter
-  aliasTable?: GenericTable
+  aliasTable?: GenericTable | PgTableWithColumns<any>
   collectionPath: string
   columnPrefix?: string
   constraintPath?: string

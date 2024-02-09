@@ -7,7 +7,14 @@ import type {
   Relations,
 } from 'drizzle-orm'
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
-import type { PgColumn, PgEnum, PgTableWithColumns, PgTransaction } from 'drizzle-orm/pg-core'
+import type {
+  PgColumn,
+  PgEnum,
+  PgSchema,
+  PgTableWithColumns,
+  PgTransaction,
+} from 'drizzle-orm/pg-core'
+import type { PgTableFn } from 'drizzle-orm/pg-core/table'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
@@ -20,6 +27,7 @@ export type Args = {
   migrationDir?: string
   pool: PoolConfig
   push?: boolean
+  schemaName?: string
 }
 
 export type GenericColumn = PgColumn<
@@ -57,11 +65,13 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
    */
   fieldConstraints: Record<string, Record<string, string>>
   logger: DrizzleConfig['logger']
+  pgSchema?: { table: PgTableFn } | PgSchema
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
   relations: Record<string, GenericRelation>
   schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  schemaName?: Args['schemaName']
   sessions: {
     [id: string]: {
       db: DrizzleTransaction
@@ -69,7 +79,7 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
       resolve: () => Promise<void>
     }
   }
-  tables: Record<string, GenericTable>
+  tables: Record<string, GenericTable | PgTableWithColumns<any>>
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter

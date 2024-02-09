@@ -34,6 +34,7 @@ const databaseAdapters = {
     pool: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
+    schemaName: 'custom',
   }),
   supabase: postgresAdapter({
     migrationDir,
