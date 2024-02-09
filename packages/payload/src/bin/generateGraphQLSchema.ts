@@ -1,8 +1,8 @@
 /* eslint-disable no-nested-ternary */
+import { configToSchema } from '@payloadcms/graphql'
 import fs from 'fs'
 import { printSchema } from 'graphql'
 
-import payload from '..'
 import loadConfig from '../config/load'
 import Logger from '../utilities/logger'
 
@@ -10,16 +10,10 @@ export async function generateGraphQLSchema(): Promise<void> {
   const logger = Logger()
   const config = await loadConfig()
 
-  config.db = null
-
-  await payload.init({
-    disableDBConnect: true,
-    disableOnInit: true,
-    local: true,
-  })
+  const { schema } = await configToSchema(config)
 
   logger.info('Compiling GraphQL schema...')
-  fs.writeFileSync(config.graphQL.schemaOutputFile, printSchema(payload.schema))
+  fs.writeFileSync(config.graphQL.schemaOutputFile, printSchema(schema))
   logger.info(`GraphQL written to ${config.graphQL.schemaOutputFile}`)
 }
 

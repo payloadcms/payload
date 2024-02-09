@@ -3,6 +3,7 @@ import type { ParsedArgs } from 'minimist'
 import minimist from 'minimist'
 
 import payload from '..'
+import loadConfig from '../config/load'
 import { prettySyncLoggerDestination } from '../utilities/logger'
 
 /**
@@ -38,6 +39,7 @@ export const migrate = async (parsedArgs: ParsedArgs): Promise<void> => {
 
   // Barebones instance to access database adapter
   await payload.init({
+    config: loadConfig(),
     disableOnInit: true,
     local: true,
     ...prettySyncLogger,
