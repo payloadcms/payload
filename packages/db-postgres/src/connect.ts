@@ -22,13 +22,18 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
 
     this.drizzle = drizzle(this.pool, { logger, schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      const schema = this.schemaName || 'public'
       this.payload.logger.info('---- DROPPING TABLES ----')
+      if (this.schemaName) {
+        await this.drizzle.execute(
+          sql.raw(`
+          drop schema if exists ${this.schemaName} cascade;
+          create schema ${this.schemaName};
+        `),
+        )
+      }
       await this.drizzle.execute(
         sql.raw(`
-        drop schema if exists ${schema} cascade;
         drop schema if exists public cascade;
-        create schema ${schema};
         create schema public;
       `),
       )
