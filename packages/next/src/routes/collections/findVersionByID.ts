@@ -2,13 +2,9 @@ import httpStatus from 'http-status'
 
 import { findVersionByIDOperation } from 'payload/operations'
 import { isNumber } from 'payload/utilities'
-import { CollectionRouteHandler } from '../types'
+import { CollectionRouteHandlerWithID } from '../types'
 
-export const findVersionByID: CollectionRouteHandler<{ id: string }> = async ({
-  req,
-  collection,
-  id,
-}) => {
+export const findVersionByID: CollectionRouteHandlerWithID = async ({ req, collection, id }) => {
   const { searchParams } = req
   const depth = searchParams.get('depth')
 
