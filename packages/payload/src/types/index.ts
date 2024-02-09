@@ -43,6 +43,10 @@ export type CustomPayloadRequest<U = any> = {
    */
   locale?: string
   /**
+   * The route parameters from the request URL
+   */
+  params: Record<string, string>
+  /**
    * The URL path of the request
    */
   pathname: null | string

@@ -6,8 +6,9 @@ import update from '../operations/update'
 
 export const updateHandler: PayloadHandler = async ({ req }) => {
   const payloadRequest = req
+
   const doc = await update({
-    key: req?.searchParams.get('key'),
+    key: req?.params?.id,
     req: payloadRequest,
     user: payloadRequest?.user,
     value: payloadRequest.data.value || payloadRequest.data,

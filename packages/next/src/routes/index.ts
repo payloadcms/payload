@@ -254,7 +254,7 @@ export const POST = async (
   let entityConfig: CollectionConfig | GlobalConfig = null
 
   try {
-    req = await createPayloadRequest({ request, config, params: { collection: slug1 } })
+    req = await createPayloadRequest({ request, config, params: { collection: slug1, id: slug2 } })
     const collection: Collection = req.payload?.collections?.[slug1]
 
     let response: Response | Promise<Response> = null
