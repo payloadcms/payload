@@ -11,7 +11,7 @@ export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
     // useAsTitle: 'title',
-    // defaultColumns: ['title'],
+    // defaultColumns: ['title', 'id'],
     components: {
       views: {
         Edit: {
