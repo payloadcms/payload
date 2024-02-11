@@ -68,6 +68,7 @@ export const upsertRow = async <T extends TypeWithID>({
 
     const localesToInsert: Record<string, unknown>[] = []
     const relationsToInsert: Record<string, unknown>[] = []
+    const textsToInsert: Record<string, unknown>[] = []
     const numbersToInsert: Record<string, unknown>[] = []
     const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
     const selectsToInsert: { [selectTableName: string]: Record<string, unknown>[] } = {}
@@ -89,6 +90,14 @@ export const upsertRow = async <T extends TypeWithID>({
       })
     }
 
+    // If there are texts, add parent to each
+    if (rowToInsert.texts.length > 0) {
+      rowToInsert.texts.forEach((textRow) => {
+        textRow.parent = insertedRow.id
+        textsToInsert.push(textRow)
+      })
+    }
+
     // If there are numbers, add parent to each
     if (rowToInsert.numbers.length > 0) {
       rowToInsert.numbers.forEach((numberRow) => {
@@ -102,7 +111,9 @@ export const upsertRow = async <T extends TypeWithID>({
     if (Object.keys(rowToInsert.selects).length > 0) {
       Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
         selectRows.forEach((row) => {
-          row.parent = insertedRow.id
+          if (typeof row.parent === 'undefined') {
+            row.parent = insertedRow.id
+          }
           if (!selectsToInsert[selectTableName]) selectsToInsert[selectTableName] = []
           selectsToInsert[selectTableName].push(row)
         })
@@ -157,6 +168,29 @@ export const upsertRow = async <T extends TypeWithID>({
 
     if (relationsToInsert.length > 0) {
       await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert)
+    }
+
+    // //////////////////////////////////
+    // INSERT hasMany TEXTS
+    // //////////////////////////////////
+
+    const textsTableName = `${tableName}_texts`
+
+    if (operation === 'update') {
+      await deleteExistingRowsByPath({
+        adapter,
+        db,
+        localeColumnName: 'locale',
+        parentColumnName: 'parent',
+        parentID: insertedRow.id,
+        pathColumnName: 'path',
+        rows: textsToInsert,
+        tableName: textsTableName,
+      })
+    }
+
+    if (textsToInsert.length > 0) {
+      await db.insert(adapter.tables[textsTableName]).values(textsToInsert).returning()
     }
 
     // //////////////////////////////////

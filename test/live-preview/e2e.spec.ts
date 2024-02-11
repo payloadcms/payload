@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { exactText, saveDocAndAssert } from '../helpers'
+import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { mobileBreakpoint } from './shared'
@@ -43,6 +43,8 @@ describe('Live Preview', () => {
     await startLivePreviewDemo({
       payload,
     })
+
+    initPageConsoleErrorCatch(page)
   })
 
   test('collection - has tab', async () => {
@@ -77,6 +79,16 @@ describe('Live Preview', () => {
     await expect(field).toBeVisible()
     await field.fill('Title 1')
     await saveDocAndAssert(page)
+  })
+
+  test('collection - should show live-preview view level action in live-preview view', async () => {
+    await goToCollectionPreview(page)
+    await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
+  })
+
+  test('global - should show live-preview view level action in live-preview view', async () => {
+    await goToGlobalPreview(page, 'footer')
+    await expect(page.locator('.app-header .global-live-preview-button')).toHaveCount(1)
   })
 
   test('global - has tab', async () => {
@@ -160,22 +172,25 @@ describe('Live Preview', () => {
     await goToCollectionPreview(page)
     expect(page.url()).toContain('/preview')
 
+    // Check that the breakpoint select is present
     const breakpointSelector = page.locator(
-      '.live-preview-toolbar select[name="live-preview-breakpoint"]',
+      '.live-preview-toolbar-controls__breakpoint button.popup-button',
     )
-
     expect(breakpointSelector).toBeTruthy()
-    await breakpointSelector.selectOption({ label: mobileBreakpoint.label })
 
-    // check the select again to make sure the value has been set
-    // then check that the `label` is proper based on the config
-    // we already know the `name` is proper because its been selected
+    // Select the mobile breakpoint
+    await breakpointSelector.first().click()
+    await page
+      .locator(`.live-preview-toolbar-controls__breakpoint button.popup-button-list__button`)
+      .filter({ hasText: mobileBreakpoint.label })
+      .click()
+
+    // Make sure the value has been set
+    await expect(breakpointSelector).toContainText(mobileBreakpoint.label)
     const option = page.locator(
-      '.live-preview-toolbar select[name="live-preview-breakpoint"] option:checked',
+      '.live-preview-toolbar-controls__breakpoint button.popup-button-list__button--selected',
     )
-    expect(option).toBeTruthy()
-    const optionLabel = await option.innerText()
-    expect(optionLabel).toBe(mobileBreakpoint.label)
+    await expect(option).toHaveText(mobileBreakpoint.label)
 
     // Measure the size of the iframe against the specified breakpoint
     const iframe = page.locator('iframe')

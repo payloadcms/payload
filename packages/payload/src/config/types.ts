@@ -11,11 +11,7 @@ import type { DeepRequired } from 'ts-essentials'
 import type { InlineConfig } from 'vite'
 import type { Configuration } from 'webpack'
 
-import type {
-  DocumentTab,
-  DocumentTabComponent,
-  DocumentTabConfig,
-} from '../admin/components/elements/DocumentHeader/Tabs/types'
+import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 import type { ContextType } from '../admin/components/utilities/DocumentInfo/types'
 import type { User } from '../auth/types'
@@ -30,6 +26,7 @@ import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
+import type { PayloadLogger } from '../utilities/logger'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -63,7 +60,11 @@ export type LivePreviewConfig = {
    Use the `useLivePreview` hook to get started in React applications.
    */
   url?:
-    | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
+    | ((args: {
+        data: Record<string, any>
+        documentInfo: ContextType
+        locale: Locale
+      }) => Promise<string> | string)
     | string
 }
 
@@ -155,6 +156,11 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
+  /**
+   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
+   * This allows you to bring your own logger instance and let payload use it
+   */
+  logger?: PayloadLogger
 
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
@@ -268,6 +274,9 @@ export type EditViewConfig =
       Component: AdminViewComponent
       path: string
     }
+  | {
+      actions?: React.ComponentType<any>[]
+    }
 
 /**
  * Override existing views
@@ -285,10 +294,14 @@ export type Locale = {
    */
   code: string
   /**
+   * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
+   */
+  fallbackLocale?: string
+  /**
    * label of supported locale
    * @example "English"
    */
-  label: string
+  label: Record<string, string> | string
   /**
    * if true, defaults textAligmnent on text fields to RTL
    */
@@ -393,6 +406,10 @@ export type Config = {
        * Replace the navigation with a custom component
        */
       Nav?: React.ComponentType<any>
+      /**
+       * Add custom components to the top right of the Admin Panel
+       */
+      actions?: React.ComponentType<any>[]
       /**
        * Add custom components after the collection overview
        */
@@ -663,7 +680,7 @@ export type Config = {
     api?: string
     /** @default "/graphql"  */
     graphQL?: string
-    /** @default "/playground" */
+    /** @default "/graphql-playground" */
     graphQLPlayground?: string
   }
   /**

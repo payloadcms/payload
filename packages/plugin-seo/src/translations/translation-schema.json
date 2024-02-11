@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "plugin-seo": {
+      "additionalProperties": false,
+      "properties": {
+        "autoGenerate": {
+          "type": "string"
+        },
+        "imageAutoGenerationTip": {
+          "type": "string"
+        },
+        "bestPractices": {
+          "type": "string"
+        },
+        "lengthTipTitle": {
+          "type": "string"
+        },
+        "lengthTipDescription": {
+          "type": "string"
+        },
+        "good": {
+          "type": "string"
+        },
+        "tooLong": {
+          "type": "string"
+        },
+        "tooShort": {
+          "type": "string"
+        },
+        "almostThere": {
+          "type": "string"
+        },
+        "characterCount": {
+          "type": "string"
+        },
+        "charactersToGo": {
+          "type": "string"
+        },
+        "charactersLeftOver": {
+          "type": "string"
+        },
+        "charactersTooMany": {
+          "type": "string"
+        },
+        "noImage": {
+          "type": "string"
+        },
+        "checksPassing": {
+          "type": "string"
+        },
+        "preview": {
+          "type": "string"
+        },
+        "previewDescription": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "autoGenerate",
+        "imageAutoGenerationTip",
+        "bestPractices",
+        "lengthTipTitle",
+        "lengthTipDescription",
+        "good",
+        "tooLong",
+        "tooShort",
+        "almostThere",
+        "characterCount",
+        "charactersToGo",
+        "charactersLeftOver",
+        "charactersTooMany",
+        "noImage",
+        "checksPassing",
+        "preview",
+        "previewDescription"
+      ],
+      "type": "object"
+    }
+  },
+  "required": ["plugin-seo"],
+  "type": "object"
+}

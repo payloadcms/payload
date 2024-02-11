@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 
+import type { PayloadRequest } from '../../packages/payload/src/express/types'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -10,7 +11,7 @@ import type {
 } from './payload-types'
 
 import payload from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import config, {
@@ -20,17 +21,38 @@ import config, {
   defaultAccessRelSlug,
   relationSlug,
   slug,
+  treeSlug,
 } from './config'
 
+let apiUrl
+let jwt
 let client: RESTClient
+
+const headers = {
+  'Content-Type': 'application/json',
+}
+const { email, password } = devUser
 
 type EasierChained = { id: string; relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    client = new RESTClient(config, { serverURL, defaultSlug: slug })
+    apiUrl = `${serverURL}/api`
+    client = new RESTClient(config, { defaultSlug: slug, serverURL })
     await client.login()
+
+    const response = await fetch(`${apiUrl}/users/login`, {
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers,
+      method: 'post',
+    })
+
+    const data = await response.json()
+    jwt = data.token
   })
 
   afterAll(async () => {
@@ -105,8 +127,8 @@ describe('Relationships', () => {
         })
 
         chained3 = await payload.update<ChainedRelation>({
-          collection: chainedRelSlug,
           id: chained3.id,
+          collection: chainedRelSlug,
           data: {
             name: 'chain3',
             relation: chained.id,
@@ -132,13 +154,13 @@ describe('Relationships', () => {
         })
 
         post = await createPost({
-          relationField: relation.id,
-          defaultAccessRelation: defaultAccessRelation.id,
           chainedRelation: chained.id,
-          maxDepthRelation: relation.id,
-          customIdRelation: customIdRelation.id,
           customIdNumberRelation: customIdNumberRelation.id,
+          customIdRelation: customIdRelation.id,
+          defaultAccessRelation: defaultAccessRelation.id,
           filteredRelation: filteredRelation.id,
+          maxDepthRelation: relation.id,
+          relationField: relation.id,
         })
 
         await createPost() // Extra post to allow asserting totalDoc count
@@ -171,17 +193,152 @@ describe('Relationships', () => {
         expect(docAfterUpdatingRel.filteredRelation).toMatchObject({ id: filteredRelation.id })
 
         // Attempt to update post with a now filtered relation
-        const { status, errors } = await client.update<Post>({
+        const { errors, status } = await client.update<Post>({
           id: post.id,
           data: { filteredRelation: filteredRelation.id },
         })
 
         expect(errors?.[0]).toMatchObject({
           name: 'ValidationError',
-          message: expect.any(String),
           data: expect.anything(),
+          message: expect.any(String),
         })
         expect(status).toEqual(400)
+      })
+
+      it('should count totalDocs correctly when using or in where query and relation contains hasMany relationship fields', async () => {
+        const user = (
+          await payload.find({
+            collection: 'users',
+          })
+        ).docs[0]
+
+        const user2 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '1@test.com',
+            password: 'fwefe',
+          },
+        })
+        const user3 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '2@test.com',
+            password: 'fwsefe',
+          },
+        })
+        const user4 = await payload.create({
+          collection: 'users',
+          data: {
+            email: '3@test.com',
+            password: 'fwddsefe',
+          },
+        })
+        await Promise.all([
+          payload.create({
+            collection: 'movieReviews',
+            data: {
+              likes: [user3.id, user2.id, user.id, user4.id],
+              movieReviewer: user.id,
+              visibility: 'public',
+            },
+          }),
+          payload.create({
+            collection: 'movieReviews',
+            data: {
+              movieReviewer: user2.id,
+              visibility: 'public',
+            },
+          }),
+        ])
+
+        const query = await payload.find({
+          collection: 'movieReviews',
+          depth: 1,
+          where: {
+            or: [
+              {
+                visibility: {
+                  equals: 'public',
+                },
+              },
+              {
+                movieReviewer: {
+                  equals: user.id,
+                },
+              },
+            ],
+          },
+        })
+        expect(query.totalDocs).toEqual(2)
+      })
+
+      // https://github.com/payloadcms/payload/issues/4240
+      it('should allow querying by relationship id field', async () => {
+        /**
+         * This test shows something which breaks on postgres but not on mongodb.
+         */
+        const someDirector = await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Harry Potter',
+          },
+        })
+
+        await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Lord of the Rings is boring',
+            director: someDirector.id,
+          },
+        })
+
+        // This causes the following error:
+        // "Your "id" field references a column "directors"."id", but the table "directors" is not part of the query! Did you forget to join it?"
+        // This only happens on postgres, not on mongodb
+        const query = await payload.find({
+          collection: 'movies',
+          depth: 5,
+          limit: 1,
+          where: {
+            or: [
+              {
+                name: {
+                  equals: 'Pulp Fiction',
+                },
+              },
+              {
+                'director.id': {
+                  equals: someDirector.id,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(query.totalDocs).toEqual(3)
+        expect(query.docs).toHaveLength(1) // Due to limit: 1
       })
 
       describe('Custom ID', () => {
@@ -199,7 +356,7 @@ describe('Relationships', () => {
           await expect(async () =>
             createPost({
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore Sending bad data to test error handling
+              // @ts-expect-error Sending bad data to test error handling
               customIdRelation: 1234,
             }),
           ).rejects.toThrow('The following field is invalid: customIdRelation')
@@ -209,7 +366,7 @@ describe('Relationships', () => {
           await expect(async () =>
             createPost({
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore Sending bad data to test error handling
+              // @ts-expect-error Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),
           ).rejects.toThrow('The following field is invalid: customIdNumberRelation')
@@ -217,8 +374,8 @@ describe('Relationships', () => {
 
         it('should allow update removing a relationship', async () => {
           const result = await client.update<Post>({
-            slug,
             id: post.id,
+            slug,
             data: {
               relationField: null,
             },
@@ -356,8 +513,8 @@ describe('Relationships', () => {
         await payload.create({
           collection: 'screenings',
           data: {
-            movie: movie.id,
             name: 'Pulp Fiction Screening',
+            movie: movie.id,
           },
         })
       })
@@ -396,8 +553,8 @@ describe('Relationships', () => {
 
       beforeAll(async () => {
         await Promise.all(
-          movieList.map((movie) => {
-            return payload.create({
+          movieList.map(async (movie) => {
+            return await payload.create({
               collection: 'movies',
               data: {
                 name: movie,
@@ -438,8 +595,8 @@ describe('Relationships', () => {
       it('should allow clearing hasMany relationships', async () => {
         const fiveMovies = await payload.find({
           collection: 'movies',
-          limit: 5,
           depth: 0,
+          limit: 5,
         })
 
         const movieIDs = fiveMovies.docs.map((doc) => doc.id)
@@ -455,8 +612,8 @@ describe('Relationships', () => {
         expect(stanley.movies).toHaveLength(5)
 
         const stanleyNeverMadeMovies = await payload.update({
-          collection: 'directors',
           id: stanley.id,
+          collection: 'directors',
           data: {
             movies: null,
           },
@@ -464,6 +621,152 @@ describe('Relationships', () => {
 
         expect(stanleyNeverMadeMovies.movies).toHaveLength(0)
       })
+    })
+
+    describe('Hierarchy', () => {
+      it('finds 1 root item with equals', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { equals: null },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('root')
+      })
+
+      it('finds 1 root item with exists', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { exists: false },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('root')
+      })
+
+      it('finds 1 sub item with equals', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { not_equals: null },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('sub')
+      })
+
+      it('finds 1 sub item with exists', async () => {
+        const {
+          docs: [item],
+          totalDocs: count,
+        } = await payload.find({
+          collection: treeSlug,
+          where: {
+            parent: { exists: true },
+          },
+        })
+        expect(count).toBe(1)
+        expect(item.text).toBe('sub')
+      })
+    })
+  })
+
+  describe('Creating', () => {
+    describe('With transactions', () => {
+      it('should be able to create filtered relations within a transaction', async () => {
+        const req = {} as PayloadRequest
+        req.transactionID = await payload.db.beginTransaction?.()
+        const related = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'parent',
+          },
+          req,
+        })
+        const withRelation = await payload.create({
+          collection: slug,
+          data: {
+            filteredRelation: related.id,
+          },
+          req,
+        })
+
+        if (req.transactionID) {
+          await payload.db.commitTransaction?.(req.transactionID)
+        }
+
+        expect(withRelation.filteredRelation.id).toEqual(related.id)
+      })
+    })
+  })
+
+  describe('Polymorphic Relationships', () => {
+    it('should allow REST querying on polymorphic relationships', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: 'polymorphic-relationships',
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+      })
+
+      const queryOne = await client.find({
+        slug: 'polymorphic-relationships',
+        query: {
+          and: [
+            {
+              'polymorphic.value': {
+                equals: movie.id,
+              },
+            },
+            {
+              'polymorphic.relationTo': {
+                equals: 'movies',
+              },
+            },
+          ],
+        },
+      })
+
+      const queryTwo = await client.find({
+        slug: 'polymorphic-relationships',
+        query: {
+          and: [
+            {
+              'polymorphic.relationTo': {
+                equals: 'movies',
+              },
+            },
+            {
+              'polymorphic.value': {
+                equals: movie.id,
+              },
+            },
+          ],
+        },
+      })
+
+      expect(queryOne.result.docs).toHaveLength(1)
+      expect(queryTwo.result.docs).toHaveLength(1)
     })
   })
 })
@@ -473,9 +776,8 @@ async function createPost(overrides?: Partial<Post>) {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find({ collection: slug, limit: 100 })
-  const ids = allDocs.docs.map((doc) => doc.id)
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ collection: slug, id })
+  await payload.delete({
+    collection: slug,
+    where: { id: { exists: true } },
   })
 }

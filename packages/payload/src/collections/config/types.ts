@@ -48,6 +48,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  req: PayloadRequest
 }) => any
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -273,7 +274,12 @@ export type CollectionAdminOptions = {
               }
           )
         | AdminViewComponent
-      List?: React.ComponentType<ListProps>
+      List?:
+        | {
+            Component?: React.ComponentType<ListProps>
+            actions?: React.ComponentType<any>[]
+          }
+        | React.ComponentType<ListProps>
     }
   }
   /**

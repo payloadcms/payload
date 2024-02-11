@@ -1,16 +1,15 @@
-import type { GeneratedTypes } from '../../..'
+import type { GeneratedTypes, RequestContext } from '../../..'
 import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Result } from '../forgotPassword'
 
-import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import forgotPassword from '../forgotPassword'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
+  context?: RequestContext
   data: {
     email: string
   }
@@ -23,14 +22,7 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {
-  const {
-    collection: collectionSlug,
-    data,
-    disableEmail,
-    expiration,
-    req = {} as PayloadRequest,
-  } = options
-  setRequestContext(req)
+  const { collection: collectionSlug, data, disableEmail, expiration } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -42,12 +34,7 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     )
   }
 
-  req.payloadAPI = req.payloadAPI || 'local'
-  req.payload = payload
-  req.i18n = i18nInit(payload.config.i18n)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = createLocalReq(options, payload)
 
   return forgotPassword({
     collection,

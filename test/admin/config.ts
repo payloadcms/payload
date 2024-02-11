@@ -9,9 +9,12 @@ import { CollectionGroup1B } from './collections/Group1B'
 import { CollectionGroup2A } from './collections/Group2A'
 import { CollectionGroup2B } from './collections/Group2B'
 import { CollectionHidden } from './collections/Hidden'
+import { CustomIdTab } from './collections/CustomIdTab'
+import { CustomIdRow } from './collections/CustomIdRow'
 import { CollectionNoApiView } from './collections/NoApiView'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
+import AdminButton from './components/AdminButton'
 import AfterDashboard from './components/AfterDashboard'
 import AfterNavLinks from './components/AfterNavLinks'
 import BeforeLogin from './components/BeforeLogin'
@@ -27,7 +30,7 @@ import { GlobalGroup1A } from './globals/Group1A'
 import { GlobalGroup1B } from './globals/Group1B'
 import { GlobalHidden } from './globals/Hidden'
 import { GlobalNoApiView } from './globals/NoApiView'
-import { seed } from './seed'
+import { clearAndSeedEverything } from './seed'
 import { customNestedViewPath, customViewPath } from './shared'
 
 export default buildConfigWithDefaults({
@@ -35,6 +38,7 @@ export default buildConfigWithDefaults({
     css: path.resolve(__dirname, 'styles.scss'),
     components: {
       // providers: [CustomProvider, CustomProvider],
+      actions: [AdminButton],
       afterDashboard: [AfterDashboard],
       beforeLogin: [BeforeLogin],
       logout: {
@@ -63,6 +67,16 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config?.resolve?.alias,
+          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+        },
+      },
+    }),
   },
   i18n: {
     resources: {
@@ -75,7 +89,22 @@ export default buildConfigWithDefaults({
   },
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
+    locales: [
+      {
+        label: {
+          es: 'Español',
+          en: 'Spanish',
+        },
+        code: 'es',
+      },
+      {
+        label: {
+          es: 'Inglés',
+          en: 'English',
+        },
+        code: 'en',
+      },
+    ],
   },
   collections: [
     Posts,
@@ -89,6 +118,8 @@ export default buildConfigWithDefaults({
     CollectionGroup2A,
     CollectionGroup2B,
     Geo,
+    CustomIdTab,
+    CustomIdRow,
   ],
   globals: [
     GlobalHidden,
@@ -99,5 +130,7 @@ export default buildConfigWithDefaults({
     GlobalGroup1A,
     GlobalGroup1B,
   ],
-  onInit: seed,
+  onInit: async (payload) => {
+    await clearAndSeedEverything(payload)
+  },
 })

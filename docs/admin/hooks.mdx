@@ -324,7 +324,7 @@ The `useForm` hook returns an object with the following properties: |
       },
       {
         drawerTitle: 'addFieldRow',
-        drawerDescription: 'A useful method to programtically add a row to an array or block field.',
+        drawerDescription: 'A useful method to programmatically add a row to an array or block field.',
         drawerSlug: 'addFieldRow',
         drawerContent: (
 <>
@@ -434,7 +434,7 @@ export const CustomArrayManager = () => {
       },
       {
         drawerTitle: 'removeFieldRow',
-        drawerDescription: 'A useful method to programtically remove a row from an array or block field.',
+        drawerDescription: 'A useful method to programmatically remove a row from an array or block field.',
         drawerSlug: 'removeFieldRow',
         drawerContent: (
 <>
@@ -531,7 +531,7 @@ export const CustomArrayManager = () => {
       },
       {
         drawerTitle: 'replaceFieldRow',
-        drawerDescription: 'A useful method to programtically replace a row from an array or block field.',
+        drawerDescription: 'A useful method to programmatically replace a row from an array or block field.',
         drawerSlug: 'replaceFieldRow',
         drawerContent: (
 <>
@@ -634,6 +634,37 @@ export const CustomArrayManager = () => {
     ],
   ]}
 />
+
+### useCollapsible
+
+The `useCollapsible` hook allows you to control parent collapsibles:
+
+| Property                  | Description                                                                                                        |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------|
+| **`collapsed`**          | State of the collapsible. `true` if open, `false` if collapsed                                                 |
+| **`isVisible`**              | If nested, determine if the nearest collapsible is visible. `true` if no parent is closed, `false` otherwise                                                        |
+| **`toggle`**                  | Toggles the state of the nearest collapsible                                                                |
+| **`withinCollapsible`**      | Determine when you are within another collaspible                                 |                                               |
+
+**Example:**
+
+```tsx
+import React from 'react'
+
+import { useCollapsible } from 'payload/components/utilities'
+
+const CustomComponent: React.FC = () => {
+  const { collapsed, toggle } = useCollapsible()
+  return (
+    <div>
+      <p className="field-type">I am {collapsed ? 'closed' : 'open'}</p>
+      <button onClick={toggle} type="button">
+        Toggle
+      </button>
+    </div>
+  )
+}
+```
 
 ### useDocumentInfo
 
@@ -758,3 +789,85 @@ const MyComponent: React.FC = () => {
 ### usePreferences
 
 Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).
+
+### useTheme
+
+Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
+
+```tsx
+import { useTheme } from 'payload/components/utilities'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { autoMode, setTheme, theme } = useTheme()
+  // highlight-end
+
+  return (
+    <>
+      <span>The current theme is {theme} and autoMode is {autoMode}</span>
+      <button
+        type="button"
+        onClick={() => setTheme(prev => prev === "light" ? "dark" : "light")}
+      >
+        Toggle theme
+      </button>
+    </>
+    )
+}
+```
+
+### useTableColumns
+
+Returns methods to manipulate table columns
+
+```tsx
+import { useTableColumns } from 'payload/components/hooks'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { setActiveColumns } = useTableColumns()
+
+  const resetColumns = () => {
+    setActiveColumns(['id', 'createdAt', 'updatedAt'])
+  }
+  // highlight-end
+
+  return (
+    <button
+      type="button"
+      onClick={resetColumns}
+    >
+      Reset columns
+    </button>
+  )
+}
+```
+
+### useDocumentEvents
+
+The `useDocumentEvents` hook provides a way of subscribing to cross-document events, such as updates made to nested documents within a drawer. This hook will report document events that are outside the scope of the document currently being edited. This hook provides the following:
+
+| Property                  | Description                                                                                                                               |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| **`mostRecentUpdate`**    | An object containing the most recently updated document. It contains the `entitySlug`, `id` (if collection), and `updatedAt` properties   |
+| **`reportUpdate`**        | A method used to report updates to documents. It accepts the same arguments as the `mostRecentUpdate` property.                           |
+
+**Example:**
+
+```tsx
+import { useDocumentEvents } from 'payload/components/hooks'
+
+const ListenForUpdates: React.FC = () => {
+  const { mostRecentUpdate } = useDocumentEvents()
+
+  return (
+    <span>
+      {JSON.stringify(mostRecentUpdate)}
+    </span>
+  )
+}
+```
+
+<Banner type="info">
+  Right now the `useDocumentEvents` hook only tracks recently updated documents, but in the future it will track more document-related events as needed, such as document creation, deletion, etc.
+</Banner>

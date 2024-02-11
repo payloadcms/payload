@@ -19,12 +19,13 @@ export const Number: React.FC<
   return (
     <Width width={width}>
       <div className={classes.wrap}>
-        <label htmlFor="name" className={classes.label}>
+        <label htmlFor={name} className={classes.label}>
           {label}
         </label>
         <input
           type="number"
           className={classes.input}
+          id={name}
           {...register(name, { required: requiredFromProps })}
         />
         {requiredFromProps && errors[name] && <Error />}

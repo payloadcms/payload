@@ -1,26 +1,23 @@
 import type { CollectionAfterChangeHook, CollectionConfig } from 'payload/types'
 
-import type { Breadcrumb } from '../types'
-
-interface DocWithBreadcrumbs {
-  breadcrumbs: Breadcrumb[]
-}
+import type { PluginConfig } from '../types'
 
 // This hook automatically re-saves a document after it is created
 // so that we can build its breadcrumbs with the newly created document's ID.
 
 const resaveSelfAfterCreate =
-  (collection: CollectionConfig): CollectionAfterChangeHook =>
-  async ({ req, doc, operation }) => {
-    const { payload, locale } = req
-    const { breadcrumbs = [] } = doc as DocWithBreadcrumbs
+  (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
+  async ({ doc, operation, req }) => {
+    const { locale, payload } = req
+    const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
+    const breadcrumbs = doc[breadcrumbSlug]
 
     if (operation === 'create') {
       const originalDocWithDepth0 = await payload.findByID({
-        req,
+        id: doc.id,
         collection: collection.slug,
         depth: 0,
-        id: doc.id,
+        req,
       })
 
       const updateAsDraft =
@@ -30,20 +27,20 @@ const resaveSelfAfterCreate =
 
       try {
         await payload.update({
-          req,
-          collection: collection.slug,
           id: doc.id,
-          locale,
-          depth: 0,
-          draft: updateAsDraft,
+          collection: collection.slug,
           data: {
             ...originalDocWithDepth0,
-            breadcrumbs:
+            [breadcrumbSlug]:
               breadcrumbs?.map((crumb, i) => ({
                 ...crumb,
                 doc: breadcrumbs.length === i + 1 ? doc.id : crumb.doc,
               })) || [],
           },
+          depth: 0,
+          draft: updateAsDraft,
+          locale,
+          req,
         })
       } catch (err: unknown) {
         payload.logger.error(

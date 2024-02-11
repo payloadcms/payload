@@ -165,7 +165,7 @@ export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, optio
         name={path}
         options={adjustedOptions}
         value={value}
-        onChange={(option) => setValue(option === null ? null : option.value)}
+        onChange={(e) => setValue(e === null ? null : e.value)}
       />
     </div>
   )

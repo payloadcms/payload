@@ -1,9 +1,11 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { numberFieldsSlug } from '../../slugs'
+
 export const defaultNumber = 5
 
 const NumberFields: CollectionConfig = {
-  slug: 'number-fields',
+  slug: numberFieldsSlug,
   admin: {
     useAsTitle: 'number',
   },
@@ -71,20 +73,13 @@ const NumberFields: CollectionConfig = {
       hasMany: true,
       localized: true,
     },
+    {
+      name: 'withMinRows',
+      type: 'number',
+      hasMany: true,
+      minRows: 2,
+    },
   ],
-}
-
-export const numberDoc = {
-  number: 5,
-  min: 15,
-  max: 5,
-  positiveNumber: 5,
-  negativeNumber: -5,
-  decimalMin: 1.25,
-  decimalMax: 0.25,
-  hasMany: [5, 10, 15],
-  validatesHasMany: [5],
-  localizedHasMany: [10],
 }
 
 export default NumberFields

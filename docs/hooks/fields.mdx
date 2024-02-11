@@ -6,7 +6,8 @@ desc: Hooks can be added to any fields, and optionally modify the return value o
 keywords: hooks, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-Field-level hooks offer incredible potential for encapsulating your logic. They help to isolate concerns and package up functionalities to be easily reusable across your projects.
+Field-level hooks offer incredible potential for encapsulating your logic. They help to isolate concerns and package up
+functionalities to be easily reusable across your projects.
 
 **Example use cases include:**
 
@@ -18,10 +19,10 @@ Field-level hooks offer incredible potential for encapsulating your logic. They 
 
 **All field types provide the following hooks:**
 
-- `beforeValidate`
-- `beforeChange`
-- `afterChange`
-- `afterRead`
+- [beforeValidate](#beforevalidate)
+- [beforeChange](#beforechange)
+- [afterChange](#afterchange)
+- [afterRead](#afterread)
 
 ## Config
 
@@ -46,7 +47,8 @@ const ExampleField: Field = {
 
 ## Arguments and return values
 
-All field-level hooks are formatted to accept the same arguments, although some arguments may be `undefined` based on which field hook you are utilizing.
+All field-level hooks are formatted to accept the same arguments, although some arguments may be `undefined` based on
+which field hook you are utilizing.
 
 <Banner type="success">
   <strong>Tip:</strong>
@@ -69,10 +71,10 @@ Field Hooks receive one `args` argument that contains the following properties:
 | **`operation`**          | A string relating to which operation the field type is currently executing within. Useful within `beforeValidate`, `beforeChange`, and `afterChange` hooks to differentiate between `create` and `update` operations. |
 | **`originalDoc`**        | The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation.                                                                                        |
 | **`previousDoc`**        | The document before changes were applied, only in `afterChange` hooks.                                                                                                                                                |
-| **`previousSiblingDoc`** | The sibling data from the previous document in `afterChange` hook.                                                                                                                                                    |
+| **`previousSiblingDoc`** | The sibling data of the document before changes being applied, only in `beforeChange` and `afterChange` hook.                                                                                                         |
 | **`req`**                | The Express `request` object. It is mocked for Local API operations.                                                                                                                                                  |
 | **`value`**              | The value of the field.                                                                                                                                                                                               |
-| **`previousValue`**      | The previous value of the field, before changes were applied, only in `afterChange` hooks.                                                                                                                            |
+| **`previousValue`**      | The previous value of the field, before changes, only in `beforeChange` and `afterChange` hooks.                                                                                                                      |
 | **`context`**            | Context passed to this hook. More info can be found under [Context](/docs/hooks/context)                                                                                                                              |
 | **`field`**              | The field which the hook is running against.                                                                                                                                                                          |
 | **`collection`**         | The collection which the field belongs to. If the field belongs to a global, this will be null.                                                                                                                       |
@@ -80,7 +82,8 @@ Field Hooks receive one `args` argument that contains the following properties:
 
 #### Return value
 
-All field hooks can optionally modify the return value of the field before the operation continues. Field Hooks may optionally return the value that should be used within the field.
+All field hooks can optionally modify the return value of the field before the operation continues. Field Hooks may
+optionally return the value that should be used within the field.
 
 <Banner type="warning">
   <strong>Important</strong>
@@ -89,6 +92,120 @@ All field hooks can optionally modify the return value of the field before the o
   field, otherwise GraphQL will produce errors. If you need to change the shape or type of data,
   reconsider Field Hooks and instead evaluate if Collection / Global hooks might suit you better.
 </Banner>
+
+## Examples of Field Hooks
+
+To better illustrate how field-level hooks can be applied, here are some specific examples. These demonstrate the
+flexibility and potential of field hooks in different contexts. Remember, these examples are just a starting point - the
+true potential of field-level hooks lies in their adaptability to a wide array of use cases.
+
+### beforeValidate
+
+Runs before the `update` operation. This hook allows you to pre-process or format field data before it undergoes
+validation.
+
+```ts
+import { Field } from 'payload/types'
+
+const usernameField: Field = {
+  name: 'username',
+  type: 'text',
+  hooks: {
+    beforeValidate: [({ value }) => {
+      // Trim whitespace and convert to lowercase
+      return value.trim().toLowerCase()
+    }],
+  }
+}
+```
+
+In this example, the `beforeValidate` hook is used to process the `username` field. The hook takes the incoming value of
+the field and transforms it by trimming whitespace and converting it to lowercase. This ensures that the username is
+stored in a consistent format in the database.
+
+### beforeChange
+
+Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage,
+you can be confident that the field data that will be saved to the document is valid in accordance to your field
+validations.
+
+```ts
+import { Field } from 'payload/types'
+
+const emailField: Field = {
+  name: 'email',
+  type: 'email',
+  hooks: {
+    beforeChange: [({ value, operation }) => {
+      if (operation === 'create') {
+        // Perform additional validation or transformation for 'create' operation
+      }
+      return value
+    }],
+  }
+}
+```
+
+In the `emailField`, the `beforeChange` hook checks the `operation` type. If the operation is `create`, it performs
+additional validation or transformation on the email field value. This allows for operation-specific logic to be applied
+to the field.
+
+### afterChange
+
+The `afterChange` hook is executed after a field's value has been changed and saved in the database. This hook is useful
+for post-processing or triggering side effects based on the new value of the field.
+
+```ts
+import { Field } from 'payload/types'
+
+const membershipStatusField: Field = {
+  name: 'membershipStatus',
+  type: 'select',
+  options: [
+    { label: 'Standard', value: 'standard' },
+    { label: 'Premium', value: 'premium' },
+    { label: 'VIP', value: 'vip' }
+  ],
+  hooks: {
+    afterChange: [({ value, previousValue, req }) => {
+      if (value !== previousValue) {
+        // Log or perform an action when the membership status changes
+        console.log(`User ID ${req.user.id} changed their membership status from ${previousValue} to ${value}.`)
+        // Here, you can implement actions that could track conversions from one tier to another
+      }
+    }],
+  }
+}
+```
+
+In this example, the `afterChange` hook is used with a `membershipStatusField`, which allows users to select their
+membership level (Standard, Premium, VIP). The hook monitors changes in the membership status. When a change occurs, it
+logs the update and can be used to trigger further actions, such as tracking conversion from one tier to another or
+notifying them about changes in their membership benefits.
+
+### afterRead
+
+The `afterRead` hook is invoked after a field value is read from the database. This is ideal for formatting or
+transforming the field data for output.
+
+```ts
+import { Field } from 'payload/types'
+
+const dateField: Field = {
+  name: 'createdAt',
+  type: 'date',
+  hooks: {
+    afterRead: [({ value }) => {
+      // Format date for display
+      return new Date(value).toLocaleDateString()
+    }],
+  }
+}
+```
+
+Here, the `afterRead` hook for the `dateField` is used to format the date into a more readable format
+using `toLocaleDateString()`. This hook modifies the way the date is presented to the user, making it more
+user-friendly.
 
 ## TypeScript
 

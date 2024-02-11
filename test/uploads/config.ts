@@ -7,12 +7,11 @@ import removeFiles from '../helpers/removeFiles'
 import { Uploads1 } from './collections/Upload1'
 import Uploads2 from './collections/Upload2'
 import AdminThumbnailCol from './collections/admin-thumbnail'
-import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './shared'
+import { audioSlug, enlargeSlug, mediaSlug, reduceSlug, relationSlug, versionSlug } from './shared'
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js')
 
 export default buildConfigWithDefaults({
-  serverURL: undefined,
   admin: {
     webpack: (config) => ({
       ...config,
@@ -34,6 +33,11 @@ export default buildConfigWithDefaults({
           type: 'upload',
           relationTo: 'media',
         },
+        {
+          name: 'versionedImage',
+          type: 'upload',
+          relationTo: versionSlug,
+        },
       ],
     },
     {
@@ -42,129 +46,157 @@ export default buildConfigWithDefaults({
         {
           name: 'audio',
           type: 'upload',
-          relationTo: 'media',
           filterOptions: {
             mimeType: {
               in: ['audio/mpeg'],
             },
           },
+          relationTo: 'media',
         },
       ],
     },
     {
       slug: 'gif-resize',
+      fields: [],
       upload: {
-        staticURL: '/media-gif',
-        staticDir: './media-gif',
-        mimeTypes: ['image/gif'],
-        resizeOptions: {
-          position: 'center',
-          width: 200,
-          height: 200,
-        },
         formatOptions: {
           format: 'gif',
         },
         imageSizes: [
           {
             name: 'small',
-            width: 100,
-            height: 100,
             formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 100,
+            width: 100,
           },
           {
             name: 'large',
-            width: 1000,
-            height: 1000,
             formatOptions: { format: 'gif', options: { quality: 90 } },
+            height: 1000,
+            width: 1000,
           },
         ],
+        mimeTypes: ['image/gif'],
+        resizeOptions: {
+          height: 200,
+          position: 'center',
+          width: 200,
+        },
+        staticDir: './media-gif',
+        staticURL: '/media-gif',
       },
-      fields: [],
     },
     {
       slug: 'no-image-sizes',
+      fields: [],
       upload: {
-        staticURL: '/no-image-sizes',
-        staticDir: './no-image-sizes',
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         resizeOptions: {
+          height: 200,
           position: 'center',
           width: 200,
-          height: 200,
         },
+        staticDir: './no-image-sizes',
+        staticURL: '/no-image-sizes',
       },
+    },
+    {
+      slug: 'object-fit',
       fields: [],
+      upload: {
+        imageSizes: [
+          {
+            name: 'fitContain',
+            fit: 'contain',
+            height: 300,
+            width: 400,
+          },
+          {
+            name: 'fitInside',
+            fit: 'inside',
+            height: 400,
+            width: 300,
+          },
+          {
+            name: 'fitCover',
+            fit: 'cover',
+            height: 300,
+            width: 900,
+          },
+          {
+            name: 'fitOutside',
+            fit: 'outside',
+            height: 200,
+            width: 900,
+          },
+        ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './object-fit',
+        staticURL: '/object-fit',
+      },
     },
     {
       slug: 'crop-only',
+      fields: [],
       upload: {
         focalPoint: false,
-        staticURL: '/crop-only',
-        staticDir: './crop-only',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
-            width: 400,
             height: 300,
+            width: 400,
           },
           {
             name: 'focalTest2',
-            width: 600,
             height: 300,
+            width: 600,
           },
           {
             name: 'focalTest3',
-            width: 900,
             height: 300,
+            width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './crop-only',
+        staticURL: '/crop-only',
       },
-      fields: [],
     },
     {
       slug: 'focal-only',
+      fields: [],
       upload: {
         crop: false,
-        staticURL: '/focal-only',
-        staticDir: './focal-only',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         imageSizes: [
           {
             name: 'focalTest',
-            width: 400,
             height: 300,
+            width: 400,
           },
           {
             name: 'focalTest2',
-            width: 600,
             height: 300,
+            width: 600,
           },
           {
             name: 'focalTest3',
-            width: 900,
             height: 300,
+            width: 900,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './focal-only',
+        staticURL: '/focal-only',
       },
-      fields: [],
     },
     {
       slug: mediaSlug,
+      fields: [],
       upload: {
-        staticURL: '/media',
         staticDir: './media',
+        staticURL: '/media',
         // crop: false,
         // focalPoint: false,
-        mimeTypes: [
-          'image/png',
-          'image/jpg',
-          'image/jpeg',
-          'image/gif',
-          'image/svg+xml',
-          'audio/mpeg',
-        ],
         formatOptions: {
           format: 'png',
           options: { quality: 90 },
@@ -172,143 +204,133 @@ export default buildConfigWithDefaults({
         imageSizes: [
           {
             name: 'maintainedAspectRatio',
-            width: 1024,
-            height: undefined,
             crop: 'center',
-            position: 'center',
             formatOptions: { format: 'png', options: { quality: 90 } },
+            height: undefined,
+            position: 'center',
+            width: 1024,
           },
           {
             name: 'differentFormatFromMainImage',
-            width: 200,
-            height: undefined,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: undefined,
+            width: 200,
           },
           {
             name: 'maintainedImageSize',
-            width: undefined,
             height: undefined,
+            width: undefined,
           },
           {
             name: 'maintainedImageSizeWithNewFormat',
-            width: undefined,
-            height: undefined,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: undefined,
+            width: undefined,
           },
           {
             name: 'accidentalSameSize',
-            width: 320,
             height: 80,
             position: 'top',
+            width: 320,
           },
           {
             name: 'tablet',
-            width: 640,
             height: 480,
+            width: 640,
           },
           {
             name: 'mobile',
-            width: 320,
-            height: 240,
             crop: 'left top',
+            height: 240,
+            width: 320,
           },
           {
             name: 'icon',
-            width: 16,
             height: 16,
+            width: 16,
           },
           {
             name: 'focalTest',
-            width: 400,
             height: 300,
+            width: 400,
           },
           {
             name: 'focalTest2',
-            width: 600,
             height: 300,
+            width: 600,
           },
           {
             name: 'focalTest3',
-            width: 900,
             height: 300,
+            width: 900,
           },
           {
             name: 'focalTest4',
-            width: 300,
             height: 400,
+            width: 300,
           },
           {
             name: 'focalTest5',
-            width: 300,
             height: 600,
+            width: 300,
           },
           {
             name: 'focalTest6',
-            width: 300,
             height: 800,
+            width: 300,
           },
           {
             name: 'focalTest7',
-            width: 300,
             height: 300,
+            width: 300,
           },
         ],
+        mimeTypes: [
+          'image/png',
+          'image/jpg',
+          'image/jpeg',
+          'image/gif',
+          'image/svg+xml',
+          'audio/mpeg',
+        ],
       },
-      fields: [],
     },
     {
       slug: enlargeSlug,
+      fields: [],
       upload: {
-        staticURL: '/enlarge',
-        staticDir: './media/enlarge',
-        mimeTypes: [
-          'image/png',
-          'image/jpg',
-          'image/jpeg',
-          'image/gif',
-          'image/svg+xml',
-          'audio/mpeg',
-        ],
         imageSizes: [
           {
             name: 'accidentalSameSize',
-            width: 320,
             height: 80,
+            width: 320,
             withoutEnlargement: false,
           },
           {
             name: 'sameSizeWithNewFormat',
-            width: 320,
-            height: 80,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: 80,
+            width: 320,
             withoutEnlargement: false,
           },
           {
             name: 'resizedLarger',
-            width: 640,
             height: 480,
+            width: 640,
             withoutEnlargement: false,
           },
           {
             name: 'resizedSmaller',
-            width: 180,
             height: 50,
+            width: 180,
           },
           {
             name: 'widthLowerHeightLarger',
-            width: 300,
-            height: 300,
             fit: 'contain',
+            height: 300,
+            width: 300,
           },
         ],
-      },
-      fields: [],
-    },
-    {
-      slug: reduceSlug,
-      upload: {
-        staticURL: '/reduce',
-        staticDir: './media/reduce',
         mimeTypes: [
           'image/png',
           'image/jpg',
@@ -317,108 +339,135 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
+        staticDir: './media/enlarge',
+        staticURL: '/enlarge',
+      },
+    },
+    {
+      slug: reduceSlug,
+      fields: [],
+      upload: {
         imageSizes: [
           {
             name: 'accidentalSameSize',
-            width: 320,
             height: 80,
+            width: 320,
             withoutEnlargement: false,
           },
           {
             name: 'sameSizeWithNewFormat',
-            width: 320,
-            height: 80,
             formatOptions: { format: 'jpg', options: { quality: 90 } },
+            height: 80,
+            width: 320,
             withoutReduction: true,
-            fit: 'contain',
           },
           {
             name: 'resizedLarger',
-            width: 640,
             height: 480,
+            width: 640,
           },
           {
             name: 'resizedSmaller',
-            width: 180,
             height: 50,
-            // Why fit `contain` should also be set to https://github.com/lovell/sharp/issues/3595
+            width: 180,
             withoutReduction: true,
-            fit: 'contain',
           },
         ],
+        mimeTypes: [
+          'image/png',
+          'image/jpg',
+          'image/jpeg',
+          'image/gif',
+          'image/svg+xml',
+          'audio/mpeg',
+        ],
+        staticDir: './media/reduce',
+        staticURL: '/reduce',
       },
-      fields: [],
     },
     {
       slug: 'media-trim',
+      fields: [],
       upload: {
-        staticURL: '/media-trim',
-        staticDir: './media-trim',
-        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
-        trimOptions: 0,
         imageSizes: [
           {
             name: 'trimNumber',
-            width: 1024,
             height: undefined,
             trimOptions: 0,
+            width: 1024,
           },
           {
             name: 'trimString',
-            width: 1024,
             height: undefined,
             trimOptions: 0,
+            width: 1024,
           },
           {
             name: 'trimOptions',
-            width: 1024,
             height: undefined,
             trimOptions: {
               background: '#000000',
               threshold: 50,
             },
+            width: 1024,
           },
         ],
+        mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
+        staticDir: './media-trim',
+        staticURL: '/media-trim',
+        trimOptions: 0,
       },
-      fields: [],
     },
     {
       slug: 'unstored-media',
-      upload: {
-        staticURL: '/media',
-        disableLocalStorage: true,
-      },
       fields: [],
+      upload: {
+        disableLocalStorage: true,
+        staticURL: '/media',
+      },
     },
     {
       slug: 'externally-served-media',
+      fields: [],
       upload: {
         // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
-        staticURL: 'http://localhost:3000/media',
         staticDir: './media',
+        staticURL: 'http://localhost:3000/media',
       },
-      fields: [],
     },
     Uploads1,
     Uploads2,
     AdminThumbnailCol,
     {
       slug: 'optional-file',
-      upload: {
-        staticURL: '/optional',
-        staticDir: './optional',
-        filesRequiredOnCreate: false,
-      },
       fields: [],
+      upload: {
+        filesRequiredOnCreate: false,
+        staticDir: './optional',
+        staticURL: '/optional',
+      },
     },
     {
       slug: 'required-file',
-      upload: {
-        staticURL: '/required',
-        staticDir: './required',
-        filesRequiredOnCreate: true,
-      },
       fields: [],
+      upload: {
+        filesRequiredOnCreate: true,
+        staticDir: './required',
+        staticURL: '/required',
+      },
+    },
+    {
+      slug: versionSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      upload: true,
+      versions: {
+        drafts: true,
+      },
     },
   ],
   onInit: async (payload) => {
@@ -443,10 +492,20 @@ export default buildConfigWithDefaults({
       file: imageFile,
     })
 
+    const { id: versionedImage } = await payload.create({
+      collection: versionSlug,
+      data: {
+        _status: 'published',
+        title: 'upload',
+      },
+      file: imageFile,
+    })
+
     await payload.create({
       collection: relationSlug,
       data: {
         image: uploadedImage,
+        versionedImage,
       },
     })
 
@@ -486,4 +545,5 @@ export default buildConfigWithDefaults({
       },
     })
   },
+  serverURL: undefined,
 })

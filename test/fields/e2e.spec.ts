@@ -3,42 +3,59 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 
+import type { RelationshipField, TextField } from './payload-types'
+
 import payload from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import {
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  saveDocHotkeyAndAssert,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
-import { collapsibleFieldsSlug } from './collections/Collapsible/shared'
-import { jsonDoc } from './collections/JSON'
-import { numberDoc } from './collections/Number'
-import { pointFieldsSlug } from './collections/Point'
-import { relationshipFieldsSlug } from './collections/Relationship'
-import { tabsSlug } from './collections/Tabs/constants'
-import { textDoc, textFieldsSlug } from './collections/Text'
+import { jsonDoc } from './collections/JSON/shared'
+import { numberDoc } from './collections/Number/shared'
+import { textDoc } from './collections/Text/shared'
+import { clearAndSeedEverything } from './seed'
+import {
+  collapsibleFieldsSlug,
+  pointFieldsSlug,
+  relationshipFieldsSlug,
+  tabsFieldsSlug,
+  textFieldsSlug,
+} from './slugs'
 
-const { afterEach, beforeAll, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 let client: RESTClient
 let page: Page
-let serverURL
+let serverURL: string
+// If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('fields', () => {
   beforeAll(async ({ browser }) => {
     const config = await initPayloadE2E(__dirname)
     serverURL = config.serverURL
-    client = new RESTClient(null, { serverURL, defaultSlug: 'users' })
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
     await client.login()
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
-
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+    await client.logout()
+    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    await client.login()
+  })
   describe('text', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, 'text-fields')
+      url = new AdminUrlUtil(serverURL, textFieldsSlug)
     })
 
     test('should display field in list view', async () => {
@@ -68,6 +85,59 @@ describe('fields', () => {
       await page.goto(url.create)
       const description = page.locator('.field-description-i18nText')
       await expect(description).toHaveText('en description')
+    })
+
+    test('should render custom label', async () => {
+      await page.goto(url.create)
+      const label = page.locator('label.custom-label[for="field-customLabel"]')
+      await expect(label).toHaveText('#label')
+    })
+
+    test('should render custom error', async () => {
+      await page.goto(url.create)
+      const input = page.locator('input[id="field-customError"]')
+      await input.fill('ab')
+      await expect(input).toHaveValue('ab')
+      const error = page.locator('.custom-error:near(input[id="field-customError"])')
+      const submit = page.locator('button[type="button"][id="action-save"]')
+      await submit.click()
+      await expect(error).toHaveText('#custom-error')
+    })
+
+    test('should render beforeInput and afterInput', async () => {
+      await page.goto(url.create)
+      const input = page.locator('input[id="field-beforeAndAfterInput"]')
+
+      const prevSibling = await input.evaluateHandle((el) => {
+        return el.previousElementSibling
+      })
+      const prevSiblingText = await page.evaluate((el) => el.textContent, prevSibling)
+      expect(prevSiblingText).toEqual('#before-input')
+
+      const nextSibling = await input.evaluateHandle((el) => {
+        return el.nextElementSibling
+      })
+      const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
+      expect(nextSiblingText).toEqual('#after-input')
+    })
+
+    test('should create hasMany with multiple texts', async () => {
+      const input = 'five'
+      const furtherInput = 'six'
+
+      await page.goto(url.create)
+      const requiredField = page.locator('#field-text')
+      const field = page.locator('.field-hasMany')
+
+      await requiredField.fill(String(input))
+      await field.click()
+      await page.keyboard.type(input)
+      await page.keyboard.press('Enter')
+      await page.keyboard.type(furtherInput)
+      await page.keyboard.press('Enter')
+      await saveDocAndAssert(page)
+      await expect(field.locator('.rs__value-container')).toContainText(input)
+      await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
     })
   })
 
@@ -142,33 +212,54 @@ describe('fields', () => {
       await saveDocAndAssert(page)
       await expect(field.locator('.rs__value-container')).toContainText(String(input))
     })
+
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      const input = 5
+
+      await page.goto(url.create)
+      await page.locator('.field-withMinRows').click()
+
+      await page.keyboard.type(String(input))
+      await page.keyboard.press('Enter')
+      await page.click('#action-save', { delay: 100 })
+
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+    })
   })
 
   describe('indexed', () => {
     let url: AdminUrlUtil
-    beforeAll(() => {
+    beforeEach(() => {
       url = new AdminUrlUtil(serverURL, 'indexed-fields')
     })
 
+    // TODO - This test is flaky. Rarely, but sometimes it randomly fails.
     test('should display unique constraint error in ui', async () => {
       const uniqueText = 'uniqueText'
       await payload.create({
         collection: 'indexed-fields',
         data: {
-          text: 'text',
-          uniqueText,
           group: {
             unique: uniqueText,
           },
+          text: 'text',
+          uniqueText,
         },
       })
+
       await page.goto(url.create)
 
       await page.locator('#field-text').fill('test')
       await page.locator('#field-uniqueText').fill(uniqueText)
 
       // attempt to save
-      await page.locator('#action-save').click()
+      await page.click('#action-save', { delay: 100 })
 
       // toast error
       await expect(page.locator('.Toastify')).toContainText(
@@ -269,22 +360,22 @@ describe('fields', () => {
     let url: AdminUrlUtil
     let filledGroupPoint
     let emptyGroupPoint
-    beforeAll(async () => {
+    beforeEach(async () => {
       url = new AdminUrlUtil(serverURL, pointFieldsSlug)
       filledGroupPoint = await payload.create({
         collection: pointFieldsSlug,
         data: {
-          point: [5, 5],
-          localized: [4, 2],
           group: { point: [4, 2] },
+          localized: [4, 2],
+          point: [5, 5],
         },
       })
       emptyGroupPoint = await payload.create({
         collection: pointFieldsSlug,
         data: {
-          point: [5, 5],
-          localized: [3, -2],
           group: {},
+          localized: [3, -2],
+          point: [5, 5],
         },
       })
     })
@@ -518,6 +609,38 @@ describe('fields', () => {
       ).toHaveValue('items>1>title')
     })
 
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      await page.goto(url.create)
+
+      await page
+        .locator('#field-blocksWithMinRows')
+        .getByRole('button', { name: 'Add Blocks With Min Row' })
+        .click()
+
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+      await expect(blocksDrawer).toBeVisible()
+
+      const firstBlockSelector = blocksDrawer
+        .locator('.blocks-drawer__blocks .blocks-drawer__block')
+        .first()
+
+      await firstBlockSelector.click()
+
+      const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
+      await expect(firstRow).toBeVisible()
+      await firstRow.fill('first row')
+      await expect(firstRow).toHaveValue('first row')
+
+      await page.click('#action-save', { delay: 100 })
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+    })
+
     describe('row manipulation', () => {
       describe('react hooks', () => {
         test('should add 2 new block rows', async () => {
@@ -591,6 +714,20 @@ describe('fields', () => {
         '#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")',
       )
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+    })
+
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
+
+      await page.click('#action-save', { delay: 100 })
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
     })
 
     describe('row manipulation', () => {
@@ -682,18 +819,20 @@ describe('fields', () => {
   describe('tabs', () => {
     let url: AdminUrlUtil
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, tabsSlug)
+      url = new AdminUrlUtil(serverURL, tabsFieldsSlug)
     })
 
     test('should fill and retain a new value within a tab while switching tabs', async () => {
       const textInRowValue = 'hello'
       const numberInRowValue = '23'
+      const jsonValue = '{ "foo": "bar"}'
 
       await page.goto(url.create)
 
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
       await page.locator('#field-numberInRow').fill(numberInRowValue)
+      await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(300)
 
@@ -704,16 +843,19 @@ describe('fields', () => {
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
       await expect(page.locator('#field-numberInRow')).toHaveValue(numberInRowValue)
+      await expect(page.locator('.json-field .lines-content')).toContainText(jsonValue)
     })
 
     test('should retain updated values within tabs while switching between tabs', async () => {
       const textInRowValue = 'new value'
+      const jsonValue = '{ "new": "value"}'
       await page.goto(url.list)
       await page.locator('.cell-id a').click()
 
       // Go to Row tab, update the value
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
       await page.locator('#field-textInRow').fill(textInRowValue)
+      await page.locator('.json-field .inputarea').fill(jsonValue)
 
       await wait(250)
 
@@ -722,6 +864,7 @@ describe('fields', () => {
       await page.locator('.tabs-field__tab-button:has-text("Tab with Row")').click()
 
       await expect(page.locator('#field-textInRow')).toHaveValue(textInRowValue)
+      await expect(page.locator('.json-field .lines-content')).toContainText(jsonValue)
 
       // Go to array tab, save the doc
       await page.locator('.tabs-field__tab-button:has-text("Tab with Array")').click()
@@ -750,13 +893,29 @@ describe('fields', () => {
       )
     })
   })
-
   describe('richText', () => {
     async function navigateToRichTextFields() {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
       await page.goto(url.list)
       await page.locator('.row-1 .cell-title a').click()
     }
+
+    describe('cell', () => {
+      test('ensure cells are smaller than 300px in height', async () => {
+        const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
+        await page.goto(url.list) // Navigate to rich-text list view
+
+        const table = page.locator('.list-controls ~ .table')
+        const lexicalCell = table.locator('.cell-lexicalCustomFields').first()
+        const lexicalHtmlCell = table.locator('.cell-lexicalCustomFields_html').first()
+        const entireRow = table.locator('.row-1').first()
+
+        // Make sure each of the 3 above are no larger than 300px in height:
+        expect((await lexicalCell.boundingBox()).height).toBeLessThanOrEqual(300)
+        expect((await lexicalHtmlCell.boundingBox()).height).toBeLessThanOrEqual(300)
+        expect((await entireRow.boundingBox()).height).toBeLessThanOrEqual(300)
+      })
+    })
 
     describe('toolbar', () => {
       test('should run url validation', async () => {
@@ -1127,8 +1286,8 @@ describe('fields', () => {
       describe('EST', () => {
         test.use({
           geolocation: {
-            longitude: -83.0458,
             latitude: 42.3314,
+            longitude: -83.0458,
           },
           timezoneId: 'America/Detroit',
         })
@@ -1148,7 +1307,7 @@ describe('fields', () => {
           const id = routeSegments.pop()
 
           // fetch the doc (need the date string from the DB)
-          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+          const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
@@ -1157,8 +1316,8 @@ describe('fields', () => {
       describe('PST', () => {
         test.use({
           geolocation: {
-            longitude: -122.419416,
             latitude: 37.774929,
+            longitude: -122.419416,
           },
           timezoneId: 'America/Los_Angeles',
         })
@@ -1179,7 +1338,7 @@ describe('fields', () => {
           const id = routeSegments.pop()
 
           // fetch the doc (need the date string from the DB)
-          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+          const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
@@ -1188,8 +1347,8 @@ describe('fields', () => {
       describe('ST', () => {
         test.use({
           geolocation: {
-            longitude: -171.857,
             latitude: -14.5994,
+            longitude: -171.857,
           },
           timezoneId: 'Pacific/Apia',
         })
@@ -1210,7 +1369,7 @@ describe('fields', () => {
           const id = routeSegments.pop()
 
           // fetch the doc (need the date string from the DB)
-          const { doc } = await client.findByID({ id, slug: 'date-fields', auth: true })
+          const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
 
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
         })
@@ -1220,6 +1379,7 @@ describe('fields', () => {
 
   describe('relationship', () => {
     let url: AdminUrlUtil
+    const tableRowLocator = 'table > tbody > tr'
 
     beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields')
@@ -1227,13 +1387,9 @@ describe('fields', () => {
 
     afterEach(async () => {
       // delete all existing relationship documents
-      const allRelationshipDocs = await payload.find({
+      await payload.delete({
         collection: relationshipFieldsSlug,
-        limit: 100,
-      })
-      const relationshipIDs = allRelationshipDocs.docs.map((doc) => doc.id)
-      await mapAsync(relationshipIDs, async (id) => {
-        await payload.delete({ collection: relationshipFieldsSlug, id })
+        where: { id: { exists: true } },
       })
     })
 
@@ -1340,6 +1496,41 @@ describe('fields', () => {
       await page.locator('.rs__option:has-text("Seeded text document")').click()
       await field.locator('.clear-indicator').click()
       await expect(field.locator('.rs__placeholder')).toBeVisible()
+    })
+
+    test('should display `hasMany` polymorphic relationships', async () => {
+      await page.goto(url.create)
+      const field = page.locator('#field-relationHasManyPolymorphic')
+      await field.click()
+
+      await page
+        .locator('.rs__option', {
+          hasText: exactText('Seeded text document'),
+        })
+        .click()
+
+      await expect(
+        page
+          .locator('#field-relationHasManyPolymorphic .relationship--multi-value-label__text', {
+            hasText: exactText('Seeded text document'),
+          })
+          .first(),
+      ).toBeVisible()
+
+      // await fill the required fields then save the document and check again
+      await page.locator('#field-relationship').click()
+      await page.locator('#field-relationship .rs__option:has-text("Seeded text document")').click()
+      await saveDocAndAssert(page)
+
+      const valueAfterSave = page.locator('#field-relationHasManyPolymorphic .multi-value').first()
+
+      await expect(
+        valueAfterSave
+          .locator('.relationship--multi-value-label__text', {
+            hasText: exactText('Seeded text document'),
+          })
+          .first(),
+      ).toBeVisible()
     })
 
     test('should populate relationship dynamic default value', async () => {
@@ -1465,6 +1656,89 @@ describe('fields', () => {
       // but the relationship document should NOT exist, as the hotkey should have saved the drawer and not the parent page
       expect(relationshipDocuments.docs.length).toEqual(0)
     })
+
+    test('should bypass min rows validation when no rows present and field is not required', async () => {
+      await page.goto(url.create)
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+      await page.locator('#field-relationship .value-container').click()
+      await page.getByText('Seeded text document', { exact: true }).click()
+
+      await saveDocAndAssert(page)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
+    })
+
+    test('should fail min rows validation when rows are present', async () => {
+      await page.goto(url.create)
+
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click()
+      await page.locator('#field-relationship .value-container').click()
+      await page.getByText('Seeded text document', { exact: true }).click()
+
+      await page.locator('#field-relationshipWithMinRows .value-container').click()
+      await page
+        .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
+        .click()
+
+      await page.click('#action-save', { delay: 100 })
+      await expect(page.locator('.Toastify')).toContainText('Please correct invalid fields')
+    })
+
+    test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationship')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Another text document')
+    })
+
+    test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-relationHasManyPolymorphic')
+      await field.click()
+
+      const firstOption = page.locator('.rs__option').first()
+      await expect(firstOption).toBeVisible()
+      const firstOptionText = await firstOption.textContent()
+      expect(firstOptionText.trim()).toBe('Seeded text document')
+    })
+
+    test('should allow filtering by relationship field / equals', async () => {
+      const textDoc = await createTextFieldDoc()
+      await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
+
+      await page.goto(url.list)
+
+      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.list-controls__toggle-where').click()
+      await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = page.locator('.condition__field')
+      await conditionField.click()
+
+      const dropdownFieldOptions = conditionField.locator('.rs__option')
+      await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+      await dropdownOperatorOptions.locator('text=equals').click()
+
+      const valueField = page.locator('.condition__value')
+      await valueField.click()
+      const dropdownValueOptions = valueField.locator('.rs__option')
+      await dropdownValueOptions.locator('text=some text').click()
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+    })
   })
 
   describe('upload', () => {
@@ -1473,7 +1747,7 @@ describe('fields', () => {
       url = new AdminUrlUtil(serverURL, 'uploads')
     })
 
-    test('should upload files', async () => {
+    async function uploadImage() {
       await page.goto(url.create)
 
       // create a jpg upload
@@ -1484,10 +1758,15 @@ describe('fields', () => {
       await page.locator('#action-save').click()
       await wait(200)
       await expect(page.locator('.Toastify')).toContainText('successfully')
+    }
+
+    test('should upload files', async () => {
+      await uploadImage()
     })
 
     // test that the image renders
     test('should render uploaded image', async () => {
+      await uploadImage()
       await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
         'src',
         '/uploads/payload-1.jpg',
@@ -1495,6 +1774,7 @@ describe('fields', () => {
     })
 
     test('should upload using the document drawer', async () => {
+      await uploadImage()
       // Open the media drawer and create a png upload
       await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
       await page
@@ -1521,10 +1801,20 @@ describe('fields', () => {
     })
 
     test('should clear selected upload', async () => {
+      await uploadImage()
+      await page.locator('.field-type.upload .upload__toggler.doc-drawer__toggler').click()
+      await page
+        .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+        .setInputFiles(path.resolve(__dirname, './uploads/payload.png'))
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
+      await wait(200)
+      await expect(page.locator('.Toastify')).toContainText('successfully')
       await page.locator('.field-type.upload .file-details__remove').click()
     })
 
     test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
+      await uploadImage()
+
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click()
       await wait(200)
       const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]')
@@ -1690,3 +1980,27 @@ describe('fields', () => {
     })
   })
 })
+
+async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextField> {
+  return payload.create({
+    collection: 'text-fields',
+    data: {
+      text: 'some text',
+      localizedText: 'some localized text',
+      ...overrides,
+    },
+  }) as unknown as Promise<TextField>
+}
+
+async function createRelationshipFieldDoc(
+  relationship: RelationshipField['relationship'],
+  overrides?: Partial<RelationshipField>,
+): Promise<RelationshipField> {
+  return payload.create({
+    collection: 'relationship-fields',
+    data: {
+      relationship,
+      ...overrides,
+    },
+  }) as unknown as Promise<RelationshipField>
+}

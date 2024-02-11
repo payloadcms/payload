@@ -1,51 +1,13 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { BlockField } from '../../../../packages/payload/src/fields/config/types'
 
+import { blockFieldsSlug, textFieldsSlug } from '../../slugs'
 import { AddCustomBlocks } from './components/AddCustomBlocks'
-
-export const getBlocksFieldSeedData = (prefix?: string): any => [
-  {
-    blockName: 'First block',
-    blockType: prefix ? `${prefix}Content` : 'content',
-    text: 'first block',
-    richText: [
-      {
-        children: [{ text: '' }],
-      },
-    ],
-  },
-  {
-    blockName: 'Second block',
-    blockType: prefix ? `${prefix}Number` : 'number',
-    number: 342,
-  },
-  {
-    blockName: 'Sub-block demonstration',
-    blockType: prefix ? `${prefix}SubBlocks` : 'subBlocks',
-    subBlocks: [
-      {
-        blockName: 'First sub block',
-        blockType: 'number',
-        number: 123,
-      },
-      {
-        blockName: 'Second sub block',
-        blockType: 'text',
-        text: 'second sub block',
-      },
-    ],
-  },
-  {
-    blockName: 'I18n Block',
-    blockType: 'i18n-text',
-    text: 'first block',
-  },
-]
+import { getBlocksFieldSeedData } from './shared'
 
 export const getBlocksField = (prefix?: string): BlockField => ({
   name: 'blocks',
   type: 'blocks',
-  required: true,
   blocks: [
     {
       slug: prefix ? `${prefix}Content` : 'content',
@@ -76,7 +38,6 @@ export const getBlocksField = (prefix?: string): BlockField => ({
       fields: [
         {
           type: 'collapsible',
-          label: 'Collapsible within Block',
           fields: [
             {
               name: 'subBlocks',
@@ -105,6 +66,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
               ],
             },
           ],
+          label: 'Collapsible within Block',
         },
       ],
     },
@@ -115,11 +77,9 @@ export const getBlocksField = (prefix?: string): BlockField => ({
           type: 'tabs',
           tabs: [
             {
-              label: 'Tab with Collapsible',
               fields: [
                 {
                   type: 'collapsible',
-                  label: 'Collapsible within Block',
                   fields: [
                     {
                       // collapsible
@@ -127,6 +87,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
                       type: 'text',
                     },
                   ],
+                  label: 'Collapsible within Block',
                 },
                 {
                   type: 'row',
@@ -139,6 +100,7 @@ export const getBlocksField = (prefix?: string): BlockField => ({
                   ],
                 },
               ],
+              label: 'Tab with Collapsible',
             },
           ],
         },
@@ -146,19 +108,20 @@ export const getBlocksField = (prefix?: string): BlockField => ({
     },
   ],
   defaultValue: getBlocksFieldSeedData(prefix),
+  required: true,
 })
 
 const BlockFields: CollectionConfig = {
-  slug: 'block-fields',
+  slug: blockFieldsSlug,
   fields: [
     getBlocksField(),
     {
       ...getBlocksField('localized'),
       name: 'collapsedByDefaultBlocks',
-      localized: true,
       admin: {
         initCollapsed: true,
       },
+      localized: true,
     },
     {
       ...getBlocksField('localized'),
@@ -166,61 +129,61 @@ const BlockFields: CollectionConfig = {
       localized: true,
     },
     {
-      type: 'blocks',
       name: 'i18nBlocks',
-      label: {
-        en: 'Block en',
-        es: 'Block es',
-      },
-      labels: {
-        singular: {
-          en: 'Block en',
-          es: 'Block es',
-        },
-        plural: {
-          en: 'Blocks en',
-          es: 'Blocks es',
-        },
-      },
+      type: 'blocks',
       blocks: [
         {
           slug: 'text',
-          graphQL: {
-            singularName: 'I18nText',
-          },
-          labels: {
-            singular: {
-              en: 'Text en',
-              es: 'Text es',
-            },
-            plural: {
-              en: 'Texts en',
-              es: 'Texts es',
-            },
-          },
           fields: [
             {
               name: 'text',
               type: 'text',
             },
           ],
+          graphQL: {
+            singularName: 'I18nText',
+          },
+          labels: {
+            plural: {
+              en: 'Texts en',
+              es: 'Texts es',
+            },
+            singular: {
+              en: 'Text en',
+              es: 'Text es',
+            },
+          },
         },
       ],
+      label: {
+        en: 'Block en',
+        es: 'Block es',
+      },
+      labels: {
+        plural: {
+          en: 'Blocks en',
+          es: 'Blocks es',
+        },
+        singular: {
+          en: 'Block en',
+          es: 'Block es',
+        },
+      },
     },
     {
-      type: 'blocks',
       name: 'blocksWithSimilarConfigs',
+      type: 'blocks',
       blocks: [
         {
           slug: 'block-a',
           fields: [
             {
-              type: 'array',
               name: 'items',
+              type: 'array',
               fields: [
                 {
-                  type: 'text',
                   name: 'title',
+                  type: 'text',
                   required: true,
                 },
               ],
@@ -231,12 +194,68 @@ const BlockFields: CollectionConfig = {
           slug: 'block-b',
           fields: [
             {
-              type: 'array',
               name: 'items',
+              type: 'array',
               fields: [
                 {
-                  type: 'text',
                   name: 'title2',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'group-block',
+          fields: [
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blocksWithSimilarGroup',
+      type: 'blocks',
+      admin: {
+        description:
+          'The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields',
+      },
+      blocks: [
+        {
+          slug: 'group-block',
+          fields: [
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'block-b',
+          fields: [
+            {
+              name: 'items',
+              type: 'array',
+              fields: [
+                {
+                  name: 'title2',
+                  type: 'text',
                   required: true,
                 },
               ],
@@ -244,6 +263,22 @@ const BlockFields: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'blocksWithMinRows',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'blockTitle',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      minRows: 2,
     },
     {
       name: 'customBlocks',
@@ -270,8 +305,24 @@ const BlockFields: CollectionConfig = {
       ],
     },
     {
-      type: 'ui',
+      name: 'relationshipBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'relationships',
+          fields: [
+            {
+              name: 'relationship',
+              type: 'relationship',
+              relationTo: textFieldsSlug,
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'ui',
+      type: 'ui',
       admin: {
         components: {
           Field: AddCustomBlocks,
@@ -279,11 +330,6 @@ const BlockFields: CollectionConfig = {
       },
     },
   ],
-}
-
-export const blocksDoc = {
-  blocks: getBlocksFieldSeedData(),
-  localizedBlocks: getBlocksFieldSeedData('localized'),
 }
 
 export default BlockFields

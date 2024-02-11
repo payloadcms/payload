@@ -2,6 +2,9 @@
 import type { PayloadRequest } from '../../express/types'
 import type { BaseDatabaseAdapter } from '../types'
 
+import { commitTransaction } from '../../utilities/commitTransaction'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
 import { getMigrations } from './getMigrations'
 import { readMigrationFiles } from './readMigrationFiles'
 
@@ -24,13 +27,13 @@ export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
     }
 
     const start = Date.now()
-    let transactionID: number | string | undefined
+    const req = { payload } as PayloadRequest
 
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
     try {
-      transactionID = await this.beginTransaction()
-      await migration.up({ payload })
+      await initTransaction(req)
+      await migration.up({ payload, req })
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
       await payload.create({
         collection: 'payload-migrations',
@@ -38,11 +41,11 @@ export async function migrate(this: BaseDatabaseAdapter): Promise<void> {
           name: migration.name,
           batch: newBatch,
         },
-        ...(transactionID && { req: { transactionID } as PayloadRequest }),
+        req,
       })
-      await this.commitTransaction(transactionID)
+      await commitTransaction(req)
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
       throw err
     }

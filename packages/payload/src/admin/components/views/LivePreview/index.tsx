@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
@@ -11,8 +11,8 @@ import type { EditViewProps } from '../types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentFields } from '../../elements/DocumentFields'
-import { Gutter } from '../../elements/Gutter'
 import { LeaveWithoutSaving } from '../../modals/LeaveWithoutSaving'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
@@ -138,9 +138,15 @@ export const LivePreviewView: React.FC<
     fieldTypes: FieldTypes
   }
 > = (props) => {
+  const { data } = props
   const config = useConfig()
   const documentInfo = useDocumentInfo()
   const locale = useLocale()
+
+  const { setViewActions } = useActions()
+
+  const collection = documentInfo.collection
+  const global = documentInfo.global
 
   let livePreviewConfig: LivePreviewConfig = config?.admin?.livePreview
 
@@ -158,14 +164,40 @@ export const LivePreviewView: React.FC<
     }
   }
 
-  const url =
-    typeof livePreviewConfig?.url === 'function'
-      ? livePreviewConfig?.url({
-          data: props?.data,
-          documentInfo,
-          locale,
-        })
-      : livePreviewConfig?.url
+  const [url, setURL] = React.useState<string | undefined>(() => {
+    if (typeof livePreviewConfig?.url === 'string') return livePreviewConfig?.url
+  })
+
+  useEffect(() => {
+    const getURL = async () => {
+      const newURL =
+        typeof livePreviewConfig?.url === 'function'
+          ? await livePreviewConfig.url({
+              data,
+              documentInfo,
+              locale,
+            })
+          : livePreviewConfig?.url
+
+      setURL(newURL)
+    }
+
+    getURL() // eslint-disable-line @typescript-eslint/no-floating-promises
+  }, [data, documentInfo, locale, livePreviewConfig])
+
+  useEffect(() => {
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
+    const livePreviewActions =
+      editConfig && 'LivePreview' in editConfig && 'actions' in editConfig.LivePreview
+        ? editConfig.LivePreview.actions
+        : []
+
+    setViewActions(livePreviewActions)
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
 
   const breakpoints: LivePreviewConfig['breakpoints'] = [
     ...(livePreviewConfig?.breakpoints || []),

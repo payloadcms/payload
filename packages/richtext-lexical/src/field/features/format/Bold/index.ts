@@ -2,7 +2,6 @@ import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
-import { BoldIcon } from '../../../lexical/ui/icons/Bold'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import {
   BOLD_ITALIC_STAR,
@@ -25,8 +24,10 @@ export const BoldTextFeature = (): FeatureProvider => {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: BoldIcon,
-                isActive: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/Bold').then((module) => module.BoldIcon),
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('bold')
                   }

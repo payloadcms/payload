@@ -8,8 +8,12 @@ import type { StripeConfig } from '../types'
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
+type HookArgsWithCustomCollection = Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'> & {
+  collection: CollectionConfig
+}
+
 export type CollectionAfterDeleteHookWithArgs = (
-  args: Parameters<CollectionAfterDeleteHook>[0] & {
+  args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
     stripeConfig?: StripeConfig
   },

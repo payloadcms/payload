@@ -10,6 +10,9 @@ export async function getFilePrefix({
   const imageSizes = (collection?.upload as IncomingUploadType)?.imageSizes || []
   const files = await req.payload.find({
     collection: collection.slug,
+    depth: 0,
+    limit: 1,
+    pagination: false,
     where: {
       or: [
         {

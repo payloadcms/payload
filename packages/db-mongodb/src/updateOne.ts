@@ -1,11 +1,9 @@
 import type { UpdateOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
-
 import type { MongooseAdapter } from '.'
 
+import handleError from './utilities/handleError'
 import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
@@ -31,18 +29,7 @@ export const updateOne: UpdateOne = async function updateOne(
   try {
     result = await Model.findOneAndUpdate(query, data, options)
   } catch (error) {
-    // Handle uniqueness error from MongoDB
-    throw error.code === 11000 && error.keyValue
-      ? new ValidationError(
-          [
-            {
-              field: Object.keys(error.keyValue)[0],
-              message: 'Value must be unique',
-            },
-          ],
-          req?.t ?? i18nInit(this.payload.config.i18n).t,
-        )
-      : error
+    handleError(error, req)
   }
 
   result = JSON.parse(JSON.stringify(result))

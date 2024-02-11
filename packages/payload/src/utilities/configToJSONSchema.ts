@@ -46,9 +46,6 @@ function buildOptionEnums(options: Option[]): string[] {
   })
 }
 
-/**
- * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
- */
 function generateEntitySchemas(
   entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
 ): JSONSchema4 {
@@ -68,7 +65,10 @@ function generateEntitySchemas(
   }
 }
 
-function withNullableType(
+/**
+ * Returns a JSON Schema Type with 'null' added if the field is not required.
+ */
+export function withNullableJSONSchemaType(
   fieldType: JSONSchema4TypeName,
   isRequired: boolean,
 ): JSONSchema4TypeName | JSONSchema4TypeName[] {
@@ -78,9 +78,12 @@ function withNullableType(
   return fieldTypes
 }
 
-function fieldsToJSONSchema(
+export function fieldsToJSONSchema(
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
   fields: Field[],
+  /**
+   * Allows you to define new top-level interfaces that can be re-used in the output schema.
+   */
   interfaceNameDefinitions: Map<string, JSONSchema4>,
 ): {
   properties: {
@@ -99,11 +102,20 @@ function fieldsToJSONSchema(
         let fieldSchema: JSONSchema4
         switch (field.type) {
           case 'text':
+            if (field.hasMany === true) {
+              fieldSchema = {
+                items: { type: 'string' },
+                type: withNullableJSONSchemaType('array', isRequired),
+              }
+            } else {
+              fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
+            }
+            break
           case 'textarea':
           case 'code':
           case 'email':
           case 'date': {
-            fieldSchema = { type: withNullableType('string', isRequired) }
+            fieldSchema = { type: withNullableJSONSchemaType('string', isRequired) }
             break
           }
 
@@ -111,16 +123,16 @@ function fieldsToJSONSchema(
             if (field.hasMany === true) {
               fieldSchema = {
                 items: { type: 'number' },
-                type: withNullableType('array', isRequired),
+                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
-              fieldSchema = { type: withNullableType('number', isRequired) }
+              fieldSchema = { type: withNullableJSONSchemaType('number', isRequired) }
             }
             break
           }
 
           case 'checkbox': {
-            fieldSchema = { type: withNullableType('boolean', isRequired) }
+            fieldSchema = { type: withNullableJSONSchemaType('boolean', isRequired) }
             break
           }
 
@@ -132,11 +144,20 @@ function fieldsToJSONSchema(
           }
 
           case 'richText': {
-            fieldSchema = {
-              items: {
-                type: 'object',
-              },
-              type: withNullableType('array', isRequired),
+            if (field.editor.outputSchema) {
+              fieldSchema = field.editor.outputSchema({
+                field,
+                interfaceNameDefinitions,
+                isRequired,
+              })
+            } else {
+              // Maintain backwards compatibility with existing rich text editors
+              fieldSchema = {
+                items: {
+                  type: 'object',
+                },
+                type: withNullableJSONSchemaType('array', isRequired),
+              }
             }
 
             break
@@ -145,7 +166,7 @@ function fieldsToJSONSchema(
           case 'radio': {
             fieldSchema = {
               enum: buildOptionEnums(field.options),
-              type: withNullableType('string', isRequired),
+              type: withNullableJSONSchemaType('string', isRequired),
             }
 
             break
@@ -160,12 +181,12 @@ function fieldsToJSONSchema(
                   enum: optionEnums,
                   type: 'string',
                 },
-                type: withNullableType('array', isRequired),
+                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
               fieldSchema = {
                 enum: optionEnums,
-                type: withNullableType('string', isRequired),
+                type: withNullableJSONSchemaType('string', isRequired),
               }
             }
 
@@ -184,7 +205,7 @@ function fieldsToJSONSchema(
               ],
               maxItems: 2,
               minItems: 2,
-              type: withNullableType('array', isRequired),
+              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
@@ -217,7 +238,7 @@ function fieldsToJSONSchema(
                       }
                     }),
                   },
-                  type: withNullableType('array', isRequired),
+                  type: withNullableJSONSchemaType('array', isRequired),
                 }
               } else {
                 fieldSchema = {
@@ -240,7 +261,7 @@ function fieldsToJSONSchema(
                         },
                       },
                       required: ['value', 'relationTo'],
-                      type: withNullableType('object', isRequired),
+                      type: withNullableJSONSchemaType('object', isRequired),
                     }
                   }),
                 }
@@ -257,13 +278,16 @@ function fieldsToJSONSchema(
                     },
                   ],
                 },
-                type: withNullableType('array', isRequired),
+                type: withNullableJSONSchemaType('array', isRequired),
               }
             } else {
               fieldSchema = {
                 oneOf: [
                   {
-                    type: withNullableType(collectionIDFieldTypes[field.relationTo], isRequired),
+                    type: withNullableJSONSchemaType(
+                      collectionIDFieldTypes[field.relationTo],
+                      isRequired,
+                    ),
                   },
                   {
                     $ref: `#/definitions/${field.relationTo}`,
@@ -323,7 +347,7 @@ function fieldsToJSONSchema(
                   return blockSchema
                 }),
               },
-              type: withNullableType('array', isRequired),
+              type: withNullableJSONSchemaType('array', isRequired),
             }
             break
           }
@@ -339,7 +363,7 @@ function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                 ),
               },
-              type: withNullableType('array', isRequired),
+              type: withNullableJSONSchemaType('array', isRequired),
             }
 
             if (field.interfaceName) {
@@ -497,12 +521,18 @@ export function entityToJSONSchema(
   }
 }
 
+/**
+ * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
+ */
 export function configToJSONSchema(
   config: SanitizedConfig,
   defaultIDType?: 'number' | 'text',
 ): JSONSchema4 {
-  // a mutable Map to store custom top-level `interfaceName` types
+  // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
+
+  // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
+  // types to be inlined inside the `Config` type
   const entityDefinitions: { [k: string]: JSONSchema4 } = [
     ...config.globals,
     ...config.collections,
@@ -514,6 +544,7 @@ export function configToJSONSchema(
   return {
     additionalProperties: false,
     definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
+    // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     properties: {
       collections: generateEntitySchemas(config.collections || []),
       globals: generateEntitySchemas(config.globals || []),

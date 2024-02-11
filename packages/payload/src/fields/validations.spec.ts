@@ -48,6 +48,16 @@ describe('Field Validations', () => {
       const result = text(val, { ...options, minLength: 10 })
       expect(result).toBe(true)
     })
+    it('should validate an array of texts', async () => {
+      const val = ['test']
+      const result = text(val, { ...options, hasMany: true })
+      expect(result).toBe(true)
+    })
+    it('should handle required array of texts', async () => {
+      const val = ['test']
+      const result = text(val, { ...options, hasMany: true, required: true })
+      expect(result).toBe(true)
+    })
   })
 
   describe('textarea', () => {
@@ -413,6 +423,11 @@ describe('Field Validations', () => {
       const result = number(val, numberOptions)
       expect(result).toBe(true)
     })
+    it('should validate 0', () => {
+      const val = 0
+      const result = number(val, { ...numberOptions, required: true })
+      expect(result).toBe(true)
+    })
     it('should validate 2', () => {
       const val = 1.5
       const result = number(val, numberOptions)
@@ -431,7 +446,7 @@ describe('Field Validations', () => {
     it('should handle required value', () => {
       const val = ''
       const result = number(val, { ...numberOptions, required: true })
-      expect(result).toBe('validation:enterNumber')
+      expect(result).toBe('validation:required')
     })
     it('should validate minValue', () => {
       const val = 2.4
@@ -461,12 +476,12 @@ describe('Field Validations', () => {
     it('should validate an array of numbers using minRows', async () => {
       const val = [1.25, 2.5]
       const result = number(val, { ...numberOptions, hasMany: true, minRows: 4 })
-      expect(result).toBe('validation:lessThanMin')
+      expect(result).toBe('validation:requiresAtLeast')
     })
     it('should validate an array of numbers using maxRows', async () => {
       const val = [1.25, 2.5, 3.5]
       const result = number(val, { ...numberOptions, hasMany: true, maxRows: 2 })
-      expect(result).toBe('validation:greaterThanMax')
+      expect(result).toBe('validation:requiresNoMoreThan')
     })
   })
 })

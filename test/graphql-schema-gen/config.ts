@@ -91,7 +91,7 @@ export default buildConfigWithDefaults({
       fields: [
         {
           type: 'array',
-          name: 'meta',
+          name: 'metaArray',
           interfaceName: 'SharedMetaArray',
           fields: [
             {
@@ -106,7 +106,7 @@ export default buildConfigWithDefaults({
         },
         {
           type: 'group',
-          name: 'meta',
+          name: 'metaGroup',
           interfaceName: 'SharedMeta',
           fields: [
             {

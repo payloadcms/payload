@@ -1,7 +1,7 @@
 import joi from 'joi'
 
 import { adminViewSchema } from './shared/adminViewSchema'
-import { livePreviewSchema } from './shared/componentSchema'
+import { componentSchema, livePreviewSchema } from './shared/componentSchema'
 
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
@@ -39,6 +39,7 @@ export default joi.object({
     },
     components: joi.object().keys({
       Nav: component,
+      actions: joi.array().items(component),
       afterDashboard: joi.array().items(component),
       afterLogin: joi.array().items(component),
       afterNavLinks: joi.array().items(component),
@@ -94,9 +95,12 @@ export default joi.object({
     .object()
     .required()
     .keys({
-      CellComponent: component.required(),
-      FieldComponent: component.required(),
+      CellComponent: componentSchema.optional(),
+      FieldComponent: componentSchema.optional(),
+      LazyCellComponent: joi.func().optional(),
+      LazyFieldComponent: joi.func().optional(),
       afterReadPromise: joi.func().optional(),
+      outputSchema: joi.func().optional(),
       populationPromise: joi.func().optional(),
       validate: joi.func().required(),
     })
@@ -134,7 +138,14 @@ export default joi.object({
         joi.array().items(
           joi.object().keys({
             code: joi.string(),
-            label: joi.string(),
+            fallbackLocale: joi.string(),
+            label: joi
+              .alternatives()
+              .try(
+                joi.object().pattern(joi.string(), [joi.string()]),
+                joi.string(),
+                joi.valid(false),
+              ),
             rtl: joi.boolean(),
             toString: joi.func(),
           }),

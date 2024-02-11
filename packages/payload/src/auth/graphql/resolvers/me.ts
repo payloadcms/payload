@@ -1,5 +1,7 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import me from '../../operations/me'
 
 function meResolver(collection: Collection): any {
@@ -7,10 +9,11 @@ function meResolver(collection: Collection): any {
     const options = {
       collection,
       depth: 0,
-      req: context.req,
+      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
     }
     return me(options)
   }
+
   return resolver
 }
 

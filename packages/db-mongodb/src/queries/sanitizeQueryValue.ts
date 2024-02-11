@@ -17,8 +17,13 @@ export const sanitizeQueryValue = ({
   operator,
   path,
   val,
-}: SanitizeQueryValueArgs): unknown => {
+}: SanitizeQueryValueArgs): {
+  operator?: string
+  rawQuery?: unknown
+  val?: unknown
+} => {
   let formattedValue = val
+  let formattedOperator = operator
 
   // Disregard invalid _ids
   if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
@@ -26,7 +31,7 @@ export const sanitizeQueryValue = ({
       const isValid = mongoose.Types.ObjectId.isValid(val)
 
       if (!isValid) {
-        return undefined
+        return { operator: formattedOperator, val: undefined }
       }
     }
 
@@ -34,7 +39,7 @@ export const sanitizeQueryValue = ({
       const parsedNumber = parseFloat(val)
 
       if (Number.isNaN(parsedNumber)) {
-        return undefined
+        return { operator: formattedOperator, val: undefined }
       }
     }
   }
@@ -67,6 +72,24 @@ export const sanitizeQueryValue = ({
   if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
       formattedValue = null
+    }
+
+    // Object equality requires the value to be the first key in the object that is being queried.
+    if (
+      operator === 'equals' &&
+      formattedValue &&
+      typeof formattedValue === 'object' &&
+      formattedValue.value &&
+      formattedValue.relationTo
+    ) {
+      return {
+        rawQuery: {
+          $and: [
+            { [`${path}.value`]: { $eq: formattedValue.value } },
+            { [`${path}.relationTo`]: { $eq: formattedValue.relationTo } },
+          ],
+        },
+      }
     }
 
     if (operator === 'in' && Array.isArray(formattedValue)) {
@@ -103,7 +126,7 @@ export const sanitizeQueryValue = ({
       formattedValue = undefined
     } else {
       formattedValue = {
-        $geometry: { coordinates: [parseFloat(lng), parseFloat(lat)], type: 'Point' },
+        $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
       if (maxDistance) formattedValue.$maxDistance = parseFloat(maxDistance)
@@ -123,9 +146,35 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (operator === 'exists') {
-    formattedValue = formattedValue === 'true' || formattedValue === true
+  if (
+    (path === '_id' || path === 'parent') &&
+    operator === 'like' &&
+    formattedValue.length === 24 &&
+    !hasCustomID
+  ) {
+    formattedOperator = 'equals'
   }
 
-  return formattedValue
+  if (operator === 'exists') {
+    formattedValue = formattedValue === 'true' || formattedValue === true
+
+    // Clearable fields
+    if (['relationship', 'select', 'upload'].includes(field.type)) {
+      if (formattedValue) {
+        return {
+          rawQuery: {
+            $and: [{ [path]: { $exists: true } }, { [path]: { $ne: null } }],
+          },
+        }
+      } else {
+        return {
+          rawQuery: {
+            $or: [{ [path]: { $exists: false } }, { [path]: { $eq: null } }],
+          },
+        }
+      }
+    }
+  }
+
+  return { operator: formattedOperator, val: formattedValue }
 }

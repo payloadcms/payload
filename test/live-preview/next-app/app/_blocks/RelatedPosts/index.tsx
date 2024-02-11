@@ -11,7 +11,7 @@ export type RelatedPostsProps = {
   blockType: 'relatedPosts'
   blockName: string
   introContent?: any
-  docs?: (string | Post)[]
+  docs?: (string | Post)[] | null
   relationTo: 'posts'
 }
 

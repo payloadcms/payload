@@ -1,9 +1,9 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { noApiViewCollection } from '../shared'
+import { noApiViewCollectionSlug } from '../slugs'
 
 export const CollectionNoApiView: CollectionConfig = {
-  slug: noApiViewCollection,
+  slug: noApiViewCollectionSlug,
   admin: {
     hideAPIURL: true,
   },

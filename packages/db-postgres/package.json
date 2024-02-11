@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "0.1.12",
+  "version": "0.5.2",
   "description": "The officially supported Postgres database adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -22,11 +22,12 @@
   "dependencies": {
     "@libsql/client": "^0.3.1",
     "console-table-printer": "2.11.2",
-    "drizzle-kit": "0.19.13-e99bac1",
-    "drizzle-orm": "0.28.5",
+    "drizzle-kit": "0.20.14-1f2c838",
+    "drizzle-orm": "0.29.3",
     "pg": "8.11.3",
     "prompts": "2.4.2",
-    "to-snake-case": "1.0.0"
+    "to-snake-case": "1.0.0",
+    "uuid": "9.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

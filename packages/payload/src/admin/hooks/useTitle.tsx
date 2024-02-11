@@ -40,8 +40,14 @@ export const formatUseAsTitle = (args: {
   }
 
   const field = fieldFromProps || getObjectDotNotation<FormField>(doc, collection.admin.useAsTitle)
-
-  let title = typeof field === 'string' ? field : (field?.value as string)
+  let title: string
+  if (typeof field === 'string') {
+    title = field
+  } else if (typeof field === 'number') {
+    title = String(field)
+  } else {
+    title = field?.value as string
+  }
 
   const fieldConfig = collection?.fields?.find((f) => 'name' in f && f?.name === useAsTitle)
   const isDate = fieldConfig?.type === 'date'

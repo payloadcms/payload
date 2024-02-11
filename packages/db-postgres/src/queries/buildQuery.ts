@@ -64,20 +64,25 @@ const buildQuery = async function buildQuery({
       orderBy.order = asc
     }
 
-    const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
-      adapter,
-      collectionPath: sortPath,
-      fields,
-      joinAliases,
-      joins,
-      locale,
-      pathSegments: sortPath.replace(/__/g, '.').split('.'),
-      selectFields,
-      tableName,
-    })
+    try {
+      const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
+        adapter,
+        collectionPath: sortPath,
+        fields,
+        joinAliases,
+        joins,
+        locale,
+        pathSegments: sortPath.replace(/__/g, '.').split('.'),
+        selectFields,
+        tableName,
+      })
+      orderBy.column = sortTable?.[sortTableColumnName]
+    } catch (err) {
+      // continue
+    }
+  }
 
-    orderBy.column = sortTable[sortTableColumnName]
-  } else {
+  if (!orderBy?.column) {
     orderBy.order = desc
     const createdAt = adapter.tables[tableName]?.createdAt
 

@@ -90,36 +90,41 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         if (result.status === 201 || result.status === 200) {
           return json.doc.id
         }
-        json.errors.forEach((error) => toast.error(error.message))
+
+        // only show the error if this is the initial request failing
+        if (!duplicateID) {
+          json.errors.forEach((error) => toast.error(error.message))
+        }
         return null
       }
 
-      let duplicateID
+      let duplicateID: string
       let abort = false
+      const localeErrors = []
 
       if (localization) {
         await localization.localeCodes.reduce(async (priorLocalePatch, locale) => {
           await priorLocalePatch
           if (abort) return
-          duplicateID = await saveDocument({ id, duplicateID, locale })
+          const localeResult = await saveDocument({
+            id,
+            duplicateID,
+            locale,
+          })
+          duplicateID = localeResult || duplicateID
+          if (duplicateID && !localeResult) {
+            localeErrors.push(locale)
+          }
           if (!duplicateID) {
             abort = true
           }
         }, Promise.resolve())
-
-        if (abort && duplicateID) {
-          // delete the duplicate doc to prevent incomplete
-          await requests.delete(`${serverURL}${api}/${slug}/${duplicateID}`, {
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          })
-        }
       } else {
         duplicateID = await saveDocument({ id })
       }
 
       if (!duplicateID) {
+        // document was not saved, error toast was displayed
         return
       }
 
@@ -127,6 +132,16 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         t('successfullyDuplicated', { label: getTranslation(collection.labels.singular, i18n) }),
         { autoClose: 3000 },
       )
+
+      if (localeErrors.length > 0) {
+        toast.error(
+          `
+          ${t('error:localesNotSaved', { count: localeErrors.length })}
+          ${localeErrors.join(', ')}
+          `,
+          { autoClose: 5000 },
+        )
+      }
 
       setModified(false)
 

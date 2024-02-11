@@ -1,4 +1,7 @@
+import type { JSONSchema4 } from 'json-schema'
+
 import type { PayloadRequest } from '../../../../../express/types'
+import type { RequestContext } from '../../../../../express/types'
 import type { RichTextField, Validate } from '../../../../../fields/config/types'
 import type { CellComponentProps } from '../../../views/collections/List/Cell/types'
 
@@ -10,15 +13,11 @@ export type RichTextFieldProps<
   path?: string
 }
 
-export type RichTextAdapter<
+type RichTextAdapterBase<
   Value extends object = object,
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  CellComponent: React.FC<
-    CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>
-  >
-  FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
   afterReadPromise?: ({
     field,
     incomingEditorState,
@@ -28,12 +27,27 @@ export type RichTextAdapter<
     incomingEditorState: Value
     siblingDoc: Record<string, unknown>
   }) => Promise<void> | null
-
+  outputSchema?: ({
+    field,
+    interfaceNameDefinitions,
+    isRequired,
+  }: {
+    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    /**
+     * Allows you to define new top-level interfaces that can be re-used in the output schema.
+     */
+    interfaceNameDefinitions: Map<string, JSONSchema4>
+    isRequired: boolean
+  }) => JSONSchema4
   populationPromise?: (data: {
+    context: RequestContext
     currentDepth?: number
     depth: number
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    findMany: boolean
+    flattenLocales: boolean
     overrideAccess?: boolean
+    populationPromises: Promise<void>[]
     req: PayloadRequest
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>
@@ -45,3 +59,25 @@ export type RichTextAdapter<
     RichTextField<Value, AdapterProps, ExtraFieldProperties>
   >
 }
+
+export type RichTextAdapter<
+  Value extends object = object,
+  AdapterProps = any,
+  ExtraFieldProperties = {},
+> = RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties> &
+  (
+    | {
+        CellComponent: React.FC<
+          CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>
+        >
+        FieldComponent: React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+      }
+    | {
+        LazyCellComponent: () => Promise<
+          React.FC<CellComponentProps<RichTextField<Value, AdapterProps, ExtraFieldProperties>>>
+        >
+        LazyFieldComponent: () => Promise<
+          React.FC<RichTextFieldProps<Value, AdapterProps, ExtraFieldProperties>>
+        >
+      }
+  )
