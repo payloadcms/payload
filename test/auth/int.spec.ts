@@ -288,7 +288,7 @@ describe('Auth', () => {
         expect(doc).toHaveProperty('roles')
       })
 
-      it.only('should block login for an unverified user', async () => {
+      it('should block login for an unverified user', async () => {
         const unverifedEmail = 'verify@me.com'
         const response = await fetch(`${apiUrl}/public-users`, {
           body: JSON.stringify({
