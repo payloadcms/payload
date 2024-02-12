@@ -8,8 +8,9 @@ import { Metadata } from 'next'
 import { initPage } from '../../utilities/initPage'
 import { redirect } from 'next/navigation'
 import { getNextT } from '../../utilities/getNextT'
-import './index.scss'
 import { LoginForm } from './LoginForm'
+
+import './index.scss'
 
 const baseClass = 'login'
 
@@ -34,7 +35,7 @@ export const Login: React.FC<{
   config: Promise<SanitizedConfig>
   searchParams: { [key: string]: string | string[] | undefined }
 }> = async ({ config: configPromise, searchParams }) => {
-  const { config, user } = await initPage({ configPromise })
+  const { config, user } = await initPage({ config: configPromise })
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },

@@ -21,7 +21,7 @@ export const CollectionList = async ({
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const { config, payload, permissions, user, collectionConfig } = await initPage({
-    configPromise,
+    config: configPromise,
     redirectUnauthenticatedUser: true,
     collectionSlug,
   })

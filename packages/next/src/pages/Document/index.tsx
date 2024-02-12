@@ -33,7 +33,7 @@ export const Document = async ({
     collection?: string
     global?: string
   }
-  config: Promise<SanitizedConfig>
+  config: Promise<SanitizedConfig> | SanitizedConfig
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const collectionSlug = params.collection
@@ -45,7 +45,7 @@ export const Document = async ({
 
   const { config, payload, permissions, user, collectionConfig, globalConfig, locale, i18n } =
     await initPage({
-      configPromise,
+      config: configPromise,
       redirectUnauthenticatedUser: true,
       collectionSlug,
       globalSlug,

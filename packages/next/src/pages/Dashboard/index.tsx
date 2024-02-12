@@ -11,7 +11,7 @@ export const Dashboard = async ({
   config: Promise<SanitizedConfig>
 }) => {
   const { config, user, permissions } = await initPage({
-    configPromise,
+    config: configPromise,
     redirectUnauthenticatedUser: true,
   })
 
