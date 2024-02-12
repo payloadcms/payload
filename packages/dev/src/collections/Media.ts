@@ -3,7 +3,12 @@ import { BeforeInput } from './Pages/BeforeInput'
 
 export const Media: CollectionConfig = {
   slug: 'media',
-  upload: true,
+  upload: {
+    staticDir: 'media',
+  },
+  access: {
+    read: () => true,
+  },
   fields: [
     {
       name: 'title',

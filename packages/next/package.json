@@ -32,13 +32,9 @@
       "import": "./src/routes/index.ts",
       "require": "./src/routes/index.ts"
     },
-    "./graphql": {
-      "import": "./src/routes/graphql/handler.ts",
-      "require": "./src/routes/graphql/handler.ts"
-    },
-    "./graphql-playground": {
-      "import": "./src/routes/graphql/playground.ts",
-      "require": "./src/routes/graphql/playground.ts"
+    "./routes/*": {
+      "import": "./src/routes/*.ts",
+      "require": "./src/routes/*.ts"
     }
   },
   "devDependencies": {
@@ -95,15 +91,10 @@
         "require": "./dist/routes/index.js",
         "types": "./dist/routes/index.d.ts"
       },
-      "./graphql": {
-        "import": "./dist/routes/graphql/handler.js",
-        "require": "./dist/routes/graphql/handler.js",
-        "types": "./dist/routes/graphql/handler.ts"
-      },
-      "./graphql-playground": {
-        "import": "./dist/routes/graphql/playground.js",
-        "require": "./dist/routes/graphql/playground.js",
-        "types": "./dist/routes/graphql/playground.ts"
+      "./routes/*": {
+        "import": "./dist/routes/*.js",
+        "require": "./dist/routes/*.js",
+        "types": "./dist/routes/*.d.ts"
       }
     },
     "registry": "https://registry.npmjs.org/"
