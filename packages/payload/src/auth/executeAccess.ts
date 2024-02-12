@@ -7,16 +7,18 @@ type OperationArgs = {
   data?: any
   disableErrors?: boolean
   id?: number | string
+  isReadingStaticFile?: boolean
   req: PayloadRequest
 }
 const executeAccess = async (
-  { id, data, disableErrors, req }: OperationArgs,
+  { id, data, disableErrors, isReadingStaticFile = false, req }: OperationArgs,
   access: Access,
 ): Promise<AccessResult> => {
   if (access) {
     const result = await access({
       id,
       data,
+      isReadingStaticFile,
       req,
     })
 
