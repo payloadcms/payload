@@ -29,7 +29,6 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     action,
     apiURL,
     BeforeDocument,
-    AfterDocument,
     data,
     formState: initialStateFromProps,
     initializeFormState,
@@ -231,7 +230,6 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
             locale={locale}
             fieldMap={fieldMap}
           />
-          {AfterDocument}
         </Form>
       </OperationProvider>
     </main>
