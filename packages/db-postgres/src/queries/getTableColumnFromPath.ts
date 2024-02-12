@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
 
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, like, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { APIError } from 'payload/errors'
 import { fieldAffectsData, tabHasName } from 'payload/types'
@@ -44,6 +44,10 @@ type Args = {
   rootTableName?: string
   selectFields: Record<string, GenericColumn>
   tableName: string
+  /**
+   * If creating a new table name for arrays and blocks, this suffix should be appended to the table name
+   */
+  tableNameSuffix?: string
 }
 /**
  * Transforms path to table and column name
@@ -65,6 +69,7 @@ export const getTableColumnFromPath = ({
   rootTableName: incomingRootTableName,
   selectFields,
   tableName,
+  tableNameSuffix = '',
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
@@ -125,6 +130,7 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix,
         })
       }
       case 'tab': {
@@ -134,7 +140,7 @@ export const getTableColumnFromPath = ({
             aliasTable,
             collectionPath,
             columnPrefix: `${columnPrefix}${field.name}_`,
-            constraintPath,
+            constraintPath: `${constraintPath}${field.name}.`,
             constraints,
             fields: field.fields,
             joinAliases,
@@ -144,6 +150,7 @@ export const getTableColumnFromPath = ({
             rootTableName,
             selectFields,
             tableName: newTableName,
+            tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
           })
         }
         return getTableColumnFromPath({
@@ -161,6 +168,7 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix,
         })
       }
 
@@ -185,7 +193,7 @@ export const getTableColumnFromPath = ({
           aliasTable,
           collectionPath,
           columnPrefix: `${columnPrefix}${field.name}_`,
-          constraintPath,
+          constraintPath: `${constraintPath}${field.name}.`,
           constraints,
           fields: field.fields,
           joinAliases,
@@ -195,11 +203,12 @@ export const getTableColumnFromPath = ({
           rootTableName,
           selectFields,
           tableName: newTableName,
+          tableNameSuffix: `${tableNameSuffix}${toSnakeCase(field.name)}_`,
         })
       }
 
       case 'array': {
-        newTableName = `${tableName}_${toSnakeCase(field.name)}`
+        newTableName = `${tableName}_${tableNameSuffix}${toSnakeCase(field.name)}`
         constraintPath = `${constraintPath}${field.name}.%.`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
@@ -317,20 +326,14 @@ export const getTableColumnFromPath = ({
 
         // Join in the relationships table
         joinAliases.push({
-          condition: eq(
-            (aliasTable || adapter.tables[rootTableName]).id,
-            aliasRelationshipTable.parent,
+          condition: and(
+            eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
+            like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
           ),
           table: aliasRelationshipTable,
         })
 
         selectFields[`${relationTableName}.path`] = aliasRelationshipTable.path
-
-        constraints.push({
-          columnName: 'path',
-          table: aliasRelationshipTable,
-          value: `${constraintPath}${field.name}`,
-        })
 
         let newAliasTable
 
@@ -346,7 +349,7 @@ export const getTableColumnFromPath = ({
             table: newAliasTable,
           })
 
-          if (newCollectionPath === '') {
+          if (newCollectionPath === '' || newCollectionPath === 'id') {
             return {
               columnName: `${field.relationTo}ID`,
               constraints,
@@ -428,7 +431,7 @@ export const getTableColumnFromPath = ({
             columnName: `${columnPrefix}${field.name}`,
             constraints,
             field,
-            pathSegments: pathSegments,
+            pathSegments,
             table: targetTable,
           }
         }

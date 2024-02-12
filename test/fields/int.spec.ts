@@ -418,7 +418,7 @@ describe('Fields', () => {
     })
   })
 
-  if (isMongoose(payload) || !['postgres'].includes(process.env.PAYLOAD_DATABASE)) {
+  if (isMongoose(payload)) {
     describe('indexes', () => {
       let indexes
       const definitions: Record<string, IndexDirection> = {}
@@ -1145,6 +1145,63 @@ describe('Fields', () => {
         expect(existTrueIDs).toContain(hasJSON.id)
         expect(existFalseIDs).not.toContain(hasJSON.id)
       })
+
+      it('exists should not return null values', async () => {
+        const { id } = await payload.create({
+          collection: 'select-fields',
+          data: {
+            select: 'one',
+          },
+        })
+
+        const existsResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: true },
+          },
+        })
+
+        expect(existsResult.docs).toHaveLength(1)
+
+        const existsFalseResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: false },
+          },
+        })
+
+        expect(existsFalseResult.docs).toHaveLength(0)
+
+        await payload.update({
+          collection: 'select-fields',
+          id,
+          data: {
+            select: null,
+          },
+        })
+
+        const existsTrueResult = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: true },
+          },
+        })
+
+        expect(existsTrueResult.docs).toHaveLength(0)
+
+        const result = await payload.find({
+          collection: 'select-fields',
+          where: {
+            id: { equals: id },
+            select: { exists: false },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+      })
     })
   })
 
@@ -1247,6 +1304,65 @@ describe('Fields', () => {
       })
 
       expect(query.docs).toBeDefined()
+    })
+  })
+
+  describe('clearable fields - exists', () => {
+    it('exists should not return null values', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          select: 'one',
+        },
+      })
+
+      const existsResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: true },
+        },
+      })
+
+      expect(existsResult.docs).toHaveLength(1)
+
+      const existsFalseResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: false },
+        },
+      })
+
+      expect(existsFalseResult.docs).toHaveLength(0)
+
+      await payload.update({
+        collection: 'select-fields',
+        id,
+        data: {
+          select: null,
+        },
+      })
+
+      const existsTrueResult = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: true },
+        },
+      })
+
+      expect(existsTrueResult.docs).toHaveLength(0)
+
+      const result = await payload.find({
+        collection: 'select-fields',
+        where: {
+          id: { equals: id },
+          select: { exists: false },
+        },
+      })
+
+      expect(result.docs).toHaveLength(1)
     })
   })
 })

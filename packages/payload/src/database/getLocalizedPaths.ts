@@ -62,6 +62,17 @@ export async function getLocalizedPaths({
         return paths
       }
 
+      if (!matchedField && currentPath === 'id' && i === pathSegments.length - 1) {
+        lastIncompletePath.path = currentPath
+        const idField: Field = {
+          name: 'id',
+          type: payload.db.defaultIDType as 'text',
+        }
+        lastIncompletePath.field = idField
+        lastIncompletePath.complete = true
+        return paths
+      }
+
       if (matchedField) {
         if ('hidden' in matchedField && matchedField.hidden && !overrideAccess) {
           lastIncompletePath.invalid = true

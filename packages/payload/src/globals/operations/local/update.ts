@@ -5,10 +5,8 @@ import type { PayloadRequest } from '../../../express/types'
 import type { Payload } from '../../../payload'
 import type { Document } from '../../../types'
 
-import { getDataLoader } from '../../../collections/dataloader'
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import update from '../update'
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
@@ -29,52 +27,18 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
-  const {
-    context,
-    data,
-    depth,
-    draft,
-    fallbackLocale: fallbackLocaleArg = options?.req?.fallbackLocale,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
-    overrideAccess = true,
-    req: incomingReq,
-    showHiddenFields,
-    slug: globalSlug,
-    user,
-  } = options
+  const { slug: globalSlug, data, depth, draft, overrideAccess = true, showHiddenFields } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
-  const localizationConfig = payload?.config?.localization
-  const defaultLocale = payload?.config?.localization
-    ? payload?.config?.localization?.defaultLocale
-    : null
-  const fallbackLocale = localizationConfig
-    ? localizationConfig.locales.find(({ code }) => locale === code)?.fallbackLocale
-    : null
-  const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
-  const req = {
-    fallbackLocale:
-      typeof fallbackLocaleArg !== 'undefined'
-        ? fallbackLocaleArg
-        : fallbackLocale || defaultLocale,
-    i18n,
-    locale,
-    payload,
-    payloadAPI: 'local',
-    t: i18n.t,
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = createLocalReq(options, payload)
 
   return update<TSlug>({
+    slug: globalSlug as string,
     data,
     depth,
     draft,
@@ -82,6 +46,5 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     overrideAccess,
     req,
     showHiddenFields,
-    slug: globalSlug as string,
   })
 }

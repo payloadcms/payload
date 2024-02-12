@@ -10,14 +10,15 @@ import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-post
 import type { PgColumn, PgEnum, PgTableWithColumns, PgTransaction } from 'drizzle-orm/pg-core'
 import type { Payload } from 'payload'
 import type { BaseDatabaseAdapter } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
 import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
+  logger?: DrizzleConfig['logger']
   migrationDir?: string
   pool: PoolConfig
-  logger?: DrizzleConfig['logger']
   push?: boolean
 }
 
@@ -49,8 +50,13 @@ export type DrizzleTransaction = PgTransaction<
 
 export type PostgresAdapter = BaseDatabaseAdapter & {
   drizzle: DrizzleDB
-  logger: DrizzleConfig['logger']
   enums: Record<string, GenericEnum>
+  /**
+   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
+   * Used for returning properly formed errors from unique fields
+   */
+  fieldConstraints: Record<string, Record<string, string>>
+  logger: DrizzleConfig['logger']
   pool: Pool
   poolOptions: Args['pool']
   push: boolean
@@ -64,17 +70,12 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
     }
   }
   tables: Record<string, GenericTable>
-  /**
-   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
-   * Used for returning properly formed errors from unique fields
-   */
-  fieldConstraints: Record<string, Record<string, string>>
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
-export type MigrateUpArgs = { payload: Payload }
-export type MigrateDownArgs = { payload: Payload }
+export type MigrateUpArgs = { payload: Payload; req?: Partial<PayloadRequest> }
+export type MigrateDownArgs = { payload: Payload; req?: Partial<PayloadRequest> }
 
 declare module 'payload' {
   export interface DatabaseAdapter
@@ -82,6 +83,7 @@ declare module 'payload' {
       BaseDatabaseAdapter {
     drizzle: DrizzleDB
     enums: Record<string, GenericEnum>
+    fieldConstraints: Record<string, Record<string, string>>
     pool: Pool
     push: boolean
     relations: Record<string, GenericRelation>
@@ -94,6 +96,5 @@ declare module 'payload' {
       }
     }
     tables: Record<string, GenericTable>
-    fieldConstraints: Record<string, Record<string, string>>
   }
 }

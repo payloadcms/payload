@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "0.5.2",
+  "version": "0.6.1",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -32,6 +32,7 @@
     "classnames": "^2.3.2",
     "deep-equal": "2.2.3",
     "i18next": "22.5.1",
+    "json-schema": "^0.4.0",
     "lexical": "0.12.6",
     "lodash": "4.17.21",
     "react": "18.2.0",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@types/json-schema": "7.0.12",
     "@types/node": "20.6.2",
     "@types/react": "18.2.15",
     "payload": "workspace:*"

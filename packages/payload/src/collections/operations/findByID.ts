@@ -30,38 +30,39 @@ export type Arguments = {
 async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<T> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection.config,
-        context: args.req.context,
-        operation: 'read',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    currentDepth,
-    depth,
-    disableErrors,
-    draft: draftEnabled = false,
-    overrideAccess = false,
-    req: { locale, t },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
-    const { transactionID } = req
+    const shouldCommit = await initTransaction(args.req)
+    const { transactionID } = args.req
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection.config,
+          context: args.req.context,
+          operation: 'read',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      currentDepth,
+      depth,
+      disableErrors,
+      draft: draftEnabled = false,
+      overrideAccess = false,
+      req: { locale, t },
+      req,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -204,7 +205,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

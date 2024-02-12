@@ -31,6 +31,10 @@ export async function generateTypes(): Promise<void> {
     style: {
       singleQuote: true,
     },
+    // Generates code for $defs that aren't referenced by the schema. Reason:
+    // If a field defines an interfaceName, it should be included in the generated types
+    // even if it's not used by another type. Reason: the user might want to use it in their own code.
+    unreachableDefinitions: true,
   }).then((compiled) => {
     if (config.typescript.declare !== false) {
       compiled += `\n\n${declare}`

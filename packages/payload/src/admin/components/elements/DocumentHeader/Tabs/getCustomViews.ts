@@ -20,7 +20,7 @@ export const getCustomViews = (args: {
         ? collection?.admin?.components?.views?.Edit
         : undefined
 
-    const defaultViewKeys = Object.keys(defaultCollectionViews)
+    const defaultViewKeys = Object.keys(defaultCollectionViews())
 
     customViews = Object.entries(collectionViewsConfig || {}).reduce((prev, [key, view]) => {
       if (defaultViewKeys.includes(key)) {
@@ -38,7 +38,7 @@ export const getCustomViews = (args: {
         ? global?.admin?.components?.views?.Edit
         : undefined
 
-    const defaultViewKeys = Object.keys(defaultGlobalViews)
+    const defaultViewKeys = Object.keys(defaultGlobalViews())
 
     customViews = Object.entries(globalViewsConfig || {}).reduce((prev, [key, view]) => {
       if (defaultViewKeys.includes(key)) {

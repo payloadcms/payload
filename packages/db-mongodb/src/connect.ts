@@ -29,14 +29,17 @@ export const connect: Connect = async function connect(this: MongooseAdapter, pa
       urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL
     } else {
       connectionOptions.dbName = 'payloadmemory'
-      const { MongoMemoryServer } = require('mongodb-memory-server')
+      const { MongoMemoryReplSet } = require('mongodb-memory-server')
       const getPort = require('get-port')
 
       const port = await getPort()
-      this.mongoMemoryServer = await MongoMemoryServer.create({
+      this.mongoMemoryServer = await MongoMemoryReplSet.create({
         instance: {
           dbName: 'payloadmemory',
           port,
+        },
+        replSet: {
+          count: 3,
         },
       })
 
