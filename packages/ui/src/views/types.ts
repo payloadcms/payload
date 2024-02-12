@@ -40,4 +40,5 @@ export type EditViewProps = (
   formState?: FormState
   initializeFormState?: boolean
   BeforeDocument?: React.ReactNode
+  AfterDocument?: React.ReactNode
 }

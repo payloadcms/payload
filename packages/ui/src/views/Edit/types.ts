@@ -8,7 +8,6 @@ export type IndexProps = {
 }
 
 export type DefaultEditViewProps = EditViewProps & {
-  BeforeDocument?: React.ReactNode
   disableRoutes?: boolean
   fieldTypes: FieldTypes
 }
