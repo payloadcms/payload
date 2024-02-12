@@ -162,8 +162,8 @@ importers:
         specifier: 3.1.2
         version: 3.1.2
       lexical:
-        specifier: 0.12.5
-        version: 0.12.5
+        specifier: 0.13.1
+        version: 0.13.1
       lint-staged:
         specifier: ^14.0.1
         version: 14.0.1
@@ -12976,13 +12976,8 @@ packages:
       type-check: 0.4.0
     dev: false
 
-  /lexical@0.12.5:
-    resolution: {integrity: sha512-ZMqisIxNe+JBqaUa1Qmz7ghpvnmARHxgYz+F0rcXRtSPZtgEL8OT2c9xk8CJ4ccVpf+qRQlONzCEIZfQQHd/RA==}
-    dev: true
-
   /lexical@0.13.1:
     resolution: {integrity: sha512-jaqRYzVEfBKbX4FwYpd/g+MyOjRaraAel0iQsTrwvx3hyN0bswUZuzb6H6nGlFSjcdrc77wKpyKwoWj4aUd+Bw==}
-    dev: false
 
   /lib0@0.2.85:
     resolution: {integrity: sha512-vtAhVttLXCu3ps2OIsTz8CdKYKdcMo7ds1MNBIcSXz6vrY8sxASqpTi4vmsAIn7xjWvyT7haKcWW6woP6jebjQ==}
