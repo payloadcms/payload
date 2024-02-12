@@ -42,7 +42,7 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
 
   const { collections, globals } = useConfig()
   const { i18n } = useTranslation()
-  const { getFieldMap } = useComponentMap()
+  const { componentMap } = useComponentMap()
 
   const collectionConfig =
     'collectionSlug' in props &&
@@ -51,10 +51,13 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
   const globalConfig =
     'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
 
-  const fieldMap = getFieldMap({
-    collectionSlug: collectionConfig?.slug,
-    globalSlug: globalConfig?.slug,
-  })
+  const slug = collectionConfig?.slug || globalConfig?.slug
+
+  let fieldMap: FieldMap
+
+  if (collectionConfig) fieldMap = componentMap?.collections?.[slug]?.fieldMap
+
+  if (globalConfig) fieldMap = componentMap?.globals?.[slug]?.fieldMap
 
   const id = 'id' in props ? props.id : undefined
   const isEditing = 'isEditing' in props ? props.isEditing : undefined
