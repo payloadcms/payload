@@ -22,23 +22,19 @@ describe('Search Plugin', () => {
       collection: 'pages',
       data: {
         _status: 'published',
-        title: 'Hello, world!',
         excerpt: 'This is a test page',
+        title: 'Hello, world!',
       },
     })
 
-    // wait for the search document to be created
-    // we do not await this within the `syncToSearch` hook
-    await wait(200)
-
     const { docs: results } = await payload.find({
       collection: 'search',
+      depth: 0,
       where: {
         'doc.value': {
           equals: pageToSync.id,
         },
       },
-      depth: 0,
     })
 
     expect(results).toHaveLength(1)
@@ -52,8 +48,8 @@ describe('Search Plugin', () => {
       collection: 'pages',
       data: {
         _status: 'draft',
-        title: 'Hello, world!',
         excerpt: 'This is a test page',
+        title: 'Hello, world!',
       },
     })
 
@@ -63,12 +59,12 @@ describe('Search Plugin', () => {
 
     const { docs: results } = await payload.find({
       collection: 'search',
+      depth: 0,
       where: {
         'doc.value': {
           equals: draftPage.id,
         },
       },
-      depth: 0,
     })
 
     expect(results).toHaveLength(0)
@@ -79,23 +75,19 @@ describe('Search Plugin', () => {
       collection: 'pages',
       data: {
         _status: 'published',
-        title: 'Hello, world!',
         excerpt: 'This is a test page',
+        title: 'Hello, world!',
       },
     })
 
-    // wait for the search document to be created
-    // we do not await this within the `syncToSearch` hook
-    await wait(200)
-
     const { docs: results } = await payload.find({
       collection: 'search',
+      depth: 0,
       where: {
         'doc.value': {
           equals: pageToReceiveUpdates.id,
         },
       },
-      depth: 0,
     })
 
     expect(results).toHaveLength(1)
@@ -104,11 +96,11 @@ describe('Search Plugin', () => {
     expect(results[0].excerpt).toBe('This is a test page')
 
     await payload.update({
-      collection: 'pages',
       id: pageToReceiveUpdates.id,
+      collection: 'pages',
       data: {
-        title: 'Hello, world! (updated)',
         excerpt: 'This is a test page (updated)',
+        title: 'Hello, world! (updated)',
       },
     })
 
@@ -119,12 +111,12 @@ describe('Search Plugin', () => {
     // Do not add `limit` to this query, this way we can test if multiple documents were created
     const { docs: updatedResults } = await payload.find({
       collection: 'search',
+      depth: 0,
       where: {
         'doc.value': {
           equals: pageToReceiveUpdates.id,
         },
       },
-      depth: 0,
     })
 
     expect(updatedResults).toHaveLength(1)
@@ -138,8 +130,8 @@ describe('Search Plugin', () => {
       collection: 'pages',
       data: {
         _status: 'published',
-        title: 'Hello, world!',
         excerpt: 'This is a test page',
+        title: 'Hello, world!',
       },
     })
 
@@ -149,20 +141,20 @@ describe('Search Plugin', () => {
 
     const { docs: results } = await payload.find({
       collection: 'search',
+      depth: 0,
       where: {
         'doc.value': {
           equals: page.id,
         },
       },
-      depth: 0,
     })
 
     expect(results).toHaveLength(1)
     expect(results[0].doc.value).toBe(page.id)
 
     await payload.delete({
-      collection: 'pages',
       id: page.id,
+      collection: 'pages',
     })
 
     // wait for the search document to be potentially deleted
@@ -171,12 +163,12 @@ describe('Search Plugin', () => {
 
     const { docs: deletedResults } = await payload.find({
       collection: 'search',
+      depth: 0,
       where: {
         'doc.value': {
           equals: page.id,
         },
       },
-      depth: 0,
     })
 
     expect(deletedResults).toHaveLength(0)

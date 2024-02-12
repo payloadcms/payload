@@ -56,7 +56,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     if (operation === 'create') {
       if (doSync) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        payload.create({
+        await payload.create({
           collection: 'search',
           data: {
             ...dataToSave,
@@ -92,16 +92,13 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         // to ensure the same, out-of-date result does not appear twice (where only syncing the first found doc)
         if (duplicativeDocs.length > 0) {
           try {
+            const duplicativeDocIDs = duplicativeDocs.map(({ id }) => id)
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            Promise.all(
-              duplicativeDocs.map(({ id: duplicativeDocID }) =>
-                payload.delete({
-                  id: duplicativeDocID,
-                  collection: 'search',
-                  req,
-                }),
-              ), // eslint-disable-line function-paren-newline
-            )
+            await payload.delete({
+              collection: 'search',
+              req,
+              where: { id: { in: duplicativeDocIDs } },
+            })
           } catch (err: unknown) {
             payload.logger.error(`Error deleting duplicative search documents.`)
           }
@@ -114,7 +111,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
             // update the doc normally
             try {
               // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              payload.update({
+              await payload.update({
                 id: searchDocID,
                 collection: 'search',
                 data: {
@@ -131,7 +128,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
             // do not include draft docs in search results, so delete the record
             try {
               // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              payload.delete({
+              await payload.delete({
                 id: searchDocID,
                 collection: 'search',
                 req,
@@ -143,7 +140,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         } else if (doSync) {
           try {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            payload.create({
+            await payload.create({
               collection: 'search',
               data: {
                 ...dataToSave,

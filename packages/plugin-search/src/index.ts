@@ -34,7 +34,7 @@ const Search =
                 afterChange: [
                   ...(existingHooks?.afterChange || []),
                   async (args: any) => {
-                    syncWithSearch({
+                    await syncWithSearch({
                       ...args,
                       collection: collection.slug,
                       searchConfig,
