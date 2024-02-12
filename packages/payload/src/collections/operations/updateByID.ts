@@ -20,6 +20,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
 import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion'
@@ -45,43 +46,44 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection.config,
-        context: args.req.context,
-        operation: 'update',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    id,
-    autosave = false,
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    draft: draftArg = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      locale,
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection.config,
+          context: args.req.context,
+          operation: 'update',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      id,
+      autosave = false,
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      draft: draftArg = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        locale,
+        payload: { config },
+        payload,
+        t,
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     if (!id) {
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
@@ -371,11 +373,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

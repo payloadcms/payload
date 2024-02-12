@@ -2,25 +2,36 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import { exactText, saveDocAndAssert } from '../helpers'
+import { exactText, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { mobileBreakpoint } from './config'
+import { mobileBreakpoint } from './shared'
 import { startLivePreviewDemo } from './startLivePreviewDemo'
 
 const { beforeAll, describe } = test
-let url: AdminUrlUtil
-let serverURL: string
-
-const goToDoc = async (page: Page) => {
-  await page.goto(url.list)
-  const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
-  expect(linkToDoc).toBeTruthy()
-  await linkToDoc.click()
-}
 
 describe('Live Preview', () => {
   let page: Page
+  let serverURL: string
+  let url: AdminUrlUtil
+
+  const goToDoc = async (page: Page) => {
+    await page.goto(url.list)
+    const linkToDoc = page.locator('tbody tr:first-child .cell-id a').first()
+    expect(linkToDoc).toBeTruthy()
+    await linkToDoc.click()
+  }
+
+  const goToCollectionPreview = async (page: Page): Promise<void> => {
+    await goToDoc(page)
+    await page.goto(`${page.url()}/preview`)
+  }
+
+  const goToGlobalPreview = async (page: Page, slug: string): Promise<void> => {
+    const global = new AdminUrlUtil(serverURL, slug)
+    const previewURL = `${global.global(slug)}/preview`
+    await page.goto(previewURL)
+  }
 
   beforeAll(async ({ browser }) => {
     const { serverURL: incomingServerURL, payload } = await initPayloadE2E(__dirname)
@@ -32,6 +43,8 @@ describe('Live Preview', () => {
     await startLivePreviewDemo({
       payload,
     })
+
+    initPageConsoleErrorCatch(page)
   })
 
   test('collection - has tab', async () => {
@@ -49,24 +62,39 @@ describe('Live Preview', () => {
   })
 
   test('collection - has route', async () => {
-    await goToDoc(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    const url = page.url()
+    await goToCollectionPreview(page)
+    expect(page.url()).toBe(`${url}/preview`)
   })
 
   test('collection - renders iframe', async () => {
-    await goToDoc(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToCollectionPreview(page)
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
+  })
+
+  test('collection - can edit fields', async () => {
+    await goToCollectionPreview(page)
+    const field = page.locator('#field-title')
+    await expect(field).toBeVisible()
+    await field.fill('Title 1')
+    await saveDocAndAssert(page)
+  })
+
+  test('collection - should show live-preview view level action in live-preview view', async () => {
+    await goToCollectionPreview(page)
+    await expect(page.locator('.app-header .collection-live-preview-button')).toHaveCount(1)
+  })
+
+  test('global - should show live-preview view level action in live-preview view', async () => {
+    await goToGlobalPreview(page, 'footer')
+    await expect(page.locator('.app-header .global-live-preview-button')).toHaveCount(1)
   })
 
   test('global - has tab', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
+
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
 
@@ -80,20 +108,24 @@ describe('Live Preview', () => {
   })
 
   test('global - has route', async () => {
-    const global = new AdminUrlUtil(serverURL, 'header')
-    const previewURL = `${global.global('header')}/preview`
-    await page.goto(previewURL)
-    expect(page.url()).toBe(previewURL)
+    const url = page.url()
+    await goToGlobalPreview(page, 'header')
+    expect(page.url()).toBe(`${url}/preview`)
   })
 
   test('global - renders iframe', async () => {
-    const global = new AdminUrlUtil(serverURL, 'header')
-    await page.goto(global.global('header'))
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToGlobalPreview(page, 'header')
     const iframe = page.locator('iframe.live-preview-iframe')
     await expect(iframe).toBeVisible()
+  })
+
+  test('global - can edit fields', async () => {
+    await goToGlobalPreview(page, 'header')
+    const field = page.locator('input#field-navItems__0__link__newTab')
+    await expect(field).toBeVisible()
+    await expect(field).toBeEnabled()
+    await field.check()
+    await saveDocAndAssert(page)
   })
 
   test('properly measures iframe and displays size', async () => {
@@ -102,9 +134,9 @@ describe('Live Preview', () => {
     await page.locator('#field-slug').fill('slug-3')
 
     await saveDocAndAssert(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToCollectionPreview(page)
+    expect(page.url()).toContain('/preview')
+
     const iframe = page.locator('iframe')
 
     // Measure the actual iframe size and compare it with the inputs rendered in the toolbar
@@ -137,26 +169,28 @@ describe('Live Preview', () => {
     await page.locator('#field-slug').fill('slug-4')
 
     await saveDocAndAssert(page)
-    const docURL = page.url()
-    await page.goto(`${docURL}/preview`)
-    expect(page.url()).toBe(`${docURL}/preview`)
+    await goToCollectionPreview(page)
+    expect(page.url()).toContain('/preview')
 
+    // Check that the breakpoint select is present
     const breakpointSelector = page.locator(
-      '.live-preview-toolbar select[name="live-preview-breakpoint"]',
+      '.live-preview-toolbar-controls__breakpoint button.popup-button',
     )
-
     expect(breakpointSelector).toBeTruthy()
-    await breakpointSelector.selectOption({ label: mobileBreakpoint.label })
 
-    // check the select again to make sure the value has been set
-    // then check that the `label` is proper based on the config
-    // we already know the `name` is proper because its been selected
+    // Select the mobile breakpoint
+    await breakpointSelector.first().click()
+    await page
+      .locator(`.live-preview-toolbar-controls__breakpoint button.popup-button-list__button`)
+      .filter({ hasText: mobileBreakpoint.label })
+      .click()
+
+    // Make sure the value has been set
+    await expect(breakpointSelector).toContainText(mobileBreakpoint.label)
     const option = page.locator(
-      '.live-preview-toolbar select[name="live-preview-breakpoint"] option:checked',
+      '.live-preview-toolbar-controls__breakpoint button.popup-button-list__button--selected',
     )
-    expect(option).toBeTruthy()
-    const optionLabel = await option.innerText()
-    expect(optionLabel).toBe(mobileBreakpoint.label)
+    await expect(option).toHaveText(mobileBreakpoint.label)
 
     // Measure the size of the iframe against the specified breakpoint
     const iframe = page.locator('iframe')

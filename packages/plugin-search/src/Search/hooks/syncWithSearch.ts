@@ -1,12 +1,11 @@
-import type { SearchConfig, SyncWithSearch } from '../../types'
+import type { DocToSync, SearchConfig, SyncWithSearch } from '../../types'
 
 const syncWithSearch: SyncWithSearch = async (args) => {
   const {
+    collection,
     doc,
     operation,
     req: { payload },
-    // @ts-expect-error
-    collection,
     // @ts-expect-error
     searchConfig,
   } = args
@@ -15,7 +14,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
 
   const { beforeSync, defaultPriorities, deleteDrafts, syncDrafts } = searchConfig as SearchConfig // todo fix SyncWithSearch type, see note in ./types.ts
 
-  let dataToSave = {
+  let dataToSave: DocToSync = {
     doc: {
       relationTo: collection,
       value: id,
@@ -54,6 +53,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
   try {
     if (operation === 'create') {
       if (doSync) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         payload.create({
           collection: 'search',
           data: {
@@ -78,7 +78,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         })
 
         const docs: Array<{
-          id: string
+          id: number | string
           priority?: number
         }> = searchDocQuery?.docs || []
 
@@ -88,6 +88,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
         // to ensure the same, out-of-date result does not appear twice (where only syncing the first found doc)
         if (duplicativeDocs.length > 0) {
           try {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             Promise.all(
               duplicativeDocs.map(({ id: duplicativeDocID }) =>
                 payload.delete({
@@ -107,6 +108,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           if (doSync) {
             // update the doc normally
             try {
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               payload.update({
                 id: searchDocID,
                 collection: 'search',
@@ -122,6 +124,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           if (deleteDrafts && status === 'draft') {
             // do not include draft docs in search results, so delete the record
             try {
+              // eslint-disable-next-line @typescript-eslint/no-floating-promises
               payload.delete({
                 id: searchDocID,
                 collection: 'search',
@@ -132,6 +135,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
           }
         } else if (doSync) {
           try {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             payload.create({
               collection: 'search',
               data: {

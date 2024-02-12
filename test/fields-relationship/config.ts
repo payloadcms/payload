@@ -8,8 +8,10 @@ import { PrePopulateFieldUI } from './PrePopulateFieldUI'
 import {
   collection1Slug,
   collection2Slug,
+  relationFalseFilterOptionSlug,
   relationOneSlug,
   relationRestrictedSlug,
+  relationTrueFilterOptionSlug,
   relationTwoSlug,
   relationUpdatedExternallySlug,
   relationWithTitleSlug,
@@ -32,6 +34,7 @@ export interface RelationOne {
   id: string
   name: string
 }
+
 export type RelationTwo = RelationOne
 export type RelationRestricted = RelationOne
 export type RelationWithTitle = RelationOne
@@ -46,7 +49,6 @@ const baseRelationshipFields: CollectionConfig['fields'] = [
 export default buildConfigWithDefaults({
   collections: [
     {
-      slug,
       admin: {
         defaultColumns: [
           'id',
@@ -58,41 +60,39 @@ export default buildConfigWithDefaults({
       },
       fields: [
         {
-          type: 'relationship',
           name: 'relationship',
           relationTo: relationOneSlug,
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipHasMany',
-          relationTo: relationOneSlug,
           hasMany: true,
+          relationTo: relationOneSlug,
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipMultiple',
           relationTo: [relationOneSlug, relationTwoSlug],
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipHasManyMultiple',
           hasMany: true,
           relationTo: [relationOneSlug, relationTwoSlug],
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipRestricted',
           relationTo: relationRestrictedSlug,
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipWithTitle',
           relationTo: relationWithTitleSlug,
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipFiltered',
-          relationTo: relationOneSlug,
           filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
             return {
               id: {
@@ -100,11 +100,11 @@ export default buildConfigWithDefaults({
               },
             }
           },
+          relationTo: relationOneSlug,
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipFilteredAsync',
-          relationTo: relationOneSlug,
           filterOptions: async (args: FilterOptionsProps<FieldsRelationship>) => {
             return {
               id: {
@@ -112,57 +112,84 @@ export default buildConfigWithDefaults({
               },
             }
           },
+          relationTo: relationOneSlug,
+          type: 'relationship',
         },
         {
-          type: 'relationship',
           name: 'relationshipManyFiltered',
-          relationTo: [relationWithTitleSlug, relationOneSlug],
-          hasMany: true,
           filterOptions: ({ relationTo, siblingData }: any) => {
             if (relationTo === relationOneSlug) {
               return { name: { equals: 'include' } }
+            }
+            if (relationTo === relationTrueFilterOptionSlug) {
+              return true
+            }
+            if (relationTo === relationFalseFilterOptionSlug) {
+              return false
             }
             if (siblingData.filter) {
               return { name: { contains: siblingData.filter } }
             }
             return { and: [] }
           },
+          hasMany: true,
+          relationTo: [
+            relationWithTitleSlug,
+            relationFalseFilterOptionSlug,
+            relationTrueFilterOptionSlug,
+            relationOneSlug,
+          ],
+          type: 'relationship',
         },
         {
-          type: 'text',
           name: 'filter',
+          type: 'text',
         },
         {
           name: 'relationshipReadOnly',
-          type: 'relationship',
-          relationTo: relationOneSlug,
           admin: {
             readOnly: true,
           },
+          relationTo: relationOneSlug,
+          type: 'relationship',
         },
       ],
+      slug,
     },
     {
-      slug: relationOneSlug,
-      fields: baseRelationshipFields,
-    },
-    {
-      slug: relationTwoSlug,
-      fields: baseRelationshipFields,
-    },
-    {
-      slug: relationRestrictedSlug,
       admin: {
         useAsTitle: 'name',
       },
       fields: baseRelationshipFields,
-      access: {
-        read: () => false,
-        create: () => false,
-      },
+      slug: relationFalseFilterOptionSlug,
     },
     {
-      slug: relationWithTitleSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: baseRelationshipFields,
+      slug: relationTrueFilterOptionSlug,
+    },
+    {
+      fields: baseRelationshipFields,
+      slug: relationOneSlug,
+    },
+    {
+      fields: baseRelationshipFields,
+      slug: relationTwoSlug,
+    },
+    {
+      access: {
+        create: () => false,
+        read: () => false,
+      },
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: baseRelationshipFields,
+      slug: relationRestrictedSlug,
+    },
+    {
       admin: {
         useAsTitle: 'meta.title',
       },
@@ -170,7 +197,6 @@ export default buildConfigWithDefaults({
         ...baseRelationshipFields,
         {
           name: 'meta',
-          type: 'group',
           fields: [
             {
               name: 'title',
@@ -178,110 +204,112 @@ export default buildConfigWithDefaults({
               type: 'text',
             },
           ],
+          type: 'group',
         },
       ],
+      slug: relationWithTitleSlug,
     },
     {
-      slug: relationUpdatedExternallySlug,
       admin: {
         useAsTitle: 'name',
       },
       fields: [
         {
-          type: 'row',
           fields: [
             {
               name: 'relationPrePopulate',
-              type: 'relationship',
-              relationTo: collection1Slug,
               admin: {
                 width: '75%',
               },
+              relationTo: collection1Slug,
+              type: 'relationship',
             },
             {
-              type: 'ui',
               name: 'prePopulate',
               admin: {
-                width: '25%',
                 components: {
-                  Field: () => PrePopulateFieldUI({ path: 'relationPrePopulate', hasMany: false }),
+                  Field: () => PrePopulateFieldUI({ hasMany: false, path: 'relationPrePopulate' }),
                 },
+                width: '25%',
               },
+              type: 'ui',
             },
           ],
+          type: 'row',
         },
         {
-          type: 'row',
           fields: [
             {
               name: 'relationHasMany',
-              type: 'relationship',
-              relationTo: collection1Slug,
-              hasMany: true,
               admin: {
                 width: '75%',
               },
+              hasMany: true,
+              relationTo: collection1Slug,
+              type: 'relationship',
             },
             {
-              type: 'ui',
               name: 'prePopulateRelationHasMany',
               admin: {
-                width: '25%',
                 components: {
                   Field: () =>
-                    PrePopulateFieldUI({ path: 'relationHasMany', hasMultipleRelations: false }),
+                    PrePopulateFieldUI({ hasMultipleRelations: false, path: 'relationHasMany' }),
                 },
+                width: '25%',
               },
+              type: 'ui',
             },
           ],
+          type: 'row',
         },
         {
-          type: 'row',
           fields: [
             {
               name: 'relationToManyHasMany',
-              type: 'relationship',
-              relationTo: [collection1Slug, collection2Slug],
-              hasMany: true,
               admin: {
                 width: '75%',
               },
+              hasMany: true,
+              relationTo: [collection1Slug, collection2Slug],
+              type: 'relationship',
             },
             {
-              type: 'ui',
               name: 'prePopulateToMany',
               admin: {
-                width: '25%',
                 components: {
                   Field: () =>
                     PrePopulateFieldUI({
-                      path: 'relationToManyHasMany',
                       hasMultipleRelations: true,
+                      path: 'relationToManyHasMany',
                     }),
                 },
+                width: '25%',
               },
+              type: 'ui',
             },
           ],
+          type: 'row',
         },
       ],
+      slug: relationUpdatedExternallySlug,
     },
     {
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
       slug: collection1Slug,
-      fields: [
-        {
-          type: 'text',
-          name: 'name',
-        },
-      ],
     },
     {
-      slug: collection2Slug,
       fields: [
         {
-          type: 'text',
           name: 'name',
+          type: 'text',
         },
       ],
+      slug: collection2Slug,
     },
   ],
   onInit: async (payload) => {
@@ -358,11 +386,11 @@ export default buildConfigWithDefaults({
         collection: slug,
         data: {
           relationship: relationOneDocId,
-          relationshipRestricted: restrictedDocId,
           relationshipHasManyMultiple: relationOneIDs.map((id) => ({
             relationTo: relationOneSlug,
             value: id,
           })),
+          relationshipRestricted: restrictedDocId,
         },
       })
     })
@@ -374,10 +402,10 @@ export default buildConfigWithDefaults({
         collection: slug,
         data: {
           relationship: relationOneDocId,
-          relationshipRestricted: restrictedDocId,
           relationshipHasMany: [relationOneID],
           relationshipHasManyMultiple: [{ relationTo: relationTwoSlug, value: relationTwoID }],
           relationshipReadOnly: relationOneID,
+          relationshipRestricted: restrictedDocId,
         },
       })
     })

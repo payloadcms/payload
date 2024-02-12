@@ -36,7 +36,7 @@ If you have not done so already, you need to have standalone copy of this repo o
 
   Use the `create-payload-app` CLI to clone this template directly to your machine:
 
-    npx create-payload-app my-project -t ecommerce
+    npx create-payload-app@latest my-project -t ecommerce
 
 #### Method 3
 
@@ -298,6 +298,14 @@ That's it! The Docker instance will help you get up and running quickly while al
 To seed the database with a few products and pages you can run `yarn seed`. This template also comes with a `GET /api/seed` endpoint you can use to seed the database from the admin panel.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
+
+
+### Conflicting routes
+
+>In a monorepo when routes are bootstrapped to the same host, they can conflict with Payload's own routes if they have the same name. In our template we've named the Nextjs API routes to `next` to avoid this conflict.
+>
+>This can happen with any other routes conflicting with Payload such as `admin` and we recommend using different names for custom routes.  
+>Alternatively you can also rename Payload's own routes via the [configuration](https://payloadcms.com/docs/configuration/overview).
 
 ## Production
 

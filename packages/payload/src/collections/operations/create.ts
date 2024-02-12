@@ -17,22 +17,21 @@ import type {
 import executeAccess from '../../auth/executeAccess'
 import sendVerificationEmail from '../../auth/sendVerificationEmail'
 import { registerLocalStrategy } from '../../auth/strategies/local/register'
-import { ValidationError } from '../../errors'
 import { fieldAffectsData } from '../../fields/config/types'
 import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
-import fileExists from '../../uploads/fileExists'
 import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
-import { mapAsync } from '../../utilities/mapAsync'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import { saveVersion } from '../../versions/saveVersion'
 import { buildAfterOperation } from './utils'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 
 const unlinkFile = promisify(fs.unlink)
 
@@ -56,44 +55,45 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'create',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    autosave = false,
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    disableVerificationEmail,
-    draft = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      payload,
-      payload: { config, emailOptions },
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'create',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      autosave = false,
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      disableVerificationEmail,
+      draft = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        payload,
+        payload: { config, emailOptions },
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     let { data } = args
 
@@ -110,10 +110,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
     // Custom id
     // /////////////////////////////////////
-
+    // @todo: Refactor code to store 'customId' on the collection configuration itself so we don't need to repeat flattenFields
     const hasIdField =
-      collectionConfig.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
-      -1
+      flattenFields(collectionConfig.fields).findIndex((field) => field.name === 'id') > -1
+
     if (hasIdField) {
       data = {
         _id: data.id,
@@ -173,14 +173,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     )
 
     // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req.t)
-    }
-
-    // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
@@ -214,6 +206,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     })
 
     // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req.t)
+    }
+
+    // /////////////////////////////////////
     // Create
     // /////////////////////////////////////
 
@@ -237,26 +237,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         req,
       })
     } else {
-      try {
-        doc = await payload.db.create({
-          collection: collectionConfig.slug,
-          data: resultWithLocales,
-          req,
-        })
-      } catch (error) {
-        // Handle uniqueness error from MongoDB
-        throw error.code === 11000 && error.keyValue
-          ? new ValidationError(
-              [
-                {
-                  field: Object.keys(error.keyValue)[0],
-                  message: req.t('error:valueMustBeUnique'),
-                },
-              ],
-              req.t,
-            )
-          : error
-      }
+      doc = await payload.db.create({
+        collection: collectionConfig.slug,
+        data: resultWithLocales,
+        req,
+      })
     }
 
     const verificationToken = doc._verificationToken
@@ -379,11 +364,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

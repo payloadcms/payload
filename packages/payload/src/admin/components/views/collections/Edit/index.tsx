@@ -26,7 +26,7 @@ import formatFields from './formatFields'
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props
 
-  const { admin: { components: { views: { Edit } = {} } = {} } = {}, slug: collectionSlug } =
+  const { slug: collectionSlug, admin: { components: { views: { Edit } = {} } = {} } = {} } =
     incomingCollection
 
   const [fields] = useState(() => formatFields(incomingCollection, isEditing))

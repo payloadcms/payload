@@ -10,6 +10,7 @@ import { Gutter } from '../../elements/Gutter'
 import { CheckboxInput } from '../../forms/field-types/Checkbox/Input'
 import SelectInput from '../../forms/field-types/Select/Input'
 import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
@@ -104,6 +105,8 @@ const RecursivelyRenderObjectData = ({
               type = 'object'
             } else if (typeof value === 'number') {
               type = 'number'
+            } else if (typeof value === 'boolean') {
+              type = 'boolean'
             } else {
               type = 'string'
             }
@@ -121,7 +124,13 @@ const RecursivelyRenderObjectData = ({
               )
             }
 
-            if (type === 'date' || type === 'string' || type === 'null' || type === 'number') {
+            if (
+              type === 'date' ||
+              type === 'string' ||
+              type === 'null' ||
+              type === 'number' ||
+              type === 'boolean'
+            ) {
               const parentHasKey = Boolean(parentType === 'object' && key)
 
               const rowClasses = [
@@ -136,11 +145,7 @@ const RecursivelyRenderObjectData = ({
                 <li className={rowClasses} key={`${key}-${keyIndex}`}>
                   {parentHasKey ? <span>{`"${key}": `}</span> : null}
 
-                  {type === 'string' ? (
-                    <span className={`${baseClass}__value`}>{`"${value}"`}</span>
-                  ) : (
-                    <span className={`${baseClass}__value`}>{value}</span>
-                  )}
+                  <span className={`${baseClass}__value`}>{JSON.stringify(value)}</span>
                   {isLastKey ? '' : ','}
                 </li>
               )
@@ -178,6 +183,8 @@ export const API: React.FC<EditViewProps> = (props) => {
   const { code } = useLocale()
   const url = createURL(apiURL)
 
+  const { setViewActions } = useActions()
+
   const draftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
   const docEndpoint = global ? `/globals/${global.slug}` : `/${collection.slug}/${id}`
 
@@ -205,6 +212,18 @@ export const API: React.FC<EditViewProps> = (props) => {
 
     fetchData()
   }, [i18n.language, fetchURL, authenticated])
+
+  React.useEffect(() => {
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
+    const apiActions =
+      editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
+
+    setViewActions(apiActions)
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
 
   const localeOptions =
     localization &&

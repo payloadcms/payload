@@ -2,23 +2,29 @@
 
 .template-default {
   min-height: 100vh;
-  display: flex;
+  display: grid;
   position: relative;
-  width: calc(100% + var(--nav-width));
-  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+  grid-template-columns: 0 auto;
+  transition: grid-template-columns var(--nav-trans-time) linear;
+  isolation: isolate;
+  @media (prefers-reduced-motion) {
+    transition: none;
+  }
 
   &--nav-open {
     width: 100%;
-    transition:
-      width var(--nav-trans-time) linear,
-      transform var(--nav-trans-time) linear;
-    transform: translate3d(0, 0, 0);
+    grid-template-columns: var(--nav-width) auto;
 
     .template-default {
       &__nav-overlay {
         transition: opacity var(--nav-trans-time) linear;
       }
     }
+  }
+  [dir='rtl']
+  &__nav-toggler-wrapper {
+    left: unset;
+    right: 0;
   }
 
   &__nav-toggler-wrapper {
@@ -38,6 +44,18 @@
     width: 100%;
     flex-grow: 1;
     position: relative;
+    background-color: var(--theme-bg);
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      inset: 0;
+      background-color: inherit;
+      opacity: 0;
+      z-index: var(--z-status);
+      visibility: hidden;
+      transition: all var(--nav-trans-time) linear;
+    }
   }
 
   @include mid-break {
@@ -50,7 +68,12 @@
 
   @include small-break {
     &--nav-open {
-      transition: none;
+      .template-default__wrap {
+        &:before {
+          opacity: 0.7;
+          visibility: visible;
+        }
+      }
     }
 
     &__nav-toggler-wrapper {
@@ -64,7 +87,7 @@
 
     .template-default {
       &__wrap {
-        transition: none;
+        min-width: 100vw;
       }
     }
   }

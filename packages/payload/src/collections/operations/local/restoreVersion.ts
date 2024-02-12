@@ -4,9 +4,7 @@ import type { Payload } from '../../../payload'
 import type { Document } from '../../../types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import restoreVersion from '../restoreVersion'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -30,18 +28,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   payload: Payload,
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
-  const {
-    id,
-    collection: collectionSlug,
-    context,
-    depth,
-    fallbackLocale = null,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
-    overrideAccess = true,
-    req: incomingReq,
-    showHiddenFields,
-    user,
-  } = options
+  const { id, collection: collectionSlug, depth, overrideAccess = true, showHiddenFields } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -53,20 +40,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     )
   }
 
-  const i18n = i18nInit(payload.config.i18n)
-  const req = {
-    fallbackLocale,
-    i18n,
-    locale,
-    payload,
-    payloadAPI: 'local',
-    t: i18n.t,
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = createLocalReq(options, payload)
 
   const args = {
     id,

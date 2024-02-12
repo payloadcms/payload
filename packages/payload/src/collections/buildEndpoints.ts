@@ -130,6 +130,16 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       path: '/access/:id',
     },
     {
+      handler: docAccessRequestHandler,
+      method: 'post',
+      path: '/access/:id',
+    },
+    {
+      handler: docAccessRequestHandler,
+      method: 'post',
+      path: '/access',
+    },
+    {
       handler: deprecatedUpdate,
       method: 'put',
       path: '/:id',

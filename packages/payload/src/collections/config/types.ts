@@ -15,7 +15,7 @@ import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
   AdminViewComponent,
-  EditView,
+  EditViewConfig,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
@@ -48,6 +48,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  req: PayloadRequest
 }) => any
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -246,30 +247,39 @@ export type CollectionAdminOptions = {
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?:
-        | {
-            [key: string]: EditView
-            API?: EditView
-            /**
-             * Replace or modify individual nested routes, or add new ones:
-             * + `Default` - `/admin/collections/:collection/:id`
-             * + `API` - `/admin/collections/:collection/:id/api`
-             * + `LivePreview` - `/admin/collections/:collection/:id/preview`
-             * + `References` - `/admin/collections/:collection/:id/references`
-             * + `Relationships` - `/admin/collections/:collection/:id/relationships`
-             * + `Versions` - `/admin/collections/:collection/:id/versions`
-             * + `Version` - `/admin/collections/:collection/:id/versions/:version`
-             * + `:path` - `/admin/collections/:collection/:id/:path`
-             */
-            Default?: EditView
-            LivePreview?: EditView
-            Version?: EditView
-            Versions?: EditView
-            // TODO: uncomment these as they are built
-            // References?: EditView
-            // Relationships?: EditView
-          }
+        | (
+            | {
+                /**
+                 * Replace or modify individual nested routes, or add new ones:
+                 * + `Default` - `/admin/collections/:collection/:id`
+                 * + `API` - `/admin/collections/:collection/:id/api`
+                 * + `LivePreview` - `/admin/collections/:collection/:id/preview`
+                 * + `References` - `/admin/collections/:collection/:id/references`
+                 * + `Relationships` - `/admin/collections/:collection/:id/relationships`
+                 * + `Versions` - `/admin/collections/:collection/:id/versions`
+                 * + `Version` - `/admin/collections/:collection/:id/versions/:version`
+                 * + `CustomView` - `/admin/collections/:collection/:id/:path`
+                 */
+                API?: AdminViewComponent | Partial<EditViewConfig>
+                Default?: AdminViewComponent | Partial<EditViewConfig>
+                LivePreview?: AdminViewComponent | Partial<EditViewConfig>
+                Version?: AdminViewComponent | Partial<EditViewConfig>
+                Versions?: AdminViewComponent | Partial<EditViewConfig>
+                // TODO: uncomment these as they are built
+                // References?: EditView
+                // Relationships?: EditView
+              }
+            | {
+                [key: string]: EditViewConfig
+              }
+          )
         | AdminViewComponent
-      List?: React.ComponentType<ListProps>
+      List?:
+        | {
+            Component?: React.ComponentType<ListProps>
+            actions?: React.ComponentType<any>[]
+          }
+        | React.ComponentType<ListProps>
     }
   }
   /**

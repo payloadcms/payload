@@ -26,6 +26,7 @@ import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
+import type { PayloadLogger } from '../utilities/logger'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -59,7 +60,11 @@ export type LivePreviewConfig = {
    Use the `useLivePreview` hook to get started in React applications.
    */
   url?:
-    | ((args: { data: Record<string, any>; documentInfo: ContextType; locale: Locale }) => string)
+    | ((args: {
+        data: Record<string, any>
+        documentInfo: ContextType
+        locale: Locale
+      }) => Promise<string> | string)
     | string
 }
 
@@ -151,6 +156,11 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
+  /**
+   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
+   * This allows you to bring your own logger instance and let payload use it
+   */
+  logger?: PayloadLogger
 
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
@@ -249,16 +259,32 @@ export type AdminViewComponent = React.ComponentType<AdminViewProps>
 
 export type AdminView = AdminViewComponent | AdminViewConfig
 
-export type EditViewConfig = {
-  /**
-   * The component to render for this view
-   * + Replaces the default component
-   */
-  Component: AdminViewComponent
-  Tab: DocumentTab
-  path: string
-}
+export type EditViewConfig =
+  | {
+      /**
+       * Add a new Edit view to the admin panel
+       * i.e. you can render a custom view that has no tab, if desired
+       * Or override a specific properties of an existing one
+       * i.e. you can customize the `Default` view tab label, if desired
+       */
+      Tab?: DocumentTab
+      path?: string
+    }
+  | {
+      Component: AdminViewComponent
+      path: string
+    }
+  | {
+      actions?: React.ComponentType<any>[]
+    }
 
+/**
+ * Override existing views
+ * i.e. Dashboard, Account, API, LivePreview, etc.
+ * Path is not available here
+ * All Tab properties become optional
+ * i.e. you can change just the label, if desired
+ */
 export type EditView = AdminViewComponent | EditViewConfig
 
 export type Locale = {
@@ -268,10 +294,14 @@ export type Locale = {
    */
   code: string
   /**
+   * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
+   */
+  fallbackLocale?: string
+  /**
    * label of supported locale
    * @example "English"
    */
-  label: string
+  label: Record<string, string> | string
   /**
    * if true, defaults textAligmnent on text fields to RTL
    */
@@ -376,6 +406,10 @@ export type Config = {
        * Replace the navigation with a custom component
        */
       Nav?: React.ComponentType<any>
+      /**
+       * Add custom components to the top right of the Admin Panel
+       */
+      actions?: React.ComponentType<any>[]
       /**
        * Add custom components after the collection overview
        */
@@ -517,7 +551,7 @@ export type Config = {
    */
   defaultMaxTextLength?: number
   /** Default richtext editor to use for richText fields */
-  editor: RichTextAdapter<any, any>
+  editor: RichTextAdapter<any, any, any>
   /**
    * Email configuration options. This value is overridden by `email` in Payload.init if passed.
    *
@@ -646,7 +680,7 @@ export type Config = {
     api?: string
     /** @default "/graphql"  */
     graphQL?: string
-    /** @default "/playground" */
+    /** @default "/graphql-playground" */
     graphQLPlayground?: string
   }
   /**

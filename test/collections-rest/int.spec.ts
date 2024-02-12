@@ -614,6 +614,14 @@ describe('collections-rest', () => {
         expect(status).toEqual(200)
         expect(result.docs).toHaveLength(1)
       })
+
+      it('should not error when attempting to sort on a field that does not exist', async () => {
+        const { status } = await client.find({
+          sort: 'fake',
+        })
+
+        expect(status).toStrictEqual(200)
+      })
     })
 
     describe('Operators', () => {
@@ -1215,7 +1223,8 @@ describe('collections-rest', () => {
           })
 
           expect(status).toEqual(200)
-          expect(result.totalDocs).toEqual(50)
+          expect(result.docs).toHaveLength(50)
+          expect(result.totalPages).toEqual(1)
         })
       })
 
@@ -1260,9 +1269,8 @@ async function createPosts(count: number) {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find({ collection: slug, limit: 100 })
-  const ids = allDocs.docs.map((doc) => doc.id)
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ id, collection: slug })
+  await payload.delete({
+    collection: slug,
+    where: { id: { exists: true } },
   })
 }

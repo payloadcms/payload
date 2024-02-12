@@ -32,6 +32,7 @@ const Select: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
+      components: { Error, Label } = {},
     } = {},
     hasMany,
     label,
@@ -103,6 +104,8 @@ const Select: React.FC<Props> = (props) => {
       style={style}
       value={value as string | string[]}
       width={width}
+      Error={Error}
+      Label={Label}
     />
   )
 }

@@ -1,3 +1,5 @@
+'use client'
+
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
@@ -324,7 +326,7 @@ const RichText: React.FC<FieldProps> = (props) => {
         <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
         <Slate
           editor={editor}
-          key={JSON.stringify({ initialValue, path })}
+          key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
           onChange={handleChange}
           value={valueToRender as any[]}
         >
@@ -443,7 +445,7 @@ const RichText: React.FC<FieldProps> = (props) => {
             </div>
           </div>
         </Slate>
-        <FieldDescription description={description} value={value} />
+        <FieldDescription description={description} path={path} value={value} />
       </div>
     </div>
   )

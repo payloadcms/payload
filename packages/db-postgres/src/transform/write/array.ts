@@ -14,9 +14,11 @@ type Args = {
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
+  blocksToDelete: Set<string>
   data: unknown
   field: ArrayField
   locale?: string
+  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
@@ -31,9 +33,11 @@ export const transformArray = ({
   arrayTableName,
   baseTableName,
   blocks,
+  blocksToDelete,
   data,
   field,
   locale,
+  texts,
   numbers,
   path,
   relationships,
@@ -78,11 +82,13 @@ export const transformArray = ({
         arrays: newRow.arrays,
         baseTableName,
         blocks,
+        blocksToDelete,
         columnPrefix: '',
         data: arrayRow,
         fieldPrefix: '',
         fields: field.fields,
         locales: newRow.locales,
+        texts,
         numbers,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,

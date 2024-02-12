@@ -2,9 +2,10 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import type { CodeField } from '../../../../../../fields/config/types'
 import type { CellComponentProps, Props } from './types'
 
-import { CodeField, fieldAffectsData } from '../../../../../../fields/config/types'
+import { fieldAffectsData } from '../../../../../../fields/config/types'
 import { getTranslation } from '../../../../../../utilities/getTranslation'
 import { useConfig } from '../../../../utilities/Config'
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent'
@@ -60,8 +61,8 @@ const DefaultCell: React.FC<Props> = (props) => {
           collection={collection}
           data={`ID: ${cellData}`}
           field={field as CodeField}
-          rowData={rowData}
           nowrap
+          rowData={rowData}
         />
       </WrapElement>
     )
@@ -73,21 +74,22 @@ const DefaultCell: React.FC<Props> = (props) => {
     if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
       CellComponent = cellComponents.File
     } else {
-      return (
-        <WrapElement {...wrapElementProps}>
-          {(cellData === '' || typeof cellData === 'undefined') &&
-            'label' in field &&
-            t('noLabel', {
+      if (!cellData && 'label' in field) {
+        return (
+          <WrapElement {...wrapElementProps}>
+            {t('noLabel', {
               label: getTranslation(
                 typeof field.label === 'function' ? 'data' : field.label || 'data',
                 i18n,
               ),
             })}
-          {typeof cellData === 'string' && cellData}
-          {typeof cellData === 'number' && cellData}
-          {typeof cellData === 'object' && JSON.stringify(cellData)}
-        </WrapElement>
-      )
+          </WrapElement>
+        )
+      } else if (typeof cellData === 'string' || typeof cellData === 'number') {
+        return <WrapElement {...wrapElementProps}>{cellData}</WrapElement>
+      } else if (typeof cellData === 'object') {
+        return <WrapElement {...wrapElementProps}>{JSON.stringify(cellData)}</WrapElement>
+      }
     }
   }
 

@@ -10,6 +10,7 @@ import { Forbidden, NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions'
@@ -29,41 +30,42 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<Document> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'delete',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    depth,
-    overrideAccess,
-    req: {
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
+
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'delete',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      depth,
+      overrideAccess,
+      req: {
+        payload: { config },
+        payload,
+        t,
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -208,11 +210,11 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // 8. Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

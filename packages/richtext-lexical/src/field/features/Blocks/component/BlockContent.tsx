@@ -1,4 +1,4 @@
-import type { Block, Data, Fields } from 'payload/types'
+import type { Block, Data, Field, Fields } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import isDeepEqual from 'deep-equal'
@@ -21,7 +21,8 @@ type Props = {
   baseClass: string
   block: Block
   field: FieldProps
-  fields: BlockFields
+  formData: BlockFields
+  formSchema: Field[]
   nodeKey: string
 }
 
@@ -31,7 +32,14 @@ type Props = {
  * not the whole document.
  */
 export const BlockContent: React.FC<Props> = (props) => {
-  const { baseClass, block, field, fields, nodeKey } = props
+  const {
+    baseClass,
+    block: { labels },
+    field,
+    formData,
+    formSchema,
+    nodeKey,
+  } = props
   const { i18n } = useTranslation()
   const [editor] = useLexicalComposerContext()
   // Used for saving collapsed to preferences (and gettin' it from there again)
@@ -47,9 +55,9 @@ export const BlockContent: React.FC<Props> = (props) => {
 
       const collapsedMap: { [key: string]: boolean } = currentFieldPreferences?.collapsed
 
-      if (collapsedMap && collapsedMap[fields.data.id] !== undefined) {
-        setCollapsed(collapsedMap[fields.data.id])
-        initialState = collapsedMap[fields.data.id]
+      if (collapsedMap && collapsedMap[formData.id] !== undefined) {
+        setCollapsed(collapsedMap[formData.id])
+        initialState = collapsedMap[formData.id]
       }
     })
     return initialState
@@ -70,22 +78,51 @@ export const BlockContent: React.FC<Props> = (props) => {
   const path = '' as const
 
   const onFormChange = useCallback(
-    ({ fields: formFields, formData }: { fields: Fields; formData: Data }) => {
-      if (!isDeepEqual(fields.data, formData)) {
-        editor.update(() => {
-          const node: BlockNode = $getNodeByKey(nodeKey)
-          if (node) {
-            node.setFields({
-              data: formData as any,
-            })
+    ({
+      fullFieldsWithValues,
+      newFormData,
+    }: {
+      fullFieldsWithValues: Fields
+      newFormData: Data
+    }) => {
+      // Recursively remove all undefined values from even being present in formData, as they will
+      // cause isDeepEqual to return false if, for example, formData has a key that fields.data
+      // does not have, even if it's undefined.
+      // Currently, this happens if a block has another sub-blocks field. Inside of formData, that sub-blocks field has an undefined blockName property.
+      // Inside of fields.data however, that sub-blocks blockName property does not exist at all.
+      function removeUndefinedAndNullRecursively(obj: object) {
+        Object.keys(obj).forEach((key) => {
+          if (obj[key] && typeof obj[key] === 'object') {
+            removeUndefinedAndNullRecursively(obj[key])
+          } else if (obj[key] === undefined || obj[key] === null) {
+            delete obj[key]
           }
         })
+      }
+      removeUndefinedAndNullRecursively(newFormData)
+      removeUndefinedAndNullRecursively(formData)
+
+      // Only update if the data has actually changed. Otherwise, we may be triggering an unnecessary value change,
+      // which would trigger the "Leave without saving" dialog unnecessarily
+      if (!isDeepEqual(formData, newFormData)) {
+        // Running this in the next tick in the meantime fixes this issue: https://github.com/payloadcms/payload/issues/4108
+        // I don't know why. When this is called immediately, it might focus out of a nested lexical editor field if an update is made there.
+        // My hypothesis is that the nested editor might not have fully finished its update cycle yet. By updating in the next tick, we
+        // ensure that the nested editor has finished its update cycle before we update the block node.
+        setTimeout(() => {
+          editor.update(() => {
+            const node: BlockNode = $getNodeByKey(nodeKey)
+            if (node) {
+              node.setFields(newFormData as BlockFields)
+            }
+          })
+        }, 0)
       }
 
       // update error count
       if (hasSubmitted) {
         let rowErrorCount = 0
-        for (const formField of Object.values(formFields)) {
+        for (const formField of Object.values(fullFieldsWithValues)) {
           if (formField?.valid === false) {
             rowErrorCount++
           }
@@ -93,7 +130,7 @@ export const BlockContent: React.FC<Props> = (props) => {
         setErrorCount(rowErrorCount)
       }
     },
-    [editor, nodeKey, hasSubmitted],
+    [editor, nodeKey, hasSubmitted, formData],
   )
 
   const onCollapsedChange = useCallback(() => {
@@ -105,19 +142,24 @@ export const BlockContent: React.FC<Props> = (props) => {
       const newCollapsed: { [key: string]: boolean } =
         collapsedMap && collapsedMap?.size ? collapsedMap : {}
 
-      newCollapsed[fields.data.id] = !collapsed
+      newCollapsed[formData.id] = !collapsed
 
       setDocFieldPreferences(field.name, {
         collapsed: newCollapsed,
       })
     })
-  }, [collapsed, getDocPreferences, field.name, setDocFieldPreferences, fields.data.id])
+  }, [collapsed, getDocPreferences, field.name, setDocFieldPreferences, formData.id])
 
   const removeBlock = useCallback(() => {
     editor.update(() => {
       $getNodeByKey(nodeKey).remove()
     })
   }, [editor, nodeKey])
+
+  const fieldSchemaWithPath = formSchema.map((field) => ({
+    ...field,
+    path: createNestedFieldPath(null, field),
+  }))
 
   return (
     <React.Fragment>
@@ -129,10 +171,10 @@ export const BlockContent: React.FC<Props> = (props) => {
           <div className={`${baseClass}__block-header`}>
             <div>
               <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${fields?.data?.blockType}`}
+                className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                 pillStyle="white"
               >
-                {getTranslation(block.labels.singular, i18n)}
+                {getTranslation(labels.singular, i18n)}
               </Pill>
               <SectionTitle path={`${path}blockName`} readOnly={field?.admin?.readOnly} />
               {fieldHasErrors && <ErrorPill count={errorCount} withMessage />}
@@ -161,25 +203,16 @@ export const BlockContent: React.FC<Props> = (props) => {
       >
         <RenderFields
           className={`${baseClass}__fields`}
-          fieldSchema={block.fields.map((field) => ({
-            ...field,
-            path: createNestedFieldPath(null, field),
-          }))}
+          fieldSchema={fieldSchemaWithPath}
           fieldTypes={field.fieldTypes}
           forceRender
           margins="small"
-          permissions={field.permissions?.blocks?.[fields?.data?.blockType]?.fields}
+          permissions={field.permissions?.blocks?.[formData?.blockType]?.fields}
           readOnly={field.admin.readOnly}
         />
       </Collapsible>
 
-      <FormSavePlugin
-        fieldSchema={block.fields.map((field) => ({
-          ...field,
-          path: createNestedFieldPath(null, field),
-        }))}
-        onChange={onFormChange}
-      />
+      <FormSavePlugin onChange={onFormChange} />
     </React.Fragment>
   )
 }

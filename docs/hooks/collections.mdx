@@ -75,6 +75,7 @@ import { CollectionBeforeOperationHook } from 'payload/types'
 const beforeOperationHook: CollectionBeforeOperationHook = async ({
   args, // original arguments passed into the operation
   operation, // name of the operation
+  req, // full express request
 }) => {
   return args // return modified operation arguments as necessary
 }
@@ -91,7 +92,7 @@ Please do note that this does not run before the client-side validation. If you 
 3. `validate` runs on the server
 
 ```ts
-import { CollectionBeforeOperationHook } from 'payload/types'
+import { CollectionBeforeValidateHook } from 'payload/types'
 
 const beforeValidateHook: CollectionBeforeValidateHook = async ({
   data, // incoming data to update or create with
@@ -209,6 +210,7 @@ import { CollectionAfterOperationHook } from 'payload/types'
 const afterOperationHook: CollectionAfterOperationHook = async ({
   args, // arguments passed into the operation
   operation, // name of the operation
+  req, // full express request
   result, // the result of the operation, before modifications
 }) => {
   return result // return modified result as necessary

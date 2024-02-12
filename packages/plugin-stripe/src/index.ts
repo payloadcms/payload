@@ -14,7 +14,7 @@ import { syncExistingWithStripe } from './hooks/syncExistingWithStripe'
 import { stripeREST } from './routes/rest'
 import { stripeWebhooks } from './routes/webhooks'
 
-export const stripePlugin =
+const stripePlugin =
   (incomingStripeConfig: StripeConfig) =>
   (config: Config): Config => {
     const { collections } = config
@@ -55,7 +55,7 @@ export const stripePlugin =
               ...collection.hooks,
               afterDelete: [
                 ...(existingHooks?.afterDelete || []),
-                async (args) =>
+                (args) =>
                   deleteFromStripe({
                     ...args,
                     collection,
@@ -64,7 +64,7 @@ export const stripePlugin =
               ],
               beforeChange: [
                 ...(existingHooks?.beforeChange || []),
-                async (args) =>
+                (args) =>
                   syncExistingWithStripe({
                     ...args,
                     collection,
@@ -73,7 +73,7 @@ export const stripePlugin =
               ],
               beforeValidate: [
                 ...(existingHooks?.beforeValidate || []),
-                async (args) =>
+                (args) =>
                   createNewInStripe({
                     ...args,
                     collection,
@@ -91,8 +91,8 @@ export const stripePlugin =
         {
           handler: [
             express.raw({ type: 'application/json' }),
-            (req, res, next) => {
-              stripeWebhooks({
+            async (req, res, next) => {
+              await stripeWebhooks({
                 config,
                 next,
                 req,
@@ -108,8 +108,8 @@ export const stripePlugin =
         ...(incomingStripeConfig?.rest
           ? [
               {
-                handler: (req: PayloadRequest, res: Response, next: NextFunction) => {
-                  stripeREST({
+                handler: async (req: PayloadRequest, res: Response, next: NextFunction) => {
+                  await stripeREST({
                     next,
                     req,
                     res,
@@ -124,3 +124,5 @@ export const stripePlugin =
       ],
     }
   }
+
+export default stripePlugin

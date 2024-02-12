@@ -1,6 +1,9 @@
 import type { Transformer } from '@lexical/markdown'
+import type { JSONSchema4 } from 'json-schema'
 import type { Klass, LexicalEditor, LexicalNode, SerializedEditorState } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
+import type { LexicalNodeReplacement } from 'lexical'
+import type { RequestContext } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type { PayloadRequest, RichTextField, ValidateOptions } from 'payload/types'
 import type React from 'react'
@@ -12,9 +15,13 @@ import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeahe
 import type { HTMLConverter } from './converters/html/converter/types'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
+  context,
   currentDepth,
   depth,
+  editorPopulationPromises,
   field,
+  findMany,
+  flattenLocales,
   node,
   overrideAccess,
   populationPromises,
@@ -22,12 +29,19 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   showHiddenFields,
   siblingDoc,
 }: {
+  context: RequestContext
   currentDepth: number
   depth: number
+  /**
+   * This maps all population promises to the node type
+   */
+  editorPopulationPromises: Map<string, Array<PopulationPromise>>
   field: RichTextField<SerializedEditorState, AdapterProps>
+  findMany: boolean
+  flattenLocales: boolean
   node: T
   overrideAccess: boolean
-  populationPromises: Map<string, Array<PopulationPromise>>
+  populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
@@ -51,6 +65,25 @@ export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNo
 export type Feature = {
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
+  }
+  generatedTypes?: {
+    modifyOutputSchema: ({
+      currentSchema,
+      field,
+      interfaceNameDefinitions,
+      isRequired,
+    }: {
+      /**
+       * Current schema which will be modified by this function.
+       */
+      currentSchema: JSONSchema4
+      field: RichTextField<SerializedEditorState, AdapterProps>
+      /**
+       * Allows you to define new top-level interfaces that can be re-used in the output schema.
+       */
+      interfaceNameDefinitions: Map<string, JSONSchema4>
+      isRequired: boolean
+    }) => JSONSchema4
   }
   hooks?: {
     afterReadPromise?: ({
@@ -78,7 +111,7 @@ export type Feature = {
     converters?: {
       html?: HTMLConverter
     }
-    node: Klass<LexicalNode>
+    node: Klass<LexicalNode> | LexicalNodeReplacement
     populationPromises?: Array<PopulationPromise>
     type: string
     validations?: Array<NodeValidation>
@@ -86,13 +119,23 @@ export type Feature = {
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
+        Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
+        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: () => Promise<React.FC>
+        position: 'bottom' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: () => Promise<React.FC>
         position: 'normal' // Determines at which position the Component will be added.
       }
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
-        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+        Component: () => Promise<React.FC>
+        position: 'top' // Determines at which position the Component will be added.
       }
   >
 
@@ -138,6 +181,33 @@ export type ResolvedFeatureMap = Map<string, ResolvedFeature>
 
 export type FeatureProviderMap = Map<string, FeatureProvider>
 
+export type SanitizedPlugin =
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC<{ anchorElem: HTMLElement }>>
+      desktopOnly?: boolean
+      key: string
+      position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'bottom' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'normal' // Determines at which position the Component will be added.
+    }
+  | {
+      // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+      Component: () => Promise<React.FC>
+      key: string
+      position: 'top' // Determines at which position the Component will be added.
+    }
+
 export type SanitizedFeatures = Required<
   Pick<ResolvedFeature, 'markdownTransformers' | 'nodes'>
 > & {
@@ -149,6 +219,27 @@ export type SanitizedFeatures = Required<
   enabledFeatures: string[]
   floatingSelectToolbar: {
     sections: FloatingToolbarSection[]
+  }
+  generatedTypes: {
+    modifyOutputSchemas: Array<
+      ({
+        currentSchema,
+        field,
+        interfaceNameDefinitions,
+        isRequired,
+      }: {
+        /**
+         * Current schema which will be modified by this function.
+         */
+        currentSchema: JSONSchema4
+        field: RichTextField<SerializedEditorState, AdapterProps>
+        /**
+         * Allows you to define new top-level interfaces that can be re-used in the output schema.
+         */
+        interfaceNameDefinitions: Map<string, JSONSchema4>
+        isRequired: boolean
+      }) => JSONSchema4
+    >
   }
   hooks: {
     afterReadPromises: Array<
@@ -177,21 +268,7 @@ export type SanitizedFeatures = Required<
       }) => SerializedEditorState
     >
   }
-  plugins?: Array<
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC
-        key: string
-        position: 'normal' // Determines at which position the Component will be added.
-      }
-    | {
-        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-        Component: React.FC<{ anchorElem: HTMLElement }>
-        desktopOnly?: boolean
-        key: string
-        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
-      }
-  >
+  plugins?: Array<SanitizedPlugin>
   /**  The node types mapped to their populationPromises */
   populationPromises: Map<string, Array<PopulationPromise>>
   slashMenu: {

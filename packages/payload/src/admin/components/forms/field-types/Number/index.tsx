@@ -8,18 +8,28 @@ import { number } from '../../../../../fields/validations'
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import { isNumber } from '../../../../../utilities/isNumber'
 import ReactSelect from '../../../elements/ReactSelect'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const NumberField: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, condition, description, placeholder, readOnly, step, style, width } = {},
+    admin: {
+      className,
+      components: { Error, Label, afterInput, beforeInput } = {},
+      condition,
+      description,
+      placeholder,
+      readOnly,
+      step,
+      style,
+      width,
+    } = {},
     hasMany,
     label,
     max,
@@ -30,6 +40,9 @@ const NumberField: React.FC<Props> = (props) => {
     required,
     validate = number,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const { i18n, t } = useTranslation()
 
@@ -118,8 +131,8 @@ const NumberField: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {hasMany ? (
         <ReactSelect
           className={`field-${path.replace(/\./g, '__')}`}
@@ -138,7 +151,7 @@ const NumberField: React.FC<Props> = (props) => {
             if (isOverHasMany) {
               return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
             }
-            return t('general:noOptions')
+            return null
           }}
           numberOnly
           onChange={handleHasManyChange}
@@ -148,21 +161,25 @@ const NumberField: React.FC<Props> = (props) => {
           value={valueToRender as Option[]}
         />
       ) : (
-        <input
-          disabled={readOnly}
-          id={`field-${path.replace(/\./g, '__')}`}
-          name={path}
-          onChange={handleChange}
-          onWheel={(e) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            e.target.blur()
-          }}
-          placeholder={getTranslation(placeholder, i18n)}
-          step={step}
-          type="number"
-          value={typeof value === 'number' ? value : ''}
-        />
+        <div className="input-wrapper">
+          {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
+          <input
+            disabled={readOnly}
+            id={`field-${path.replace(/\./g, '__')}`}
+            name={path}
+            onChange={handleChange}
+            onWheel={(e) => {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              e.target.blur()
+            }}
+            placeholder={getTranslation(placeholder, i18n)}
+            step={step}
+            type="number"
+            value={typeof value === 'number' ? value : ''}
+          />
+          {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
+        </div>
       )}
 
       <FieldDescription description={description} value={value} />

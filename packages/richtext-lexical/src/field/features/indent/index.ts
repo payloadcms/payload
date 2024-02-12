@@ -2,10 +2,7 @@ import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../types'
 
-import { IndentDecreaseIcon } from '../../lexical/ui/icons/IndentDecrease'
-import { IndentIncreaseIcon } from '../../lexical/ui/icons/IndentIncrease'
 import { IndentSectionWithEntries } from './floatingSelectToolbarIndentSection'
-import './index.scss'
 
 export const IndentFeature = (): FeatureProvider => {
   return {
@@ -15,15 +12,24 @@ export const IndentFeature = (): FeatureProvider => {
           sections: [
             IndentSectionWithEntries([
               {
-                ChildComponent: IndentDecreaseIcon,
-                isActive: ({ editor, selection }) => false,
-                isEnabled: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/IndentDecrease').then(
+                    (module) => module.IndentDecreaseIcon,
+                  ),
+                isActive: () => false,
+                isEnabled: ({ selection }) => {
                   if (!selection || !selection?.getNodes()?.length) {
                     return false
                   }
                   for (const node of selection.getNodes()) {
                     // If at least one node is indented, this should be active
-                    if (node.__indent > 0 || node.getParent().__indent > 0) {
+                    if (
+                      ('__indent' in node && (node.__indent as number) > 0) ||
+                      (node.getParent() &&
+                        '__indent' in node.getParent() &&
+                        node.getParent().__indent > 0)
+                    ) {
                       return true
                     }
                   }
@@ -39,8 +45,12 @@ export const IndentFeature = (): FeatureProvider => {
             ]),
             IndentSectionWithEntries([
               {
-                ChildComponent: IndentIncreaseIcon,
-                isActive: ({ editor, selection }) => false,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/IndentIncrease').then(
+                    (module) => module.IndentIncreaseIcon,
+                  ),
+                isActive: () => false,
                 key: 'indent-increase',
                 label: `Increase Indent`,
                 onClick: ({ editor }) => {
@@ -51,6 +61,14 @@ export const IndentFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        plugins: [
+          {
+            Component: () =>
+              // @ts-expect-error
+              import('./plugin').then((module) => module.IndentPlugin),
+            position: 'normal',
+          },
+        ],
         props: null,
       }
     },

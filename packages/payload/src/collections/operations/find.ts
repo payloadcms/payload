@@ -8,6 +8,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
@@ -36,42 +37,43 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 ): Promise<PaginatedDocs<T>> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        collection: args.collection.config,
-        context: args.req.context,
-        operation: 'read',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    collection: { config: collectionConfig },
-    collection,
-    currentDepth,
-    depth,
-    disableErrors,
-    draft: draftsEnabled,
-    limit,
-    overrideAccess,
-    page,
-    pagination = true,
-    req: { locale, payload },
-    req,
-    showHiddenFields,
-    sort,
-    where,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook
+
+      args =
+        (await hook({
+          args,
+          collection: args.collection.config,
+          context: args.req.context,
+          operation: 'read',
+          req: args.req,
+        })) || args
+    }, Promise.resolve())
+
+    const {
+      collection: { config: collectionConfig },
+      collection,
+      currentDepth,
+      depth,
+      disableErrors,
+      draft: draftsEnabled,
+      limit,
+      overrideAccess,
+      page,
+      pagination = true,
+      req: { locale, payload },
+      req,
+      showHiddenFields,
+      sort,
+      where,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -248,11 +250,11 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

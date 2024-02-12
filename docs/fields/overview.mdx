@@ -46,6 +46,7 @@ export const Page: CollectionConfig = {
 - [Date](/docs/fields/date) - date / time field that saves a timestamp
 - [Email](/docs/fields/email) - validates the entry is a properly formatted email
 - [Group](/docs/fields/group) - nest fields within an object
+- [JSON](/docs/fields/json) - saves actual JSON in the database
 - [Number](/docs/fields/number) - field that enforces that its value be a number
 - [Point](/docs/fields/point) - geometric coordinates for location data
 - [Radio](/docs/fields/radio) - radio button group, allowing only one value to be selected
@@ -53,6 +54,7 @@ export const Page: CollectionConfig = {
 - [Rich Text](/docs/fields/rich-text) - fully extensible Rich Text editor
 - [Row](/docs/fields/row) - used for admin field layout, no effect on data shape
 - [Select](/docs/fields/select) - dropdown / picklist style value selector
+- [Tabs](/docs/fields/tabs) - used for admin layout, nest fields within tabs
 - [Text](/docs/fields/text) - simple text input
 - [Textarea](/docs/fields/textarea) - allows a bit larger of a text editor
 - [Upload](/docs/fields/upload) - allows local file and image upload
@@ -250,11 +252,16 @@ const field = {
 
 ### Description
 
-A description can be configured three ways.
+A description can be configured in three ways.
 
 - As a string
-- As a function that accepts an object containing the field's value, which returns a string
-- As a React component that accepts value as a prop
+- As a function which returns a string
+- As a React component
+
+Functions are called with an optional argument object with the following shape, and React components are rendered with the following props:
+
+- `path` - the path of the field
+- `value` - the current value of the field
 
 As shown above, you can simply provide a string that will show by the field, but there are use cases where you may want to create some dynamic feedback. By using a function or a component for the `description` property you can provide realtime feedback as the user interacts with the form.
 
@@ -268,8 +275,8 @@ As shown above, you can simply provide a string that will show by the field, but
       type: 'text',
       maxLength: 20,
       admin: {
-        description: ({ value }) =>
-          `${typeof value === 'string' ? 20 - value.length : '20'} characters left`,
+        description: ({ path, value }) =>
+          `${typeof value === 'string' ? 20 - value.length : '20'} characters left (field: ${path})`,
       },
     },
   ]
@@ -289,11 +296,12 @@ This example will display the number of characters allowed as the user types.
       maxLength: 20,
       admin: {
         description:
-          ({ value }) => (
+          ({ path, value }) => (
             <div>
               Character count:
               {' '}
               { value?.length || 0 }
+               (field: {path})
             </div>
           )
       }
@@ -302,7 +310,7 @@ This example will display the number of characters allowed as the user types.
 }
 ```
 
-This component will count the number of characters entered.
+This component will count the number of characters entered, as well as display the path of the field.
 
 ### TypeScript
 

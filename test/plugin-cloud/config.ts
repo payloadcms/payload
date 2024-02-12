@@ -14,6 +14,7 @@ dotenv.config({
 
 export default buildConfigWithDefaults({
   collections: [Media, Users],
+  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   admin: {
     webpack: (config) => ({
       ...config,

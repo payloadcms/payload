@@ -1,3 +1,4 @@
+import type { UploadedFile } from 'express-fileupload'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GeneratedTypes } from '../../../'
@@ -8,10 +9,8 @@ import type { File } from '../../../uploads/types'
 import type { BulkOperationResult } from '../../config/types'
 
 import { APIError } from '../../../errors'
-import { setRequestContext } from '../../../express/setRequestContext'
-import { i18nInit } from '../../../translations/init'
 import getFileByPath from '../../../uploads/getFileByPath'
-import { getDataLoader } from '../../dataloader'
+import { createLocalReq } from '../../../utilities/createLocalReq'
 import update from '../update'
 import updateByID from '../updateByID'
 
@@ -70,27 +69,18 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     id,
     autosave,
     collection: collectionSlug,
-    context,
     data,
     depth,
     draft,
-    fallbackLocale,
     file,
     filePath,
-    locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
-    req: incomingReq,
     showHiddenFields,
-    user,
     where,
   } = options
 
   const collection = payload.collections[collectionSlug]
-  const i18n = i18nInit(payload.config.i18n)
-  const defaultLocale = payload.config.localization
-    ? payload.config.localization?.defaultLocale
-    : null
 
   if (!collection) {
     throw new APIError(
@@ -98,22 +88,17 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     )
   }
 
-  const req = {
-    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
-    files: {
-      file: file ?? (await getFileByPath(filePath)),
-    },
-    i18n,
-    locale: locale ?? defaultLocale,
-    payload,
-    payloadAPI: 'local',
-    transactionID: incomingReq?.transactionID,
-    user,
-  } as PayloadRequest
-  setRequestContext(req, context)
-
-  if (!req.t) req.t = req.i18n.t
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
+  const req = createLocalReq(options, payload)
+  const fileToSet = (file ?? (await getFileByPath(filePath))) as UploadedFile
+  if (fileToSet) {
+    if (req?.files) {
+      req.files.file = fileToSet
+    } else {
+      req.files = {
+        file: fileToSet,
+      }
+    }
+  }
 
   const args = {
     id,

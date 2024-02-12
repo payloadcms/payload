@@ -13,6 +13,7 @@ import { transformBlocks } from './blocks'
 import { transformNumbers } from './numbers'
 import { transformRelationship } from './relationships'
 import { transformSelects } from './selects'
+import { transformTexts } from './texts'
 
 type Args = {
   adapter: PostgresAdapter
@@ -26,6 +27,7 @@ type Args = {
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
+  blocksToDelete: Set<string>
   /**
    * A snake-case field prefix, representing prior fields
    * Ex: my_group_my_named_tab_
@@ -43,6 +45,7 @@ type Args = {
   locales: {
     [locale: string]: Record<string, unknown>
   }
+  texts: Record<string, unknown>[]
   numbers: Record<string, unknown>[]
   /**
    * This is the name of the parent table
@@ -62,6 +65,7 @@ export const traverseFields = ({
   arrays,
   baseTableName,
   blocks,
+  blocksToDelete,
   columnPrefix,
   data,
   existingLocales,
@@ -69,6 +73,7 @@ export const traverseFields = ({
   fields,
   forcedLocale,
   locales,
+  texts,
   numbers,
   parentTableName,
   path,
@@ -102,9 +107,11 @@ export const traverseFields = ({
                 arrayTableName,
                 baseTableName,
                 blocks,
+                blocksToDelete,
                 data: localeData,
                 field,
                 locale: localeKey,
+                texts,
                 numbers,
                 path,
                 relationships,
@@ -122,8 +129,10 @@ export const traverseFields = ({
           arrayTableName,
           baseTableName,
           blocks,
+          blocksToDelete,
           data: data[field.name],
           field,
+          texts,
           numbers,
           path,
           relationships,
@@ -138,6 +147,10 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks') {
+      field.blocks.forEach(({ slug }) => {
+        blocksToDelete.add(toSnakeCase(slug))
+      })
+
       if (field.localized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
@@ -146,9 +159,11 @@ export const traverseFields = ({
                 adapter,
                 baseTableName,
                 blocks,
+                blocksToDelete,
                 data: localeData,
                 field,
                 locale: localeKey,
+                texts,
                 numbers,
                 path,
                 relationships,
@@ -163,8 +178,10 @@ export const traverseFields = ({
           adapter,
           baseTableName,
           blocks,
+          blocksToDelete,
           data: fieldData,
           field,
+          texts,
           numbers,
           path,
           relationships,
@@ -185,6 +202,7 @@ export const traverseFields = ({
               arrays,
               baseTableName,
               blocks,
+              blocksToDelete,
               columnPrefix: `${columnName}_`,
               data: localeData as Record<string, unknown>,
               existingLocales,
@@ -192,6 +210,7 @@ export const traverseFields = ({
               fields: field.fields,
               forcedLocale: localeKey,
               locales,
+              texts,
               numbers,
               parentTableName,
               path: `${path || ''}${field.name}.`,
@@ -207,12 +226,14 @@ export const traverseFields = ({
             arrays,
             baseTableName,
             blocks,
+            blocksToDelete,
             columnPrefix: `${columnName}_`,
             data: data[field.name] as Record<string, unknown>,
             existingLocales,
             fieldPrefix: `${fieldName}_`,
             fields: field.fields,
             locales,
+            texts,
             numbers,
             parentTableName,
             path: `${path || ''}${field.name}.`,
@@ -238,6 +259,7 @@ export const traverseFields = ({
                   arrays,
                   baseTableName,
                   blocks,
+                  blocksToDelete,
                   columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
                   data: localeData as Record<string, unknown>,
                   existingLocales,
@@ -245,6 +267,7 @@ export const traverseFields = ({
                   fields: tab.fields,
                   forcedLocale: localeKey,
                   locales,
+                  texts,
                   numbers,
                   parentTableName,
                   path: `${path || ''}${tab.name}.`,
@@ -260,12 +283,14 @@ export const traverseFields = ({
                 arrays,
                 baseTableName,
                 blocks,
+                blocksToDelete,
                 columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
                 data: data[tab.name] as Record<string, unknown>,
                 existingLocales,
                 fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
                 fields: tab.fields,
                 locales,
+                texts,
                 numbers,
                 parentTableName,
                 path: `${path || ''}${tab.name}.`,
@@ -282,12 +307,14 @@ export const traverseFields = ({
             arrays,
             baseTableName,
             blocks,
+            blocksToDelete,
             columnPrefix,
             data,
             existingLocales,
             fieldPrefix,
             fields: tab.fields,
             locales,
+            texts,
             numbers,
             parentTableName,
             path,
@@ -306,12 +333,14 @@ export const traverseFields = ({
         arrays,
         baseTableName,
         blocks,
+        blocksToDelete,
         columnPrefix,
         data,
         existingLocales,
         fieldPrefix,
         fields: field.fields,
         locales,
+        texts,
         numbers,
         parentTableName,
         path,
@@ -366,6 +395,37 @@ export const traverseFields = ({
       return
     }
 
+    if (field.type === 'text' && field.hasMany) {
+      const textPath = `${path || ''}${field.name}`
+
+      if (field.localized) {
+        if (typeof fieldData === 'object') {
+          Object.entries(fieldData).forEach(([localeKey, localeData]) => {
+            if (Array.isArray(localeData)) {
+              transformTexts({
+                baseRow: {
+                  locale: localeKey,
+                  path: textPath,
+                },
+                data: localeData,
+                texts,
+              })
+            }
+          })
+        }
+      } else if (Array.isArray(fieldData)) {
+        transformTexts({
+          baseRow: {
+            path: textPath,
+          },
+          data: fieldData,
+          texts,
+        })
+      }
+
+      return
+    }
+
     if (field.type === 'number' && field.hasMany) {
       const numberPath = `${path || ''}${field.name}`
 
@@ -406,6 +466,7 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
               const newRows = transformSelects({
+                id: data._uuid || data.id,
                 data: localeData,
                 locale: localeKey,
               })
@@ -416,6 +477,7 @@ export const traverseFields = ({
         }
       } else if (Array.isArray(data[field.name])) {
         const newRows = transformSelects({
+          id: data._uuid || data.id,
           data: data[field.name],
         })
 

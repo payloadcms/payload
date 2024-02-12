@@ -33,13 +33,19 @@ export { fieldTypes } from '../../admin/components/forms/field-types'
 export { default as Checkbox } from '../../admin/components/forms/field-types/Checkbox'
 
 export { default as Collapsible } from '../../admin/components/forms/field-types/Collapsible'
+export { default as Date } from '../../admin/components/forms/field-types/DateTime'
+export { DateTimeInput } from '../../admin/components/forms/field-types/DateTime/Input'
+
 export { default as Group } from '../../admin/components/forms/field-types/Group'
 export { default as HiddenInput } from '../../admin/components/forms/field-types/HiddenInput'
-
 export { default as Select } from '../../admin/components/forms/field-types/Select'
 export { default as SelectInput } from '../../admin/components/forms/field-types/Select/Input'
 export { default as Text } from '../../admin/components/forms/field-types/Text'
 export { default as TextInput } from '../../admin/components/forms/field-types/Text/Input'
+export { default as Textarea } from '../../admin/components/forms/field-types/Textarea'
+export { default as TextareaInput } from '../../admin/components/forms/field-types/Textarea/Input'
+export { default as Upload } from '../../admin/components/forms/field-types/Upload'
+export { default as UploadInput } from '../../admin/components/forms/field-types/Upload/Input'
 
 /**
  * @deprecated This method is now called useField. The useFieldType alias will be removed in an upcoming version.

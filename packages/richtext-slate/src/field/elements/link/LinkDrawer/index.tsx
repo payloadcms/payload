@@ -1,3 +1,5 @@
+'use client'
+
 import { Drawer } from 'payload/components/elements'
 import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
 import { fieldTypes } from 'payload/components/forms'

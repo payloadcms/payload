@@ -486,6 +486,7 @@ describe('Auth', () => {
         it('should lock the user after too many attempts', async () => {
           await tryLogin()
           await tryLogin()
+          await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
 
           const userResult = await payload.find({
             collection: slug,
@@ -635,6 +636,21 @@ describe('Auth', () => {
         },
       }).then((res) => res.json())
       expect(editorMe.user.adminOnlyField).toBeUndefined()
+    })
+
+    it('should not allow refreshing an invalid token', async () => {
+      const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+        body: JSON.stringify({
+          token: 'INVALID',
+        }),
+        headers,
+        method: 'post',
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(data.token).toBeUndefined()
     })
   })
 

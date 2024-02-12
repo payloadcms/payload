@@ -1,8 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { groupFieldsSlug } from '../../slugs'
+
 export const groupDefaultValue = 'set from parent'
 export const groupDefaultChild = 'child takes priority'
-export const groupFieldsSlug = 'group-fields'
 
 const GroupFields: CollectionConfig = {
   slug: groupFieldsSlug,
@@ -54,6 +55,24 @@ const GroupFields: CollectionConfig = {
               ],
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'arrayOfGroups',
+      type: 'array',
+      defaultValue: [
+        {
+          groupItem: {
+            text: 'Hello world',
+          },
+        },
+      ],
+      fields: [
+        {
+          name: 'groupItem',
+          type: 'group',
+          fields: [{ name: 'text', type: 'text' }],
         },
       ],
     },
@@ -166,20 +185,6 @@ const GroupFields: CollectionConfig = {
       ],
     },
   ],
-}
-
-export const groupDoc = {
-  group: {
-    text: 'some text within a group',
-    subGroup: {
-      textWithinGroup: 'please',
-      arrayWithinGroup: [
-        {
-          textWithinArray: 'text in a group and array',
-        },
-      ],
-    },
-  },
 }
 
 export default GroupFields

@@ -256,7 +256,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     fallbackLocaleInputType?: any
     groupTypes: any
     localeInputType?: any
-    tabTypes: any
   }
 
   unlock = async <T extends keyof TGeneratedTypes['collections']>(
@@ -312,7 +311,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    */
   // @ts-expect-error // TODO: TypeScript hallucinating again. fix later
   async init(options: InitOptions): Promise<Payload> {
-    this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
+    this.logger =
+      options.logger ?? Logger('payload', options.loggerOptions, options.loggerDestination)
 
     if (!options.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')

@@ -1,8 +1,9 @@
 import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
-import { noApiViewGlobal } from '../shared'
+
+import { noApiViewGlobalSlug } from '../slugs'
 
 export const GlobalNoApiView: GlobalConfig = {
-  slug: noApiViewGlobal,
+  slug: noApiViewGlobalSlug,
   admin: {
     hideAPIURL: true,
   },

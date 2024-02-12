@@ -15,12 +15,13 @@ import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
 import { useLocale } from '../../../utilities/Locale'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import { useFormProcessing } from '../../Form/context'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
 import { findOptionsByValue } from './findOptionsByValue'
@@ -28,7 +29,6 @@ import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
-import { fieldBaseClass } from '../shared'
 
 const maxResultsPerRequest = 10
 
@@ -40,10 +40,12 @@ const Relationship: React.FC<Props> = (props) => {
     admin: {
       allowCreate = true,
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       isSortable = true,
       readOnly,
+      sortOptions,
       style,
       width,
     } = {},
@@ -55,6 +57,9 @@ const Relationship: React.FC<Props> = (props) => {
     required,
     validate = relationship,
   } = props
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   const config = useConfig()
 
@@ -125,6 +130,7 @@ const Relationship: React.FC<Props> = (props) => {
 
       if (!errorLoading) {
         relationsToFetch.reduce(async (priorRelation, relation) => {
+          const relationFilterOption = filterOptionsResult?.[relation]
           let lastLoadedPageToUse
           if (search !== searchArg) {
             lastLoadedPageToUse = 1
@@ -133,15 +139,28 @@ const Relationship: React.FC<Props> = (props) => {
           }
           await priorRelation
 
+          if (relationFilterOption === false) {
+            setLastFullyLoadedRelation(relations.indexOf(relation))
+            return Promise.resolve()
+          }
+
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSearch = collection?.defaultSort || collection?.admin?.useAsTitle || 'id'
+            if (!searchArg) {
+              if (typeof sortOptions === 'string') {
+                fieldToSearch = sortOptions
+              } else if (sortOptions?.[relation]) {
+                fieldToSearch = sortOptions[relation]
+              }
+            }
 
             const query: {
               [key: string]: unknown
               where: Where
             } = {
               depth: 0,
+              draft: true,
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
@@ -165,8 +184,8 @@ const Relationship: React.FC<Props> = (props) => {
               })
             }
 
-            if (filterOptionsResult?.[relation]) {
-              query.where.and.push(filterOptionsResult[relation])
+            if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
+              query.where.and.push(relationFilterOption)
             }
 
             const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
@@ -193,24 +212,24 @@ const Relationship: React.FC<Props> = (props) => {
                 resultsFetched += data.docs.length
 
                 dispatchOptions({
+                  type: 'ADD',
                   collection,
                   config,
                   docs: data.docs,
                   i18n,
                   sort,
-                  type: 'ADD',
                 })
               }
             } else if (response.status === 403) {
               setLastFullyLoadedRelation(relations.indexOf(relation))
               dispatchOptions({
+                type: 'ADD',
                 collection,
                 config,
                 docs: [],
                 i18n,
                 ids: relationMap[relation],
                 sort,
-                type: 'ADD',
               })
             } else {
               setErrorLoading(t('error:unspecific'))
@@ -232,6 +251,7 @@ const Relationship: React.FC<Props> = (props) => {
       locale,
       filterOptionsResult,
       serverURL,
+      sortOptions,
       api,
       i18n,
       config,
@@ -248,7 +268,7 @@ const Relationship: React.FC<Props> = (props) => {
     (searchArg: string, valueArg: Value | Value[]) => {
       if (search !== searchArg) {
         setLastLoadedPage({})
-        updateSearch(searchArg, valueArg)
+        updateSearch(searchArg, valueArg, searchArg !== '')
       }
     },
     [search, updateSearch],
@@ -280,6 +300,7 @@ const Relationship: React.FC<Props> = (props) => {
       if (idsToLoad.length > 0) {
         const query = {
           depth: 0,
+          draft: true,
           limit: idsToLoad.length,
           locale,
           where: {
@@ -306,13 +327,13 @@ const Relationship: React.FC<Props> = (props) => {
           }
 
           dispatchOptions({
+            type: 'ADD',
             collection,
             config,
             docs,
             i18n,
             ids: idsToLoad,
             sort: true,
-            type: 'ADD',
           })
         }
       }
@@ -360,11 +381,11 @@ const Relationship: React.FC<Props> = (props) => {
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       dispatchOptions({
+        type: 'UPDATE',
         collection: args.collectionConfig,
         config,
         doc: args.doc,
         i18n,
-        type: 'UPDATE',
       })
     },
     [i18n, config],
@@ -391,6 +412,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [])
 
   const valueToRender = findOptionsByValue({ options, value })
+
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
 
   return (
@@ -411,8 +433,8 @@ const Relationship: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={pathOrName} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={pathOrName} label={label} required={required} />
       <GetFilterOptions
         {...{
           filterOptions,
@@ -513,7 +535,7 @@ const Relationship: React.FC<Props> = (props) => {
         </div>
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

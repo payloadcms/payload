@@ -21,6 +21,8 @@ type Args = {
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
+  triggerAccessControl?: boolean
+  triggerHooks?: boolean
 }
 
 export const traverseFields = ({
@@ -39,6 +41,8 @@ export const traverseFields = ({
   req,
   showHiddenFields,
   siblingDoc,
+  triggerAccessControl = true,
+  triggerHooks = true,
 }: Args): void => {
   fields.forEach((field) => {
     fieldPromises.push(
@@ -58,6 +62,8 @@ export const traverseFields = ({
         req,
         showHiddenFields,
         siblingDoc,
+        triggerAccessControl,
+        triggerHooks,
       }),
     )
   })

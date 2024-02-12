@@ -1,13 +1,16 @@
-import type { Config } from '../../packages/payload/src/config/types'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { openAccess } from '../helpers/configHelpers'
+import { devUser } from '../credentials'
 
-const config: Config = {
+export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'pages',
-      access: openAccess,
+      access: {
+        read: () => true,
+        create: () => true,
+        delete: () => true,
+        update: () => true,
+      },
       endpoints: [
         {
           path: '/hello',
@@ -23,6 +26,27 @@ const config: Config = {
           name: 'title',
           type: 'text',
           custom: { description: 'The title of this page' },
+        },
+        {
+          name: 'myBlocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'blockOne',
+              fields: [
+                {
+                  name: 'blockOneField',
+                  type: 'text',
+                },
+                {
+                  name: 'blockTwoField',
+                  type: 'text',
+                },
+              ],
+              custom: { description: 'The blockOne of this page' },
+            },
+          ],
+          custom: { description: 'The blocks of this page' },
         },
       ],
       custom: { externalLink: 'https://foo.bar' },
@@ -64,6 +88,13 @@ const config: Config = {
     },
   ],
   custom: { name: 'Customer portal' },
-}
-
-export default buildConfigWithDefaults(config)
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+  },
+})
