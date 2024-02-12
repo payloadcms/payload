@@ -40,6 +40,10 @@ describe('Auth', () => {
     }
   })
 
+  beforeEach(() => {
+    jest.resetModules()
+  })
+
   describe('GraphQL - admin user', () => {
     let token
     let user
