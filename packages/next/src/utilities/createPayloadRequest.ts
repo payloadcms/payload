@@ -98,7 +98,11 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    ...urlPropertiesObject,
+    host: urlProperties.host,
+    protocol: urlProperties.protocol,
+    pathname: urlProperties.pathname,
+    searchParams: urlProperties.searchParams,
+    origin: urlProperties.origin,
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)
