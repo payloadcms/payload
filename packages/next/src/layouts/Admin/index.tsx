@@ -12,15 +12,15 @@ export const metadata = {
 
 export const AdminLayout = async ({
   children,
-  config: configPromise,
+  config,
 }: {
   children: React.ReactNode
-  config: Promise<SanitizedConfig>
+  config: Promise<SanitizedConfig> | SanitizedConfig
 }) => {
-  const { user, permissions, i18n } = await initPage({ configPromise })
+  const { user, permissions, i18n } = await initPage({ config })
 
   return (
-    <DefaultTemplate config={configPromise} user={user} permissions={permissions} i18n={i18n}>
+    <DefaultTemplate config={config} user={user} permissions={permissions} i18n={i18n}>
       {children}
     </DefaultTemplate>
   )

@@ -47,7 +47,7 @@ export const CreateFirstUser: React.FC<{
     i18n: { t },
     payload,
   } = await initPage({
-    configPromise,
+    config: configPromise,
     redirectUnauthenticatedUser: false,
   })
 
