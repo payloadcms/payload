@@ -133,8 +133,9 @@ export function LinkEditor({
       } else {
         // internal link
         setLinkUrl(
-          `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${linkParent.getFields()
-            ?.doc?.value}`,
+          `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${
+            linkParent.getFields()?.doc?.value
+          }`,
         )
 
         const relatedField = config.collections.find(
