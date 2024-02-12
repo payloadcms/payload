@@ -98,8 +98,6 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    searchParams,
-    pathname,
     ...urlPropertiesObject,
   }
 
