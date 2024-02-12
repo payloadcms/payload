@@ -20,7 +20,7 @@ export const Account = async ({
   searchParams: { [key: string]: string | string[] | undefined }
 }) => {
   const { config, payload, permissions, user, i18n, locale } = await initPage({
-    configPromise,
+    config: configPromise,
     redirectUnauthenticatedUser: true,
   })
 

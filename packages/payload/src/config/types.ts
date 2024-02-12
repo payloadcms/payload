@@ -141,7 +141,7 @@ export type InitOptions = {
    * The passed config should match the config file, and if it doesn't, there could be mismatches between the admin UI
    * and the backend functionality
    */
-  config: Promise<SanitizedConfig>
+  config: Promise<SanitizedConfig> | SanitizedConfig
   /**
    * Disable connect to the database on init
    */
@@ -278,9 +278,7 @@ export type AdminViewProps = {
   user: User | null | undefined
 }
 
-export type AdminViewComponent =
-  | Promise<React.ComponentType<AdminViewProps>>
-  | React.ComponentType<AdminViewProps>
+export type AdminViewComponent = React.ComponentType<AdminViewProps>
 
 export type AdminView = AdminViewComponent | AdminViewConfig
 
