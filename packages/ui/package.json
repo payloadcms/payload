@@ -56,7 +56,7 @@
     "react-datepicker": "4.16.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.7.4",
-    "react-toastify": "10.0.0",
+    "react-toastify": "10.0.4",
     "use-context-selector": "1.4.1",
     "uuid": "9.0.1"
   },
