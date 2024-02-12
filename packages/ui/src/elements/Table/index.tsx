@@ -37,11 +37,7 @@ export const Table: React.FC<Props> = ({ columns: columnsFromProps, data, custom
           {data &&
             data.map((row, rowIndex) => (
               <tr className={`row-${rowIndex + 1}`} key={rowIndex}>
-                {columns.map((col, colIndex) => {
-                  const { active } = col || {}
-
-                  if (!active) return null
-
+                {activeColumns.map((col, colIndex) => {
                   return (
                     <td className={`cell-${col.accessor}`} key={colIndex}>
                       <TableCellProvider
