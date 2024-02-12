@@ -5,13 +5,12 @@ import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys'
 import { serializeSlate } from '../../../utilities/slate/serializeSlate'
 
 const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promise<any> => {
-  const { data, operation } = beforeChangeData
+  const { data, operation, req } = beforeChangeData
 
   if (operation === 'create') {
     const {
       data: { id: formSubmissionID },
       req: { locale, payload },
-      req,
     } = beforeChangeData
 
     const { form: formID, submissionData } = data || {}
