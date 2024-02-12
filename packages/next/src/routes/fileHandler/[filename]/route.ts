@@ -77,9 +77,16 @@ export const GET =
         throw new APIError(`Media collection not found: ${collectionSlug}`, httpStatus.BAD_REQUEST)
       }
 
-      if (!collection.config.upload?.staticDir) {
+      if (!collection.config.upload) {
         throw new APIError(
-          `No staticDir defined for collection: ${collectionSlug}`,
+          `This collection is not an upload collection: ${collectionSlug}`,
+          httpStatus.BAD_REQUEST,
+        )
+      }
+
+      if (collection.config.upload.disableLocalStorage) {
+        throw new APIError(
+          `This collection has local storage disabled: ${collectionSlug}`,
           httpStatus.BAD_REQUEST,
         )
       }
@@ -98,7 +105,8 @@ export const GET =
         collection,
       })
 
-      const filePath = path.resolve(`${collection.config.upload.staticDir}/${filename}`)
+      const fileDir = collection.config.upload?.staticDir || collection.config.slug
+      const filePath = path.resolve(`${fileDir}/${filename}`)
       const stats = await fsPromises.stat(filePath)
       const data = streamFile(filePath)
       return new Response(data, {
