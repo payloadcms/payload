@@ -43,7 +43,7 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
 
   const { componentMap } = useComponentMap()
 
-  const collectionComponentMap = componentMap?.collections?.[collectionSlug]
+  const collectionComponentMap = componentMap.collections[collectionSlug]
 
   const { BeforeList, AfterList, BeforeListTable, AfterListTable } = collectionComponentMap || {}
 

@@ -2,13 +2,14 @@
 import React, { createContext, useCallback, useContext } from 'react'
 import { ComponentMap, FieldMap, MappedField } from '../../utilities/buildComponentMap/types'
 
-type IComponentMapContext = {
+export type IComponentMapContext = {
   componentMap: ComponentMap
   getMappedFieldByPath: (args: {
     path: string
     collectionSlug?: string
     globalSlug?: string
   }) => MappedField | undefined
+  getFieldMap: (args: { collectionSlug?: string; globalSlug?: string }) => FieldMap | []
 }
 
 const ComponentMapContext = createContext<IComponentMapContext>({} as IComponentMapContext)
@@ -17,9 +18,8 @@ export const ComponentMapProvider: React.FC<{
   children: React.ReactNode
   componentMap: ComponentMap
 }> = ({ children, componentMap }) => {
-  const getMappedFieldByPath = useCallback(
-    (args: { path: string; collectionSlug?: string; globalSlug?: string }) => {
-      const { path, collectionSlug, globalSlug } = args
+  const getMappedFieldByPath: IComponentMapContext['getMappedFieldByPath'] = useCallback(
+    ({ collectionSlug, globalSlug, path }) => {
       let fieldMap: FieldMap
 
       if (collectionSlug) {
@@ -36,8 +36,23 @@ export const ComponentMapProvider: React.FC<{
     [componentMap],
   )
 
+  const getFieldMap: IComponentMapContext['getFieldMap'] = useCallback(
+    ({ collectionSlug, globalSlug }) => {
+      if (collectionSlug) {
+        return componentMap.collections[collectionSlug].fieldMap
+      }
+
+      if (globalSlug) {
+        return componentMap.globals[globalSlug].fieldMap
+      }
+
+      return []
+    },
+    [componentMap],
+  )
+
   return (
-    <ComponentMapContext.Provider value={{ componentMap, getMappedFieldByPath }}>
+    <ComponentMapContext.Provider value={{ componentMap, getMappedFieldByPath, getFieldMap }}>
       {children}
     </ComponentMapContext.Provider>
   )
