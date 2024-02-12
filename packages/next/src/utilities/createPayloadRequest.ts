@@ -35,7 +35,23 @@ export const createPayloadRequest = async ({
     collection = collections[params.collection]
   }
 
-  const { searchParams, pathname } = new URL(request.url)
+  const urlProperties = new URL(request.url)
+
+  // NOTE: URL properties are not enumerable, so we need to convert them to an object
+  const urlPropertiesObject = {
+    searchParams: urlProperties.searchParams,
+    pathname: urlProperties.pathname,
+    port: urlProperties.port,
+    protocol: urlProperties.protocol,
+    search: urlProperties.search,
+    origin: urlProperties.origin,
+    href: urlProperties.href,
+    host: urlProperties.host,
+    hash: urlProperties.hash,
+  }
+
+  const { searchParams, pathname } = urlPropertiesObject
+
   const isGraphQL = !config.graphQL.disable && pathname === `/api${config.routes.graphQL}`
 
   const { data, file } = await getDataAndFile({
@@ -46,6 +62,7 @@ export const createPayloadRequest = async ({
 
   let requestFallbackLocale
   let requestLocale
+
   if (config.localization) {
     const locales = getRequestLocales({
       localization: config.localization,
@@ -81,8 +98,7 @@ export const createPayloadRequest = async ({
     transactionID: undefined,
     payloadDataLoader: undefined,
     payloadUploadSizes: {},
-    searchParams,
-    pathname,
+    ...urlPropertiesObject,
   }
 
   const req: PayloadRequest = Object.assign(request, customRequest)

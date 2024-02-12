@@ -12,9 +12,26 @@ export const buildColumns = (args: {
 }): Column[] => {
   const { fieldMap, cellProps, defaultColumns, columnPreferences, useAsTitle } = args
 
+  let sortedFieldMap = fieldMap
+
+  const sortTo = defaultColumns || columnPreferences
+
+  if (sortTo) {
+    // sort the fields to the order of `defaultColumns` or `columnPreferences`
+    // TODO: flatten top level field, i.e. `flattenTopLevelField()` from `payload` but that is typed for `Field`, not `fieldMap`
+    sortedFieldMap = fieldMap.sort((a, b) => {
+      const aIndex = sortTo.findIndex((column) => column.accessor === a.name)
+      const bIndex = sortTo.findIndex((column) => column.accessor === b.name)
+      if (aIndex === -1 && bIndex === -1) return 0
+      if (aIndex === -1) return 1
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    })
+  }
+
   let numberOfActiveColumns = 0
 
-  return fieldMap.reduce((acc, field, index) => {
+  return sortedFieldMap.reduce((acc, field, index) => {
     const columnPreference = columnPreferences?.find(
       (preference) => preference.accessor === field.name,
     )
