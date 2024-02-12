@@ -11,6 +11,7 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
     const {
       data: { id: formSubmissionID },
       req: { locale, payload },
+      req,
     } = beforeChangeData
 
     const { form: formID, submissionData } = data || {}
@@ -22,6 +23,7 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
         id: formID,
         collection: formOverrides?.slug || 'forms',
         locale,
+        req,
       })
 
       const { emails } = form

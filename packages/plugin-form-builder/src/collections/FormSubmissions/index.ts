@@ -29,8 +29,7 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
         },
         relationTo: formSlug,
         required: true,
-        type: 'relationship',
-        validate: async (value, { payload }) => {
+        validate: async (value, { payload, req }) => {
           /* Don't run in the client side */
           if (!payload) return true
 
@@ -41,6 +40,7 @@ export const generateSubmissionCollection = (formConfig: PluginConfig): Collecti
               existingForm = await payload.findByID({
                 id: value,
                 collection: formSlug,
+                req,
               })
 
               return true
