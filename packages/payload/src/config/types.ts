@@ -215,6 +215,8 @@ export type AccessArgs<T = any, U = any> = {
   data?: T
   /** ID of the resource being accessed */
   id?: number | string
+  /** If true, the request is for a static file */
+  isReadingStaticFile?: boolean
   /** The original request that requires an access check */
   req: PayloadRequest<U>
 }
