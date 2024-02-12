@@ -6,6 +6,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     doc,
     operation,
     req: { payload },
+    req,
     // @ts-expect-error
     searchConfig,
   } = args
@@ -26,6 +27,7 @@ const syncWithSearch: SyncWithSearch = async (args) => {
     dataToSave = await beforeSync({
       originalDoc: doc,
       payload,
+      req,
       searchDoc: dataToSave,
     })
   }
