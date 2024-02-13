@@ -2,18 +2,12 @@ import React from 'react'
 
 import type { Field } from 'payload/types'
 import { getNextT } from '../../utilities/getNextT'
-import {
-  MinimalTemplate,
-  FormSubmit,
-  Form,
-  RenderFields,
-  fieldTypes,
-  buildStateFromSchema,
-} from '@payloadcms/ui'
+import { Form, FormSubmit, MinimalTemplate, buildStateFromSchema } from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
 import { initPage } from '../../utilities/initPage'
+import { CreateFirstUserFields } from './index.client'
 
 import './index.scss'
 
@@ -43,30 +37,17 @@ export const CreateFirstUser: React.FC<{
     config,
     user,
     locale,
-    i18n,
     i18n: { t },
-    payload,
   } = await initPage({
     config: configPromise,
     redirectUnauthenticatedUser: false,
   })
 
   const {
+    routes: { api: apiRoute, admin: adminRoute },
     admin: { user: userSlug },
-    collections,
-    routes: { admin, api },
     serverURL,
   } = config
-
-  const userConfig = collections.find((collection) => collection.slug === userSlug)
-
-  // const onSuccess = async (json) => {
-  //   if (json?.user?.token) {
-  //     await fetchFullUser()
-  //   }
-
-  //   setInitialized(true)
-  // }
 
   const fields = [
     {
@@ -103,20 +84,14 @@ export const CreateFirstUser: React.FC<{
       <h1>{t('general:welcome')}</h1>
       <p>{t('authentication:beginCreateFirstUser')}</p>
       <Form
-        action={`${serverURL}${api}/${userSlug}/first-register`}
+        action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
         method="POST"
         // onSuccess={onSuccess}
-        redirect={admin}
+        redirect={adminRoute}
         validationOperation="create"
+        initialState={formState}
       >
-        <RenderFields
-          fieldSchema={[...fields, ...userConfig.fields]}
-          fieldTypes={fieldTypes}
-          user={user}
-          formState={formState}
-          i18n={i18n}
-          payload={payload}
-        />
+        <CreateFirstUserFields userSlug={userSlug} />
         <FormSubmit>{t('general:create')}</FormSubmit>
       </Form>
     </MinimalTemplate>

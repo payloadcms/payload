@@ -223,12 +223,6 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
                 )}
               </Fragment>
             }
-            hasSavePermission={hasSavePermission}
-            docPermissions={docPermissions}
-            docPreferences={docPreferences}
-            data={data}
-            user={user}
-            locale={locale}
             fieldMap={fieldMap}
             AfterFields={AfterFields}
           />

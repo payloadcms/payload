@@ -18,11 +18,7 @@ export const buildComponentMap = (args: {
 
   // Collections
   const collections = config.collections.reduce((acc, collectionConfig) => {
-    const {
-      fields,
-      slug,
-      admin: { useAsTitle, defaultColumns },
-    } = collectionConfig
+    const { fields, slug } = collectionConfig
 
     const beforeList = collectionConfig?.admin?.components?.BeforeList
 
