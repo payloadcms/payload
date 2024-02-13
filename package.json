@@ -106,12 +106,12 @@
   },
   "pnpm": {
     "overrides": {
-      "copyfiles": "2.4.1",
-      "cross-env": "7.0.3",
-      "dotenv": "8.6.0",
-      "drizzle-orm": "0.29.3",
-      "ts-node": "10.9.2",
-      "typescript": "5.2.2"
+      "copyfiles": "$copyfiles",
+      "cross-env": "$cross-env",
+      "dotenv": "$dotenv",
+      "drizzle-orm": "$drizzle-orm",
+      "ts-node": "$ts-node",
+      "typescript": "$typescript"
     }
   },
   "engines": {
