@@ -43,6 +43,7 @@ export type MappedField = {
    */
   tabs?: MappedTab[]
   fieldMap?: FieldMap
+  localized: boolean
 }
 
 export type FieldMap = MappedField[]

@@ -283,6 +283,7 @@ export const mapFields = (args: {
           isSidebar: field.admin?.position === 'sidebar',
           subfields: nestedFieldMap,
           tabs,
+          localized: 'localized' in field ? field.localized : false,
         }
 
         if (FieldComponent) {

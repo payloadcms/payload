@@ -131,13 +131,11 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
 
   return (
     <DefaultVersionView
-      collectionConfig={collectionConfig}
+      collectionSlug={collectionSlug}
+      globalSlug={globalSlug}
       compareDoc={compareDoc}
-      config={config}
       doc={doc}
-      fields={fields}
-      globalConfig={globalConfig}
-      locales={locales}
+      locales={locales && Array.isArray(locales) && locales?.map(({ label }) => label)}
       mostRecentDoc={mostRecentDoc}
       id={id}
       permissions={permissions}
@@ -146,7 +144,6 @@ export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
       versionID={versionID}
       docPermissions={docPermissions}
       locale="" // TODO
-      i18n={i18n}
     />
   )
 }

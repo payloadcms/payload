@@ -1,7 +1,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { ArrayField, BlockField, Field } from 'payload/types'
+import type { Field } from 'payload/types'
 import type { Props } from '../types'
 
 import RenderFieldsToDiff from '../..'
@@ -9,19 +9,19 @@ import { fieldAffectsData } from 'payload/types'
 import { getUniqueListBy } from 'payload/utilities'
 import Label from '../../Label'
 import './index.scss'
+import { MappedField } from '@payloadcms/ui'
 
 const baseClass = 'iterable-diff'
 
-const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
+const Iterable: React.FC<Props> = ({
   comparison,
   field,
-  fieldComponents,
   locale,
   locales,
   permissions,
   version,
   i18n,
-  config,
+  fieldComponents,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
@@ -41,9 +41,9 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
             const versionRow = version?.[i] || {}
             const comparisonRow = comparison?.[i] || {}
 
-            let subFields: Field[] = []
+            let subFields: MappedField[] = []
 
-            if (field.type === 'array') subFields = field.fields
+            if (field.type === 'array') subFields = field.subfields
 
             if (field.type === 'blocks') {
               subFields = [
@@ -76,9 +76,9 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
 
             return (
               <div className={`${baseClass}__wrap`} key={i}>
-                <RenderFieldsToDiff
+                {/* <RenderFieldsToDiff
                   comparison={comparisonRow}
-                  fieldComponents={fieldComponents}
+                  fieldMap={subFields}
                   fieldPermissions={permissions}
                   fields={subFields.filter(
                     (subField) =>
@@ -88,8 +88,8 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
                   version={versionRow}
                   i18n={i18n}
                   locale={locale}
-                  config={config}
-                />
+                  fieldComponents={fieldComponents}
+                /> */}
               </div>
             )
           })}

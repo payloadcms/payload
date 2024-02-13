@@ -1,14 +1,22 @@
+'use client'
 import React from 'react'
 import type { FieldAffectingData } from 'payload/types'
 import type { StepNavItem } from '@payloadcms/ui'
 import type { DefaultVersionsViewProps } from './types'
 import { fieldAffectsData } from 'payload/types'
-import { Gutter, SetStepNav, formatDate } from '@payloadcms/ui'
-import RenderFieldsToDiff from '../RenderFieldsToDiff'
-import fieldComponents from '../RenderFieldsToDiff/fields'
+import {
+  Gutter,
+  SetStepNav,
+  formatDate,
+  useComponentMap,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
 import Restore from '../Restore'
 import { mostRecentVersionOption } from '../shared'
 import { getTranslation } from '@payloadcms/translations'
+import fieldComponents from '../RenderFieldsToDiff/fields'
+import RenderFieldsToDiff from '../RenderFieldsToDiff'
 
 import './index.scss'
 
@@ -21,15 +29,26 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   compareDoc,
   locales,
   docPermissions,
-  fields,
-  config,
-  collectionConfig,
-  globalConfig,
+  collectionSlug,
+  globalSlug,
   id,
   versionID,
   locale,
-  i18n,
 }) => {
+  const config = useConfig()
+
+  const { i18n } = useTranslation()
+
+  const { getFieldMap } = useComponentMap()
+
+  const fieldMap = getFieldMap({ collectionSlug, globalSlug })
+
+  const collectionConfig = config.collections.find(
+    (collection) => collection.slug === collectionSlug,
+  )
+
+  const globalConfig = config.globals.find((global) => global.slug === globalSlug)
+
   const {
     routes: { admin },
     admin: { dateFormat },
@@ -142,8 +161,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             {canUpdate && (
               <Restore
                 className={`${baseClass}__restore`}
-                collectionSlug={collectionConfig?.slug}
-                globalSlug={globalConfig?.slug}
+                collectionSlug={collectionSlug}
+                globalSlug={globalSlug}
                 label={collectionConfig?.labels.singular || globalConfig?.label}
                 originalDocID={id}
                 versionDate={formattedCreatedAt}
@@ -168,18 +187,13 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         {doc?.version && (
           <RenderFieldsToDiff
             comparison={comparison}
-            fieldComponents={fieldComponents}
             fieldPermissions={docPermissions?.fields}
-            fields={fields}
-            locales={
-              locales
-                ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
-                : []
-            }
+            fieldMap={fieldMap}
+            locales={locales}
             version={doc?.version}
-            i18n={i18n}
             locale={locale}
-            config={config}
+            i18n={i18n}
+            fieldComponents={fieldComponents}
           />
         )}
       </Gutter>

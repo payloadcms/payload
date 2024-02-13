@@ -1,18 +1,6 @@
-import { I18n } from '@payloadcms/translations'
-import {
-  CollectionPermission,
-  FieldPermissions,
-  GlobalPermission,
-  Permissions,
-  User,
-} from 'payload/auth'
-import {
-  Document,
-  Field,
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-} from 'payload/types'
+import { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
+
+import { Document, SanitizedCollectionConfig } from 'payload/types'
 
 export type CompareOption = {
   label: string
@@ -26,16 +14,13 @@ export type DefaultVersionsViewProps = {
   mostRecentDoc: Document
   publishedDoc: Document
   compareDoc: Document
-  fields: Field[]
-  locales: CompareOption[]
+  locales: string[]
   user: User
   permissions: Permissions
-  config: SanitizedConfig
-  collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
   id?: string | number
   versionID?: string
   docPermissions: CollectionPermission | GlobalPermission
   locale: string
-  i18n: I18n
+  collectionSlug?: SanitizedCollectionConfig['slug']
+  globalSlug?: SanitizedCollectionConfig['slug']
 }

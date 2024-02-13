@@ -5,8 +5,9 @@ import type { Props } from '../types'
 
 import Label from '../../Label'
 import { diffStyles } from '../styles'
-import './index.scss'
 import { DiffViewer } from './DiffViewer'
+
+import './index.scss'
 
 const baseClass = 'text-diff'
 
@@ -36,7 +37,7 @@ const Text: React.FC<Props> = ({
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
         {typeof field.label === 'string' ? field.label : '[field-label]' /* TODO */}
-        {getTranslation(field.label, i18n)}
+        {getTranslation(field?.label || '', i18n)}
       </Label>
       <DiffViewer
         comparisonToRender={comparisonToRender}
