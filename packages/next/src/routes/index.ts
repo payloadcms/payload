@@ -161,6 +161,7 @@ export const GET = async (
         collection: slug1,
       },
     })
+
     collection = req.payload.collections?.[slug1]
 
     if (collection) {

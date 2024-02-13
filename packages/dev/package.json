@@ -11,7 +11,7 @@
   "dependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "next": "14.1.1-canary.27",
+    "next": "14.1.0",
     "payload": "workspace:*",
     "react": "18.3.0-canary-b36ae8d7a-20231207",
     "react-dom": "18.3.0-canary-b36ae8d7a-20231207"

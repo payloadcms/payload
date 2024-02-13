@@ -1,42 +1,41 @@
-import payload from '../../packages/payload/src'
-import { devUser } from '../credentials'
+import type { Payload } from '../../packages/payload/src'
+
 import { initPayloadTest } from '../helpers/configHelpers'
 import { postsSlug } from './collections/Posts'
 
 require('isomorphic-fetch')
 
-let apiUrl
 let jwt
 
 const headers = {
   'Content-Type': 'application/json',
 }
-const { email, password } = devUser
+
+let payload: Payload
+let apiURL: string
+
 describe('_Community Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
-
-    const response = await fetch(`${apiUrl}/users/login`, {
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-      headers,
-      method: 'post',
+    const { payload: payloadClient, serverURL } = await initPayloadTest({
+      __dirname,
+      init: { local: false },
     })
 
-    const data = await response.json()
-    jwt = data.token
+    apiURL = `${serverURL}/api`
+    payload = payloadClient
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy(payload)
     }
+  })
+
+  beforeEach(() => {
+    jest.resetModules()
   })
 
   // --__--__--__--__--__--__--__--__--__
@@ -56,7 +55,7 @@ describe('_Community Tests', () => {
   })
 
   it('rest API example', async () => {
-    const newPost = await fetch(`${apiUrl}/${postsSlug}`, {
+    const newPost = await fetch(`${apiURL}/${postsSlug}`, {
       method: 'POST',
       headers: {
         ...headers,
