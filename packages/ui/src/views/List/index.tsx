@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import type { DefaultListViewProps } from './types'
 import { SelectionProvider } from './SelectionProvider'
@@ -16,6 +16,7 @@ import { useTranslation } from '../../providers/Translation'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
 import { Table } from '../../elements/Table'
 import { ListControls } from '../../elements/ListControls'
+import { useStepNav } from '../../elements/StepNav'
 
 import './index.scss'
 
@@ -55,6 +56,8 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
 
   const { i18n } = useTranslation()
 
+  const { setStepNav } = useStepNav()
+
   let docs = data.docs || []
 
   if (collectionConfig.upload) {
@@ -65,6 +68,14 @@ export const DefaultList: React.FC<DefaultListViewProps> = (props) => {
       }
     })
   }
+
+  useEffect(() => {
+    setStepNav([
+      {
+        label: labels?.plural,
+      },
+    ])
+  }, [setStepNav, labels])
 
   return (
     <div className={baseClass}>
