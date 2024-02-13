@@ -112,8 +112,13 @@ export const POST = async (request: Request) => {
     validationRules: (request, args, defaultRules) => defaultRules.concat(validationRules(args)),
   })(originalRequest)
 
+  const resHeaders = new Headers(apiResponse.headers)
+  for (let key in headers) {
+    resHeaders.append(key, headers[key])
+  }
+
   return new Response(apiResponse.body, {
     status: apiResponse.status,
-    headers: new Headers(headers),
+    headers: new Headers(resHeaders),
   })
 }
