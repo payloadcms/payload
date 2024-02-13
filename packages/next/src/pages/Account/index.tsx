@@ -5,13 +5,11 @@ import {
   HydrateClientUser,
   buildStateFromSchema,
   formatFields,
-  fieldTypes,
   DefaultEditView,
-  DefaultEditViewProps,
+  EditViewProps,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
-import { ToggleTheme } from './ToggleTheme'
 import { Settings } from './Settings'
 
 export const Account = async ({
@@ -82,27 +80,20 @@ export const Account = async ({
       user,
     })
 
-    const componentProps: DefaultEditViewProps = {
+    const componentProps: EditViewProps = {
       action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
       apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
       collectionSlug: userSlug,
       data,
-      fieldTypes,
       hasSavePermission: collectionPermissions?.update?.permission,
       formState,
-      onSave: () => {},
       docPermissions: collectionPermissions,
       docPreferences,
       user,
       updatedAt: '', // TODO
       id: user?.id,
       locale,
-      AfterDocument: (
-        <Fragment>
-          <Settings />
-          <ToggleTheme />
-        </Fragment>
-      ),
+      AfterFields: <Settings />,
     }
 
     return (

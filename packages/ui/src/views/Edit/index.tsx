@@ -18,7 +18,6 @@ import { Upload } from './Upload'
 import { useConfig } from '../../providers/Config'
 import { useTranslation } from '../../providers/Translation'
 import { useComponentMap } from '../../providers/ComponentMapProvider'
-import { FieldMap } from '../../utilities/buildComponentMap/types'
 
 import './index.scss'
 
@@ -29,6 +28,8 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
     action,
     apiURL,
     BeforeDocument,
+    AfterDocument,
+    AfterFields,
     data,
     formState: initialStateFromProps,
     initializeFormState,
@@ -229,7 +230,9 @@ export const DefaultEditView: React.FC<EditViewProps> = (props) => {
             user={user}
             locale={locale}
             fieldMap={fieldMap}
+            AfterFields={AfterFields}
           />
+          {AfterDocument}
         </Form>
       </OperationProvider>
     </main>
