@@ -6,6 +6,7 @@ import { withCondition } from '../../withCondition'
 import { fieldBaseClass } from '../shared'
 import { Validate } from 'payload/types'
 import useField from '../../useField'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -21,8 +22,11 @@ export const Password: React.FC<Props> = (props) => {
     path: pathFromProps,
     name,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const memoizedValidate: Validate = useCallback(
     (value, options) => {

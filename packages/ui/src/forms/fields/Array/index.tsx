@@ -19,6 +19,8 @@ import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import { ArrayRow } from './ArrayRow'
+import LabelComp from '../../Label'
+
 import './index.scss'
 
 const baseClass = 'array-field'
@@ -36,10 +38,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     required,
     validate,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     Description,
     fieldMap,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const minRows = 'minRows' in props ? props.minRows : 0
   const maxRows = 'maxRows' in props ? props.maxRows : undefined

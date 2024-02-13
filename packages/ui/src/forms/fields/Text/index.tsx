@@ -6,9 +6,11 @@ import { withCondition } from '../../withCondition'
 import { fieldBaseClass, isFieldRTL } from '../shared'
 import useField from '../../useField'
 import { useTranslation } from '../../../providers/Translation'
-import { useConfig, useLocale } from '../../..'
+import { useConfig } from '../../../providers/Config'
+import { useLocale } from '../../../providers/Locale'
 import { Validate } from 'payload/types'
 import { getTranslation } from '@payloadcms/translations'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -20,7 +22,7 @@ const Text: React.FC<Props> = (props) => {
     minLength,
     required,
     Error,
-    Label,
+    Label: LabelFromProps,
     Description,
     BeforeInput,
     AfterInput,
@@ -34,7 +36,10 @@ const Text: React.FC<Props> = (props) => {
     rtl,
     name,
     path: pathFromProps,
+    label,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 

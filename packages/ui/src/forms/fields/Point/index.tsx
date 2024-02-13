@@ -9,6 +9,7 @@ import { fieldBaseClass } from '../shared'
 import { Validate } from 'payload/types'
 import { useTranslation } from '../../../providers/Translation'
 import { withCondition } from '../../withCondition'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -28,9 +29,12 @@ const PointField: React.FC<Props> = (props) => {
     Error,
     BeforeInput,
     AfterInput,
-    Label,
+    Label: LabelFromProps,
+    label,
     Description,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 

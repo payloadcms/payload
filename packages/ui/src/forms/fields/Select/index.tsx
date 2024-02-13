@@ -9,6 +9,7 @@ import { fieldBaseClass } from '../shared'
 import useField from '../../useField'
 import ReactSelect from '../../../elements/ReactSelect'
 import { useTranslation } from '../../../providers/Translation'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -35,11 +36,14 @@ export const Select: React.FC<Props> = (props) => {
     required,
     Description,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     BeforeInput,
     AfterInput,
     validate,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const optionsFromProps = 'options' in props ? props.options : []
   const hasMany = 'hasMany' in props ? props.hasMany : false

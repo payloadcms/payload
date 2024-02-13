@@ -8,6 +8,7 @@ import { useTranslation } from '../../../providers/Translation'
 import useField from '../../useField'
 import { Validate } from 'payload/types'
 import { useConfig } from '../../../providers/Config'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -27,12 +28,15 @@ const Textarea: React.FC<Props> = (props) => {
     required,
     locale,
     Error,
-    Label,
+    Label: LabelFromProps,
     BeforeInput,
     AfterInput,
     validate,
     Description,
+    label,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const rows = 'rows' in props ? props.rows : undefined
 

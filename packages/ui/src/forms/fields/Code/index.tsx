@@ -6,6 +6,7 @@ import { CodeEditor } from '../../../elements/CodeEditor'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import { withCondition } from '../../withCondition'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -26,12 +27,15 @@ const Code: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     Description,
     BeforeInput,
     AfterInput,
     validate,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
   const language = 'language' in props ? props.language : 'javascript'

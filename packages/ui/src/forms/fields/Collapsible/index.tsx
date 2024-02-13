@@ -14,6 +14,7 @@ import { useFieldPath } from '../../FieldPathProvider'
 import { WatchChildErrors } from '../../WatchChildErrors'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import { useTranslation } from '../../../providers/Translation'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -28,8 +29,12 @@ const CollapsibleField: React.FC<Props> = (props) => {
     Description,
     Error,
     fieldMap,
-    Label,
+    Label: LabelFromProps,
+    label,
+    required,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const pathFromContext = useFieldPath()
   const path = pathFromProps || pathFromContext
