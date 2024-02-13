@@ -2,11 +2,11 @@ import React from 'react'
 
 import { DefaultVersionView } from './Default'
 import { Document, Field } from 'payload/types'
-import type { EditViewProps } from '@payloadcms/ui'
+import type { ServerSideEditViewProps } from '@payloadcms/ui'
 import { CollectionPermission, GlobalPermission } from 'payload/auth'
 import { notFound } from 'next/navigation'
 
-export const VersionView: React.FC<EditViewProps> = async (props) => {
+export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
   const { config, permissions, payload, user, params, i18n } = props
 
   const versionID = params.segments[2]

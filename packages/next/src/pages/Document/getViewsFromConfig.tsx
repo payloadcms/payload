@@ -43,7 +43,7 @@ export const getViewsFromConfig = async ({
           if ('create' in docPermissions && docPermissions?.create?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = lazy(() =>
-              import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
+              import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
             )
           }
           break
@@ -53,7 +53,7 @@ export const getViewsFromConfig = async ({
           if (docPermissions?.read?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = lazy(() =>
-              import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
+              import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
             )
           }
         }
@@ -120,7 +120,7 @@ export const getViewsFromConfig = async ({
       if (docPermissions?.read?.permission) {
         CustomView = getCustomViewByKey(views, 'Default')
         DefaultView = lazy(() =>
-          import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
+          import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
         )
       }
     } else if (routeSegments?.length === 1) {
@@ -161,7 +161,7 @@ export const getViewsFromConfig = async ({
           if (docPermissions?.read?.permission) {
             CustomView = getCustomViewByKey(views, 'Default')
             DefaultView = lazy(() =>
-              import('@payloadcms/ui').then((module) => ({ default: module.DefaultEditView })),
+              import('../Edit/index.tsx').then((module) => ({ default: module.EditView })),
             )
           }
           break

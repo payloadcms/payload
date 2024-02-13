@@ -6,18 +6,18 @@ import {
   PerPage,
   Table,
   SetDocumentStepNav as SetStepNav,
-  EditViewProps,
+  ServerSideEditViewProps,
 } from '@payloadcms/ui'
 import { buildVersionColumns } from './columns'
-import './index.scss'
-
 import { notFound } from 'next/navigation'
 import { getTranslation } from '@payloadcms/translations'
 
+import './index.scss'
+
 const baseClass = 'versions'
 
-export const VersionsView: React.FC<EditViewProps> = async (props) => {
-  const { config, searchParams, payload, user, i18n } = props
+export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => {
+  const { user, payload, config, searchParams, i18n } = props
 
   const id = 'id' in props ? props.id : undefined
   const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
@@ -102,6 +102,14 @@ export const VersionsView: React.FC<EditViewProps> = async (props) => {
 
   const versionCount = versionsData?.totalDocs || 0
 
+  const columns = buildVersionColumns({
+    config,
+    collectionConfig,
+    globalConfig,
+    docID: id,
+    i18n,
+  })
+
   return (
     <React.Fragment>
       <SetStepNav
@@ -131,16 +139,7 @@ export const VersionsView: React.FC<EditViewProps> = async (props) => {
                   },
                 )}
               </div>
-              <Table
-                columns={buildVersionColumns({
-                  config,
-                  collectionConfig,
-                  globalConfig,
-                  docID: id,
-                  i18n,
-                })}
-                data={versionsData?.docs}
-              />
+              <Table columns={columns} data={versionsData?.docs} />
               <div className={`${baseClass}__page-controls`}>
                 <Pagination
                   hasNextPage={versionsData.hasNextPage}

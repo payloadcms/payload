@@ -1,16 +1,8 @@
-import type { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
-import type {
-  Document,
-  SanitizedCollectionConfig,
-  SanitizedConfig,
-  SanitizedGlobalConfig,
-  Payload,
-  DocumentPreferences,
-} from 'payload/types'
-import type { I18n } from '@payloadcms/translations'
+import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
+import type { Document, DocumentPreferences, Payload, SanitizedConfig } from 'payload/types'
 import type { FormState } from '../forms/Form/types'
-import type { FieldTypes, Locale } from 'payload/config'
-import { FieldMap } from '../utilities/buildComponentMap/types'
+import type { Locale } from 'payload/config'
+import { I18n } from '@payloadcms/translations'
 
 export type EditViewProps = (
   | {
@@ -42,4 +34,13 @@ export type EditViewProps = (
   BeforeDocument?: React.ReactNode
   AfterDocument?: React.ReactNode
   AfterFields?: React.ReactNode
+}
+
+export type ServerSideEditViewProps = EditViewProps & {
+  payload: Payload
+  config: SanitizedConfig
+  searchParams: { [key: string]: string | string[] | undefined }
+  i18n: I18n
+  collectionConfig?: SanitizedConfig['collections'][0]
+  globalConfig?: SanitizedConfig['globals'][0]
 }
