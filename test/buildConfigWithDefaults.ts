@@ -35,6 +35,13 @@ const databaseAdapters = {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   }),
+  'postgres-uuid': postgresAdapter({
+    idType: 'uuid',
+    migrationDir,
+    pool: {
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
+    },
+  }),
   supabase: postgresAdapter({
     migrationDir,
     pool: {

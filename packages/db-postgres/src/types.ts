@@ -16,9 +16,9 @@ import type { Pool, PoolConfig } from 'pg'
 export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
+  idType?: 'serial' | 'uuid'
   logger?: DrizzleConfig['logger']
   migrationDir?: string
-  idType?: 'serial' | 'uuid'
   pool: PoolConfig
   push?: boolean
 }
@@ -57,9 +57,9 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  idType: Args['idType']
   logger: DrizzleConfig['logger']
   pool: Pool
-  idType: Args['idType']
   poolOptions: Args['pool']
   push: boolean
   relations: Record<string, GenericRelation>
@@ -73,6 +73,8 @@ export type PostgresAdapter = BaseDatabaseAdapter & {
   }
   tables: Record<string, GenericTable>
 }
+
+export type IDType = 'integer' | 'numeric' | 'uuid' | 'varchar'
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 

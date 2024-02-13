@@ -1,7 +1,9 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
-import { relations } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
+import type { Field } from 'payload/types'
+
+import { relations } from 'drizzle-orm'
 import {
   index,
   integer,
@@ -10,17 +12,15 @@ import {
   serial,
   timestamp,
   unique,
-  uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
-import type { Field } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumns, GenericTable, PostgresAdapter } from '../types'
+import type { GenericColumns, GenericTable, IDType, PostgresAdapter } from '../types'
 
-import { getConfigIDType } from './getConfigIDType'
 import { parentIDColumnMap } from './parentIDColumnMap'
+import { setColumnID } from './setColumnID'
 import { traverseFields } from './traverseFields'
 
 type Args = {
@@ -89,34 +89,8 @@ export const buildTable = ({
   // Drizzle relations
   const relationsToBuild: Map<string, string> = new Map()
 
-  // main branch
-  // const idColType = getConfigIDType(fields)
-  // const idColTypeMap = {
-  //   integer: serial,
-  //   numeric,
-  //   varchar,
-  // }
-  // columns.id = idColTypeMap[idColType]('id').primaryKey()
+  const idColType: IDType = setColumnID({ adapter, columns, fields })
 
-  const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
-  let idColType = 'integer'
-
-  if (adapter.idType === 'uuid') {
-    idColType = 'uuid'
-    columns.id = uuid('id').defaultRandom().primaryKey()
-  } else if (idField) {
-    if (idField.type === 'number') {
-      idColType = 'numeric'
-      columns.id = numeric('id').primaryKey()
-    }
-
-    if (idField.type === 'text') {
-      idColType = 'varchar'
-      columns.id = varchar('id').primaryKey()
-    }
-  } else {
-    columns.id = serial('id').primaryKey()
-  }
   ;({
     hasLocalizedField,
     hasLocalizedManyNumberField,
