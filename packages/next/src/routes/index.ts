@@ -151,6 +151,7 @@ export const GET = async (
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
   let req: PayloadRequest
+  let res: Response
   let collection: Collection
 
   try {
@@ -175,23 +176,29 @@ export const GET = async (
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.GET.find({ req, collection })
+          res = await endpoints.collection.GET.find({ req, collection })
+          break
         case 2:
           if (slug2 in endpoints.collection.GET) {
             // /:collection/init
             // /:collection/me
             // /:collection/versions
-            return (endpoints.collection.GET[slug2] as CollectionRouteHandler)({ req, collection })
+            res = await (endpoints.collection.GET[slug2] as CollectionRouteHandler)({
+              req,
+              collection,
+            })
+          } else {
+            // /:collection/:id
+            res = await endpoints.collection.GET.findByID({ req, id: slug2, collection })
           }
-          // /:collection/:id
-          return endpoints.collection.GET.findByID({ req, id: slug2, collection })
+          break
         case 3:
           if (`doc-${slug2}-by-id` in endpoints.collection.GET) {
             // /:collection/access/:id
             // /:collection/versions/:id
-            return (endpoints.collection.GET[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID)(
-              { req, id: slug3, collection },
-            )
+            res = await (
+              endpoints.collection.GET[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
+            )({ req, id: slug3, collection })
           }
           break
       }
@@ -207,12 +214,13 @@ export const GET = async (
       switch (slug.length) {
         case 2:
           // /globals/:slug
-          return endpoints.global.GET.findOne({ req, globalConfig })
+          res = await endpoints.global.GET.findOne({ req, globalConfig })
+          break
         case 3:
           if (`doc-${slug3}` in endpoints.global.GET) {
             // /globals/:slug/access
             // /globals/:slug/versions
-            return (endpoints.global.GET?.[`doc-${slug3}`] as GlobalRouteHandler)({
+            res = await (endpoints.global.GET?.[`doc-${slug3}`] as GlobalRouteHandler)({
               req,
               globalConfig,
             })
@@ -221,7 +229,7 @@ export const GET = async (
         case 4:
           if (`doc-${slug3}-by-id` in endpoints.global.GET) {
             // /globals/:slug/versions/:id
-            return (endpoints.global.GET?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID)({
+            res = await (endpoints.global.GET?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID)({
               req,
               id: slug4,
               globalConfig,
@@ -230,8 +238,10 @@ export const GET = async (
           break
       }
     } else if (slug.length === 1 && slug1 === 'access') {
-      return endpoints.root.GET.access({ req })
+      res = await endpoints.root.GET.access({ req })
     }
+
+    if (res instanceof Response) return res
 
     // root routes
     const customEndpointResponse = await handleCustomEndpoints({
@@ -256,6 +266,7 @@ export const POST = async (
 ) => {
   const [slug1, slug2, slug3, slug4] = slug
   let req: PayloadRequest
+  let res: Response
   let collection: Collection
 
   try {
@@ -277,7 +288,8 @@ export const POST = async (
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.POST.create({ req, collection })
+          res = await endpoints.collection.POST.create({ req, collection })
+          break
         case 2:
           if (slug2 in endpoints.collection.POST) {
             // /:collection/login
@@ -288,7 +300,7 @@ export const POST = async (
             // /:collection/forgot-password
             // /:collection/reset-password
             // /:collection/refresh-token
-            return (endpoints.collection.POST?.[slug2] as CollectionRouteHandler)({
+            res = await (endpoints.collection.POST?.[slug2] as CollectionRouteHandler)({
               req,
               collection,
             })
@@ -299,7 +311,7 @@ export const POST = async (
             // /:collection/access/:id
             // /:collection/versions/:id
             // /:collection/verify/:token ("doc-verify-by-id" uses id as token internally)
-            return (
+            res = await (
               endpoints.collection.POST[`doc-${slug2}-by-id`] as CollectionRouteHandlerWithID
             )({ req, id: slug3, collection })
           }
@@ -311,11 +323,12 @@ export const POST = async (
       switch (slug.length) {
         case 2:
           // /globals/:slug
-          return endpoints.global.POST.update({ req, globalConfig })
+          res = await endpoints.global.POST.update({ req, globalConfig })
+          break
         case 3:
           if (`doc-${slug3}` in endpoints.global.POST) {
             // /globals/:slug/access
-            return (endpoints.global.POST?.[`doc-${slug3}`] as GlobalRouteHandler)({
+            res = await (endpoints.global.POST?.[`doc-${slug3}`] as GlobalRouteHandler)({
               req,
               globalConfig,
             })
@@ -324,17 +337,21 @@ export const POST = async (
         case 4:
           if (`doc-${slug3}-by-id` in endpoints.global.POST) {
             // /globals/:slug/versions/:id
-            return (endpoints.global.POST?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID)({
-              req,
-              id: slug4,
-              globalConfig,
-            })
+            res = await (endpoints.global.POST?.[`doc-${slug3}-by-id`] as GlobalRouteHandlerWithID)(
+              {
+                req,
+                id: slug4,
+                globalConfig,
+              },
+            )
           }
           break
         default:
-          return new Response('Route Not Found', { status: 404 })
+          res = new Response('Route Not Found', { status: 404 })
       }
     }
+
+    if (res instanceof Response) return res
 
     // root routes
     const customEndpointResponse = await handleCustomEndpoints({
@@ -359,6 +376,7 @@ export const DELETE = async (
 ) => {
   const [slug1, slug2] = slug
   let req: PayloadRequest
+  let res: Response
   let collection: Collection
 
   try {
@@ -382,12 +400,16 @@ export const DELETE = async (
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.DELETE.delete({ req, collection })
+          res = await endpoints.collection.DELETE.delete({ req, collection })
+          break
         case 2:
           // /:collection/:id
-          return endpoints.collection.DELETE.deleteByID({ req, id: slug2, collection })
+          res = await endpoints.collection.DELETE.deleteByID({ req, id: slug2, collection })
+          break
       }
     }
+
+    if (res instanceof Response) return res
 
     // root routes
     const customEndpointResponse = await handleCustomEndpoints({
@@ -412,6 +434,7 @@ export const PATCH = async (
 ) => {
   const [slug1, slug2] = slug
   let req: PayloadRequest
+  let res: Response
   let collection: Collection
 
   try {
@@ -435,12 +458,16 @@ export const PATCH = async (
       switch (slug.length) {
         case 1:
           // /:collection
-          return endpoints.collection.PATCH.update({ req, collection })
+          res = await endpoints.collection.PATCH.update({ req, collection })
+          break
         case 2:
           // /:collection/:id
-          return endpoints.collection.PATCH.updateByID({ req, id: slug2, collection })
+          res = await endpoints.collection.PATCH.updateByID({ req, id: slug2, collection })
+          break
       }
     }
+
+    if (res instanceof Response) return res
 
     // root routes
     const customEndpointResponse = await handleCustomEndpoints({
