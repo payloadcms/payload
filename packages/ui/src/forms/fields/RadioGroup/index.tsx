@@ -8,6 +8,7 @@ import { Radio } from './Radio'
 import { optionIsObject } from 'payload/types'
 import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -22,11 +23,14 @@ const RadioGroup: React.FC<Props> = (props) => {
     width,
     path: pathFromProps,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     Description,
     validate,
     required,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const options = 'options' in props ? props.options : []
 

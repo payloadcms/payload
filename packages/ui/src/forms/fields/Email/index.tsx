@@ -8,6 +8,7 @@ import { useTranslation } from '../../../providers/Translation'
 import { Validate } from 'payload/types'
 import useField from '../../useField'
 import { getTranslation } from '@payloadcms/translations'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -21,7 +22,8 @@ export const Email: React.FC<Props> = (props) => {
     style,
     width,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     BeforeInput,
     AfterInput,
     Description,
@@ -29,6 +31,8 @@ export const Email: React.FC<Props> = (props) => {
     validate,
     placeholder,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const { i18n } = useTranslation()
 

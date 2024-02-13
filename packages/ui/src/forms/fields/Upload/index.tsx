@@ -16,6 +16,7 @@ import FileDetails from '../../../elements/FileDetails'
 import { useListDrawer } from '../../../elements/ListDrawer'
 import { GetFilterOptions } from '../../../elements/GetFilterOptions'
 import { fieldBaseClass } from '../shared'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -29,13 +30,16 @@ const Upload: React.FC<Props> = (props) => {
     style,
     width,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     filterOptions,
     path: pathFromProps,
     relationTo,
     required,
     validate,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const {
     collections,

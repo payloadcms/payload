@@ -10,6 +10,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '../../../providers/Translation'
 import useField from '../../useField'
 import { Option } from '../../../elements/ReactSelect/types'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -24,12 +25,15 @@ const NumberField: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     Error,
-    Label,
+    Label: LabelFromProps,
     Description,
     BeforeInput,
     AfterInput,
     validate,
+    label,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const max = 'max' in props ? props.max : Infinity
   const min = 'min' in props ? props.min : -Infinity

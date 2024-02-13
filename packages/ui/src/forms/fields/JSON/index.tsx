@@ -8,6 +8,7 @@ import { CodeEditor } from '../../../elements/CodeEditor'
 import { Validate } from 'payload/types'
 import useField from '../../useField'
 import { withCondition } from '../../withCondition'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -22,13 +23,16 @@ const JSONField: React.FC<Props> = (props) => {
     width,
     path: pathFromProps,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     Description,
     BeforeInput,
     AfterInput,
     validate,
     required,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const editorOptions = 'editorOptions' in props ? props.editorOptions : {}
 

@@ -13,13 +13,26 @@ import { FieldPathProvider, useFieldPath } from '../../FieldPathProvider'
 import { WatchChildErrors } from '../../WatchChildErrors'
 import { ErrorPill } from '../../../elements/ErrorPill'
 import { useTranslation } from '../../../providers/Translation'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
 const baseClass = 'group-field'
 
 const Group: React.FC<Props> = (props) => {
-  const { className, style, width, fieldMap, Description, hideGutter, Label } = props
+  const {
+    className,
+    style,
+    width,
+    fieldMap,
+    Description,
+    hideGutter,
+    Label: LabelFromProps,
+    label,
+    required,
+  } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const path = useFieldPath()
 

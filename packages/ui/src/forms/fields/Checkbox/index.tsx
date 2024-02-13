@@ -8,6 +8,7 @@ import { Validate } from 'payload/types'
 import useField from '../../useField'
 import { Check } from '../../../icons/Check'
 import { Line } from '../../../icons/Line'
+import LabelComp from '../../Label'
 
 import './index.scss'
 
@@ -25,7 +26,8 @@ const Checkbox: React.FC<Props> = (props) => {
     validate,
     BeforeInput,
     AfterInput,
-    Label,
+    Label: LabelFromProps,
+    label,
     Error,
     Description,
     onChange: onChangeFromProps,
@@ -36,6 +38,8 @@ const Checkbox: React.FC<Props> = (props) => {
     path: pathFromProps,
     name,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const memoizedValidate: Validate = useCallback(
     (value, options) => {

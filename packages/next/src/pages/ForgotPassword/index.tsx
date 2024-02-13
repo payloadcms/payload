@@ -88,12 +88,7 @@ export const ForgotPassword: React.FC<{
       >
         <h1>{i18n.t('authentication:forgotPassword')}</h1>
         <p>{i18n.t('authentication:forgotPasswordEmailInstructions')}</p>
-        <Email
-          admin={{ autoComplete: 'email' }}
-          label={i18n.t('general:emailAddress')}
-          name="email"
-          required
-        />
+        <Email autoComplete="email" label={i18n.t('general:emailAddress')} name="email" required />
         <FormSubmit>{i18n.t('general:submit')}</FormSubmit>
       </Form>
       <Link href={`${admin}/login`}>{i18n.t('authentication:backToLogin')}</Link>

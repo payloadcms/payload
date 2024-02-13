@@ -14,7 +14,7 @@ import {
 } from 'payload/types'
 import { Option } from 'payload/types'
 import { FormState } from '../..'
-import type { FieldMap, ReducedBlock, ReducedTab } from '../../utilities/buildComponentMap/types'
+import type { FieldMap, ReducedBlock, MappedTab } from '../../utilities/buildComponentMap/types'
 
 export const fieldBaseClass = 'field-type'
 
@@ -26,6 +26,7 @@ export type FormFieldBase = {
   BeforeInput?: React.ReactNode
   AfterInput?: React.ReactNode
   Label?: React.ReactNode
+  label?: string
   Description?: React.ReactNode
   Error?: React.ReactNode
   fieldMap?: FieldMap
@@ -33,7 +34,6 @@ export type FormFieldBase = {
   style?: React.CSSProperties
   width?: string
   className?: string
-  label?: RowLabel
   readOnly?: boolean
   rtl?: boolean
   maxLength?: number
@@ -66,7 +66,7 @@ export type FormFieldBase = {
       isSortable?: boolean
     }
   | {
-      tabs?: ReducedTab[]
+      tabs?: MappedTab[]
     }
   | {
       // For `code` fields
@@ -90,6 +90,7 @@ export type FormFieldBase = {
       minRows?: ArrayField['minRows']
       maxRows?: ArrayField['maxRows']
       labels?: ArrayField['labels']
+      label?: RowLabel
     }
   | {
       // For `blocks` fields

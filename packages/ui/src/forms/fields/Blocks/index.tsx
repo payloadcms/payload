@@ -22,6 +22,8 @@ import useField from '../../useField'
 import { fieldBaseClass } from '../shared'
 import { BlockRow } from './BlockRow'
 import { BlocksDrawer } from './BlocksDrawer'
+import LabelComp from '../../Label'
+
 import './index.scss'
 
 const baseClass = 'blocks-field'
@@ -38,12 +40,15 @@ const BlocksField: React.FC<Props> = (props) => {
     localized,
     Description,
     Error,
-    Label,
+    Label: LabelFromProps,
+    label,
     path: pathFromProps,
     permissions,
     required,
     validate,
   } = props
+
+  const Label = LabelFromProps || <LabelComp label={label} required={required} />
 
   const minRows = 'minRows' in props ? props.minRows : 0
   const maxRows = 'maxRows' in props ? props.maxRows : undefined
