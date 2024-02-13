@@ -92,6 +92,8 @@
     "nodemon": "3.0.3",
     "pino": "8.15.0",
     "pino-pretty": "10.2.0",
+    "pino": "8.15.0",
+    "pino-pretty": "10.2.0",
     "prettier": "^3.0.3",
     "prompts": "2.4.2",
     "qs": "6.11.2",
