@@ -116,7 +116,7 @@ jobs:
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: matrix.database == 'postgres'
+        if: matrix.database == 'postgres' || matrix.database == 'postgres-uuid'
 
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
@@ -132,14 +132,14 @@ jobs:
 
       - name: Wait for PostgreSQL
         run: sleep 30
-        if: matrix.database == 'postgres'
+        if: matrix.database == 'postgres' || matrix.database == 'postgres-uuid'
 
       - name: Configure PostgreSQL
         run: |
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: matrix.database == 'postgres'
+        if: matrix.database == 'postgres' || matrix.database == 'postgres-uuid'
 
       - name: Configure Supabase
         run: |
