@@ -33,7 +33,7 @@ export type DefaultVersionsViewProps = {
   config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
-  id?: string
+  id?: string | number
   versionID?: string
   docPermissions: CollectionPermission | GlobalPermission
   locale: string

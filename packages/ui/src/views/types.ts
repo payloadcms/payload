@@ -1,4 +1,4 @@
-import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
+import type { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
 import type { Document, DocumentPreferences, Payload, SanitizedConfig } from 'payload/types'
 import type { FormState } from '../forms/Form/types'
 import type { Locale } from 'payload/config'
@@ -43,4 +43,10 @@ export type ServerSideEditViewProps = EditViewProps & {
   i18n: I18n
   collectionConfig?: SanitizedConfig['collections'][0]
   globalConfig?: SanitizedConfig['globals'][0]
+  params: {
+    segments: string[]
+    collection?: string
+    global?: string
+  }
+  permissions: Permissions
 }

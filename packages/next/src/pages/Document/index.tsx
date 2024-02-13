@@ -189,6 +189,8 @@ export const Document = async ({
     i18n,
     collectionConfig,
     globalConfig,
+    params,
+    permissions,
   }
 
   return (

@@ -7,9 +7,10 @@ import { Gutter, SetStepNav, formatDate } from '@payloadcms/ui'
 import RenderFieldsToDiff from '../RenderFieldsToDiff'
 import fieldComponents from '../RenderFieldsToDiff/fields'
 import Restore from '../Restore'
-import './index.scss'
 import { mostRecentVersionOption } from '../shared'
 import { getTranslation } from '@payloadcms/translations'
+
+import './index.scss'
 
 const baseClass = 'view-version'
 
