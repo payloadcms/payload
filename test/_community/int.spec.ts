@@ -1,18 +1,19 @@
 import type { Payload } from '../../packages/payload/src'
 
+import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { postsSlug } from './collections/Posts'
 
 require('isomorphic-fetch')
 
+let payload: Payload
+let apiURL: string
 let jwt
 
 const headers = {
   'Content-Type': 'application/json',
 }
-
-let payload: Payload
-let apiURL: string
+const { email, password } = devUser
 
 describe('_Community Tests', () => {
   // --__--__--__--__--__--__--__--__--__
@@ -26,16 +27,24 @@ describe('_Community Tests', () => {
 
     apiURL = `${serverURL}/api`
     payload = payloadClient
+
+    const response = await fetch(`${apiURL}/users/login`, {
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+      headers,
+      method: 'post',
+    })
+
+    const data = await response.json()
+    jwt = data.token
   })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy(payload)
     }
-  })
-
-  beforeEach(() => {
-    jest.resetModules()
   })
 
   // --__--__--__--__--__--__--__--__--__

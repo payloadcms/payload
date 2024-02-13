@@ -1,4 +1,3 @@
-import swcRegister from '@swc/register'
 import getPort from 'get-port'
 import path from 'path'
 import shelljs from 'shelljs'
@@ -39,21 +38,6 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_ENV = 'test'
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - bad @swc/register types
-  swcRegister({
-    sourceMaps: 'inline',
-    jsc: {
-      parser: {
-        syntax: 'typescript',
-        tsx: true,
-      },
-    },
-    module: {
-      type: 'commonjs',
-    },
-  })
-
   const payload = await getPayload(initOptions)
 
   const port = await getPort()
@@ -63,6 +47,7 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
     process.env.APP_ENV = 'test'
     process.env.__NEXT_TEST_MODE = 'jest'
     await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../../packages/dev') })
+    jest.resetModules()
   }
 
   return { serverURL, payload }
