@@ -28,6 +28,8 @@ const RadioGroup: React.FC<Props> = (props) => {
     Description,
     validate,
     required,
+    onChange: onChangeFromProps,
+    value: valueFromProps,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -44,10 +46,17 @@ const RadioGroup: React.FC<Props> = (props) => {
     [validate, options, required],
   )
 
-  const { setValue, value, path, showError } = useField<string>({
+  const {
+    setValue,
+    value: valueFromContext,
+    path,
+    showError,
+  } = useField<string>({
     path: pathFromProps || name,
     validate: memoizedValidate,
   })
+
+  const value = valueFromContext || valueFromProps
 
   return (
     <div
@@ -90,7 +99,15 @@ const RadioGroup: React.FC<Props> = (props) => {
               <Radio
                 id={id}
                 isSelected={isSelected}
-                onChange={readOnly ? undefined : setValue}
+                onChange={() => {
+                  if (typeof onChangeFromProps === 'function') {
+                    onChangeFromProps(optionValue)
+                  }
+
+                  if (!readOnly) {
+                    setValue(optionValue)
+                  }
+                }}
                 option={optionIsObject(option) ? option : { label: option, value: option }}
                 path={path}
               />
