@@ -1,4 +1,5 @@
 'use client'
+import React from 'react'
 import {
   Email,
   Form,
@@ -9,12 +10,11 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import React from 'react'
+import Link from 'next/link'
 
 const baseClass = 'login__form'
 
 import './index.scss'
-import Link from 'next/link'
 
 export const LoginForm: React.FC<{
   searchParams: { [key: string]: string | string[] | undefined }

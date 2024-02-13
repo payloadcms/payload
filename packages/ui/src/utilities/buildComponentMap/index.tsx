@@ -1,61 +1,97 @@
-'use client'
-import React, { createContext, useCallback, useContext } from 'react'
-import { ComponentMap, FieldMap, MappedField } from '../../utilities/buildComponentMap/types'
+import React from 'react'
+import type { FieldPermissions } from 'payload/auth'
+import type { SanitizedConfig } from 'payload/types'
+import { mapFields } from './mapFields'
+import { CollectionComponentMap, ComponentMap, GlobalComponentMap } from './types'
 
-export type IComponentMapContext = {
-  componentMap: ComponentMap
-  getMappedFieldByPath: (args: {
-    path: string
-    collectionSlug?: string
-    globalSlug?: string
-  }) => MappedField | undefined
-  getFieldMap: (args: { collectionSlug?: string; globalSlug?: string }) => FieldMap | []
+export const buildComponentMap = (args: {
+  config: SanitizedConfig
+  operation?: 'create' | 'update'
+  permissions?:
+    | {
+        [field: string]: FieldPermissions
+      }
+    | FieldPermissions
+  readOnly?: boolean
+}): ComponentMap => {
+  const { config, operation = 'update', permissions, readOnly: readOnlyOverride } = args
+
+  // Collections
+  const collections = config.collections.reduce((acc, collectionConfig) => {
+    const {
+      fields,
+      slug,
+      admin: { useAsTitle, defaultColumns },
+    } = collectionConfig
+
+    const beforeList = collectionConfig?.admin?.components?.BeforeList
+
+    const beforeListTable = collectionConfig?.admin?.components?.BeforeListTable
+
+    const afterList = collectionConfig?.admin?.components?.AfterList
+
+    const afterListTable = collectionConfig?.admin?.components?.AfterListTable
+
+    const BeforeList =
+      beforeList && Array.isArray(beforeList) && beforeList?.map((Component) => <Component />)
+
+    const BeforeListTable =
+      beforeListTable &&
+      Array.isArray(beforeListTable) &&
+      beforeListTable?.map((Component) => <Component />)
+
+    const AfterList =
+      afterList && Array.isArray(afterList) && afterList?.map((Component) => <Component />)
+
+    const AfterListTable =
+      afterListTable &&
+      Array.isArray(afterListTable) &&
+      afterListTable?.map((Component) => <Component />)
+
+    const mappedFields = mapFields({
+      fieldSchema: fields,
+      operation,
+      permissions,
+      readOnly: readOnlyOverride,
+    })
+
+    const componentMap: CollectionComponentMap = {
+      BeforeList,
+      AfterList,
+      BeforeListTable,
+      AfterListTable,
+      fieldMap: mappedFields,
+    }
+
+    return {
+      ...acc,
+      [slug]: componentMap,
+    }
+  }, {})
+
+  // Globals
+  const globals = config.globals.reduce((acc, globalConfig) => {
+    const { fields, slug } = globalConfig
+
+    const mappedFields = mapFields({
+      fieldSchema: fields,
+      operation,
+      permissions,
+      readOnly: readOnlyOverride,
+    })
+
+    const componentMap: GlobalComponentMap = {
+      fieldMap: mappedFields,
+    }
+
+    return {
+      ...acc,
+      [slug]: componentMap,
+    }
+  }, {})
+
+  return {
+    collections,
+    globals,
+  }
 }
-
-const ComponentMapContext = createContext<IComponentMapContext>({} as IComponentMapContext)
-
-export const ComponentMapProvider: React.FC<{
-  children: React.ReactNode
-  componentMap: ComponentMap
-}> = ({ children, componentMap }) => {
-  const getMappedFieldByPath: IComponentMapContext['getMappedFieldByPath'] = useCallback(
-    ({ collectionSlug, globalSlug, path }) => {
-      let fieldMap: FieldMap
-
-      if (collectionSlug) {
-        fieldMap = componentMap.collections[collectionSlug].fieldMap
-      }
-
-      if (globalSlug) {
-        fieldMap = componentMap.globals[globalSlug].fieldMap
-      }
-
-      // TODO: better lookup for nested fields, etc.
-      return fieldMap.find((field) => field.name === path)
-    },
-    [componentMap],
-  )
-
-  const getFieldMap: IComponentMapContext['getFieldMap'] = useCallback(
-    ({ collectionSlug, globalSlug }) => {
-      if (collectionSlug) {
-        return componentMap.collections[collectionSlug].fieldMap
-      }
-
-      if (globalSlug) {
-        return componentMap.globals[globalSlug].fieldMap
-      }
-
-      return []
-    },
-    [componentMap],
-  )
-
-  return (
-    <ComponentMapContext.Provider value={{ componentMap, getMappedFieldByPath, getFieldMap }}>
-      {children}
-    </ComponentMapContext.Provider>
-  )
-}
-
-export const useComponentMap = (): IComponentMapContext => useContext(ComponentMapContext)

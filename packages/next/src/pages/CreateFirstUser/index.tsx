@@ -13,9 +13,9 @@ import {
 import { SanitizedConfig } from 'payload/types'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
+import { initPage } from '../../utilities/initPage'
 
 import './index.scss'
-import { initPage } from '../../utilities/initPage'
 
 const baseClass = 'create-first-user'
 
