@@ -2,8 +2,9 @@ import React from 'react'
 import type { SanitizedConfig } from 'payload/types'
 
 import { Gutter, SetStepNav } from '@payloadcms/ui'
-import './index.scss'
 import { DefaultDashboardClient } from './index.client'
+
+import './index.scss'
 
 const baseClass = 'dashboard'
 

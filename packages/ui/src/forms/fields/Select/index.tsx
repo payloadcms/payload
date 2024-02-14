@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { Option, OptionObject, Validate } from 'payload/types'
 import type { Props } from './types'
@@ -41,6 +41,7 @@ export const Select: React.FC<Props> = (props) => {
     BeforeInput,
     AfterInput,
     validate,
+    onChange: onChangeFromProps,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -101,10 +102,14 @@ export const Select: React.FC<Props> = (props) => {
           newValue = selectedOption.value
         }
 
+        if (typeof onChangeFromProps === 'function') {
+          onChangeFromProps(newValue)
+        }
+
         setValue(newValue)
       }
     },
-    [readOnly, hasMany, setValue],
+    [readOnly, hasMany, setValue, onChangeFromProps],
   )
 
   return (

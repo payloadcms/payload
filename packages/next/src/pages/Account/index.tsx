@@ -1,16 +1,16 @@
-import { SanitizedConfig, TypeWithID } from 'payload/types'
+import { DocumentPreferences, SanitizedConfig, TypeWithID } from 'payload/types'
 import React, { Fragment } from 'react'
 import {
   RenderCustomComponent,
   HydrateClientUser,
   buildStateFromSchema,
-  findLocaleFromCode,
   formatFields,
-  fieldTypes,
+  DefaultEditView,
+  EditViewProps,
 } from '@payloadcms/ui'
 import { initPage } from '../../utilities/initPage'
 import { notFound } from 'next/navigation'
-import { DefaultAccount, DefaultAccountViewProps } from './Default'
+import { Settings } from './Settings'
 
 export const Account = async ({
   config: configPromise,
@@ -58,20 +58,16 @@ export const Account = async ({
       preferencesKey = `collection-${userSlug}-${user.id}`
     }
 
-    const {
-      docs: [preferences],
-    } = await payload.find({
+    const { docs: [{ value: docPreferences } = { value: null }] = [] } = (await payload.find({
       collection: 'payload-preferences',
       depth: 0,
-      pagination: false,
-      user,
-      limit: 1,
       where: {
         key: {
           equals: preferencesKey,
         },
       },
-    })
+      limit: 1,
+    })) as any as { docs: { value: DocumentPreferences }[] }
 
     const formState = await buildStateFromSchema({
       id: user?.id,
@@ -79,30 +75,25 @@ export const Account = async ({
       fieldSchema,
       locale: locale.code,
       operation: 'update',
-      preferences,
+      preferences: docPreferences,
       t: i18n.t,
       user,
     })
 
-    const componentProps: DefaultAccountViewProps = {
+    const componentProps: EditViewProps = {
       action: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
       apiURL: `${serverURL}${api}/${userSlug}/${data?.id}?locale=${locale}`,
-      config,
-      collectionConfig,
+      collectionSlug: userSlug,
       data,
-      fieldTypes,
       hasSavePermission: collectionPermissions?.update?.permission,
       formState,
-      onSave: () => {},
-      permissions,
       docPermissions: collectionPermissions,
+      docPreferences,
       user,
       updatedAt: '', // TODO
       id: user?.id,
-      i18n,
-      payload,
-      locale: locale.code,
-      searchParams,
+      locale,
+      AfterFields: <Settings />,
     }
 
     return (
@@ -112,7 +103,7 @@ export const Account = async ({
           CustomComponent={
             typeof CustomAccountComponent === 'function' ? CustomAccountComponent : undefined
           }
-          DefaultComponent={DefaultAccount}
+          DefaultComponent={DefaultEditView}
           componentProps={componentProps}
         />
       </Fragment>
