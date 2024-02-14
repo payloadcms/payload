@@ -90,8 +90,8 @@ export const Document = async ({
       docPermissions,
     })
 
-    CustomView = collectionViews.CustomView
-    DefaultView = collectionViews.DefaultView
+    CustomView = collectionViews?.CustomView
+    DefaultView = collectionViews?.DefaultView
 
     try {
       data = await payload.findByID({
@@ -125,8 +125,8 @@ export const Document = async ({
       docPermissions,
     })
 
-    CustomView = globalViews.CustomView
-    DefaultView = globalViews.DefaultView
+    CustomView = globalViews?.CustomView
+    DefaultView = globalViews?.DefaultView
 
     data = await payload.findGlobal({
       slug: globalSlug,
@@ -191,6 +191,10 @@ export const Document = async ({
     globalConfig,
     params,
     permissions,
+  }
+
+  if (!DefaultView && !CustomView) {
+    return notFound()
   }
 
   return (
