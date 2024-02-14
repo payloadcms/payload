@@ -1,2 +1,3 @@
-export { POST as POST_GraphQLHandler } from './handler'
-export { GET as GET_GraphQLPlayground } from './playground'
+export { POST as GRAPHQL_POST } from './handler'
+
+export { GET as GRAPHQL_PLAYGROUND_GET } from './playground'
