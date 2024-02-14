@@ -1,14 +1,16 @@
 import type { Payload } from '../../packages/payload/src'
 
+import { GET as createGET, POST as createPOST } from '../../packages/next/src/routes/rest/index'
+import { getPayload } from '../../packages/payload/src'
 import { devUser } from '../credentials'
-import { initPayloadTest } from '../helpers/configHelpers'
 import { postsSlug } from './collections/Posts'
-
-require('isomorphic-fetch')
+import config from './config'
 
 let payload: Payload
-let apiURL: string
 let jwt
+
+const GET = createGET(config)
+const POST = createPOST(config)
 
 const headers = {
   'Content-Type': 'application/json',
@@ -20,25 +22,28 @@ describe('_Community Tests', () => {
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const { payload: payloadClient, serverURL } = await initPayloadTest({
-      __dirname,
-      init: { local: false },
-    })
+    payload = await getPayload({ config })
 
-    apiURL = `${serverURL}/api`
-    payload = payloadClient
-
-    const response = await fetch(`${apiURL}/users/login`, {
+    const req = new Request('http://localhost:3000/api/users/login', {
+      method: 'POST',
+      headers: new Headers(headers),
       body: JSON.stringify({
         email,
         password,
       }),
-      headers,
-      method: 'post',
     })
 
-    const data = await response.json()
+    const data = await POST(req, {
+      params: {
+        slug: ['users', 'login'],
+      },
+    }).then((res) => res.json())
+
     jwt = data.token
+  })
+
+  beforeEach(() => {
+    jest.resetModules()
   })
 
   afterAll(async () => {
@@ -64,17 +69,23 @@ describe('_Community Tests', () => {
   })
 
   it('rest API example', async () => {
-    const newPost = await fetch(`${apiURL}/${postsSlug}`, {
+    const req = new Request(`http://localhost:3000/posts`, {
       method: 'POST',
-      headers: {
+      headers: new Headers({
         ...headers,
         Authorization: `JWT ${jwt}`,
-      },
+      }),
       body: JSON.stringify({
         text: 'REST API EXAMPLE',
       }),
+    })
+
+    const data = await POST(req, {
+      params: {
+        slug: ['posts'],
+      },
     }).then((res) => res.json())
 
-    expect(newPost.doc.text).toEqual('REST API EXAMPLE')
+    expect(data.doc.text).toEqual('REST API EXAMPLE')
   })
 })
