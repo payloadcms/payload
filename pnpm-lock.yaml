@@ -116,7 +116,7 @@ importers:
         version: 8.6.0
       drizzle-orm:
         specifier: 0.28.5
-        version: 0.28.5
+        version: 0.28.5(@libsql/client@0.3.4)(@types/pg@8.10.2)(pg@8.11.3)
       express:
         specifier: 4.18.2
         version: 4.18.2
@@ -164,7 +164,7 @@ importers:
         version: 1.2.8
       next:
         specifier: 14.1.1-canary.26
-        version: 14.1.1-canary.26(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0)
+        version: 14.1.1-canary.26(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0)
       node-fetch:
         specifier: 2.6.12
         version: 2.6.12
@@ -374,10 +374,13 @@ importers:
         version: link:../next
       next:
         specifier: 14.1.0
-        version: 14.1.0(@babel/core@7.22.20)(react-dom@18.3.0-canary-b36ae8d7a-20231207)(react@18.3.0-canary-b36ae8d7a-20231207)(sass@1.69.5)
+        version: 14.1.0(@babel/core@7.22.20)(react-dom@18.3.0-canary-b36ae8d7a-20231207)(react@18.3.0-canary-b36ae8d7a-20231207)(sass@1.70.0)
       payload:
         specifier: workspace:*
         version: link:../payload
+      postcss:
+        specifier: ^8.4.35
+        version: 8.4.35
       react:
         specifier: 18.3.0-canary-b36ae8d7a-20231207
         version: 18.3.0-canary-b36ae8d7a-20231207
@@ -395,8 +398,8 @@ importers:
         specifier: ^18
         version: 18.2.7
       sass:
-        specifier: ^1.69.5
-        version: 1.69.5
+        specifier: ^1.70.0
+        version: 1.70.0
       typescript:
         specifier: ^5
         version: 5.2.2
@@ -3801,7 +3804,6 @@ packages:
       - bufferutil
       - encoding
       - utf-8-validate
-    dev: false
 
   /@libsql/hrana-client@0.5.5:
     resolution: {integrity: sha512-i+hDBpiV719poqEiHupUUZYKJ9YSbCRFe5Q2PQ0v3mHIftePH6gayLjp2u6TXbqbO/Dv6y8yyvYlBXf/kFfRZA==}
@@ -3814,7 +3816,6 @@ packages:
       - bufferutil
       - encoding
       - utf-8-validate
-    dev: false
 
   /@libsql/isomorphic-fetch@0.1.10:
     resolution: {integrity: sha512-dH0lMk50gKSvEKD78xWMu60SY1sjp1sY//iFLO0XMmBwfVfG136P9KOk06R4maBdlb8KMXOzJ1D28FR5ZKnHTA==}
@@ -3823,7 +3824,6 @@ packages:
       node-fetch: 2.6.12
     transitivePeerDependencies:
       - encoding
-    dev: false
 
   /@libsql/isomorphic-ws@0.1.5:
     resolution: {integrity: sha512-DtLWIH29onUYR00i0GlQ3UdcTRC6EP4u9w/h9LxpUZJWRMARk6dQwZ6Jkd+QdwVpuAOrdxt18v0K2uIYR3fwFg==}
@@ -3833,7 +3833,6 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-    dev: false
 
   /@mole-inc/bin-wrapper@8.0.1:
     resolution: {integrity: sha512-sTGoeZnjI8N4KS+sW2AN95gDBErhAguvkw/tWdCjeM8bvxpz5lqrnd0vOJABA1A+Ic3zED7PYoLP/RANLgVotA==}
@@ -5994,7 +5993,6 @@ packages:
     resolution: {integrity: sha512-lwhs8hktwxSjf9UaZ9tG5M03PGogvFaH8gUgLNbN9HKIg0dvv6q+gkSuJ8HN4/VbyxkuLzCjlN7GquQ0gUJfIg==}
     dependencies:
       '@types/node': 20.6.2
-    dev: false
 
   /@types/yargs-parser@21.0.0:
     resolution: {integrity: sha512-iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==}
@@ -6887,7 +6885,6 @@ packages:
     dependencies:
       bindings: 1.5.0
       prebuild-install: 7.1.1
-    dev: false
 
   /big-integer@1.6.51:
     resolution: {integrity: sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==}
@@ -6935,7 +6932,6 @@ packages:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
     dependencies:
       file-uri-to-path: 1.0.0
-    dev: false
 
   /bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
@@ -7077,7 +7073,6 @@ packages:
   /buffer-writer@2.0.0:
     resolution: {integrity: sha512-a7ZpuTZU1TRtnwyCNW3I5dc0wWNC3VR9S++Ewyk2HHZdrO3CQJqSpd+95Us590V6AL7JqUAH2IwZ/398PmNFgw==}
     engines: {node: '>=4'}
-    dev: false
 
   /buffer@4.9.2:
     resolution: {integrity: sha512-xq+q3SRMOxGivLhBNaUdC64hDTQwejJ+H0T/NB1XMtTVEwNTrfFF3gAxiyW0Bu/xWEGhjVKgUcMhCrUy2+uCWg==}
@@ -8434,69 +8429,6 @@ packages:
       - supports-color
     dev: false
 
-  /drizzle-orm@0.28.5:
-    resolution: {integrity: sha512-6r6Iw4c38NAmW6TiKH3TUpGUQ1YdlEoLJOQptn8XPx3Z63+vFNKfAiANqrIiYZiMjKR9+NYAL219nFrmo1duXA==}
-    peerDependencies:
-      '@aws-sdk/client-rds-data': '>=3'
-      '@cloudflare/workers-types': '>=3'
-      '@libsql/client': '*'
-      '@neondatabase/serverless': '>=0.1'
-      '@opentelemetry/api': ^1.4.1
-      '@planetscale/database': '>=1'
-      '@types/better-sqlite3': '*'
-      '@types/pg': '*'
-      '@types/sql.js': '*'
-      '@vercel/postgres': '*'
-      better-sqlite3: '>=7'
-      bun-types: '*'
-      knex: '*'
-      kysely: '*'
-      mysql2: '>=2'
-      pg: '>=8'
-      postgres: '>=3'
-      sql.js: '>=1'
-      sqlite3: '>=5'
-    peerDependenciesMeta:
-      '@aws-sdk/client-rds-data':
-        optional: true
-      '@cloudflare/workers-types':
-        optional: true
-      '@libsql/client':
-        optional: true
-      '@neondatabase/serverless':
-        optional: true
-      '@opentelemetry/api':
-        optional: true
-      '@planetscale/database':
-        optional: true
-      '@types/better-sqlite3':
-        optional: true
-      '@types/pg':
-        optional: true
-      '@types/sql.js':
-        optional: true
-      '@vercel/postgres':
-        optional: true
-      better-sqlite3:
-        optional: true
-      bun-types:
-        optional: true
-      knex:
-        optional: true
-      kysely:
-        optional: true
-      mysql2:
-        optional: true
-      pg:
-        optional: true
-      postgres:
-        optional: true
-      sql.js:
-        optional: true
-      sqlite3:
-        optional: true
-    dev: true
-
   /drizzle-orm@0.28.5(@libsql/client@0.3.4)(@types/pg@8.10.2)(pg@8.11.3):
     resolution: {integrity: sha512-6r6Iw4c38NAmW6TiKH3TUpGUQ1YdlEoLJOQptn8XPx3Z63+vFNKfAiANqrIiYZiMjKR9+NYAL219nFrmo1duXA==}
     peerDependencies:
@@ -8562,7 +8494,6 @@ packages:
       '@libsql/client': 0.3.4
       '@types/pg': 8.10.2
       pg: 8.11.3
-    dev: false
 
   /duplexify@4.1.2:
     resolution: {integrity: sha512-fz3OjcNCHmRP12MJoZMPglx8m4rrFP8rovnk4vT8Fs+aonZoCwGg10dSsQsfP/E62eZcPTMSMP6686fu9Qlqtw==}
@@ -9566,7 +9497,6 @@ packages:
 
   /file-uri-to-path@1.0.0:
     resolution: {integrity: sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==}
-    dev: false
 
   /filename-reserved-regex@3.0.0:
     resolution: {integrity: sha512-hn4cQfU6GOT/7cFHXBqeBg2TbrMBgdD0kcjLhvSQYYwm3s4B6cjvBfb7nBALJLAXqmU5xajSa7X2NnUud/VCdw==}
@@ -11793,7 +11723,6 @@ packages:
 
   /js-base64@3.7.5:
     resolution: {integrity: sha512-3MEt5DTINKqfScXKfJFrRbxkrnk2AxPWGBL/ycjz4dK8iqiSJ06UxD8jh8xuh6p10TX4t2+7FsBYVxxQbMg+qA==}
-    dev: false
 
   /js-beautify@1.14.9:
     resolution: {integrity: sha512-coM7xq1syLcMyuVGyToxcj2AlzhkDjmfklL8r0JgJ7A76wyGMpJ1oA35mr4APdYNO/o/4YY8H54NQIJzhMbhBg==}
@@ -12739,6 +12668,12 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  /nanoid@3.3.7:
+    resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+    dev: false
+
   /napi-build-utils@1.0.2:
     resolution: {integrity: sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==}
 
@@ -12832,7 +12767,7 @@ packages:
       - babel-plugin-macros
     dev: false
 
-  /next@14.1.0(@babel/core@7.22.20)(react-dom@18.3.0-canary-b36ae8d7a-20231207)(react@18.3.0-canary-b36ae8d7a-20231207)(sass@1.69.5):
+  /next@14.1.0(@babel/core@7.22.20)(react-dom@18.3.0-canary-b36ae8d7a-20231207)(react@18.3.0-canary-b36ae8d7a-20231207)(sass@1.70.0):
     resolution: {integrity: sha512-wlzrsbfeSU48YQBjZhDzOwhWhGsy+uQycR8bHAOt1LY1bn3zZEcDyHQOEoN3aWzQ8LHCAJ1nqrWCc9XF2+O45Q==}
     engines: {node: '>=18.17.0'}
     hasBin: true
@@ -12855,7 +12790,7 @@ packages:
       postcss: 8.4.31
       react: 18.3.0-canary-b36ae8d7a-20231207
       react-dom: 18.3.0-canary-b36ae8d7a-20231207(react@18.3.0-canary-b36ae8d7a-20231207)
-      sass: 1.69.5
+      sass: 1.70.0
       styled-jsx: 5.1.1(@babel/core@7.22.20)(react@18.3.0-canary-b36ae8d7a-20231207)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.1.0
@@ -12871,45 +12806,6 @@ packages:
       - '@babel/core'
       - babel-plugin-macros
     dev: false
-
-  /next@14.1.1-canary.26(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-vHj7hCL9qn8AhRXNEC1ujTO55w3IjckEE1tkmxwyqA3ypTH9PtxSnU6eFfC9C67Xf/Q2C5Btug7Yqvw7pxGkhg==}
-    engines: {node: '>=18.17.0'}
-    hasBin: true
-    peerDependencies:
-      '@opentelemetry/api': ^1.1.0
-      react: ^18.2.0
-      react-dom: ^18.2.0
-      sass: ^1.3.0
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      sass:
-        optional: true
-    dependencies:
-      '@next/env': 14.1.1-canary.26
-      '@swc/helpers': 0.5.2
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001579
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(@babel/core@7.22.20)(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.1.1-canary.26
-      '@next/swc-darwin-x64': 14.1.1-canary.26
-      '@next/swc-linux-arm64-gnu': 14.1.1-canary.26
-      '@next/swc-linux-arm64-musl': 14.1.1-canary.26
-      '@next/swc-linux-x64-gnu': 14.1.1-canary.26
-      '@next/swc-linux-x64-musl': 14.1.1-canary.26
-      '@next/swc-win32-arm64-msvc': 14.1.1-canary.26
-      '@next/swc-win32-ia32-msvc': 14.1.1-canary.26
-      '@next/swc-win32-x64-msvc': 14.1.1-canary.26
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-    dev: true
 
   /next@14.1.1-canary.26(@babel/core@7.22.20)(react-dom@18.2.0)(react@18.2.0)(sass@1.70.0):
     resolution: {integrity: sha512-vHj7hCL9qn8AhRXNEC1ujTO55w3IjckEE1tkmxwyqA3ypTH9PtxSnU6eFfC9C67Xf/Q2C5Btug7Yqvw7pxGkhg==}
@@ -12949,7 +12845,6 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
-    dev: false
 
   /node-abi@2.30.1:
     resolution: {integrity: sha512-/2D0wOQPgaUWzVSVgRMx+trKJRC2UG4SUc4oCJoXx9Uxjtp0Vy3/kt7zcbxHF8+Z/pK3UloLWzBISg72brfy1w==}
@@ -12997,7 +12892,6 @@ packages:
       data-uri-to-buffer: 4.0.1
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
-    dev: false
 
   /node-forge@1.3.1:
     resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
@@ -13465,7 +13359,6 @@ packages:
 
   /packet-reader@1.0.0:
     resolution: {integrity: sha512-HAKu/fG3HpHFO0AA8WE8q2g+gBJaZ9MG7fcKk+IJPLTGAD6Psw4443l+9DGRbOIh3/aXr7Phy0TjilYivJo5XQ==}
-    dev: false
 
   /parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -13627,12 +13520,10 @@ packages:
   /pg-cloudflare@1.1.1:
     resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
     requiresBuild: true
-    dev: false
     optional: true
 
   /pg-connection-string@2.6.2:
     resolution: {integrity: sha512-ch6OwaeaPYcova4kKZ15sbJ2hKb/VP48ZD2gE7i1J+L4MspCtBMAx8nMgz7bksc7IojCIIWuEhHibSMFH8m8oA==}
-    dev: false
 
   /pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
@@ -13648,7 +13539,6 @@ packages:
       pg: '>=8.0'
     dependencies:
       pg: 8.11.3
-    dev: false
 
   /pg-protocol@1.6.0:
     resolution: {integrity: sha512-M+PDm637OY5WM307051+bsDia5Xej6d9IR4GwJse1qA1DIhiKlksvrneZOYQq42OM+spubpcNYEo2FcKQrDk+Q==}
@@ -13662,7 +13552,6 @@ packages:
       postgres-bytea: 1.0.0
       postgres-date: 1.0.7
       postgres-interval: 1.2.0
-    dev: false
 
   /pg-types@4.0.1:
     resolution: {integrity: sha512-hRCSDuLII9/LE3smys1hRHcu5QGcLs9ggT7I/TCs0IE+2Eesxi9+9RWAAwZ0yaGjxoWICF/YHLOEjydGujoJ+g==}
@@ -13694,13 +13583,11 @@ packages:
       pgpass: 1.0.5
     optionalDependencies:
       pg-cloudflare: 1.1.1
-    dev: false
 
   /pgpass@1.0.5:
     resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
     dependencies:
       split2: 4.2.0
-    dev: false
 
   /picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
@@ -13821,10 +13708,18 @@ packages:
       picocolors: 1.0.0
       source-map-js: 1.0.2
 
+  /postcss@8.4.35:
+    resolution: {integrity: sha512-u5U8qYpBCpN13BsiEB0CbR1Hhh4Gc0zLFuedrHJKMctHCHAGrMdG0PRM/KErzAL3CU6/eckEtmHNB3x6e3c0vA==}
+    engines: {node: ^10 || ^12 || >=14}
+    dependencies:
+      nanoid: 3.3.7
+      picocolors: 1.0.0
+      source-map-js: 1.0.2
+    dev: false
+
   /postgres-array@2.0.0:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
     engines: {node: '>=4'}
-    dev: false
 
   /postgres-array@3.0.2:
     resolution: {integrity: sha512-6faShkdFugNQCLwucjPcY5ARoW1SlbnrZjmGl0IrrqewpvxvhSLHimCVzqeuULCbG0fQv7Dtk1yDbG3xv7Veog==}
@@ -13833,7 +13728,6 @@ packages:
   /postgres-bytea@1.0.0:
     resolution: {integrity: sha512-xy3pmLuQqRBZBXDULy7KbaitYqLcmxigw14Q5sj8QBVLqEwXfeybIKVWiqAXTlcvdvb0+xkOtDbfQMOf4lST1w==}
     engines: {node: '>=0.10.0'}
-    dev: false
 
   /postgres-bytea@3.0.0:
     resolution: {integrity: sha512-CNd4jim9RFPkObHSjVHlVrxoVQXz7quwNFpz7RY1okNNme49+sVyiTvTRobiLV548Hx/hb1BG+iE7h9493WzFw==}
@@ -13844,7 +13738,6 @@ packages:
   /postgres-date@1.0.7:
     resolution: {integrity: sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q==}
     engines: {node: '>=0.10.0'}
-    dev: false
 
   /postgres-date@2.0.1:
     resolution: {integrity: sha512-YtMKdsDt5Ojv1wQRvUhnyDJNSr2dGIC96mQVKz7xufp07nfuFONzdaowrMHjlAzY6GDLd4f+LUHHAAM1h4MdUw==}
@@ -13855,7 +13748,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       xtend: 4.0.2
-    dev: false
 
   /postgres-interval@3.0.0:
     resolution: {integrity: sha512-BSNDnbyZCXSxgA+1f5UU2GmwhoI0aU5yMxRGO8CdFEcY2BQF9xm/7MqKnYoM1nJDk8nONNWDk9WeSmePFhQdlw==}
@@ -14789,15 +14681,6 @@ packages:
     dependencies:
       truncate-utf8-bytes: 1.0.2
     dev: false
-
-  /sass@1.69.5:
-    resolution: {integrity: sha512-qg2+UCJibLr2LCVOt3OlPhr/dqVHWOa9XtZf2OjbLs/T4VPSJ00udtgJxH3neXZm+QqX8B+3cU7RaLqp1iVfcQ==}
-    engines: {node: '>=14.0.0'}
-    hasBin: true
-    dependencies:
-      chokidar: 3.5.3
-      immutable: 4.3.4
-      source-map-js: 1.0.2
 
   /sass@1.70.0:
     resolution: {integrity: sha512-uUxNQ3zAHeAx5nRFskBnrWzDUJrrvpCPD5FNAoRvTi0WwremlheES3tg+56PaVtCs5QDRX5CBLxxKMDJMEa1WQ==}
