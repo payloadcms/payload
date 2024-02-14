@@ -40,7 +40,7 @@ export default buildConfigWithDefaults({
     {
       path: '/send-test-email',
       method: 'get',
-      handler: async (req, res) => {
+      handler: async ({ req }) => {
         await req.payload.sendEmail({
           from: 'dev@payloadcms.com',
           to: devUser.email,
@@ -55,19 +55,15 @@ export default buildConfigWithDefaults({
           // },
         })
 
-        res.status(200).send('Email sent')
+        return Response.json({ message: 'Email sent' })
       },
     },
     {
       path: '/internal-error-here',
       method: 'get',
-      handler: async (req, res, next) => {
-        try {
-          // Throwing an internal error with potentially sensitive data
-          throw new Error('Lost connection to the Pentagon. Secret data: ******')
-        } catch (err) {
-          next(err)
-        }
+      handler: () => {
+        // Throwing an internal error with potentially sensitive data
+        throw new Error('Lost connection to the Pentagon. Secret data: ******')
       },
     },
   ],

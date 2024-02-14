@@ -1,14 +1,12 @@
-import swcRegister from '@swc/register'
-import express from 'express'
 import getPort from 'get-port'
 import path from 'path'
 import shelljs from 'shelljs'
-import { v4 as uuid } from 'uuid'
 
 import type { Payload } from '../../packages/payload/src'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
-import payload from '../../packages/payload/src'
+import { getPayload } from '../../packages/payload/src'
+import { bootAdminPanel } from './bootAdminPanel'
 
 type Options = {
   __dirname: string
@@ -29,42 +27,31 @@ export async function initPayloadE2E(__dirname: string): Promise<InitializedPayl
 }
 
 export async function initPayloadTest(options: Options): Promise<InitializedPayload> {
-  const initOptions = {
+  process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
+
+  const initOptions: InitOptions = {
     local: true,
-    secret: uuid(),
-    mongoURL: `mongodb://localhost/${uuid()}`,
+    config: require(process.env.PAYLOAD_CONFIG_PATH).default,
+    // loggerOptions: {
+    //   enabled: false,
+    // },
     ...(options.init || {}),
   }
 
   process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_ENV = 'test'
-  process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
 
-  if (!initOptions?.local) {
-    initOptions.express = express()
-  }
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - bad @swc/register types
-  swcRegister({
-    sourceMaps: 'inline',
-    jsc: {
-      parser: {
-        syntax: 'typescript',
-        tsx: true,
-      },
-    },
-    module: {
-      type: 'commonjs',
-    },
-  })
-
-  await payload.init(initOptions)
+  const payload = await getPayload(initOptions)
 
   const port = await getPort()
-  if (initOptions.express) {
-    initOptions.express.listen(port)
+  const serverURL = `http://localhost:${port}`
+
+  if (!initOptions?.local) {
+    process.env.APP_ENV = 'test'
+    process.env.__NEXT_TEST_MODE = 'jest'
+    await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../../packages/dev') })
+    jest.resetModules()
   }
 
-  return { serverURL: `http://localhost:${port}`, payload }
+  return { serverURL, payload }
 }

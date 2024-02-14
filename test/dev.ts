@@ -1,11 +1,10 @@
 import * as dotenv from 'dotenv'
-import express from 'express'
 import fs from 'fs'
 import path from 'path'
-import { v4 as uuid } from 'uuid'
 
-import payload from '../packages/payload/src'
+import { getPayload } from '../packages/payload/src'
 import { prettySyncLoggerDestination } from '../packages/payload/src/utilities/logger'
+import { bootAdminPanel } from './helpers/bootAdminPanel'
 import { startLivePreviewDemo } from './live-preview/startLivePreviewDemo'
 
 dotenv.config()
@@ -46,31 +45,19 @@ if (process.argv.includes('--no-auto-login') && process.env.NODE_ENV !== 'produc
   process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN = 'true'
 }
 
-const expressApp = express()
-
 const startDev = async () => {
-  await payload.init({
+  const payload = await getPayload({
     email: {
       fromAddress: 'hello@payloadcms.com',
       fromName: 'Payload',
       logMockCredentials: false,
     },
-    express: expressApp,
-    secret: uuid(),
+    config: require(configPath).default,
     ...prettySyncLogger,
-    onInit: async (payload) => {
+    onInit: (payload) => {
       payload.logger.info('Payload Dev Server Initialized')
     },
   })
-
-  // Redirect root to Admin panel
-  expressApp.get('/', (_, res) => {
-    res.redirect('/admin')
-  })
-
-  const externalRouter = express.Router()
-
-  externalRouter.use(payload.authenticate)
 
   if (testSuiteDir === 'live-preview') {
     await startLivePreviewDemo({
@@ -78,10 +65,10 @@ const startDev = async () => {
     })
   }
 
-  expressApp.listen(3000, async () => {
-    payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`)
-    payload.logger.info(`API URL on http://localhost:3000${payload.getAPIURL()}`)
-  })
+  await bootAdminPanel({ appDir: path.resolve(__dirname, '../packages/dev') })
+
+  payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`)
+  payload.logger.info(`API URL on http://localhost:3000${payload.getAPIURL()}`)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises

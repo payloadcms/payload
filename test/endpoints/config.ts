@@ -1,5 +1,3 @@
-import path from 'path'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { collectionEndpoints } from './endpoints/collections'
@@ -61,20 +59,6 @@ export default buildConfigWithDefaults({
     },
   ],
   endpoints,
-  admin: {
-    webpack: (config) => {
-      return {
-        ...config,
-        resolve: {
-          ...config.resolve,
-          alias: {
-            ...config.resolve.alias,
-            express: path.resolve(__dirname, './mocks/emptyModule.js'),
-          },
-        },
-      }
-    },
-  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

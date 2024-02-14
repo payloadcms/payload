@@ -8,8 +8,6 @@ export const build = async (): Promise<void> => {
     disableOnInit: true,
     local: true,
   })
-
-  await payload.config.admin.bundler.build(payload.config)
 }
 
 // when build.js is launched directly

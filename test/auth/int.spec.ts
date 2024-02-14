@@ -1,9 +1,9 @@
 import { GraphQLClient } from 'graphql-request'
 import jwtDecode from 'jwt-decode'
 
+import type { Payload } from '../../packages/payload/src'
 import type { User } from '../../packages/payload/src/auth'
 
-import payload from '../../packages/payload/src'
 import configPromise from '../collections-graphql/config'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
@@ -13,6 +13,7 @@ require('isomorphic-fetch')
 
 let apiUrl
 let client: GraphQLClient
+let payload: Payload
 
 const headers = {
   'Content-Type': 'application/json',
@@ -22,7 +23,11 @@ const { email, password } = devUser
 
 describe('Auth', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
+    const { serverURL, payload: payloadClient } = await initPayloadTest({
+      __dirname,
+      init: { local: false },
+    })
+    payload = payloadClient
     apiUrl = `${serverURL}/api`
     const config = await configPromise
     const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
@@ -33,6 +38,10 @@ describe('Auth', () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy(payload)
     }
+  })
+
+  beforeEach(() => {
+    jest.resetModules()
   })
 
   describe('GraphQL - admin user', () => {
@@ -650,6 +659,14 @@ describe('Auth', () => {
 
       expect(response.status).toBe(403)
       expect(data.token).toBeUndefined()
+    })
+  })
+
+  describe('REST API', () => {
+    it('should respond from route handlers', async () => {
+      const test = await fetch(`${apiUrl}/api/test`)
+
+      expect(test.status).toStrictEqual(200)
     })
   })
 

@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request'
 
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
-import type { PayloadRequest } from '../../packages/payload/src/express/types'
+import type { PayloadRequest } from '../../packages/payload/src/types'
 
 import payload from '../../packages/payload/src'
 import { commitTransaction } from '../../packages/payload/src/utilities/commitTransaction'
