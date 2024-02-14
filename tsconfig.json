@@ -11,11 +11,7 @@
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "jsx": "preserve" /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "noEmit": true /* Do not emit outputs. */,
     /* Concatenate and emit output to single file. */
     "outDir": "./dist" /* Redirect output structure to the directory. */,
@@ -24,11 +20,7 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "sourceMap": true,
     "strict": false /* Enable all strict type-checking options. */,
-    "types": [
-      "jest",
-      "node",
-      "@types/jest"
-    ],
+    "types": ["jest", "node", "@types/jest"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -37,47 +29,22 @@
       }
     ],
     "paths": {
-      "payload": [
-        "./packages/payload/src"
-      ],
-      "payload/*": [
-        "./packages/payload/src/exports/*"
-      ],
-      "@payloadcms/db-mongodb": [
-        "./packages/db-mongodb/src"
-      ],
-      "@payloadcms/richtext-lexical": [
-        "./packages/richtext-lexical/src"
-      ],
-      "@payloadcms/ui/*": [
-        "./packages/ui/src/exports/*"
-      ],
-      "@payloadcms/translations": [
-        "./packages/translations/src/exports/index.ts"
-      ],
-      "@payloadcms/translations/client": [
-        "./packages/translations/src/all"
-      ],
-      "@payloadcms/translations/api": [
-        "./packages/translations/src/all"
-      ],
-      "@payloadcms/next/*": [
-        "./packages/next/src/*"
-      ],
-      "@payloadcms/graphql": [
-        "./packages/graphql/src"
-      ],
-      "payload-config": [
-        "./test/_community/config.ts"
-      ]
+      "payload": ["./packages/payload/src"],
+      "payload/*": ["./packages/payload/src/exports/*"],
+      "@payloadcms/db-mongodb": ["./packages/db-mongodb/src"],
+      "@payloadcms/richtext-lexical": ["./packages/richtext-lexical/src"],
+      "@payloadcms/ui/*": ["./packages/ui/src/exports/*"],
+      "@payloadcms/ui/scss": ["./packages/ui/src/scss/styles.scss"],
+      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
+      "@payloadcms/translations": ["./packages/translations/src/exports/index.ts"],
+      "@payloadcms/translations/client": ["./packages/translations/src/all"],
+      "@payloadcms/translations/api": ["./packages/translations/src/all"],
+      "@payloadcms/next/*": ["./packages/next/src/*"],
+      "@payloadcms/graphql": ["./packages/graphql/src"],
+      "payload-config": ["./test/_community/config.ts"]
     }
   },
-  "exclude": [
-    "dist",
-    "build",
-    "temp",
-    "node_modules"
-  ],
+  "exclude": ["dist", "build", "temp", "node_modules"],
   /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
   "composite": true, // Required for references to work
   "references": [
@@ -140,10 +107,5 @@
       "path": "./packages/ui"
     }
   ],
-  "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ]
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"]
 }

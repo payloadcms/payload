@@ -7,6 +7,11 @@ const nextConfig = {
       '**/*': ['drizzle-kit', 'drizzle-kit/utils'],
     },
     serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
+    turbo: {
+      resolveAlias: {
+        '@payloadcms/ui/scss': path.resolve(__dirname, './packages/ui/src/scss/styles.scss'),
+      },
+    },
   },
   webpack: (config) => {
     return {
@@ -29,6 +34,7 @@ const nextConfig = {
         ...config.resolve,
         alias: {
           ...config.resolve.alias,
+          '@payloadcms/ui/scss': path.resolve(__dirname, './packages/ui/src/scss/styles.scss'),
           'payload-config': process.env.PAYLOAD_CONFIG_PATH,
         },
         fallback: {
