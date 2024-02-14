@@ -30,6 +30,7 @@ const nextConfig = {
           ...config.resolve.alias,
           graphql$: path.resolve(__dirname, '../next/node_modules/graphql/index.js'),
           'graphql-http$': path.resolve(__dirname, '../next/node_modules/graphql-http/index.js'),
+          'payload-config$': path.resolve(process.env.PAYLOAD_CONFIG_PATH),
         },
         fallback: {
           ...config.resolve.fallback,
