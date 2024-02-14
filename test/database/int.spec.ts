@@ -5,7 +5,7 @@ import path from 'path'
 
 import type { PostgresAdapter } from '../../packages/db-postgres/src/types'
 import type { TypeWithID } from '../../packages/payload/src/collections/config/types'
-import type { PayloadRequest } from '../../packages/payload/src/express/types'
+import type { PayloadRequest } from '../../packages/payload/src/types'
 
 import payload from '../../packages/payload/src'
 import { migrate } from '../../packages/payload/src/bin/migrate'

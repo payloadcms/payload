@@ -245,7 +245,7 @@ export type PayloadHandler = ({
 /**
  * Docs: https://payloadcms.com/docs/rest-api/overview#custom-endpoints
  */
-export type Endpoint = {
+export type Endpoint<U = User> = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
   /**

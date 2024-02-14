@@ -9,7 +9,7 @@ export const APIKeyAuthentication =
   async ({ headers, payload }) => {
     const authHeader = headers.get('Authorization')
 
-    if (authHeader.startsWith(`${collectionConfig.slug} API-Key `)) {
+    if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
       const apiKey = authHeader.replace(`${collectionConfig.slug} API-Key `, '')
       const apiKeyIndex = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
 
@@ -38,8 +38,6 @@ export const APIKeyAuthentication =
           collection: collectionConfig.slug,
           depth: collectionConfig.auth.depth,
           overrideAccess: true,
-          // TODO(JAMES)(REVIEW): had to remove with new pattern
-          // req,
           where,
         })
 

@@ -1,5 +1,5 @@
 import type { Payload } from '../../../packages/payload/src'
-import type { PayloadRequest } from '../../../packages/payload/src/express/types'
+import type { PayloadRequest } from '../../../packages/payload/src/types'
 
 import { formSubmissionsSlug, formsSlug, pagesSlug } from '../shared'
 

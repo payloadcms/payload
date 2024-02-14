@@ -36,7 +36,6 @@ export default buildConfig({
     //     title: 'Test Page',
     //   },
     // })
-    //
     // await payload.update({
     //   collection: 'pages',
     //   id: page.id,

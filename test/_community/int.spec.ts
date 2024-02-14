@@ -1,26 +1,34 @@
-import payload from '../../packages/payload/src'
+import type { Payload } from '../../packages/payload/src'
+
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { postsSlug } from './collections/Posts'
 
 require('isomorphic-fetch')
 
-let apiUrl
+let payload: Payload
+let apiURL: string
 let jwt
 
 const headers = {
   'Content-Type': 'application/json',
 }
 const { email, password } = devUser
+
 describe('_Community Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
-    apiUrl = `${serverURL}/api`
+    const { payload: payloadClient, serverURL } = await initPayloadTest({
+      __dirname,
+      init: { local: false },
+    })
 
-    const response = await fetch(`${apiUrl}/users/login`, {
+    apiURL = `${serverURL}/api`
+    payload = payloadClient
+
+    const response = await fetch(`${apiURL}/users/login`, {
       body: JSON.stringify({
         email,
         password,
@@ -56,7 +64,7 @@ describe('_Community Tests', () => {
   })
 
   it('rest API example', async () => {
-    const newPost = await fetch(`${apiUrl}/${postsSlug}`, {
+    const newPost = await fetch(`${apiURL}/${postsSlug}`, {
       method: 'POST',
       headers: {
         ...headers,

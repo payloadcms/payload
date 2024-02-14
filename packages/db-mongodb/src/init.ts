@@ -4,7 +4,6 @@ import type { Init } from 'payload/database'
 import type { SanitizedCollectionConfig } from 'payload/types'
 
 import mongoose from 'mongoose'
-import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 import {
   buildVersionCollectionFields,
@@ -44,10 +43,6 @@ export const init: Init = async function init(this: MongooseAdapter) {
           versionsFields: versionCollectionFields,
         }),
       )
-
-      if (collection.versions?.drafts) {
-        versionSchema.plugin(mongooseAggregatePaginate)
-      }
 
       const model = mongoose.model(
         versionModelName,

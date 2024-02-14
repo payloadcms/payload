@@ -17,21 +17,20 @@
     "allowImportingTsExtensions": true,
     "plugins": [
       {
-        "name": "next"
-      }
+        "name": "next",
+      },
     ],
     "paths": {
       "payload": ["../payload/src"],
       "payload/*": ["../payload/src/exports/*"],
-      "payload-config": ["./src/payload.config.ts"],
       "@payloadcms/db-mongodb": ["../db-mongodb/src"],
       "@payloadcms/richtext-lexical": ["../richtext-lexical/src"],
       "@payloadcms/ui/*": ["../ui/src/exports/*"],
       "@payloadcms/translations": ["../translations/src/exports/index.ts"],
       "@payloadcms/translations/client": ["../translations/src/all"],
       "@payloadcms/translations/api": ["../translations/src/all"],
-      "@payloadcms/next/*": ["../next/src/*"]
-    }
+      "@payloadcms/next/*": ["../next/src/*"],
+    },
   },
   "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"],
@@ -43,6 +42,6 @@
     { "path": "../translations" },
     { "path": "../db-mongodb" },
     { "path": "../db-postgres" },
-    { "path": "../richtext-lexical" }
-  ]
+    { "path": "../richtext-lexical" },
+  ],
 }

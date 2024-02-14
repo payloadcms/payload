@@ -1,5 +1,5 @@
 'use client'
-import { ShimmerEffect } from 'payload/components'
+import { ShimmerEffect } from '@payloadcms/ui'
 import React, { Suspense, lazy } from 'react'
 
 import type { FieldProps } from '../types'
