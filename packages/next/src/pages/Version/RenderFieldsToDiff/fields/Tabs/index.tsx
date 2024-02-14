@@ -15,7 +15,7 @@ const Tabs: React.FC<Props> = ({
   version,
   i18n,
   locale,
-  fieldComponents,
+  diffComponents,
 }) => {
   return (
     <div className={baseClass}>
@@ -33,7 +33,7 @@ const Tabs: React.FC<Props> = ({
                 i18n={i18n}
                 locale={locale}
                 field={field}
-                fieldComponents={fieldComponents}
+                diffComponents={diffComponents}
               />
             )
           }
@@ -48,7 +48,7 @@ const Tabs: React.FC<Props> = ({
               version={version}
               i18n={i18n}
               locale={locale}
-              fieldComponents={fieldComponents}
+              diffComponents={diffComponents}
             />
           )
         })}

@@ -17,7 +17,7 @@ const maxResultsPerRequest = 10
 
 const baseOptions = [mostRecentVersionOption]
 
-const CompareVersion: React.FC<Props> = (props) => {
+export const SelectComparison: React.FC<Props> = (props) => {
   const { baseURL, onChange, parentID, publishedDoc, value, versionID } = props
 
   const {
@@ -117,5 +117,3 @@ const CompareVersion: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default CompareVersion

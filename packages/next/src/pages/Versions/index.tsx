@@ -131,14 +131,6 @@ export const VersionsView: React.FC<ServerSideEditViewProps> = async (props) => 
           )}
           {versionCount > 0 && (
             <React.Fragment>
-              <div className={`${baseClass}__version-count`}>
-                {i18n.t(
-                  versionCount === 1 ? 'version:versionCount_one' : 'version:versionCount_many',
-                  {
-                    count: versionCount,
-                  },
-                )}
-              </div>
               <Table columns={columns} data={versionsData?.docs} />
               <div className={`${baseClass}__page-controls`}>
                 <Pagination

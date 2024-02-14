@@ -1,7 +1,7 @@
 import type { FieldPermissions } from 'payload/auth'
 import { FieldMap, MappedField } from '@payloadcms/ui'
 import { I18n } from '@payloadcms/translations/types'
-import { FieldComponents } from './fields/types'
+import { DiffComponents } from './fields/types'
 
 export type Props = {
   comparison: Record<string, any>
@@ -9,9 +9,8 @@ export type Props = {
   fieldMap: FieldMap
   locales: string[]
   version: Record<string, any>
-  locale: string
   i18n: I18n
-  fieldComponents: FieldComponents
+  diffComponents: DiffComponents
 }
 
 export type FieldDiffProps = Props & {

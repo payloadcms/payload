@@ -8,8 +8,9 @@ import RenderFieldsToDiff from '../..'
 import { fieldAffectsData } from 'payload/types'
 import { getUniqueListBy } from 'payload/utilities'
 import Label from '../../Label'
-import './index.scss'
 import { MappedField } from '@payloadcms/ui'
+
+import './index.scss'
 
 const baseClass = 'iterable-diff'
 
@@ -21,7 +22,7 @@ const Iterable: React.FC<Props> = ({
   permissions,
   version,
   i18n,
-  fieldComponents,
+  diffComponents,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
@@ -88,7 +89,7 @@ const Iterable: React.FC<Props> = ({
                   version={versionRow}
                   i18n={i18n}
                   locale={locale}
-                  fieldComponents={fieldComponents}
+                  diffComponents={diffComponents}
                 /> */}
               </div>
             )

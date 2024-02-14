@@ -1,3 +1,4 @@
+import { Option } from '@payloadcms/ui'
 import { CollectionPermission, GlobalPermission, Permissions, User } from 'payload/auth'
 
 import { Document, SanitizedCollectionConfig } from 'payload/types'
@@ -13,14 +14,13 @@ export type DefaultVersionsViewProps = {
   doc: Document
   mostRecentDoc: Document
   publishedDoc: Document
-  compareDoc: Document
-  locales: string[]
+  comparisonDoc: Document
+  localeOptions: Option[]
   user: User
   permissions: Permissions
   id?: string | number
   versionID?: string
   docPermissions: CollectionPermission | GlobalPermission
-  locale: string
   collectionSlug?: SanitizedCollectionConfig['slug']
   globalSlug?: SanitizedCollectionConfig['slug']
 }

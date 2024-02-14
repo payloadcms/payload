@@ -52,6 +52,7 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, versio
     typeof comparison !== 'undefined'
       ? getTranslatedOptions(getOptionsToRender(comparison, field.options, field.hasMany), i18n)
       : placeholder
+
   const versionToRender =
     typeof version !== 'undefined'
       ? getTranslatedOptions(getOptionsToRender(version, field.options, field.hasMany), i18n)

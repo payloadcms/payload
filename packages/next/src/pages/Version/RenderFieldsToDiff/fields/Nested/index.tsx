@@ -19,7 +19,7 @@ const Nested: React.FC<Props> = ({
   version,
   i18n,
   fieldMap,
-  fieldComponents,
+  diffComponents,
 }) => {
   return (
     <div className={baseClass}>
@@ -40,9 +40,8 @@ const Nested: React.FC<Props> = ({
           fieldPermissions={permissions}
           locales={locales}
           version={version}
-          locale={locale}
           i18n={i18n}
-          fieldComponents={fieldComponents}
+          diffComponents={diffComponents}
         />
       </div>
     </div>

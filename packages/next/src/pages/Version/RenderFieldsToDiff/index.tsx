@@ -18,14 +18,13 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   fieldMap,
   locales,
   version,
-  locale,
   i18n,
-  fieldComponents,
+  diffComponents,
 }) => {
   return (
     <div className={baseClass}>
       {fieldMap?.map((field, i) => {
-        const Component = fieldComponents[field.type]
+        const Component = diffComponents[field.type]
 
         const isRichText = field.type === 'richText'
         const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
@@ -52,12 +51,12 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               // diffMethod: diffMethod,
               field,
               // isRichText: isRichText,
-              locale: locale,
               locales: locales,
               // permissions: subFieldPermissions,
               i18n,
               fieldMap: 'subfields' in field ? field.subfields : fieldMap,
-              fieldComponents,
+              diffComponents,
+              comparison: comparisonValue,
             }
 
             if (field.localized) {
@@ -76,7 +75,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                     return (
                       <div className={`${baseClass}__locale`} key={[locale, index].join('-')}>
                         <div className={`${baseClass}__locale-value`}>
-                          <Component {...cellProps} />
+                          <Component {...cellProps} locale={locale} />
                         </div>
                       </div>
                     )
@@ -93,7 +92,7 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           }
 
           if (field.type === 'tabs') {
-            const Tabs = fieldComponents.tabs
+            const Tabs = diffComponents.tabs
 
             return (
               <Tabs
@@ -101,11 +100,10 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 key={i}
                 locales={locales}
                 version={version}
-                locale={locale}
                 i18n={i18n}
                 field={field}
                 fieldMap={field.subfields}
-                fieldComponents={fieldComponents}
+                diffComponents={diffComponents}
               />
             )
           }
@@ -122,9 +120,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                 locales={locales}
                 permissions={fieldPermissions}
                 version={version}
-                locale={locale}
                 i18n={i18n}
-                fieldComponents={fieldComponents}
+                diffComponents={diffComponents}
               />
             )
           }

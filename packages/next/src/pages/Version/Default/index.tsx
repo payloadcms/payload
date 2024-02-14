@@ -1,22 +1,22 @@
 'use client'
-import React from 'react'
-import type { FieldAffectingData } from 'payload/types'
-import type { StepNavItem } from '@payloadcms/ui'
-import type { DefaultVersionsViewProps } from './types'
-import { fieldAffectsData } from 'payload/types'
+import React, { useState } from 'react'
+import type { CompareOption, DefaultVersionsViewProps } from './types'
 import {
   Gutter,
-  SetStepNav,
+  Option,
   formatDate,
   useComponentMap,
   useConfig,
+  usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
 import Restore from '../Restore'
 import { mostRecentVersionOption } from '../shared'
-import { getTranslation } from '@payloadcms/translations'
-import fieldComponents from '../RenderFieldsToDiff/fields'
+import diffComponents from '../RenderFieldsToDiff/fields'
 import RenderFieldsToDiff from '../RenderFieldsToDiff'
+import { SetStepNav } from './SetStepNav'
+import { SelectLocales } from '../SelectLocales'
+import { SelectComparison } from '../SelectComparison'
 
 import './index.scss'
 
@@ -26,14 +26,13 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   doc,
   mostRecentDoc,
   publishedDoc,
-  compareDoc,
-  locales,
+  comparisonDoc,
+  localeOptions,
   docPermissions,
   collectionSlug,
   globalSlug,
   id,
   versionID,
-  locale,
 }) => {
   const config = useConfig()
 
@@ -41,80 +40,23 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const { getFieldMap } = useComponentMap()
 
-  const fieldMap = getFieldMap({ collectionSlug, globalSlug })
+  const [fieldMap] = useState(() => getFieldMap({ collectionSlug, globalSlug }))
 
-  const collectionConfig = config.collections.find(
-    (collection) => collection.slug === collectionSlug,
+  const [collectionConfig] = useState(() =>
+    config.collections.find((collection) => collection.slug === collectionSlug),
   )
 
-  const globalConfig = config.globals.find((global) => global.slug === globalSlug)
+  const [globalConfig] = useState(() => config.globals.find((global) => global.slug === globalSlug))
+
+  const [locales, setLocales] = useState<Option[]>(localeOptions)
+  const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption)
 
   const {
-    routes: { admin },
     admin: { dateFormat },
+    routes: { api: apiRoute },
+    localization,
+    serverURL,
   } = config
-
-  let nav: StepNavItem[] = []
-
-  if (collectionConfig) {
-    let docLabel = ''
-
-    if (mostRecentDoc) {
-      const { useAsTitle } = collectionConfig.admin
-
-      if (useAsTitle !== 'id') {
-        const titleField = collectionConfig.fields.find(
-          (field) => fieldAffectsData(field) && field.name === useAsTitle,
-        ) as FieldAffectingData
-
-        if (titleField && mostRecentDoc[useAsTitle]) {
-          if (titleField.localized) {
-            docLabel = mostRecentDoc[useAsTitle]?.[locale]
-          } else {
-            docLabel = mostRecentDoc[useAsTitle]
-          }
-        } else {
-          docLabel = `[${i18n.t('general:untitled')}]`
-        }
-      } else {
-        docLabel = mostRecentDoc.id
-      }
-    }
-
-    nav = [
-      {
-        label: getTranslation(collectionConfig.labels.plural, i18n),
-        url: `${admin}/collections/${collectionConfig.slug}`,
-      },
-      {
-        label: docLabel,
-        url: `${admin}/collections/${collectionConfig.slug}/${id}`,
-      },
-      {
-        label: 'Versions',
-        url: `${admin}/collections/${collectionConfig.slug}/${id}/versions`,
-      },
-      {
-        label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
-      },
-    ]
-  }
-
-  if (globalConfig) {
-    nav = [
-      {
-        label: globalConfig.label,
-        url: `${admin}/globals/${globalConfig.slug}`,
-      },
-      {
-        label: i18n.t('version:versions'),
-        url: `${admin}/globals/${globalConfig.slug}/versions`,
-      },
-      {
-        label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n.language) : '',
-      },
-    ]
-  }
 
   // useEffect(() => {
   //   const editConfig = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
@@ -130,30 +72,48 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     ? formatDate(doc.createdAt, dateFormat, i18n.language)
     : ''
 
-  // TODO: this value should ultimately be dynamic based on the user's selection
-  // This will come from URL params
-  let compareValue = mostRecentVersionOption
+  const originalDocFetchURL = `${serverURL}${apiRoute}${globalSlug ? 'globals/' : ''}/${
+    collectionSlug || globalSlug
+  }${collectionSlug ? `/${id}` : ''}`
 
-  let comparison = compareDoc?.version
+  const compareBaseURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
+    collectionSlug || globalSlug
+  }/versions`
 
-  if (compareValue?.value === 'mostRecent') {
-    comparison = mostRecentDoc
-  }
+  const compareFetchURL =
+    compareValue?.value === 'mostRecent' || compareValue?.value === 'published'
+      ? originalDocFetchURL
+      : `${compareBaseURL}/${compareValue.value}`
 
-  if (compareValue?.value === 'published') {
-    comparison = publishedDoc
-  }
+  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, {
+    initialParams: { depth: 1, draft: 'true', locale: '*' },
+  })
+
+  const comparison =
+    compareValue?.value === 'mostRecent'
+      ? mostRecentDoc
+      : compareValue?.value === 'published'
+      ? publishedDoc
+      : comparisonDoc?.version // the `version` key is only present on `versions` documents
 
   const canUpdate = docPermissions?.update?.permission
 
   return (
     <main className={baseClass}>
-      <SetStepNav nav={nav} />
+      <SetStepNav
+        collectionSlug={collectionSlug}
+        globalSlug={globalSlug}
+        mostRecentDoc={mostRecentDoc}
+        doc={doc}
+        id={id}
+        fieldMap={fieldMap}
+        collectionConfig={collectionConfig}
+      />
       <Gutter className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__header-wrap`}>
           <p className={`${baseClass}__created-at`}>
             {i18n.t('version:versionCreatedOn', {
-              version: i18n.t(doc?.autosave ? 'autosavedVersion' : 'version'),
+              version: i18n.t(doc?.autosave ? 'version:autosavedVersion' : 'version:version'),
             })}
           </p>
           <header className={`${baseClass}__header`}>
@@ -172,28 +132,31 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           </header>
         </div>
         <div className={`${baseClass}__controls`}>
-          {/* <CompareVersion
+          <SelectComparison
             baseURL={compareBaseURL}
             onChange={setCompareValue}
-            parentID={parentID}
+            parentID={id}
             publishedDoc={publishedDoc}
             value={compareValue}
             versionID={versionID}
-          /> */}
-          {/* {localization && (
+          />
+          {localization && (
             <SelectLocales onChange={setLocales} options={localeOptions} value={locales} />
-          )} */}
+          )}
         </div>
         {doc?.version && (
           <RenderFieldsToDiff
             comparison={comparison}
             fieldPermissions={docPermissions?.fields}
             fieldMap={fieldMap}
-            locales={locales}
+            locales={
+              locales
+                ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
+                : []
+            }
             version={doc?.version}
-            locale={locale}
             i18n={i18n}
-            fieldComponents={fieldComponents}
+            diffComponents={diffComponents}
           />
         )}
       </Gutter>
