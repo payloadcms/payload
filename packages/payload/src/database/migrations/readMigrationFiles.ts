@@ -35,7 +35,7 @@ export const readMigrationFiles = async ({
 
   return Promise.all(
     files.map(async (filePath) => {
-      const migration = (await import(`${filePath}`)) as Migration
+      const migration = eval(`(await import(${filePath}))`) as Migration
       migration.name = path.basename(filePath).split('.')?.[0]
       return migration
     }),

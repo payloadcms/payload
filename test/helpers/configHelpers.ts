@@ -49,7 +49,7 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   if (!initOptions?.local) {
     process.env.APP_ENV = 'test'
     process.env.__NEXT_TEST_MODE = 'jest'
-    await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../../packages/dev') })
+    await bootAdminPanel({ port, appDir: path.resolve(__dirname, '../../') })
     jest.resetModules()
   }
 
