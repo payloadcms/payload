@@ -14,6 +14,7 @@
     "@payloadcms/richtext-lexical": "workspace:*",
     "next": "14.0.4",
     "payload": "workspace:*",
+    "postcss": "^8.4.35",
     "react": "18.3.0-canary-b36ae8d7a-20231207",
     "react-dom": "18.3.0-canary-b36ae8d7a-20231207"
   },
@@ -21,7 +22,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "sass": "^1.69.5",
+    "sass": "^1.70.0",
     "typescript": "^5"
   }
 }

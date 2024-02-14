@@ -7,44 +7,53 @@ const nextConfig = {
       '**/*': ['drizzle-kit', 'drizzle-kit/utils'],
     },
     serverComponentsExternalPackages: ['drizzle-kit', 'drizzle-kit/utils', 'pino', 'pino-pretty'],
+    // turbo: {
+    //   resolveAlias: {
+    //     'payload-styles': path.resolve(__dirname, '../ui/src/scss/styles.scss'),
+    //   },
+    // },
   },
-  webpack: (config) => {
-    return {
-      ...config,
-      externals: [
-        ...config.externals,
-        'drizzle-kit',
-        'drizzle-kit/utils',
-        'pino',
-        'pino-pretty',
-        'sharp',
-      ],
-      ignoreWarnings: [
-        ...(config.ignoreWarnings || []),
-        { module: /node_modules\/mongodb\/lib\/utils\.js/ },
-        { file: /node_modules\/mongodb\/lib\/utils\.js/ },
-      ],
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve.alias,
-          graphql$: path.resolve(__dirname, '../next/node_modules/graphql/index.js'),
-          'graphql-http$': path.resolve(__dirname, '../next/node_modules/graphql-http/index.js'),
-          'payload-config$': path.resolve(process.env.PAYLOAD_CONFIG_PATH),
-        },
-        fallback: {
-          ...config.resolve.fallback,
-          '@aws-sdk/credential-providers': false,
-          '@mongodb-js/zstd': false,
-          aws4: false,
-          kerberos: false,
-          'mongodb-client-encryption': false,
-          snappy: false,
-          'supports-color': false,
-        },
-      },
-    }
-  },
+  // sassOptions: {
+  //   includePaths: [path.join(__dirname, '../ui/src')],
+  // },
+  // webpack: (config) => {
+  //   return {
+  //     ...config,
+  //     externals: [
+  //       ...config.externals,
+  //       'drizzle-kit',
+  //       'drizzle-kit/utils',
+  //       'pino',
+  //       'pino-pretty',
+  //       'sharp',
+  //     ],
+  //     ignoreWarnings: [
+  //       ...(config.ignoreWarnings || []),
+  //       { module: /node_modules\/mongodb\/lib\/utils\.js/ },
+  //       { file: /node_modules\/mongodb\/lib\/utils\.js/ },
+  //     ],
+  //     resolve: {
+  //       ...config.resolve,
+  //       alias: {
+  //         ...config.resolve.alias,
+  //         graphql$: path.resolve(__dirname, '../next/node_modules/graphql/index.js'),
+  //         'graphql-http$': path.resolve(__dirname, '../next/node_modules/graphql-http/index.js'),
+  //         'payload-config$': path.resolve(process.env.PAYLOAD_CONFIG_PATH),
+  //         'payload-styles': path.resolve(__dirname, '../ui/src/scss/styles.scss'),
+  //       },
+  //       fallback: {
+  //         ...config.resolve.fallback,
+  //         '@aws-sdk/credential-providers': false,
+  //         '@mongodb-js/zstd': false,
+  //         aws4: false,
+  //         kerberos: false,
+  //         'mongodb-client-encryption': false,
+  //         snappy: false,
+  //         'supports-color': false,
+  //       },
+  //     },
+  //   }
+  // },
 }
 
 module.exports = nextConfig
