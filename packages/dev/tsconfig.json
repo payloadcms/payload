@@ -23,7 +23,6 @@
     "paths": {
       "payload": ["../payload/src"],
       "payload/*": ["../payload/src/exports/*"],
-      "payload-config": ["./src/payload.config.ts"],
       "@payloadcms/db-mongodb": ["../db-mongodb/src"],
       "@payloadcms/richtext-lexical": ["../richtext-lexical/src"],
       "@payloadcms/ui/*": ["../ui/src/exports/*"],
