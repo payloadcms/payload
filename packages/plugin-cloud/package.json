@@ -22,7 +22,7 @@
     "@aws-sdk/credential-providers": "^3.289.0",
     "@aws-sdk/lib-storage": "^3.267.0",
     "amazon-cognito-identity-js": "^6.1.2",
-    "nodemailer": "6.9.8"
+    "nodemailer": "6.9.9"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
