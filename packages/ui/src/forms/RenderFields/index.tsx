@@ -3,7 +3,6 @@ import React from 'react'
 import type { Props } from './types'
 import { useTranslation } from '../../providers/Translation'
 import { RenderField } from './RenderField'
-import { FieldPathProvider } from '../FieldPathProvider'
 
 import './index.scss'
 
@@ -13,6 +12,10 @@ const RenderFields: React.FC<Props> = (props) => {
   const { className, margins, fieldMap } = props
 
   const { i18n } = useTranslation()
+
+  if (!fieldMap || (Array.isArray(fieldMap) && fieldMap.length === 0)) {
+    console.error('No fieldMap provided when calling RenderFields')
+  }
 
   if (!i18n) {
     console.error('Need to implement i18n when calling RenderFields')

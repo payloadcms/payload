@@ -1,12 +1,11 @@
 import React from 'react'
 import { headers, cookies } from 'next/headers'
 import { translations } from '@payloadcms/translations/client'
-import { RootProvider } from '@payloadcms/ui'
+import { RootProvider, buildComponentMap } from '@payloadcms/ui'
 import { SanitizedConfig } from 'payload/types'
 import { createClientConfig } from '../../utilities/createClientConfig'
 import { getRequestLanguage } from '../../utilities/getRequestLanguage'
 import { deepMerge } from 'payload/utilities'
-import { buildComponentMap } from '@payloadcms/ui'
 
 import '@payloadcms/ui/scss/app.scss'
 

@@ -10,13 +10,14 @@ import {
   Password,
   Translation,
 } from '@payloadcms/ui'
-import './index.scss'
 import { SanitizedConfig } from 'payload/types'
 import Link from 'next/link'
 import { initPage } from '../../utilities/initPage'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
 import { getNextT } from '../../utilities/getNextT'
+
+import './index.scss'
 
 const baseClass = 'reset-password'
 

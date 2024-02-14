@@ -2,6 +2,7 @@
 import React, { Fragment, useEffect } from 'react'
 import { useAuth } from '../../../../ui/src/providers/Auth'
 import { Button, useTranslation } from '@payloadcms/ui'
+import Link from 'next/link'
 
 export const LogoutClient: React.FC<{
   inactivity?: boolean
@@ -32,6 +33,7 @@ export const LogoutClient: React.FC<{
           url={`${adminRoute}/login${
             redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
           }`}
+          Link={Link}
         >
           {t('authentication:logBackIn')}
         </Button>

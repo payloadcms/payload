@@ -2,11 +2,12 @@ import React from 'react'
 
 import { MinimalTemplate, Button } from '@payloadcms/ui'
 import { meta } from '../../utilities/meta'
-import './index.scss'
 import { Metadata } from 'next'
 import { SanitizedConfig } from 'payload/types'
 import { LogoutClient } from './LogoutClient'
 import { getNextT } from '../../utilities/getNextT'
+
+import './index.scss'
 
 const baseClass = 'logout'
 

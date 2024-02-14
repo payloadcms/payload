@@ -31,6 +31,7 @@ const NumberField: React.FC<Props> = (props) => {
     AfterInput,
     validate,
     label,
+    onChange: onChangeFromProps,
   } = props
 
   const Label = LabelFromProps || <LabelComp label={label} required={required} />
@@ -60,12 +61,17 @@ const NumberField: React.FC<Props> = (props) => {
   const handleChange = useCallback(
     (e) => {
       const val = parseFloat(e.target.value)
+      let newVal = val
 
       if (Number.isNaN(val)) {
-        setValue('')
-      } else {
-        setValue(val)
+        newVal = undefined
       }
+
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(newVal)
+      }
+
+      setValue(newVal)
     },
     [setValue],
   )
@@ -173,6 +179,8 @@ const NumberField: React.FC<Props> = (props) => {
             step={step}
             type="number"
             value={typeof value === 'number' ? value : ''}
+            min={min}
+            max={max}
           />
           {AfterInput}
         </div>

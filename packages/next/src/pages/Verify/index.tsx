@@ -1,13 +1,14 @@
 import React from 'react'
 
 import { Button, MinimalTemplate, Logo } from '@payloadcms/ui'
-import './index.scss'
 import { initPage } from '../../utilities/initPage'
 import { SanitizedConfig } from 'payload/types'
 import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { meta } from '../../utilities/meta'
 import { getNextT } from '../../utilities/getNextT'
+
+import './index.scss'
 
 const baseClass = 'verify'
 

@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
 import type { SanitizedConfig } from 'payload/types'
 
-import './index.scss'
-import { DefaultDashboardClient } from './index.client'
 import { Gutter, SetStepNav, useActions } from '@payloadcms/ui'
+import { DefaultDashboardClient } from './index.client'
+
+import './index.scss'
 
 const baseClass = 'dashboard'
 

@@ -1,13 +1,10 @@
 'use client'
 import React from 'react'
 
-import type { CollectionPermission, GlobalPermission, User } from 'payload/auth'
-import type { Description, DocumentPreferences } from 'payload/types'
-import type { Locale } from 'payload/config'
+import type { Description } from 'payload/types'
 
 import RenderFields from '../../forms/RenderFields'
 import { Gutter } from '../Gutter'
-import { Document } from 'payload/types'
 import { FieldMap } from '../../utilities/buildComponentMap/types'
 
 import './index.scss'
@@ -19,27 +16,9 @@ export const DocumentFields: React.FC<{
   BeforeFields?: React.ReactNode
   description?: Description
   forceSidebarWrap?: boolean
-  hasSavePermission: boolean
-  docPermissions: CollectionPermission | GlobalPermission
-  docPreferences: DocumentPreferences
-  data: Document
-  user: User
-  locale?: Locale
   fieldMap: FieldMap
 }> = (props) => {
-  const {
-    AfterFields,
-    BeforeFields,
-    description,
-    forceSidebarWrap,
-    hasSavePermission,
-    docPermissions,
-    docPreferences,
-    data,
-    user,
-    locale,
-    fieldMap,
-  } = props
+  const { AfterFields, BeforeFields, description, forceSidebarWrap, fieldMap } = props
 
   const mainFields = fieldMap.filter(({ isSidebar }) => !isSidebar)
 
@@ -68,15 +47,7 @@ export const DocumentFields: React.FC<{
               )}
             </header>
             {BeforeFields}
-            <RenderFields
-              className={`${baseClass}__fields`}
-              // permissions={permissions.fields}
-              readOnly={!hasSavePermission}
-              data={data}
-              docPreferences={docPreferences}
-              locale={locale}
-              fieldMap={mainFields}
-            />
+            <RenderFields className={`${baseClass}__fields`} fieldMap={mainFields} />
             {AfterFields}
           </Gutter>
         </div>
@@ -84,13 +55,7 @@ export const DocumentFields: React.FC<{
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-fields`}>
-                <RenderFields
-                  // permissions={permissions.fields}
-                  readOnly={!hasSavePermission}
-                  data={data}
-                  locale={locale}
-                  fieldMap={sidebarFields}
-                />
+                <RenderFields fieldMap={sidebarFields} />
               </div>
             </div>
           </div>

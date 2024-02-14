@@ -1,3 +1,4 @@
+'use client'
 import * as React from 'react'
 
 import {
@@ -9,28 +10,47 @@ import {
   Select,
   Number as NumberInput,
   EditViewProps,
+  useConfig,
+  MinimizeMaximize,
+  useActions,
+  useTranslation,
+  useLocale,
 } from '@payloadcms/ui'
-import './index.scss'
 import { RenderJSON } from './RenderJSON'
+import { useSearchParams } from 'next/navigation'
+import qs from 'qs'
+import { toast } from 'react-toastify'
+import './index.scss'
 
 const baseClass = 'query-inspector'
 
-export const APIView: React.FC<EditViewProps> = async (props) => {
-  const { config, searchParams, locale, data, i18n } = props
+export const APIView: React.FC<EditViewProps> = (props) => {
+  const { data: initialData } = props
 
-  const collectionConfig = 'collectionConfig' in props && props?.collectionConfig
-  const globalConfig = 'globalConfig' in props && props?.globalConfig
-  const id = 'id' in props ? props.id : undefined
-
-  const collectionSlug = collectionConfig?.slug
-  const globalSlug = globalConfig?.slug
-  const { depth, draft, authenticated } = searchParams
+  const searchParams = useSearchParams()
+  const { setViewActions } = useActions()
+  const { i18n } = useTranslation()
+  const { code } = useLocale()
 
   const {
     localization,
     routes: { api: apiRoute },
     serverURL,
-  } = config
+    collections,
+    globals,
+  } = useConfig()
+
+  const collectionConfig =
+    'collectionSlug' in props &&
+    collections.find((collection) => collection.slug === props.collectionSlug)
+
+  const globalConfig =
+    'globalSlug' in props && globals.find((global) => global.slug === props.globalSlug)
+
+  const id = 'id' in props ? props.id : undefined
+
+  const collectionSlug = collectionConfig?.slug
+  const globalSlug = globalConfig?.slug
 
   const localeOptions =
     localization &&
@@ -38,8 +58,8 @@ export const APIView: React.FC<EditViewProps> = async (props) => {
 
   const isEditing = Boolean(globalSlug || (collectionSlug && !!id))
 
-  let draftsEnabled = false
-  let docEndpoint = ''
+  let draftsEnabled: boolean = false
+  let docEndpoint: string = ''
 
   if (collectionConfig) {
     draftsEnabled = Boolean(collectionConfig.versions?.drafts)
@@ -51,18 +71,64 @@ export const APIView: React.FC<EditViewProps> = async (props) => {
     docEndpoint = `/globals/${globalSlug}`
   }
 
-  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}?locale=${locale}&draft=${draft}&depth=${
-    depth || 0
-  }`
+  const [data, setData] = React.useState<any>(initialData)
+  const [draft, setDraft] = React.useState<boolean>(searchParams.get('draft') === 'true')
+  const [locale, setLocale] = React.useState<string>(searchParams?.get('locale') || code)
+  const [depth, setDepth] = React.useState<string>(searchParams.get('depth') || '1')
+  const [authenticated, setAuthenticated] = React.useState<boolean>(true)
+  const [fullscreen, setFullscreen] = React.useState<boolean>(false)
+
+  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}${qs.stringify(
+    {
+      locale,
+      draft,
+      depth,
+    },
+    { addQueryPrefix: true },
+  )}`
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(fetchURL, {
+          method: 'GET',
+          credentials: authenticated ? 'include' : 'omit',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        })
+
+        try {
+          const json = await res.json()
+          setData(json)
+        } catch (error) {
+          toast.error('Error parsing response')
+          console.error(error)
+        }
+      } catch (error) {
+        toast.error('Error making request')
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [i18n.language, fetchURL, authenticated])
+
+  React.useEffect(() => {
+    const editConfig = (collectionConfig || globalConfig)?.admin?.components?.views?.Edit
+    const apiActions =
+      editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
+
+    setViewActions(apiActions)
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collectionConfig, globalConfig, setViewActions])
 
   return (
     <Gutter
-      className={[
-        baseClass,
-        // fullscreen && `${baseClass}--fullscreen`
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      className={[baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')}
       right={false}
     >
       <SetStepNav
@@ -110,18 +176,39 @@ export const APIView: React.FC<EditViewProps> = async (props) => {
         >
           <div className={`${baseClass}__form-fields`}>
             <div className={`${baseClass}__filter-query-checkboxes`}>
-              {draftsEnabled && <Checkbox i18n={i18n} name="draft" path="draft" label="Draft" />}
+              {draftsEnabled && (
+                <Checkbox
+                  name="draft"
+                  path="draft"
+                  label="Draft"
+                  onChange={() => setDraft(!draft)}
+                />
+              )}
               <Checkbox
-                i18n={i18n}
                 name="authenticated"
                 path="authenticated"
                 label="Authenticated"
+                onChange={() => setAuthenticated(!authenticated)}
               />
             </div>
             {localeOptions && (
-              <Select label="Locale" name="locale" options={localeOptions} path="locale" />
+              <Select
+                label="Locale"
+                name="locale"
+                options={localeOptions}
+                path="locale"
+                onChange={(value) => setLocale(value)}
+              />
             )}
-            <NumberInput label="Depth" name="depth" path="depth" />
+            <NumberInput
+              label="Depth"
+              name="depth"
+              path="depth"
+              min={0}
+              max={10}
+              step={1}
+              onChange={(value) => setDepth(value.toString())}
+            />
           </div>
         </Form>
       </div>
@@ -130,10 +217,10 @@ export const APIView: React.FC<EditViewProps> = async (props) => {
           <button
             aria-label="toggle fullscreen"
             className={`${baseClass}__toggle-fullscreen-button`}
-            // onClick={() => setFullscreen(!fullscreen)}
+            onClick={() => setFullscreen(!fullscreen)}
             type="button"
           >
-            {/* <MinimizeMaximize isMinimized={!fullscreen} /> */}
+            <MinimizeMaximize isMinimized={!fullscreen} />
           </button>
         </div>
         <div className={`${baseClass}__results`}>
