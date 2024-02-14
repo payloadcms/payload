@@ -1,8 +1,7 @@
-import config from 'payload-config'
 import { GraphQLError } from 'graphql'
 import httpStatus from 'http-status'
 import { configToSchema } from '@payloadcms/graphql'
-import type { Payload, CollectionAfterErrorHook } from 'payload/types'
+import type { Payload, CollectionAfterErrorHook, SanitizedConfig } from 'payload/types'
 import type { GraphQLFormattedError } from 'graphql'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest'
 import { createHandler } from 'graphql-http/lib/use/fetch'
@@ -49,7 +48,7 @@ if (!cached) {
   cached = global._payload_graphql = { graphql: null, promise: null }
 }
 
-export const getGraphql = async () => {
+export const getGraphql = async (config: Promise<SanitizedConfig>) => {
   if (cached.graphql) {
     return cached.graphql
   }
@@ -72,13 +71,13 @@ export const getGraphql = async () => {
   return cached.graphql
 }
 
-export const POST = async (request: Request) => {
+export const POST = (config: Promise<SanitizedConfig>) => async (request: Request) => {
   const originalRequest = request.clone()
   const req = await createPayloadRequest({
     request,
     config,
   })
-  const { schema, validationRules } = await getGraphql()
+  const { schema, validationRules } = await getGraphql(config)
 
   const { payload } = req
 

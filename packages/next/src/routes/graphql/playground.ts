@@ -1,8 +1,8 @@
-import config from 'payload-config'
 import { renderPlaygroundPage } from 'graphql-playground-html'
 import { createPayloadRequest } from '../../utilities/createPayloadRequest'
+import type { SanitizedConfig } from 'payload/types'
 
-export const GET = async (request: Request) => {
+export const GET = (config: Promise<SanitizedConfig>) => async (request: Request) => {
   const req = await createPayloadRequest({
     request,
     config,
