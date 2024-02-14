@@ -22,7 +22,7 @@ export const DocumentLayout = async ({
   globalSlug?: string
 }) => {
   const { config, collectionConfig, globalConfig, i18n } = await initPage({
-    configPromise,
+    config: configPromise,
     collectionSlug,
     globalSlug,
   })

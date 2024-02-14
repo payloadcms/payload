@@ -1,12 +1,11 @@
 import path from 'path'
-import config from 'payload-config'
-import { streamFile } from '../../../next-stream-file'
+import { streamFile } from '../../../../../next-stream-file'
 import fsPromises from 'fs/promises'
-import { Collection, PayloadRequest, Where } from 'payload/types'
+import type { Collection, PayloadRequest, SanitizedConfig, Where } from 'payload/types'
 import executeAccess from 'payload/dist/auth/executeAccess'
 import { APIError, Forbidden } from 'payload/errors'
-import { RouteError } from '../../RouteError'
-import { createPayloadRequest } from '../../../utilities/createPayloadRequest'
+import { RouteError } from '../../../RouteError'
+import { createPayloadRequest } from '../../../../../utilities/createPayloadRequest'
 import httpStatus from 'http-status'
 
 async function checkFileAccess({
@@ -60,8 +59,9 @@ async function checkFileAccess({
 }
 
 export const GET =
-  (collectionSlug: string) =>
-  async (request: Request, { params }: { params: { filename: string } }) => {
+  (config: Promise<SanitizedConfig>) =>
+  async (request: Request, { params }: { params: { collection: string; filename: string } }) => {
+    const { collection: collectionSlug, filename } = params
     let req: PayloadRequest
     let collection: Collection
 
@@ -87,14 +87,6 @@ export const GET =
       if (collection.config.upload.disableLocalStorage) {
         throw new APIError(
           `This collection has local storage disabled: ${collectionSlug}`,
-          httpStatus.BAD_REQUEST,
-        )
-      }
-
-      const { filename } = params
-      if (!filename) {
-        throw new APIError(
-          'No filename provided, ensure this route is within a [filename] folder, i.e. staticDir/[filename]/route.ts',
           httpStatus.BAD_REQUEST,
         )
       }

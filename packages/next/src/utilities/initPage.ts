@@ -16,13 +16,13 @@ import { I18n } from '@payloadcms/translations/types'
 import { initI18n } from '@payloadcms/translations'
 
 export const initPage = async ({
-  configPromise,
+  config: configPromise,
   redirectUnauthenticatedUser = false,
   collectionSlug,
   globalSlug,
   localeParam,
 }: {
-  configPromise: Promise<SanitizedConfig>
+  config: SanitizedConfig | Promise<SanitizedConfig>
   redirectUnauthenticatedUser?: boolean
   collectionSlug?: string
   globalSlug?: string
@@ -57,7 +57,7 @@ export const initPage = async ({
   }
 
   const payload = await getPayload({
-    config: configPromise,
+    config,
   })
 
   const i18n = await initI18n({

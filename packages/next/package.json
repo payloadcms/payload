@@ -4,12 +4,16 @@
   "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
+  "bin": {
+    "@payloadcms/next": "./dist/bin/index.js"
+  },
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" \"src/app/api/**\" dist/ && pnpm copyfiles:api",
+    "copyfiles:api": "copyfiles -u 1 \"src/app/api/**\" dist/template",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "exports": {
@@ -31,10 +35,6 @@
     "./routes": {
       "import": "./src/routes/index.ts",
       "require": "./src/routes/index.ts"
-    },
-    "./routes/*": {
-      "import": "./src/routes/*.ts",
-      "require": "./src/routes/*.ts"
     }
   },
   "devDependencies": {
@@ -90,11 +90,6 @@
         "import": "./dist/routes/index.js",
         "require": "./dist/routes/index.js",
         "types": "./dist/routes/index.d.ts"
-      },
-      "./routes/*": {
-        "import": "./dist/routes/*.js",
-        "require": "./dist/routes/*.js",
-        "types": "./dist/routes/*.d.ts"
       }
     },
     "registry": "https://registry.npmjs.org/"

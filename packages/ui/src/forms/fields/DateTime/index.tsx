@@ -25,12 +25,15 @@ const DateTime: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     Error,
-    Label,
+    Label: LabelComp,
+    label,
     BeforeInput,
     AfterInput,
     Description,
     validate,
   } = props
+
+  const Label = LabelComp || label
 
   const datePickerProps = 'date' in props ? props.date : {}
 
