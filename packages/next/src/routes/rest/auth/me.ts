@@ -12,6 +12,10 @@ export const me: CollectionRouteHandler = async ({ req, collection }) => {
     currentToken,
   })
 
+  if (collection.config.auth.removeTokenFromResponses) {
+    delete result.token
+  }
+
   return Response.json(
     {
       ...result,

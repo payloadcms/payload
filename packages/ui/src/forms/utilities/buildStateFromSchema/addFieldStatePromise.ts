@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { TFunction } from '@payloadcms/translations'
 
-import ObjectID from 'bson-objectid'
+import { ObjectId } from 'bson'
 
 import type { User } from 'payload/auth'
 import type { NonPresentationalField, Data } from 'payload/types'
@@ -132,7 +132,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const { promises, rowMetadata } = arrayValue.reduce(
           (acc, row, i) => {
             const rowPath = `${path}${field.name}.${i}.`
-            row.id = row?.id || new ObjectID().toHexString()
+            row.id = row?.id || new ObjectId().toHexString()
 
             if (!omitParents) {
               state[`${rowPath}id`] = {
@@ -219,7 +219,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const rowPath = `${path}${field.name}.${i}.`
 
             if (block) {
-              row.id = row?.id || new ObjectID().toHexString()
+              row.id = row?.id || new ObjectId().toHexString()
 
               if (!omitParents) {
                 state[`${rowPath}id`] = {

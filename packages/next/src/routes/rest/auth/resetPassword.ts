@@ -24,12 +24,15 @@ export const resetPassword: CollectionRouteHandler = async ({ req, collection })
     collectionConfig: collection.config,
   })
 
+  if (collection.config.auth.removeTokenFromResponses) {
+    delete result.token
+  }
+
   return Response.json(
     {
       // TODO(translate)
       message: 'Password reset successfully.',
-      token: result.token,
-      user: result.user,
+      ...result,
     },
     {
       headers: new Headers({

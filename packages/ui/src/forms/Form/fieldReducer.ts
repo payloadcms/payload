@@ -1,4 +1,4 @@
-import ObjectID from 'bson-objectid'
+import { ObjectId } from 'bson'
 import equal from 'deep-equal'
 
 import type { FieldAction, FormState, FormField, Row } from './types'
@@ -105,7 +105,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const withNewRow = [...(state[path]?.rows || [])]
 
       const newRow: Row = {
-        id: new ObjectID().toHexString(),
+        id: new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
       }
@@ -147,7 +147,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata[rowIndex] = {
-        id: new ObjectID().toHexString(),
+        id: new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
       }
@@ -183,10 +183,10 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const rowsMetadata = state[path]?.rows || []
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex])
-      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString()
+      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectId().toHexString()
 
       const duplicateRowState = deepCopyObject(rows[rowIndex])
-      if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString()
+      if (duplicateRowState.id) duplicateRowState.id = new ObjectId().toHexString()
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {

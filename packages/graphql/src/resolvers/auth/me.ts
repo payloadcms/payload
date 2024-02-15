@@ -11,7 +11,13 @@ function meResolver(collection: Collection): any {
       depth: 0,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
-    return meOperation(options)
+    const result = await meOperation(options)
+
+    if (collection.config.auth.removeTokenFromResponses) {
+      delete result.token
+    }
+
+    return result
   }
 
   return resolver
