@@ -76,7 +76,7 @@ declare module 'payload' {
     connection: Connection
     globals: GlobalModel
     mongoMemoryServer: any
-    sessions: Record<number | string, ClientSession>
+    // sessions: Record<number | string, ClientSession>
     versions: {
       [slug: string]: CollectionModel
     }

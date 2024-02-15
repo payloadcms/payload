@@ -27,15 +27,9 @@ import type {
 
 import type { BuildQueryArgs } from './queries/buildQuery'
 
-export interface CollectionModel extends Model<any>, PaginateModel<any>, PassportLocalModel {
+export interface CollectionModel extends Model<any>, PaginateModel<any> {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
   buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
-}
-type Register<T = any> = (doc: T, password: string) => T
-
-interface PassportLocalModel {
-  authenticate: any
-  register: Register
 }
 
 export interface AuthCollectionModel extends CollectionModel {
