@@ -56,7 +56,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     const fetchData = async () => {
       setIsError(false)
       setIsLoading(true)
-      console.log('url', `${url}${search}`)
+
       try {
         const response = await requests.get(`${url}${search}`, {
           headers: {
