@@ -24,6 +24,8 @@ const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fieldMap?.map((field, i) => {
+        if (field.name === 'id') return null
+
         const Component = diffComponents[field.type]
 
         const isRichText = field.type === 'richText'

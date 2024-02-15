@@ -149,7 +149,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
           <RenderFieldsToDiff
             comparison={comparison}
             fieldPermissions={docPermissions?.fields}
-            fieldMap={fieldMap.filter(({ name }) => name !== 'id')}
+            fieldMap={fieldMap}
             locales={
               locales
                 ? locales.map(({ label }) => (typeof label === 'string' ? label : undefined))
