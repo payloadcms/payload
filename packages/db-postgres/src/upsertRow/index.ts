@@ -3,7 +3,6 @@ import type { TypeWithID } from 'payload/types'
 
 import { eq } from 'drizzle-orm'
 import { ValidationError } from 'payload/errors'
-import { i18nInit } from 'payload/utilities'
 
 import type { BlockRowToInsert } from '../transform/write/types'
 import type { Args } from './types'
