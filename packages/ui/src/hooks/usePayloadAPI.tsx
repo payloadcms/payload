@@ -1,6 +1,6 @@
 'use client'
 import queryString from 'qs'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from '../providers/Translation'
 
 import { requests } from '../utilities/api'
@@ -25,14 +25,15 @@ type Options = {
 type UsePayloadAPI = (url: string, options?: Options) => Result
 
 const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
-  const { initialData = {}, initialParams = {} } = options
+  const { initialData, initialParams = {} } = options
 
   const { i18n } = useTranslation()
-  const [data, setData] = useState(initialData)
+  const [data, setData] = useState(initialData || {})
   const [params, setParams] = useState(initialParams)
   const [isLoading, setIsLoading] = useState(true)
   const [isError, setIsError] = useState(false)
   const { code: locale } = useLocale()
+  const hasInitialized = useRef(false)
 
   const search = queryString.stringify(
     {
@@ -45,6 +46,11 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   )
 
   useEffect(() => {
+    if (initialData && !hasInitialized.current) {
+      hasInitialized.current = true
+      return
+    }
+
     const abortController = new AbortController()
 
     const fetchData = async () => {

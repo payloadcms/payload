@@ -8,7 +8,7 @@ import './index.scss'
 
 const baseClass = 'select-version-locales'
 
-const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
+export const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
   const { t } = useTranslation()
   const { code } = useLocale()
 
@@ -37,5 +37,3 @@ const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
     </div>
   )
 }
-
-export default SelectLocales

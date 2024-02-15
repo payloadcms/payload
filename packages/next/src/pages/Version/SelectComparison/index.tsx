@@ -17,7 +17,7 @@ const maxResultsPerRequest = 10
 
 const baseOptions = [mostRecentVersionOption]
 
-const CompareVersion: React.FC<Props> = (props) => {
+export const SelectComparison: React.FC<Props> = (props) => {
   const { baseURL, onChange, parentID, publishedDoc, value, versionID } = props
 
   const {
@@ -58,6 +58,7 @@ const CompareVersion: React.FC<Props> = (props) => {
       }
 
       const search = qs.stringify(query)
+
       const response = await fetch(`${baseURL}?${search}`, {
         credentials: 'include',
         headers: {
@@ -67,6 +68,7 @@ const CompareVersion: React.FC<Props> = (props) => {
 
       if (response.ok) {
         const data: PaginatedDocs = await response.json()
+
         if (data.docs.length > 0) {
           setOptions((existingOptions) => [
             ...existingOptions,
@@ -75,6 +77,7 @@ const CompareVersion: React.FC<Props> = (props) => {
               value: doc.id,
             })),
           ])
+
           setLastLoadedPage(data.page)
         }
       } else {
@@ -117,5 +120,3 @@ const CompareVersion: React.FC<Props> = (props) => {
     </div>
   )
 }
-
-export default CompareVersion

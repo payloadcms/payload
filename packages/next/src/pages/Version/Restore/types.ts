@@ -5,7 +5,7 @@ export type Props = {
   collectionSlug?: SanitizedCollectionConfig['slug']
   globalSlug?: SanitizedGlobalConfig['slug']
   label: SanitizedCollectionConfig['labels']['singular'] | SanitizedGlobalConfig['label']
-  originalDocID: string
+  originalDocID: string | number
   versionDate: string
   versionID: string
 }

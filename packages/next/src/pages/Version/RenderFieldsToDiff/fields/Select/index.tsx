@@ -1,6 +1,5 @@
 import { getTranslation, I18n } from '@payloadcms/translations'
 import React from 'react'
-import { DiffMethod } from 'react-diff-viewer-continued'
 
 import type { OptionObject, SelectField } from 'payload/types'
 import type { Props } from '../types'
@@ -52,6 +51,7 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, versio
     typeof comparison !== 'undefined'
       ? getTranslatedOptions(getOptionsToRender(comparison, field.options, field.hasMany), i18n)
       : placeholder
+
   const versionToRender =
     typeof version !== 'undefined'
       ? getTranslatedOptions(getOptionsToRender(version, field.options, field.hasMany), i18n)
@@ -61,10 +61,10 @@ const Select: React.FC<Props> = ({ comparison, diffMethod, field, locale, versio
     <div className={baseClass}>
       <Label>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {getTranslation(field.label, i18n)}
+        {getTranslation(field.label || '', i18n)}
       </Label>
       <DiffViewer
-        diffMethod={diffMethod as DiffMethod}
+        diffMethod={diffMethod}
         versionToRender={versionToRender}
         comparisonToRender={comparisonToRender}
         placeholder={placeholder}

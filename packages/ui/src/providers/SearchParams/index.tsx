@@ -1,14 +1,14 @@
 'use client'
+import { useSearchParams as useNextSearchParams } from 'next/navigation'
 import qs from 'qs'
 import React, { createContext, useContext } from 'react'
-import { useLocation } from 'react-router-dom'
 
 const Context = createContext({})
 
 export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const location = useLocation()
+  const searchParams = useNextSearchParams()
 
-  const params = qs.parse(location.search, { depth: 10, ignoreQueryPrefix: true })
+  const params = qs.parse(searchParams.toString(), { depth: 10, ignoreQueryPrefix: true })
 
   return <Context.Provider value={params}>{children}</Context.Provider>
 }

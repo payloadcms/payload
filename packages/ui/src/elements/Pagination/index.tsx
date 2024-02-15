@@ -1,7 +1,6 @@
 'use client'
 import queryString from 'qs'
 import React from 'react'
-import { useHistory } from 'react-router-dom'
 
 import type { Node, Props } from './types'
 
@@ -9,6 +8,7 @@ import { useSearchParams } from '../../providers/SearchParams'
 import ClickableArrow from './ClickableArrow'
 import Page from './Page'
 import Separator from './Separator'
+import { usePathname, useRouter } from 'next/navigation'
 import './index.scss'
 
 const nodeTypes = {
@@ -20,8 +20,9 @@ const nodeTypes = {
 const baseClass = 'paginator'
 
 export const Pagination: React.FC<Props> = (props) => {
-  const history = useHistory()
+  const router = useRouter()
   const params = useSearchParams()
+  const pathname = usePathname()
 
   const {
     disableHistoryChange = false,
@@ -37,7 +38,6 @@ export const Pagination: React.FC<Props> = (props) => {
 
   if (!totalPages || totalPages <= 1) return null
 
-  // uses react router to set the current page
   const updatePage = (page) => {
     if (!disableHistoryChange) {
       const newParams = {
@@ -45,7 +45,7 @@ export const Pagination: React.FC<Props> = (props) => {
       }
 
       newParams.page = page
-      history.push({ search: queryString.stringify(newParams, { addQueryPrefix: true }) })
+      router.push(pathname + queryString.stringify(newParams, { addQueryPrefix: true }))
     }
 
     if (typeof onChange === 'function') onChange(page)

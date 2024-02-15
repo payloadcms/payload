@@ -1,16 +1,21 @@
 import type { FieldPermissions } from 'payload/auth'
-import type { Field, SanitizedConfig } from 'payload/types'
-import type { FieldComponents } from './fields/types'
-import type { I18n } from '@payloadcms/translations'
+import { FieldMap, MappedField } from '@payloadcms/ui'
+import { I18n } from '@payloadcms/translations/types'
+import { DiffComponents } from './fields/types'
+import type { DiffMethod } from 'react-diff-viewer-continued'
 
 export type Props = {
   comparison: Record<string, any>
-  fieldComponents: FieldComponents
   fieldPermissions: Record<string, FieldPermissions>
-  fields: Field[]
+  fieldMap: FieldMap
   locales: string[]
   version: Record<string, any>
   i18n: I18n
-  config: SanitizedConfig
-  locale: string
+  diffComponents: DiffComponents
+}
+
+export type FieldDiffProps = Props & {
+  field: MappedField
+  diffMethod: DiffMethod
+  isRichText: boolean
 }

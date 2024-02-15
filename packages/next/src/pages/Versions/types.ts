@@ -4,7 +4,6 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload/types'
 import type { PaginatedDocs } from 'payload/database'
-import type { Version } from '@payloadcms/ui'
 import { User } from 'payload/auth'
 import { I18n } from '@payloadcms/translations'
 
@@ -13,11 +12,11 @@ export type DefaultVersionsViewProps = {
   config: SanitizedConfig
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
-  data: Version
-  versionsData: PaginatedDocs<Version>
+  data: Document
+  versionsData: PaginatedDocs<Document>
   editURL: string
   entityLabel: string
-  id: string
+  id: string | number
   user: User
   limit: number
   i18n: I18n

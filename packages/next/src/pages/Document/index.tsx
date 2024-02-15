@@ -16,12 +16,12 @@ import {
   HydrateClientUser,
   DocumentInfoProvider,
 } from '@payloadcms/ui'
-import type { EditViewProps } from '@payloadcms/ui'
 import queryString from 'qs'
 import { notFound } from 'next/navigation'
 import { AdminViewComponent } from 'payload/config'
 import { getViewsFromConfig } from './getViewsFromConfig'
 import type { DocumentPermissions } from 'payload/types'
+import { ServerSideEditViewProps } from '../../../../ui/src/views/types'
 
 export const Document = async ({
   params,
@@ -167,7 +167,7 @@ export const Document = async ({
     uploadEdits: undefined,
   }
 
-  const componentProps: EditViewProps = {
+  const componentProps: ServerSideEditViewProps = {
     id,
     action: `${action}?${queryString.stringify(formQueryParams)}`,
     apiURL,
@@ -183,6 +183,14 @@ export const Document = async ({
     updatedAt: data?.updatedAt?.toString(),
     user,
     locale,
+    payload,
+    config,
+    searchParams,
+    i18n,
+    collectionConfig,
+    globalConfig,
+    params,
+    permissions,
   }
 
   return (

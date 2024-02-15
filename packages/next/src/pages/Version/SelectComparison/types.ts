@@ -5,7 +5,7 @@ import type { CompareOption } from '../Default/types'
 export type Props = {
   baseURL: string
   onChange: (val: CompareOption) => void
-  parentID?: string
+  parentID?: string | number
   publishedDoc: any
   value: CompareOption
   versionID: string

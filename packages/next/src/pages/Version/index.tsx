@@ -1,13 +1,13 @@
 import React from 'react'
 
 import { DefaultVersionView } from './Default'
-import { Document, Field } from 'payload/types'
-import type { EditViewProps } from '@payloadcms/ui'
+import { Document } from 'payload/types'
+import type { Option, ServerSideEditViewProps } from '@payloadcms/ui'
 import { CollectionPermission, GlobalPermission } from 'payload/auth'
 import { notFound } from 'next/navigation'
 
-export const VersionView: React.FC<EditViewProps> = async (props) => {
-  const { config, permissions, payload, user, params, i18n } = props
+export const VersionView: React.FC<ServerSideEditViewProps> = async (props) => {
+  const { config, permissions, payload, user, params } = props
 
   const versionID = params.segments[2]
 
@@ -21,17 +21,14 @@ export const VersionView: React.FC<EditViewProps> = async (props) => {
   const { localization } = config
 
   let docPermissions: CollectionPermission | GlobalPermission
-  let fields: Field[]
   let slug: string
 
   let doc: Document
   let publishedDoc: Document
   let mostRecentDoc: Document
-  let compareDoc: Document
 
   if (collectionSlug) {
     slug = collectionSlug
-    fields = collectionConfig.fields
     docPermissions = permissions.collections[collectionSlug]
 
     try {
@@ -57,16 +54,6 @@ export const VersionView: React.FC<EditViewProps> = async (props) => {
         draft: true,
         locale: '*',
       })
-
-      // TODO: this `id` will be dynamic based on the user's selection
-      // Use URL params to achieve this
-      compareDoc = await payload.findByID({
-        collection: slug,
-        id,
-        depth: 1,
-        draft: true,
-        locale: '*',
-      })
     } catch (error) {
       return notFound()
     }
@@ -74,7 +61,6 @@ export const VersionView: React.FC<EditViewProps> = async (props) => {
 
   if (globalSlug) {
     slug = globalSlug
-    fields = globalConfig.fields
     docPermissions = permissions.globals[globalSlug]
 
     try {
@@ -98,26 +84,12 @@ export const VersionView: React.FC<EditViewProps> = async (props) => {
         draft: true,
         locale: '*',
       })
-
-      // TODO: this `slug` will be dynamic based on the user's selection
-      // Use URL params to achieve this
-      compareDoc = payload.findGlobal({
-        slug,
-        depth: 1,
-        draft: true,
-        locale: '*',
-      })
     } catch (error) {
       return notFound()
     }
   }
 
-  // const compareFetchURL =
-  //   compareValue?.value === 'mostRecent' || compareValue?.value === 'published'
-  //     ? originalDocFetchURL
-  //     : `${compareBaseURL}/${compareValue.value}`
-
-  const locales =
+  const localeOptions: Option[] =
     localization &&
     localization?.locales &&
     localization.locales.map(({ code, label }) => ({
@@ -131,13 +103,11 @@ export const VersionView: React.FC<EditViewProps> = async (props) => {
 
   return (
     <DefaultVersionView
-      collectionConfig={collectionConfig}
-      compareDoc={compareDoc}
-      config={config}
+      collectionSlug={collectionSlug}
+      globalSlug={globalSlug}
+      initialComparisonDoc={mostRecentDoc}
       doc={doc}
-      fields={fields}
-      globalConfig={globalConfig}
-      locales={locales}
+      localeOptions={localeOptions}
       mostRecentDoc={mostRecentDoc}
       id={id}
       permissions={permissions}
@@ -145,8 +115,6 @@ export const VersionView: React.FC<EditViewProps> = async (props) => {
       user={user}
       versionID={versionID}
       docPermissions={docPermissions}
-      locale="" // TODO
-      i18n={i18n}
     />
   )
 }
