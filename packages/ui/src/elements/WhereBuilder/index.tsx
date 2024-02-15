@@ -66,7 +66,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
   const collection = config.collections.find((c) => c.slug === collectionSlug)
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
 
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.

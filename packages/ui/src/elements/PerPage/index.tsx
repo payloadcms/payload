@@ -30,7 +30,7 @@ export const PerPage: React.FC<Props> = ({
   modifySearchParams = true,
   resetPage = false,
 }) => {
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const history = useHistory()
   const { t } = useTranslation()
 

@@ -22,7 +22,7 @@ const Localizer: React.FC<{
 
   const { i18n } = useTranslation()
   const locale = useLocale()
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
 
   const localeLabel = getTranslation(locale.label, i18n)
 

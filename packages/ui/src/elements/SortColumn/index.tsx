@@ -15,7 +15,7 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<Props> = (props) => {
   const { name, disable = false, label } = props
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
   const history = useHistory()
   const { i18n, t } = useTranslation()
 
