@@ -63,7 +63,6 @@ export const findVersions: FindVersions = async function findVersions(
     lean: true,
     leanWithId: true,
     limit,
-    offset: skip || 0,
     options,
     page,
     pagination,
