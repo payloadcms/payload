@@ -6,7 +6,9 @@ export const ShouldRenderTabs: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
   const {
-    params: { collection: collectionSlug, global: globalSlug, segments: [idFromParam] = [] },
+    collection: collectionSlug,
+    global: globalSlug,
+    segments: [idFromParam] = [],
   } = useParams()
 
   const id = idFromParam !== 'create' ? idFromParam : null
